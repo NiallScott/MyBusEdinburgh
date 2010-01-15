@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <!-- Application strings -->
+    <string name="app_name">Edinburgh Bus Tracker</string>
+    <string name="app_description">View live bus data in Edinburgh</string>
+    <string name="app_version">0.0.1</string>
+
+    <!-- Generic strings -->
+    <string name="exit">Exit</string>
+    <string name="submit">Submit</string>
+
+    <!-- Strings for MainActivity -->
+
+    <!-- Strings for MainActivity menu -->
+    <string name="main_menu_stopcode">Enter code</string>
+    <string name="main_menu_map">Find stop</string>
+    <string name="main_menu_addstop">Add stop</string>
+
+    <!--Strings for EnterStopCodeActivity -->
+    <string name="enterstopcode_title">Enter Bus Stop Code</string>
+    <string name="enterstopcode_text">Enter the code of the bus stop. Hint:
+    the code can be found on the bus timetable at the stop.</string>
+</resources>
