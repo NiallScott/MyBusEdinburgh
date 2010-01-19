@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2009 Niall 'Rivernile' Scott
  *
@@ -23,20 +21,20 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
- */ -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-     package="uk.org.rivernile.edinburghbustracker.android"
-     android:versionCode="1"
-     android:versionName="@string/app_version">
-    <application android:label="@string/app_name"
-    android:description="@string/app_description">
-         <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-        <activity android:name=".EnterStopCodeActivity"
-        android:label="@string/enterstopcode_title" />
-    </application>
-</manifest>
+ */
+
+package uk.org.rivernile.edinburghbustracker.android;
+
+import android.app.ExpandableListActivity;
+import android.os.Bundle;
+
+public class DisplayStopDataActivity extends ExpandableListActivity {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+}

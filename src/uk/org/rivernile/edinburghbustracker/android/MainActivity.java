@@ -25,16 +25,18 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.app.Activity;
+import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 /**
  *
  * @author Niall Scott
  */
-public class MainActivity extends Activity {
+public class MainActivity extends ListActivity {
 
     /**
      * The entry point in to this activity.
@@ -45,16 +47,35 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        ArrayAdapter ad = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1);
+        ad.add(getString(R.string.main_favourite_stops));
+        ad.add(getString(R.string.main_enter_stop_code));
+        ad.add(getString(R.string.main_bus_stop_map));
+        ad.add(getString(R.string.preferences));
+        ad.add(getString(R.string.exit));
+        setListAdapter(ad);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.mainmenu, menu);
-        return true;
+    protected void onListItemClick(final ListView l, final View v,
+            final int position, final long id) {
+        switch(position) {
+            case 0:
+                break;
+            case 1:
+                startActivity(new Intent(this, EnterStopCodeActivity.class));
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                finish();
+                break;
+        }
     }
 }
