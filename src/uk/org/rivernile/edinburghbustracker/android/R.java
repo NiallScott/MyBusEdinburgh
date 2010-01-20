@@ -17,6 +17,7 @@ public final class R {
     }
     public static final class layout {
         public static final int enterstopcode=0x7f020000;
+        public static final int favouritestops=0x7f020001;
     }
     public static final class string {
         public static final int app_description=0x7f030001;
@@ -24,23 +25,32 @@ public final class R {
          */
         public static final int app_name=0x7f030000;
         public static final int app_version=0x7f030002;
-        public static final int enterstopcode_text=0x7f03000d;
-        /** Strings for EnterStopCodeActivity 
+        public static final int displaystopdata_menu_refresh=0x7f030012;
+        public static final int displaystopdata_menu_turnautorefreshoff=0x7f030011;
+        /**  Strings for DisplayStopDataActivity menu 
          */
-        public static final int enterstopcode_title=0x7f03000c;
+        public static final int displaystopdata_menu_turnautorefreshon=0x7f030010;
+        /**  Strings for DisplayStopDataActivity 
+         */
+        public static final int displaystopdata_title=0x7f03000f;
+        public static final int enterstopcode_edit_hint=0x7f03000c;
+        public static final int enterstopcode_text=0x7f03000a;
+        /**  Strings for EnterStopCodeActivity 
+         */
+        public static final int enterstopcode_title=0x7f030009;
+        public static final int enterstopcode_toast_inputerr=0x7f03000b;
         /**  Generic strings 
          */
         public static final int exit=0x7f030003;
+        public static final int favouritestops_nosavedstops=0x7f03000e;
+        /**  Strings for FavouriteStopsActivity 
+         */
+        public static final int favouritestops_title=0x7f03000d;
         public static final int main_bus_stop_map=0x7f030008;
         public static final int main_enter_stop_code=0x7f030007;
         /**  Strings for MainActivity 
          */
         public static final int main_favourite_stops=0x7f030006;
-        public static final int main_menu_addstop=0x7f03000b;
-        public static final int main_menu_map=0x7f03000a;
-        /**  Strings for MainActivity menu 
-         */
-        public static final int main_menu_stopcode=0x7f030009;
         public static final int preferences=0x7f030005;
         public static final int submit=0x7f030004;
     }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
  * Copyright (C) 2009 Niall 'Rivernile' Scott
@@ -24,26 +24,17 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
-    <TextView
-        android:id="@+id/enterstopcode_label"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/enterstopcode_text"/>
-    <EditText
-        android:id="@+id/enterstopcode_entry"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/enterstopcode_label"
-        android:numeric="integer"
-        android:hint="@string/enterstopcode_edit_hint" />
-    <Button
-        android:id="@+id/enterstopcode_submit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/enterstopcode_entry"
-        android:layout_alignParentRight="true"
-        android:text="@string/submit" />
-</RelativeLayout>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent" >
+
+    <ListView android:id="@id/android:list"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent" />
+
+    <TextView android:id="@id/android:empty"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:text="@string/favouritestops_nosavedstops" />
+</LinearLayout>

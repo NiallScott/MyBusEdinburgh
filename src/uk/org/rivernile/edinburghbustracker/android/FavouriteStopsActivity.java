@@ -25,22 +25,16 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.app.Activity;
-import android.content.Intent;
+import android.app.ListActivity;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
 
 /**
- * The EnterStopCodeActivity allows the user to manually enter a bus stop code
- * to get the information for that stop.
+ * The FavouriteStopsActivity displays the user a list of their saved favourite
+ * bus stops and allows them to perform actions on them.
  *
  * @author Niall Scott
  */
-public class EnterStopCodeActivity extends Activity
-        implements View.OnClickListener {
+public class FavouriteStopsActivity extends ListActivity {
 
     /**
      * {@inheritDoc}
@@ -48,27 +42,7 @@ public class EnterStopCodeActivity extends Activity
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.enterstopcode);
-        setTitle(R.string.enterstopcode_title);
-        final Button button = (Button)findViewById(R.id.enterstopcode_submit);
-        button.setOnClickListener(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onClick(final View v) {
-        final EditText txt = (EditText)findViewById(R.id.enterstopcode_entry);
-        if(txt.getText().length() == 0) {
-            Toast.makeText(this, R.string.enterstopcode_toast_inputerr,
-                    Toast.LENGTH_LONG).show();
-            return;
-        } else {
-            Intent intent = new Intent(this, DisplayStopDataActivity.class);
-            intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-            intent.putExtra("stopCode", txt.getText().toString().trim());
-            startActivity(intent);
-        }
+        setContentView(R.layout.favouritestops);
+        setTitle(R.string.favouritestops_title);
     }
 }

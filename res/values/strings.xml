@@ -25,7 +25,7 @@
  *     exempt from clause 2.
  */
 
- This version of strings.xml is in the developer's locale (en_GB) -->
+This version of strings.xml is in the developer's locale (en_GB) -->
 <resources>
     <!-- Application strings -->
     <string name="app_name">Edinburgh Bus Tracker</string>
@@ -38,17 +38,32 @@
     <string name="preferences">Preferences(!)</string>
 
     <!-- Strings for MainActivity -->
-    <string name="main_favourite_stops">Favourite Stops(!)</string>
+    <string name="main_favourite_stops">Favourite Stops</string>
     <string name="main_enter_stop_code">Enter Stop Code</string>
     <string name="main_bus_stop_map">Bus Stop Map(!)</string>
 
-    <!-- Strings for MainActivity menu -->
-    <string name="main_menu_stopcode">Enter code</string>
-    <string name="main_menu_map">Find stop</string>
-    <string name="main_menu_addstop">Add stop</string>
-
-    <!--Strings for EnterStopCodeActivity -->
+    <!-- Strings for EnterStopCodeActivity -->
     <string name="enterstopcode_title">Enter Bus Stop Code</string>
     <string name="enterstopcode_text">Enter the code of the bus stop. Hint:
-    the code can be found on the bus timetable at the stop.</string>
+    the code can be found on the bus timetable at the stop or from the 
+    mybustracker.co.uk website.</string>
+    <string name="enterstopcode_toast_inputerr">You need to enter a valid bus
+    stop code to view bus stop informtion. Usually this is an 8 digit number.
+    </string>
+    <string name="enterstopcode_edit_hint">Enter bus stop code</string>
+
+    <!-- Strings for FavouriteStopsActivity -->
+    <string name="favouritestops_title">Favourite Bus Stops</string>
+    <string name="favouritestops_nosavedstops">You have no saved favourite bus
+    stops.</string>
+
+    <!-- Strings for DisplayStopDataActivity -->
+    <string name="displaystopdata_title">Display Stop Data</string>
+
+    <!-- Strings for DisplayStopDataActivity menu -->
+    <string name="displaystopdata_menu_turnautorefreshon">Turn auto-refresh on
+    </string>
+    <string name="displaystopdata_menu_turnautorefreshoff">Turn auto-refresh off
+    </string>
+    <string name="displaystopdata_menu_refresh">Refresh</string>
 </resources>

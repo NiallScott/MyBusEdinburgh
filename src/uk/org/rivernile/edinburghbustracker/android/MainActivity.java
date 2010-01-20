@@ -33,16 +33,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 /**
+ * The main activity in the application. This activity displays a the main menu
+ * of the application to the user where they select the action they want to
+ * perform.
  *
  * @author Niall Scott
  */
 public class MainActivity extends ListActivity {
 
     /**
-     * The entry point in to this activity.
-     *
-     * @param savedInstanceState The saved state of the application if it is
-     * being relaunched.
+     * {@inheritDoc}
      */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -65,6 +65,7 @@ public class MainActivity extends ListActivity {
             final int position, final long id) {
         switch(position) {
             case 0:
+                startActivity(new Intent(this, FavouriteStopsActivity.class));
                 break;
             case 1:
                 startActivity(new Intent(this, EnterStopCodeActivity.class));

@@ -27,8 +27,25 @@ package uk.org.rivernile.edinburghbustracker.android;
 
 import android.app.ExpandableListActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
+/**
+ * The DisplayStopDataActivity displays the bus stop information to the user
+ * once they have selected a bus stop to view data for in an ExpandableListView.
+ *
+ * @author Niall Scott
+ */
 public class DisplayStopDataActivity extends ExpandableListActivity {
+
+    private final static int AUTO_REFRESH_ID = Menu.FIRST;
+    private final static int REFRESH_ID = Menu.FIRST + 1;
+
+    public final static String ACTION_VIEW_STOP_DATA =
+            "uk.org.rivernile.edinburghbustracker.android." +
+            "ACTION_VIEW_STOP_DATA";
+
+    private boolean autoRefresh = false;
 
     /**
      * {@inheritDoc}
@@ -36,5 +53,54 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle(R.string.displaystopdata_title);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        menu.add(0, AUTO_REFRESH_ID, 1,
+                R.string.displaystopdata_menu_turnautorefreshon);
+        menu.add(0, REFRESH_ID, 2, R.string.displaystopdata_menu_refresh);
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch(item.getItemId()) {
+            case AUTO_REFRESH_ID:
+                handleAutoRefreshMenuItem(item);
+                break;
+            case REFRESH_ID:
+                // TODO: Add refresh code
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Handle the auto-refresh menu item click event. This alternates between
+     * turning it on and off.
+     *
+     * @param item The menu item object of the auto-refresh menu item. Used to
+     * edit its text content.
+     */
+    private void handleAutoRefreshMenuItem(final MenuItem item) {
+        if(autoRefresh) {
+            autoRefresh = false;
+            item.setTitle(R.string.displaystopdata_menu_turnautorefreshon);
+        } else {
+            autoRefresh = true;
+            item.setTitle(R.string.displaystopdata_menu_turnautorefreshoff);
+        }
     }
 }
