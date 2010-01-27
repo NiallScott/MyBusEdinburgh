@@ -43,4 +43,5 @@
         <activity android:name=".DisplayStopDataActivity"
                   android:label="@string/displaystopdata_title" />
     </application>
+    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

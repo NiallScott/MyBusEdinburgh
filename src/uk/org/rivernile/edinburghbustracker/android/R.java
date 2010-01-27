@@ -16,8 +16,9 @@ public final class R {
         public static final int enterstopcode_submit=0x7f040002;
     }
     public static final class layout {
-        public static final int enterstopcode=0x7f020000;
-        public static final int favouritestops=0x7f020001;
+        public static final int displaystopdata=0x7f020000;
+        public static final int enterstopcode=0x7f020001;
+        public static final int favouritestops=0x7f020002;
     }
     public static final class string {
         public static final int app_description=0x7f030001;
@@ -25,33 +26,48 @@ public final class R {
          */
         public static final int app_name=0x7f030000;
         public static final int app_version=0x7f030002;
-        public static final int displaystopdata_menu_refresh=0x7f030012;
-        public static final int displaystopdata_menu_turnautorefreshoff=0x7f030011;
+        public static final int cancel=0x7f030008;
+        public static final int displaystopdata_empty=0x7f030016;
+        public static final int displaystopdata_err_nocode=0x7f030017;
+        public static final int displaystopdata_err_noconn=0x7f030019;
+        public static final int displaystopdata_err_nodata=0x7f03001c;
+        public static final int displaystopdata_err_noresolv=0x7f03001a;
+        public static final int displaystopdata_err_parseerr=0x7f030018;
+        public static final int displaystopdata_err_serverr=0x7f03001b;
+        public static final int displaystopdata_gettingdata=0x7f030015;
+        public static final int displaystopdata_menu_addfav=0x7f030020;
+        public static final int displaystopdata_menu_refresh=0x7f03001f;
+        public static final int displaystopdata_menu_remfac=0x7f030021;
+        public static final int displaystopdata_menu_turnautorefreshoff=0x7f03001e;
         /**  Strings for DisplayStopDataActivity menu 
          */
-        public static final int displaystopdata_menu_turnautorefreshon=0x7f030010;
+        public static final int displaystopdata_menu_turnautorefreshon=0x7f03001d;
         /**  Strings for DisplayStopDataActivity 
          */
-        public static final int displaystopdata_title=0x7f03000f;
-        public static final int enterstopcode_edit_hint=0x7f03000c;
-        public static final int enterstopcode_text=0x7f03000a;
+        public static final int displaystopdata_title=0x7f030013;
+        public static final int displaystopdata_title2=0x7f030014;
+        public static final int enterstopcode_edit_hint=0x7f030010;
+        public static final int enterstopcode_text=0x7f03000e;
         /**  Strings for EnterStopCodeActivity 
          */
-        public static final int enterstopcode_title=0x7f030009;
-        public static final int enterstopcode_toast_inputerr=0x7f03000b;
+        public static final int enterstopcode_title=0x7f03000d;
+        public static final int enterstopcode_toast_inputerr=0x7f03000f;
+        public static final int error=0x7f030006;
         /**  Generic strings 
          */
         public static final int exit=0x7f030003;
-        public static final int favouritestops_nosavedstops=0x7f03000e;
+        public static final int favouritestops_nosavedstops=0x7f030012;
         /**  Strings for FavouriteStopsActivity 
          */
-        public static final int favouritestops_title=0x7f03000d;
-        public static final int main_bus_stop_map=0x7f030008;
-        public static final int main_enter_stop_code=0x7f030007;
+        public static final int favouritestops_title=0x7f030011;
+        public static final int main_bus_stop_map=0x7f03000c;
+        public static final int main_enter_stop_code=0x7f03000b;
         /**  Strings for MainActivity 
          */
-        public static final int main_favourite_stops=0x7f030006;
+        public static final int main_favourite_stops=0x7f03000a;
+        public static final int okay=0x7f030007;
         public static final int preferences=0x7f030005;
+        public static final int retry=0x7f030009;
         public static final int submit=0x7f030004;
     }
 }
