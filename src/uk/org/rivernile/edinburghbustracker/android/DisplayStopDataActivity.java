@@ -24,13 +24,14 @@
  */
 
 package uk.org.rivernile.edinburghbustracker.android;
-
+// TODO: MASSIVE clean up of this source file.
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -80,14 +81,15 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             "uk.org.rivernile.edinburghbustracker.android."
             + "ACTION_VIEW_STOP_DATA";
 
-    private boolean autoRefresh = false;
-    private String remoteHost = "10.0.2.2";
-    private int remotePort = 4876;
+    private boolean autoRefresh;
+    private String remoteHost;
+    private int remotePort;
     private String stopCode;
     private JSONObject jo;
     private String errorString;
     private Thread sockThread;
     private ExpandableListAdapter listAdapter;
+    private SharedPreferences sp;
 
     /**
      * {@inheritDoc}
@@ -104,6 +106,17 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             doError(getString(R.string.displaystopdata_err_nocode));
             finish();
         }
+        sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        autoRefresh = sp.getBoolean(PreferencesActivity.KEY_AUTOREFRESH_STATE,
+                false);
+        remoteHost = sp.getString(PreferencesActivity.KEY_HOSTNAME,
+                "bustracker.selfip.org");
+        try {
+            remotePort = Integer.parseInt(sp.getString(
+                    PreferencesActivity.KEY_PORT, "4876"));
+        } catch(NumberFormatException e) {
+            remotePort = 4876;
+        }
         doGetBusTimesTask();
     }
 
@@ -114,8 +127,13 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(0, AUTO_REFRESH_ID, 1,
-                R.string.displaystopdata_menu_turnautorefreshon);
+        if(autoRefresh) {
+            menu.add(0, AUTO_REFRESH_ID, 1,
+                    R.string.displaystopdata_menu_turnautorefreshoff);
+        } else {
+            menu.add(0, AUTO_REFRESH_ID, 1,
+                    R.string.displaystopdata_menu_turnautorefreshon);
+        }
         menu.add(0, REFRESH_ID, 2, R.string.displaystopdata_menu_refresh);
         return true;
     }

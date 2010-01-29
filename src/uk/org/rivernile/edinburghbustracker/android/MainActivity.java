@@ -71,8 +71,10 @@ public class MainActivity extends ListActivity {
                 startActivity(new Intent(this, EnterStopCodeActivity.class));
                 break;
             case 2:
+                // TODO: Add bus stop maps stuff.
                 break;
             case 3:
+                startActivity(new Intent(this, PreferencesActivity.class));
                 break;
             case 4:
                 finish();

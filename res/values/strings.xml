@@ -35,7 +35,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <!-- Generic strings -->
     <string name="exit">Exit</string>
     <string name="submit">Submit</string>
-    <string name="preferences">Preferences(!)</string>
+    <string name="preferences">Preferences</string>
     <string name="error">Error</string>
     <string name="okay">OK</string>
     <string name="cancel">Cancel</string>
@@ -49,10 +49,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <!-- Strings for EnterStopCodeActivity -->
     <string name="enterstopcode_title">Enter Bus Stop Code</string>
     <string name="enterstopcode_text">Enter the code of the bus stop. Hint:
-    the code can be found on the bus timetable at the stop or from the 
+        the code can be found on the bus timetable at the stop or from the
     mybustracker.co.uk website.</string>
     <string name="enterstopcode_toast_inputerr">You need to enter a valid bus
-    stop code to view bus stop informtion. Usually this is an 8 digit number.
+        stop code to view bus stop informtion. Usually this is an 8 digit number.
     </string>
     <string name="enterstopcode_edit_hint">Enter bus stop code</string>
 
@@ -89,4 +89,24 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_menu_refresh">Refresh</string>
     <string name="displaystopdata_menu_addfav">Add favourite</string>
     <string name="displaystopdata_menu_remfac">Remove favourite</string>
+
+    <!-- Strings for PreferencesActivity -->
+    <string name="preferences_title">Preferences</string>
+    <string name="preferences_invalidhostname">The hostname you have entered is
+    invalid, it has been reset back to the default value.</string>
+    <string name="preferences_invalidport">The port you have entered is invalid,
+    it has been reset back to the default value.</string>
+    <string name="preferences_category_autorefresh">Auto-refresh</string>
+    <string name="preferences_checkbox_autorefresh_summary">Selects if
+    auto-refresh should be on by default when viewing bus stop data.</string>
+    <string name="preferences_category_server">Server Settings</string>
+    <string name="preferences_textbox_hostname">Hostname</string>
+    <string name="preferences_textbox_hostname_summary">The hostname of the
+        server. For advanced users only.
+    </string>
+    <string name="preferences_textbox_hostname_dialog">Edit Hostname</string>
+    <string name="preferences_textbox_port">Port</string>
+    <string name="preferences_textbox_port_summary">The port on the server.
+    For advanced users only.</string>
+    <string name="preferences_textbox_port_dialog">Edit Port</string>
 </resources>
