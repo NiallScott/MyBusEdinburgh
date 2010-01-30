@@ -28,6 +28,8 @@ public final class R {
         public static final int app_version=0x7f040002;
         public static final int cancel=0x7f040008;
         public static final int displaystopdata_empty=0x7f040016;
+        /**  Strings for DisplayStopDataActvity errors 
+         */
         public static final int displaystopdata_err_nocode=0x7f040017;
         public static final int displaystopdata_err_noconn=0x7f040019;
         public static final int displaystopdata_err_nodata=0x7f04001c;

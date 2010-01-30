@@ -45,4 +45,6 @@ public class FavouriteStopsActivity extends ListActivity {
         setContentView(R.layout.favouritestops);
         setTitle(R.string.favouritestops_title);
     }
+
+    // TODO: Do favourite stop stuff.
 }

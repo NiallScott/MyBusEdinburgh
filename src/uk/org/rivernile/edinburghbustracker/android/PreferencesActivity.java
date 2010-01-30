@@ -41,9 +41,13 @@ import android.widget.Toast;
 public class PreferencesActivity extends PreferenceActivity
         implements OnSharedPreferenceChangeListener {
 
+    /** The name of the preferences file. */
     public final static String PREF_FILE = "preferences";
+    /** The AUTOREFRESH_STATE key in the preferences. */
     public final static String KEY_AUTOREFRESH_STATE = "pref_autorefresh_state";
+    /** The HOSTNAME key in the preferences */
     public final static String KEY_HOSTNAME = "pref_server_hostname";
+    /** The PORT key in the preferences */
     public final static String KEY_PORT = "pref_server_port";
 
     /**
