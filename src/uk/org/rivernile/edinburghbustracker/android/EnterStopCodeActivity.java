@@ -59,7 +59,7 @@ public class EnterStopCodeActivity extends Activity
      */
     @Override
     public void onClick(final View v) {
-        final EditText txt = (EditText)findViewById(R.id.enterstopcode_entry);
+        EditText txt = (EditText)findViewById(R.id.enterstopcode_entry);
         if(txt.getText().length() == 0) {
             Toast.makeText(this, R.string.enterstopcode_toast_inputerr,
                     Toast.LENGTH_LONG).show();

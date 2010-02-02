@@ -40,6 +40,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="okay">OK</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
 
     <!-- Strings for MainActivity -->
     <string name="main_favourite_stops">Favourite Stops</string>
@@ -60,7 +62,15 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <!-- Strings for FavouriteStopsActivity -->
     <string name="favouritestops_title">Favourite Bus Stops</string>
     <string name="favouritestops_nosavedstops">You have no saved favourite bus
-    stops.</string>
+    stops. You can add a new favourite stop by viewing the bus stop live
+    departures and select "Add Favourite" in the menu.</string>
+    <string name="favouritestops_dialog_confirm_title">Are you sure you want to
+    delete this stop?</string>
+
+    <!-- Strings for FavouriteStopsActivity menu -->
+    <string name="favouritestops_menu_view">View stop</string>
+    <string name="favouritestops_menu_edit">Edit stop</string>
+    <string name="favouritestops_menu_delete">Delete stop</string>
 
     <!-- Strings for DisplayStopDataActivity -->
     <string name="displaystopdata_title">Display Bus Times</string>
@@ -91,7 +101,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     </string>
     <string name="displaystopdata_menu_refresh">Refresh</string>
     <string name="displaystopdata_menu_addfav">Add favourite</string>
-    <string name="displaystopdata_menu_remfac">Remove favourite</string>
+    <string name="displaystopdata_menu_remfav">Remove favourite</string>
 
     <!-- Strings for PreferencesActivity -->
     <string name="preferences_title">Preferences</string>
@@ -112,4 +122,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_textbox_port_summary">The port on the server.
     For advanced users only.</string>
     <string name="preferences_textbox_port_dialog">Edit Port</string>
+
+    <!-- Strings for AddEditFavouriteStopActivity -->
+    <string name="addeditstop_title">Add/Edit Favourite Stop</string>
+    <string name="addeditstop_title_add">Add Favourite Stop:</string>
+    <string name="addeditstop_title_edit">Edit Favourite Stop:</string>
+    <string name="addeditstop_description">Enter a name for this bus stop:
+    </string>
+    <string name="addeditstop_edit_stopname_hint">Stop name</string>
+    <string name="addeditstop_error_blankstopname">You cannot have a blank stop
+    name.</string>
 </resources>

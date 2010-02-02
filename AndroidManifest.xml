@@ -27,7 +27,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="uk.org.rivernile.edinburghbustracker.android"
           android:versionCode="1"
-          android:versionName="@string/app_version">
+          android:versionName="0.0.1">
     <application android:label="@string/app_name"
                  android:description="@string/app_description">
         <activity android:name=".MainActivity">
@@ -44,6 +44,8 @@
                   android:label="@string/displaystopdata_title" />
         <activity android:name=".PreferencesActivity"
                   android:label="@string/preferences_title" />
+        <activity android:name=".AddEditFavouriteStopActivity"
+                  android:label="@string/addeditstop_title" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

@@ -30,6 +30,7 @@ import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,8 +48,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,8 +61,9 @@ import org.json.JSONObject;
 public class DisplayStopDataActivity extends ExpandableListActivity
         implements Runnable {
 
-    private final static int AUTO_REFRESH_ID = Menu.FIRST;
-    private final static int REFRESH_ID = Menu.FIRST + 1;
+    private final static int FAVOURITE_ID = Menu.FIRST;
+    private final static int AUTO_REFRESH_ID = Menu.FIRST + 1;
+    private final static int REFRESH_ID = Menu.FIRST + 2;
 
     private final static int PROGRESS_DIALOG = 0;
     private final static int ERROR_DIALOG = 1;
@@ -81,14 +81,13 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             "uk.org.rivernile.edinburghbustracker.android."
             + "ACTION_VIEW_STOP_DATA";
 
-    private boolean autoRefresh, cancel = false;
+    private boolean autoRefresh, cancel = false, favouriteExists;
     private String remoteHost;
     private int remotePort;
     private String stopCode;
+    private String stopName;
     private JSONObject jo;
     private String errorString;
-    private Thread sockThread, afThread;
-    private ExpandableListAdapter listAdapter;
     private SharedPreferences sp;
     private long lastRefresh;
 
@@ -122,8 +121,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
 
         doGetBusTimesTask();
         if(autoRefresh) {
-            afThread = new Thread(afTask);
-            afThread.start();
+            new Thread(afTask).start();
         }
     }
 
@@ -139,8 +137,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         autoRefresh = sp.getBoolean(PreferencesActivity.KEY_AUTOREFRESH_STATE,
                 false);
         if(autoRefresh) {
-            afThread = new Thread(afTask);
-            afThread.start();
+            new Thread(afTask).start();
         }
     }
 
@@ -151,16 +148,27 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
 
+        favouriteExists =
+                SettingsDatabase.getFavouriteStopExists(this, stopCode);
+        if(favouriteExists) {
+            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_remfav)
+                    .setIcon(android.R.drawable.ic_menu_delete);
+        } else {
+            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_addfav)
+                    .setIcon(android.R.drawable.ic_menu_add);
+        }
         if(autoRefresh) {
-            menu.add(0, AUTO_REFRESH_ID, 1,
+            menu.add(0, AUTO_REFRESH_ID, 2,
                     R.string.displaystopdata_menu_turnautorefreshoff);
         } else {
-            menu.add(0, AUTO_REFRESH_ID, 1,
+            menu.add(0, AUTO_REFRESH_ID, 2,
                     R.string.displaystopdata_menu_turnautorefreshon);
         }
-        menu.add(0, REFRESH_ID, 2, R.string.displaystopdata_menu_refresh);
+        menu.add(0, REFRESH_ID, 3, R.string.displaystopdata_menu_refresh);
         return true;
     }
+
+
 
     /**
      * {@inheritDoc}
@@ -168,6 +176,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
+            case FAVOURITE_ID:
+                handleFavouriteMenuItem(item);
+                break;
             case AUTO_REFRESH_ID:
                 handleAutoRefreshMenuItem(item);
                 break;
@@ -181,8 +192,19 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(final Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem item = menu.getItem(FAVOURITE_ID);
+        if(stopName.length() > 0) {
+            item.setEnabled(true);
+        } else {
+            item.setEnabled(false);
+        }
+        return true;
+    }
+
+    @Override
     protected Dialog onCreateDialog(int id) {
-        Dialog dialog;
         switch (id) {
             case PROGRESS_DIALOG:
                 ProgressDialog d = new ProgressDialog(this);
@@ -195,8 +217,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                         finish();
                     }
                 });
-                dialog = d;
-                break;
+                return d;
             case ERROR_DIALOG:
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage(errorString).setCancelable(false)
@@ -216,13 +237,10 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                                 DisplayStopDataActivity.this.finish();
                             }
                 });
-                dialog = builder.create();
-                break;
+                return builder.create();
             default:
-                dialog = null;
-                break;
+                return null;
         }
-        return dialog;
     }
 
     @Override
@@ -247,8 +265,24 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         } else {
             autoRefresh = true;
             item.setTitle(R.string.displaystopdata_menu_turnautorefreshoff);
-            afThread = new Thread(afTask);
-            afThread.start();
+            new Thread(afTask).start();
+        }
+    }
+
+    private void handleFavouriteMenuItem(final MenuItem item) {
+        if(favouriteExists) {
+            SettingsDatabase.deleteFavouriteStop(this, stopCode);
+            favouriteExists = false;
+            item.setTitle(R.string.displaystopdata_menu_addfav)
+                    .setIcon(android.R.drawable.ic_menu_add);
+        } else {
+            Intent intent = new Intent(this,
+                    AddEditFavouriteStopActivity.class);
+            intent.setAction(AddEditFavouriteStopActivity
+                    .ACTION_ADD_EDIT_FAVOURITE_STOP);
+            intent.putExtra("stopCode", stopCode);
+            intent.putExtra("stopName", stopName);
+            startActivity(intent);
         }
     }
 
@@ -305,8 +339,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     private void doGetBusTimesTask() {
         cancel = false;
         showDialog(PROGRESS_DIALOG);
-        sockThread = new Thread(this);
-        sockThread.start();
+        new Thread(this).start();
     }
 
     /**
@@ -337,29 +370,31 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                 dismissDialog(PROGRESS_DIALOG);
                 if(cancel) return;
                 try {
-                    String stopCode = jo.getString("stopCode");
+                    stopCode = jo.getString("stopCode");
                     if(stopCode.length() == 0) {
                         doError(getString(R.string.displaystopdata_err_nodata));
                         return;
                     }
-                    String stopName = jo.getString("stopName");
+                    stopName = jo.getString("stopName");
                     setTitle(getString(R.string.displaystopdata_title2) + " " +
                             stopCode + " " + stopName);
 
                     JSONArray services = jo.getJSONArray("services");
                     if(services.length() == 0) return;
 
-                    List<Map<String, String>> groupData =
-                            new ArrayList<Map<String, String>>();
-                    List<List<Map<String, String>>> childData =
-                            new ArrayList<List<Map<String, String>>>();
+                    ArrayList<HashMap<String, String>> groupData =
+                            new ArrayList<HashMap<String, String>>();
+                    ArrayList<ArrayList<HashMap<String, String>>> childData =
+                            new ArrayList<ArrayList<HashMap<String, String>>>();
                     JSONObject currService, currBus;
-                    Map<String, String> curGroupMap;
+                    HashMap<String, String> curGroupMap;
                     JSONArray buses;
-                    List<Map<String, String>> children;
-                    Map<String, String> curChildMap;
-                    
-                    for(int i = 0; i < services.length(); i++) {
+                    ArrayList<HashMap<String, String>> children;
+                    HashMap<String, String> curChildMap;
+
+                    int a = services.length();
+                    int b;
+                    for(int i = 0; i < a; i++) {
                         currService = services.getJSONObject(i);
                         curGroupMap = new HashMap<String, String>();
                         groupData.add(curGroupMap);
@@ -368,8 +403,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                         curGroupMap.put(ROUTE_KEY,
                                 currService.getString("route"));
                         buses = currService.getJSONArray("buses");
-                        children = new ArrayList<Map<String, String>>();
-                        for(int j = 0; j < buses.length(); j++) {
+                        children = new ArrayList<HashMap<String, String>>();
+                        b = buses.length();
+                        for(int j = 0; j < b; j++) {
                             currBus = buses.getJSONObject(j);
                             if(j == 0) {
                                 curGroupMap.put(ARRIVAL_TIME_KEY,
@@ -385,7 +421,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                         childData.add(children);
                     }
 
-                    listAdapter = new SimpleExpandableListAdapter(
+                    ExpandableListAdapter listAdapter =
+                            new SimpleExpandableListAdapter(
                             DisplayStopDataActivity.this,
                             groupData,
                             android.R.layout.simple_expandable_list_item_1,
@@ -400,8 +437,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                     setListAdapter(listAdapter);
                     setLastRefresh(System.currentTimeMillis());
                     if(autoRefresh) {
-                        afThread = new Thread(afTask);
-                        afThread.start();
+                        new Thread(afTask).start();
                     }
                 } catch(JSONException e) {
                     doError(getString(R.string.displaystopdata_err_parseerr));
@@ -414,7 +450,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         return lastRefresh;
     }
 
-    private synchronized void setLastRefresh(long lr) {
+    private synchronized void setLastRefresh(final long lr) {
         lastRefresh = lr;
     }
 
@@ -425,7 +461,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             Bundle b = new Bundle();
             b.putBoolean("refresh", true);
             while(autoRefresh) {
-                if(System.currentTimeMillis() >= (getLastRefresh() + 10000)) {
+                if(System.currentTimeMillis() >= (getLastRefresh() + 60000)) {
                     msg.setData(b);
                     handler.sendMessage(msg);
                     return;
