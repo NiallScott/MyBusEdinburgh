@@ -399,8 +399,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                         curGroupMap = new HashMap<String, String>();
                         groupData.add(curGroupMap);
                         curGroupMap.put(SERVICE_NAME_KEY,
-                                currService.getString("serviceName"));
-                        curGroupMap.put(ROUTE_KEY,
+                                currService.getString("serviceName") + " " +
                                 currService.getString("route"));
                         buses = currService.getJSONArray("buses");
                         children = new ArrayList<HashMap<String, String>>();
@@ -426,12 +425,11 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                             DisplayStopDataActivity.this,
                             groupData,
                             android.R.layout.simple_expandable_list_item_1,
-                            new String[] { SERVICE_NAME_KEY, ROUTE_KEY,
-                    ARRIVAL_TIME_KEY },
+                            new String[] { SERVICE_NAME_KEY, ARRIVAL_TIME_KEY },
                             new int[] { android.R.id.text1, android.R.id.text2 },
                             childData,
                             android.R.layout.simple_expandable_list_item_2,
-                            new String[] { DESTINATION_KEY, ARRIVAL_TIME_KEY },
+                            new String[] { ARRIVAL_TIME_KEY, DESTINATION_KEY },
                             new int[] { android.R.id.text1, android.R.id.text2 }
                             );
                     setListAdapter(listAdapter);
