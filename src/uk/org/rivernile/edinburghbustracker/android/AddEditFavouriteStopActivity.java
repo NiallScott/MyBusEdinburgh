@@ -54,8 +54,9 @@ public class AddEditFavouriteStopActivity extends Activity
 
         stopCode = getIntent().getStringExtra("stopCode");
         stopName = getIntent().getStringExtra("stopName");
+        SettingsDatabase sd = SettingsDatabase.getInstance(this);
         if(stopName == null || stopName.length() == 0) {
-            stopName = SettingsDatabase.getNameForStop(this, stopCode);
+            stopName = sd.getNameForStop(stopCode);
         }
         edit = (EditText)findViewById(R.id.addeditstop_edit_stopname);
         okay = (Button)findViewById(R.id.addeditstop_button_ok);
@@ -64,7 +65,7 @@ public class AddEditFavouriteStopActivity extends Activity
         cancel.setOnClickListener(this);
         edit.setText(stopName);
 
-        editing = SettingsDatabase.getFavouriteStopExists(this, stopCode);
+        editing = sd.getFavouriteStopExists(stopCode);
         if(editing) {
             setTitle(getString(R.string.addeditstop_title_edit) + " " +
                     stopCode);
@@ -83,10 +84,11 @@ public class AddEditFavouriteStopActivity extends Activity
                         Toast.LENGTH_LONG).show();
                 return;
             }
+            SettingsDatabase sd = SettingsDatabase.getInstance(this);
             if(editing) {
-                SettingsDatabase.modifyFavouriteStop(this, stopCode, s);
+                sd.modifyFavouriteStop(stopCode, s);
             } else {
-                SettingsDatabase.insertFavouriteStop(this, stopCode, s);
+                sd.insertFavouriteStop(stopCode, s);
             }
         }
         finish();

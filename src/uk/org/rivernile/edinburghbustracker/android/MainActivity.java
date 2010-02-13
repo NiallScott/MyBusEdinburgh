@@ -31,6 +31,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * The main activity in the application. This activity displays a the main menu
@@ -55,6 +59,7 @@ public class MainActivity extends ListActivity {
         ad.add(getString(R.string.preferences));
         ad.add(getString(R.string.exit));
         setListAdapter(ad);
+        new Thread(initStopDBTask).start();
     }
 
     /**
@@ -71,7 +76,7 @@ public class MainActivity extends ListActivity {
                 startActivity(new Intent(this, EnterStopCodeActivity.class));
                 break;
             case 2:
-                // TODO: Add bus stop maps stuff.
+                startActivity(new Intent(this, BusStopMapActivity.class));
                 break;
             case 3:
                 startActivity(new Intent(this, PreferencesActivity.class));
@@ -81,4 +86,30 @@ public class MainActivity extends ListActivity {
                 break;
         }
     }
+
+    private Runnable initStopDBTask = new Runnable() {
+        @Override
+        public void run() {
+            File f = new File(BusStopDatabase.STOP_DB_PATH +
+                    BusStopDatabase.STOP_DB_NAME);
+            if(!f.exists()) {
+                try {
+                    InputStream in = getAssets().open(
+                            BusStopDatabase.STOP_DB_NAME);
+                    FileOutputStream out = new FileOutputStream(
+                            BusStopDatabase.STOP_DB_PATH +
+                            BusStopDatabase.STOP_DB_NAME);
+                    byte[] buf = new byte[1024];
+                    int len;
+                    while((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                    out.flush();
+                    out.close();
+                    in.close();
+                } catch(IOException e) {
+                }
+            }
+        }
+    };
 }

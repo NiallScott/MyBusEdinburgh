@@ -56,6 +56,7 @@ public class FavouriteStopsActivity extends ListActivity {
     private ListAdapter ca;
     private Cursor c;
     private String selectedStopCode;
+    private SettingsDatabase sd;
 
     /**
      * {@inheritDoc}
@@ -66,19 +67,14 @@ public class FavouriteStopsActivity extends ListActivity {
         setContentView(R.layout.favouritestops);
         setTitle(R.string.favouritestops_title);
 
-        c = SettingsDatabase.getAllFavouriteStops(this);
+        sd = SettingsDatabase.getInstance(this);
+        c = sd.getAllFavouriteStops();
         startManagingCursor(c);
         ca = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1,
                 c, new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
                 new int[] { android.R.id.text1 });
         setListAdapter(ca);
         registerForContextMenu(getListView());
-    }
-
-    @Override
-    public void onDestroy() {
-        c.close();
-        super.onDestroy();
     }
 
     /**
@@ -100,8 +96,8 @@ public class FavouriteStopsActivity extends ListActivity {
     {
         super.onCreateContextMenu(menu, v, menuInfo);
         AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
-        menu.setHeaderTitle(String.valueOf(info.id) + " " + SettingsDatabase
-                .getNameForStop(this, String.valueOf(info.id)));
+        menu.setHeaderTitle(String.valueOf(info.id) + " " +
+                sd.getNameForStop(String.valueOf(info.id)));
         menu.add(0, CONTEXT_MENU_VIEW, 1, R.string.favouritestops_menu_view);
         menu.add(0, CONTEXT_MENU_MODIFY, 1, R.string.favouritestops_menu_edit);
         menu.add(0, CONTEXT_MENU_DELETE, 2, R.string
@@ -148,8 +144,7 @@ public class FavouriteStopsActivity extends ListActivity {
                     public void onClick(final DialogInterface dialog,
                             final int id)
                     {
-                        SettingsDatabase.deleteFavouriteStop(
-                                FavouriteStopsActivity.this, selectedStopCode);
+                        sd.deleteFavouriteStop(selectedStopCode);
                         FavouriteStopsActivity.this.c.requery();
                     }
                 }).setNegativeButton(R.string.cancel,

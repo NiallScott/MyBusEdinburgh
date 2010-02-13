@@ -39,36 +39,64 @@ import android.database.sqlite.SQLiteOpenHelper;
  *
  * @author Niall Scott
  */
-public class SettingsDatabase {
+public class SettingsDatabase extends SQLiteOpenHelper {
 
     protected final static String SETTINGS_DB_NAME = "settings.db";
     protected final static int SETTINGS_DB_VERSION = 1;
 
     protected final static String FAVOURITE_STOPS_TABLE = "favourite_stops";
-    public final static String FAVOURITE_STOPS_STOPCODE = "_id";
-    public final static String FAVOURITE_STOPS_STOPNAME = "stopName";
+    protected final static String FAVOURITE_STOPS_STOPCODE = "_id";
+    protected final static String FAVOURITE_STOPS_STOPNAME = "stopName";
 
-    private static class OpenHelper extends SQLiteOpenHelper {
+    private static SettingsDatabase instance;
 
-        public OpenHelper(final Context context) {
-            super(context, SETTINGS_DB_NAME, null, SETTINGS_DB_VERSION);
-        }
+    /**
+     * Creates a new SettingsDatabase object. If the DB does not already exist,
+     * it will be created.
+     *
+     * @param context The activity context.
+     */
+    private SettingsDatabase(final Context context) {
+        super(context, SETTINGS_DB_NAME, null, SETTINGS_DB_VERSION);
+    }
 
-        @Override
-        public void onCreate(final SQLiteDatabase db) {
-            // This is what happens when the application cannot find a database
-            // with the database name.
-            db.execSQL("CREATE TABLE " + FAVOURITE_STOPS_TABLE + " (" +
-                    FAVOURITE_STOPS_STOPCODE + " TEXT PRIMARY KEY," +
-                    FAVOURITE_STOPS_STOPNAME + " TEXT NOT NULL);");
-        }
+    public static SettingsDatabase getInstance(final Context context) {
+        if(instance == null) instance = new SettingsDatabase(context);
+        return instance;
+    }
 
-        @Override
-        public void onUpgrade(final SQLiteDatabase db, final int oldVersion,
-                final int newVersion)
-        {
-            // Nothing to upgrade yet.
-        }
+    @Override
+    protected void finalize() {
+        getReadableDatabase().close();
+    }
+
+    /**
+     * This is called when the DB does not exist.
+     *
+     * @param db The database object to interface with.
+     */
+    @Override
+    public void onCreate(final SQLiteDatabase db) {
+        // This is what happens when the application cannot find a database
+        // with the database name.
+        db.execSQL("CREATE TABLE " + FAVOURITE_STOPS_TABLE + " (" +
+                FAVOURITE_STOPS_STOPCODE + " TEXT PRIMARY KEY," +
+                FAVOURITE_STOPS_STOPNAME + " TEXT NOT NULL);");
+    }
+
+    /**
+     * An upgrade of the database, an abstract method in the super class. This
+     * method, as of yet, does nothing.
+     *
+     * @param db The database object to interface with.
+     * @param oldVersion The version of the old database.
+     * @param newVersion The version of the new database.
+     */
+    @Override
+    public void onUpgrade(final SQLiteDatabase db, final int oldVersion,
+            final int newVersion)
+    {
+        // Nothing to upgrade yet.
     }
 
     /**
@@ -77,8 +105,8 @@ public class SettingsDatabase {
      * @param context The activity context.
      * @return A Cursor object to all the favourite stop items.
      */
-    public static Cursor getAllFavouriteStops(final Context context) {
-        SQLiteDatabase db = new OpenHelper(context).getReadableDatabase();
+    public Cursor getAllFavouriteStops() {
+        SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(true,
                 FAVOURITE_STOPS_TABLE,
                 new String[] { FAVOURITE_STOPS_STOPCODE,
@@ -96,20 +124,19 @@ public class SettingsDatabase {
      * @param stopCode The stopCode to check for.
      * @return True if it already exists, false if it doesn't.
      */
-    public static boolean getFavouriteStopExists(final Context context,
-            final String stopCode)
+    public boolean getFavouriteStopExists(final String stopCode)
     {
         if(stopCode == null || stopCode.length() == 0) return false;
-        SQLiteDatabase db = new OpenHelper(context).getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(FAVOURITE_STOPS_TABLE,
                 new String[] { FAVOURITE_STOPS_STOPCODE },
                 FAVOURITE_STOPS_STOPCODE + " = " + stopCode,
                 null, null, null, null);
         if(c.getCount() > 0) {
-            db.close();
+            c.close();
             return true;
         }
-        db.close();
+        c.close();
         return false;
     }
 
@@ -121,19 +148,18 @@ public class SettingsDatabase {
      * @param stopName The stop name to insert.
      * @throws SQLException If an error occurs whilst writing to the database.
      */
-    public static void insertFavouriteStop(final Context context,
-            final String stopCode, final String stopName) throws SQLException
+    public void insertFavouriteStop(final String stopCode,
+            final String stopName) throws SQLException
     {
         if(stopCode == null || stopName == null || stopCode.length() == 0
                 || stopName.length() == 0) return;
-        if(getFavouriteStopExists(context, stopCode)) return;
+        if(getFavouriteStopExists(stopCode)) return;
         ContentValues cv = new ContentValues();
         cv.put(FAVOURITE_STOPS_STOPCODE, stopCode);
         cv.put(FAVOURITE_STOPS_STOPNAME, stopName);
 
-        SQLiteDatabase db = new OpenHelper(context).getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         db.insertOrThrow(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPNAME, cv);
-        db.close();
     }
 
     /**
@@ -142,54 +168,52 @@ public class SettingsDatabase {
      * @param context The activity context.
      * @param stopCode The stop code to delete from the database.
      */
-    public static void deleteFavouriteStop(final Context context,
-            final String stopCode)
-    {
+    public void deleteFavouriteStop(final String stopCode) {
         if(stopCode == null || stopCode.length() == 0) return;
-        if(!getFavouriteStopExists(context, stopCode)) return;
+        if(!getFavouriteStopExists(stopCode)) return;
 
-        SQLiteDatabase db = new OpenHelper(context).getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         db.delete(FAVOURITE_STOPS_TABLE,
                 FAVOURITE_STOPS_STOPCODE + " = " + stopCode, null);
-        db.close();
     }
 
     /**
      * Modify the stopName string of an item in the database.
      *
-     * @param context The activity context.
      * @param stopCode The stop code of the item to modify.
      * @param stopName The new stop name.
      */
-    public static void modifyFavouriteStop(final Context context,
-            final String stopCode, final String stopName)
-    {
+    public void modifyFavouriteStop(final String stopCode,
+            final String stopName) {
         if(stopCode == null || stopName == null || stopCode.length() == 0
                 || stopName.length() == 0) return;
-        if(!getFavouriteStopExists(context, stopCode)) return;
+        if(!getFavouriteStopExists(stopCode)) return;
         ContentValues cv = new ContentValues();
         cv.put(FAVOURITE_STOPS_STOPNAME, stopName);
 
-        SQLiteDatabase db = new OpenHelper(context).getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         db.update(FAVOURITE_STOPS_TABLE, cv,
                 FAVOURITE_STOPS_STOPCODE + " = " + stopCode, null);
-        db.close();
     }
 
-    public static String getNameForStop(final Context context,
-            final String stopCode)
-    {
+    /**
+     * Get the name for a bus stop.
+     *
+     * @param stopCode The bus stop code.
+     * @return The name for the bus stop.
+     */
+    public String getNameForStop(final String stopCode) {
         if(stopCode == null || stopCode.length() == 0
-                || !getFavouriteStopExists(context, stopCode)) return null;
+                || !getFavouriteStopExists(stopCode)) return null;
 
-        SQLiteDatabase db = new OpenHelper(context).getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(FAVOURITE_STOPS_TABLE,
                 new String[] { FAVOURITE_STOPS_STOPNAME },
                 FAVOURITE_STOPS_STOPCODE + " = " + stopCode,
                 null, null, null, null);
         c.moveToFirst();
         String s = c.getString(0);
-        db.close();
+        c.close();
         return s;
     }
 }

@@ -46,7 +46,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <!-- Strings for MainActivity -->
     <string name="main_favourite_stops">Favourite Stops</string>
     <string name="main_enter_stop_code">Enter Stop Code</string>
-    <string name="main_bus_stop_map">Bus Stop Map(!)</string>
+    <string name="main_bus_stop_map">Bus Stop Map</string>
 
     <!-- Strings for EnterStopCodeActivity -->
     <string name="enterstopcode_title">Enter Bus Stop Code</string>
@@ -132,4 +132,13 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addeditstop_edit_stopname_hint">Stop name</string>
     <string name="addeditstop_error_blankstopname">You cannot have a blank stop
     name.</string>
+
+    <!-- Strings for BusStopMapActivity -->
+    <string name="map_title">Bus Stop Map</string>
+
+    <!-- Strings for BusStopMapActivity menu -->
+    <string name="map_menu_maptype_mapview">Map view</string>
+    <string name="map_menu_maptype_satellite">Satellite view</string>
+    <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
+    <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
 </resources>

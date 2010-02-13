@@ -81,7 +81,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             "uk.org.rivernile.edinburghbustracker.android."
             + "ACTION_VIEW_STOP_DATA";
 
-    private boolean autoRefresh, cancel = false, favouriteExists;
+    private boolean autoRefresh, cancel = false, favouriteExists, paused;
     private String remoteHost;
     private int remotePort;
     private String stopCode;
@@ -129,13 +129,17 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     protected void onPause() {
         super.onPause();
         autoRefresh = false;
+        paused = true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        paused = false;
         autoRefresh = sp.getBoolean(PreferencesActivity.KEY_AUTOREFRESH_STATE,
                 false);
+        favouriteExists = SettingsDatabase.getInstance(this)
+                .getFavouriteStopExists(stopCode);
         if(autoRefresh) {
             new Thread(afTask).start();
         }
@@ -148,14 +152,10 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        favouriteExists =
-                SettingsDatabase.getFavouriteStopExists(this, stopCode);
         if(favouriteExists) {
-            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_remfav)
-                    .setIcon(android.R.drawable.ic_menu_delete);
+            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_remfav);
         } else {
-            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_addfav)
-                    .setIcon(android.R.drawable.ic_menu_add);
+            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_addfav);
         }
         if(autoRefresh) {
             menu.add(0, AUTO_REFRESH_ID, 2,
@@ -194,7 +194,15 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        MenuItem item = menu.getItem(FAVOURITE_ID);
+        MenuItem item = menu.findItem(FAVOURITE_ID);
+        if(favouriteExists) {
+            item.setTitle(R.string.displaystopdata_menu_remfav)
+                    .setIcon(android.R.drawable.ic_menu_delete);
+        } else {
+            item.setTitle(R.string.displaystopdata_menu_addfav)
+                    .setIcon(android.R.drawable.ic_menu_add);
+
+        }
         if(stopName.length() > 0) {
             item.setEnabled(true);
         } else {
@@ -271,7 +279,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity
 
     private void handleFavouriteMenuItem(final MenuItem item) {
         if(favouriteExists) {
-            SettingsDatabase.deleteFavouriteStop(this, stopCode);
+            SettingsDatabase sd = SettingsDatabase.getInstance(this);
+            sd.deleteFavouriteStop(stopCode);
             favouriteExists = false;
             item.setTitle(R.string.displaystopdata_menu_addfav)
                     .setIcon(android.R.drawable.ic_menu_add);
@@ -363,7 +372,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             if (msg.getData().getBoolean("isError")) {
                 errorString = msg.getData().getString("errorString");
                 dismissDialog(PROGRESS_DIALOG);
-                showDialog(ERROR_DIALOG);
+                if(!paused) showDialog(ERROR_DIALOG);
             } else if(msg.getData().getBoolean("refresh")) {
                 doGetBusTimesTask();
             } else if(msg.getData().getBoolean("finished")) {
