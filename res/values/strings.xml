@@ -135,6 +135,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <!-- Strings for BusStopMapActivity -->
     <string name="map_title">Bus Stop Map</string>
+    <string name="map_dialog_showtimes">Show bus times</string>
+    <string name="map_dialog_addfav">Add as favourite</string>
+    <string name="map_dialog_close">Close</string>
+    <string name="map_dialog_noservices">There are no known services for this
+    stop.</string>
 
     <!-- Strings for BusStopMapActivity menu -->
     <string name="map_menu_maptype_mapview">Map view</string>

@@ -21,6 +21,8 @@ public final class R {
         public static final int enterstopcode_entry=0x7f060006;
         public static final int enterstopcode_label=0x7f060005;
         public static final int enterstopcode_submit=0x7f060007;
+        public static final int mapdialog_list_options=0x7f060009;
+        public static final int mapdialog_text_services=0x7f060008;
         public static final int mapview=0x7f060004;
     }
     public static final class layout {
@@ -29,6 +31,7 @@ public final class R {
         public static final int displaystopdata=0x7f030002;
         public static final int enterstopcode=0x7f030003;
         public static final int favouritestops=0x7f030004;
+        public static final int mapdialog=0x7f030005;
     }
     public static final class string {
         public static final int addeditstop_description=0x7f050037;
@@ -93,12 +96,16 @@ public final class R {
         /**  Strings for MainActivity 
          */
         public static final int main_favourite_stops=0x7f05000c;
-        public static final int map_menu_mapoverlay_trafficviewoff=0x7f05003e;
-        public static final int map_menu_mapoverlay_trafficviewon=0x7f05003d;
+        public static final int map_dialog_addfav=0x7f05003c;
+        public static final int map_dialog_close=0x7f05003d;
+        public static final int map_dialog_noservices=0x7f05003e;
+        public static final int map_dialog_showtimes=0x7f05003b;
+        public static final int map_menu_mapoverlay_trafficviewoff=0x7f050042;
+        public static final int map_menu_mapoverlay_trafficviewon=0x7f050041;
         /**  Strings for BusStopMapActivity menu 
          */
-        public static final int map_menu_maptype_mapview=0x7f05003b;
-        public static final int map_menu_maptype_satellite=0x7f05003c;
+        public static final int map_menu_maptype_mapview=0x7f05003f;
+        public static final int map_menu_maptype_satellite=0x7f050040;
         /**  Strings for BusStopMapActivity 
          */
         public static final int map_title=0x7f05003a;

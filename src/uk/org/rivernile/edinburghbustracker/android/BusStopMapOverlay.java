@@ -25,13 +25,12 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
+import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import java.util.ArrayList;
 
@@ -39,13 +38,14 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem> {
 
     private ArrayList<BusStopOverlayItem> items =
             new ArrayList<BusStopOverlayItem>();
-    private Context context;
+    private MapActivity context;
     private MapView mapView;
     private int lastZoom;
     private GeoPoint lastCenter;
+    private BusStopOverlayItem selectedItem;
 
     public BusStopMapOverlay(final Drawable defaultMarker,
-            final Context context, final MapView mapView)
+            final MapActivity context, final MapView mapView)
     {
         super(boundCenterBottom(defaultMarker));
         this.context = context;
@@ -67,7 +67,8 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem> {
 
     @Override
     protected boolean onTap(final int index) {
-        Toast.makeText(context, items.get(index).getTitle(), Toast.LENGTH_LONG).show();
+        selectedItem = items.get(index);
+        context.showDialog(0);
         return true;
     }
 
@@ -84,8 +85,7 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem> {
             minY = g.getLongitudeE6() - longSpan;
             maxX = g.getLatitudeE6() - latSpan;
             maxY = g.getLongitudeE6() + longSpan;
-            BusStopDatabase bsd = new BusStopDatabase(
-                    BusStopMapOverlay.this.context);
+            BusStopDatabase bsd = BusStopDatabase.getInstance(context);
             Cursor c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
             if(c.getCount() > 0) {
                 String stopCode, stopName;
@@ -104,7 +104,6 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem> {
                 populate();
             }
             c.close();
-            bsd.close();
         }
     }
 
@@ -121,5 +120,9 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem> {
             lastCenter = g;
             doPopulateBusStops();
         }
+    }
+
+    public BusStopOverlayItem getSeletedItem() {
+        return selectedItem;
     }
 }

@@ -31,15 +31,21 @@ import com.google.android.maps.OverlayItem;
 public class BusStopOverlayItem extends OverlayItem {
 
     private String stopCode;
+    private String stopName;
 
     public BusStopOverlayItem(final GeoPoint point, final String stopCode,
             final String stopName, final String services)
     {
         super(point, stopCode + " " + stopName, services);
         this.stopCode = stopCode;
+        this.stopName = stopName;
     }
 
     public String getStopCode() {
         return stopCode;
+    }
+
+    public String getStopName() {
+        return stopName;
     }
 }

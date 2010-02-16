@@ -37,8 +37,20 @@ public class BusStopDatabase extends SQLiteOpenHelper {
     protected final static String STOP_DB_NAME = "busstops.db";
     protected final static int STOP_DB_VERSION = 1;
 
-    public BusStopDatabase(final Context context) {
+    private static BusStopDatabase instance = null;
+
+    private BusStopDatabase(final Context context) {
         super(context, STOP_DB_NAME, null, STOP_DB_VERSION);
+    }
+
+    public static BusStopDatabase getInstance(final Context context) {
+        if(instance == null) instance = new BusStopDatabase(context);
+        return instance;
+    }
+
+    @Override
+    protected void finalize() {
+        getReadableDatabase().close();
     }
 
     @Override
@@ -53,12 +65,6 @@ public class BusStopDatabase extends SQLiteOpenHelper {
         // Do nothing.
     }
 
-    public Cursor getAllBusStops() {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query("bus_stops", null, null, null, null, null, null);
-        return c;
-    }
-
     public Cursor getBusStopsByCoords(final int minX, final int minY,
             final int maxX, final int maxY)
     {
@@ -67,5 +73,27 @@ public class BusStopDatabase extends SQLiteOpenHelper {
                 minY + " AND x >= " + maxX + " AND y <= " + maxY, null, null,
                 null, null);
         return c;
+    }
+
+    public String[] getBusServicesForStop(final String stopCode) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query(true, "service_stops",
+                new String[] { "serviceName" }, "stopCode = " + stopCode, null,
+                null, null, "serviceName ASC", null);
+        int count = c.getCount();
+        int i = 0;
+        if(count > 0) {
+            String[] result = new String[count];
+            while(!c.isLast()) {
+                c.moveToNext();
+                result[i] = c.getString(0);
+                i++;
+            }
+            c.close();
+            return result;
+        } else {
+            c.close();
+            return null;
+        }
     }
 }

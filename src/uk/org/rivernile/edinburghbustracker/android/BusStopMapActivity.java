@@ -25,15 +25,24 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 
-public class BusStopMapActivity extends MapActivity {
+public class BusStopMapActivity extends MapActivity
+        implements OnItemClickListener {
 
     private static final int MENU_MAPTYPE = 0;
     private static final int MENU_OVERLAY_TRAFFICVIEW = 1;
@@ -138,5 +147,66 @@ public class BusStopMapActivity extends MapActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(final int id) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.mapdialog);
+        dialog.setCancelable(true);
+        ListView list =
+                (ListView)dialog.findViewById(R.id.mapdialog_list_options);
+        ArrayAdapter ad = new ArrayAdapter<String>(dialog.getContext(),
+                android.R.layout.simple_list_item_1);
+        ad.add(getString(R.string.map_dialog_showtimes));
+        ad.add(getString(R.string.map_dialog_addfav));
+        ad.add(getString(R.string.map_dialog_close));
+        list.setAdapter(ad);
+        list.setOnItemClickListener(this);
+        return dialog;
+    }
+
+    @Override
+    protected void onPrepareDialog(final int id, final Dialog dialog) {
+        BusStopOverlayItem oi = stopOverlay.getSeletedItem();
+        String[] services = BusStopDatabase.getInstance(this)
+                .getBusServicesForStop(oi.getStopCode());
+        TextView tv = (TextView)dialog.findViewById(
+                R.id.mapdialog_text_services);
+        dialog.setTitle(oi.getStopCode() + " " + oi.getStopName());
+        if(services == null) {
+            tv.setText(R.string.map_dialog_noservices);
+        } else {
+            String s = "";
+            for(int i = 0; i < services.length; i++) {
+                if(i == (services.length - 1)) {
+                    s = s + services[i];
+                } else {
+                    s = s + services[i] + ", ";
+                }
+            }
+            tv.setText(s);
+        }
+    }
+
+    @Override
+    public void onItemClick(final AdapterView<?> l, final View view,
+            final int position, final long id)
+    {
+        //String stopName = stopOverlay.getSeletedItem().getStopName();
+        switch(position) {
+            case 0:
+                Intent intent = new Intent(this, DisplayStopDataActivity.class);
+                intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
+                intent.putExtra("stopCode",
+                        stopOverlay.getSeletedItem().getStopCode());
+                startActivity(intent);
+                break;
+            case 1:
+                break;
+            case 2:
+                dismissDialog(0);
+                break;
+        }
     }
 }
