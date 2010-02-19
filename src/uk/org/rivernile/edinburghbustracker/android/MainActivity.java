@@ -27,6 +27,7 @@ package uk.org.rivernile.edinburghbustracker.android;
 
 import android.app.ListActivity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -90,15 +91,18 @@ public class MainActivity extends ListActivity {
     private Runnable initStopDBTask = new Runnable() {
         @Override
         public void run() {
-            File f = new File(BusStopDatabase.STOP_DB_PATH +
-                    BusStopDatabase.STOP_DB_NAME);
+            File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
             if(!f.exists()) {
                 try {
+                    // Start of horrible hack to create database directory and
+                    // set permissions if it doesn't already exist.
+                    SQLiteDatabase db = MainActivity.this.openOrCreateDatabase(
+                            BusStopDatabase.STOP_DB_NAME, 0, null);
+                    db.close();
+                    // End of horrible hack.
                     InputStream in = getAssets().open(
                             BusStopDatabase.STOP_DB_NAME);
-                    FileOutputStream out = new FileOutputStream(
-                            BusStopDatabase.STOP_DB_PATH +
-                            BusStopDatabase.STOP_DB_NAME);
+                    FileOutputStream out = new FileOutputStream(f);
                     byte[] buf = new byte[1024];
                     int len;
                     while((len = in.read(buf)) > 0) {

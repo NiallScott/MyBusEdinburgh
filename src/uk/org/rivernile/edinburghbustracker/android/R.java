@@ -96,16 +96,16 @@ public final class R {
         /**  Strings for MainActivity 
          */
         public static final int main_favourite_stops=0x7f05000c;
-        public static final int map_dialog_addfav=0x7f05003c;
-        public static final int map_dialog_close=0x7f05003d;
-        public static final int map_dialog_noservices=0x7f05003e;
+        public static final int map_dialog_close=0x7f05003c;
+        public static final int map_dialog_noservices=0x7f05003d;
         public static final int map_dialog_showtimes=0x7f05003b;
-        public static final int map_menu_mapoverlay_trafficviewoff=0x7f050042;
-        public static final int map_menu_mapoverlay_trafficviewon=0x7f050041;
+        public static final int map_menu_mapoverlay_trafficviewoff=0x7f050041;
+        public static final int map_menu_mapoverlay_trafficviewon=0x7f050040;
         /**  Strings for BusStopMapActivity menu 
          */
-        public static final int map_menu_maptype_mapview=0x7f05003f;
-        public static final int map_menu_maptype_satellite=0x7f050040;
+        public static final int map_menu_maptype_mapview=0x7f05003e;
+        public static final int map_menu_maptype_satellite=0x7f05003f;
+        public static final int map_menu_mylocation=0x7f050042;
         /**  Strings for BusStopMapActivity 
          */
         public static final int map_title=0x7f05003a;

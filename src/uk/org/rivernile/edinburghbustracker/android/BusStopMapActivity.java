@@ -44,12 +44,14 @@ import com.google.android.maps.MyLocationOverlay;
 public class BusStopMapActivity extends MapActivity
         implements OnItemClickListener {
 
-    private static final int MENU_MAPTYPE = 0;
-    private static final int MENU_OVERLAY_TRAFFICVIEW = 1;
+    private static final int MENU_MYLOCATION = 0;
+    private static final int MENU_MAPTYPE = 1;
+    private static final int MENU_OVERLAY_TRAFFICVIEW = 2;
 
     private MapView mapView;
     private MyLocationOverlay myLocation;
     private BusStopMapOverlay stopOverlay;
+    private boolean createdDialog = false;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -66,6 +68,7 @@ public class BusStopMapActivity extends MapActivity
                 mapView.getController().setCenter(
                         BusStopMapActivity.this.myLocation.getMyLocation());
                 mapView.getController().setZoom(17);
+                if(createdDialog) dismissDialog(0);
             }
         });
         mapView.getOverlays().add(myLocation);
@@ -97,16 +100,17 @@ public class BusStopMapActivity extends MapActivity
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
 
+        menu.add(0, MENU_MYLOCATION, 1, R.string.map_menu_mylocation);
         if(mapView.isSatellite()) {
-            menu.add(0, MENU_MAPTYPE, 1, R.string.map_menu_maptype_mapview);
+            menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_mapview);
         } else {
-            menu.add(0, MENU_MAPTYPE, 1, R.string.map_menu_maptype_satellite);
+            menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_satellite);
         }
         if(mapView.isTraffic()) {
-            menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 2,
+            menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 3,
                 R.string.map_menu_mapoverlay_trafficviewoff);
         } else {
-            menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 2,
+            menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 3,
                 R.string.map_menu_mapoverlay_trafficviewon);
         }
         return true;
@@ -133,6 +137,10 @@ public class BusStopMapActivity extends MapActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
+            case MENU_MYLOCATION:
+                mapView.getController().setCenter(myLocation.getMyLocation());
+                mapView.getController().setZoom(17);
+                break;
             case MENU_MAPTYPE:
                 mapView.setSatellite(!mapView.isSatellite());
                 break;
@@ -159,10 +167,10 @@ public class BusStopMapActivity extends MapActivity
         ArrayAdapter ad = new ArrayAdapter<String>(dialog.getContext(),
                 android.R.layout.simple_list_item_1);
         ad.add(getString(R.string.map_dialog_showtimes));
-        ad.add(getString(R.string.map_dialog_addfav));
         ad.add(getString(R.string.map_dialog_close));
         list.setAdapter(ad);
         list.setOnItemClickListener(this);
+        createdDialog = true;
         return dialog;
     }
 
@@ -203,8 +211,6 @@ public class BusStopMapActivity extends MapActivity
                 startActivity(intent);
                 break;
             case 1:
-                break;
-            case 2:
                 dismissDialog(0);
                 break;
         }

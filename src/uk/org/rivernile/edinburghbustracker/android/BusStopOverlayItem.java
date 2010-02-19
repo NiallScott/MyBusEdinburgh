@@ -34,9 +34,9 @@ public class BusStopOverlayItem extends OverlayItem {
     private String stopName;
 
     public BusStopOverlayItem(final GeoPoint point, final String stopCode,
-            final String stopName, final String services)
+            final String stopName)
     {
-        super(point, stopCode + " " + stopName, services);
+        super(point, stopCode, stopName);
         this.stopCode = stopCode;
         this.stopName = stopName;
     }

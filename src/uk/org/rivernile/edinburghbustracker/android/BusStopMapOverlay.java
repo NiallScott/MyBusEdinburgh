@@ -98,7 +98,7 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem> {
                     x = c.getInt(2);
                     y = c.getInt(3);
                     oi = new BusStopOverlayItem(new GeoPoint(x, y), stopCode,
-                        stopName, "");
+                        stopName);
                     items.add(oi);
                 }
                 populate();

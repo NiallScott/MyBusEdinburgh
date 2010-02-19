@@ -489,6 +489,8 @@ is divided into following sections:
     <target depends="init,-package-res-and-assets,-package-res-no-assets,-package-dex" name="-sign">
         <exec executable="${apkbuilder}" failonerror="true">
             <arg value="${basedir}/${dist.apk}"/>
+            <!-- Uncomment the line below to produce an unsigned APK file. -->
+            <!-- <arg value="-u" /> -->
             <arg value="-z"/>
             <arg value="${basedir}/${dist.apk}_"/>
         </exec>

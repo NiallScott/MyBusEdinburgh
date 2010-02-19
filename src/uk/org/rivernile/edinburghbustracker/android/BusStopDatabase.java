@@ -32,8 +32,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class BusStopDatabase extends SQLiteOpenHelper {
 
-    protected final static String STOP_DB_PATH = "/data/data/uk.org.rivernile" +
-            ".edinburghbustracker.android/databases/";
     protected final static String STOP_DB_NAME = "busstops.db";
     protected final static int STOP_DB_VERSION = 1;
 
