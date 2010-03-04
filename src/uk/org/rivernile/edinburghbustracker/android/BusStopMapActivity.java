@@ -36,6 +36,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
@@ -62,6 +63,8 @@ public class BusStopMapActivity extends MapActivity
         mapView.getController().setCenter(new GeoPoint(55948611, -3199811));
         mapView.getController().setZoom(12);
         myLocation = new MyLocationOverlay(this, mapView);
+        Toast.makeText(this, R.string.map_finding_location, Toast.LENGTH_LONG)
+                .show();
         myLocation.runOnFirstFix(new Runnable() {
             @Override
             public void run() {
@@ -100,7 +103,8 @@ public class BusStopMapActivity extends MapActivity
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(0, MENU_MYLOCATION, 1, R.string.map_menu_mylocation);
+        menu.add(0, MENU_MYLOCATION, 1, R.string.map_menu_mylocation).setIcon(
+                android.R.drawable.ic_menu_mylocation);
         if(mapView.isSatellite()) {
             menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_mapview);
         } else {
@@ -138,8 +142,14 @@ public class BusStopMapActivity extends MapActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case MENU_MYLOCATION:
-                mapView.getController().setCenter(myLocation.getMyLocation());
-                mapView.getController().setZoom(17);
+                GeoPoint ml = myLocation.getMyLocation();
+                if(ml != null) {
+                    mapView.getController().setCenter(ml);
+                    mapView.getController().setZoom(17);
+                } else {
+                    Toast.makeText(this, R.string.map_location_unknown,
+                            Toast.LENGTH_LONG).show();
+                }
                 break;
             case MENU_MAPTYPE:
                 mapView.setSatellite(!mapView.isSatellite());
@@ -176,7 +186,7 @@ public class BusStopMapActivity extends MapActivity
 
     @Override
     protected void onPrepareDialog(final int id, final Dialog dialog) {
-        BusStopOverlayItem oi = stopOverlay.getSeletedItem();
+        BusStopOverlayItem oi = stopOverlay.getSelectedItem();
         String[] services = BusStopDatabase.getInstance(this)
                 .getBusServicesForStop(oi.getStopCode());
         TextView tv = (TextView)dialog.findViewById(
@@ -207,7 +217,7 @@ public class BusStopMapActivity extends MapActivity
                 Intent intent = new Intent(this, DisplayStopDataActivity.class);
                 intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
                 intent.putExtra("stopCode",
-                        stopOverlay.getSeletedItem().getStopCode());
+                        stopOverlay.getSelectedItem().getStopCode());
                 startActivity(intent);
                 break;
             case 1:

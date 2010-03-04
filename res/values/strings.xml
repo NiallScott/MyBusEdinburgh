@@ -47,6 +47,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="main_favourite_stops">Favourite Stops</string>
     <string name="main_enter_stop_code">Enter Stop Code</string>
     <string name="main_bus_stop_map">Bus Stop Map</string>
+    <string name="main_db_updated">Edinburgh Bus Tracker: The stop database has
+    been updated to the latest version.</string>
 
     <!-- Strings for EnterStopCodeActivity -->
     <string name="enterstopcode_title">Enter Bus Stop Code</string>
@@ -122,6 +124,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_textbox_port_summary">The port on the server.
     For advanced users only.</string>
     <string name="preferences_textbox_port_dialog">Edit Port</string>
+    <string name="preferences_category_database">Bus Stops Database</string>
+    <string name="preferences_checkbox_database_autoupdate">Auto-update</string>
+    <string name="preferences_checkbox_database_autoupdate_summary">Should the
+    bus stop database automatically update weekly?</string>
 
     <!-- Strings for AddEditFavouriteStopActivity -->
     <string name="addeditstop_title">Add/Edit Favourite Stop</string>
@@ -139,6 +145,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_dialog_close">Close</string>
     <string name="map_dialog_noservices">There are no known services for this
     stop.</string>
+    <string name="map_finding_location">Trying to determine your location...
+    </string>
+    <string name="map_location_unknown">Your current location is unknown.
+    </string>
 
     <!-- Strings for BusStopMapActivity menu -->
     <string name="map_menu_maptype_mapview">Map view</string>

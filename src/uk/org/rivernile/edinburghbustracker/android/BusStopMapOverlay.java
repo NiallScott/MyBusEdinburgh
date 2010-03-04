@@ -122,7 +122,7 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem> {
         }
     }
 
-    public BusStopOverlayItem getSeletedItem() {
+    public BusStopOverlayItem getSelectedItem() {
         return selectedItem;
     }
 }

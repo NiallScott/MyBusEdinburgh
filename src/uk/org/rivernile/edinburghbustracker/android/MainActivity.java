@@ -26,16 +26,30 @@
 package uk.org.rivernile.edinburghbustracker.android;
 
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.URL;
+import java.net.UnknownHostException;
 
 /**
  * The main activity in the application. This activity displays a the main menu
@@ -45,6 +59,8 @@ import java.io.InputStream;
  * @author Niall Scott
  */
 public class MainActivity extends ListActivity {
+
+    private Thread initStopDBThread;
 
     /**
      * {@inheritDoc}
@@ -60,7 +76,9 @@ public class MainActivity extends ListActivity {
         ad.add(getString(R.string.preferences));
         ad.add(getString(R.string.exit));
         setListAdapter(ad);
-        new Thread(initStopDBTask).start();
+        initStopDBThread = new Thread(initStopDBTask);
+        initStopDBThread.start();
+        new Thread(updateTask).start();
     }
 
     /**
@@ -116,4 +134,127 @@ public class MainActivity extends ListActivity {
             }
         }
     };
+
+    private Runnable updateTask = new Runnable() {
+        @Override
+        public void run() {
+            SharedPreferences sp = getSharedPreferences(
+                    PreferencesActivity.PREF_FILE, 0);
+            long lastCheck = sp.getLong("lastUpdateCheck", 0);
+            boolean autoUpdate = sp.getBoolean("pref_database_autoupdate",
+                    true);
+            if((System.currentTimeMillis() - lastCheck) < 86400000) return;
+            String remoteHost = sp.getString(PreferencesActivity.KEY_HOSTNAME,
+                    "bustracker.selfip.org");
+            int remotePort;
+            try {
+                remotePort = Integer.parseInt(sp.getString(
+                        PreferencesActivity.KEY_PORT, "4876"));
+            } catch(NumberFormatException e) {
+                remotePort = 4876;
+            }
+
+            String latestClientVersionStr;
+            String dbLastModStr = "";
+            String dbURL = "";
+            try {
+                Socket sock = new Socket();
+                sock.setSoTimeout(20000);
+                sock.connect(new InetSocketAddress(remoteHost, remotePort),
+                        20000);
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(sock.getInputStream()));
+                PrintWriter writer = new PrintWriter(sock.getOutputStream(),
+                        true);
+                writer.println("getLatestAndroidClientVersion");
+                latestClientVersionStr = reader.readLine();
+                if(autoUpdate) {
+                    writer.println("getDBLastModTime");
+                    dbLastModStr = reader.readLine();
+                    writer.println("getDBURL");
+                    dbURL = reader.readLine();
+                }
+                writer.println("exit");
+                writer.close();
+                reader.close();
+                sock.close();
+            } catch(UnknownHostException e) {
+                return;
+            } catch(IOException e) {
+                return;
+            }
+
+            if(latestClientVersionStr != null &&
+                    latestClientVersionStr.length() > 0 &&
+                    !latestClientVersionStr.equals("Unknown"))
+            {
+                try {
+                    int latestClientVersion;
+                    latestClientVersion = Integer.parseInt(
+                            latestClientVersionStr);
+                    int currentVersion = getPackageManager().getPackageInfo(
+                            getPackageName(), 0).versionCode;
+                    if(latestClientVersion > currentVersion) {
+                        // What to do if there's a new client version
+                    }
+                } catch(NumberFormatException e) {
+
+                } catch(PackageManager.NameNotFoundException e) { }
+            }
+
+            if(dbLastModStr == null || dbLastModStr.length() == 0 ||
+                    !autoUpdate) return;
+            long dbLastMod;
+            try {
+                dbLastMod = Long.parseLong(dbLastModStr);
+            } catch(NumberFormatException e) {
+                return;
+            }
+            if(dbLastMod > BusStopDatabase.getInstance(getApplicationContext())
+                    .getLastDBModTime())
+            {
+                try {
+                    initStopDBThread.join();
+                } catch(InterruptedException e) { }
+                updateStopsDB(getApplicationContext(), dbURL);
+            }
+            SharedPreferences.Editor edit = sp.edit();
+            edit.putLong("lastUpdateCheck", System.currentTimeMillis());
+            edit.commit();
+        }
+    };
+
+    public static synchronized void updateStopsDB(final Context context,
+            final String url)
+    {
+        if(context == null || url == null || url.length() == 0) return;
+        try {
+            URL u = new URL(url);
+            HttpURLConnection con = (HttpURLConnection)u.openConnection();
+            InputStream in = con.getInputStream();
+            File temp = context.getDatabasePath(BusStopDatabase.STOP_DB_NAME +
+                    "_temp");
+            File dest = context.getDatabasePath(BusStopDatabase.STOP_DB_NAME);
+            FileOutputStream out = new FileOutputStream(temp);
+            byte[] buf = new byte[1024];
+            int len;
+            while((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            out.close();
+            in.close();
+            con.disconnect();
+            dest.delete();
+            temp.renameTo(dest);
+            Looper.prepare();
+            Toast.makeText(context, R.string.main_db_updated, Toast.LENGTH_LONG)
+                    .show();
+            Looper.loop();
+        } catch(MalformedURLException e) {
+
+        } catch(IOException e) {
+
+        }
+    }
 }

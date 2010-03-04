@@ -36,6 +36,14 @@
             android:defaultValue="false" />
     </PreferenceCategory>
     <PreferenceCategory
+        android:title="@string/preferences_category_database">
+        <CheckBoxPreference
+            android:key="pref_database_autoupdate"
+            android:title="@string/preferences_checkbox_database_autoupdate"
+            android:summary="@string/preferences_checkbox_database_autoupdate_summary"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory
         android:title="@string/preferences_category_server">
         <EditTextPreference
             android:key="pref_server_hostname"

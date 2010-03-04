@@ -94,4 +94,19 @@ public class BusStopDatabase extends SQLiteOpenHelper {
             return null;
         }
     }
+
+    public long getLastDBModTime() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query(true, "metadata", new String[] { "updateTS" }, null,
+                null, null, null, null, null);
+        if(c.getCount() == 0) return 0;
+        c.moveToNext();
+        String result = c.getString(0);
+        c.close();
+        try {
+            return Long.parseLong(result);
+        } catch(NumberFormatException e) {
+            return 0;
+        }
+    }
 }
