@@ -379,14 +379,14 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                 dismissDialog(PROGRESS_DIALOG);
                 if(cancel) return;
                 try {
-                    stopCode = jo.getString("stopCode");
-                    if(stopCode.length() == 0) {
+                    String sc = jo.getString("stopCode");
+                    if(sc.length() == 0) {
                         doError(getString(R.string.displaystopdata_err_nodata));
                         return;
                     }
                     stopName = jo.getString("stopName");
                     setTitle(getString(R.string.displaystopdata_title2) + " " +
-                            stopCode + " " + stopName);
+                            sc + " " + stopName);
 
                     JSONArray services = jo.getJSONArray("services");
                     if(services.length() == 0) return;
@@ -474,7 +474,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                     return;
                 }
                 try {
-                    Thread.sleep(20);
+                    Thread.sleep(1000);
                 } catch(InterruptedException e) {
                 }
             }
