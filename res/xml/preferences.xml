@@ -28,33 +28,56 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="@string/preferences_category_autorefresh">
+        android:title="@string/preferences_category_general">
         <CheckBoxPreference
-            android:key="pref_autorefresh_state"
-            android:title="@string/preferences_category_autorefresh"
-            android:summary="@string/preferences_checkbox_autorefresh_summary"
-            android:defaultValue="false" />
-    </PreferenceCategory>
-    <PreferenceCategory
-        android:title="@string/preferences_category_database">
-        <CheckBoxPreference
-            android:key="pref_database_autoupdate"
-            android:title="@string/preferences_checkbox_database_autoupdate"
-            android:summary="@string/preferences_checkbox_database_autoupdate_summary"
+            android:key="pref_appupdatescheck_state"
+            android:title="@string/preferences_checkbox_general_updatecheck"
+            android:summaryOn="@string/preferences_checkbox_general_updatecheck_ticked"
+            android:summaryOff="@string/preferences_checkbox_general_updatecheck_unticked"
             android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="@string/preferences_category_server">
+        android:title="@string/preferences_category_bustimes">
+        <CheckBoxPreference
+            android:key="pref_autorefresh_state"
+            android:title="@string/preferences_checkbox_bustimes_autorefresh"
+            android:summaryOn="@string/preferences_checkbox_bustimes_autorefresh_ticked"
+            android:summaryOff="@string/preferences_checkbox_bustimes_autorefresh_unticked"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="pref_nightservices_state"
+            android:title="@string/preferences_checkbox_bustimes_nightbus"
+            android:summaryOn="@string/preferences_checkbox_bustimes_nightbus_ticked"
+            android:summaryOff="@string/preferences_checkbox_bustimes_nightbus_unticked"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/preferences_category_map">
+        <CheckBoxPreference
+            android:key="pref_database_autoupdate"
+            android:title="@string/preferences_checkbox_map_dbupdate"
+            android:summaryOn="@string/preferences_checkbox_map_dbupdate_ticked"
+            android:summaryOff="@string/preferences_checkbox_map_dbupdate_unticked"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_autolocation_state"
+            android:title="@string/preferences_checkbox_map_autolocation"
+            android:summaryOn="@string/preferences_checkbox_map_autolocation_ticked"
+            android:summaryOff="@string/preferences_checkbox_map_autolocation_unticked"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/preferences_category_advanced">
         <EditTextPreference
             android:key="pref_server_hostname"
-            android:title="@string/preferences_textbox_hostname"
-            android:summary="@string/preferences_textbox_hostname_summary"
+            android:title="@string/preferences_textbox_advanced_hostname"
+            android:summary="@string/preferences_textbox_advanced_hostname_summary"
             android:defaultValue="bustracker.selfip.org"
             android:dialogTitle="@string/preferences_textbox_hostname_dialog" />
         <EditTextPreference
             android:key="pref_server_port"
-            android:title="@string/preferences_textbox_port"
-            android:summary="@string/preferences_textbox_port_summary"
+            android:title="@string/preferences_textbox_advanced_port"
+            android:summary="@string/preferences_textbox_advanced_port_summary"
             android:defaultValue="4876"
             android:dialogTitle="@string/preferences_textbox_port_dialog"
             android:numeric="integer" />

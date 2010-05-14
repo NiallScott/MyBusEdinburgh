@@ -63,8 +63,6 @@ public class BusStopMapActivity extends MapActivity
         mapView.getController().setCenter(new GeoPoint(55948611, -3199811));
         mapView.getController().setZoom(12);
         myLocation = new MyLocationOverlay(this, mapView);
-        Toast.makeText(this, R.string.map_finding_location, Toast.LENGTH_LONG)
-                .show();
         myLocation.runOnFirstFix(new Runnable() {
             @Override
             public void run() {
@@ -85,7 +83,11 @@ public class BusStopMapActivity extends MapActivity
     @Override
     public void onResume() {
         super.onResume();
+        if(!getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
+                .getBoolean("pref_autolocation_state", true)) return;
         myLocation.enableMyLocation();
+        Toast.makeText(this, R.string.map_finding_location, Toast.LENGTH_LONG)
+                .show();
     }
 
     @Override
@@ -104,7 +106,7 @@ public class BusStopMapActivity extends MapActivity
         super.onCreateOptionsMenu(menu);
 
         menu.add(0, MENU_MYLOCATION, 1, R.string.map_menu_mylocation).setIcon(
-                android.R.drawable.ic_menu_mylocation);
+                R.drawable.ic_menu_mylocation);
         if(mapView.isSatellite()) {
             menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_mapview);
         } else {
@@ -123,7 +125,14 @@ public class BusStopMapActivity extends MapActivity
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        MenuItem item = menu.getItem(MENU_MAPTYPE);
+        
+        MenuItem item;
+        if(!getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
+                .getBoolean("pref_autolocation_state", true)) {
+            item = menu.getItem(MENU_MYLOCATION);
+            item.setEnabled(false);
+        }
+        item = menu.getItem(MENU_MAPTYPE);
         if(mapView.isSatellite()) {
             item.setTitle(R.string.map_menu_maptype_mapview);
         } else {
@@ -155,11 +164,7 @@ public class BusStopMapActivity extends MapActivity
                 mapView.setSatellite(!mapView.isSatellite());
                 break;
             case MENU_OVERLAY_TRAFFICVIEW:
-                if(mapView.isTraffic()) {
-                    mapView.setTraffic(false);
-                } else {
-                    mapView.setTraffic(true);
-                }
+                mapView.setTraffic(!mapView.isTraffic());
                 break;
             default:
                 break;

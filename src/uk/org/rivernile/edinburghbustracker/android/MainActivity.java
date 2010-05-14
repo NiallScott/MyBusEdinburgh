@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2010 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -74,7 +74,7 @@ public class MainActivity extends ListActivity {
         ad.add(getString(R.string.main_enter_stop_code));
         ad.add(getString(R.string.main_bus_stop_map));
         ad.add(getString(R.string.preferences));
-        ad.add(getString(R.string.exit));
+        ad.add(getString(R.string.about_title));
         setListAdapter(ad);
         initStopDBThread = new Thread(initStopDBTask);
         initStopDBThread.start();
@@ -101,7 +101,7 @@ public class MainActivity extends ListActivity {
                 startActivity(new Intent(this, PreferencesActivity.class));
                 break;
             case 4:
-                finish();
+                startActivity(new Intent(this, AboutActivity.class));
                 break;
         }
     }
@@ -140,9 +140,13 @@ public class MainActivity extends ListActivity {
         public void run() {
             SharedPreferences sp = getSharedPreferences(
                     PreferencesActivity.PREF_FILE, 0);
-            long lastCheck = sp.getLong("lastUpdateCheck", 0);
             boolean autoUpdate = sp.getBoolean("pref_database_autoupdate",
                     true);
+            boolean updateCheck = sp.getBoolean("pref_appupdatescheck_state",
+                    true);
+            if(!autoUpdate && !updateCheck) return;
+            long lastCheck = sp.getLong("lastUpdateCheck", 0);
+
             if((System.currentTimeMillis() - lastCheck) < 86400000) return;
             String remoteHost = sp.getString(PreferencesActivity.KEY_HOSTNAME,
                     "bustracker.selfip.org");
@@ -154,7 +158,7 @@ public class MainActivity extends ListActivity {
                 remotePort = 4876;
             }
 
-            String latestClientVersionStr;
+            String latestClientVersionStr = "";
             String dbLastModStr = "";
             String dbURL = "";
             try {
@@ -166,8 +170,10 @@ public class MainActivity extends ListActivity {
                         new InputStreamReader(sock.getInputStream()));
                 PrintWriter writer = new PrintWriter(sock.getOutputStream(),
                         true);
-                writer.println("getLatestAndroidClientVersion");
-                latestClientVersionStr = reader.readLine();
+                if(updateCheck) {
+                    writer.println("getLatestAndroidClientVersion");
+                    latestClientVersionStr = reader.readLine();
+                }
                 if(autoUpdate) {
                     writer.println("getDBLastModTime");
                     dbLastModStr = reader.readLine();
@@ -184,7 +190,7 @@ public class MainActivity extends ListActivity {
                 return;
             }
 
-            if(latestClientVersionStr != null &&
+            if(updateCheck && latestClientVersionStr != null &&
                     latestClientVersionStr.length() > 0 &&
                     !latestClientVersionStr.equals("Unknown"))
             {
@@ -198,7 +204,6 @@ public class MainActivity extends ListActivity {
                         // What to do if there's a new client version
                     }
                 } catch(NumberFormatException e) {
-
                 } catch(PackageManager.NameNotFoundException e) { }
             }
 
@@ -236,6 +241,7 @@ public class MainActivity extends ListActivity {
                     "_temp");
             File dest = context.getDatabasePath(BusStopDatabase.STOP_DB_NAME);
             FileOutputStream out = new FileOutputStream(temp);
+            BusStopDatabase.getInstance(context).finalize();
             byte[] buf = new byte[1024];
             int len;
             while((len = in.read(buf)) > 0) {
@@ -252,9 +258,6 @@ public class MainActivity extends ListActivity {
                     .show();
             Looper.loop();
         } catch(MalformedURLException e) {
-
-        } catch(IOException e) {
-
-        }
+        } catch(IOException e) { }
     }
 }

@@ -164,7 +164,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             menu.add(0, AUTO_REFRESH_ID, 2,
                     R.string.displaystopdata_menu_turnautorefreshon);
         }
-        menu.add(0, REFRESH_ID, 3, R.string.displaystopdata_menu_refresh);
+        menu.add(0, REFRESH_ID, 3, R.string.displaystopdata_menu_refresh)
+                .setIcon(R.drawable.ic_menu_refresh);
         return true;
     }
 
@@ -197,10 +198,10 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         MenuItem item = menu.findItem(FAVOURITE_ID);
         if(favouriteExists) {
             item.setTitle(R.string.displaystopdata_menu_remfav)
-                    .setIcon(android.R.drawable.ic_menu_delete);
+                    .setIcon(R.drawable.ic_menu_delete);
         } else {
             item.setTitle(R.string.displaystopdata_menu_addfav)
-                    .setIcon(android.R.drawable.ic_menu_add);
+                    .setIcon(R.drawable.ic_menu_add);
 
         }
         if(stopName.length() > 0) {
@@ -403,12 +404,19 @@ public class DisplayStopDataActivity extends ExpandableListActivity
 
                     int a = services.length();
                     int b;
+                    String serviceName;
+                    boolean showNightBuses = getSharedPreferences(
+                            PreferencesActivity.PREF_FILE, 0)
+                            .getBoolean("pref_nightservices_state", true);
                     for(int i = 0; i < a; i++) {
                         currService = services.getJSONObject(i);
+                        serviceName = currService.getString("serviceName");
+                        if(!showNightBuses && serviceName.startsWith("N"))
+                            continue;
                         curGroupMap = new HashMap<String, String>();
                         groupData.add(curGroupMap);
                         curGroupMap.put(SERVICE_NAME_KEY,
-                                currService.getString("serviceName") + " " +
+                                serviceName + " " +
                                 currService.getString("route"));
                         buses = currService.getJSONArray("buses");
                         children = new ArrayList<HashMap<String, String>>();

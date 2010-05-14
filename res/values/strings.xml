@@ -30,10 +30,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <!-- Application strings -->
     <string name="app_name">Edinburgh Bus Tracker</string>
     <string name="app_description">View live bus data in Edinburgh</string>
-    <string name="app_version">0.0.1</string>
+    <string name="app_author">Niall Scott</string>
+    <string name="app_about">&lt;html>&lt;body>&lt;b>%appname&lt;/b>&lt;br>Version %vername (%vernumber)&lt;br>Stop DB version: %dbversion (%dbtime)&lt;p>&lt;a %url&lt;/a>&lt;/p>&lt;p>Author: Niall %quoteRivernile%quote Scott&lt;/p>&lt;p>Thanks to:&lt;br>Gordon Christie (EdinBus for iPhone developer)&lt;br>The City of Edinburgh Council&lt;/p>&lt;p>Permission has been granted from The City of Edinburgh Council for this application to tie in to their data feed. Neither the author of the application, or The City of Edinburgh Council take any responsibility for the accuracy of data supplied by this application or its implications, or any data loss or any other issues arising through its usage. Usage of this application signifies the user takes complete responsibility.&lt;/p>&lt;/body>&lt;/html></string>
 
     <!-- Generic strings -->
-    <string name="exit">Exit</string>
     <string name="submit">Submit</string>
     <string name="preferences">Preferences</string>
     <string name="error">Error</string>
@@ -81,6 +81,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     </string>
     <string name="displaystopdata_empty">There is currently no data to display.
     </string>
+    <string name="displaystopdata_mins">mins</string>
 
     <!-- Strings for DisplayStopDataActvity errors -->
     <string name="displaystopdata_err_nocode">No stop code was provided.
@@ -102,32 +103,44 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_menu_turnautorefreshoff">Turn auto-refresh off
     </string>
     <string name="displaystopdata_menu_refresh">Refresh</string>
-    <string name="displaystopdata_menu_addfav">Add favourite</string>
-    <string name="displaystopdata_menu_remfav">Remove favourite</string>
+    <string name="displaystopdata_menu_addfav">Add as favourite</string>
+    <string name="displaystopdata_menu_remfav">Remove as favourite</string>
 
     <!-- Strings for PreferencesActivity -->
     <string name="preferences_title">Preferences</string>
-    <string name="preferences_invalidhostname">The hostname you have entered is
-    invalid, it has been reset back to the default value.</string>
-    <string name="preferences_invalidport">The port you have entered is invalid,
-    it has been reset back to the default value.</string>
-    <string name="preferences_category_autorefresh">Auto-refresh</string>
-    <string name="preferences_checkbox_autorefresh_summary">Should bus stop data
-    automatically refresh by default?</string>
-    <string name="preferences_category_server">Server Settings</string>
-    <string name="preferences_textbox_hostname">Hostname</string>
-    <string name="preferences_textbox_hostname_summary">The hostname of the
-        server. For advanced users only.
-    </string>
-    <string name="preferences_textbox_hostname_dialog">Edit Hostname</string>
-    <string name="preferences_textbox_port">Port</string>
-    <string name="preferences_textbox_port_summary">The port on the server.
+
+    <string name="preferences_category_general">General</string>
+    <string name="preferences_checkbox_general_updatecheck">Check for updates</string>
+    <string name="preferences_checkbox_general_updatecheck_ticked">Untick to turn off checking for app updates.</string>
+    <string name="preferences_checkbox_general_updatecheck_unticked">Tick to turn on checking for app updates.</string>
+
+    <string name="preferences_category_bustimes">Bus Times Display</string>
+    <string name="preferences_checkbox_bustimes_autorefresh">Auto-refresh</string>
+    <string name="preferences_checkbox_bustimes_autorefresh_ticked">Untick to not auto-refresh bus times by default.</string>
+    <string name="preferences_checkbox_bustimes_autorefresh_unticked">Tick to auto-refresh bus times by default.</string>
+    <string name="preferences_checkbox_bustimes_nightbus">Show night services</string>
+    <string name="preferences_checkbox_bustimes_nightbus_ticked">Untick to not show night bus services.</string>
+    <string name="preferences_checkbox_bustimes_nightbus_unticked">Tick to show night bus services.</string>
+
+    <string name="preferences_category_map">Bus Stop Map</string>
+    <string name="preferences_checkbox_map_dbupdate">Auto-update database</string>
+    <string name="preferences_checkbox_map_dbupdate_ticked">Untick for the stop database to not be auto updated.</string>
+    <string name="preferences_checkbox_map_dbupdate_unticked">Tick for the stop database to auto update.</string>
+    <string name="preferences_checkbox_map_autolocation">Auto find location</string>
+    <string name="preferences_checkbox_map_autolocation_ticked">Untick to not find your location on the map.</string>
+    <string name="preferences_checkbox_map_autolocation_unticked">Tick to find your location on the map.</string>
+
+    <string name="preferences_category_advanced">Advanced</string>
+    <string name="preferences_textbox_advanced_hostname">Hostname</string>
+    <string name="preferences_textbox_advanced_hostname_summary">The hostname of the server. For advanced users only.</string>
+    <string name="preferences_textbox_advanced_port">Port</string>
+    <string name="preferences_textbox_advanced_port_summary">The port on the server.
     For advanced users only.</string>
+
+    <string name="preferences_invalidhostname">The hostname you have entered is invalid, it has been reset back to the default value.</string>
+    <string name="preferences_invalidport">The port you have entered is invalid, it has been reset back to the default value.</string>
+    <string name="preferences_textbox_hostname_dialog">Edit Hostname</string>
     <string name="preferences_textbox_port_dialog">Edit Port</string>
-    <string name="preferences_category_database">Bus Stops Database</string>
-    <string name="preferences_checkbox_database_autoupdate">Auto-update</string>
-    <string name="preferences_checkbox_database_autoupdate_summary">Should the
-    bus stop database automatically update weekly?</string>
 
     <!-- Strings for AddEditFavouriteStopActivity -->
     <string name="addeditstop_title">Add/Edit Favourite Stop</string>
@@ -156,4 +169,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
     <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
     <string name="map_menu_mylocation">My location</string>
+
+    <!-- Strings for AboutActivity -->
+    <string name="about_title">About</string>
 </resources>
