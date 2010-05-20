@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 Niall 'Rivernile' Scott & Scott Straughan
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,26 +24,71 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    android:id="@+id/widget28"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:id="@+id/widget29"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/overlay"
+        android:paddingBottom="10px">
+        <ImageView
+            android:id="@+id/widget30"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/stopsign"
+            android:padding="20px" />
+        <LinearLayout
+            android:id="@+id/widget32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:textStyle="bold"
+                android:id="@+id/widget33"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5px"
+                android:layout_marginTop="10px"
+                android:text="@string/main_enter_stop_code"
+                android:textSize="16px" />
+            <TextView
+                android:id="@+id/widget34"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5px"
+                android:text="@string/enterstopcode_text" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget35"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center">
+        <RelativeLayout
+            android:layout_gravity="center_vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="20px">
+            <EditText
+                android:id="@+id/enterstopcode_entry"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
-    <TextView
-        android:id="@+id/enterstopcode_label"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/enterstopcode_text"/>
-    <EditText
-        android:id="@+id/enterstopcode_entry"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/enterstopcode_label"
-        android:numeric="integer"
-        android:hint="@string/enterstopcode_edit_hint" />
-    <Button
-        android:id="@+id/enterstopcode_submit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/enterstopcode_entry"
-        android:layout_alignParentRight="true"
-        android:text="@string/submit" />
-</RelativeLayout>
+                android:layout_height="wrap_content"
+                android:numeric="integer"
+                android:hint="@string/enterstopcode_edit_hint" />
+            <Button
+                android:id="@+id/enterstopcode_submit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/enterstopcode_entry"
+                android:layout_alignParentRight="true"
+                android:text="@string/submit" />
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>

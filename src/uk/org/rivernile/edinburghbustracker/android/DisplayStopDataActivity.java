@@ -67,6 +67,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
 
     private final static int PROGRESS_DIALOG = 0;
     private final static int ERROR_DIALOG = 1;
+    private final static int CONFIRM_DELETE = 2;
 
     private final static String STOP_DATA_COMMAND = "getBusTimesByStopCode";
     
@@ -90,6 +91,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     private String errorString;
     private SharedPreferences sp;
     private long lastRefresh;
+    private MenuItem favouriteMenuItem;
 
     /**
      * {@inheritDoc}
@@ -153,16 +155,20 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         super.onCreateOptionsMenu(menu);
 
         if(favouriteExists) {
-            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_remfav);
+            favouriteMenuItem = menu.add(0, FAVOURITE_ID, 1,
+                    R.string.displaystopdata_menu_remfav);
         } else {
-            menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_addfav);
+            favouriteMenuItem = menu.add(0, FAVOURITE_ID, 1,
+                    R.string.displaystopdata_menu_addfav);
         }
         if(autoRefresh) {
             menu.add(0, AUTO_REFRESH_ID, 2,
-                    R.string.displaystopdata_menu_turnautorefreshoff);
+                    R.string.displaystopdata_menu_turnautorefreshoff)
+                    .setIcon(R.drawable.ic_menu_auto_refresh);
         } else {
             menu.add(0, AUTO_REFRESH_ID, 2,
-                    R.string.displaystopdata_menu_turnautorefreshon);
+                    R.string.displaystopdata_menu_turnautorefreshon)
+                    .setIcon(R.drawable.ic_menu_auto_refresh);
         }
         menu.add(0, REFRESH_ID, 3, R.string.displaystopdata_menu_refresh)
                 .setIcon(R.drawable.ic_menu_refresh);
@@ -178,7 +184,11 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
             case FAVOURITE_ID:
-                handleFavouriteMenuItem(item);
+                if(favouriteExists) {
+                    showDialog(CONFIRM_DELETE);
+                } else {
+                    addStopAsFavourite();
+                }
                 break;
             case AUTO_REFRESH_ID:
                 handleAutoRefreshMenuItem(item);
@@ -247,6 +257,30 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                             }
                 });
                 return builder.create();
+            case CONFIRM_DELETE:
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
+                builder2.setCancelable(true)
+                    .setTitle(R.string.favouritestops_dialog_confirm_title)
+                    .setPositiveButton(R.string.okay,
+                    new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog,
+                            final int id)
+                    {
+                        SettingsDatabase.getInstance(
+                                DisplayStopDataActivity.this)
+                                .deleteFavouriteStop(stopCode);
+                                favouriteExists = false;
+                    }
+                }).setNegativeButton(R.string.cancel,
+                        new DialogInterface.OnClickListener() {
+                     public void onClick(final DialogInterface dialog,
+                             final int id)
+                     {
+                        dismissDialog(0);
+                     }
+                });
+                return builder2.create();
             default:
                 return null;
         }
@@ -278,22 +312,13 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         }
     }
 
-    private void handleFavouriteMenuItem(final MenuItem item) {
-        if(favouriteExists) {
-            SettingsDatabase sd = SettingsDatabase.getInstance(this);
-            sd.deleteFavouriteStop(stopCode);
-            favouriteExists = false;
-            item.setTitle(R.string.displaystopdata_menu_addfav)
-                    .setIcon(android.R.drawable.ic_menu_add);
-        } else {
-            Intent intent = new Intent(this,
-                    AddEditFavouriteStopActivity.class);
-            intent.setAction(AddEditFavouriteStopActivity
-                    .ACTION_ADD_EDIT_FAVOURITE_STOP);
-            intent.putExtra("stopCode", stopCode);
-            intent.putExtra("stopName", stopName);
-            startActivity(intent);
-        }
+    private void addStopAsFavourite() {
+        Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
+        intent.setAction(AddEditFavouriteStopActivity
+                .ACTION_ADD_EDIT_FAVOURITE_STOP);
+        intent.putExtra("stopCode", stopCode);
+        intent.putExtra("stopName", stopName);
+        startActivity(intent);        
     }
 
     @Override

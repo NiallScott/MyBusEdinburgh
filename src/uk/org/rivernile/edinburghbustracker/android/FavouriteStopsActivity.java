@@ -136,7 +136,7 @@ public class FavouriteStopsActivity extends ListActivity {
     @Override
     protected Dialog onCreateDialog(final int id) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(false)
+        builder.setCancelable(true)
                 .setTitle(R.string.favouritestops_dialog_confirm_title)
                 .setPositiveButton(R.string.okay,
                 new DialogInterface.OnClickListener() {

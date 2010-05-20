@@ -28,15 +28,6 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:title="@string/preferences_category_general">
-        <CheckBoxPreference
-            android:key="pref_appupdatescheck_state"
-            android:title="@string/preferences_checkbox_general_updatecheck"
-            android:summaryOn="@string/preferences_checkbox_general_updatecheck_ticked"
-            android:summaryOff="@string/preferences_checkbox_general_updatecheck_unticked"
-            android:defaultValue="true" />
-    </PreferenceCategory>
-    <PreferenceCategory
         android:title="@string/preferences_category_bustimes">
         <CheckBoxPreference
             android:key="pref_autorefresh_state"

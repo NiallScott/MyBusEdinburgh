@@ -126,12 +126,9 @@ public class BusStopMapActivity extends MapActivity
     public boolean onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
         
-        MenuItem item;
-        if(!getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
-                .getBoolean("pref_autolocation_state", true)) {
-            item = menu.getItem(MENU_MYLOCATION);
-            item.setEnabled(false);
-        }
+        MenuItem item = menu.getItem(MENU_MYLOCATION);
+        item.setEnabled(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
+                .getBoolean("pref_autolocation_state", true));
         item = menu.getItem(MENU_MAPTYPE);
         if(mapView.isSatellite()) {
             item.setTitle(R.string.map_menu_maptype_mapview);

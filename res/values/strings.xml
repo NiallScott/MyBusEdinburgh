@@ -28,10 +28,10 @@
 This version of strings.xml is in the developer's locale (en_GB) -->
 <resources>
     <!-- Application strings -->
-    <string name="app_name">Edinburgh Bus Tracker</string>
+    <string name="app_name">My Bus Edinburgh</string>
     <string name="app_description">View live bus data in Edinburgh</string>
     <string name="app_author">Niall Scott</string>
-    <string name="app_about">&lt;html>&lt;body>&lt;b>%appname&lt;/b>&lt;br>Version %vername (%vernumber)&lt;br>Stop DB version: %dbversion (%dbtime)&lt;p>&lt;a %url&lt;/a>&lt;/p>&lt;p>Author: Niall %quoteRivernile%quote Scott&lt;/p>&lt;p>Thanks to:&lt;br>Gordon Christie (EdinBus for iPhone developer)&lt;br>The City of Edinburgh Council&lt;/p>&lt;p>Permission has been granted from The City of Edinburgh Council for this application to tie in to their data feed. Neither the author of the application, or The City of Edinburgh Council take any responsibility for the accuracy of data supplied by this application or its implications, or any data loss or any other issues arising through its usage. Usage of this application signifies the user takes complete responsibility.&lt;/p>&lt;/body>&lt;/html></string>
+    <string name="app_about">&lt;html>&lt;body>&lt;b>%appname&lt;/b>&lt;br>Version %vername (%vernumber)&lt;br>Stop DB version: %dbversion (%dbtime)&lt;p>&lt;a %url&lt;/a>&lt;/p>&lt;p>Author: Niall %quoteRivernile%quote Scott&lt;/p>&lt;p>Thanks to:&lt;br>Gordon Christie (EdinBus for iPhone developer)&lt;br>The City of Edinburgh Council&lt;br>Anthony Totton (App icon and website design)&lt;br>Scott Straughan (App interface reskinning)&lt;/p>&lt;p>Permission has been granted from The City of Edinburgh Council for this application to tie in to their data feed. Neither the author of the application, nor The City of Edinburgh Council take any responsibility for the accuracy of data supplied by this application or its implications, or any data loss or any other issues arising through its usage. Usage of this application signifies the user takes complete responsibility.&lt;/p>&lt;/body>&lt;/html></string>
 
     <!-- Generic strings -->
     <string name="submit">Submit</string>
@@ -42,6 +42,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="retry">Retry</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="save">Save</string>
 
     <!-- Strings for MainActivity -->
     <string name="main_favourite_stops">Favourite Stops</string>
@@ -49,12 +52,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="main_bus_stop_map">Bus Stop Map</string>
     <string name="main_db_updated">Edinburgh Bus Tracker: The stop database has
     been updated to the latest version.</string>
+    <string name="main_updateavailable">There is an update available for this application. Would you like to visit the Android Market?</string>
 
     <!-- Strings for EnterStopCodeActivity -->
     <string name="enterstopcode_title">Enter Bus Stop Code</string>
-    <string name="enterstopcode_text">Enter the code of the bus stop. Hint:
-        the code can be found on the bus timetable at the stop or from the
-    mybustracker.co.uk website.</string>
+    <string name="enterstopcode_text">Enter the stop code. This can usually be found on a bus stop\'s timetable.</string>
     <string name="enterstopcode_toast_inputerr">You need to enter a valid bus
         stop code to view bus stop informtion. Usually this is an 8 digit
         number.
@@ -68,6 +70,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     departures and select "Add Favourite" in the menu.</string>
     <string name="favouritestops_dialog_confirm_title">Are you sure you want to
     delete this stop?</string>
+    <string name="favouritestops_description">Long press on a stop name to reveal more options.</string>
 
     <!-- Strings for FavouriteStopsActivity menu -->
     <string name="favouritestops_menu_view">View stop</string>
@@ -96,6 +99,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     </string>
     <string name="displaystopdata_err_nodata">There is no data for this bus
     stop. Are you sure the supplied stop code is correct?</string>
+    <string name="displaystopdata_description">Live Bus Departures</string>
+    <string name="displaystopdata_description2">View live bus departures for your chosen stop. Press the menu key for more options.</string>
 
     <!-- Strings for DisplayStopDataActivity menu -->
     <string name="displaystopdata_menu_turnautorefreshon">Turn auto-refresh on
@@ -108,11 +113,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <!-- Strings for PreferencesActivity -->
     <string name="preferences_title">Preferences</string>
-
-    <string name="preferences_category_general">General</string>
-    <string name="preferences_checkbox_general_updatecheck">Check for updates</string>
-    <string name="preferences_checkbox_general_updatecheck_ticked">Untick to turn off checking for app updates.</string>
-    <string name="preferences_checkbox_general_updatecheck_unticked">Tick to turn on checking for app updates.</string>
 
     <string name="preferences_category_bustimes">Bus Times Display</string>
     <string name="preferences_checkbox_bustimes_autorefresh">Auto-refresh</string>
@@ -145,7 +145,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <!-- Strings for AddEditFavouriteStopActivity -->
     <string name="addeditstop_title">Add/Edit Favourite Stop</string>
     <string name="addeditstop_title_add">Add Favourite Stop:</string>
-    <string name="addeditstop_title_edit">Edit Favourite Stop:</string>
+    <string name="addeditstop_title_edit">Edit Stop Details</string>
+    <string name="addeditstop_title_description">You can enter a custom name for this bus stop below.</string>
     <string name="addeditstop_description">Enter a name for this bus stop:
     </string>
     <string name="addeditstop_edit_stopname_hint">Stop name</string>

@@ -25,17 +25,18 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
@@ -58,9 +59,12 @@ import java.net.UnknownHostException;
  *
  * @author Niall Scott
  */
-public class MainActivity extends ListActivity {
+public class MainActivity extends Activity {
 
-    private Thread initStopDBThread;
+    private ImageButton favouriteButton;
+    private ImageButton stopCodeButton;
+    private ImageButton stopMapButton;
+    private ImageButton preferencesButton;
 
     /**
      * {@inheritDoc}
@@ -68,85 +72,102 @@ public class MainActivity extends ListActivity {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ArrayAdapter ad = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1);
-        ad.add(getString(R.string.main_favourite_stops));
-        ad.add(getString(R.string.main_enter_stop_code));
-        ad.add(getString(R.string.main_bus_stop_map));
-        ad.add(getString(R.string.preferences));
-        ad.add(getString(R.string.about_title));
-        setListAdapter(ad);
-        initStopDBThread = new Thread(initStopDBTask);
-        initStopDBThread.start();
-        new Thread(updateTask).start();
+        setContentView(R.layout.home);
+
+        favouriteButton = (ImageButton) findViewById(R.id.favouriteButton);
+        stopCodeButton = (ImageButton) findViewById(R.id.stopCodeButton);
+        stopMapButton = (ImageButton) findViewById(R.id.stopMapButton);
+        preferencesButton = (ImageButton) findViewById(R.id.stopSettingsButton);
+
+        favouriteButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                startActivity(new Intent(MainActivity.this,
+                        FavouriteStopsActivity.class));
+            }
+        });
+
+        stopCodeButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                startActivity(new Intent(MainActivity.this,
+                        EnterStopCodeActivity.class));
+            }
+        });
+
+        stopMapButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                startActivity(new Intent(MainActivity.this,
+                        BusStopMapActivity.class));
+            }
+        });
+
+        preferencesButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                startActivity(new Intent(MainActivity.this,
+                        PreferencesActivity.class));
+            }
+        });
+
+        new Thread(stopDBTasks).start();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void onListItemClick(final ListView l, final View v,
-            final int position, final long id) {
-        switch(position) {
-            case 0:
-                startActivity(new Intent(this, FavouriteStopsActivity.class));
-                break;
-            case 1:
-                startActivity(new Intent(this, EnterStopCodeActivity.class));
-                break;
-            case 2:
-                startActivity(new Intent(this, BusStopMapActivity.class));
-                break;
-            case 3:
-                startActivity(new Intent(this, PreferencesActivity.class));
-                break;
-            case 4:
-                startActivity(new Intent(this, AboutActivity.class));
-                break;
-        }
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.add(0, 0, 2, R.string.about_title)
+                .setIcon(R.drawable.ic_menu_info_details);
+        return true;
     }
 
-    private Runnable initStopDBTask = new Runnable() {
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        startActivity(new Intent(this, AboutActivity.class));
+        return super.onOptionsItemSelected(item);
+    }
+    
+    private Runnable stopDBTasks = new Runnable() {
         @Override
         public void run() {
-            File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
-            if(!f.exists()) {
-                try {
-                    // Start of horrible hack to create database directory and
-                    // set permissions if it doesn't already exist.
-                    SQLiteDatabase db = MainActivity.this.openOrCreateDatabase(
-                            BusStopDatabase.STOP_DB_NAME, 0, null);
-                    db.close();
-                    // End of horrible hack.
-                    InputStream in = getAssets().open(
-                            BusStopDatabase.STOP_DB_NAME);
-                    FileOutputStream out = new FileOutputStream(f);
-                    byte[] buf = new byte[1024];
-                    int len;
-                    while((len = in.read(buf)) > 0) {
-                        out.write(buf, 0, len);
-                    }
-                    out.flush();
-                    out.close();
-                    in.close();
-                } catch(IOException e) {
-                }
-            }
+            initStopDB();
+            checkForDBUpdates();
         }
     };
 
-    private Runnable updateTask = new Runnable() {
-        @Override
-        public void run() {
-            SharedPreferences sp = getSharedPreferences(
-                    PreferencesActivity.PREF_FILE, 0);
-            boolean autoUpdate = sp.getBoolean("pref_database_autoupdate",
-                    true);
-            boolean updateCheck = sp.getBoolean("pref_appupdatescheck_state",
-                    true);
-            if(!autoUpdate && !updateCheck) return;
-            long lastCheck = sp.getLong("lastUpdateCheck", 0);
+    private void initStopDB() {
+        File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
+        if(!f.exists()) {
+            try {
+                // Start of horrible hack to create database directory and
+                // set permissions if it doesn't already exist.
+                SQLiteDatabase db = MainActivity.this.openOrCreateDatabase(
+                        BusStopDatabase.STOP_DB_NAME, 0, null);
+                db.close();
+                // End of horrible hack.
+                InputStream in = getAssets().open(
+                        BusStopDatabase.STOP_DB_NAME);
+                FileOutputStream out = new FileOutputStream(f);
+                byte[] buf = new byte[1024];
+                int len;
+                while((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.flush();
+                out.close();
+                in.close();
+            } catch(IOException e) { }
+        }
+    }
 
+    private void checkForDBUpdates() {
+        SharedPreferences sp = getSharedPreferences(
+                PreferencesActivity.PREF_FILE, 0);
+        boolean autoUpdate = sp.getBoolean("pref_database_autoupdate", true);
+
+        if(autoUpdate) {
+            long lastCheck = sp.getLong("lastUpdateCheck", 0);
             if((System.currentTimeMillis() - lastCheck) < 86400000) return;
             String remoteHost = sp.getString(PreferencesActivity.KEY_HOSTNAME,
                     "bustracker.selfip.org");
@@ -158,7 +179,6 @@ public class MainActivity extends ListActivity {
                 remotePort = 4876;
             }
 
-            String latestClientVersionStr = "";
             String dbLastModStr = "";
             String dbURL = "";
             try {
@@ -170,16 +190,10 @@ public class MainActivity extends ListActivity {
                         new InputStreamReader(sock.getInputStream()));
                 PrintWriter writer = new PrintWriter(sock.getOutputStream(),
                         true);
-                if(updateCheck) {
-                    writer.println("getLatestAndroidClientVersion");
-                    latestClientVersionStr = reader.readLine();
-                }
-                if(autoUpdate) {
-                    writer.println("getDBLastModTime");
-                    dbLastModStr = reader.readLine();
-                    writer.println("getDBURL");
-                    dbURL = reader.readLine();
-                }
+                writer.println("getDBLastModTime");
+                dbLastModStr = reader.readLine();
+                writer.println("getDBURL");
+                dbURL = reader.readLine();
                 writer.println("exit");
                 writer.close();
                 reader.close();
@@ -190,25 +204,7 @@ public class MainActivity extends ListActivity {
                 return;
             }
 
-            if(updateCheck && latestClientVersionStr != null &&
-                    latestClientVersionStr.length() > 0 &&
-                    !latestClientVersionStr.equals("Unknown"))
-            {
-                try {
-                    int latestClientVersion;
-                    latestClientVersion = Integer.parseInt(
-                            latestClientVersionStr);
-                    int currentVersion = getPackageManager().getPackageInfo(
-                            getPackageName(), 0).versionCode;
-                    if(latestClientVersion > currentVersion) {
-                        // What to do if there's a new client version
-                    }
-                } catch(NumberFormatException e) {
-                } catch(PackageManager.NameNotFoundException e) { }
-            }
-
-            if(dbLastModStr == null || dbLastModStr.length() == 0 ||
-                    !autoUpdate) return;
+            if(dbLastModStr == null || dbLastModStr.length() == 0) return;
             long dbLastMod;
             try {
                 dbLastMod = Long.parseLong(dbLastModStr);
@@ -218,18 +214,15 @@ public class MainActivity extends ListActivity {
             if(dbLastMod > BusStopDatabase.getInstance(getApplicationContext())
                     .getLastDBModTime())
             {
-                try {
-                    initStopDBThread.join();
-                } catch(InterruptedException e) { }
                 updateStopsDB(getApplicationContext(), dbURL);
             }
             SharedPreferences.Editor edit = sp.edit();
             edit.putLong("lastUpdateCheck", System.currentTimeMillis());
             edit.commit();
         }
-    };
+    }
 
-    public static synchronized void updateStopsDB(final Context context,
+    private static void updateStopsDB(final Context context,
             final String url)
     {
         if(context == null || url == null || url.length() == 0) return;

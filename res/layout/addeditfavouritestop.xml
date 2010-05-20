@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 Niall 'Rivernile' Scott & Scott Straughan
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,34 +24,87 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    android:id="@+id/widget28"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    <TextView
-        android:id="@+id/addeditstop_text_description"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:id="@+id/widget29"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/addeditstop_description" />
-    <EditText
-        android:id="@+id/addeditstop_edit_stopname"
+        android:background="@drawable/overlay"
+        android:paddingBottom="10px">
+        <ImageView
+            android:id="@+id/widget30"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/stopsign"
+            android:padding="20px" />
+        <LinearLayout
+            android:id="@+id/widget32"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:textStyle="bold"
+                android:id="@+id/widget33"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5px"
+                android:layout_marginTop="10px"
+                android:text="@string/addeditstop_title_edit"
+                android:textSize="16px" />
+            <TextView
+                android:id="@+id/widget34"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5px"
+                android:text="@string/addeditstop_title_description" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget35"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/addeditstop_text_description"
-        android:hint="@string/addeditstop_edit_stopname_hint" />
-    <Button
-        android:id="@+id/addeditstop_button_ok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/addeditstop_edit_stopname"
-        android:layout_alignParentRight="true"
-        android:layout_marginLeft="10dip"
-        android:text="@string/okay" />
-    <Button
-        android:id="@+id/addeditstop_button_cancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/addeditstop_button_ok"
-        android:layout_alignTop="@id/addeditstop_button_ok"
-        android:text="@string/cancel" />
-</RelativeLayout>
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center">
+        <RelativeLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:padding="20px"
+            android:layout_gravity="center_vertical">
+            <TextView
+                android:id="@+id/addeditstop_text_description"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/addeditstop_description"
+                android:paddingBottom="5px" />
+            <EditText
+                android:id="@+id/addeditstop_edit_stopname"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/addeditstop_text_description"
+                android:hint="@string/addeditstop_edit_stopname_hint" />
+            <Button
+                android:id="@+id/addeditstop_button_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/addeditstop_edit_stopname"
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="10dip"
+                android:text="@string/save" />
+            <Button
+                android:id="@+id/addeditstop_button_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@id/addeditstop_button_ok"
+                android:layout_alignTop="@id/addeditstop_button_ok"
+                android:text="@string/cancel" />
+        </RelativeLayout>
+    </LinearLayout>
+</LinearLayout>
+

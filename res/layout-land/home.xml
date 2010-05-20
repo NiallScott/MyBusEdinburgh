@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2010 Niall 'Rivernile' Scott & Scott Straughan
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+*/ -->
+<LinearLayout
+    android:id="@+id/widget56"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="1px"
+    android:orientation="vertical"
+    android:layout_gravity="center_horizontal"
+    android:gravity="center"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout
+        android:layout_gravity="center_vertical"
+        android:id="@+id/widget35"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+        <LinearLayout
+            android:layout_alignParentLeft="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_centerHorizontal="true">
+            <ImageButton
+                android:id="@+id/favouriteButton"
+                android:layout_width="120dip"
+                android:layout_height="126dip"
+                android:background="@layout/homebutton"
+                android:src="@drawable/star"
+                android:scaleType="center" />
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="15dip"
+                android:id="@+id/widget63"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/main_favourite_stops" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/widget58"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_alignParentRight="true">
+            <ImageButton
+                android:id="@+id/stopCodeButton"
+                android:src="@drawable/stopcode"
+                android:scaleType="center"
+                android:layout_width="120dip"
+                android:layout_height="126dip"
+                android:background="@layout/homebutton" />
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="15dip"
+                android:id="@+id/widget62"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/main_enter_stop_code" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_alignParentLeft="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_centerHorizontal="true">
+            <ImageButton
+                android:id="@+id/stopMapButton"
+                android:layout_width="120dip"
+                android:layout_height="126dip"
+                android:src="@drawable/stopmap"
+                android:scaleType="center"
+                android:background="@layout/homebutton" />
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="15dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/main_bus_stop_map" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_alignParentRight="true">
+            <ImageButton
+                android:id="@+id/stopSettingsButton"
+                android:layout_width="120dip"
+                android:layout_height="126dip"
+                android:src="@drawable/stopsettings"
+                android:scaleType="center"
+                android:background="@layout/homebutton" />
+            <TextView
+                android:textStyle="bold"
+                android:layout_marginTop="15dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/preferences" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
