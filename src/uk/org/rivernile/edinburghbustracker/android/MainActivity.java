@@ -55,7 +55,8 @@ import java.net.UnknownHostException;
 /**
  * The main activity in the application. This activity displays a the main menu
  * of the application to the user where they select the action they want to
- * perform.
+ * perform. This class also deals with the initialisation and updating of the
+ * bus stop database.
  *
  * @author Niall Scott
  */
@@ -114,6 +115,9 @@ public class MainActivity extends Activity {
         new Thread(stopDBTasks).start();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -122,12 +126,18 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         startActivity(new Intent(this, AboutActivity.class));
         return super.onOptionsItemSelected(item);
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
     private Runnable stopDBTasks = new Runnable() {
         @Override
         public void run() {
@@ -136,6 +146,11 @@ public class MainActivity extends Activity {
         }
     };
 
+    /**
+     * Initialise the bus stop database. This is only normally run the first
+     * time a user runs the application so that the default map database is
+     * moved from the assets directory to the working data directory.
+     */
     private void initStopDB() {
         File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
         if(!f.exists()) {
@@ -161,6 +176,11 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Check with the remote server to see if any database updates exist for the
+     * database. This gets checked upon app startup if it hasn't been checked
+     * for more than 24 hours. If a database update does exist, its downloaded.
+     */
     private void checkForDBUpdates() {
         SharedPreferences sp = getSharedPreferences(
                 PreferencesActivity.PREF_FILE, 0);
@@ -222,6 +242,13 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Download the stop database from the server and put it in the
+     * application's working data directory.
+     *
+     * @param context The context to use this method with.
+     * @param url The URL of the bus stop database to download.
+     */
     private static void updateStopsDB(final Context context,
             final String url)
     {
