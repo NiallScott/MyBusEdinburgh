@@ -45,6 +45,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="save">Save</string>
+    <string name="services">Services</string>
 
     <!-- Strings for MainActivity -->
     <string name="main_favourite_stops">Favourite Stops</string>

@@ -71,16 +71,16 @@ public final class R {
     public static final class string {
         /**  Strings for AboutActivity 
          */
-        public static final int about_title=0x7f05005b;
-        public static final int addeditstop_description=0x7f05004d;
-        public static final int addeditstop_edit_stopname_hint=0x7f05004e;
-        public static final int addeditstop_error_blankstopname=0x7f05004f;
+        public static final int about_title=0x7f05005c;
+        public static final int addeditstop_description=0x7f05004e;
+        public static final int addeditstop_edit_stopname_hint=0x7f05004f;
+        public static final int addeditstop_error_blankstopname=0x7f050050;
         /**  Strings for AddEditFavouriteStopActivity 
          */
-        public static final int addeditstop_title=0x7f050049;
-        public static final int addeditstop_title_add=0x7f05004a;
-        public static final int addeditstop_title_description=0x7f05004c;
-        public static final int addeditstop_title_edit=0x7f05004b;
+        public static final int addeditstop_title=0x7f05004a;
+        public static final int addeditstop_title_add=0x7f05004b;
+        public static final int addeditstop_title_description=0x7f05004d;
+        public static final int addeditstop_title_edit=0x7f05004c;
         public static final int app_about=0x7f050003;
         public static final int app_author=0x7f050002;
         public static final int app_description=0x7f050001;
@@ -89,102 +89,103 @@ public final class R {
         public static final int app_name=0x7f050000;
         public static final int cancel=0x7f050008;
         public static final int delete=0x7f05000b;
-        public static final int displaystopdata_description=0x7f05002a;
-        public static final int displaystopdata_description2=0x7f05002b;
-        public static final int displaystopdata_empty=0x7f050022;
+        public static final int displaystopdata_description=0x7f05002b;
+        public static final int displaystopdata_description2=0x7f05002c;
+        public static final int displaystopdata_empty=0x7f050023;
         /**  Strings for DisplayStopDataActvity errors 
          */
-        public static final int displaystopdata_err_nocode=0x7f050024;
-        public static final int displaystopdata_err_noconn=0x7f050026;
-        public static final int displaystopdata_err_nodata=0x7f050029;
-        public static final int displaystopdata_err_noresolv=0x7f050027;
-        public static final int displaystopdata_err_parseerr=0x7f050025;
-        public static final int displaystopdata_err_serverr=0x7f050028;
-        public static final int displaystopdata_gettingdata=0x7f050021;
-        public static final int displaystopdata_menu_addfav=0x7f05002f;
-        public static final int displaystopdata_menu_refresh=0x7f05002e;
-        public static final int displaystopdata_menu_remfav=0x7f050030;
-        public static final int displaystopdata_menu_turnautorefreshoff=0x7f05002d;
+        public static final int displaystopdata_err_nocode=0x7f050025;
+        public static final int displaystopdata_err_noconn=0x7f050027;
+        public static final int displaystopdata_err_nodata=0x7f05002a;
+        public static final int displaystopdata_err_noresolv=0x7f050028;
+        public static final int displaystopdata_err_parseerr=0x7f050026;
+        public static final int displaystopdata_err_serverr=0x7f050029;
+        public static final int displaystopdata_gettingdata=0x7f050022;
+        public static final int displaystopdata_menu_addfav=0x7f050030;
+        public static final int displaystopdata_menu_refresh=0x7f05002f;
+        public static final int displaystopdata_menu_remfav=0x7f050031;
+        public static final int displaystopdata_menu_turnautorefreshoff=0x7f05002e;
         /**  Strings for DisplayStopDataActivity menu 
          */
-        public static final int displaystopdata_menu_turnautorefreshon=0x7f05002c;
-        public static final int displaystopdata_mins=0x7f050023;
+        public static final int displaystopdata_menu_turnautorefreshon=0x7f05002d;
+        public static final int displaystopdata_mins=0x7f050024;
         /**  Strings for DisplayStopDataActivity 
          */
-        public static final int displaystopdata_title=0x7f05001f;
-        public static final int displaystopdata_title2=0x7f050020;
+        public static final int displaystopdata_title=0x7f050020;
+        public static final int displaystopdata_title2=0x7f050021;
         public static final int edit=0x7f05000a;
-        public static final int enterstopcode_edit_hint=0x7f050017;
-        public static final int enterstopcode_text=0x7f050015;
+        public static final int enterstopcode_edit_hint=0x7f050018;
+        public static final int enterstopcode_text=0x7f050016;
         /**  Strings for EnterStopCodeActivity 
          */
-        public static final int enterstopcode_title=0x7f050014;
-        public static final int enterstopcode_toast_inputerr=0x7f050016;
+        public static final int enterstopcode_title=0x7f050015;
+        public static final int enterstopcode_toast_inputerr=0x7f050017;
         public static final int error=0x7f050006;
-        public static final int favouritestops_description=0x7f05001b;
-        public static final int favouritestops_dialog_confirm_title=0x7f05001a;
-        public static final int favouritestops_menu_delete=0x7f05001e;
-        public static final int favouritestops_menu_edit=0x7f05001d;
+        public static final int favouritestops_description=0x7f05001c;
+        public static final int favouritestops_dialog_confirm_title=0x7f05001b;
+        public static final int favouritestops_menu_delete=0x7f05001f;
+        public static final int favouritestops_menu_edit=0x7f05001e;
         /**  Strings for FavouriteStopsActivity menu 
          */
-        public static final int favouritestops_menu_view=0x7f05001c;
-        public static final int favouritestops_nosavedstops=0x7f050019;
+        public static final int favouritestops_menu_view=0x7f05001d;
+        public static final int favouritestops_nosavedstops=0x7f05001a;
         /**  Strings for FavouriteStopsActivity 
          */
-        public static final int favouritestops_title=0x7f050018;
-        public static final int main_bus_stop_map=0x7f050011;
-        public static final int main_db_updated=0x7f050012;
-        public static final int main_enter_stop_code=0x7f050010;
+        public static final int favouritestops_title=0x7f050019;
+        public static final int main_bus_stop_map=0x7f050012;
+        public static final int main_db_updated=0x7f050013;
+        public static final int main_enter_stop_code=0x7f050011;
         /**  Strings for MainActivity 
          */
-        public static final int main_favourite_stops=0x7f05000f;
-        public static final int main_updateavailable=0x7f050013;
-        public static final int map_dialog_close=0x7f050052;
-        public static final int map_dialog_noservices=0x7f050053;
-        public static final int map_dialog_showtimes=0x7f050051;
-        public static final int map_finding_location=0x7f050054;
-        public static final int map_location_unknown=0x7f050055;
-        public static final int map_menu_mapoverlay_trafficviewoff=0x7f050059;
-        public static final int map_menu_mapoverlay_trafficviewon=0x7f050058;
+        public static final int main_favourite_stops=0x7f050010;
+        public static final int main_updateavailable=0x7f050014;
+        public static final int map_dialog_close=0x7f050053;
+        public static final int map_dialog_noservices=0x7f050054;
+        public static final int map_dialog_showtimes=0x7f050052;
+        public static final int map_finding_location=0x7f050055;
+        public static final int map_location_unknown=0x7f050056;
+        public static final int map_menu_mapoverlay_trafficviewoff=0x7f05005a;
+        public static final int map_menu_mapoverlay_trafficviewon=0x7f050059;
         /**  Strings for BusStopMapActivity menu 
          */
-        public static final int map_menu_maptype_mapview=0x7f050056;
-        public static final int map_menu_maptype_satellite=0x7f050057;
-        public static final int map_menu_mylocation=0x7f05005a;
+        public static final int map_menu_maptype_mapview=0x7f050057;
+        public static final int map_menu_maptype_satellite=0x7f050058;
+        public static final int map_menu_mylocation=0x7f05005b;
         /**  Strings for BusStopMapActivity 
          */
-        public static final int map_title=0x7f050050;
+        public static final int map_title=0x7f050051;
         public static final int no=0x7f05000d;
         public static final int okay=0x7f050007;
         public static final int preferences=0x7f050005;
-        public static final int preferences_category_advanced=0x7f050040;
-        public static final int preferences_category_bustimes=0x7f050032;
-        public static final int preferences_category_map=0x7f050039;
-        public static final int preferences_checkbox_bustimes_autorefresh=0x7f050033;
-        public static final int preferences_checkbox_bustimes_autorefresh_ticked=0x7f050034;
-        public static final int preferences_checkbox_bustimes_autorefresh_unticked=0x7f050035;
-        public static final int preferences_checkbox_bustimes_nightbus=0x7f050036;
-        public static final int preferences_checkbox_bustimes_nightbus_ticked=0x7f050037;
-        public static final int preferences_checkbox_bustimes_nightbus_unticked=0x7f050038;
-        public static final int preferences_checkbox_map_autolocation=0x7f05003d;
-        public static final int preferences_checkbox_map_autolocation_ticked=0x7f05003e;
-        public static final int preferences_checkbox_map_autolocation_unticked=0x7f05003f;
-        public static final int preferences_checkbox_map_dbupdate=0x7f05003a;
-        public static final int preferences_checkbox_map_dbupdate_ticked=0x7f05003b;
-        public static final int preferences_checkbox_map_dbupdate_unticked=0x7f05003c;
-        public static final int preferences_invalidhostname=0x7f050045;
-        public static final int preferences_invalidport=0x7f050046;
-        public static final int preferences_textbox_advanced_hostname=0x7f050041;
-        public static final int preferences_textbox_advanced_hostname_summary=0x7f050042;
-        public static final int preferences_textbox_advanced_port=0x7f050043;
-        public static final int preferences_textbox_advanced_port_summary=0x7f050044;
-        public static final int preferences_textbox_hostname_dialog=0x7f050047;
-        public static final int preferences_textbox_port_dialog=0x7f050048;
+        public static final int preferences_category_advanced=0x7f050041;
+        public static final int preferences_category_bustimes=0x7f050033;
+        public static final int preferences_category_map=0x7f05003a;
+        public static final int preferences_checkbox_bustimes_autorefresh=0x7f050034;
+        public static final int preferences_checkbox_bustimes_autorefresh_ticked=0x7f050035;
+        public static final int preferences_checkbox_bustimes_autorefresh_unticked=0x7f050036;
+        public static final int preferences_checkbox_bustimes_nightbus=0x7f050037;
+        public static final int preferences_checkbox_bustimes_nightbus_ticked=0x7f050038;
+        public static final int preferences_checkbox_bustimes_nightbus_unticked=0x7f050039;
+        public static final int preferences_checkbox_map_autolocation=0x7f05003e;
+        public static final int preferences_checkbox_map_autolocation_ticked=0x7f05003f;
+        public static final int preferences_checkbox_map_autolocation_unticked=0x7f050040;
+        public static final int preferences_checkbox_map_dbupdate=0x7f05003b;
+        public static final int preferences_checkbox_map_dbupdate_ticked=0x7f05003c;
+        public static final int preferences_checkbox_map_dbupdate_unticked=0x7f05003d;
+        public static final int preferences_invalidhostname=0x7f050046;
+        public static final int preferences_invalidport=0x7f050047;
+        public static final int preferences_textbox_advanced_hostname=0x7f050042;
+        public static final int preferences_textbox_advanced_hostname_summary=0x7f050043;
+        public static final int preferences_textbox_advanced_port=0x7f050044;
+        public static final int preferences_textbox_advanced_port_summary=0x7f050045;
+        public static final int preferences_textbox_hostname_dialog=0x7f050048;
+        public static final int preferences_textbox_port_dialog=0x7f050049;
         /**  Strings for PreferencesActivity 
          */
-        public static final int preferences_title=0x7f050031;
+        public static final int preferences_title=0x7f050032;
         public static final int retry=0x7f050009;
         public static final int save=0x7f05000e;
+        public static final int services=0x7f05000f;
         /**  Generic strings 
          */
         public static final int submit=0x7f050004;

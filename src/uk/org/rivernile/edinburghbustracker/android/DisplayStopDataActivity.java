@@ -108,22 +108,19 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         autoRefresh = sp.getBoolean(PreferencesActivity.KEY_AUTOREFRESH_STATE,
                 false);
 
-        boolean rotating;
         if(savedInstanceState != null) {
-            rotating = savedInstanceState.getBoolean("rotating", false);
             jsonString = savedInstanceState.getString("jsonString");
             autoRefresh = savedInstanceState.getBoolean("autoRefresh", false);
         } else {
-            rotating = false;
             autoRefresh = sp.getBoolean(
                     PreferencesActivity.KEY_AUTOREFRESH_STATE, false);
         }
 
-        if(!fetchTask.isExecuting() && !rotating) {
-            showDialog(PROGRESS_DIALOG);
-            fetchTask.doTask(stopCode, remoteHost, remotePort);
-        } else {
+        if(jsonString != null && jsonString.length() > 0) {
             handleJSONString(jsonString);
+        } else if(!fetchTask.isExecuting()) {
+                showDialog(PROGRESS_DIALOG);
+                fetchTask.doTask(stopCode, remoteHost, remotePort);
         }
     }
 
@@ -147,7 +144,6 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     protected void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putBoolean("rotating", true);
         outState.putBoolean("autoRefresh", autoRefresh);
         outState.putString("jsonString", jsonString);
     }
@@ -271,11 +267,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                     public void onClick(final DialogInterface dialog,
                             final int id)
                     {
-                        SettingsDatabase.getInstance(
-                                DisplayStopDataActivity.this
-                                .getApplicationContext())
+                        SettingsDatabase.getInstance(getApplicationContext())
                                 .deleteFavouriteStop(stopCode);
-                                favouriteExists = false;
+                        favouriteExists = false;
                     }
                 }).setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {

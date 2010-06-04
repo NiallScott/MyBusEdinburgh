@@ -25,7 +25,9 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -49,10 +51,16 @@ public class BusStopMapActivity extends MapActivity
     private static final int MENU_MAPTYPE = 1;
     private static final int MENU_OVERLAY_TRAFFICVIEW = 2;
 
+    private static final int DIALOG_STOP = 0;
+    private static final int DIALOG_CONFIRM = 1;
+
     private MapView mapView;
     private MyLocationOverlay myLocation;
     private BusStopMapOverlay stopOverlay;
     private boolean createdDialog = false;
+    private boolean selectedStopIsFavourite;
+    private ArrayAdapter ad;
+    private BusStopOverlayItem oi;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -88,6 +96,18 @@ public class BusStopMapActivity extends MapActivity
         myLocation.enableMyLocation();
         Toast.makeText(this, R.string.map_finding_location, Toast.LENGTH_LONG)
                 .show();
+        if(createdDialog) {
+            selectedStopIsFavourite = SettingsDatabase.getInstance(this)
+                    .getFavouriteStopExists(oi.getStopCode());
+            ad.clear();
+            ad.add(getString(R.string.map_dialog_showtimes));
+            if(selectedStopIsFavourite) {
+                ad.add(getString(R.string.displaystopdata_menu_remfav));
+            } else {
+                ad.add(getString(R.string.displaystopdata_menu_addfav));
+            }
+            ad.add(getString(R.string.map_dialog_close));
+        }
     }
 
     @Override
@@ -171,41 +191,84 @@ public class BusStopMapActivity extends MapActivity
 
     @Override
     protected Dialog onCreateDialog(final int id) {
-        Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.mapdialog);
-        dialog.setCancelable(true);
-        ListView list =
-                (ListView)dialog.findViewById(R.id.mapdialog_list_options);
-        ArrayAdapter ad = new ArrayAdapter<String>(dialog.getContext(),
-                android.R.layout.simple_list_item_1);
-        ad.add(getString(R.string.map_dialog_showtimes));
-        ad.add(getString(R.string.map_dialog_close));
-        list.setAdapter(ad);
-        list.setOnItemClickListener(this);
-        createdDialog = true;
-        return dialog;
+        switch(id) {
+            case DIALOG_STOP:
+                Dialog dialog = new Dialog(this);
+                dialog.setContentView(R.layout.mapdialog);
+                dialog.setCancelable(true);
+                ListView list =
+                    (ListView)dialog.findViewById(R.id.mapdialog_list_options);
+                ad = new ArrayAdapter<String>(dialog.getContext(),
+                    android.R.layout.simple_list_item_1);
+                list.setAdapter(ad);
+                list.setOnItemClickListener(this);
+                createdDialog = true;
+                return dialog;
+            case DIALOG_CONFIRM:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setCancelable(true)
+                    .setTitle(R.string.favouritestops_dialog_confirm_title)
+                    .setPositiveButton(R.string.okay,
+                    new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog,
+                            final int id)
+                    {
+                        SettingsDatabase.getInstance(getApplicationContext())
+                                .deleteFavouriteStop(oi.getStopCode());
+                        selectedStopIsFavourite = false;
+                        showDialog(DIALOG_STOP);
+                    }
+                }).setNegativeButton(R.string.cancel,
+                        new DialogInterface.OnClickListener() {
+                     public void onClick(final DialogInterface dialog,
+                             final int id)
+                     {
+                        dialog.dismiss();
+                        showDialog(DIALOG_STOP);
+                     }
+                });
+                return builder.create();
+            default:
+                return null;
+        }
     }
 
     @Override
     protected void onPrepareDialog(final int id, final Dialog dialog) {
-        BusStopOverlayItem oi = stopOverlay.getSelectedItem();
-        String[] services = BusStopDatabase.getInstance(this)
-                .getBusServicesForStop(oi.getStopCode());
-        TextView tv = (TextView)dialog.findViewById(
-                R.id.mapdialog_text_services);
-        dialog.setTitle(oi.getStopCode() + " " + oi.getStopName());
-        if(services == null) {
-            tv.setText(R.string.map_dialog_noservices);
-        } else {
-            String s = "";
-            for(int i = 0; i < services.length; i++) {
-                if(i == (services.length - 1)) {
-                    s = s + services[i];
+        switch(id) {
+            case DIALOG_STOP:
+                oi = stopOverlay.getSelectedItem();
+                selectedStopIsFavourite = SettingsDatabase.getInstance(this)
+                    .getFavouriteStopExists(oi.getStopCode());
+                String[] services = BusStopDatabase.getInstance(this)
+                    .getBusServicesForStop(oi.getStopCode());
+                TextView tv = (TextView)dialog.findViewById(
+                    R.id.mapdialog_text_services);
+                dialog.setTitle(oi.getStopCode() + " " + oi.getStopName());
+                if(services == null) {
+                    tv.setText(R.string.map_dialog_noservices);
                 } else {
-                    s = s + services[i] + ", ";
+                    String s = getString(R.string.services) + ": ";
+                    for(int i = 0; i < services.length; i++) {
+                        if(i == (services.length - 1)) {
+                            s = s + services[i];
+                        } else {
+                            s = s + services[i] + ", ";
+                        }
+                    }
+                    tv.setText(s);
                 }
-            }
-            tv.setText(s);
+                ad.clear();
+                ad.add(getString(R.string.map_dialog_showtimes));
+                if(selectedStopIsFavourite) {
+                    ad.add(getString(R.string.displaystopdata_menu_remfav));
+                } else {
+                    ad.add(getString(R.string.displaystopdata_menu_addfav));
+                }
+                ad.add(getString(R.string.map_dialog_close));
+            default:
+                break;
         }
     }
 
@@ -223,7 +286,21 @@ public class BusStopMapActivity extends MapActivity
                 startActivity(intent);
                 break;
             case 1:
-                dismissDialog(0);
+                if(selectedStopIsFavourite) {
+                    dismissDialog(DIALOG_STOP);
+                    showDialog(DIALOG_CONFIRM);
+                } else {
+                    Intent intent2 = new Intent(this,
+                            AddEditFavouriteStopActivity.class);
+                    intent2.setAction(AddEditFavouriteStopActivity
+                            .ACTION_ADD_EDIT_FAVOURITE_STOP);
+                    intent2.putExtra("stopCode", oi.getStopCode());
+                    intent2.putExtra("stopName", oi.getStopName());
+                    startActivity(intent2);
+                }
+                break;
+            case 2:
+                dismissDialog(DIALOG_STOP);
                 break;
         }
     }
