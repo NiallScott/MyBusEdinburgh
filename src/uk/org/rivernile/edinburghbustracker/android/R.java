@@ -19,15 +19,18 @@ public final class R {
         public static final int ic_menu_auto_refresh=0x7f020005;
         public static final int ic_menu_delete=0x7f020006;
         public static final int ic_menu_info_details=0x7f020007;
-        public static final int ic_menu_mylocation=0x7f020008;
-        public static final int ic_menu_refresh=0x7f020009;
-        public static final int mapmarker=0x7f02000a;
-        public static final int overlay=0x7f02000b;
-        public static final int star=0x7f02000c;
-        public static final int stopcode=0x7f02000d;
-        public static final int stopmap=0x7f02000e;
-        public static final int stopsettings=0x7f02000f;
-        public static final int stopsign=0x7f020010;
+        public static final int ic_menu_mapmode=0x7f020008;
+        public static final int ic_menu_mylocation=0x7f020009;
+        public static final int ic_menu_refresh=0x7f02000a;
+        public static final int ic_menu_satview=0x7f02000b;
+        public static final int ic_menu_trafficview=0x7f02000c;
+        public static final int mapmarker=0x7f02000d;
+        public static final int overlay=0x7f02000e;
+        public static final int star=0x7f02000f;
+        public static final int stopcode=0x7f020010;
+        public static final int stopmap=0x7f020011;
+        public static final int stopsettings=0x7f020012;
+        public static final int stopsign=0x7f020013;
     }
     public static final class id {
         public static final int addeditstop_button_cancel=0x7f06000b;

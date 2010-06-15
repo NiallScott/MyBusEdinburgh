@@ -202,7 +202,8 @@ public class FetchLiveTimesTask implements Runnable {
                 msg.setData(b);
                 handler.sendMessage(msg);
             }
+        } finally {
+            executing = false;
         }
-        executing = false;
     }
 }

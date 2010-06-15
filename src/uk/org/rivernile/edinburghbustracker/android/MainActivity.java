@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.Menu;
@@ -142,6 +143,14 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
             initStopDB();
+            try {
+                BusStopDatabase.getInstance(getApplicationContext())
+                        .getLastDBModTime();
+            } catch(SQLiteException e) {
+                File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
+                if(f.exists()) f.delete();
+                initStopDB();
+            }
             checkForDBUpdates();
         }
     };
@@ -232,7 +241,7 @@ public class MainActivity extends Activity {
                 return;
             }
             if(dbLastMod > BusStopDatabase.getInstance(getApplicationContext())
-                    .getLastDBModTime())
+                        .getLastDBModTime())
             {
                 updateStopsDB(getApplicationContext(), dbURL);
             }

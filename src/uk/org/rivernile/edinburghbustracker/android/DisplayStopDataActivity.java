@@ -119,8 +119,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         if(jsonString != null && jsonString.length() > 0) {
             handleJSONString(jsonString);
         } else if(!fetchTask.isExecuting()) {
-                showDialog(PROGRESS_DIALOG);
-                fetchTask.doTask(stopCode, remoteHost, remotePort);
+            showDialog(PROGRESS_DIALOG);
+            fetchTask.doTask(stopCode, remoteHost, remotePort);
         }
     }
 
@@ -130,6 +130,11 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
 
         favouriteExists = SettingsDatabase.getInstance(getApplicationContext())
                 .getFavouriteStopExists(stopCode);
+        if((jsonString == null || jsonString.length() == 0)
+                && !fetchTask.isExecuting()) {
+            showDialog(PROGRESS_DIALOG);
+            fetchTask.doTask(stopCode, remoteHost, remotePort);
+        }
     }
 
     @Override

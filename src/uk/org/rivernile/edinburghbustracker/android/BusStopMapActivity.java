@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2010 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,6 +44,14 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 
+/**
+ * This class extends MapActivity from the Google Maps API and this shows the
+ * map on the device. This class also initiates the location finding and stop
+ * marker classes. Also, this class deals with the menus for this activity and
+ * dialogs shown on this activity.
+ *
+ * @author Niall Scott
+ */
 public class BusStopMapActivity extends MapActivity
         implements OnItemClickListener {
 
@@ -59,9 +67,13 @@ public class BusStopMapActivity extends MapActivity
     private BusStopMapOverlay stopOverlay;
     private boolean createdDialog = false;
     private boolean selectedStopIsFavourite;
+    private String selectedStopCode;
     private ArrayAdapter ad;
     private BusStopOverlayItem oi;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,8 +86,7 @@ public class BusStopMapActivity extends MapActivity
         myLocation.runOnFirstFix(new Runnable() {
             @Override
             public void run() {
-                mapView.getController().setCenter(
-                        BusStopMapActivity.this.myLocation.getMyLocation());
+                mapView.getController().setCenter(myLocation.getMyLocation());
                 mapView.getController().setZoom(17);
                 if(createdDialog) dismissDialog(0);
             }
@@ -87,7 +98,10 @@ public class BusStopMapActivity extends MapActivity
         stopOverlay.doPopulateBusStops();
         mapView.getOverlays().add(stopOverlay);
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onResume() {
         super.onResume();
@@ -97,8 +111,9 @@ public class BusStopMapActivity extends MapActivity
         Toast.makeText(this, R.string.map_finding_location, Toast.LENGTH_LONG)
                 .show();
         if(createdDialog) {
-            selectedStopIsFavourite = SettingsDatabase.getInstance(this)
-                    .getFavouriteStopExists(oi.getStopCode());
+            selectedStopIsFavourite = SettingsDatabase
+                    .getInstance(getApplicationContext())
+                    .getFavouriteStopExists(selectedStopCode);
             ad.clear();
             ad.add(getString(R.string.map_dialog_showtimes));
             if(selectedStopIsFavourite) {
@@ -110,6 +125,9 @@ public class BusStopMapActivity extends MapActivity
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onPause() {
         super.onPause();
@@ -117,10 +135,22 @@ public class BusStopMapActivity extends MapActivity
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if(createdDialog) dismissDialog(0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected boolean isRouteDisplayed() {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -128,20 +158,27 @@ public class BusStopMapActivity extends MapActivity
         menu.add(0, MENU_MYLOCATION, 1, R.string.map_menu_mylocation).setIcon(
                 R.drawable.ic_menu_mylocation);
         if(mapView.isSatellite()) {
-            menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_mapview);
+            menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_mapview)
+                    .setIcon(R.drawable.ic_menu_mapmode);
         } else {
-            menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_satellite);
+            menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_satellite)
+                    .setIcon(R.drawable.ic_menu_satview);
         }
         if(mapView.isTraffic()) {
             menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 3,
-                R.string.map_menu_mapoverlay_trafficviewoff);
+                R.string.map_menu_mapoverlay_trafficviewoff)
+                .setIcon(R.drawable.ic_menu_trafficview);
         } else {
             menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 3,
-                R.string.map_menu_mapoverlay_trafficviewon);
+                R.string.map_menu_mapoverlay_trafficviewon)
+                .setIcon(R.drawable.ic_menu_trafficview);
         }
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
@@ -151,9 +188,11 @@ public class BusStopMapActivity extends MapActivity
                 .getBoolean("pref_autolocation_state", true));
         item = menu.getItem(MENU_MAPTYPE);
         if(mapView.isSatellite()) {
-            item.setTitle(R.string.map_menu_maptype_mapview);
+            item.setTitle(R.string.map_menu_maptype_mapview)
+                    .setIcon(R.drawable.ic_menu_mapmode);
         } else {
-            item.setTitle(R.string.map_menu_maptype_satellite);
+            item.setTitle(R.string.map_menu_maptype_satellite)
+                    .setIcon(R.drawable.ic_menu_satview);
         }
         item = menu.getItem(MENU_OVERLAY_TRAFFICVIEW);
         if(mapView.isTraffic()) {
@@ -164,6 +203,9 @@ public class BusStopMapActivity extends MapActivity
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
@@ -189,6 +231,9 @@ public class BusStopMapActivity extends MapActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Dialog onCreateDialog(final int id) {
         switch(id) {
@@ -234,11 +279,15 @@ public class BusStopMapActivity extends MapActivity
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onPrepareDialog(final int id, final Dialog dialog) {
         switch(id) {
             case DIALOG_STOP:
                 oi = stopOverlay.getSelectedItem();
+                selectedStopCode = oi.getStopCode();
                 selectedStopIsFavourite = SettingsDatabase.getInstance(this)
                     .getFavouriteStopExists(oi.getStopCode());
                 String[] services = BusStopDatabase.getInstance(this)
@@ -272,6 +321,9 @@ public class BusStopMapActivity extends MapActivity
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onItemClick(final AdapterView<?> l, final View view,
             final int position, final long id)
