@@ -31,6 +31,12 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * This class deals with the database interaction with the settings database.
@@ -50,6 +56,8 @@ public class SettingsDatabase extends SQLiteOpenHelper {
 
     private static SettingsDatabase instance;
 
+    private Context context;
+
     /**
      * Creates a new SettingsDatabase object. If the DB does not already exist,
      * it will be created.
@@ -58,6 +66,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      */
     private SettingsDatabase(final Context context) {
         super(context, SETTINGS_DB_NAME, null, SETTINGS_DB_VERSION);
+        this.context = context;
     }
 
     public static SettingsDatabase getInstance(final Context context) {
@@ -215,5 +224,42 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         String s = c.getString(0);
         c.close();
         return s;
+    }
+
+    public String backupDatabase(final File orig, final File dest) {
+        getReadableDatabase().close();
+
+        if(!Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            return context.getString(
+                    R.string.preferences_backup_error_mediaerror);
+        }
+
+        orig.mkdirs();
+        dest.mkdirs();
+
+        FileInputStream in;
+        try {
+            in = new FileInputStream(orig);
+        } catch(FileNotFoundException e) {
+            return context.getString(R.string.preferences_backup_error_nodb);
+        }
+
+        dest.delete();
+        try {
+            FileOutputStream out = new FileOutputStream(dest);
+
+            byte[] buf = new byte[1024];
+            int len;
+            while((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            out.close();
+            in.close();
+        } catch(IOException e) {
+            return context.getString(R.string.preferences_backup_error_ioerror);
+        }
+        return "success";
     }
 }

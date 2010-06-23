@@ -72,5 +72,21 @@
             android:defaultValue="4876"
             android:dialogTitle="@string/preferences_textbox_port_dialog"
             android:numeric="integer" />
+        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+            android:key="pref_backup_favourites"
+            android:title="@string/preferences_dialog_advanced_backup"
+            android:summary="@string/preferences_dialog_advanced_backup_summary"
+            android:dialogTitle="@string/preferences_dialog_advanced_backup"
+            android:dialogMessage="@string/preferences_dialog_advanced_backup_message"
+            android:positiveButtonText="@string/yes"
+            android:negativeButtonText="@string/no" />
+        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+            android:key="pref_restore_favourites"
+            android:title="@string/preferences_dialog_advanced_restore"
+            android:summary="@string/preferences_dialog_advanced_restore_summary"
+            android:dialogTitle="@string/preferences_dialog_advanced_restore"
+            android:dialogMessage="@string/preferences_dialog_advanced_restore_message"
+            android:positiveButtonText="@string/yes"
+            android:negativeButtonText="@string/no" />
     </PreferenceCategory>
 </PreferenceScreen>

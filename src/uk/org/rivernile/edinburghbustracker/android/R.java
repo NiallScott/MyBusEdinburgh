@@ -74,16 +74,16 @@ public final class R {
     public static final class string {
         /**  Strings for AboutActivity 
          */
-        public static final int about_title=0x7f05005c;
-        public static final int addeditstop_description=0x7f05004e;
-        public static final int addeditstop_edit_stopname_hint=0x7f05004f;
-        public static final int addeditstop_error_blankstopname=0x7f050050;
+        public static final int about_title=0x7f050067;
+        public static final int addeditstop_description=0x7f050059;
+        public static final int addeditstop_edit_stopname_hint=0x7f05005a;
+        public static final int addeditstop_error_blankstopname=0x7f05005b;
         /**  Strings for AddEditFavouriteStopActivity 
          */
-        public static final int addeditstop_title=0x7f05004a;
-        public static final int addeditstop_title_add=0x7f05004b;
-        public static final int addeditstop_title_description=0x7f05004d;
-        public static final int addeditstop_title_edit=0x7f05004c;
+        public static final int addeditstop_title=0x7f050055;
+        public static final int addeditstop_title_add=0x7f050056;
+        public static final int addeditstop_title_description=0x7f050058;
+        public static final int addeditstop_title_edit=0x7f050057;
         public static final int app_about=0x7f050003;
         public static final int app_author=0x7f050002;
         public static final int app_description=0x7f050001;
@@ -142,24 +142,29 @@ public final class R {
          */
         public static final int main_favourite_stops=0x7f050010;
         public static final int main_updateavailable=0x7f050014;
-        public static final int map_dialog_close=0x7f050053;
-        public static final int map_dialog_noservices=0x7f050054;
-        public static final int map_dialog_showtimes=0x7f050052;
-        public static final int map_finding_location=0x7f050055;
-        public static final int map_location_unknown=0x7f050056;
-        public static final int map_menu_mapoverlay_trafficviewoff=0x7f05005a;
-        public static final int map_menu_mapoverlay_trafficviewon=0x7f050059;
+        public static final int map_dialog_close=0x7f05005e;
+        public static final int map_dialog_noservices=0x7f05005f;
+        public static final int map_dialog_showtimes=0x7f05005d;
+        public static final int map_finding_location=0x7f050060;
+        public static final int map_location_unknown=0x7f050061;
+        public static final int map_menu_mapoverlay_trafficviewoff=0x7f050065;
+        public static final int map_menu_mapoverlay_trafficviewon=0x7f050064;
         /**  Strings for BusStopMapActivity menu 
          */
-        public static final int map_menu_maptype_mapview=0x7f050057;
-        public static final int map_menu_maptype_satellite=0x7f050058;
-        public static final int map_menu_mylocation=0x7f05005b;
+        public static final int map_menu_maptype_mapview=0x7f050062;
+        public static final int map_menu_maptype_satellite=0x7f050063;
+        public static final int map_menu_mylocation=0x7f050066;
         /**  Strings for BusStopMapActivity 
          */
-        public static final int map_title=0x7f050051;
+        public static final int map_title=0x7f05005c;
         public static final int no=0x7f05000d;
         public static final int okay=0x7f050007;
+        public static final int preference_backup_success=0x7f050053;
+        public static final int preference_restore_success=0x7f050054;
         public static final int preferences=0x7f050005;
+        public static final int preferences_backup_error_ioerror=0x7f050052;
+        public static final int preferences_backup_error_mediaerror=0x7f050051;
+        public static final int preferences_backup_error_nodb=0x7f050050;
         public static final int preferences_category_advanced=0x7f050041;
         public static final int preferences_category_bustimes=0x7f050033;
         public static final int preferences_category_map=0x7f05003a;
@@ -175,6 +180,12 @@ public final class R {
         public static final int preferences_checkbox_map_dbupdate=0x7f05003b;
         public static final int preferences_checkbox_map_dbupdate_ticked=0x7f05003c;
         public static final int preferences_checkbox_map_dbupdate_unticked=0x7f05003d;
+        public static final int preferences_dialog_advanced_backup=0x7f05004a;
+        public static final int preferences_dialog_advanced_backup_message=0x7f05004c;
+        public static final int preferences_dialog_advanced_backup_summary=0x7f05004b;
+        public static final int preferences_dialog_advanced_restore=0x7f05004d;
+        public static final int preferences_dialog_advanced_restore_message=0x7f05004f;
+        public static final int preferences_dialog_advanced_restore_summary=0x7f05004e;
         public static final int preferences_invalidhostname=0x7f050046;
         public static final int preferences_invalidport=0x7f050047;
         public static final int preferences_textbox_advanced_hostname=0x7f050042;
