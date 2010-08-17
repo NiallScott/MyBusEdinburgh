@@ -41,6 +41,12 @@
             android:summaryOn="@string/preferences_checkbox_bustimes_nightbus_ticked"
             android:summaryOff="@string/preferences_checkbox_bustimes_nightbus_unticked"
             android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_servicessorting_state"
+            android:title="@string/preferences_checkbox_bustimes_sorting"
+            android:summaryOn="@string/preferences_checkbox_bustimes_sorting_ticked"
+            android:summaryOff="@string/preferences_checkbox_bustimes_sorting_unticked"
+            android:defaultValue="false" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/preferences_category_map">

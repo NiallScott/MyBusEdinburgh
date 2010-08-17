@@ -33,7 +33,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <RelativeLayout
         android:id="@+id/widget57"
-        android:layout_marginTop="20dip"
+        android:layout_marginTop="5dip"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
         <LinearLayout
@@ -84,7 +84,7 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dip">
+        android:layout_marginTop="10dip">
         <LinearLayout
             android:layout_alignParentLeft="true"
             android:layout_width="wrap_content"

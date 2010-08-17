@@ -40,6 +40,8 @@ import android.view.MenuItem;
 import android.widget.ExpandableListAdapter;
 import android.widget.SimpleExpandableListAdapter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,8 +57,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     public final static int ERROR_NODATA = 5;
 
     private final static int FAVOURITE_ID = Menu.FIRST;
-    private final static int AUTO_REFRESH_ID = Menu.FIRST + 1;
-    private final static int REFRESH_ID = Menu.FIRST + 2;
+    private final static int SORT_ID = Menu.FIRST + 1;
+    private final static int AUTO_REFRESH_ID = Menu.FIRST + 2;
+    private final static int REFRESH_ID = Menu.FIRST + 3;
 
     private final static int PROGRESS_DIALOG = 0;
     private final static int CONFIRM_DELETE = 1;
@@ -169,17 +172,25 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
              menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_addfav);
         }
 
+        if(sp.getBoolean("pref_servicessorting_state", false)) {
+            menu.add(0, SORT_ID, 2, R.string.displaystopdata_menu_sort_service)
+                    .setIcon(R.drawable.ic_menu_sort);
+        } else {
+            menu.add(0, SORT_ID, 2, R.string.displaystopdata_menu_sort_times)
+                    .setIcon(R.drawable.ic_menu_sort);
+        }
+
         if(autoRefresh) {
-            menu.add(0, AUTO_REFRESH_ID, 2,
+            menu.add(0, AUTO_REFRESH_ID, 3,
                     R.string.displaystopdata_menu_turnautorefreshoff)
                     .setIcon(R.drawable.ic_menu_auto_refresh);
         } else {
-            menu.add(0, AUTO_REFRESH_ID, 2,
+            menu.add(0, AUTO_REFRESH_ID, 3,
                     R.string.displaystopdata_menu_turnautorefreshon)
                     .setIcon(R.drawable.ic_menu_auto_refresh);
         }
 
-        menu.add(0, REFRESH_ID, 3, R.string.displaystopdata_menu_refresh)
+        menu.add(0, REFRESH_ID, 4, R.string.displaystopdata_menu_refresh)
                 .setIcon(R.drawable.ic_menu_refresh);
 
         return true;
@@ -196,7 +207,13 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         } else {
             item.setTitle(R.string.displaystopdata_menu_addfav)
                     .setIcon(R.drawable.ic_menu_add);
+        }
 
+        item = menu.findItem(SORT_ID);
+        if(sp.getBoolean("pref_servicessorting_state", false)) {
+            item.setTitle(R.string.displaystopdata_menu_sort_service);
+        } else {
+            item.setTitle(R.string.displaystopdata_menu_sort_times);
         }
 
         item = menu.findItem(AUTO_REFRESH_ID);
@@ -224,6 +241,15 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                     intent.putExtra("stopName", stopName);
                     startActivity(intent);
                 }
+                break;
+            case SORT_ID:
+                boolean sortByTime = sp.getBoolean("pref_servicessorting_state",
+                        false);
+                sortByTime = !sortByTime;
+                SharedPreferences.Editor edit = sp.edit();
+                edit.putBoolean("pref_servicessorting_state", sortByTime);
+                edit.commit();
+                handleJSONString(jsonString);
                 break;
             case AUTO_REFRESH_ID:
                 if(autoRefresh) {
@@ -365,54 +391,105 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                     sc + " " + stopName);
 
             JSONArray services = jo.getJSONArray("services");
-            if(services.length() == 0) return;
+            int a = services.length();
+            if(a == 0) return;
+
+            BusServiceTimeMapping[] timesArray = new BusServiceTimeMapping[a];
+            String serviceName, timeString;
+            JSONObject currService, currBus;
+            JSONArray buses;
+            int i, b;
+            Calendar time;
+            int mins;
+            for(i = 0; i < a; i++) {
+                currService = services.getJSONObject(i);
+                serviceName = currService.getString("serviceName");
+                buses = currService.getJSONArray("buses");
+                b = buses.length();
+                if(b <= 0) continue;
+                currBus = buses.getJSONObject(0);
+                timeString = currBus.getString("arrivalTime");
+                time = Calendar.getInstance();
+                if(timeString.charAt(0) == '*')
+                    timeString = timeString.substring(1);
+                try {
+                    mins = Integer.parseInt(timeString);
+                    time.add(Calendar.MINUTE, mins);
+                } catch(NumberFormatException e) {
+                    if(timeString.indexOf(':') != -1) {
+                        time.set(Calendar.HOUR_OF_DAY,
+                                Integer.parseInt(timeString.split(":")[0]));
+                        time.set(Calendar.MINUTE,
+                                Integer.parseInt(timeString.split(":")[1]));
+                        if(time.compareTo(Calendar.getInstance()) < 0)
+                            time.add(Calendar.DAY_OF_WEEK, 1);
+                    } else if(!timeString.equals("DUE")) {
+                        time.add(Calendar.DAY_OF_WEEK, 2);
+                    }
+                }
+                timesArray[i] = new BusServiceTimeMapping(serviceName,
+                        time.getTime());
+            }
+            if(sp.getBoolean("pref_servicessorting_state", false))
+                Arrays.sort(timesArray);
 
             ArrayList<HashMap<String, String>> groupData =
                     new ArrayList<HashMap<String, String>>();
             ArrayList<ArrayList<HashMap<String, String>>> childData =
                     new ArrayList<ArrayList<HashMap<String, String>>>();
-            JSONObject currService, currBus;
             HashMap<String, String> curGroupMap;
-            JSONArray buses;
             ArrayList<HashMap<String, String>> children;
             HashMap<String, String> curChildMap;
-            int a = services.length();
-            int b;
-            String serviceName;
+            int k;
 
-            for(int i = 0; i < a; i++) {
-                currService = services.getJSONObject(i);
-                serviceName = currService.getString("serviceName");
+            for(i = 0; i < a; i++) {
+                serviceName = "";
+                currService = null;
+                for(k = 0; k < a; k++) {
+                    currService = services.getJSONObject(k);
+                    serviceName = currService.getString("serviceName");
+                    if(timesArray[i].getServiceName().equals(serviceName))
+                        break;
+                }
                 if(!showNightBuses && serviceName.startsWith("N")) continue;
                 curGroupMap = new HashMap<String, String>();
                 groupData.add(curGroupMap);
-                curGroupMap.put(SERVICE_NAME_KEY, serviceName + " " +
-                        currService.getString("route"));
+                curGroupMap.put(SERVICE_NAME_KEY, serviceName);
                 buses = currService.getJSONArray("buses");
                 children = new ArrayList<HashMap<String, String>>();
                 b = buses.length();
                 for(int j = 0; j < b; j++) {
                     currBus = buses.getJSONObject(j);
-                    curChildMap = new HashMap<String, String>();
-                    children.add(curChildMap);
-                    curChildMap.put(DESTINATION_KEY,
-                            currBus.getString("destination"));
-                    curChildMap.put(ARRIVAL_TIME_KEY,
-                            currBus.getString("arrivalTime"));
+                    if(j==0) {
+                        curGroupMap.put(DESTINATION_KEY,
+                                currBus.getString("destination"));
+                        curGroupMap.put(ARRIVAL_TIME_KEY,
+                                currBus.getString("arrivalTime"));
+                    } else {
+                        curChildMap = new HashMap<String, String>();
+                        children.add(curChildMap);
+                        curChildMap.put(DESTINATION_KEY,
+                                currBus.getString("destination"));
+                        curChildMap.put(ARRIVAL_TIME_KEY,
+                                currBus.getString("arrivalTime"));
+                    }
                 }
                 childData.add(children);
             }
 
             ExpandableListAdapter listAdapter = new SimpleExpandableListAdapter(
                     this, groupData,
-                    android.R.layout.simple_expandable_list_item_1,
-                    new String[] { SERVICE_NAME_KEY, ARRIVAL_TIME_KEY },
-                    new int[] { android.R.id.text1, android.R.id.text2 },
-                    childData,android.R.layout.simple_expandable_list_item_2,
-                    new String[] { ARRIVAL_TIME_KEY, DESTINATION_KEY },
-                    new int[] { android.R.id.text1, android.R.id.text2 });
+                    R.layout.expandable_list_group,
+                    new String[] { SERVICE_NAME_KEY, DESTINATION_KEY,
+                    ARRIVAL_TIME_KEY },
+                    new int[] { R.id.buslist_service, R.id.buslist_destination,
+                    R.id.buslist_time },
+                    childData, R.layout.expandable_list_child,
+                    new String[] { DESTINATION_KEY, ARRIVAL_TIME_KEY },
+                    new int[] { R.id.buschild_destination,
+                    R.id.buschild_time });
             setListAdapter(listAdapter);
-            
+
             if(progressDialogShown) dismissDialog(PROGRESS_DIALOG);
             if(autoRefresh) setUpAutoRefresh();
         } catch(JSONException e) {
