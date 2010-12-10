@@ -52,6 +52,8 @@
                   android:label="@string/map_title" />
         <activity android:name=".AboutActivity"
                   android:label="@string/about_title" />
+        <activity android:name=".NewsUpdatesActivity"
+                  android:label="@string/newsupdates_title" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />

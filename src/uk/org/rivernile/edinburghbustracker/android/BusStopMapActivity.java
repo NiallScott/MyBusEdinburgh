@@ -207,7 +207,7 @@ public class BusStopMapActivity extends MapActivity
      * {@inheritDoc}
      */
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
             case MENU_MYLOCATION:
                 GeoPoint ml = myLocation.getMyLocation();

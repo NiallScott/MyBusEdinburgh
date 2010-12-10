@@ -192,6 +192,17 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
     <string name="map_menu_mylocation">My location</string>
 
+    <!-- Strings for NewsUpdatesActivity -->
+    <string name="newsupdates_title">News and Updates</string>
+    <string name="newsupdates_description">View news about the application and get the latest bus and traffic updates.</string>
+    <string name="newsupdates_empty">There are currently no news or update items to display.</string>
+
+    <!-- Strings for NewsUpdatesActivity errors -->
+    <string name="newsupdates_err_nodata">No data was received from the Twitter server.</string>
+    <string name="newsupdates_err_parseerr">There was a parsing error while trying to process the incoming data.</string>
+    <string name="newsupdates_err_ioerr">There was an IO error while receiving data from the Twitter server.</string>
+    <string name="newsupdates_err_urlerr">There was a problem formatting the URL to request the data from the Twitter server.</string>
+
     <!-- Strings for AboutActivity -->
     <string name="about_title">About</string>
 </resources>

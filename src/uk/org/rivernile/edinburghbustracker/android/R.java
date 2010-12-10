@@ -16,23 +16,24 @@ public final class R {
         public static final int empty=0x7f020002;
         public static final int hover=0x7f020003;
         public static final int ic_menu_add=0x7f020004;
-        public static final int ic_menu_auto_refresh=0x7f020005;
-        public static final int ic_menu_autorefresh=0x7f020006;
-        public static final int ic_menu_delete=0x7f020007;
-        public static final int ic_menu_info_details=0x7f020008;
-        public static final int ic_menu_mapmode=0x7f020009;
-        public static final int ic_menu_mylocation=0x7f02000a;
-        public static final int ic_menu_refresh=0x7f02000b;
-        public static final int ic_menu_satview=0x7f02000c;
-        public static final int ic_menu_sort=0x7f02000d;
-        public static final int ic_menu_trafficview=0x7f02000e;
-        public static final int mapmarker=0x7f02000f;
-        public static final int overlay=0x7f020010;
-        public static final int star=0x7f020011;
-        public static final int stopcode=0x7f020012;
-        public static final int stopmap=0x7f020013;
-        public static final int stopsettings=0x7f020014;
-        public static final int stopsign=0x7f020015;
+        public static final int ic_menu_agenda=0x7f020005;
+        public static final int ic_menu_auto_refresh=0x7f020006;
+        public static final int ic_menu_autorefresh=0x7f020007;
+        public static final int ic_menu_delete=0x7f020008;
+        public static final int ic_menu_info_details=0x7f020009;
+        public static final int ic_menu_mapmode=0x7f02000a;
+        public static final int ic_menu_mylocation=0x7f02000b;
+        public static final int ic_menu_refresh=0x7f02000c;
+        public static final int ic_menu_satview=0x7f02000d;
+        public static final int ic_menu_sort=0x7f02000e;
+        public static final int ic_menu_trafficview=0x7f02000f;
+        public static final int mapmarker=0x7f020010;
+        public static final int overlay=0x7f020011;
+        public static final int star=0x7f020012;
+        public static final int stopcode=0x7f020013;
+        public static final int stopmap=0x7f020014;
+        public static final int stopsettings=0x7f020015;
+        public static final int stopsign=0x7f020016;
     }
     public static final class id {
         public static final int addeditstop_button_cancel=0x7f06000b;
@@ -55,6 +56,8 @@ public final class R {
         public static final int stopMapButton=0x7f06001c;
         public static final int stopSettingsButton=0x7f06001d;
         public static final int textabout=0x7f060000;
+        public static final int twitInfo=0x7f060021;
+        public static final int twitText=0x7f060020;
         public static final int widget28=0x7f060001;
         public static final int widget29=0x7f060002;
         public static final int widget30=0x7f060003;
@@ -80,11 +83,13 @@ public final class R {
         public static final int home=0x7f030008;
         public static final int homebutton=0x7f030009;
         public static final int mapdialog=0x7f03000a;
+        public static final int newsupdates=0x7f03000b;
+        public static final int newsupdateslist=0x7f03000c;
     }
     public static final class string {
         /**  Strings for AboutActivity 
          */
-        public static final int about_title=0x7f05006c;
+        public static final int about_title=0x7f050073;
         public static final int addeditstop_description=0x7f05005e;
         public static final int addeditstop_edit_stopname_hint=0x7f05005f;
         public static final int addeditstop_error_blankstopname=0x7f050060;
@@ -169,6 +174,15 @@ public final class R {
         /**  Strings for BusStopMapActivity 
          */
         public static final int map_title=0x7f050061;
+        public static final int newsupdates_description=0x7f05006d;
+        public static final int newsupdates_empty=0x7f05006e;
+        public static final int newsupdates_err_ioerr=0x7f050071;
+        public static final int newsupdates_err_nodata=0x7f05006f;
+        public static final int newsupdates_err_parseerr=0x7f050070;
+        public static final int newsupdates_err_urlerr=0x7f050072;
+        /**  Strings for NewsUpdatesActivity 
+         */
+        public static final int newsupdates_title=0x7f05006c;
         public static final int no=0x7f05000d;
         public static final int okay=0x7f050007;
         public static final int preference_backup_success=0x7f050058;

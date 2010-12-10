@@ -68,6 +68,9 @@ public class MainActivity extends Activity {
     private ImageButton stopMapButton;
     private ImageButton preferencesButton;
 
+    private static final int MENU_NEWSUPDATES = 0;
+    private static final int MENU_ABOUT = 1;
+
     /**
      * {@inheritDoc}
      */
@@ -122,7 +125,9 @@ public class MainActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         super.onCreateOptionsMenu(menu);
-        menu.add(0, 0, 2, R.string.about_title)
+        menu.add(0, MENU_NEWSUPDATES, 1, R.string.newsupdates_title)
+                .setIcon(R.drawable.ic_menu_agenda);
+        menu.add(0, MENU_ABOUT, 2, R.string.about_title)
                 .setIcon(R.drawable.ic_menu_info_details);
         return true;
     }
@@ -132,7 +137,16 @@ public class MainActivity extends Activity {
      */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        startActivity(new Intent(this, AboutActivity.class));
+        switch(item.getItemId()) {
+            case MENU_NEWSUPDATES:
+                startActivity(new Intent(this, NewsUpdatesActivity.class));
+                break;
+            case MENU_ABOUT:
+                startActivity(new Intent(this, AboutActivity.class));
+                break;
+            default:
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 
