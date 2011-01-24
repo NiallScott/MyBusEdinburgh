@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android;
+package uk.org.rivernile.edinburghbustracker.android.mapoverlays;
 
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.OverlayItem;

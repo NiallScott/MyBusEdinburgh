@@ -26,8 +26,8 @@
 */ -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="uk.org.rivernile.edinburghbustracker.android"
-          android:versionCode="3"
-          android:versionName="0.0.3">
+          android:versionCode="4"
+          android:versionName="0.0.4alpha">
     <application android:label="@string/app_name"
                  android:description="@string/app_description"
                  android:icon="@drawable/appicon">
@@ -49,11 +49,20 @@
         <activity android:name=".AddEditFavouriteStopActivity"
                   android:label="@string/addeditstop_title" />
         <activity android:name=".BusStopMapActivity"
-                  android:label="@string/map_title" />
-        <activity android:name=".AboutActivity"
-                  android:label="@string/about_title" />
+                  android:label="@string/map_title"
+                  android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
         <activity android:name=".NewsUpdatesActivity"
                   android:label="@string/newsupdates_title" />
+
+        <provider android:name=".MapSearchHistoryProvider"
+                  android:authorities="uk.org.rivernile.edinburghbustracker.android.MapSearchHistoryProvider" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />

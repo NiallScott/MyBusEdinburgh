@@ -25,6 +25,8 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import uk.org.rivernile.edinburghbustracker.android.fetchers
+        .FetchNewsUpdatesTask;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;

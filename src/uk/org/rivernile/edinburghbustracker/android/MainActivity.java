@@ -26,18 +26,26 @@
 package uk.org.rivernile.edinburghbustracker.android;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
@@ -52,6 +60,7 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Calendar;
 
 /**
  * The main activity in the application. This activity displays a the main menu
@@ -70,6 +79,8 @@ public class MainActivity extends Activity {
 
     private static final int MENU_NEWSUPDATES = 0;
     private static final int MENU_ABOUT = 1;
+
+    private static final int DIALOG_ABOUT = 0;
 
     /**
      * {@inheritDoc}
@@ -103,8 +114,11 @@ public class MainActivity extends Activity {
         stopMapButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                startActivity(new Intent(MainActivity.this,
-                        BusStopMapActivity.class));
+                Intent intent = new Intent(MainActivity.this,
+                        BusStopMapActivity.class);
+                intent.putExtra(BusStopMapActivity.INTENT_LAYERS,
+                        BusStopMapActivity.SHOW_STOPS);
+                startActivity(intent);
             }
         });
 
@@ -142,12 +156,68 @@ public class MainActivity extends Activity {
                 startActivity(new Intent(this, NewsUpdatesActivity.class));
                 break;
             case MENU_ABOUT:
-                startActivity(new Intent(this, AboutActivity.class));
+                showDialog(DIALOG_ABOUT);
                 break;
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Dialog onCreateDialog(final int id) {
+        switch(id) {
+            case DIALOG_ABOUT:
+                LayoutInflater inflater = (LayoutInflater)getSystemService(
+                        LAYOUT_INFLATER_SERVICE);
+                View layout = inflater.inflate(R.layout.about,
+                        (ViewGroup)findViewById(R.id.aboutRoot));
+
+                TextView temp = (TextView)layout.findViewById(
+                        R.id.aboutVersion);
+                try {
+                    temp.setText(getText(R.string.version) + " " +
+                        getPackageManager().getPackageInfo(getPackageName(),
+                        0).versionName + " (#" + getPackageManager()
+                        .getPackageInfo(getPackageName(), 0).versionCode +
+                        ")");
+                } catch(NameNotFoundException e) {
+                    // This should never occur.
+                    temp.setText("Unknown");
+                }
+                long dbtime;
+                Calendar date = Calendar.getInstance();
+                try {
+                    dbtime = BusStopDatabase.getInstance(this)
+                            .getLastDBModTime();
+                } catch(SQLException e) {
+                    dbtime = 0;
+                }
+                date.setTimeInMillis(dbtime);
+
+                temp = (TextView)layout.findViewById(R.id.aboutDBVersion);
+                temp.setText(getText(R.string.main_aboutdialog_dbversion) +
+                        ": " + dbtime + " (" + date.getTime().toLocaleString() +
+                        ")");
+
+                Button close = (Button)layout.findViewById(R.id.aboutClose);
+                close.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        dismissDialog(DIALOG_ABOUT);
+                    }
+                });
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setView(layout);
+
+                return builder.create();
+            default:
+                return null;
+        }
     }
 
     /**

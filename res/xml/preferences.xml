@@ -62,6 +62,14 @@
             android:summaryOn="@string/preferences_checkbox_map_autolocation_ticked"
             android:summaryOff="@string/preferences_checkbox_map_autolocation_unticked"
             android:defaultValue="true" />
+        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+            android:key="pref_clear_search_history"
+            android:title="@string/preferences_dialog_map_clearsearchhistory"
+            android:summary="@string/preferences_dialog_map_clearsearchhistory_summary"
+            android:dialogTitle="@string/preferences_dialog_map_clearsearchhistory"
+            android:dialogMessage="@string/preferences_dialog_map_clearsearchhistory_message"
+            android:positiveButtonText="@string/yes"
+            android:negativeButtonText="@string/no"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/preferences_category_advanced">

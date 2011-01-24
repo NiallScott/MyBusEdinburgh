@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android;
+package uk.org.rivernile.edinburghbustracker.android.fetchers;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,33 +31,36 @@ import android.os.Message;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.PrintWriter;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 
 /**
- * This class fetches the latest updates from the Twitter list of the URL
- * specified in REQUEST_URL. It then feeds this information back to the handler
- * defined in the 'handler' field.
+ * This class is a helper class to the DisplayStopDataActivity. Only a single
+ * instance of this class can be created and this is controlled through the
+ * getInstance() method. This is used so that problems do not occur regarding
+ * null pointers and so in DisplayStopDataActivity.
  *
  * @author Niall Scott
  */
-public class FetchNewsUpdatesTask implements Runnable {
+public class FetchLiveTimesTask implements Runnable {
 
-    private final static String REQUEST_URL = "http://api.twitter.com/1/" +
-            "NiallScott/lists/bus-tracker-updates/statuses.json";
+    private final static String STOP_DATA_COMMAND = "getBusTimesByStopCode";
 
-    private static FetchNewsUpdatesTask instance = null;
+    private static FetchLiveTimesTask instance = null;
     private Handler handler;
+    private String stopCode;
+    private String remoteHost;
+    private int remotePort;
     private boolean executing = false;
-    private String jsonString;
-    private long lastRequestTime = 0;
 
     /**
      * This constructor is intentionally left blank and private, this class
      * can only be instantiated from within.
      */
-    private FetchNewsUpdatesTask() {
+    private FetchLiveTimesTask() {
         // Nothing to do here
     }
 
@@ -68,8 +71,8 @@ public class FetchNewsUpdatesTask implements Runnable {
      * @param handler The handler object to fire data back to.
      * @return An instance of this class.
      */
-    public static FetchNewsUpdatesTask getInstance(final Handler handler) {
-        if(instance == null) instance = new FetchNewsUpdatesTask();
+    public static FetchLiveTimesTask getInstance(final Handler handler) {
+        if(instance == null) instance = new FetchLiveTimesTask();
         instance.setHandler(handler);
         return instance;
     }
@@ -100,26 +103,6 @@ public class FetchNewsUpdatesTask implements Runnable {
     }
 
     /**
-     * Get the JSON String this object holds. Be prepared to handle a null or
-     * 0 length String.
-     *
-     * @return The JSON String for this object.
-     */
-    public String getJSONString() {
-        return jsonString;
-    }
-
-    /**
-     * Get the timestamp (in milliseconds) that the Twitter data was last
-     * refreshed at.
-     *
-     * @return The timestamp (in milliseconds) the data was last refreshed at.
-     */
-    public long getLastRequestTime() {
-        return lastRequestTime;
-    }
-
-    /**
      * When the thread within this class is executing, true will be returned
      * otherwise false will be returned.
      *
@@ -132,8 +115,16 @@ public class FetchNewsUpdatesTask implements Runnable {
     /**
      * Contact the server and get the JSON string. This data will be fired back
      * to the Handler object specified by getInstance() or setHandler().
+     *
+     * @param stopCode The stop code to get.
+     * @param remoteHost The remote host to connect to.
+     * @param remotePort The remote port to connect to.
      */
-    public void doTask() {
+    public void doTask(final String stopCode, final String remoteHost,
+            final int remotePort) {
+        this.stopCode = stopCode;
+        this.remoteHost = remoteHost;
+        this.remotePort = remotePort;
         if(!executing) {
             executing = true;
             new Thread(this).start();
@@ -148,18 +139,46 @@ public class FetchNewsUpdatesTask implements Runnable {
         Message msg;
         Bundle b = new Bundle();
         try {
-            URL u = new URL(REQUEST_URL);
-            URLConnection con = u.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    con.getInputStream()));
-            jsonString = "";
-            String lineIn;
-            while((lineIn = in.readLine()) != null) {
-                jsonString = jsonString + lineIn;
+            // Set up socket stuff.
+            Socket sock = new Socket();
+            sock.setSoTimeout(30000);
+            sock.connect(new InetSocketAddress(remoteHost, remotePort), 20000);
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(sock.getInputStream()));
+            PrintWriter writer = new PrintWriter(sock.getOutputStream(), true);
+            writer.println(STOP_DATA_COMMAND + ":" + stopCode);
+            String jsonString = "";
+            String tmp = "";
+            boolean readJson = false;
+            while ((tmp = reader.readLine()) != null) {
+                if(tmp.startsWith("Error:")) {
+                    if(getHandler() != null) {
+                        b.putInt("errorCode",
+                                DisplayStopDataActivity.ERROR_SERVER);
+                        synchronized(this) {
+                            msg = handler.obtainMessage();
+                            msg.setData(b);
+                            handler.sendMessage(msg);
+                        }
+                    }
+                    writer.println("exit");
+                    reader.close();
+                    writer.close();
+                    sock.close();
+                    return;
+                }
+                if (tmp.equals("+")) {
+                    readJson = true;
+                } else if (tmp.equals("-")) {
+                    break;
+                } else if (readJson) {
+                    jsonString = jsonString + tmp;
+                }
             }
-            in.close();
-
-            lastRequestTime = System.currentTimeMillis();
+            writer.println("exit");
+            reader.close();
+            writer.close();
+            sock.close();
 
             if(getHandler() == null) return;
             b.putString("jsonString", jsonString);
@@ -168,17 +187,17 @@ public class FetchNewsUpdatesTask implements Runnable {
                 msg.setData(b);
                 handler.sendMessage(msg);
             }
-        } catch(MalformedURLException e) {
+        } catch (UnknownHostException e) {
             if(getHandler() == null) return;
-            b.putInt("errorCode", NewsUpdatesActivity.ERROR_URLERR);
+            b.putInt("errorCode", DisplayStopDataActivity.ERROR_CANNOTRESOLVE);
             synchronized(this) {
                 msg = handler.obtainMessage();
                 msg.setData(b);
                 handler.sendMessage(msg);
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             if(getHandler() == null) return;
-            b.putInt("errorCode", NewsUpdatesActivity.ERROR_IOERR);
+            b.putInt("errorCode", DisplayStopDataActivity.ERROR_NOCONNECTION);
             synchronized(this) {
                 msg = handler.obtainMessage();
                 msg.setData(b);

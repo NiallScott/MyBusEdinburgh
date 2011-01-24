@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2010 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,49 +27,55 @@ package uk.org.rivernile.edinburghbustracker.android;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Canvas;
+import android.location.Location;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
+import uk.org.rivernile.edinburghbustracker.android.mapoverlays
+        .BusStopMapOverlay;
 
-/**
- * This class extends MapActivity from the Google Maps API and this shows the
- * map on the device. This class also initiates the location finding and stop
- * marker classes. Also, this class deals with the menus for this activity and
- * dialogs shown on this activity.
- *
- * @author Niall Scott
- */
-public class BusStopMapActivity extends MapActivity
-        implements OnItemClickListener {
+public class BusStopMapActivity extends MapActivity implements
+        OnItemClickListener{
+
+    public static final String INTENT_LAYERS = "LAYERS";
+
+    public static final int SHOW_STOPS = 1;
+
+    public static final int DIALOG_PROGRESS = 0;
+    public static final int DIALOG_SEARCH_RESULTS = 1;
 
     private static final int MENU_MYLOCATION = 0;
-    private static final int MENU_MAPTYPE = 1;
-    private static final int MENU_OVERLAY_TRAFFICVIEW = 2;
+    private static final int MENU_SEARCH = 1;
+    private static final int MENU_MAPTYPE = 2;
+    private static final int MENU_OVERLAY_TRAFFICVIEW = 3;
 
-    private static final int DIALOG_STOP = 0;
-    private static final int DIALOG_CONFIRM = 1;
+    private static final int DEFAULT_LAT = 55948611;
+    private static final int DEFAULT_LONG = -3199811;
+    private static final int DEFAULT_ZOOM = 12;
 
     private MapView mapView;
-    private MyLocationOverlay myLocation;
+    private MyLocationOverlayFix myLocation;
+
     private BusStopMapOverlay stopOverlay;
-    private boolean createdDialog = false;
-    private boolean selectedStopIsFavourite;
-    private String selectedStopCode;
-    private ArrayAdapter ad;
-    private BusStopOverlayItem oi;
+
+    private String searchTerm;
+    private MapSearchHelper searcher;
 
     /**
      * {@inheritDoc}
@@ -78,25 +84,53 @@ public class BusStopMapActivity extends MapActivity
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.busstopmap);
+
         mapView = (MapView)findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);
-        mapView.getController().setCenter(new GeoPoint(55948611, -3199811));
-        mapView.getController().setZoom(12);
-        myLocation = new MyLocationOverlay(this, mapView);
+
+        if(savedInstanceState != null &&
+                savedInstanceState.containsKey("currentLat") &&
+                savedInstanceState.containsKey("currentLong") &&
+                savedInstanceState.containsKey("currentZoom"))
+        {
+            mapView.getController().setCenter(new GeoPoint(savedInstanceState
+                    .getInt("currentLat", DEFAULT_LAT), savedInstanceState
+                    .getInt("currentLong", DEFAULT_LONG)));
+            mapView.getController().setZoom(savedInstanceState
+                    .getInt("currentZoom", DEFAULT_ZOOM));
+        } else {
+            mapView.getController().setCenter(new GeoPoint(55948611, -3199811));
+            mapView.getController().setZoom(12);
+        }
+
+        myLocation = new MyLocationOverlayFix(this, mapView);
         myLocation.runOnFirstFix(new Runnable() {
             @Override
             public void run() {
                 mapView.getController().setCenter(myLocation.getMyLocation());
                 mapView.getController().setZoom(17);
-                if(createdDialog) dismissDialog(0);
             }
         });
         mapView.getOverlays().add(myLocation);
-        stopOverlay = new BusStopMapOverlay(
-                getResources().getDrawable(R.drawable.mapmarker), this,
-                mapView);
-        stopOverlay.doPopulateBusStops();
-        mapView.getOverlays().add(stopOverlay);
+
+        Intent intent = getIntent();
+        int layers = intent.getIntExtra(INTENT_LAYERS, 0);
+        if((layers & SHOW_STOPS) == SHOW_STOPS) {
+            stopOverlay = new BusStopMapOverlay(getResources()
+                    .getDrawable(R.drawable.mapmarker), this, mapView);
+            mapView.getOverlays().add(stopOverlay);
+            if(savedInstanceState != null &&
+                    savedInstanceState.containsKey("currentSelectedStopCode"))
+                stopOverlay.setCurrentStopCodeAndShowDialog(savedInstanceState
+                        .getString("currentSelectedStopCode"));
+        }
+
+        if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            searchTerm = intent.getStringExtra(SearchManager.QUERY);
+            doSearch();
+        }
+
+        searcher = MapSearchHelper.getInstance(this);
     }
 
     /**
@@ -105,24 +139,12 @@ public class BusStopMapActivity extends MapActivity
     @Override
     public void onResume() {
         super.onResume();
-        if(!getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
-                .getBoolean("pref_autolocation_state", true)) return;
-        myLocation.enableMyLocation();
-        Toast.makeText(this, R.string.map_finding_location, Toast.LENGTH_LONG)
-                .show();
-        if(createdDialog) {
-            selectedStopIsFavourite = SettingsDatabase
-                    .getInstance(getApplicationContext())
-                    .getFavouriteStopExists(selectedStopCode);
-            ad.clear();
-            ad.add(getString(R.string.map_dialog_showtimes));
-            if(selectedStopIsFavourite) {
-                ad.add(getString(R.string.displaystopdata_menu_remfav));
-            } else {
-                ad.add(getString(R.string.displaystopdata_menu_addfav));
-            }
-            ad.add(getString(R.string.map_dialog_close));
+
+        if(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
+                .getBoolean("pref_autolocation_state", true)) {
+            myLocation.enableMyLocation();
         }
+        if(stopOverlay != null) stopOverlay.mapResumed();
     }
 
     /**
@@ -135,18 +157,52 @@ public class BusStopMapActivity extends MapActivity
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if(createdDialog) dismissDialog(0);
+    public void onNewIntent(final Intent intent) {
+        super.onNewIntent(intent);
+
+        /**setIntent(intent);
+
+        int layers = intent.getIntExtra(INTENT_LAYERS, 0);
+        if(((layers & SHOW_STOPS) == SHOW_STOPS) && stopOverlay == null) {
+            stopOverlay = new BusStopMapOverlay(getResources()
+                    .getDrawable(R.drawable.mapmarker), this, mapView);
+            mapView.getOverlays().add(stopOverlay);
+        } else if(((layers & SHOW_STOPS) != SHOW_STOPS) &&
+                stopOverlay != null) {
+            mapView.getOverlays().remove(stopOverlay);
+            stopOverlay = null;
+        }
+
+        mapView.postInvalidate();**/
+
+        if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            searchTerm = intent.getStringExtra(SearchManager.QUERY);
+            doSearch();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        GeoPoint g = mapView.getMapCenter();
+
+        outState.putInt("currentLat", g.getLatitudeE6());
+        outState.putInt("currentLong", g.getLongitudeE6());
+        outState.putInt("currentZoom", mapView.getZoomLevel());
+
+        if(stopOverlay != null) {
+            String stopCode = stopOverlay.getCurrentStopCode();
+            if(stopCode != null) outState.putString("currentSelectedStopCode",
+                    stopCode);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean isRouteDisplayed() {
-        return false;
-    }
+    public boolean isRouteDisplayed() { return false; }
 
     /**
      * {@inheritDoc}
@@ -157,22 +213,14 @@ public class BusStopMapActivity extends MapActivity
 
         menu.add(0, MENU_MYLOCATION, 1, R.string.map_menu_mylocation).setIcon(
                 R.drawable.ic_menu_mylocation);
-        if(mapView.isSatellite()) {
-            menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_mapview)
+        menu.add(0, MENU_SEARCH, 2, R.string.search)
+                .setIcon(R.drawable.ic_menu_search);
+        menu.add(0, MENU_MAPTYPE, 3, R.string.map_menu_maptype_mapview)
                     .setIcon(R.drawable.ic_menu_mapmode);
-        } else {
-            menu.add(0, MENU_MAPTYPE, 2, R.string.map_menu_maptype_satellite)
-                    .setIcon(R.drawable.ic_menu_satview);
-        }
-        if(mapView.isTraffic()) {
-            menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 3,
+        menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 4,
                 R.string.map_menu_mapoverlay_trafficviewoff)
                 .setIcon(R.drawable.ic_menu_trafficview);
-        } else {
-            menu.add(0, MENU_OVERLAY_TRAFFICVIEW, 3,
-                R.string.map_menu_mapoverlay_trafficviewon)
-                .setIcon(R.drawable.ic_menu_trafficview);
-        }
+
         return true;
     }
 
@@ -182,7 +230,7 @@ public class BusStopMapActivity extends MapActivity
     @Override
     public boolean onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        
+
         MenuItem item = menu.getItem(MENU_MYLOCATION);
         item.setEnabled(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
                 .getBoolean("pref_autolocation_state", true));
@@ -216,8 +264,11 @@ public class BusStopMapActivity extends MapActivity
                     mapView.getController().setZoom(17);
                 } else {
                     Toast.makeText(this, R.string.map_location_unknown,
-                            Toast.LENGTH_LONG).show();
+                            Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case MENU_SEARCH:
+                onSearchRequested();
                 break;
             case MENU_MAPTYPE:
                 mapView.setSatellite(!mapView.isSatellite());
@@ -231,129 +282,86 @@ public class BusStopMapActivity extends MapActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected Dialog onCreateDialog(final int id) {
         switch(id) {
-            case DIALOG_STOP:
-                Dialog dialog = new Dialog(this);
-                dialog.setContentView(R.layout.mapdialog);
-                dialog.setCancelable(true);
-                ListView list =
-                    (ListView)dialog.findViewById(R.id.mapdialog_list_options);
-                ad = new ArrayAdapter<String>(dialog.getContext(),
-                    android.R.layout.simple_list_item_1);
-                list.setAdapter(ad);
-                list.setOnItemClickListener(this);
-                createdDialog = true;
-                return dialog;
-            case DIALOG_CONFIRM:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setCancelable(true)
-                    .setTitle(R.string.favouritestops_dialog_confirm_title)
-                    .setPositiveButton(R.string.okay,
-                    new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog,
-                            final int id)
-                    {
-                        SettingsDatabase.getInstance(getApplicationContext())
-                                .deleteFavouriteStop(oi.getStopCode());
-                        selectedStopIsFavourite = false;
-                        showDialog(DIALOG_STOP);
+            case DIALOG_PROGRESS:
+                ProgressDialog prog = new ProgressDialog(this);
+                prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                prog.setCancelable(true);
+                prog.setMessage(getString(R.string.map_search_progress_dialog));
+                prog.setOnCancelListener(new DialogInterface
+                        .OnCancelListener() {
+                    public void onCancel(DialogInterface di) {
+                        searcher.searchThread.interrupt();
                     }
-                }).setNegativeButton(R.string.cancel,
-                        new DialogInterface.OnClickListener() {
-                     public void onClick(final DialogInterface dialog,
-                             final int id)
-                     {
-                        dialog.dismiss();
-                        showDialog(DIALOG_STOP);
-                     }
                 });
-                return builder.create();
+                return prog;
+            case DIALOG_SEARCH_RESULTS:
+                AlertDialog.Builder ad;
+                LayoutInflater inflater = (LayoutInflater)
+                        getSystemService(LAYOUT_INFLATER_SERVICE);
+                View layout = inflater.inflate(
+                        R.layout.map_search_results_list, null);
+                ListView lv = (ListView)layout.findViewById(
+                        R.id.listMapSearchResults);
+                lv.setAdapter(searcher.searchResults);
+                lv.setOnItemClickListener(this);
+                ad = new AlertDialog.Builder(this);
+                ad.setTitle(R.string.map_search_dialog_title);
+                ad.setView(layout);
+                return ad.create();
             default:
                 return null;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    private void doSearch() {
+        searcher.doSearch(searchTerm);
+    }
+
     @Override
-    protected void onPrepareDialog(final int id, final Dialog dialog) {
-        switch(id) {
-            case DIALOG_STOP:
-                oi = stopOverlay.getSelectedItem();
-                selectedStopCode = oi.getStopCode();
-                selectedStopIsFavourite = SettingsDatabase.getInstance(this)
-                    .getFavouriteStopExists(oi.getStopCode());
-                String[] services = BusStopDatabase.getInstance(this)
-                    .getBusServicesForStop(oi.getStopCode());
-                TextView tv = (TextView)dialog.findViewById(
-                    R.id.mapdialog_text_services);
-                dialog.setTitle(oi.getStopCode() + " " + oi.getStopName());
-                if(services == null) {
-                    tv.setText(R.string.map_dialog_noservices);
-                } else {
-                    String s = getString(R.string.services) + ": ";
-                    for(int i = 0; i < services.length; i++) {
-                        if(i == (services.length - 1)) {
-                            s = s + services[i];
-                        } else {
-                            s = s + services[i] + ", ";
-                        }
-                    }
-                    tv.setText(s);
-                }
-                ad.clear();
-                ad.add(getString(R.string.map_dialog_showtimes));
-                if(selectedStopIsFavourite) {
-                    ad.add(getString(R.string.displaystopdata_menu_remfav));
-                } else {
-                    ad.add(getString(R.string.displaystopdata_menu_addfav));
-                }
-                ad.add(getString(R.string.map_dialog_close));
-            default:
-                break;
-        }
+    public void onItemClick(final AdapterView<?> l, final View view,
+            final int position, final long id) {
+        MapSearchHelper.SearchResult sr = searcher.searchResults
+                .getItem(position);
+        mapView.getController().setCenter(sr.geoPoint);
+        mapView.getController().setZoom(19);
+        dismissDialog(DIALOG_SEARCH_RESULTS);
     }
 
     /**
-     * {@inheritDoc}
+     * This private class here is a hacky fix to get around the Google Maps API
+     * crashing when drawing the user's location on the map. This crash is
+     * caused by a class missing internally within Google Maps, therefore the
+     * code cannot be found and then the API just fails. At least with this,
+     * the user can continue, albeit with a missing location dot on the map!
      */
-    @Override
-    public void onItemClick(final AdapterView<?> l, final View view,
-            final int position, final long id)
-    {
-        //String stopName = stopOverlay.getSeletedItem().getStopName();
-        switch(position) {
-            case 0:
-                Intent intent = new Intent(this, DisplayStopDataActivity.class);
-                intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-                intent.putExtra("stopCode",
-                        stopOverlay.getSelectedItem().getStopCode());
-                startActivity(intent);
-                break;
-            case 1:
-                if(selectedStopIsFavourite) {
-                    dismissDialog(DIALOG_STOP);
-                    showDialog(DIALOG_CONFIRM);
-                } else {
-                    Intent intent2 = new Intent(this,
-                            AddEditFavouriteStopActivity.class);
-                    intent2.setAction(AddEditFavouriteStopActivity
-                            .ACTION_ADD_EDIT_FAVOURITE_STOP);
-                    intent2.putExtra("stopCode", oi.getStopCode());
-                    intent2.putExtra("stopName", oi.getStopName());
-                    startActivity(intent2);
-                }
-                break;
-            case 2:
-                dismissDialog(DIALOG_STOP);
-                break;
+    private class MyLocationOverlayFix extends MyLocationOverlay {
+
+        public MyLocationOverlayFix(final Context context,
+                final MapView mapView) {
+            super(context, mapView);
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected void drawMyLocation(final Canvas canvas,
+                final MapView mapView, final Location lastFix,
+                final GeoPoint myLocation, final long when) {
+            try {
+                super.drawMyLocation(canvas, mapView, lastFix, myLocation,
+                        when);
+            } catch(Exception e) {
+                /*
+                 * I really really really hate catching Exception, but I have
+                 * to make an exception (lol) in this case because it appears a
+                 * few things cause the crash to happen. It is safe to catch the
+                 * exception and let the application continue.
+                 */
+            }
         }
     }
 }

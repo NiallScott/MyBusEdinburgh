@@ -73,6 +73,14 @@ public class BusStopDatabase extends SQLiteOpenHelper {
         return c;
     }
 
+    public Cursor getBusStopByCode(final String stopCode) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor c = db.query("bus_stops", null, "_id = " + stopCode, null,
+                null, null, null);
+        return c;
+    }
+
     public String[] getBusServicesForStop(final String stopCode) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(true, "service_stops",
@@ -108,5 +116,13 @@ public class BusStopDatabase extends SQLiteOpenHelper {
         } catch(NumberFormatException e) {
             return 0;
         }
+    }
+
+    public Cursor searchDatabase(final String term) {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query("bus_stops", null, "_id LIKE \"%" + term + "%\"" +
+                " OR stopName LIKE \"%" + term + "%\"", null, null, null, null);
+
+        return c;
     }
 }

@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import uk.org.rivernile.edinburghbustracker.android.fetchers.FetchLiveTimesTask;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;

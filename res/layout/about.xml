@@ -24,13 +24,67 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/aboutRoot"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    <TextView
-        android:id="@+id/textabout"
+    android:layout_height="fill_parent" >
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-    </TextView>
-</LinearLayout>
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:padding="15dp" >
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="20dp" >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/appicon"
+                android:adjustViewBounds="true"
+                android:paddingRight="10dp" />
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+                <TextView
+                    android:text="@string/app_name"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold" />
+                <TextView
+                    android:id="@+id/aboutVersion"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_author" />
+            </LinearLayout>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/aboutDBVersion"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="20dp" />
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:paddingBottom="20dp"
+            android:text="@string/main_aboutdialog_contact" />
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:autoLink="web|email|map"
+            android:paddingBottom="20dp"
+            android:text="@string/main_aboutdialog_body" />
+        <Button
+            android:id="@+id/aboutClose"
+            android:text="@string/close"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</ScrollView>
