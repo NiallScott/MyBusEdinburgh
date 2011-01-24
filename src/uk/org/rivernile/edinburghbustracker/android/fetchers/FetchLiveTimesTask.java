@@ -55,6 +55,7 @@ public class FetchLiveTimesTask implements Runnable {
     private String remoteHost;
     private int remotePort;
     private boolean executing = false;
+    private Thread fetchThread;
 
     /**
      * This constructor is intentionally left blank and private, this class
@@ -86,6 +87,7 @@ public class FetchLiveTimesTask implements Runnable {
      * @param handler The handler object to fire data back to.
      */
     public void setHandler(final Handler handler) {
+        if(handler == null && fetchThread != null) fetchThread.interrupt();
         synchronized(this) {
             this.handler = handler;
         }
@@ -127,7 +129,8 @@ public class FetchLiveTimesTask implements Runnable {
         this.remotePort = remotePort;
         if(!executing) {
             executing = true;
-            new Thread(this).start();
+            fetchThread = new Thread(this);
+            fetchThread.start();
         }
     }
 
@@ -180,7 +183,7 @@ public class FetchLiveTimesTask implements Runnable {
             writer.close();
             sock.close();
 
-            if(getHandler() == null) return;
+            if(getHandler() == null || fetchThread.isInterrupted()) return;
             b.putString("jsonString", jsonString);
             synchronized(this) {
                 msg = handler.obtainMessage();
@@ -188,7 +191,7 @@ public class FetchLiveTimesTask implements Runnable {
                 handler.sendMessage(msg);
             }
         } catch (UnknownHostException e) {
-            if(getHandler() == null) return;
+            if(getHandler() == null || fetchThread.isInterrupted()) return;
             b.putInt("errorCode", DisplayStopDataActivity.ERROR_CANNOTRESOLVE);
             synchronized(this) {
                 msg = handler.obtainMessage();
@@ -196,7 +199,7 @@ public class FetchLiveTimesTask implements Runnable {
                 handler.sendMessage(msg);
             }
         } catch (IOException e) {
-            if(getHandler() == null) return;
+            if(getHandler() == null || fetchThread.isInterrupted()) return;
             b.putInt("errorCode", DisplayStopDataActivity.ERROR_NOCONNECTION);
             synchronized(this) {
                 msg = handler.obtainMessage();
