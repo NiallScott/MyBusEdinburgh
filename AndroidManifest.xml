@@ -64,10 +64,16 @@
         <provider android:name=".MapSearchHistoryProvider"
                   android:authorities="uk.org.rivernile.edinburghbustracker.android.MapSearchHistoryProvider" />
     </application>
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature android:name="android.hardware.location" android:required="false" />
+    <uses-feature android:name="android.hardware.location.network" android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+
     <uses-sdk android:minSdkVersion="3"
               android:targetSdkVersion="7"/>
 </manifest>

@@ -70,6 +70,8 @@ public class PreferencesActivity extends PreferenceActivity
         GenericDialogPreference clearSearchHistoryDialog =
                 (GenericDialogPreference)findPreference(
                 "pref_clear_search_history");
+        GenericDialogPreference checkStopDBUpdates =
+                (GenericDialogPreference)findPreference("pref_update_stop_db");
 
         backupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
             @Override
@@ -132,6 +134,25 @@ public class PreferencesActivity extends PreferenceActivity
                         MapSearchHistoryProvider.AUTHORITY,
                         MapSearchHistoryProvider.MODE);
                 suggestions.clearHistory();
+            }
+        });
+
+        checkStopDBUpdates.setOnClickListener(
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, final int which) {
+                if(which != dialog.BUTTON_POSITIVE) {
+                    dialog.dismiss();
+                    return;
+                }
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainActivity.checkForDBUpdates(getApplicationContext(),
+                                true);
+                    }
+                }).start();
             }
         });
     }

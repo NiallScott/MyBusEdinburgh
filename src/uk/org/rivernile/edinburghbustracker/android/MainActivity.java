@@ -77,10 +77,14 @@ public class MainActivity extends Activity {
     private ImageButton stopMapButton;
     private ImageButton preferencesButton;
 
+    private TextView txtDBVersion;
+
     private static final int MENU_NEWSUPDATES = 0;
     private static final int MENU_ABOUT = 1;
 
     private static final int DIALOG_ABOUT = 0;
+
+    private static File f;
 
     /**
      * {@inheritDoc}
@@ -89,6 +93,8 @@ public class MainActivity extends Activity {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home);
+
+        f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
 
         favouriteButton = (ImageButton) findViewById(R.id.favouriteButton);
         stopCodeButton = (ImageButton) findViewById(R.id.stopCodeButton);
@@ -188,21 +194,10 @@ public class MainActivity extends Activity {
                     // This should never occur.
                     temp.setText("Unknown");
                 }
-                long dbtime;
-                Calendar date = Calendar.getInstance();
-                try {
-                    dbtime = BusStopDatabase.getInstance(this)
-                            .getLastDBModTime();
-                } catch(SQLException e) {
-                    dbtime = 0;
-                }
-                date.setTimeInMillis(dbtime);
 
-                temp = (TextView)layout.findViewById(R.id.aboutDBVersion);
-                temp.setText(getText(R.string.main_aboutdialog_dbversion) +
-                        ": " + dbtime + " (" + date.getTime().toLocaleString() +
-                        ")");
-
+                txtDBVersion = (TextView)layout.findViewById(R.id
+                        .aboutDBVersion);
+                
                 Button close = (Button)layout.findViewById(R.id.aboutClose);
                 close.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -220,6 +215,29 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onPrepareDialog(final int id, final Dialog d) {
+        switch(id) {
+            case DIALOG_ABOUT:
+                long dbtime;
+                Calendar date = Calendar.getInstance();
+                try {
+                    dbtime = BusStopDatabase.getInstance(this)
+                            .getLastDBModTime();
+                } catch(SQLException e) {
+                    dbtime = 0;
+                }
+                date.setTimeInMillis(dbtime);
+
+                txtDBVersion.setText(getText(R.string
+                        .main_aboutdialog_dbversion) + ": " + dbtime + " (" +
+                        date.getTime().toLocaleString() + ")");
+                break;
+            default:
+                break;
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -227,15 +245,7 @@ public class MainActivity extends Activity {
         @Override
         public void run() {
             initStopDB();
-            try {
-                BusStopDatabase.getInstance(getApplicationContext())
-                        .getLastDBModTime();
-            } catch(SQLiteException e) {
-                File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
-                if(f.exists()) f.delete();
-                initStopDB();
-            }
-            checkForDBUpdates();
+            checkForDBUpdates(getApplicationContext(), false);
         }
     };
 
@@ -245,27 +255,50 @@ public class MainActivity extends Activity {
      * moved from the assets directory to the working data directory.
      */
     private void initStopDB() {
-        File f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
         if(!f.exists()) {
+            restoreDBFromAssets();
+        } else {
+            long assetVersion = Long.parseLong(getString(
+                    R.string.asset_db_version));
+            long currentVersion = 0;
             try {
-                // Start of horrible hack to create database directory and
-                // set permissions if it doesn't already exist.
-                SQLiteDatabase db = MainActivity.this.openOrCreateDatabase(
-                        BusStopDatabase.STOP_DB_NAME, 0, null);
-                db.close();
-                // End of horrible hack.
-                InputStream in = getAssets().open(
-                        BusStopDatabase.STOP_DB_NAME);
-                FileOutputStream out = new FileOutputStream(f);
-                byte[] buf = new byte[1024];
-                int len;
-                while((len = in.read(buf)) > 0) {
-                    out.write(buf, 0, len);
-                }
-                out.flush();
-                out.close();
-                in.close();
-            } catch(IOException e) { }
+                currentVersion = BusStopDatabase.getInstance(
+                        getApplicationContext()).getLastDBModTime();
+            } catch(SQLiteException e) {
+                f.delete();
+                restoreDBFromAssets();
+                return;
+            }
+
+            if(assetVersion > currentVersion) {
+                f.delete();
+                restoreDBFromAssets();
+            }
+        }
+    }
+
+    private boolean restoreDBFromAssets() {
+        try {
+            // Start of horrible hack to create database directory and
+            // set permissions if it doesn't already exist.
+            SQLiteDatabase db = MainActivity.this.openOrCreateDatabase(
+                    BusStopDatabase.STOP_DB_NAME, 0, null);
+            db.close();
+            // End of horrible hack.
+            InputStream in = getAssets().open(
+                    BusStopDatabase.STOP_DB_NAME);
+            FileOutputStream out = new FileOutputStream(f);
+            byte[] buf = new byte[1024];
+            int len;
+            while((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.flush();
+            out.close();
+            in.close();
+            return true;
+        } catch(IOException e) {
+            return false;
         }
     }
 
@@ -274,14 +307,17 @@ public class MainActivity extends Activity {
      * database. This gets checked upon app startup if it hasn't been checked
      * for more than 24 hours. If a database update does exist, its downloaded.
      */
-    private void checkForDBUpdates() {
-        SharedPreferences sp = getSharedPreferences(
+    public static void checkForDBUpdates(final Context context,
+            final boolean force) {
+        SharedPreferences sp = context.getSharedPreferences(
                 PreferencesActivity.PREF_FILE, 0);
         boolean autoUpdate = sp.getBoolean("pref_database_autoupdate", true);
 
-        if(autoUpdate) {
-            long lastCheck = sp.getLong("lastUpdateCheck", 0);
-            if((System.currentTimeMillis() - lastCheck) < 86400000) return;
+        if(autoUpdate || force) {
+            if(!force) {
+                long lastCheck = sp.getLong("lastUpdateCheck", 0);
+                if((System.currentTimeMillis() - lastCheck) < 86400000) return;
+            }
             String remoteHost = sp.getString(PreferencesActivity.KEY_HOSTNAME,
                     "bustracker.selfip.org");
             int remotePort;
@@ -324,10 +360,16 @@ public class MainActivity extends Activity {
             } catch(NumberFormatException e) {
                 return;
             }
-            if(dbLastMod > BusStopDatabase.getInstance(getApplicationContext())
-                        .getLastDBModTime())
-            {
-                updateStopsDB(getApplicationContext(), dbURL);
+            if(dbLastMod > BusStopDatabase.getInstance(context)
+                    .getLastDBModTime()) {
+                updateStopsDB(context, dbURL);
+            } else {
+                if(force) {
+                    Looper.prepare();
+                    Toast.makeText(context, R.string.main_db_no_updates,
+                            Toast.LENGTH_LONG).show();
+                    Looper.loop();
+                }
             }
             SharedPreferences.Editor edit = sp.edit();
             edit.putLong("lastUpdateCheck", System.currentTimeMillis());

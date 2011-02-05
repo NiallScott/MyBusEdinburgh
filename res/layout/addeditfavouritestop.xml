@@ -25,31 +25,26 @@
  *     exempt from clause 2.
 */ -->
 <LinearLayout
-    android:id="@+id/widget28"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <LinearLayout
-        android:id="@+id/widget29"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/overlay"
         android:paddingBottom="10px">
         <ImageView
-            android:id="@+id/widget30"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/stopsign"
             android:padding="20px" />
         <LinearLayout
-            android:id="@+id/widget32"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <TextView
                 android:textStyle="bold"
-                android:id="@+id/widget33"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5px"
@@ -57,7 +52,6 @@
                 android:text="@string/addeditstop_title_edit"
                 android:textSize="16px" />
             <TextView
-                android:id="@+id/widget34"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5px"
@@ -65,7 +59,6 @@
         </LinearLayout>
     </LinearLayout>
     <LinearLayout
-        android:id="@+id/widget35"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:orientation="vertical"
