@@ -31,8 +31,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_name">My Bus Edinburgh</string>
     <string name="app_description">View live bus data in Edinburgh</string>
     <string name="app_author">Niall Scott</string>
-    <!--<string name="app_about">&lt;html>&lt;body>&lt;b>%appname&lt;/b>&lt;br>Version %vername (%vernumber)&lt;br>Stop DB version: %dbversion (%dbtime)&lt;p>&lt;a %url&lt;/a>&lt;br>Twitter: @MyBusEdinburgh&lt;/p>&lt;p>Author: Niall %quoteRivernile%quote Scott&lt;/p>&lt;p>Thanks to:&lt;br>Gordon Christie (EdinBus for iPhone developer)&lt;br>The City of Edinburgh Council&lt;br>Anthony Totton (App icon and website design)&lt;br>Scott Straughan (App interface reskinning)&lt;/p>&lt;p>Permission has been granted from The City of Edinburgh Council for this application to tie in to their data feed. Neither the author of the application, nor The City of Edinburgh Council take any responsibility for the accuracy of data supplied by this application or its implications, or any data loss or any other issues arising through its usage. Usage of this application signifies the user takes complete responsibility.&lt;/p>&lt;/body>&lt;/html></string>
-    -->
     <string name="search_hint">Search bus stops and places</string>
     <string name="asset_db_version">1281848892973</string>
 
@@ -231,7 +229,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <!-- Strings for NewsUpdatesActivity errors -->
     <string name="newsupdates_err_nodata">No data was received from the Twitter server.</string>
     <string name="newsupdates_err_parseerr">There was a parsing error while trying to process the incoming data.</string>
-    <string name="newsupdates_err_ioerr">There was an IO error while receiving data from the Twitter server.</string>
+    <string name="newsupdates_err_ioerr">There was an IO error while receiving data from the Twitter server. Sometimes this error will happen when Twitter is experiencing heavy load.</string>
     <string name="newsupdates_err_urlerr">There was a problem formatting the URL to request the data from the Twitter server.</string>
 
     <!-- Strings for AboutActivity -->

@@ -35,8 +35,8 @@
     android:paddingRight="10dp" >
     <ImageView
         android:id="@+id/imgMapSearchIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:paddingRight="10dp" />
     <TextView
         android:id="@+id/txtMapSearchResult"

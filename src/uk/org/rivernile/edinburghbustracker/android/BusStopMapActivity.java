@@ -70,7 +70,7 @@ public class BusStopMapActivity extends MapActivity implements
     private static final int DEFAULT_ZOOM = 12;
 
     private MapView mapView;
-    private MyLocationOverlayFix myLocation;
+    protected MyLocationOverlayFix myLocation;
 
     private BusStopMapOverlay stopOverlay;
 
@@ -337,7 +337,7 @@ public class BusStopMapActivity extends MapActivity implements
      * code cannot be found and then the API just fails. At least with this,
      * the user can continue, albeit with a missing location dot on the map!
      */
-    private class MyLocationOverlayFix extends MyLocationOverlay {
+    protected class MyLocationOverlayFix extends MyLocationOverlay {
 
         public MyLocationOverlayFix(final Context context,
                 final MapView mapView) {

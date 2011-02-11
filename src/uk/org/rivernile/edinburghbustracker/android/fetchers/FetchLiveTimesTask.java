@@ -183,7 +183,10 @@ public class FetchLiveTimesTask implements Runnable {
             writer.close();
             sock.close();
 
-            if(getHandler() == null || fetchThread.isInterrupted()) return;
+            if(getHandler() == null || fetchThread.isInterrupted()) {
+                executing = false;
+                return;
+            }
             b.putString("jsonString", jsonString);
             synchronized(this) {
                 msg = handler.obtainMessage();
@@ -191,7 +194,10 @@ public class FetchLiveTimesTask implements Runnable {
                 handler.sendMessage(msg);
             }
         } catch (UnknownHostException e) {
-            if(getHandler() == null || fetchThread.isInterrupted()) return;
+            if(getHandler() == null || fetchThread.isInterrupted()) {
+                executing = false;
+                return;
+            }
             b.putInt("errorCode", DisplayStopDataActivity.ERROR_CANNOTRESOLVE);
             synchronized(this) {
                 msg = handler.obtainMessage();
@@ -199,7 +205,10 @@ public class FetchLiveTimesTask implements Runnable {
                 handler.sendMessage(msg);
             }
         } catch (IOException e) {
-            if(getHandler() == null || fetchThread.isInterrupted()) return;
+            if(getHandler() == null || fetchThread.isInterrupted()) {
+                executing = false;
+                return;
+            }
             b.putInt("errorCode", DisplayStopDataActivity.ERROR_NOCONNECTION);
             synchronized(this) {
                 msg = handler.obtainMessage();
