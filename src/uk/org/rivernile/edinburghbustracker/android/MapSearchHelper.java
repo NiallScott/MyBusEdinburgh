@@ -226,16 +226,19 @@ public class MapSearchHelper {
 
     public class SearchResultsArrayAdapter extends ArrayAdapter<SearchResult> {
 
+        private LayoutInflater vi;
+
         public SearchResultsArrayAdapter() {
             super(mContext, R.layout.map_search_results_list_item,
                     R.id.txtMapSearchResult);
+
+            vi = (LayoutInflater)mContext.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
         public View getView(final int position, View convertView,
                 final ViewGroup parent) {
-            LayoutInflater vi = (LayoutInflater)mContext.getSystemService(
-                        Context.LAYOUT_INFLATER_SERVICE);
             View row = vi.inflate(R.layout.map_search_results_list_item, null);
 
             TextView tv = (TextView)row.findViewById(R.id.txtMapSearchResult);

@@ -119,13 +119,6 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
             autoRefresh = sp.getBoolean(
                     PreferencesActivity.KEY_AUTOREFRESH_STATE, false);
         }
-
-        if(jsonString != null && jsonString.length() > 0) {
-            handleJSONString(jsonString);
-        } else if(!fetchTask.isExecuting()) {
-            showDialog(PROGRESS_DIALOG);
-            fetchTask.doTask(stopCode, remoteHost, remotePort);
-        }
     }
 
     @Override
@@ -134,10 +127,16 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
 
         favouriteExists = SettingsDatabase.getInstance(getApplicationContext())
                 .getFavouriteStopExists(stopCode);
-        if((jsonString == null || jsonString.length() == 0)
-                && !fetchTask.isExecuting()) {
+        
+         if(!fetchTask.isExecuting()) {
+            if(jsonString == null || jsonString.length() == 0) {
+                showDialog(PROGRESS_DIALOG);
+                fetchTask.doTask(stopCode, remoteHost, remotePort);
+            } else {
+                handleJSONString(jsonString);
+            }
+        } else {
             showDialog(PROGRESS_DIALOG);
-            fetchTask.doTask(stopCode, remoteHost, remotePort);
         }
     }
 
@@ -382,6 +381,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
             jo = new JSONObject(jsonString);
 
             String sc = jo.getString("stopCode");
+            if(!stopCode.equals(sc)) return;
             if(sc.length() == 0) {
                 handleError(ERROR_NODATA);
                 return;

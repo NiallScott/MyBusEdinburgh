@@ -72,6 +72,11 @@ public class NewsUpdatesActivity extends ListActivity {
 
         if(savedInstanceState != null)
             jsonString = savedInstanceState.getString("jsonString");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
         String temp = fetchTask.getJSONString();
         if(jsonString != null && jsonString.length() > 0) {

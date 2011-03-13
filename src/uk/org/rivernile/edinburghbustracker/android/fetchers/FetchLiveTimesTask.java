@@ -87,10 +87,12 @@ public class FetchLiveTimesTask implements Runnable {
      * @param handler The handler object to fire data back to.
      */
     public void setHandler(final Handler handler) {
-        if(handler == null && fetchThread != null) fetchThread.interrupt();
-        synchronized(this) {
-            this.handler = handler;
+        if((handler == null || handler != this.handler)
+                && fetchThread != null) {
+            fetchThread.interrupt();
+            executing = false;
         }
+        this.handler = handler;
     }
 
     /**
@@ -99,9 +101,7 @@ public class FetchLiveTimesTask implements Runnable {
      * @return The Handler object.
      */
     public Handler getHandler() {
-        synchronized(this) {
-            return handler;
-        }
+        return handler;
     }
 
     /**
@@ -158,11 +158,9 @@ public class FetchLiveTimesTask implements Runnable {
                     if(getHandler() != null) {
                         b.putInt("errorCode",
                                 DisplayStopDataActivity.ERROR_SERVER);
-                        synchronized(this) {
-                            msg = handler.obtainMessage();
-                            msg.setData(b);
-                            handler.sendMessage(msg);
-                        }
+                        msg = handler.obtainMessage();
+                        msg.setData(b);
+                        handler.sendMessage(msg);
                     }
                     writer.println("exit");
                     reader.close();
@@ -188,33 +186,27 @@ public class FetchLiveTimesTask implements Runnable {
                 return;
             }
             b.putString("jsonString", jsonString);
-            synchronized(this) {
-                msg = handler.obtainMessage();
-                msg.setData(b);
-                handler.sendMessage(msg);
-            }
+            msg = handler.obtainMessage();
+            msg.setData(b);
+            handler.sendMessage(msg);
         } catch (UnknownHostException e) {
             if(getHandler() == null || fetchThread.isInterrupted()) {
                 executing = false;
                 return;
             }
             b.putInt("errorCode", DisplayStopDataActivity.ERROR_CANNOTRESOLVE);
-            synchronized(this) {
-                msg = handler.obtainMessage();
-                msg.setData(b);
-                handler.sendMessage(msg);
-            }
+            msg = handler.obtainMessage();
+            msg.setData(b);
+            handler.sendMessage(msg);
         } catch (IOException e) {
             if(getHandler() == null || fetchThread.isInterrupted()) {
                 executing = false;
                 return;
             }
             b.putInt("errorCode", DisplayStopDataActivity.ERROR_NOCONNECTION);
-            synchronized(this) {
-                msg = handler.obtainMessage();
-                msg.setData(b);
-                handler.sendMessage(msg);
-            }
+            msg = handler.obtainMessage();
+            msg.setData(b);
+            handler.sendMessage(msg);
         } finally {
             executing = false;
         }
