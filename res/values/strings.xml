@@ -32,7 +32,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_description">View live bus data in Edinburgh</string>
     <string name="app_author">Niall Scott</string>
     <string name="search_hint">Search bus stops and places</string>
-    <string name="asset_db_version">1281848892973</string>
+    <string name="asset_db_version">1300011079753</string>
 
     <!-- Generic strings -->
     <string name="submit">Submit</string>
