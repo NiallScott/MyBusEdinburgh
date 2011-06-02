@@ -195,7 +195,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <string name="preferences_backup_error_nodb">The database does not exist.</string>
     <string name="preferences_backup_error_mediaerror">There is a problem with the external storage. Is it present and not already in use?</string>
-    <string name="preferences_backup_error_ioerror">There was an error transferring the database, an IO error occurred.</string>
+    <string name="preferences_backup_error_ioerror">There was an error transferring the database. Either the database could not be found, or the location was inaccessible.</string>
 
     <string name="preference_backup_success">The database was successfully backed up to external storage.</string>
     <string name="preference_restore_success">The database was successfully restored from external storage.</string>

@@ -133,12 +133,11 @@ public class BusStopMapActivity extends MapActivity implements
             stopOverlay.setCurrentStopCodeAndShowDialog(savedInstanceState
                         .getString("currentSelectedStopCode"));
 
+        searcher = MapSearchHelper.getInstance(this);
         if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
             searchTerm = intent.getStringExtra(SearchManager.QUERY);
             searcher.doSearch(searchTerm);
         }
-
-        searcher = MapSearchHelper.getInstance(this);
     }
 
     /**
