@@ -64,6 +64,7 @@ public class AddEditFavouriteStopActivity extends Activity
         okay.setOnClickListener(this);
         cancel.setOnClickListener(this);
         edit.setText(stopName);
+        edit.setSelection(stopName.length());
 
         editing = sd.getFavouriteStopExists(stopCode);
         if(editing) {

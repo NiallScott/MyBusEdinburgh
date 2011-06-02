@@ -28,9 +28,9 @@
 This version of strings.xml is in the developer's locale (en_GB) -->
 <resources>
     <!-- Application strings -->
-    <string name="app_name">My Bus Edinburgh</string>
+    <string name="app_name">My Bus Edinburgh</string> <!-- Should not be changed -->
     <string name="app_description">View live bus data in Edinburgh</string>
-    <string name="app_author">Niall Scott</string>
+    <string name="app_author">Niall Scott</string> <!-- Should not be changed -->
     <string name="search_hint">Search bus stops and places</string>
     <string name="asset_db_version">1300011079753</string>
 
@@ -43,6 +43,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="retry">Retry</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
+    <string name="clear">Clear</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="save">Save</string>
@@ -50,6 +51,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="version">Version</string>
     <string name="close">Close</string>
     <string name="search">Search</string>
+    <string name="distance">Distance</string>
 
     <!-- Strings for MainActivity -->
     <string name="main_favourite_stops">Favourite Stops</string>
@@ -133,6 +135,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_menu_remfav">Remove as favourite</string>
     <string name="displaystopdata_menu_sort_service">Sort by service</string>
     <string name="displaystopdata_menu_sort_times">Sort by time</string>
+    
+    <!-- Strings for DisplayStopDataActivity context menu -->
+    <string name="displaystopdata_context_title">empty</string>
+    <string name="displaystopdata_context_addalarm">Add new alarm...</string>
 
     <!-- Strings for PreferencesActivity -->
     <string name="preferences_title">Preferences</string>
@@ -161,6 +167,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_dialog_map_clearsearchhistory">Clear search history</string>
     <string name="preferences_dialog_map_clearsearchhistory_summary">Remove all previous search terms from the map search facility.</string>
     <string name="preferences_dialog_map_clearsearchhistory_message">Are you sure you want to clear your map search history?</string>
+    
+    <string name="preferences_category_neareststops">Nearest Stops Display</string>
+    <string name="preferences_checkbox_neareststops_gpsdisabled">Disable GPS prompt</string>
+    <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">Untick to show a prompt when GPS is disabled whilst viewing nearest bus stops.</string>
+    <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">Tick to not show a prompt when GPS is disabled whilst viewing nearest bus stops.</string>
 
     <string name="preferences_category_advanced">Advanced</string>
     <string name="preferences_textbox_advanced_hostname">Hostname</string>
@@ -220,6 +231,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
     <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
     <string name="map_menu_mylocation">My location</string>
+    <string name="map_menu_filter">Filter services</string>
 
     <!-- Strings for NewsUpdatesActivity -->
     <string name="newsupdates_title">News and Updates</string>
@@ -232,6 +244,23 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="newsupdates_err_ioerr">There was an IO error while receiving data from the Twitter server. Sometimes this error will happen when Twitter is experiencing heavy load.</string>
     <string name="newsupdates_err_urlerr">There was a problem formatting the URL to request the data from the Twitter server.</string>
 
+    <!-- Strings for NearestStopsActivity -->
+    <string name="neareststops_title">Nearest Bus Stops</string>
+    <string name="neareststops_empty">There is no data to display. This means that either your location could not be determined, or you are not in range of any bus stops.</string>
+    <string name="neareststops_turnongps_title">You do not have GPS turned on</string>
+    <string name="neareststops_turnongps_message">To get the most precise location information, GPS needs to be turned on. Turn on now?</string>
+    <string name="neareststops_turnongps_checkbox">Do not remind me again</string>
+    <!-- Strings for NearestStopsActivity menu -->
+    <string name="neareststops_menu_filter">Filter services</string>
+
+    <!-- Strings for NearestStopsActivity ListView contextual menu -->
+    <string name="neareststops_context_showonmap">Show stop on map</string>
+    <string name="neareststops_context_addasfav">Add stop as favourite</string>
+    <string name="neareststops_context_remasfav">Remove stop as favourite</string>
+
     <!-- Strings for AboutActivity -->
     <string name="about_title">About</string>
+    
+    <!-- Strings for ServiceFilter -->
+    <string name="servicefilter_title">Select services to filter</string>
 </resources>

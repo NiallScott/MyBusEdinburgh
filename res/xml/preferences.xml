@@ -80,6 +80,15 @@
             android:negativeButtonText="@string/no" />
     </PreferenceCategory>
     <PreferenceCategory
+        android:title="@string/preferences_category_neareststops">
+        <CheckBoxPreference
+            android:key="neareststops_gps_prompt_disable"
+            android:title="@string/preferences_checkbox_neareststops_gpsdisabled"
+            android:summaryOn="@string/preferences_checkbox_neareststops_gpsdisabled_ticked"
+            android:summaryOff="@string/preferences_checkbox_neareststops_gpsdisabled_unticked"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
         android:title="@string/preferences_category_advanced">
         <EditTextPreference
             android:key="pref_server_hostname"

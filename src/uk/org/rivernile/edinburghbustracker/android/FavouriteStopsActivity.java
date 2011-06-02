@@ -96,11 +96,11 @@ public class FavouriteStopsActivity extends ListActivity {
     {
         super.onCreateContextMenu(menu, v, menuInfo);
         AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
-        menu.setHeaderTitle(String.valueOf(info.id) + " " +
-                sd.getNameForStop(String.valueOf(info.id)));
+        menu.setHeaderTitle(sd.getNameForStop(String.valueOf(info.id)) + " (" +
+                String.valueOf(info.id) + ")");
         menu.add(0, CONTEXT_MENU_VIEW, 1, R.string.favouritestops_menu_view);
-        menu.add(0, CONTEXT_MENU_MODIFY, 1, R.string.favouritestops_menu_edit);
-        menu.add(0, CONTEXT_MENU_DELETE, 2, R.string
+        menu.add(0, CONTEXT_MENU_MODIFY, 2, R.string.favouritestops_menu_edit);
+        menu.add(0, CONTEXT_MENU_DELETE, 3, R.string
                 .favouritestops_menu_delete);
     }
 
