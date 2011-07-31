@@ -53,6 +53,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import com.google.android.maps.GeoPoint;
 import java.util.Comparator;
+import java.util.List;
 
 public class NearestStopsActivity extends ListActivity
         implements LocationListener, Filterable {
@@ -88,7 +89,29 @@ public class NearestStopsActivity extends ListActivity
         sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
         
         locMan = (LocationManager)getSystemService(LOCATION_SERVICE);
-        loc = locMan.getLastKnownLocation(getBestProvider());
+        
+        // See http://android-developers.blogspot.com/2011/06/deep-dive-into-location.html
+        List<String> matchingProviders = locMan.getAllProviders();
+        float accuracy, bestAccuracy = Float.MAX_VALUE;
+        long time, bestTime = Long.MIN_VALUE;
+        for(String provider : matchingProviders) {
+            Location location = locMan.getLastKnownLocation(provider);
+            if(location != null) {
+                accuracy = location.getAccuracy();
+                time = location.getTime();
+        
+                if(time > REQUEST_PERIOD && accuracy < bestAccuracy) {
+                    loc = location;
+                    bestAccuracy = accuracy;
+                    bestTime = time;
+                }
+                else if(time < REQUEST_PERIOD && 
+                    bestAccuracy == Float.MAX_VALUE && time > bestTime) {
+                    loc = location;
+                    bestTime = time;
+                }
+            }
+        }
         
         if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)
                 && savedInstanceState == null &&
@@ -141,6 +164,7 @@ public class NearestStopsActivity extends ListActivity
                 builder.setCancelable(true)
                         .setTitle(R.string.neareststops_turnongps_title)
                         .setView(v)
+                        .setInverseBackgroundForced(true)
                         .setPositiveButton(R.string.yes,
                         new DialogInterface.OnClickListener() {
                     @Override
@@ -283,8 +307,7 @@ public class NearestStopsActivity extends ListActivity
                 return true;
             case CONTEXT_MENU_MAP:
                 intent = new Intent(this, BusStopMapActivity.class);
-                intent.putExtra("lat", currSelected.point.getLatitudeE6());
-                intent.putExtra("long", currSelected.point.getLongitudeE6());
+                intent.putExtra("stopCode", currSelected.stopCode);
                 intent.putExtra("zoom", 19);
                 startActivity(intent);
                 return true;
@@ -326,8 +349,8 @@ public class NearestStopsActivity extends ListActivity
                         currLoc, stopPoint) * 1000;
                 String stopCode = c.getString(0);
                 String stopName = c.getString(1);
-                String[] services = BusStopDatabase.getInstance(this)
-                        .getBusServicesForStop(stopCode);
+                String services = BusStopDatabase.getInstance(this)
+                        .getBusServicesForStopAsString(stopCode);
                 items.add(new SearchResult(stopCode, stopName, services,
                         distance, stopPoint));
             }
@@ -394,12 +417,12 @@ public class NearestStopsActivity extends ListActivity
 
         public String stopCode;
         public String stopName;
-        public String[] services;
+        public String services;
         public double distance;
         public GeoPoint point;
 
         public SearchResult(final String stopCode, final String stopName,
-                final String[] services, final double distance,
+                final String services, final double distance,
                 final GeoPoint point) {
             this.stopCode = stopCode;
             this.stopName = stopName;
@@ -422,9 +445,14 @@ public class NearestStopsActivity extends ListActivity
         }
 
         @Override
-        public View getView(final int position, View convertView,
+        public View getView(final int position, final View convertView,
                 final ViewGroup parent) {
-            View row = vi.inflate(R.layout.neareststops_list_item, null);
+            View row;
+            if(convertView != null) {
+                row = convertView;
+            } else {
+                row = vi.inflate(R.layout.neareststops_list_item, null);
+            }
 
             TextView distance = (TextView)row.findViewById(
                     R.id.txtNearestDistance);
@@ -436,13 +464,7 @@ public class NearestStopsActivity extends ListActivity
                     (int)sr.distance + "m");
             stopDetails.setText(sr.stopName + " (" + sr.stopCode + ")");
 
-            StringBuilder builder = new StringBuilder();
-            int len = sr.services.length;
-            for(int i = 0; i < len; i++) {
-                builder.append(sr.services[i]);
-                if(i != (len - 1)) builder.append(", ");
-            }
-            buses.setText(builder);
+            buses.setText(sr.services);
 
             return row;
         }

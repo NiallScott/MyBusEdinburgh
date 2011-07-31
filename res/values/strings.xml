@@ -68,7 +68,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="main_aboutdialog_body"><b>Thanks to the following people and
     entities for making this application happen:</b>\nGordon Christie (EdinBus for
     iPhone developer)\nThe City of Edinburgh Council\nAnthony Totton (App icon,
-    website and graphics)\nScott Straughan (App interface skinning)\n
+    website and graphics)\nScott Straughan (App interface designer)\n
     \n<b>Disclaimer</b>\nPermission has been granted from The City of Edinburgh Council
     for this application to tie in to their data feed. Neither the author of the
     application, nor The City of Edinburgh Council take any responsibility for
@@ -96,9 +96,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="favouritestops_description">Long press on a stop name to reveal more options.</string>
 
     <!-- Strings for FavouriteStopsActivity menu -->
-    <string name="favouritestops_menu_view">View stop</string>
+    <string name="favouritestops_menu_view">View stop times</string>
     <string name="favouritestops_menu_edit">Edit stop</string>
     <string name="favouritestops_menu_delete">Delete stop</string>
+    <string name="favouritestops_menu_showonmap">Show stop on map</string>
 
     <!-- Strings for DisplayStopDataActivity -->
     <string name="displaystopdata_title">Display Bus Times</string>
@@ -107,7 +108,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     </string>
     <string name="displaystopdata_empty">There is currently no data to display.
     </string>
-    <string name="displaystopdata_mins">mins</string>
+    <string name="displaystopdata_lastupdated">Last updated: </string>
 
     <!-- Strings for DisplayStopDataActvity errors -->
     <string name="displaystopdata_err_nocode">No stop code was provided.
@@ -142,6 +143,23 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <!-- Strings for PreferencesActivity -->
     <string name="preferences_title">Preferences</string>
+    
+    <string name="preferences_category_general">General</string>
+    <string name="preferences_checkbox_general_showfavourites">Show favourites</string>
+    <string name="preferences_checkbox_general_showfavourites_ticked">Untick to show the home menu when the application is launched.</string>
+    <string name="preferences_checkbox_general_showfavourites_unticked">Tick to show your favourite stops when the application is launched.</string>
+    <string name="preferences_checkbox_general_dbupdate">Auto-update database</string>
+    <string name="preferences_checkbox_general_dbupdate_ticked">Untick for the stop database to not be auto updated.</string>
+    <string name="preferences_checkbox_general_dbupdate_unticked">Tick for the stop database to auto update.</string>
+    <string name="preferences_dialog_general_update">Update stop database</string>
+    <string name="preferences_dialog_general_update_summary">Check for stop database updates, and update if a new version is available.</string>
+    <string name="preferences_dialog_general_update_message">Are you sure you want to update the bus stop database?</string>
+    <string name="preferences_dialog_general_backup">Backup favourites</string>
+    <string name="preferences_dialog_general_backup_summary">Backup the list of favourite stops to the external storage.</string>
+    <string name="preferences_dialog_general_backup_message">Are you sure you want to backup your favourite stops list?</string>
+    <string name="preferences_dialog_general_restore">Restore favourites</string>
+    <string name="preferences_dialog_general_restore_summary">Restore the list of favourite stops from external storage.</string>
+    <string name="preferences_dialog_general_restore_message">Are you sure you want to restore your favourite stops list? Warning: This will overwrite your current favourite stops list.</string>
 
     <string name="preferences_category_bustimes">Bus Times Display</string>
     <string name="preferences_checkbox_bustimes_autorefresh">Auto-refresh</string>
@@ -155,15 +173,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_bustimes_sorting_unticked">Tick to sort bus services by arrival time.</string>
 
     <string name="preferences_category_map">Bus Stop Map</string>
-    <string name="preferences_checkbox_map_dbupdate">Auto-update database</string>
-    <string name="preferences_checkbox_map_dbupdate_ticked">Untick for the stop database to not be auto updated.</string>
-    <string name="preferences_checkbox_map_dbupdate_unticked">Tick for the stop database to auto update.</string>
     <string name="preferences_checkbox_map_autolocation">Auto find location</string>
     <string name="preferences_checkbox_map_autolocation_ticked">Untick to not find your location on the map.</string>
     <string name="preferences_checkbox_map_autolocation_unticked">Tick to find your location on the map.</string>
-    <string name="preferences_dialog_stopdb_update">Update stop database</string>
-    <string name="preferences_dialog_stopdb_update_summary">Check for stop database updates, and update if a new version is available.</string>
-    <string name="preferences_dialog_stopdb_update_message">Are you sure you want to update the bus stop database?</string>
     <string name="preferences_dialog_map_clearsearchhistory">Clear search history</string>
     <string name="preferences_dialog_map_clearsearchhistory_summary">Remove all previous search terms from the map search facility.</string>
     <string name="preferences_dialog_map_clearsearchhistory_message">Are you sure you want to clear your map search history?</string>
@@ -184,14 +196,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_invalidport">The port you have entered is invalid, it has been reset back to the default value.</string>
     <string name="preferences_textbox_hostname_dialog">Edit Hostname</string>
     <string name="preferences_textbox_port_dialog">Edit Port</string>
-
-    <string name="preferences_dialog_advanced_backup">Backup favourites</string>
-    <string name="preferences_dialog_advanced_backup_summary">Backup the list of favourite stops to the external storage.</string>
-    <string name="preferences_dialog_advanced_backup_message">Are you sure you want to backup your favourite stops list?</string>
-
-    <string name="preferences_dialog_advanced_restore">Restore favourites</string>
-    <string name="preferences_dialog_advanced_restore_summary">Restore the list of favourite stops from external storage.</string>
-    <string name="preferences_dialog_advanced_restore_message">Are you sure you want to restore your favourite stops list? Warning: This will overwrite your current favourite stops list.</string>
 
     <string name="preferences_backup_error_nodb">The database does not exist.</string>
     <string name="preferences_backup_error_mediaerror">There is a problem with the external storage. Is it present and not already in use?</string>
@@ -263,4 +267,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     
     <!-- Strings for ServiceFilter -->
     <string name="servicefilter_title">Select services to filter</string>
+    
+    <!-- String related to times -->
+    <string name="times_never">never</string>
+    <string name="times_lessthanoneminago">less than 1 minute ago</string>
+    <string name="times_oneminago">1 minute ago</string>
+    <string name="times_xminsago">%t minutes ago</string>
+    <string name="times_greaterthanhour">greater than 1 hour ago</string>
 </resources>

@@ -28,6 +28,7 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -36,10 +37,12 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 /**
  * The FavouriteStopsActivity displays the user a list of their saved favourite
@@ -52,6 +55,7 @@ public class FavouriteStopsActivity extends ListActivity {
     private final static int CONTEXT_MENU_VIEW = ContextMenu.FIRST;
     private final static int CONTEXT_MENU_MODIFY = ContextMenu.FIRST +1;
     private final static int CONTEXT_MENU_DELETE = ContextMenu.FIRST + 2;
+    private final static int CONTEXT_MENU_SHOWONMAP = ContextMenu.FIRST + 3;
 
     private ListAdapter ca;
     private Cursor c;
@@ -70,8 +74,9 @@ public class FavouriteStopsActivity extends ListActivity {
         sd = SettingsDatabase.getInstance(this);
         c = sd.getAllFavouriteStops();
         startManagingCursor(c);
-        ca = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1,
-                c, new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
+        ca = new FavouritesCursorAdapter(this,
+                android.R.layout.simple_list_item_2, c,
+                new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
                 new int[] { android.R.id.text1 });
         setListAdapter(ca);
         registerForContextMenu(getListView());
@@ -102,6 +107,8 @@ public class FavouriteStopsActivity extends ListActivity {
         menu.add(0, CONTEXT_MENU_MODIFY, 2, R.string.favouritestops_menu_edit);
         menu.add(0, CONTEXT_MENU_DELETE, 3, R.string
                 .favouritestops_menu_delete);
+        menu.add(0, CONTEXT_MENU_SHOWONMAP, 4, R.string
+                .favouritestops_menu_showonmap);
     }
 
     @Override
@@ -127,6 +134,12 @@ public class FavouriteStopsActivity extends ListActivity {
             case CONTEXT_MENU_DELETE:
                 selectedStopCode = String.valueOf(info.id);
                 showDialog(0);
+                return true;
+            case CONTEXT_MENU_SHOWONMAP:
+                intent = new Intent(this, BusStopMapActivity.class);
+                intent.putExtra("stopCode", String.valueOf(info.id));
+                intent.putExtra("zoom", 19);
+                startActivity(intent);
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -156,5 +169,27 @@ public class FavouriteStopsActivity extends ListActivity {
                      }
         });
         return builder.create();
+    }
+    
+    public class FavouritesCursorAdapter extends SimpleCursorAdapter {
+        
+        public FavouritesCursorAdapter(final Context context, final int layout,
+                final Cursor c, final String[] from, final int[] to) {
+            super(context, layout, c, from, to);
+        }
+        
+        @Override
+        public View getView(final int position, final View convertView,
+                final ViewGroup parent) {
+            View v = super.getView(position, convertView, parent);
+            
+            TextView services = (TextView)v.findViewById(android.R.id.text2);
+            BusStopDatabase bsd = BusStopDatabase.getInstance(
+                    FavouriteStopsActivity.this);
+            services.setText(bsd.getBusServicesForStopAsString(
+                    getCursor().getString(0)));
+            
+            return v;
+        }
     }
 }

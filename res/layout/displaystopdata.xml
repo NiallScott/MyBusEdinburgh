@@ -65,6 +65,11 @@
         android:orientation="vertical"
         android:layout_gravity="center_horizontal"
         android:gravity="center">
+        <TextView
+            android:id="@+id/displayLastUpdated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
         <ExpandableListView
             android:id="@id/android:list"
             android:layout_width="fill_parent"

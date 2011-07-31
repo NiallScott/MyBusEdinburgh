@@ -27,6 +27,49 @@
 
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <!-- General -->
+    <PreferenceCategory
+        android:title="@string/preferences_category_general">
+        <CheckBoxPreference
+            android:key="pref_startupshowfavs_state"
+            android:title="@string/preferences_checkbox_general_showfavourites"
+            android:summaryOn="@string/preferences_checkbox_general_showfavourites_ticked"
+            android:summaryOff="@string/preferences_checkbox_general_showfavourites_unticked"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="pref_database_autoupdate"
+            android:title="@string/preferences_checkbox_general_dbupdate"
+            android:summaryOn="@string/preferences_checkbox_general_dbupdate_ticked"
+            android:summaryOff="@string/preferences_checkbox_general_dbupdate_unticked"
+            android:defaultValue="true" />
+        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+            android:key="pref_update_stop_db"
+            android:title="@string/preferences_dialog_general_update"
+            android:summary="@string/preferences_dialog_general_update_summary"
+            android:dialogTitle="@string/preferences_dialog_general_update"
+            android:dialogMessage="@string/preferences_dialog_general_update_message"
+            android:positiveButtonText="@string/yes"
+            android:negativeButtonText="@string/no" />
+        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+            android:key="pref_backup_favourites"
+            android:title="@string/preferences_dialog_general_backup"
+            android:summary="@string/preferences_dialog_general_backup_summary"
+            android:dialogTitle="@string/preferences_dialog_general_backup"
+            android:dialogMessage="@string/preferences_dialog_general_backup_message"
+            android:positiveButtonText="@string/yes"
+            android:negativeButtonText="@string/no" />
+        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+            android:key="pref_restore_favourites"
+            android:title="@string/preferences_dialog_general_restore"
+            android:summary="@string/preferences_dialog_general_restore_summary"
+            android:dialogTitle="@string/preferences_dialog_general_restore"
+            android:dialogMessage="@string/preferences_dialog_general_restore_message"
+            android:positiveButtonText="@string/yes"
+            android:negativeButtonText="@string/no" />
+    </PreferenceCategory>
+    
+    <!-- Bus Times Display -->
     <PreferenceCategory
         android:title="@string/preferences_category_bustimes">
         <CheckBoxPreference
@@ -48,28 +91,16 @@
             android:summaryOff="@string/preferences_checkbox_bustimes_sorting_unticked"
             android:defaultValue="false" />
     </PreferenceCategory>
+    
+    <!-- Bus Stop Map -->
     <PreferenceCategory
         android:title="@string/preferences_category_map">
-        <CheckBoxPreference
-            android:key="pref_database_autoupdate"
-            android:title="@string/preferences_checkbox_map_dbupdate"
-            android:summaryOn="@string/preferences_checkbox_map_dbupdate_ticked"
-            android:summaryOff="@string/preferences_checkbox_map_dbupdate_unticked"
-            android:defaultValue="true" />
         <CheckBoxPreference
             android:key="pref_autolocation_state"
             android:title="@string/preferences_checkbox_map_autolocation"
             android:summaryOn="@string/preferences_checkbox_map_autolocation_ticked"
             android:summaryOff="@string/preferences_checkbox_map_autolocation_unticked"
             android:defaultValue="true" />
-        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
-            android:key="pref_update_stop_db"
-            android:title="@string/preferences_dialog_stopdb_update"
-            android:summary="@string/preferences_dialog_stopdb_update_summary"
-            android:dialogTitle="@string/preferences_dialog_stopdb_update"
-            android:dialogMessage="@string/preferences_dialog_stopdb_update_message"
-            android:positiveButtonText="@string/yes"
-            android:negativeButtonText="@string/no" />
         <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
             android:key="pref_clear_search_history"
             android:title="@string/preferences_dialog_map_clearsearchhistory"
@@ -79,6 +110,8 @@
             android:positiveButtonText="@string/yes"
             android:negativeButtonText="@string/no" />
     </PreferenceCategory>
+    
+    <!-- Nearest Stops Display -->
     <PreferenceCategory
         android:title="@string/preferences_category_neareststops">
         <CheckBoxPreference
@@ -88,6 +121,8 @@
             android:summaryOff="@string/preferences_checkbox_neareststops_gpsdisabled_unticked"
             android:defaultValue="false" />
     </PreferenceCategory>
+    
+    <!-- Advanced -->
     <PreferenceCategory
         android:title="@string/preferences_category_advanced">
         <EditTextPreference
@@ -103,21 +138,5 @@
             android:defaultValue="4876"
             android:dialogTitle="@string/preferences_textbox_port_dialog"
             android:numeric="integer" />
-        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
-            android:key="pref_backup_favourites"
-            android:title="@string/preferences_dialog_advanced_backup"
-            android:summary="@string/preferences_dialog_advanced_backup_summary"
-            android:dialogTitle="@string/preferences_dialog_advanced_backup"
-            android:dialogMessage="@string/preferences_dialog_advanced_backup_message"
-            android:positiveButtonText="@string/yes"
-            android:negativeButtonText="@string/no" />
-        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
-            android:key="pref_restore_favourites"
-            android:title="@string/preferences_dialog_advanced_restore"
-            android:summary="@string/preferences_dialog_advanced_restore_summary"
-            android:dialogTitle="@string/preferences_dialog_advanced_restore"
-            android:dialogMessage="@string/preferences_dialog_advanced_restore_message"
-            android:positiveButtonText="@string/yes"
-            android:negativeButtonText="@string/no" />
     </PreferenceCategory>
 </PreferenceScreen>

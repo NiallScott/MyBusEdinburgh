@@ -222,23 +222,16 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
         if(currentItem == null) return;
         isFavourite = SettingsDatabase.getInstance(context)
                 .getFavouriteStopExists(currentItem.getStopCode());
-        String[] services = BusStopDatabase.getInstance(context)
-                    .getBusServicesForStop(currentItem.getStopCode());
+        String services = BusStopDatabase.getInstance(context)
+                    .getBusServicesForStopAsString(currentItem.getStopCode());
         TextView tv = (TextView)stopDialog.findViewById(
                 R.id.mapdialog_text_services);
-        stopDialog.setTitle(currentItem.getStopCode() + " " +
-                currentItem.getStopName());
+        stopDialog.setTitle(currentItem.getStopName() + " (" +
+                currentItem.getStopCode() + ")");
         if(services == null) {
             tv.setText(R.string.map_dialog_noservices);
         } else {
-            String s = context.getString(R.string.services) + ": ";
-            for(int i = 0; i < services.length; i++) {
-                if(i == (services.length - 1)) {
-                    s = s + services[i];
-                } else {
-                    s = s + services[i] + ", ";
-                }
-            }
+            String s = context.getString(R.string.services) + ": " + services;
             tv.setText(s);
         }
         ad.clear();

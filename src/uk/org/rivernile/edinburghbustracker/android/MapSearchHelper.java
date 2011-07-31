@@ -96,8 +96,8 @@ public class MapSearchHelper {
                     c.moveToNext();
                     pointLocation = new GeoPoint(c.getInt(2), c.getInt(3));
                     result = new SearchResult(pointLocation,
-                            SearchResult.TYPE_STOP, c.getString(0) + " " +
-                            c.getString(1));
+                            SearchResult.TYPE_STOP, c.getString(1) + " (" +
+                            c.getString(0) + ")");
                     if(myLocation != null)
                         result.distance = calculateGeographicalDistance(
                                 myLocation, pointLocation);
@@ -237,9 +237,14 @@ public class MapSearchHelper {
         }
 
         @Override
-        public View getView(final int position, View convertView,
+        public View getView(final int position, final View convertView,
                 final ViewGroup parent) {
-            View row = vi.inflate(R.layout.map_search_results_list_item, null);
+            View row;
+            if(convertView != null) {
+                row = convertView;
+            } else {
+                row = vi.inflate(R.layout.map_search_results_list_item, null);
+            }
 
             TextView tv = (TextView)row.findViewById(R.id.txtMapSearchResult);
             SearchResult sr = getItem(position);

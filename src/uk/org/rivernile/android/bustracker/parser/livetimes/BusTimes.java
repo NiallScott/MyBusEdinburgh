@@ -25,13 +25,16 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.AsyncTask;
 import java.util.HashMap;
-import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 
-public class BusTimes implements Runnable {
+/**
+ * This class is a singleton class and you must obtain an instance from
+ * getInstance() before using it. Its purpose is to handle bus time requests.
+ * 
+ * @author Niall Scott
+ */
+public class BusTimes {
     
     public final static int ERROR_SERVER = 0;
     public final static int ERROR_NOCONNECTION = 1;
@@ -43,22 +46,20 @@ public class BusTimes implements Runnable {
     private static BusTimes instance;
     
     private long lastDataRefresh = 0;
-    private Handler handler;
+    private BusTimesEvent handler;
     private HashMap<String, BusStop> busStops;
-    private String[] stopCodes;
-    private boolean executing = false;
-    private Thread fetchThread;
     private BusParser parser;
+    private GetBusTimesTask task;
     
     /**
      * Create a new bus times instance. This constructor MUST receive valid
      * Handler and BusParser objects to be able to operate.
      * 
-     * @param handler The Handler object to send events back to.
+     * @param handler The object to send events back to.
      * @param parser The parser implementation. That implementation is
      * responsible for any resources it may acquire.
      */
-    private BusTimes(final Handler handler, final BusParser parser) {
+    private BusTimes(final BusTimesEvent handler, final BusParser parser) {
         if(handler == null)
             throw new IllegalArgumentException("The handler must not be null.");
         
@@ -70,14 +71,14 @@ public class BusTimes implements Runnable {
     }
     
     /**
-     * Get a bus times instance. This constructor MUST receive valid Handler and
-     * BusParser objects to be able to operate.
+     * Get a bus times instance. This constructor MUST receive valid
+     * BusTimesEvent and BusParser objects to be able to operate.
      * 
-     * @param handler The Handler object to send events back to.
+     * @param handler The object to send events back to.
      * @param parser The parser implementation. That implementation is
      * responsible for any resources it may acquire.
      */
-    public static BusTimes getInstance(final Handler handler,
+    public static BusTimes getInstance(final BusTimesEvent handler,
             final BusParser parser) {
         if(instance == null) {
             instance = new BusTimes(handler, parser);
@@ -91,14 +92,9 @@ public class BusTimes implements Runnable {
     /**
      * Set the Handler object to send events back to.
      * 
-     * @param handler The Handler object to send events back to.
+     * @param handler The object to send events back to.
      */
-    public void setHandler(final Handler handler) {
-        if((handler == null || handler != this.handler)
-                && fetchThread != null) {
-            fetchThread.interrupt();
-            executing = false;
-        }
+    public void setHandler(final BusTimesEvent handler) {
         this.handler = handler;
     }
     
@@ -120,7 +116,8 @@ public class BusTimes implements Runnable {
      * @return True when the parser is busy, false when not.
      */
     public boolean isExecuting() {
-        return executing;
+        return task != null ?
+                task.getStatus() == AsyncTask.Status.RUNNING : false;
     }
     
     /**
@@ -132,46 +129,80 @@ public class BusTimes implements Runnable {
     }
     
     /**
-     * Do 
-     * @param stopCodes 
+     * Do request.
+     * @param stopCodes The list of stop codes for which we want to get bus
+     * times for.
+     * @return true if the task was kicked off, false if not. The task will not
+     * be kicked off if another task is already taking place.
      */
-    public void doRequest(final String[] stopCodes) {
+    public boolean doRequest(final String[] stopCodes) {
         if(stopCodes == null || stopCodes.length == 0)
             throw new IllegalArgumentException("The stop codes array must " +
                     "not be null or empty.");
         
-        this.stopCodes = stopCodes;
-        
-        if(!executing) {
-            executing = true;
-            fetchThread = new Thread(this);
-            fetchThread.start();
+        if(task == null) {
+            task = new GetBusTimesTask();
+            task.execute(stopCodes);
+            return true;
+        } else {
+            return false;
         }
     }
     
-    /**
-     * This is the thread which kicks off parsing. This method should not be
-     * invoked externally to this class.
-     */
-    @Override
-    public void run() {
-        try {
-            busStops = parser.getBusStopData(stopCodes);
-            lastDataRefresh = System.currentTimeMillis();
+    private class GetBusTimesTask
+            extends AsyncTask<String, Void, HashMap<String, BusStop>> {
+        
+        private int error = -1;
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected void onPreExecute() {
+            if(handler != null) handler.onPreExecute();
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected HashMap<String, BusStop> doInBackground(
+                final String... stopCodes) {
+            HashMap<String, BusStop> res = null;
             
-            if(handler != null && !fetchThread.isInterrupted()) {
-                handler.sendEmptyMessage(DisplayStopDataActivity.EVENT_READY);
-            }
-        } catch(BusParserException e) {
-            if(handler != null && !fetchThread.isInterrupted()) {
-                Message msg = handler.obtainMessage();
-                msg.what = DisplayStopDataActivity.EVENT_ERROR;
-                Bundle b = new Bundle();
-                b.putInt("errorCode", e.getCode());
-                msg.setData(b);
-                handler.sendMessage(msg);
+            try {
+                res = parser.getBusStopData(stopCodes);
+                lastDataRefresh = System.currentTimeMillis();
+            } catch(BusParserException e) {
+                error = e.getCode();
+            } finally {
+                return res;
             }
         }
-        executing = false;
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected void onPostExecute(final HashMap<String, BusStop> result) {
+            busStops = result;
+            if(handler != null) {
+                if(error < 0) {
+                    handler.onBusTimesReady(result);
+                } else {
+                    handler.onBusTimesError(error);
+                }
+            }
+            task = null;
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected void onCancelled() {
+            if(handler != null) handler.onCancel();
+            task = null;
+        }
     }
 }

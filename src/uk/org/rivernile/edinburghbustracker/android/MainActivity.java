@@ -135,6 +135,11 @@ public class MainActivity extends Activity {
         });
 
         new Thread(stopDBTasks).start();
+        
+        if(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
+                .getBoolean("pref_startupshowfavs_state", false)) {
+            startActivity(new Intent(this, FavouriteStopsActivity.class));
+        }
     }
 
     /**

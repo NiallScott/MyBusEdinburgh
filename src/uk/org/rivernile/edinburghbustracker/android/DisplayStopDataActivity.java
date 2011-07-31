@@ -42,18 +42,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
 import android.widget.SimpleExpandableListAdapter;
+import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Bus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimes;
+import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimesEvent;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBus;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBusStop;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
         .EdinburghParser;
 
-public class DisplayStopDataActivity extends ExpandableListActivity {
+public class DisplayStopDataActivity extends ExpandableListActivity
+        implements BusTimesEvent {
 
     public final static int ERROR_SERVER = 0;
     public final static int ERROR_NOCONNECTION = 1;
@@ -62,17 +65,16 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     public final static int ERROR_PARSEERR = 4;
     public final static int ERROR_NODATA = 5;
         
-    public final static int EVENT_READY = 0;
-    public final static int EVENT_ERROR = 1;
-    public final static int EVENT_REFRESH = 2;
+    private final static int EVENT_REFRESH = 1;
+    private final static int EVENT_UPDATE_TIME = 2;
 
     private final static int FAVOURITE_ID = Menu.FIRST;
     private final static int SORT_ID = Menu.FIRST + 1;
     private final static int AUTO_REFRESH_ID = Menu.FIRST + 2;
     private final static int REFRESH_ID = Menu.FIRST + 3;
 
-    private final static int PROGRESS_DIALOG = 0;
-    private final static int CONFIRM_DELETE = 1;
+    private final static int DIALOG_PROGRESS = 0;
+    private final static int DIALOG_CONFIRM_DELETE = 1;
 
     private final static String SERVICE_NAME_KEY = "SERVICE_NAME";
     private final static String DESTINATION_KEY = "DESTINATION";
@@ -89,14 +91,16 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     private boolean progressDialogShown = false;
     private SharedPreferences sp;
     private BusTimes busTimes;
+    private TextView textLastRefreshed;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.displaystopdata);
+        textLastRefreshed = (TextView)findViewById(R.id.displayLastUpdated);
         setTitle(R.string.displaystopdata_title);
 
-        busTimes = BusTimes.getInstance(mHandler,
+        busTimes = BusTimes.getInstance(this,
                 EdinburghParser.getInstance());
         sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
 
@@ -121,16 +125,19 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     public void onResume() {
         super.onResume();
         
+        mHandler.removeMessages(EVENT_UPDATE_TIME);
+        updateLastRefreshed();
+        setUpLastUpdated();
+        
         if(!busTimes.isExecuting()) {
             HashMap<String, BusStop> busStops = busTimes.getBusStops();
             if(busStops == null || !busStops.containsKey(stopCode)) {
-                showDialog(PROGRESS_DIALOG);
                 busTimes.doRequest(new String[] { stopCode });
             } else {
                 displayData();
             }
         } else {
-            showDialog(PROGRESS_DIALOG);
+            showDialog(DIALOG_PROGRESS);
         }
     }
 
@@ -140,6 +147,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
 
         autoRefresh = false;
         mHandler.removeMessages(EVENT_REFRESH);
+        mHandler.removeMessages(EVENT_UPDATE_TIME);
     }
 
     @Override
@@ -210,8 +218,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         switch(item.getItemId()) {
             case FAVOURITE_ID:
                 if(SettingsDatabase.getInstance(getApplicationContext())
-                .getFavouriteStopExists(stopCode)) {
-                    showDialog(CONFIRM_DELETE);
+                        .getFavouriteStopExists(stopCode)) {
+                    showDialog(DIALOG_CONFIRM_DELETE);
                 } else {
                     Intent intent = new Intent(this,
                             AddEditFavouriteStopActivity.class);
@@ -242,7 +250,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                 break;
             case REFRESH_ID:
                 mHandler.removeMessages(EVENT_REFRESH);
-                showDialog(PROGRESS_DIALOG);
+                showDialog(DIALOG_PROGRESS);
                 busTimes.doRequest(new String[] { stopCode });
                 break;
             default:
@@ -263,7 +271,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     @Override
     protected Dialog onCreateDialog(final int id) {
         switch(id) {
-            case PROGRESS_DIALOG:
+            case DIALOG_PROGRESS:
                 ProgressDialog prog = new ProgressDialog(this);
                 prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 prog.setCancelable(true);
@@ -277,7 +285,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                 });
                 progressDialogShown = true;
                 return prog;
-            case CONFIRM_DELETE:
+            case DIALOG_CONFIRM_DELETE:
                 AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
                 builder2.setCancelable(true)
                     .setTitle(R.string.favouritestops_dialog_confirm_title)
@@ -303,22 +311,40 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                 return null;
         }
     }
+    
+    @Override
+    public void onPreExecute() {
+        showDialog(DIALOG_PROGRESS);
+    }
+    
+    @Override
+    public void onBusTimesError(final int errorCode) {
+        handleError(errorCode);
+    }
+    
+    @Override
+    public void onBusTimesReady(final HashMap<String, BusStop> result) {
+        if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
+        displayData();
+    }
+    
+    @Override
+    public void onCancel() {
+        if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
+        finish();
+    }
 
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
             switch(msg.what) {
-                case EVENT_READY:
-                    displayData();
-                    break;
-                case EVENT_ERROR:
-                    if(msg.getData().containsKey("errorCode")) {
-                        handleError(msg.getData().getInt("errorCode"));
-                    }
-                    break;
                 case EVENT_REFRESH:
-                    showDialog(PROGRESS_DIALOG);
+                    showDialog(DIALOG_PROGRESS);
                     busTimes.doRequest(new String[] { stopCode });
+                    break;
+                case EVENT_UPDATE_TIME:
+                    updateLastRefreshed();
+                    setUpLastUpdated();
                     break;
                 default:
                     break;
@@ -327,7 +353,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
     };
 
     private void handleError(final int errorCode) {
-        if(progressDialogShown) dismissDialog(PROGRESS_DIALOG);
+        if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         switch(errorCode) {
             case ERROR_SERVER:
@@ -357,7 +383,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface di, final int i) {
-                showDialog(PROGRESS_DIALOG);
+                showDialog(DIALOG_PROGRESS);
                 busTimes.doRequest(new String[] { stopCode });
             }
         }).setNegativeButton(R.string.cancel,
@@ -408,6 +434,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
         HashMap<String, String> curGroupMap;
         ArrayList<HashMap<String, String>> children;
         HashMap<String, String> curChildMap;
+        boolean first;
         
         for(BusService busService : services) {
             if(!sp.getBoolean("pref_nightservices_state", true) &&
@@ -418,20 +445,20 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
             curGroupMap.put(SERVICE_NAME_KEY, busService.getServiceName());
             
             children = new ArrayList<HashMap<String, String>>();
-            boolean first = true;
+            first = true;
             for(Bus lBus : busService.getBuses()) {
                 EdinburghBus bus = (EdinburghBus)lBus;
                 
                 if(first) {
                     curGroupMap.put(DESTINATION_KEY, bus.getDestination());
                     curGroupMap.put(ARRIVAL_TIME_KEY, bus.getArrivalTime());
+                    first = false;
                 } else {
                     curChildMap = new HashMap<String, String>();
                     children.add(curChildMap);
                     curChildMap.put(DESTINATION_KEY, bus.getDestination());
                     curChildMap.put(ARRIVAL_TIME_KEY, bus.getArrivalTime());
                 }
-                first = false;
             }
             childData.add(children);
         }
@@ -447,11 +474,41 @@ public class DisplayStopDataActivity extends ExpandableListActivity {
                 new int[] { R.id.buschild_destination, R.id.buschild_time });
         setListAdapter(listAdapter);
 
-        if(progressDialogShown) dismissDialog(PROGRESS_DIALOG);
+        if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
         if(autoRefresh) setUpAutoRefresh();
+        updateLastRefreshed();
+    }
+    
+    private void updateLastRefreshed() {
+        long lastRefreshed = busTimes.getLastDataRefresh();
+        long timeSinceRefresh = System.currentTimeMillis() - lastRefreshed;
+        
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append(getString(R.string.displaystopdata_lastupdated)).append(' ');
+        
+        if(lastRefreshed == 0) {
+            sb.append(getString(R.string.times_never));
+        } else if(timeSinceRefresh < 60000) {
+            sb.append(getString(R.string.times_lessthanoneminago));
+        } else if(timeSinceRefresh < 120000) {
+            sb.append(getString(R.string.times_oneminago));
+        } else if(timeSinceRefresh > 3600000) {
+            sb.append(getString(R.string.times_greaterthanhour));
+        } else {
+            byte secs = (byte)(timeSinceRefresh / 60000);
+            sb.append(getString(R.string.times_xminsago).replace("%t",
+                    String.valueOf(secs)));
+        }
+        
+        textLastRefreshed.setText(sb.toString());
     }
 
     private void setUpAutoRefresh() {
         mHandler.sendEmptyMessageDelayed(EVENT_REFRESH, 60000);
+    }
+    
+    private void setUpLastUpdated() {
+        mHandler.sendEmptyMessageDelayed(EVENT_UPDATE_TIME, 10000);
     }
 }

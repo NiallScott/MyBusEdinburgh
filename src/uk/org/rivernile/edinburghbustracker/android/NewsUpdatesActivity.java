@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,6 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SimpleAdapter;
@@ -43,8 +41,9 @@ import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import uk.org.rivernile.edinburghbustracker.android.fetchers.NewsEvent;
 
-public class NewsUpdatesActivity extends ListActivity {
+public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
 
     /* Error constants */
     public static final int ERROR_NODATA = 0;
@@ -56,11 +55,10 @@ public class NewsUpdatesActivity extends ListActivity {
     private static final int MENU_REFRESH = Menu.FIRST;
 
     /* Constants for dialogs */
-    private static final int PROGRESS_DIALOG = 0;
+    private static final int DIALOG_PROGRESS = 0;
 
     private boolean progressDialogShown = false;
     private FetchNewsUpdatesTask fetchTask;
-    private String jsonString;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -68,10 +66,7 @@ public class NewsUpdatesActivity extends ListActivity {
         setContentView(R.layout.newsupdates);
         setTitle(R.string.newsupdates_title);
 
-        fetchTask = FetchNewsUpdatesTask.getInstance(mHandler);
-
-        if(savedInstanceState != null)
-            jsonString = savedInstanceState.getString("jsonString");
+        fetchTask = FetchNewsUpdatesTask.getInstance(this);
     }
 
     @Override
@@ -79,21 +74,11 @@ public class NewsUpdatesActivity extends ListActivity {
         super.onResume();
 
         String temp = fetchTask.getJSONString();
-        if(jsonString != null && jsonString.length() > 0) {
-            handleJSONString(jsonString);
-        } else if(temp != null && temp.length() > 0) {
+        if(temp != null && temp.length() > 0) {
             handleJSONString(temp);
         } else if(!fetchTask.isExecuting()) {
-            showDialog(PROGRESS_DIALOG);
             fetchTask.doTask();
         }
-    }
-
-    @Override
-    protected void onSaveInstanceState(final Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putString("jsonString", jsonString);
     }
 
     @Override
@@ -121,7 +106,6 @@ public class NewsUpdatesActivity extends ListActivity {
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
             case MENU_REFRESH:
-                showDialog(PROGRESS_DIALOG);
                 fetchTask.doTask();
                 break;
             default:
@@ -133,7 +117,7 @@ public class NewsUpdatesActivity extends ListActivity {
     @Override
     protected Dialog onCreateDialog(final int id) {
         switch(id) {
-            case PROGRESS_DIALOG:
+            case DIALOG_PROGRESS:
                 ProgressDialog prog = new ProgressDialog(this);
                 prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 prog.setCancelable(true);
@@ -151,23 +135,24 @@ public class NewsUpdatesActivity extends ListActivity {
                 return null;
         }
     }
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(final Message msg) {
-            if(msg.getData().containsKey("errorCode")) {
-                handleError(msg.getData().getInt("errorCode"));
-            } else if(msg.getData().containsKey("jsonString")) {
-                handleJSONString(msg.getData().getString("jsonString"));
-            } else if(msg.getData().containsKey("refresh")) {
-                showDialog(PROGRESS_DIALOG);
-                fetchTask.doTask();
-            }
-        }
-    };
+    
+    @Override
+    public void onPreExecute() {
+        showDialog(DIALOG_PROGRESS);
+    }
+    
+    @Override
+    public void onNewsAvailable(final String result) {
+        handleJSONString(result);
+    }
+    
+    @Override
+    public void onFetchError(final int error) {
+        handleError(error);
+    }
 
     private void handleError(final int errorCode) {
-        if(progressDialogShown) dismissDialog(PROGRESS_DIALOG);
+        if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         switch(errorCode) {
             case ERROR_NODATA:
@@ -190,7 +175,6 @@ public class NewsUpdatesActivity extends ListActivity {
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface di, final int i) {
-                showDialog(PROGRESS_DIALOG);
                 fetchTask.doTask();
             }
         }).setNegativeButton(R.string.cancel,
@@ -208,7 +192,7 @@ public class NewsUpdatesActivity extends ListActivity {
             handleError(ERROR_NODATA);
             return;
         }
-        System.out.println(jsonString.length());
+
         JSONArray ja;
         try {
             ja = new JSONArray(jsonString);
@@ -216,8 +200,10 @@ public class NewsUpdatesActivity extends ListActivity {
                     new ArrayList<HashMap<String, String>>();
             JSONObject currentObj, user;
             String[] splitted;
+            int i;
+            int j = ja.length();
 
-            for(int i = 0; i < ja.length(); i++) {
+            for(i = 0; i < j; i++) {
                 HashMap<String, String> map = new HashMap<String, String>();
                 currentObj = ja.getJSONObject(i);
                 map.put("TEXT", currentObj.getString("text"));
@@ -241,6 +227,6 @@ public class NewsUpdatesActivity extends ListActivity {
             handleError(ERROR_PARSEERR);
         }
 
-        if(progressDialogShown) dismissDialog(PROGRESS_DIALOG);
+        if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
     }
 }

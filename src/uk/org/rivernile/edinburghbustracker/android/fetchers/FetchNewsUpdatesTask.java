@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,9 +25,7 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fetchers;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.AsyncTask;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,16 +41,16 @@ import uk.org.rivernile.edinburghbustracker.android.NewsUpdatesActivity;
  *
  * @author Niall Scott
  */
-public class FetchNewsUpdatesTask implements Runnable {
+public class FetchNewsUpdatesTask {
 
     private final static String REQUEST_URL = "http://api.twitter.com/1/" +
             "NiallScott/lists/bus-tracker-updates/statuses.json";
 
     private static FetchNewsUpdatesTask instance = null;
-    private Handler handler;
-    private boolean executing = false;
-    private String jsonString;
+    private NewsEvent handler;
+    private String newsJsonString;
     private long lastRequestTime = 0;
+    private GetNewsTask task;
 
     /**
      * This constructor is intentionally left blank and private, this class
@@ -66,38 +64,33 @@ public class FetchNewsUpdatesTask implements Runnable {
      * Get an instance of this class. A handler object needs to be specified so
      * this class knows where to return the server data to.
      *
-     * @param handler The handler object to fire data back to.
+     * @param handler The object to fire data back to.
      * @return An instance of this class.
      */
-    public static FetchNewsUpdatesTask getInstance(final Handler handler) {
+    public static FetchNewsUpdatesTask getInstance(final NewsEvent handler) {
         if(instance == null) instance = new FetchNewsUpdatesTask();
         instance.setHandler(handler);
         return instance;
     }
 
     /**
-     * Set the handler to fire the data back to. This method is thread safe.
-     * This method can even be called when the main task of this class is
-     * executing. The handler may need to be changed when the device screen
-     * orientation is changed.
+     * Set the handler to fire the data back to. This method can even be called
+     * when the main task of this class is executing. The handler may need to be
+     * changed when the device screen orientation is changed.
      *
-     * @param handler The handler object to fire data back to.
+     * @param handler The object to fire data back to.
      */
-    public void setHandler(final Handler handler) {
-        synchronized(this) {
-            this.handler = handler;
-        }
+    public void setHandler(final NewsEvent handler) {
+        this.handler = handler;
     }
 
     /**
-     * Get the Handler object where data is fired back to.
+     * Get the object where data is fired back to.
      *
-     * @return The Handler object.
+     * @return The callback object.
      */
-    public Handler getHandler() {
-        synchronized(this) {
-            return handler;
-        }
+    public NewsEvent getHandler() {
+        return handler;
     }
 
     /**
@@ -107,7 +100,7 @@ public class FetchNewsUpdatesTask implements Runnable {
      * @return The JSON String for this object.
      */
     public String getJSONString() {
-        return jsonString;
+        return newsJsonString;
     }
 
     /**
@@ -127,66 +120,90 @@ public class FetchNewsUpdatesTask implements Runnable {
      * @return The execution state of the thread in this class.
      */
     public boolean isExecuting() {
-        return executing;
+        return task != null ?
+                task.getStatus() == AsyncTask.Status.RUNNING : false;
     }
 
     /**
      * Contact the server and get the JSON string. This data will be fired back
      * to the Handler object specified by getInstance() or setHandler().
+     * 
+     * @return true when the task was started, false when the task couldn't be
+     * started because a task is already running.
      */
-    public void doTask() {
-        if(!executing) {
-            executing = true;
-            new Thread(this).start();
+    public boolean doTask() {
+        if(task == null) {
+            task = new GetNewsTask();
+            task.execute(new Void[] { });
+            return true;
+        } else {
+            return false;
         }
     }
+    
+    private class GetNewsTask extends AsyncTask<Void, Void, String> {
+        
+        private int error = -1;
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected void onPreExecute() {
+            if(handler != null) handler.onPreExecute();
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        protected String doInBackground(final Void... v) {
+            try {
+                URL u = new URL(REQUEST_URL);
+                URLConnection con = u.openConnection();
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        con.getInputStream()));
+                String jsonString = "";
+                String lineIn;
+                while((lineIn = in.readLine()) != null) {
+                    jsonString = jsonString + lineIn;
+                }
+                in.close();
 
-    /**
-     * The thread in this class.
-     */
-    @Override
-    public void run() {
-        Message msg;
-        Bundle b = new Bundle();
-        try {
-            URL u = new URL(REQUEST_URL);
-            URLConnection con = u.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    con.getInputStream()));
-            jsonString = "";
-            String lineIn;
-            while((lineIn = in.readLine()) != null) {
-                jsonString = jsonString + lineIn;
-            }
-            in.close();
+                lastRequestTime = System.currentTimeMillis();
 
-            lastRequestTime = System.currentTimeMillis();
-
-            if(getHandler() == null) return;
-            b.putString("jsonString", jsonString);
-            synchronized(this) {
-                msg = handler.obtainMessage();
-                msg.setData(b);
-                handler.sendMessage(msg);
+                return jsonString;
+            } catch(MalformedURLException e) {
+                error = NewsUpdatesActivity.ERROR_URLERR;
+            } catch(IOException e) {
+                error = NewsUpdatesActivity.ERROR_IOERR;
             }
-        } catch(MalformedURLException e) {
-            if(getHandler() == null) return;
-            b.putInt("errorCode", NewsUpdatesActivity.ERROR_URLERR);
-            synchronized(this) {
-                msg = handler.obtainMessage();
-                msg.setData(b);
-                handler.sendMessage(msg);
+            
+            return null;
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void onPostExecute(final String result) {
+            newsJsonString = result;
+            if(handler != null) {
+                if(error < 0) {
+                    handler.onNewsAvailable(result);
+                } else {
+                    handler.onFetchError(error);
+                }
             }
-        } catch(IOException e) {
-            if(getHandler() == null) return;
-            b.putInt("errorCode", NewsUpdatesActivity.ERROR_IOERR);
-            synchronized(this) {
-                msg = handler.obtainMessage();
-                msg.setData(b);
-                handler.sendMessage(msg);
-            }
-        } finally {
-            executing = false;
+            task = null;
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void onCancelled() {
+            task = null;
         }
     }
 }

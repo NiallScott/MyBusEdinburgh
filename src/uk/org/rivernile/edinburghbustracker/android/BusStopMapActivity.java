@@ -51,7 +51,7 @@ import uk.org.rivernile.edinburghbustracker.android.mapoverlays
         .BusStopMapOverlay;
 
 public class BusStopMapActivity extends MapActivity implements
-        OnItemClickListener{
+        OnItemClickListener {
 
     public static final int SHOW_STOPS = 1;
 
@@ -59,11 +59,11 @@ public class BusStopMapActivity extends MapActivity implements
     public static final int DIALOG_SEARCH_RESULTS = 1;
     public static final int DIALOG_FILTER = 2;
 
-    private static final int MENU_MYLOCATION = 0;
-    private static final int MENU_SEARCH = 1;
-    private static final int MENU_MAPTYPE = 2;
-    private static final int MENU_OVERLAY_TRAFFICVIEW = 3;
-    private static final int MENU_FILTER = 4;
+    private static final int MENU_MYLOCATION = Menu.FIRST;
+    private static final int MENU_SEARCH = Menu.FIRST + 1;
+    private static final int MENU_MAPTYPE = Menu.FIRST + 2;
+    private static final int MENU_OVERLAY_TRAFFICVIEW = Menu.FIRST + 3;
+    private static final int MENU_FILTER = Menu.FIRST + 4;
 
     private static final int DEFAULT_LAT = 55948611;
     private static final int DEFAULT_LONG = -3199811;
@@ -110,6 +110,16 @@ public class BusStopMapActivity extends MapActivity implements
                         intent.getIntExtra("lat", DEFAULT_LAT),
                         intent.getIntExtra("long", DEFAULT_LONG)));
                 mapView.getController().setZoom(intent.getIntExtra("zoom", 12));
+            } else if(intent.hasExtra("stopCode") && intent.hasExtra("zoom")) {
+                BusStopDatabase bsd = BusStopDatabase.getInstance(
+                        getApplicationContext());
+                GeoPoint gp = bsd.getGeoPointForStopCode(
+                        intent.getStringExtra("stopCode"));
+                if(gp != null) {
+                    mapView.getController().setCenter(gp);
+                    mapView.getController().setZoom(intent.getIntExtra("zoom",
+                            12));
+                }
             } else {
                 mapView.getController().setCenter(new GeoPoint(DEFAULT_LAT,
                     DEFAULT_LONG));

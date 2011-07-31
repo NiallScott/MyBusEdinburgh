@@ -29,6 +29,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import com.google.android.maps.GeoPoint;
 
 public class BusStopDatabase extends SQLiteOpenHelper {
 
@@ -115,6 +116,19 @@ public class BusStopDatabase extends SQLiteOpenHelper {
             return null;
         }
     }
+    
+    public String getBusServicesForStopAsString(final String stopCode) {
+        String[] services = getBusServicesForStop(stopCode);
+        StringBuilder builder = new StringBuilder();
+        int len = services.length;
+        
+        for(int i = 0; i < len; i++) {
+            builder.append(services[i]);
+            if(i != (len - 1)) builder.append(", ");
+        }
+        
+        return builder.toString();
+    }
 
     public long getLastDBModTime() {
         SQLiteDatabase db = getReadableDatabase();
@@ -160,5 +174,19 @@ public class BusStopDatabase extends SQLiteOpenHelper {
             c.close();
             return new String[] { };
         }
+    }
+    
+    public GeoPoint getGeoPointForStopCode(final String stopCode) {
+        GeoPoint gp = null;
+        
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query("bus_stops", new String[] { "x", "y" },
+                "_id = " + stopCode, null, null, null, null);
+        
+        if(c.getCount() == 0) return null;
+        c.moveToNext();
+        gp = new GeoPoint(c.getInt(0), c.getInt(1));
+        c.close();
+        return gp;
     }
 }
