@@ -27,17 +27,22 @@ package uk.org.rivernile.edinburghbustracker.android.mapoverlays;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
@@ -66,8 +71,10 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
     private BusStopOverlayItem currentItem;
     private boolean isFavourite;
     private ArrayAdapter<String> ad;
+    private View stopDialogView;
 
     private Dialog confirmDialog;
+    private Dialog installStreetViewDialog;
     private ServiceFilter serviceFilter;
 
     public BusStopMapOverlay(final Drawable defaultMarker,
@@ -80,6 +87,8 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
         lastZoom = mapView.getZoomLevel();
         lastCenter = mapView.getMapCenter();
         doPopulateBusStops();
+        // FIXME: shadows appear the first time the map is launched, but not
+        // on subsequent launches. This needs fixed.
     }
 
     @Override
@@ -99,7 +108,7 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
         return true;
     }
 
-    public void doPopulateBusStops() {
+    private void doPopulateBusStops() {
         setLastFocusedIndex(-1);
         items.clear();
         populate();
@@ -179,13 +188,25 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
     }
 
     private void createStopDialog() {
-        stopDialog = new Dialog(context);
-        stopDialog.setContentView(R.layout.mapdialog);
-        stopDialog.setCancelable(true);
+        LayoutInflater vi = (LayoutInflater)context.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
+        stopDialogView = vi.inflate(R.layout.mapdialog, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setCancelable(true);
+        builder.setNegativeButton(R.string.close,
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, final int id) {
+                dialog.dismiss();
+            }
+        });
+        builder.setView(stopDialogView);
+        stopDialog = builder.create();
+        
         ListView list =
-            (ListView)stopDialog.findViewById(R.id.mapdialog_list_options);
+            (ListView)stopDialogView.findViewById(R.id.mapdialog_list_options);
         ad = new ArrayAdapter<String>(stopDialog.getContext(),
-        android.R.layout.simple_list_item_1);
+                android.R.layout.simple_list_item_1);
         list.setAdapter(ad);
         list.setOnItemClickListener(this);
     }
@@ -216,6 +237,41 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
         );
         confirmDialog = builder.create();
     }
+    
+    private void createInstallStreetViewDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setCancelable(true).setInverseBackgroundForced(true)
+                .setTitle(R.string.map_streetview_dialog_title)
+                .setMessage(R.string.map_streetview_dialog_message)
+                .setPositiveButton(R.string.yes,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(final DialogInterface dialog,
+                                final int id) {
+                            try {
+                                context.startActivity(new Intent(
+                                        Intent.ACTION_VIEW,
+                                        Uri.parse("market://details?id=com." +
+                                        "google.android.street")));
+                            } catch(ActivityNotFoundException e) {
+                                Toast.makeText(context,
+                                        R.string.map_streetview_error_nomarket,
+                                        Toast.LENGTH_LONG).show();
+                            } finally {
+                                showStopDialog();
+                            }
+                        }
+                }).setNegativeButton(R.string.no,
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(final DialogInterface dialog,
+                                final int id) {
+                            dialog.dismiss();
+                            showStopDialog();
+                        }
+                });
+        installStreetViewDialog = builder.create();
+    }
 
     private void showStopDialog() {
         if(stopDialog == null) createStopDialog();
@@ -224,15 +280,14 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
                 .getFavouriteStopExists(currentItem.getStopCode());
         String services = BusStopDatabase.getInstance(context)
                     .getBusServicesForStopAsString(currentItem.getStopCode());
-        TextView tv = (TextView)stopDialog.findViewById(
+        TextView tv = (TextView)stopDialogView.findViewById(
                 R.id.mapdialog_text_services);
         stopDialog.setTitle(currentItem.getStopName() + " (" +
                 currentItem.getStopCode() + ")");
         if(services == null) {
             tv.setText(R.string.map_dialog_noservices);
         } else {
-            String s = context.getString(R.string.services) + ": " + services;
-            tv.setText(s);
+            tv.setText(services);
         }
         ad.clear();
         ad.add(context.getString(R.string.map_dialog_showtimes));
@@ -241,7 +296,7 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
         } else {
             ad.add(context.getString(R.string.displaystopdata_menu_addfav));
         }
-        ad.add(context.getString(R.string.map_dialog_close));
+        ad.add(context.getString(R.string.map_dialog_streetview));
         stopDialog.show();
     }
 
@@ -252,9 +307,10 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
     public void onItemClick(final AdapterView<?> l, final View view,
             final int position, final long id)
     {
+        Intent intent;
         switch(position) {
             case 0:
-                Intent intent = new Intent(context,
+                intent = new Intent(context,
                         DisplayStopDataActivity.class);
                 intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
                 intent.putExtra("stopCode", currentItem.getStopCode());
@@ -266,17 +322,36 @@ public class BusStopMapOverlay extends ItemizedOverlay<BusStopOverlayItem>
                     if(confirmDialog == null) createConfirmDialog();
                     confirmDialog.show();
                 } else {
-                    Intent intent2 = new Intent(context,
+                    intent = new Intent(context,
                             AddEditFavouriteStopActivity.class);
-                    intent2.setAction(AddEditFavouriteStopActivity
+                    intent.setAction(AddEditFavouriteStopActivity
                             .ACTION_ADD_EDIT_FAVOURITE_STOP);
-                    intent2.putExtra("stopCode", currentItem.getStopCode());
-                    intent2.putExtra("stopName", currentItem.getStopName());
-                    context.startActivity(intent2);
+                    intent.putExtra("stopCode", currentItem.getStopCode());
+                    intent.putExtra("stopName", currentItem.getStopName());
+                    context.startActivity(intent);
                 }
                 break;
             case 2:
-                stopDialog.dismiss();
+                GeoPoint g = BusStopDatabase.getInstance(context)
+                        .getGeoPointForStopCode(currentItem.getStopCode());
+                if(g != null) {
+                    try {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("google.streetview:cbll=");
+                        sb.append((double)(g.getLatitudeE6() / 1E6));
+                        sb.append(',');
+                        sb.append((double)(g.getLongitudeE6() / 1E6));
+                        sb.append("&cbp=1,0,,0,1.0&mz=19");
+                    
+                        context.startActivity(new Intent(Intent.ACTION_VIEW,
+                                Uri.parse(sb.toString())));
+                    } catch(ActivityNotFoundException e) {
+                        stopDialog.dismiss();
+                        if(installStreetViewDialog != null)
+                            createInstallStreetViewDialog();
+                        installStreetViewDialog.show();
+                    }
+                }
                 break;
         }
     }

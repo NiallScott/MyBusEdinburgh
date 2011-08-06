@@ -496,9 +496,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         } else if(timeSinceRefresh > 3600000) {
             sb.append(getString(R.string.times_greaterthanhour));
         } else {
-            byte secs = (byte)(timeSinceRefresh / 60000);
+            byte mins = (byte)(timeSinceRefresh / 60000);
             sb.append(getString(R.string.times_xminsago).replace("%t",
-                    String.valueOf(secs)));
+                    String.valueOf(mins)));
         }
         
         textLastRefreshed.setText(sb.toString());

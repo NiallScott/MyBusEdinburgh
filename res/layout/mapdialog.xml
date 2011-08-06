@@ -24,18 +24,20 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
-              android:layout_height="fill_parent" >
+              android:layout_height="fill_parent"
+              android:orientation="vertical" >
     <TextView android:id="@+id/mapdialog_text_services"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
               android:textColor="#FFF"
               android:textSize="15sp"
-              android:paddingLeft="7sp" />
+              android:paddingTop="10sp"
+              android:paddingLeft="10sp"
+              android:paddingRight="10sp" />
     <ListView android:id="@+id/mapdialog_list_options"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              android:paddingTop="30sp"
-              android:layout_below="@id/mapdialog_list_options" />
-</RelativeLayout>
+              android:cacheColorHint="#00000000" />
+</LinearLayout>

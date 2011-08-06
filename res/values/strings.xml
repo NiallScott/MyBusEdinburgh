@@ -47,7 +47,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="save">Save</string>
-    <string name="services">Services</string>
     <string name="version">Version</string>
     <string name="close">Close</string>
     <string name="search">Search</string>
@@ -219,6 +218,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_title">Bus Stop Map</string>
     <string name="map_dialog_showtimes">Show bus times</string>
     <string name="map_dialog_close">Close</string>
+    <string name="map_dialog_streetview">Show on Street View</string>
     <string name="map_dialog_noservices">There are no known services for this
     stop.</string>
     <string name="map_finding_location">Trying to determine your location...
@@ -228,6 +228,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_search_progress_dialog">Searching location...</string>
     <string name="map_search_dialog_title">Did you mean...?</string>
     <string name="map_search_dialog_noresults">There were no results for your search.</string>
+    <string name="map_streetview_dialog_title">Google Street View required</string>
+    <string name="map_streetview_dialog_message">You currently do not have Google Street View installed. Do you want to install this from the Android Market now?</string>
+    <string name="map_streetview_error_nomarket">The Android Market is not installed on your device. The Market must be installed to install Google Street View.</string>
 
     <!-- Strings for BusStopMapActivity menu -->
     <string name="map_menu_maptype_mapview">Map view</string>

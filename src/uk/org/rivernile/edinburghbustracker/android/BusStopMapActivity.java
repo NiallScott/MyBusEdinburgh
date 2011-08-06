@@ -134,7 +134,7 @@ public class BusStopMapActivity extends MapActivity implements
                 });
             }
         }
-
+        
         stopOverlay = new BusStopMapOverlay(getResources().getDrawable(
                 R.drawable.mapmarker), this, mapView);
         mapView.getOverlays().add(stopOverlay);
