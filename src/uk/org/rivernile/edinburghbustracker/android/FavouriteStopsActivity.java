@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,6 +43,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 /**
  * The FavouriteStopsActivity displays the user a list of their saved favourite
@@ -55,12 +56,21 @@ public class FavouriteStopsActivity extends ListActivity {
     private final static int CONTEXT_MENU_VIEW = ContextMenu.FIRST;
     private final static int CONTEXT_MENU_MODIFY = ContextMenu.FIRST +1;
     private final static int CONTEXT_MENU_DELETE = ContextMenu.FIRST + 2;
-    private final static int CONTEXT_MENU_SHOWONMAP = ContextMenu.FIRST + 3;
+    private final static int CONTEXT_MENU_PROX = ContextMenu.FIRST + 3;
+    private final static int CONTEXT_MENU_TIME = ContextMenu.FIRST + 4;
+    private final static int CONTEXT_MENU_SHOWONMAP = ContextMenu.FIRST + 5;
+    
+    private final static int DIALOG_FAV_DEL = 0;
+    private final static int DIALOG_PROX_ADD = 1;
+    private final static int DIALOG_PROX_DEL = 2;
+    private final static int DIALOG_TIME_ADD = 3;
+    private final static int DIALOG_TIME_DEL = 4;
 
     private ListAdapter ca;
     private Cursor c;
     private String selectedStopCode;
     private SettingsDatabase sd;
+    private AlertManager alertMan;
 
     /**
      * {@inheritDoc}
@@ -70,8 +80,14 @@ public class FavouriteStopsActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.favouritestops);
         setTitle(R.string.favouritestops_title);
+        
+        if(savedInstanceState != null && savedInstanceState
+                .containsKey("selectedStopCode")) {
+            selectedStopCode = savedInstanceState.getString("selectedStopCode");
+        }
 
         sd = SettingsDatabase.getInstance(this);
+        alertMan = AlertManager.getInstance(getApplicationContext());
         c = sd.getAllFavouriteStops();
         startManagingCursor(c);
         ca = new FavouritesCursorAdapter(this,
@@ -80,6 +96,15 @@ public class FavouriteStopsActivity extends ListActivity {
                 new int[] { android.R.id.text1 });
         setListAdapter(ca);
         registerForContextMenu(getListView());
+    }
+    
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        if(selectedStopCode != null) {
+            outState.putString("selectedStopCode", selectedStopCode);
+        }
     }
 
     /**
@@ -101,13 +126,28 @@ public class FavouriteStopsActivity extends ListActivity {
     {
         super.onCreateContextMenu(menu, v, menuInfo);
         AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
+        selectedStopCode = String.valueOf(info.id);
+        
         menu.setHeaderTitle(sd.getNameForStop(String.valueOf(info.id)) + " (" +
                 String.valueOf(info.id) + ")");
         menu.add(0, CONTEXT_MENU_VIEW, 1, R.string.favouritestops_menu_view);
         menu.add(0, CONTEXT_MENU_MODIFY, 2, R.string.favouritestops_menu_edit);
         menu.add(0, CONTEXT_MENU_DELETE, 3, R.string
                 .favouritestops_menu_delete);
-        menu.add(0, CONTEXT_MENU_SHOWONMAP, 4, R.string
+        
+        if(sd.isActiveProximityAlert(selectedStopCode)) {
+            menu.add(0, CONTEXT_MENU_PROX, 4, R.string.alert_prox_rem);
+        } else {
+            menu.add(0, CONTEXT_MENU_PROX, 4, R.string.alert_prox_add);
+        }
+        
+        if(sd.isActiveTimeAlert(selectedStopCode)) {
+            menu.add(0, CONTEXT_MENU_TIME, 5, R.string.alert_time_rem);
+        } else {
+            menu.add(0, CONTEXT_MENU_TIME, 5, R.string.alert_time_add);
+        }
+        
+        menu.add(0, CONTEXT_MENU_SHOWONMAP, 6, R.string
                 .favouritestops_menu_showonmap);
     }
 
@@ -132,8 +172,7 @@ public class FavouriteStopsActivity extends ListActivity {
                 startActivity(intent);
                 return true;
             case CONTEXT_MENU_DELETE:
-                selectedStopCode = String.valueOf(info.id);
-                showDialog(0);
+                showDialog(DIALOG_FAV_DEL);
                 return true;
             case CONTEXT_MENU_SHOWONMAP:
                 intent = new Intent(this, BusStopMapActivity.class);
@@ -141,6 +180,19 @@ public class FavouriteStopsActivity extends ListActivity {
                 intent.putExtra("zoom", 19);
                 startActivity(intent);
                 return true;
+            case CONTEXT_MENU_PROX:
+                if(sd.isActiveProximityAlert(String.valueOf(info.id))) {
+                    showDialog(DIALOG_PROX_DEL);
+                } else {
+                    showDialog(DIALOG_PROX_ADD);
+                }
+                return true;
+            case CONTEXT_MENU_TIME:
+                if(sd.isActiveTimeAlert(String.valueOf(info.id))) {
+                    showDialog(DIALOG_TIME_DEL);
+                } else {
+                    showDialog(DIALOG_TIME_ADD);
+                }
             default:
                 return super.onContextItemSelected(item);
         }
@@ -148,34 +200,65 @@ public class FavouriteStopsActivity extends ListActivity {
 
     @Override
     protected Dialog onCreateDialog(final int id) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(true)
-                .setTitle(R.string.favouritestops_dialog_confirm_title)
-                .setPositiveButton(R.string.okay,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog,
-                            final int id)
-                    {
-                        sd.deleteFavouriteStop(selectedStopCode);
-                        FavouriteStopsActivity.this.c.requery();
-                    }
-                }).setNegativeButton(R.string.cancel,
+        switch(id) {
+            case DIALOG_FAV_DEL:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setCancelable(true)
+                        .setTitle(R.string.favouritestops_dialog_confirm_title)
+                        .setPositiveButton(R.string.okay,
                         new DialogInterface.OnClickListener() {
-                     public void onClick(final DialogInterface dialog,
-                             final int id)
-                     {
-                        dismissDialog(0);
-                     }
-        });
-        return builder.create();
+                            @Override
+                            public void onClick(final DialogInterface dialog,
+                                    final int id)
+                            {
+                                sd.deleteFavouriteStop(selectedStopCode);
+                                FavouriteStopsActivity.this.c.requery();
+                            }
+                        }).setNegativeButton(R.string.cancel,
+                                new DialogInterface.OnClickListener() {
+                             public void onClick(final DialogInterface dialog,
+                                     final int id)
+                             {
+                                dialog.dismiss();
+                             }
+                });
+                return builder.create();
+            case DIALOG_PROX_ADD:
+                return alertMan.getAddProxAlertDialog(this);
+            case DIALOG_PROX_DEL:
+                return alertMan.getConfirmDeleteProxAlertDialog(this);
+            case DIALOG_TIME_ADD:
+                return alertMan.getAddTimeAlertDialog(this);
+            case DIALOG_TIME_DEL:
+                return alertMan.getConfirmDeleteTimeAlertDialog(this);
+            default:
+                return null;
+        }
+    }
+    
+    @Override
+    public void onPrepareDialog(final int id, final Dialog d) {
+        switch(id) {
+            case DIALOG_PROX_ADD:
+                alertMan.editAddProxAlertDialog(selectedStopCode,
+                        (AlertDialog)d);
+            case DIALOG_TIME_ADD:
+                alertMan.editAddTimeAlertDialog(selectedStopCode,
+                        (AlertDialog)d, null);
+            default:
+                break;
+        }
     }
     
     public class FavouritesCursorAdapter extends SimpleCursorAdapter {
         
+        private BusStopDatabase bsd;
+        
         public FavouritesCursorAdapter(final Context context, final int layout,
                 final Cursor c, final String[] from, final int[] to) {
             super(context, layout, c, from, to);
+            
+            bsd = BusStopDatabase.getInstance(FavouriteStopsActivity.this);
         }
         
         @Override
@@ -184,8 +267,6 @@ public class FavouriteStopsActivity extends ListActivity {
             View v = super.getView(position, convertView, parent);
             
             TextView services = (TextView)v.findViewById(android.R.id.text2);
-            BusStopDatabase bsd = BusStopDatabase.getInstance(
-                    FavouriteStopsActivity.this);
             services.setText(bsd.getBusServicesForStopAsString(
                     getCursor().getString(0)));
             

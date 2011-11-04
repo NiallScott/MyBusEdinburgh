@@ -42,6 +42,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +55,7 @@ import android.widget.TextView;
 import com.google.android.maps.GeoPoint;
 import java.util.Comparator;
 import java.util.List;
+import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 public class NearestStopsActivity extends ListActivity
         implements LocationListener, Filterable {
@@ -65,20 +67,27 @@ public class NearestStopsActivity extends ListActivity
     private static final int LONGITUDE_SPAN = 8001;
 
     private static final int DIALOG_TURNONGPS = 1;
-    private static final int DIALOG_CONFIRM_DELETE = 2;
+    private static final int DIALOG_CONFIRM_DELETE_FAV = 2;
     private static final int DIALOG_FILTER = 3;
+    private static final int DIALOG_CONFIRM_DELETE_PROX = 4;
+    private static final int DIALOG_ADD_PROX_ALERT = 5;
+    private static final int DIALOG_CONFIRM_DELETE_TIME = 6;
+    private static final int DIALOG_ADD_TIME_ALERT = 7;
     
-    private static final int MENU_FILTER = Menu.FIRST;
-
     private static final int CONTEXT_MENU_VIEW = ContextMenu.FIRST;
     private static final int CONTEXT_MENU_SAVE = ContextMenu.FIRST + 1;
-    private static final int CONTEXT_MENU_MAP = ContextMenu.FIRST + 2;
+    private static final int CONTEXT_MENU_PROX = ContextMenu.FIRST + 2;
+    private static final int CONTEXT_MENU_TIME = ContextMenu.FIRST + 3;
+    private static final int CONTEXT_MENU_MAP = ContextMenu.FIRST + 4;
 
     private LocationManager locMan;
     private Location loc;
     private SearchResult currSelected;
     private ServiceFilter serviceFilter;
+    private AlertManager alertMan;
     private SharedPreferences sp;
+    private SettingsDatabase sd;
+    private LayoutInflater vi;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -86,9 +95,12 @@ public class NearestStopsActivity extends ListActivity
         setTitle(R.string.neareststops_title);
         setContentView(R.layout.neareststops);
         registerForContextMenu(getListView());
-        sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
         
+        sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        sd = SettingsDatabase.getInstance(getApplicationContext());
+        alertMan = AlertManager.getInstance(getApplicationContext());
         locMan = (LocationManager)getSystemService(LOCATION_SERVICE);
+        vi = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
         
         // See http://android-developers.blogspot.com/2011/06/deep-dive-into-location.html
         List<String> matchingProviders = locMan.getAllProviders();
@@ -118,6 +130,37 @@ public class NearestStopsActivity extends ListActivity
                 !sp.getBoolean("neareststops_gps_prompt_disable", false)) {
             showDialog(DIALOG_TURNONGPS);
         }
+        
+        if(savedInstanceState != null) {
+            if(savedInstanceState.containsKey("currSelected.stopCode")) {
+                currSelected = new SearchResult(
+                        savedInstanceState.getString("currSelected.stopCode"),
+                        savedInstanceState.getString("currSelected.stopName"),
+                        savedInstanceState.getString("currSelected.services"),
+                        savedInstanceState.getDouble("currSelected.distance"),
+                        new GeoPoint(
+                                savedInstanceState.getInt(
+                                    "currSelected.latitude"),
+                                savedInstanceState.getInt(
+                                    "currSelected.longitutde")));
+            }
+        }
+    }
+    
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        if(currSelected != null) {
+            outState.putString("currSelected.stopCode", currSelected.stopCode);
+            outState.putString("currSelected.stopName", currSelected.stopName);
+            outState.putString("currSelected.services", currSelected.services);
+            outState.putDouble("currSelected.distance", currSelected.distance);
+            outState.putInt("currSelected.latitude",
+                    currSelected.point.getLatitudeE6());
+            outState.putInt("currSelected.longitude",
+                    currSelected.point.getLongitudeE6());
+        }
     }
 
     @Override
@@ -142,10 +185,9 @@ public class NearestStopsActivity extends ListActivity
     
     @Override
     protected Dialog onCreateDialog(final int id) {
+        AlertDialog.Builder builder;
         switch(id) {
             case DIALOG_TURNONGPS:
-                LayoutInflater vi = (LayoutInflater)getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
                 View v = vi.inflate(R.layout.neareststops_gpsdialog, null);
                 CheckBox cb = (CheckBox)v.findViewById(R.id.chkTurnongps);
                 cb.setOnCheckedChangeListener(new CompoundButton
@@ -160,7 +202,7 @@ public class NearestStopsActivity extends ListActivity
                     }
                 });
                 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder = new AlertDialog.Builder(this);
                 builder.setCancelable(true)
                         .setTitle(R.string.neareststops_turnongps_title)
                         .setView(v)
@@ -182,9 +224,9 @@ public class NearestStopsActivity extends ListActivity
                     }
                 });
                 return builder.create();
-            case DIALOG_CONFIRM_DELETE:
-                AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
-                builder2.setCancelable(true)
+            case DIALOG_CONFIRM_DELETE_FAV:
+                builder = new AlertDialog.Builder(this);
+                builder.setCancelable(true)
                     .setTitle(R.string.favouritestops_dialog_confirm_title)
                     .setPositiveButton(R.string.okay,
                     new DialogInterface.OnClickListener() {
@@ -192,8 +234,7 @@ public class NearestStopsActivity extends ListActivity
                     public void onClick(final DialogInterface dialog,
                             final int id)
                     {
-                        SettingsDatabase.getInstance(getApplicationContext())
-                                .deleteFavouriteStop(currSelected.stopCode);
+                        sd.deleteFavouriteStop(currSelected.stopCode);
                     }
                 }).setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
@@ -203,31 +244,53 @@ public class NearestStopsActivity extends ListActivity
                         dialog.dismiss();
                      }
                 });
-                return builder2.create();
+                return builder.create();
             case DIALOG_FILTER:
                 if(serviceFilter == null) {
                     serviceFilter = ServiceFilter.getInstance(this);
                     serviceFilter.setCallback(this);
                 }
                 return serviceFilter.getFilterDialog();
+            case DIALOG_CONFIRM_DELETE_PROX:
+                return alertMan.getConfirmDeleteProxAlertDialog(this);
+            case DIALOG_ADD_PROX_ALERT:
+                return alertMan.getAddProxAlertDialog(this);
+            case DIALOG_CONFIRM_DELETE_TIME:
+                return alertMan.getConfirmDeleteTimeAlertDialog(this);
+            case DIALOG_ADD_TIME_ALERT:
+                return alertMan.getAddTimeAlertDialog(this);
             default:
                 return null;
         }
     }
     
     @Override
+    public void onPrepareDialog(final int id, final Dialog dialog) {
+        switch(id) {
+            case DIALOG_ADD_PROX_ALERT:
+                alertMan.editAddProxAlertDialog(currSelected.stopCode,
+                        (AlertDialog)dialog);
+                break;
+            case DIALOG_ADD_TIME_ALERT:
+                alertMan.editAddTimeAlertDialog(currSelected.stopCode,
+                        (AlertDialog)dialog, null);
+                break;
+            default:
+                break;
+        }
+    }
+    
+    @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        
-        menu.add(0, MENU_FILTER, 1, R.string.neareststops_menu_filter)
-                .setIcon(R.drawable.ic_menu_filter);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.neareststops_option_menu, menu);
         return true;
     }
     
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
-            case MENU_FILTER:
+            case R.id.neareststops_option_menu_filter:
                 showDialog(DIALOG_FILTER);
                 break;
             default:
@@ -266,15 +329,27 @@ public class NearestStopsActivity extends ListActivity
                 currSelected.stopCode + ")");
         menu.add(0, CONTEXT_MENU_VIEW, 1, R.string.favouritestops_menu_view);
         
-        if(SettingsDatabase.getInstance(this)
-                .getFavouriteStopExists(currSelected.stopCode)) {
+        if(sd.getFavouriteStopExists(currSelected.stopCode)) {
             menu.add(0, CONTEXT_MENU_SAVE, 2, R.string
                     .neareststops_context_remasfav);
         } else {
             menu.add(0, CONTEXT_MENU_SAVE, 2, R.string
                     .neareststops_context_addasfav);
         }
-        menu.add(0, CONTEXT_MENU_MAP, 3, R.string
+        
+        if(sd.isActiveProximityAlert(currSelected.stopCode)) {
+            menu.add(0, CONTEXT_MENU_PROX, 3, R.string.alert_prox_rem);
+        } else {
+            menu.add(0, CONTEXT_MENU_PROX, 3, R.string.alert_prox_add);
+        }
+        
+        if(sd.isActiveTimeAlert(currSelected.stopCode)) {
+            menu.add(0, CONTEXT_MENU_TIME, 4, R.string.alert_time_rem);
+        } else {
+            menu.add(0, CONTEXT_MENU_TIME, 4, R.string.alert_time_add);
+        }
+        
+        menu.add(0, CONTEXT_MENU_MAP, 5, R.string
                 .neareststops_context_showonmap);
     }
 
@@ -292,9 +367,8 @@ public class NearestStopsActivity extends ListActivity
                 startActivity(intent);
                 return true;
             case CONTEXT_MENU_SAVE:
-                if(SettingsDatabase.getInstance(this)
-                        .getFavouriteStopExists(currSelected.stopCode)) {
-                    showDialog(DIALOG_CONFIRM_DELETE);
+                if(sd.getFavouriteStopExists(currSelected.stopCode)) {
+                    showDialog(DIALOG_CONFIRM_DELETE_FAV);
                 } else {
                     intent = new Intent(this,
                             AddEditFavouriteStopActivity.class);
@@ -303,6 +377,20 @@ public class NearestStopsActivity extends ListActivity
                     intent.putExtra("stopCode", currSelected.stopCode);
                     intent.putExtra("stopName", currSelected.stopName);
                     startActivity(intent);
+                }
+                return true;
+            case CONTEXT_MENU_PROX:
+                if(sd.isActiveProximityAlert(currSelected.stopCode)) {
+                    showDialog(DIALOG_CONFIRM_DELETE_PROX);
+                } else {
+                    showDialog(DIALOG_ADD_PROX_ALERT);
+                }
+                return true;
+            case CONTEXT_MENU_TIME:
+                if(sd.isActiveTimeAlert(currSelected.stopCode)) {
+                    showDialog(DIALOG_CONFIRM_DELETE_TIME);
+                } else {
+                    showDialog(DIALOG_ADD_TIME_ALERT);
                 }
                 return true;
             case CONTEXT_MENU_MAP:

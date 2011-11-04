@@ -69,6 +69,29 @@
             android:negativeButtonText="@string/no" />
     </PreferenceCategory>
     
+    <!-- Alerts -->
+    <PreferenceCategory
+        android:title="@string/preferences_category_alerts">
+        <CheckBoxPreference
+            android:key="pref_alertsound_state"
+            android:title="@string/preferences_checkbox_alerts_sound"
+            android:summaryOn="@string/preferences_checkbox_alerts_sound_ticked"
+            android:summaryOff="@string/preferences_checkbox_alerts_sound_unticked"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_alertvibrate_state"
+            android:title="@string/preferences_checkbox_alerts_vibrate"
+            android:summaryOn="@string/preferences_checkbox_alerts_vibrate_ticked"
+            android:summaryOff="@string/preferences_checkbox_alerts_vibrate_unticked"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_alertled_state"
+            android:title="@string/preferences_checkbox_alerts_led"
+            android:summaryOn="@string/preferences_checkbox_alerts_led_ticked"
+            android:summaryOff="@string/preferences_checkbox_alerts_led_unticked"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    
     <!-- Bus Times Display -->
     <PreferenceCategory
         android:title="@string/preferences_category_bustimes">

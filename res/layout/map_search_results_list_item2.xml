@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 Niall 'Rivernile' Scott & Scott Straughan
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,12 +27,15 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    <com.google.android.maps.MapView
-        android:id="@+id/mapview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:enabled="true"
-        android:clickable="true"
-        android:apiKey="0m4LU68_mob7URuceOY4OeXGdga36OCwg_1cVmw" />
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+    <ImageView
+        android:id="@+id/imgMapSearchIcon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_gravity="center_vertical" />
+    <include
+        layout="@android:layout/simple_list_item_2" />
 </LinearLayout>

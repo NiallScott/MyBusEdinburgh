@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,15 +24,20 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    <com.google.android.maps.MapView
-        android:id="@+id/mapview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:enabled="true"
-        android:clickable="true"
-        android:apiKey="0m4LU68_mob7URuceOY4OeXGdga36OCwg_1cVmw" />
-</LinearLayout>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/main_option_menu_newsupdates"
+        android:title="@string/newsupdates_title"
+        android:icon="@drawable/ic_menu_agenda" />
+    <item
+        android:id="@+id/main_option_menu_about"
+        android:title="@string/about_title"
+        android:icon="@drawable/ic_menu_info_details" />
+    <item
+        android:id="@+id/main_option_menu_nearest"
+        android:title="@string/neareststops_title" />
+    <item
+        android:id="@+id/main_option_menu_alertman"
+        android:title="@string/alertmanager_title" />
+</menu>

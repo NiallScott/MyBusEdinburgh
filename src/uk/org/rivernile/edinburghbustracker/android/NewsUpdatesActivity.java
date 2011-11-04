@@ -34,6 +34,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.SimpleAdapter;
 import java.util.ArrayList;
@@ -92,10 +93,8 @@ public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
      */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        super.onCreateOptionsMenu(menu);
-
-        menu.add(0, MENU_REFRESH, 1, R.string.displaystopdata_menu_refresh)
-                .setIcon(R.drawable.ic_menu_refresh);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.newsupdates_option_menu, menu);
         return true;
     }
 
@@ -105,7 +104,7 @@ public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
-            case MENU_REFRESH:
+            case R.id.newsupdates_option_menu_refresh:
                 fetchTask.doTask();
                 break;
             default:

@@ -38,6 +38,7 @@ import android.os.Message;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListAdapter;
@@ -50,6 +51,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimes;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimesEvent;
+import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBus;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBusStop;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
@@ -68,13 +70,12 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     private final static int EVENT_REFRESH = 1;
     private final static int EVENT_UPDATE_TIME = 2;
 
-    private final static int FAVOURITE_ID = Menu.FIRST;
-    private final static int SORT_ID = Menu.FIRST + 1;
-    private final static int AUTO_REFRESH_ID = Menu.FIRST + 2;
-    private final static int REFRESH_ID = Menu.FIRST + 3;
-
     private final static int DIALOG_PROGRESS = 0;
     private final static int DIALOG_CONFIRM_DELETE = 1;
+    private final static int DIALOG_PROX_ADD = 2;
+    private final static int DIALOG_PROX_REM = 3;
+    private final static int DIALOG_TIME_ADD = 4;
+    private final static int DIALOG_TIME_REM = 5;
 
     private final static String SERVICE_NAME_KEY = "SERVICE_NAME";
     private final static String DESTINATION_KEY = "DESTINATION";
@@ -92,6 +93,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     private SharedPreferences sp;
     private BusTimes busTimes;
     private TextView textLastRefreshed;
+    private SettingsDatabase sd;
+    private AlertManager alertMan;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -99,12 +102,21 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         setContentView(R.layout.displaystopdata);
         textLastRefreshed = (TextView)findViewById(R.id.displayLastUpdated);
         setTitle(R.string.displaystopdata_title);
+        Intent intent = getIntent();
+        
+        sd = SettingsDatabase.getInstance(this);
+        alertMan = AlertManager.getInstance(getApplicationContext());
 
         busTimes = BusTimes.getInstance(this,
                 EdinburghParser.getInstance());
         sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        
+        if(Intent.ACTION_VIEW.equals(intent.getAction())) {
+            stopCode = intent.getData().getQueryParameter("busStopCode");
+        } else {
+            stopCode = getIntent().getStringExtra("stopCode");
+        }
 
-        stopCode = getIntent().getStringExtra("stopCode");
         if(stopCode == null || stopCode.length() == 0)
             handleError(ERROR_NOCODE);
 
@@ -165,20 +177,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        super.onCreateOptionsMenu(menu);
-
-        menu.add(0, FAVOURITE_ID, 1, R.string.displaystopdata_menu_remfav);
-
-        menu.add(0, SORT_ID, 2, R.string.displaystopdata_menu_sort_service)
-                .setIcon(R.drawable.ic_menu_sort);
-
-        menu.add(0, AUTO_REFRESH_ID, 3,
-                R.string.displaystopdata_menu_turnautorefreshoff)
-                .setIcon(R.drawable.ic_menu_auto_refresh);
-
-        menu.add(0, REFRESH_ID, 4, R.string.displaystopdata_menu_refresh)
-                .setIcon(R.drawable.ic_menu_refresh);
-
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.displaystopdata_option_menu, menu);
         return true;
     }
 
@@ -186,9 +186,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     public boolean onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        MenuItem item = menu.findItem(FAVOURITE_ID);
-        if(SettingsDatabase.getInstance(getApplicationContext())
-                .getFavouriteStopExists(stopCode)) {
+        MenuItem item = menu.findItem(
+                R.id.displaystopdata_option_menu_favourite);
+        if(sd.getFavouriteStopExists(stopCode)) {
             item.setTitle(R.string.displaystopdata_menu_remfav)
                     .setIcon(R.drawable.ic_menu_delete);
         } else {
@@ -196,18 +196,32 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                     .setIcon(R.drawable.ic_menu_add);
         }
 
-        item = menu.findItem(SORT_ID);
+        item = menu.findItem(R.id.displaystopdata_option_menu_sort);
         if(sp.getBoolean("pref_servicessorting_state", false)) {
             item.setTitle(R.string.displaystopdata_menu_sort_service);
         } else {
             item.setTitle(R.string.displaystopdata_menu_sort_times);
         }
 
-        item = menu.findItem(AUTO_REFRESH_ID);
+        item = menu.findItem(R.id.displaystopdata_option_menu_autorefresh);
         if(autoRefresh) {
             item.setTitle(R.string.displaystopdata_menu_turnautorefreshoff);
         } else {
             item.setTitle(R.string.displaystopdata_menu_turnautorefreshon);
+        }
+        
+        item = menu.findItem(R.id.displaystopdata_option_menu_prox);
+        if(sd.isActiveProximityAlert(stopCode)) {
+            item.setTitle(R.string.alert_prox_rem);
+        } else {
+            item.setTitle(R.string.alert_prox_add);
+        }
+        
+        item = menu.findItem(R.id.displaystopdata_option_menu_time);
+        if(sd.isActiveTimeAlert(stopCode)) {
+            item.setTitle(R.string.alert_time_rem);
+        } else {
+            item.setTitle(R.string.alert_time_add);
         }
 
         return true;
@@ -216,9 +230,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
-            case FAVOURITE_ID:
-                if(SettingsDatabase.getInstance(getApplicationContext())
-                        .getFavouriteStopExists(stopCode)) {
+            case R.id.displaystopdata_option_menu_favourite:
+                if(sd.getFavouriteStopExists(stopCode)) {
                     showDialog(DIALOG_CONFIRM_DELETE);
                 } else {
                     Intent intent = new Intent(this,
@@ -230,7 +243,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                     startActivity(intent);
                 }
                 break;
-            case SORT_ID:
+            case R.id.displaystopdata_option_menu_sort:
                 boolean sortByTime = sp.getBoolean("pref_servicessorting_state",
                         false);
                 sortByTime = !sortByTime;
@@ -239,7 +252,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                 edit.commit();
                 displayData();
                 break;
-            case AUTO_REFRESH_ID:
+            case R.id.displaystopdata_option_menu_autorefresh:
                 if(autoRefresh) {
                     autoRefresh = false;
                     mHandler.removeMessages(EVENT_REFRESH);
@@ -248,11 +261,24 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                     setUpAutoRefresh();
                 }
                 break;
-            case REFRESH_ID:
+            case R.id.displaystopdata_option_menu_refresh:
                 mHandler.removeMessages(EVENT_REFRESH);
                 showDialog(DIALOG_PROGRESS);
                 busTimes.doRequest(new String[] { stopCode });
                 break;
+            case R.id.displaystopdata_option_menu_prox:
+                if(sd.isActiveProximityAlert(stopCode)) {
+                    showDialog(DIALOG_PROX_REM);
+                } else {
+                    showDialog(DIALOG_PROX_ADD);
+                }
+                break;
+            case R.id.displaystopdata_option_menu_time:
+                if(sd.isActiveTimeAlert(stopCode)) {
+                    showDialog(DIALOG_TIME_REM);
+                } else {
+                    showDialog(DIALOG_TIME_ADD);
+                }
             default:
                 break;
         }
@@ -266,6 +292,11 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         
         menu.setHeaderTitle("Test context menu");
         menu.add(0, ContextMenu.FIRST, 2, "Test context menu item");
+    }
+    
+    @Override
+    public boolean onContextItemSelected(final MenuItem item) {
+        return super.onContextItemSelected(item);
     }
 
     @Override
@@ -295,8 +326,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                     public void onClick(final DialogInterface dialog,
                             final int id)
                     {
-                        SettingsDatabase.getInstance(getApplicationContext())
-                                .deleteFavouriteStop(stopCode);
+                        sd.deleteFavouriteStop(stopCode);
                     }
                 }).setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
@@ -307,8 +337,28 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                      }
                 });
                 return builder2.create();
+            case DIALOG_PROX_ADD:
+                return alertMan.getAddProxAlertDialog(this);
+            case DIALOG_PROX_REM:
+                return alertMan.getConfirmDeleteProxAlertDialog(this);
+            case DIALOG_TIME_ADD:
+                return alertMan.getAddTimeAlertDialog(this);
+            case DIALOG_TIME_REM:
+                return alertMan.getConfirmDeleteTimeAlertDialog(this);
             default:
                 return null;
+        }
+    }
+    
+    @Override
+    public void onPrepareDialog(final int id, final Dialog d) {
+        switch(id) {
+            case DIALOG_PROX_ADD:
+                alertMan.editAddProxAlertDialog(stopCode, (AlertDialog)d);
+            case DIALOG_TIME_ADD:
+                alertMan.editAddTimeAlertDialog(stopCode, (AlertDialog)d, null);
+            default:
+                break;
         }
     }
     

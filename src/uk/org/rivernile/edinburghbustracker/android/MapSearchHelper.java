@@ -28,8 +28,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
-import android.os.Handler;
-import android.os.Message;
+import android.os.AsyncTask;
 import android.provider.SearchRecentSuggestions;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,75 +39,86 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class MapSearchHelper {
 
-    private static final int EVENT_SEARCH_READY = 1;
-    private static final int EVENT_NO_RESULTS = 2;
-
     private static MapSearchHelper instance = null;
 
-    public Thread searchThread;
-
     private BusStopMapActivity mContext;
-    private String searchTerm;
+    private SearchRecentSuggestions suggestions;
+    private BusStopDatabase bsd;
+    private DoSearchTask task;
     protected SearchResultsArrayAdapter searchResults;
 
-    private MapSearchHelper() {
-
+    private MapSearchHelper(final Context context) {
+        searchResults = new SearchResultsArrayAdapter(context
+                .getApplicationContext());
+        suggestions = new SearchRecentSuggestions(context
+                .getApplicationContext(),
+                MapSearchHistoryProvider.AUTHORITY,
+                MapSearchHistoryProvider.MODE);
+        bsd = BusStopDatabase.getInstance(context);
     }
 
     public static MapSearchHelper getInstance(
             final BusStopMapActivity context) {
-        if(instance == null) instance = new MapSearchHelper();
+        if(instance == null) instance = new MapSearchHelper(context);
         instance.mContext = context;
         return instance;
     }
 
     public void doSearch(final String searchTerm) {
-        this.searchTerm = searchTerm;
-        if(searchResults == null)
-            searchResults = new SearchResultsArrayAdapter();
         searchResults.clear();
-
-        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(
-                mContext, MapSearchHistoryProvider.AUTHORITY,
-                MapSearchHistoryProvider.MODE);
         suggestions.saveRecentQuery(searchTerm, null);
 
         mContext.showDialog(BusStopMapActivity.DIALOG_PROGRESS);
-        searchThread = new Thread(searchTask);
-        searchThread.start();
+        task = new DoSearchTask();
+        task.execute(new String[] { searchTerm });
     }
-
-    private Runnable searchTask = new Runnable() {
+    
+    public void cancel() {
+        if(task != null) {
+            task.cancel(true);
+        }
+    }
+    
+    private class DoSearchTask extends AsyncTask<String, Void,
+            ArrayList<SearchResult>> {
+        
         @Override
-        public void run() {
+        protected ArrayList<SearchResult> doInBackground(final String... args) {
+            if(args.length != 1)
+                throw new IllegalArgumentException("There must only be one " +
+                        "search term.");
+            
+            ArrayList<SearchResult> res = new ArrayList<SearchResult>();
             GeoPoint myLocation = mContext.myLocation.getMyLocation();
             GeoPoint pointLocation;
             SearchResult result;
-            BusStopDatabase bsd = BusStopDatabase.getInstance(mContext);
-            Cursor c = bsd.searchDatabase(searchTerm);
-            if(c.getCount() > 0) {
-                while(!c.isLast()) {
-                    c.moveToNext();
-                    pointLocation = new GeoPoint(c.getInt(2), c.getInt(3));
-                    result = new SearchResult(pointLocation,
-                            SearchResult.TYPE_STOP, c.getString(1) + " (" +
-                            c.getString(0) + ")");
-                    if(myLocation != null)
-                        result.distance = calculateGeographicalDistance(
-                                myLocation, pointLocation);
-                    searchResults.add(result);
-                }
+            
+            Cursor c = bsd.searchDatabase(args[0]);
+            String stopCode;
+            while(c.moveToNext()) {
+                pointLocation = new GeoPoint(c.getInt(2), c.getInt(3));
+                stopCode = c.getString(0);
+                result = new SearchResult(pointLocation,
+                        SearchResult.TYPE_STOP, c.getString(1) + " (" +
+                        stopCode + ")");
+                result.stopCode = stopCode;
+                result.services = bsd.getBusServicesForStopAsString(stopCode);
+                if(myLocation != null)
+                    result.distance = calculateGeographicalDistance(
+                            myLocation, pointLocation);
+                res.add(result);
             }
             c.close();
 
             Geocoder geo = new Geocoder(mContext);
             try {
-                List<Address> addrs = geo.getFromLocationName(searchTerm, 50,
+                List<Address> addrs = geo.getFromLocationName(args[0], 50,
                     55.819447, -3.403363, 56.000000, -2.864143);
                 String locLine;
                 for(Address a : addrs) {
@@ -124,41 +134,35 @@ public class MapSearchHelper {
                     if(myLocation != null)
                         result.distance = calculateGeographicalDistance(
                                 myLocation, pointLocation);
-                    searchResults.add(result);
-                    searchResults.sort(mDistanceCompare);
+                    res.add(result);
                 }
-            } catch(IOException e) {
-            } finally {
-                mContext.dismissDialog(BusStopMapActivity.DIALOG_PROGRESS);
-                if(!searchThread.isInterrupted()) {
-                    if(searchResults.getCount() > 0) {
-                        mHandler.sendEmptyMessage(EVENT_SEARCH_READY);
-                    } else {
-                        mHandler.sendEmptyMessage(EVENT_NO_RESULTS);
-                    }
-                }
-            }
+            } catch(IOException e) { }
+            
+            return res;
         }
-    };
-
-    private Handler mHandler = new Handler() {
+        
         @Override
-        public void handleMessage(final Message msg) {
-            switch(msg.what) {
-                case EVENT_SEARCH_READY:
-                    mContext.showDialog(BusStopMapActivity
-                            .DIALOG_SEARCH_RESULTS);
-                    break;
-                case EVENT_NO_RESULTS:
-                    Toast.makeText(mContext,
-                            R.string.map_search_dialog_noresults,
-                            Toast.LENGTH_LONG).show();
-                    break;
-                default:
-                    break;
+        protected void onPostExecute(final ArrayList<SearchResult> result) {
+            mContext.dismissDialog(BusStopMapActivity.DIALOG_PROGRESS);
+            
+            if(result.isEmpty()) {
+                Toast.makeText(mContext, R.string.map_search_dialog_noresults,
+                        Toast.LENGTH_LONG).show();
+            } else {
+                for(SearchResult sr : result) {
+                    searchResults.add(sr);
+                }
+                
+                searchResults.sort(mDistanceCompare);
+                mContext.showDialog(BusStopMapActivity.DIALOG_SEARCH_RESULTS);
             }
         }
-    };
+        
+        @Override
+        protected void onCancelled() {
+            task = null;
+        }
+    }
 
     private Comparator<SearchResult> mDistanceCompare =
             new Comparator<SearchResult>() {
@@ -214,6 +218,8 @@ public class MapSearchHelper {
         public int type;
         public String description;
         public double distance = 0;
+        public String stopCode;
+        public String services;
 
         public SearchResult(final GeoPoint geoPoint, final int type,
                 final String description)
@@ -228,35 +234,64 @@ public class MapSearchHelper {
 
         private LayoutInflater vi;
 
-        public SearchResultsArrayAdapter() {
-            super(mContext, R.layout.map_search_results_list_item,
-                    R.id.txtMapSearchResult);
+        public SearchResultsArrayAdapter(final Context context) {
+            super(context, R.layout.map_search_results_list_item1,
+                    android.R.id.text1);
 
-            vi = (LayoutInflater)mContext.getSystemService(
+            vi = (LayoutInflater)context.getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
         public View getView(final int position, final View convertView,
                 final ViewGroup parent) {
-            View row;
-            if(convertView != null) {
-                row = convertView;
-            } else {
-                row = vi.inflate(R.layout.map_search_results_list_item, null);
-            }
-
-            TextView tv = (TextView)row.findViewById(R.id.txtMapSearchResult);
             SearchResult sr = getItem(position);
-            tv.setText(sr.description);
-
-            ImageView iv = (ImageView)row.findViewById(R.id.imgMapSearchIcon);
-            if(sr.type == SearchResult.TYPE_STOP) {
-                iv.setImageResource(R.drawable.mapmarker);
-            } else {
-                iv.setImageResource(R.drawable.house);
+            
+            TextView text1, text2 = null;
+            ImageView iv;
+            
+            if(convertView != null) {
+                text2 = (TextView)convertView.findViewById(android.R.id.text2);
             }
-
+            
+            View row = null;
+            
+            switch(sr.type) {
+                case SearchResult.TYPE_ADDRESS:
+                    if(text2 == null) {
+                        if(convertView != null) row = convertView;
+                    } else {
+                        row = vi.inflate(R.layout.map_search_results_list_item1,
+                                parent, false);
+                    }
+                    
+                    iv = (ImageView)row.findViewById(R.id.imgMapSearchIcon);
+                    iv.setImageResource(R.drawable.house);
+                    
+                    text1 = (TextView)row.findViewById(android.R.id.text1);
+                    text1.setText(sr.description);
+                    break;
+                case SearchResult.TYPE_STOP:
+                    if(text2 == null) {
+                        row = vi.inflate(R.layout.map_search_results_list_item2,
+                                parent, false);
+                        text2 = (TextView)row.findViewById(android.R.id.text2);
+                    } else {
+                        row = convertView;
+                    }
+                    
+                    text2.setText(sr.services);
+                    
+                    iv = (ImageView)row.findViewById(R.id.imgMapSearchIcon);
+                    iv.setImageResource(R.drawable.mapmarker);
+                    
+                    text1 = (TextView)row.findViewById(android.R.id.text1);
+                    text1.setText(sr.description);
+                    break;
+                default:
+                    break;
+            }
+            
             return row;
         }
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,15 +24,22 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    <com.google.android.maps.MapView
-        android:id="@+id/mapview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:enabled="true"
-        android:clickable="true"
-        android:apiKey="0m4LU68_mob7URuceOY4OeXGdga36OCwg_1cVmw" />
-</LinearLayout>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/displaystopdata_option_menu_favourite" />
+    <item
+        android:id="@+id/displaystopdata_option_menu_sort"
+        android:icon="@drawable/ic_menu_sort"/>
+    <item
+        android:id="@+id/displaystopdata_option_menu_autorefresh"
+        android:icon="@drawable/ic_menu_auto_refresh" />
+    <item
+        android:id="@+id/displaystopdata_option_menu_refresh"
+        android:title="@string/displaystopdata_menu_refresh"
+        android:icon="@drawable/ic_menu_refresh" />
+    <item
+        android:id="@+id/displaystopdata_option_menu_prox" />
+    <item
+        android:id="@+id/displaystopdata_option_menu_time" />
+</menu>

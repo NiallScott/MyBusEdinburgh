@@ -32,5 +32,6 @@
     <ListView
         android:id="@+id/listMapSearchResults"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:cacheColorHint="#00000000" />
 </RelativeLayout>

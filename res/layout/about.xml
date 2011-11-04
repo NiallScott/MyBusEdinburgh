@@ -79,12 +79,6 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:autoLink="web|email|map"
-            android:paddingBottom="20dp"
             android:text="@string/main_aboutdialog_body" />
-        <Button
-            android:id="@+id/aboutClose"
-            android:text="@string/close"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
     </LinearLayout>
 </ScrollView>

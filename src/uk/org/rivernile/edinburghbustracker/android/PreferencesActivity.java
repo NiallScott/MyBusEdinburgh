@@ -29,12 +29,10 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
 import android.provider.SearchRecentSuggestions;
 import android.widget.Toast;
-import java.io.File;
 
 /**
  * The preferences dialog of the application. There is not much code here, it is
@@ -53,6 +51,8 @@ public class PreferencesActivity extends PreferenceActivity
     public final static String KEY_HOSTNAME = "pref_server_hostname";
     /** The PORT key in the preferences */
     public final static String KEY_PORT = "pref_server_port";
+    
+    private SettingsDatabase sd;
 
     /**
      * {@inheritDoc}
@@ -62,6 +62,7 @@ public class PreferencesActivity extends PreferenceActivity
         super.onCreate(savedInstanceState);
         getPreferenceManager().setSharedPreferencesName(PREF_FILE);
         addPreferencesFromResource(R.xml.preferences);
+        sd = SettingsDatabase.getInstance(this);
 
         GenericDialogPreference backupDialog = (GenericDialogPreference)
                 findPreference("pref_backup_favourites");
@@ -76,16 +77,11 @@ public class PreferencesActivity extends PreferenceActivity
         backupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                if(which != dialog.BUTTON_POSITIVE) {
+                if(which != DialogInterface.BUTTON_POSITIVE) {
                     dialog.dismiss();
                     return;
                 }
-                String message = SettingsDatabase.getInstance(
-                        getApplicationContext())
-                        .backupDatabase(getDatabasePath(SettingsDatabase
-                        .SETTINGS_DB_NAME), new File(Environment
-                        .getExternalStorageDirectory(), "/mybusedinburgh/" +
-                        SettingsDatabase.SETTINGS_DB_NAME + ".backup"));
+                String message = sd.backupDatabase();
                 if(message.equals("success")) {
                     Toast.makeText(getApplicationContext(),
                             R.string.preference_backup_success,
@@ -100,16 +96,11 @@ public class PreferencesActivity extends PreferenceActivity
         restoreDialog.setOnClickListener(new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                if(which != dialog.BUTTON_POSITIVE) {
+                if(which != DialogInterface.BUTTON_POSITIVE) {
                     dialog.dismiss();
                     return;
                 }
-                String message = SettingsDatabase.getInstance(
-                        getApplicationContext()).backupDatabase(
-                        new File(Environment.getExternalStorageDirectory(),
-                        "/mybusedinburgh/" + SettingsDatabase.SETTINGS_DB_NAME +
-                        ".backup"), getDatabasePath(SettingsDatabase
-                        .SETTINGS_DB_NAME));
+                String message = sd.restoreDatabase();
                 if(message.equals("success")) {
                     Toast.makeText(getApplicationContext(),
                             R.string.preference_restore_success,
@@ -125,7 +116,7 @@ public class PreferencesActivity extends PreferenceActivity
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                if(which != dialog.BUTTON_POSITIVE) {
+                if(which != DialogInterface.BUTTON_POSITIVE) {
                     dialog.dismiss();
                     return;
                 }
@@ -141,7 +132,7 @@ public class PreferencesActivity extends PreferenceActivity
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                if(which != dialog.BUTTON_POSITIVE) {
+                if(which != DialogInterface.BUTTON_POSITIVE) {
                     dialog.dismiss();
                     return;
                 }

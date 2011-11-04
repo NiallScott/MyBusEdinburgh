@@ -29,21 +29,20 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,10 +77,6 @@ public class MainActivity extends Activity {
     private ImageButton preferencesButton;
 
     private TextView txtDBVersion;
-
-    private static final int MENU_NEWSUPDATES = 0;
-    private static final int MENU_ABOUT = 1;
-    private static final int MENU_NEAREST = 2;
 
     private static final int DIALOG_ABOUT = 0;
 
@@ -147,12 +142,8 @@ public class MainActivity extends Activity {
      */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        menu.add(0, MENU_NEWSUPDATES, 1, R.string.newsupdates_title)
-                .setIcon(R.drawable.ic_menu_agenda);
-        menu.add(0, MENU_ABOUT, 2, R.string.about_title)
-                .setIcon(R.drawable.ic_menu_info_details);
-        menu.add(0, MENU_NEAREST, 3, R.string.neareststops_title);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_option_menu, menu);
         return true;
     }
 
@@ -162,14 +153,17 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
-            case MENU_NEWSUPDATES:
+            case R.id.main_option_menu_newsupdates:
                 startActivity(new Intent(this, NewsUpdatesActivity.class));
                 break;
-            case MENU_ABOUT:
+            case R.id.main_option_menu_about:
                 showDialog(DIALOG_ABOUT);
                 break;
-            case MENU_NEAREST:
+            case R.id.main_option_menu_nearest:
                 startActivity(new Intent(this, NearestStopsActivity.class));
+                break;
+            case R.id.main_option_menu_alertman:
+                startActivity(new Intent(this, AlertManagerActivity.class));
                 break;
             default:
                 break;
@@ -205,16 +199,16 @@ public class MainActivity extends Activity {
                 txtDBVersion = (TextView)layout.findViewById(R.id
                         .aboutDBVersion);
                 
-                Button close = (Button)layout.findViewById(R.id.aboutClose);
-                close.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        dismissDialog(DIALOG_ABOUT);
-                    }
-                });
-
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setView(layout);
+                builder.setView(layout)
+                        .setNegativeButton(R.string.close,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(final DialogInterface dialog,
+                                    final int id) {
+                                dialog.dismiss();
+                            }
+                        });
 
                 return builder.create();
             default:
@@ -251,63 +245,9 @@ public class MainActivity extends Activity {
     private Runnable stopDBTasks = new Runnable() {
         @Override
         public void run() {
-            initStopDB();
             checkForDBUpdates(getApplicationContext(), false);
         }
     };
-
-    /**
-     * Initialise the bus stop database. This is only normally run the first
-     * time a user runs the application so that the default map database is
-     * moved from the assets directory to the working data directory.
-     */
-    private void initStopDB() {
-        if(!f.exists()) {
-            restoreDBFromAssets();
-        } else {
-            long assetVersion = Long.parseLong(getString(
-                    R.string.asset_db_version));
-            long currentVersion = 0;
-            try {
-                currentVersion = BusStopDatabase.getInstance(
-                        getApplicationContext()).getLastDBModTime();
-            } catch(SQLiteException e) {
-                f.delete();
-                restoreDBFromAssets();
-                return;
-            }
-
-            if(assetVersion > currentVersion) {
-                f.delete();
-                restoreDBFromAssets();
-            }
-        }
-    }
-
-    private boolean restoreDBFromAssets() {
-        try {
-            // Start of horrible hack to create database directory and
-            // set permissions if it doesn't already exist.
-            SQLiteDatabase db = MainActivity.this.openOrCreateDatabase(
-                    BusStopDatabase.STOP_DB_NAME, 0, null);
-            db.close();
-            // End of horrible hack.
-            InputStream in = getAssets().open(
-                    BusStopDatabase.STOP_DB_NAME);
-            FileOutputStream out = new FileOutputStream(f);
-            byte[] buf = new byte[1024];
-            int len;
-            while((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
-            }
-            out.flush();
-            out.close();
-            in.close();
-            return true;
-        } catch(IOException e) {
-            return false;
-        }
-    }
 
     /**
      * Check with the remote server to see if any database updates exist for the

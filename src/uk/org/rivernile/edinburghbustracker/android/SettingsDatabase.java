@@ -32,11 +32,15 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This class deals with the database interaction with the settings database.
@@ -48,11 +52,23 @@ import java.io.IOException;
 public class SettingsDatabase extends SQLiteOpenHelper {
 
     protected final static String SETTINGS_DB_NAME = "settings.db";
-    protected final static int SETTINGS_DB_VERSION = 1;
+    private final static int SETTINGS_DB_VERSION = 2;
 
     protected final static String FAVOURITE_STOPS_TABLE = "favourite_stops";
     protected final static String FAVOURITE_STOPS_STOPCODE = "_id";
     protected final static String FAVOURITE_STOPS_STOPNAME = "stopName";
+    
+    protected final static String ALERTS_TABLE = "active_alerts";
+    protected final static String ALERTS_ID = "_id";
+    protected final static String ALERTS_TYPE = "type";
+    protected final static String ALERTS_TIME_ADDED = "timeAdded";
+    protected final static String ALERTS_STOPCODE = "stopCode";
+    protected final static String ALERTS_DISTANCE_FROM = "distanceFrom";
+    protected final static String ALERTS_SERVICE_NAMES = "serviceNames";
+    protected final static String ALERTS_TIME_TRIGGER = "timeTrigger";
+    
+    public final static byte ALERTS_TYPE_PROXIMITY = 1;
+    public final static byte ALERTS_TYPE_TIME = 2;
 
     private static SettingsDatabase instance;
 
@@ -69,6 +85,12 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         this.context = context;
     }
 
+    /**
+     * Get the singleton instance of this class.
+     * 
+     * @param context The application context.
+     * @return A reference to the singleton instance of this class.
+     */
     public static SettingsDatabase getInstance(final Context context) {
         if(instance == null) instance = new SettingsDatabase(context);
         return instance;
@@ -91,11 +113,18 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + FAVOURITE_STOPS_TABLE + " (" +
                 FAVOURITE_STOPS_STOPCODE + " TEXT PRIMARY KEY," +
                 FAVOURITE_STOPS_STOPNAME + " TEXT NOT NULL);");
+        db.execSQL("CREATE TABLE " + ALERTS_TABLE + " (" +
+                ALERTS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                ALERTS_TYPE + " NUMERIC NOT NULL," +
+                ALERTS_TIME_ADDED + " INTEGER NOT NULL," +
+                ALERTS_STOPCODE + " TEXT NOT NULL," +
+                ALERTS_DISTANCE_FROM + " INTEGER," +
+                ALERTS_SERVICE_NAMES + " TEXT," +
+                ALERTS_TIME_TRIGGER + " INTEGER);");
     }
 
     /**
-     * An upgrade of the database, an abstract method in the super class. This
-     * method, as of yet, does nothing.
+     * An upgrade of the database, an abstract method in the super class.
      *
      * @param db The database object to interface with.
      * @param oldVersion The version of the old database.
@@ -105,7 +134,19 @@ public class SettingsDatabase extends SQLiteOpenHelper {
     public void onUpgrade(final SQLiteDatabase db, final int oldVersion,
             final int newVersion)
     {
-        // Nothing to upgrade yet.
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + ALERTS_TABLE + " (" +
+                ALERTS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                ALERTS_TYPE + " NUMERIC NOT NULL," +
+                ALERTS_TIME_ADDED + " INTEGER NOT NULL," +
+                ALERTS_STOPCODE + " TEXT NOT NULL," +
+                ALERTS_DISTANCE_FROM + " INTEGER," +
+                ALERTS_SERVICE_NAMES + " TEXT," +
+                ALERTS_TIME_TRIGGER + " INTEGER);");
+    }
+    
+    @Override
+    public void onOpen(final SQLiteDatabase db) {
+        cleanupAlerts(db);
     }
 
     /**
@@ -225,41 +266,180 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         c.close();
         return s;
     }
+    
+    public void insertNewProximityAlert(final String stopCode,
+            final int distance) {
+        SQLiteDatabase db = getWritableDatabase();
+        cleanupAlerts(db);
+        
+        ContentValues cv = new ContentValues();
+        cv.put(ALERTS_TYPE, ALERTS_TYPE_PROXIMITY);
+        cv.put(ALERTS_TIME_ADDED, System.currentTimeMillis());
+        cv.put(ALERTS_STOPCODE, stopCode);
+        cv.put(ALERTS_DISTANCE_FROM, distance);
+        
+        db.insertOrThrow(ALERTS_TABLE, ALERTS_DISTANCE_FROM, cv);
+    }
+    
+    public void insertNewTimeAlert(final String stopCode,
+            final String[] serviceNames, final int timeTrigger) {
+        SQLiteDatabase db = getWritableDatabase();
+        cleanupAlerts(db);
+        
+        int len = serviceNames.length;
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i < len; i++) {
+            sb.append(serviceNames[i]);
+            if(i != len-1) {
+                sb.append(',');
+            }
+        }
+        
+        ContentValues cv = new ContentValues();
+        cv.put(ALERTS_TYPE, ALERTS_TYPE_TIME);
+        cv.put(ALERTS_TIME_ADDED, System.currentTimeMillis());
+        cv.put(ALERTS_STOPCODE, stopCode);
+        cv.put(ALERTS_SERVICE_NAMES, sb.toString());
+        cv.put(ALERTS_TIME_TRIGGER, timeTrigger);
+        
+        db.insertOrThrow(ALERTS_TABLE, ALERTS_TIME_TRIGGER, cv);
+    }
+    
+    public void deleteAllAlertsOfType(final byte type) {
+        SQLiteDatabase db = getWritableDatabase();
+        cleanupAlerts(db);
+        db.delete(ALERTS_TABLE, ALERTS_TYPE + " = " + type, null);
+    }
+    
+    public boolean isActiveProximityAlert(final String stopCode) {
+        return isActiveAlertOfType(stopCode, ALERTS_TYPE_PROXIMITY);
+    }
+    
+    public boolean isActiveTimeAlert(final String stopCode) {
+        return isActiveAlertOfType(stopCode, ALERTS_TYPE_TIME);
+    }
+    
+    public boolean isActiveAlertOfType(final String stopCode, final int type) {
+        if(stopCode == null || stopCode.length() == 0) return false;
+        SQLiteDatabase db = getWritableDatabase();
+        cleanupAlerts(db);
+        Cursor c = db.query(ALERTS_TABLE,
+                new String[] { ALERTS_STOPCODE },
+                ALERTS_STOPCODE + " = " + stopCode + " AND " + ALERTS_TYPE +
+                " = " + type, null, null, null, null);
+        if(c.getCount() > 0) {
+            c.close();
+            return true;
+        }
+        c.close();
+        return false;
+    }
+    
+    public Cursor getAllAlerts() {
+        SQLiteDatabase db = getWritableDatabase();
+        
+        cleanupAlerts(db);
+        return db.query(ALERTS_TABLE, null, null, null, null, null, null);
+    }
+    
+    public void cleanupAlerts(SQLiteDatabase db) {
+        if(!db.isReadOnly()) {
+            long time = System.currentTimeMillis() - 3600000;
+            db.delete(ALERTS_TABLE, ALERTS_TIME_ADDED + " < " +
+                    String.valueOf(System.currentTimeMillis() - 3600000), null);
+        }
+    }
 
-    public String backupDatabase(final File orig, final File dest) {
-        getReadableDatabase().close();
-
+    public String backupDatabase() {
         if(!Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {
             return context.getString(
                     R.string.preferences_backup_error_mediaerror);
         }
-
-        orig.mkdirs();
-        dest.mkdirs();
-
-        FileInputStream in;
+        
+        File out = new File(Environment.getExternalStorageDirectory(),
+                "/mybusedinburgh/");
+        out.mkdirs();
+        out = new File(out, "settings.backup");
+        
+        JSONObject root = new JSONObject();
+        JSONArray favStops = new JSONArray();
+        JSONObject stop;
         try {
-            in = new FileInputStream(orig);
-        } catch(FileNotFoundException e) {
-            return context.getString(R.string.preferences_backup_error_nodb);
-        }
-
-        dest.delete();
-        try {
-            FileOutputStream out = new FileOutputStream(dest);
-
-            byte[] buf = new byte[1024];
-            int len;
-            while((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
+            root.put("dbVersion", SETTINGS_DB_VERSION);
+            root.put("jsonSchemaVersion", 1);
+            root.put("createTime", System.currentTimeMillis());
+            root.put("favouriteStops", favStops);
+            
+            Cursor c = getAllFavouriteStops();
+            while(c.moveToNext()) {
+                stop = new JSONObject();
+                stop.put("stopCode", c.getString(0));
+                stop.put("stopName", c.getString(1));
+                favStops.put(stop);
             }
-            out.flush();
-            out.close();
-            in.close();
+        } catch(JSONException e) {
+            return context.getString(
+                    R.string.preferences_backup_error_json_write);
+        }
+        
+        try {
+            PrintWriter pw = new PrintWriter(new FileWriter(out));
+            pw.println(root.toString());
+            pw.flush();
+            pw.close();
         } catch(IOException e) {
             return context.getString(R.string.preferences_backup_error_ioerror);
         }
+        
+        return "success";
+    }
+    
+    public String restoreDatabase() {
+        if(!Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            return context.getString(
+                    R.string.preferences_backup_error_mediaerror);
+        }
+        
+        final File in = new File(Environment.getExternalStorageDirectory(),
+                "/mybusedinburgh/settings.backup");
+        if(!in.exists() || !in.canRead()) {
+            return context.getString(R.string.preferences_backup_error_nofile);
+        }
+        
+        String jsonString = "";
+        try {
+            String str;
+            BufferedReader reader = new BufferedReader(new FileReader(in));
+            while((str = reader.readLine()) != null) {
+                jsonString += str;
+            }
+            reader.close();
+        } catch(IOException e) {
+            return context.getString(R.string.preferences_backup_error_ioerror);
+        }
+        
+        JSONObject root, stop;
+        JSONArray favStops;
+        
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(FAVOURITE_STOPS_TABLE, null, null);
+        
+        try {
+            root = new JSONObject(jsonString);
+            favStops = root.getJSONArray("favouriteStops");
+            int len = favStops.length();
+            for(int i = 0; i < len; i++) {
+                stop = favStops.getJSONObject(i);
+                insertFavouriteStop(stop.getString("stopCode"),
+                        stop.getString("stopName"));
+            }
+        } catch(JSONException e) {
+            return context.getString(
+                    R.string.preferences_backup_error_json_read);
+        }
+        
         return "success";
     }
 }
