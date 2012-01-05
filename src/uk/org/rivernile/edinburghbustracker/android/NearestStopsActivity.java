@@ -70,9 +70,7 @@ public class NearestStopsActivity extends ListActivity
     private static final int DIALOG_CONFIRM_DELETE_FAV = 2;
     private static final int DIALOG_FILTER = 3;
     private static final int DIALOG_CONFIRM_DELETE_PROX = 4;
-    private static final int DIALOG_ADD_PROX_ALERT = 5;
-    private static final int DIALOG_CONFIRM_DELETE_TIME = 6;
-    private static final int DIALOG_ADD_TIME_ALERT = 7;
+    private static final int DIALOG_CONFIRM_DELETE_TIME = 5;
     
     private static final int CONTEXT_MENU_VIEW = ContextMenu.FIRST;
     private static final int CONTEXT_MENU_SAVE = ContextMenu.FIRST + 1;
@@ -106,8 +104,10 @@ public class NearestStopsActivity extends ListActivity
         List<String> matchingProviders = locMan.getAllProviders();
         float accuracy, bestAccuracy = Float.MAX_VALUE;
         long time, bestTime = Long.MIN_VALUE;
+        Location location;
+        
         for(String provider : matchingProviders) {
-            Location location = locMan.getLastKnownLocation(provider);
+            location = locMan.getLastKnownLocation(provider);
             if(location != null) {
                 accuracy = location.getAccuracy();
                 time = location.getTime();
@@ -116,8 +116,7 @@ public class NearestStopsActivity extends ListActivity
                     loc = location;
                     bestAccuracy = accuracy;
                     bestTime = time;
-                }
-                else if(time < REQUEST_PERIOD && 
+                } else if(time < REQUEST_PERIOD && 
                     bestAccuracy == Float.MAX_VALUE && time > bestTime) {
                     loc = location;
                     bestTime = time;
@@ -253,30 +252,10 @@ public class NearestStopsActivity extends ListActivity
                 return serviceFilter.getFilterDialog();
             case DIALOG_CONFIRM_DELETE_PROX:
                 return alertMan.getConfirmDeleteProxAlertDialog(this);
-            case DIALOG_ADD_PROX_ALERT:
-                return alertMan.getAddProxAlertDialog(this);
             case DIALOG_CONFIRM_DELETE_TIME:
                 return alertMan.getConfirmDeleteTimeAlertDialog(this);
-            case DIALOG_ADD_TIME_ALERT:
-                return alertMan.getAddTimeAlertDialog(this);
             default:
                 return null;
-        }
-    }
-    
-    @Override
-    public void onPrepareDialog(final int id, final Dialog dialog) {
-        switch(id) {
-            case DIALOG_ADD_PROX_ALERT:
-                alertMan.editAddProxAlertDialog(currSelected.stopCode,
-                        (AlertDialog)dialog);
-                break;
-            case DIALOG_ADD_TIME_ALERT:
-                alertMan.editAddTimeAlertDialog(currSelected.stopCode,
-                        (AlertDialog)dialog, null);
-                break;
-            default:
-                break;
         }
     }
     
@@ -383,14 +362,18 @@ public class NearestStopsActivity extends ListActivity
                 if(sd.isActiveProximityAlert(currSelected.stopCode)) {
                     showDialog(DIALOG_CONFIRM_DELETE_PROX);
                 } else {
-                    showDialog(DIALOG_ADD_PROX_ALERT);
+                    intent = new Intent(this, AddProximityAlertActivity.class);
+                    intent.putExtra("stopCode", currSelected.stopCode);
+                    startActivity(intent);
                 }
                 return true;
             case CONTEXT_MENU_TIME:
                 if(sd.isActiveTimeAlert(currSelected.stopCode)) {
                     showDialog(DIALOG_CONFIRM_DELETE_TIME);
                 } else {
-                    showDialog(DIALOG_ADD_TIME_ALERT);
+                    intent = new Intent(this, AddTimeAlertActivity.class);
+                    intent.putExtra("stopCode", currSelected.stopCode);
+                    startActivity(intent);
                 }
                 return true;
             case CONTEXT_MENU_MAP:

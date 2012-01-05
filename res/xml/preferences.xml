@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -143,23 +143,5 @@
             android:summaryOn="@string/preferences_checkbox_neareststops_gpsdisabled_ticked"
             android:summaryOff="@string/preferences_checkbox_neareststops_gpsdisabled_unticked"
             android:defaultValue="false" />
-    </PreferenceCategory>
-    
-    <!-- Advanced -->
-    <PreferenceCategory
-        android:title="@string/preferences_category_advanced">
-        <EditTextPreference
-            android:key="pref_server_hostname"
-            android:title="@string/preferences_textbox_advanced_hostname"
-            android:summary="@string/preferences_textbox_advanced_hostname_summary"
-            android:defaultValue="bustracker.selfip.org"
-            android:dialogTitle="@string/preferences_textbox_hostname_dialog" />
-        <EditTextPreference
-            android:key="pref_server_port"
-            android:title="@string/preferences_textbox_advanced_port"
-            android:summary="@string/preferences_textbox_advanced_port_summary"
-            android:defaultValue="4876"
-            android:dialogTitle="@string/preferences_textbox_port_dialog"
-            android:numeric="integer" />
     </PreferenceCategory>
 </PreferenceScreen>

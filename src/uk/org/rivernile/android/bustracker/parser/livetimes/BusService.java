@@ -103,11 +103,12 @@ public class BusService {
         return (ArrayList<Bus>)buses.clone();
     }
     
-    public Bus getFirstBus() {
-        if(buses.isEmpty()) {
-            return null;
-        } else {
-            return buses.get(0);
-        }
+    /**
+     * Get the first bus in the array.
+     * 
+     * @return The first bus in the array.
+     */
+    public Bus getFirstBus() {    
+        return buses.isEmpty() ? null : buses.get(0);
     }
 }

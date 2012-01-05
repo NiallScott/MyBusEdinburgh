@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2010 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -92,7 +92,7 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
         }
 
         n.flags |= Notification.FLAG_AUTO_CANCEL;
-        n.icon = R.drawable.appicon;
+        n.icon = R.drawable.ic_status_bus;
         n.when = System.currentTimeMillis();
         n.tickerText = ticker;
         n.setLatestEventInfo(context, title, summary,

@@ -27,8 +27,25 @@ package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 import java.util.HashMap;
 
+/**
+ * The BusParser interface defines a single method that all parsers of the
+ * bus times should implement. Essentially this method will take a list of bus
+ * stops to get bus times for, and it will return a HashMap of stop codes and
+ * BusStop objects.
+ * 
+ * @author Niall Scott
+ */
 public interface BusParser {
     
+    /**
+     * Get data for a list of bus stops. This is usually bus times.
+     * 
+     * @param stopCodes The list of stop codes to return data for.
+     * @return A HashMap of String -> BusStop.
+     * @throws BusParserException When an exception occurs during fetching or
+     * parsing. Exceptions are wrapped in BusParserException to return a common
+     * type.
+     */
     public HashMap<String, BusStop> getBusStopData(final String[] stopCodes)
             throws BusParserException;
 }

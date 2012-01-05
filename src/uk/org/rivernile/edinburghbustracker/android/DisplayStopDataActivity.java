@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2010 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,9 +29,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -41,11 +43,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ExpandableListAdapter;
+import android.view.ViewGroup;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
+import android.widget.LinearLayout;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Bus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
@@ -60,26 +69,19 @@ import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
 public class DisplayStopDataActivity extends ExpandableListActivity
         implements BusTimesEvent {
 
-    public final static int ERROR_SERVER = 0;
-    public final static int ERROR_NOCONNECTION = 1;
-    public final static int ERROR_CANNOTRESOLVE = 2;
-    public final static int ERROR_NOCODE = 3;
-    public final static int ERROR_PARSEERR = 4;
-    public final static int ERROR_NODATA = 5;
-        
     private final static int EVENT_REFRESH = 1;
     private final static int EVENT_UPDATE_TIME = 2;
 
     private final static int DIALOG_PROGRESS = 0;
     private final static int DIALOG_CONFIRM_DELETE = 1;
-    private final static int DIALOG_PROX_ADD = 2;
-    private final static int DIALOG_PROX_REM = 3;
-    private final static int DIALOG_TIME_ADD = 4;
-    private final static int DIALOG_TIME_REM = 5;
+    private final static int DIALOG_PROX_REM = 2;
+    private final static int DIALOG_TIME_REM = 3;
 
     private final static String SERVICE_NAME_KEY = "SERVICE_NAME";
     private final static String DESTINATION_KEY = "DESTINATION";
     private final static String ARRIVAL_TIME_KEY = "ARRIVAL_TIME";
+    private final static String IS_DELAYED_KEY = "IS_DELAYED";
+    private final static String IS_ESTIMATED_KEY = "IS_ESTIMATED";
 
     /** The ACTION_VIEW_STOP_DATA intent action name. */
     public final static String ACTION_VIEW_STOP_DATA =
@@ -95,11 +97,16 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     private TextView textLastRefreshed;
     private SettingsDatabase sd;
     private AlertManager alertMan;
+    private BusTimesListAdapter listAdapter;
+    private BusStopDatabase bsd;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.displaystopdata);
+        
+        bsd = BusStopDatabase.getInstance(this);
+        
         textLastRefreshed = (TextView)findViewById(R.id.displayLastUpdated);
         setTitle(R.string.displaystopdata_title);
         Intent intent = getIntent();
@@ -118,7 +125,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         }
 
         if(stopCode == null || stopCode.length() == 0)
-            handleError(ERROR_NOCODE);
+            handleError(BusTimes.ERROR_NOCODE);
 
         autoRefresh = sp.getBoolean(PreferencesActivity.KEY_AUTOREFRESH_STATE,
                 false);
@@ -150,6 +157,10 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             }
         } else {
             showDialog(DIALOG_PROGRESS);
+        }
+        
+        if(MainActivity.isHoneycombOrGreater()) {
+            invalidateOptionsMenuSupport();
         }
     }
 
@@ -212,16 +223,20 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         
         item = menu.findItem(R.id.displaystopdata_option_menu_prox);
         if(sd.isActiveProximityAlert(stopCode)) {
-            item.setTitle(R.string.alert_prox_rem);
+            item.setTitle(R.string.alert_prox_rem)
+                    .setIcon(R.drawable.ic_menu_proximityremove);
         } else {
-            item.setTitle(R.string.alert_prox_add);
+            item.setTitle(R.string.alert_prox_add)
+                    .setIcon(R.drawable.ic_menu_proximityadd);
         }
         
         item = menu.findItem(R.id.displaystopdata_option_menu_time);
         if(sd.isActiveTimeAlert(stopCode)) {
-            item.setTitle(R.string.alert_time_rem);
+            item.setTitle(R.string.alert_time_rem)
+                    .setIcon(R.drawable.ic_menu_arrivalremove);
         } else {
-            item.setTitle(R.string.alert_time_add);
+            item.setTitle(R.string.alert_time_add)
+                    .setIcon(R.drawable.ic_menu_arrivaladd);
         }
 
         return true;
@@ -229,12 +244,13 @@ public class DisplayStopDataActivity extends ExpandableListActivity
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
+        Intent intent;
         switch(item.getItemId()) {
             case R.id.displaystopdata_option_menu_favourite:
                 if(sd.getFavouriteStopExists(stopCode)) {
                     showDialog(DIALOG_CONFIRM_DELETE);
                 } else {
-                    Intent intent = new Intent(this,
+                    intent = new Intent(this,
                             AddEditFavouriteStopActivity.class);
                     intent.setAction(AddEditFavouriteStopActivity
                             .ACTION_ADD_EDIT_FAVOURITE_STOP);
@@ -251,6 +267,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                 edit.putBoolean("pref_servicessorting_state", sortByTime);
                 edit.commit();
                 displayData();
+                if(MainActivity.isHoneycombOrGreater()) {
+                    invalidateOptionsMenuSupport();
+                }
                 break;
             case R.id.displaystopdata_option_menu_autorefresh:
                 if(autoRefresh) {
@@ -270,14 +289,19 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                 if(sd.isActiveProximityAlert(stopCode)) {
                     showDialog(DIALOG_PROX_REM);
                 } else {
-                    showDialog(DIALOG_PROX_ADD);
+                    intent = new Intent(this,
+                            AddProximityAlertActivity.class);
+                    intent.putExtra("stopCode", stopCode);
+                    startActivity(intent);
                 }
                 break;
             case R.id.displaystopdata_option_menu_time:
                 if(sd.isActiveTimeAlert(stopCode)) {
                     showDialog(DIALOG_TIME_REM);
                 } else {
-                    showDialog(DIALOG_TIME_ADD);
+                    intent = new Intent(this, AddTimeAlertActivity.class);
+                    intent.putExtra("stopCode", stopCode);
+                    startActivity(intent);
                 }
             default:
                 break;
@@ -290,13 +314,35 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             final ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         
-        menu.setHeaderTitle("Test context menu");
-        menu.add(0, ContextMenu.FIRST, 2, "Test context menu item");
+        MenuInflater inflater = getMenuInflater();
+        menu.setHeaderTitle(getString(R.string.displaystopdata_context_title));
+        inflater.inflate(R.menu.displaystopdata_context_menu, menu);
     }
     
     @Override
     public boolean onContextItemSelected(final MenuItem item) {
-        return super.onContextItemSelected(item);
+        ExpandableListContextMenuInfo info =
+                (ExpandableListContextMenuInfo)item.getMenuInfo();
+        
+        switch(item.getItemId()) {
+            case R.id.displaystopdata_context_menu_addarrivalalert:
+                int position = ExpandableListView
+                        .getPackedPositionGroup(info.packedPosition);
+                if(listAdapter != null) {
+                    HashMap<String, String> groupData =
+                            (HashMap<String, String>)listAdapter
+                            .getGroup(position);
+                    Intent intent = new Intent(this,
+                            AddTimeAlertActivity.class);
+                    intent.putExtra("stopCode", stopCode);
+                    intent.putExtra("defaultService",
+                            groupData.get(SERVICE_NAME_KEY));
+                    startActivity(intent);
+                }
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
     }
 
     @Override
@@ -327,6 +373,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                             final int id)
                     {
                         sd.deleteFavouriteStop(stopCode);
+                        if(MainActivity.isHoneycombOrGreater()) {
+                            invalidateOptionsMenuSupport();
+                        }
                     }
                 }).setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
@@ -337,28 +386,12 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                      }
                 });
                 return builder2.create();
-            case DIALOG_PROX_ADD:
-                return alertMan.getAddProxAlertDialog(this);
             case DIALOG_PROX_REM:
                 return alertMan.getConfirmDeleteProxAlertDialog(this);
-            case DIALOG_TIME_ADD:
-                return alertMan.getAddTimeAlertDialog(this);
             case DIALOG_TIME_REM:
                 return alertMan.getConfirmDeleteTimeAlertDialog(this);
             default:
                 return null;
-        }
-    }
-    
-    @Override
-    public void onPrepareDialog(final int id, final Dialog d) {
-        switch(id) {
-            case DIALOG_PROX_ADD:
-                alertMan.editAddProxAlertDialog(stopCode, (AlertDialog)d);
-            case DIALOG_TIME_ADD:
-                alertMan.editAddTimeAlertDialog(stopCode, (AlertDialog)d, null);
-            default:
-                break;
         }
     }
     
@@ -406,28 +439,46 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         switch(errorCode) {
-            case ERROR_SERVER:
-                builder.setMessage(R.string.displaystopdata_err_serverr);
-                break;
-            case ERROR_NOCONNECTION:
+            case BusTimes.ERROR_NOCONNECTION:
                 builder.setMessage(R.string.displaystopdata_err_noconn);
                 break;
-            case ERROR_CANNOTRESOLVE:
+            case BusTimes.ERROR_CANNOTRESOLVE:
                 builder.setMessage(R.string.displaystopdata_err_noresolv);
                 break;
-            case ERROR_NOCODE:
+            case BusTimes.ERROR_NOCODE:
                 builder.setMessage(R.string.displaystopdata_err_nocode);
                 break;
-            case ERROR_PARSEERR:
+            case BusTimes.ERROR_PARSEERR:
                 builder.setMessage(R.string.displaystopdata_err_parseerr);
                 break;
-            case ERROR_NODATA:
+            case BusTimes.ERROR_NODATA:
                 builder.setMessage(R.string.displaystopdata_err_nodata);
                 break;
+            case BusTimes.ERROR_INVALID_APP_KEY:
+                builder.setMessage(R.string
+                        .displaystopdata_err_api_invalid_key);
+                break;
+            case BusTimes.ERROR_INVALID_PARAMETER:
+                builder.setMessage(R.string
+                        .displaystopdata_err_api_invalid_parameter);
+                break;
+            case BusTimes.ERROR_PROCESSING_ERROR:
+                builder.setMessage(R.string
+                        .displaystopdata_err_api_processing_error);
+                break;
+            case BusTimes.ERROR_SYSTEM_MAINTENANCE:
+                builder.setMessage(R.string
+                        .displaystopdata_err_api_system_maintenance);
+                break;
+            case BusTimes.ERROR_SYSTEM_OVERLOADED:
+                builder.setMessage(R.string
+                        .displaystopdata_err_api_system_overloaded);
+                break;
             default:
-                // Default error message
+                builder.setMessage(R.string.displaystopdata_err_unknown);
                 break;
         }
+        
         builder.setCancelable(false).setTitle(R.string.error)
                 .setPositiveButton(R.string.retry,
                 new DialogInterface.OnClickListener() {
@@ -462,13 +513,18 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         stopName = busStop.getStopName();
         
         StringBuilder sb = new StringBuilder();
-        sb.append(getString(R.string.displaystopdata_title2));
-        sb.append(' ');
         sb.append(busStop.getStopName());
         sb.append(" (");
         sb.append(busStop.getStopCode());
         sb.append(')');
-        setTitle(sb.toString());
+        
+        LinearLayout ll = (LinearLayout)findViewById(R.id.stopInfo);
+        ll.setVisibility(View.VISIBLE);
+        TextView tv = (TextView)findViewById(R.id.txtStopName);
+        tv.setText(sb.toString());
+        
+        tv = (TextView)findViewById(R.id.txtServices);
+        tv.setText(bsd.getBusServicesForStopAsString(stopCode));
         
         ArrayList<BusService> services;
         if(sp.getBoolean("pref_servicessorting_state", false)) {
@@ -484,6 +540,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         HashMap<String, String> curGroupMap;
         ArrayList<HashMap<String, String>> children;
         HashMap<String, String> curChildMap;
+        EdinburghBus bus;
+        String timeToDisplay;
+        int mins;
         boolean first;
         
         for(BusService busService : services) {
@@ -497,23 +556,41 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             children = new ArrayList<HashMap<String, String>>();
             first = true;
             for(Bus lBus : busService.getBuses()) {
-                EdinburghBus bus = (EdinburghBus)lBus;
+                bus = (EdinburghBus)lBus;
+                mins = bus.getArrivalMinutes();
+                if(mins > 59) {
+                    timeToDisplay = bus.getArrivalTime();
+                } else if(mins < 2) {
+                    timeToDisplay = "DUE";
+                } else {
+                    timeToDisplay = String.valueOf(mins);
+                }
                 
                 if(first) {
                     curGroupMap.put(DESTINATION_KEY, bus.getDestination());
-                    curGroupMap.put(ARRIVAL_TIME_KEY, bus.getArrivalTime());
+                    curGroupMap.put(ARRIVAL_TIME_KEY, timeToDisplay);
+                    if(bus.isDelayed()) {
+                        curGroupMap.put(IS_DELAYED_KEY, "true");
+                    } else if(bus.isEstimated()) {
+                        curGroupMap.put(IS_ESTIMATED_KEY, "true");
+                    }
                     first = false;
                 } else {
                     curChildMap = new HashMap<String, String>();
                     children.add(curChildMap);
                     curChildMap.put(DESTINATION_KEY, bus.getDestination());
-                    curChildMap.put(ARRIVAL_TIME_KEY, bus.getArrivalTime());
+                    curChildMap.put(ARRIVAL_TIME_KEY, timeToDisplay);
+                    if(bus.isDelayed()) {
+                        curChildMap.put(IS_DELAYED_KEY, "true");
+                    } else if(bus.isEstimated()) {
+                        curChildMap.put(IS_ESTIMATED_KEY, "true");
+                    }
                 }
             }
             childData.add(children);
         }
         
-        ExpandableListAdapter listAdapter = new SimpleExpandableListAdapter(
+        listAdapter = new BusTimesListAdapter(
                 this, groupData, R.layout.expandable_list_group,
                 new String[] { SERVICE_NAME_KEY, DESTINATION_KEY,
                     ARRIVAL_TIME_KEY },
@@ -560,5 +637,84 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     
     private void setUpLastUpdated() {
         mHandler.sendEmptyMessageDelayed(EVENT_UPDATE_TIME, 10000);
+    }
+    
+    private void invalidateOptionsMenuSupport() {
+        try {
+            Method mtd = BusStopMapActivity.class
+                    .getMethod("invalidateOptionsMenu", (Class<?>[]) null);
+            if(mtd != null) mtd.invoke(this, (Object[]) null);
+        } catch(NoSuchMethodException e) {
+            
+        } catch(IllegalAccessException e) {
+            
+        } catch(InvocationTargetException e) {
+            
+        }
+    }
+    
+    private static class BusTimesListAdapter
+            extends SimpleExpandableListAdapter {
+        
+        private Context context;
+        
+        public BusTimesListAdapter(Context context,
+                List<? extends Map<String, ?>> groupData, int groupLayout,
+                String[] groupFrom, int[] groupTo,
+                List<? extends List<? extends Map<String, ?>>> childData,
+                int childLayout, String[] childFrom, int[] childTo) {
+            super(context, groupData, groupLayout, groupLayout, groupFrom,
+                    groupTo, childData, childLayout, childLayout, childFrom,
+                    childTo);
+            
+            this.context = context;
+        }
+        
+        @Override
+        public View getGroupView(final int groupPosition,
+                final boolean isExpanded, final View convertView,
+                final ViewGroup parent) {
+            View v = super.getGroupView(groupPosition, isExpanded, convertView,
+                    parent);
+            
+            TextView tv = (TextView)v.findViewById(R.id.buslist_time);
+            HashMap<String, String> data =
+                        (HashMap<String, String>)getGroup(groupPosition);
+            
+            if(tv != null) tv.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+                
+            if(data.containsKey(IS_ESTIMATED_KEY)) {
+                if(tv != null) {
+                    tv.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+                    tv.setText(tv.getText() + " ");
+                }
+            }
+            
+            return v;
+        }
+        
+        @Override
+        public View getChildView(final int groupPosition,
+                final int childPosition, final boolean isLastChild,
+                final View convertView, final ViewGroup parent) {
+            View v = super.getChildView(groupPosition, childPosition,
+                    isLastChild, convertView, parent);
+            
+            TextView tv = (TextView)v.findViewById(R.id.buschild_time);
+            HashMap<String, String> data =
+                    (HashMap<String, String>)getChild(groupPosition,
+                    childPosition);
+            
+            if(tv != null) tv.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+                
+            if(data.containsKey(IS_ESTIMATED_KEY)) {
+                if(tv != null) {
+                    tv.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+                    tv.setText(tv.getText() + " ");
+                }
+            }
+            
+            return v;
+        }
     }
 }

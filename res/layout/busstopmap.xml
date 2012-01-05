@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,5 +34,5 @@
         android:layout_height="fill_parent"
         android:enabled="true"
         android:clickable="true"
-        android:apiKey="0m4LU68_mob7URuceOY4OeXGdga36OCwg_1cVmw" />
+        android:apiKey="0m4LU68_mob7KZZE852UT0PWi1bRZAr3hXnjKPQ" />
 </LinearLayout>

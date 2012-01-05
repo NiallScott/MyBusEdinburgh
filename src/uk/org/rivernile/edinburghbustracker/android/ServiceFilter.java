@@ -63,7 +63,7 @@ public class ServiceFilter {
     public Dialog getFilterDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setCancelable(true).setTitle(R.string.servicefilter_title);
-        builder.setMultiChoiceItems(bsd.getBusServiceList(), checkBoxes,
+        builder.setMultiChoiceItems(services, checkBoxes,
                 new DialogInterface.OnMultiChoiceClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which,
@@ -91,10 +91,8 @@ public class ServiceFilter {
     }
     
     public boolean isFiltered() {
-        int length = checkBoxes.length;
-        
-        for(int i = 0; i < length; i++) {
-            if(checkBoxes[i]) return true;
+        for(boolean checkBox : checkBoxes) {
+            if(checkBox) return true;
         }
         
         return false;

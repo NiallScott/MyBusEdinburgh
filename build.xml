@@ -44,7 +44,75 @@
             message="sdk.dir is missing. Make sure to generate local.properties using 'android update project'"
             unless="sdk.dir"
     />
+    
+    <target name="-pre-build">
+        <delete file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" />
+        
+        <echo>Generating API key class...</echo>
+        <echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java"><![CDATA[
+/**
+* This is a generated source file. It has been created by build.xml.
+* 
+* This file contains your API key. DO NOT check this file in to
+* source control system. Infact, because it is generated, there is
+* no need for it to be checked in. DO NOT distribute this file
+* to anybody else as doing so will comprimise your API key.
+*/
+             
+package uk.org.rivernile.edinburghbustracker.android;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+             
+public final class ApiKey {
+
+    /** This is the API key in byte form. Keep this secure. */
+    private static final byte[] API_KEY =
+            { ]]></echo>
+            <echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" append="true">${api.key}</echo>
+            <echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" append="true"><![CDATA[
+            };
+            
+    public static final String BUGSENSE_KEY = "]]></echo><echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" append="true">${bugsense.key}</echo><echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" append="true"><![CDATA[";
+            
+    private static final SimpleDateFormat formatter =
+            new SimpleDateFormat("yyyyMMddHH");
+    
+    /**
+     * This constructor has intentionally been left blank so that this class
+     * cannot be instantiated.
+     */
+    private ApiKey() {
+    
+    }
+
+    /**
+     * Get the hashed version of the API key.
+     *
+     * @return The hashed version of the API key.
+     */
+    public static String getHashedKey() {
+        String combinedKey = new String(API_KEY) + formatter.format(new Date());
+        
+        try {
+            MessageDigest m = MessageDigest.getInstance("MD5");
+            m.update(combinedKey.getBytes(), 0, combinedKey.length());
+            String hashedKey = new BigInteger(1, m.digest()).toString(16);
+            while(hashedKey.length() < 32) {
+                hashedKey = "0" + hashedKey;
+            }
+            return hashedKey;
+        } catch(NoSuchAlgorithmException e) {
+            return "";
+        }
+    }
+}
+            ]]>
+        </echo>
+    </target>
 
 <!-- extension targets. Uncomment the ones where you want to do custom work
      in between standard targets -->
@@ -79,7 +147,7 @@
          In all cases you must update the value of version-tag below to read 'custom' instead of an integer,
          in order to avoid having your file be overridden by tools such as "android update project"
     -->
-    <!-- version-tag: 1 -->
+    <!-- version-tag: custom -->
     <import file="${sdk.dir}/tools/ant/build.xml" />
 
 </project>

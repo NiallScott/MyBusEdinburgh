@@ -38,14 +38,16 @@ public class BusParserException extends Exception {
     private int code;
     
     /**
-     * {@inheritDoc}
+     * Create a new BusParserException instance with the default message.
      */
     public BusParserException() {
         super();
     }
     
     /**
-     * {@inheritDoc}
+     * Create a new BusParserException with the supplied message.
+     * 
+     * @param message The message to set.
      */
     public BusParserException(final String message) {
         super(message);

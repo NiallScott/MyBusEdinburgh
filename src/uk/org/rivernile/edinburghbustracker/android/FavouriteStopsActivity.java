@@ -33,6 +33,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
@@ -61,16 +62,15 @@ public class FavouriteStopsActivity extends ListActivity {
     private final static int CONTEXT_MENU_SHOWONMAP = ContextMenu.FIRST + 5;
     
     private final static int DIALOG_FAV_DEL = 0;
-    private final static int DIALOG_PROX_ADD = 1;
-    private final static int DIALOG_PROX_DEL = 2;
-    private final static int DIALOG_TIME_ADD = 3;
-    private final static int DIALOG_TIME_DEL = 4;
+    private final static int DIALOG_PROX_DEL = 1;
+    private final static int DIALOG_TIME_DEL = 2;
 
     private ListAdapter ca;
     private Cursor c;
     private String selectedStopCode;
     private SettingsDatabase sd;
     private AlertManager alertMan;
+    private boolean isCreateShortcut = false;
 
     /**
      * {@inheritDoc}
@@ -79,7 +79,6 @@ public class FavouriteStopsActivity extends ListActivity {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.favouritestops);
-        setTitle(R.string.favouritestops_title);
         
         if(savedInstanceState != null && savedInstanceState
                 .containsKey("selectedStopCode")) {
@@ -95,7 +94,16 @@ public class FavouriteStopsActivity extends ListActivity {
                 new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
                 new int[] { android.R.id.text1 });
         setListAdapter(ca);
-        registerForContextMenu(getListView());
+        
+        isCreateShortcut = Intent.ACTION_CREATE_SHORTCUT.equals(
+                getIntent().getAction());
+        
+        if(isCreateShortcut) {
+            setTitle(R.string.favouriteshortcut_title);
+        } else {
+            setTitle(R.string.favouritestops_title);
+            registerForContextMenu(getListView());
+        }
     }
     
     @Override
@@ -114,10 +122,30 @@ public class FavouriteStopsActivity extends ListActivity {
     protected void onListItemClick(final ListView l, final View v,
             final int position, final long id)
     {
-        Intent intent = new Intent(this, DisplayStopDataActivity.class);
-        intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-        intent.putExtra("stopCode", String.valueOf(id));
-        startActivity(intent);
+        String stopCode = String.valueOf(id);
+        Intent intent;
+        
+        if(isCreateShortcut) {
+            intent = new Intent(Intent.ACTION_MAIN);
+            intent.setClass(this, DisplayStopDataActivity.class);
+            intent.putExtra("stopCode", stopCode);
+
+            Intent result = new Intent();
+            result.putExtra(Intent.EXTRA_SHORTCUT_INTENT, intent);
+            result.putExtra(Intent.EXTRA_SHORTCUT_NAME,
+                    sd.getNameForStop(stopCode));
+            Parcelable icon = Intent.ShortcutIconResource.fromContext(this,
+                    R.drawable.appicon);
+            result.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
+
+            setResult(RESULT_OK, result);
+            finish();
+        } else {
+            intent = new Intent(this, DisplayStopDataActivity.class);
+            intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
+            intent.putExtra("stopCode", String.valueOf(id));
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -184,14 +212,18 @@ public class FavouriteStopsActivity extends ListActivity {
                 if(sd.isActiveProximityAlert(String.valueOf(info.id))) {
                     showDialog(DIALOG_PROX_DEL);
                 } else {
-                    showDialog(DIALOG_PROX_ADD);
+                    intent = new Intent(this, AddProximityAlertActivity.class);
+                    intent.putExtra("stopCode", String.valueOf(info.id));
+                    startActivity(intent);
                 }
                 return true;
             case CONTEXT_MENU_TIME:
                 if(sd.isActiveTimeAlert(String.valueOf(info.id))) {
                     showDialog(DIALOG_TIME_DEL);
                 } else {
-                    showDialog(DIALOG_TIME_ADD);
+                    intent = new Intent(this, AddTimeAlertActivity.class);
+                    intent.putExtra("stopCode", String.valueOf(info.id));
+                    startActivity(intent);
                 }
             default:
                 return super.onContextItemSelected(item);
@@ -223,12 +255,8 @@ public class FavouriteStopsActivity extends ListActivity {
                              }
                 });
                 return builder.create();
-            case DIALOG_PROX_ADD:
-                return alertMan.getAddProxAlertDialog(this);
             case DIALOG_PROX_DEL:
                 return alertMan.getConfirmDeleteProxAlertDialog(this);
-            case DIALOG_TIME_ADD:
-                return alertMan.getAddTimeAlertDialog(this);
             case DIALOG_TIME_DEL:
                 return alertMan.getConfirmDeleteTimeAlertDialog(this);
             default:
@@ -236,21 +264,7 @@ public class FavouriteStopsActivity extends ListActivity {
         }
     }
     
-    @Override
-    public void onPrepareDialog(final int id, final Dialog d) {
-        switch(id) {
-            case DIALOG_PROX_ADD:
-                alertMan.editAddProxAlertDialog(selectedStopCode,
-                        (AlertDialog)d);
-            case DIALOG_TIME_ADD:
-                alertMan.editAddTimeAlertDialog(selectedStopCode,
-                        (AlertDialog)d, null);
-            default:
-                break;
-        }
-    }
-    
-    public class FavouritesCursorAdapter extends SimpleCursorAdapter {
+    public static class FavouritesCursorAdapter extends SimpleCursorAdapter {
         
         private BusStopDatabase bsd;
         
@@ -258,7 +272,7 @@ public class FavouriteStopsActivity extends ListActivity {
                 final Cursor c, final String[] from, final int[] to) {
             super(context, layout, c, from, to);
             
-            bsd = BusStopDatabase.getInstance(FavouriteStopsActivity.this);
+            bsd = BusStopDatabase.getInstance(context);
         }
         
         @Override

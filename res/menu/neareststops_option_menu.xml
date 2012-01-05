@@ -29,5 +29,6 @@
     <item
         android:id="@+id/neareststops_option_menu_filter"
         android:title="@string/neareststops_menu_filter"
-        android:icon="@drawable/ic_menu_filter" />
+        android:icon="@drawable/ic_menu_filter"
+        android:showAsAction="ifRoom|withText" />
 </menu>

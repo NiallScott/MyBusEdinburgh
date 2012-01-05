@@ -46,9 +46,11 @@ import java.io.InputStream;
 public final class BusStopDatabase extends SQLiteOpenHelper {
 
     /** The name of the database. */
-    protected final static String STOP_DB_NAME = "busstops.db";
+    public static final String STOP_DB_NAME = "busstops2.db";
+    /** This is the schema name of the database. */
+    public static final String SCHEMA_NAME = "MBE_5";
     /** The version of the database. For internal use only. */
-    protected final static int STOP_DB_VERSION = 1;
+    protected static final int STOP_DB_VERSION = 1;
 
     private static BusStopDatabase instance = null;
     
@@ -277,17 +279,42 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      */
     public long getLastDBModTime() {
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(true, "metadata", new String[] { "updateTS" }, null,
-                null, null, null, null, null);
-        if(c.getCount() == 0) return 0;
-        c.moveToNext();
-        String result = c.getString(0);
-        c.close();
-        try {
-            return Long.parseLong(result);
-        } catch(NumberFormatException e) {
+        Cursor c = db.query(true, "database_info",
+                new String[] { "updateTS" }, null, null, null, null, null,
+                null);
+        
+        if(c.moveToNext()) {
+            String result = c.getString(0);
+            c.close();
+            try {
+                return Long.parseLong(result);
+            } catch(NumberFormatException e) {
+                return 0;
+            }
+        } else {
+            c.close();
             return 0;
         }
+    }
+    
+    /**
+     * Get the current topology ID. This is a string which uniquely identifies
+     * the version of the bus stop data the database is using.
+     * 
+     * @return The current topology ID.
+     */
+    public String getTopoId() {
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query(true, "database_info",
+                new String[] { "current_topo_id" }, null, null, null, null,
+                null, null);
+        String result = "";
+        if(c.moveToNext()) {
+            result = c.getString(0);
+        }
+        c.close();
+        
+        return result;
     }
 
     /**

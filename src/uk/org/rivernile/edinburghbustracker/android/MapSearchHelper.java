@@ -34,7 +34,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
@@ -248,7 +247,6 @@ public class MapSearchHelper {
             SearchResult sr = getItem(position);
             
             TextView text1, text2 = null;
-            ImageView iv;
             
             if(convertView != null) {
                 text2 = (TextView)convertView.findViewById(android.R.id.text2);
@@ -265,9 +263,6 @@ public class MapSearchHelper {
                                 parent, false);
                     }
                     
-                    iv = (ImageView)row.findViewById(R.id.imgMapSearchIcon);
-                    iv.setImageResource(R.drawable.house);
-                    
                     text1 = (TextView)row.findViewById(android.R.id.text1);
                     text1.setText(sr.description);
                     break;
@@ -281,9 +276,6 @@ public class MapSearchHelper {
                     }
                     
                     text2.setText(sr.services);
-                    
-                    iv = (ImageView)row.findViewById(R.id.imgMapSearchIcon);
-                    iv.setImageResource(R.drawable.mapmarker);
                     
                     text1 = (TextView)row.findViewById(android.R.id.text1);
                     text1.setText(sr.description);

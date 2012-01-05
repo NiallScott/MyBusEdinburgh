@@ -27,17 +27,20 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/displaystopdata_option_menu_favourite" />
-    <item
-        android:id="@+id/displaystopdata_option_menu_sort"
-        android:icon="@drawable/ic_menu_sort"/>
-    <item
-        android:id="@+id/displaystopdata_option_menu_autorefresh"
-        android:icon="@drawable/ic_menu_auto_refresh" />
+        android:id="@+id/displaystopdata_option_menu_favourite"
+        android:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/displaystopdata_option_menu_refresh"
         android:title="@string/displaystopdata_menu_refresh"
-        android:icon="@drawable/ic_menu_refresh" />
+        android:icon="@drawable/ic_menu_refresh"
+        android:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/displaystopdata_option_menu_sort"
+        android:icon="@drawable/ic_menu_sort"
+        android:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/displaystopdata_option_menu_autorefresh"
+        android:icon="@drawable/ic_menu_autorefresh" />
     <item
         android:id="@+id/displaystopdata_option_menu_prox" />
     <item

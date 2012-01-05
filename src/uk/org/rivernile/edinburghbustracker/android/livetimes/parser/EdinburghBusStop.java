@@ -31,17 +31,49 @@ import java.util.Comparator;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
 
+/**
+ * This is the Edinburgh specific implementation of a BusStop. Essentially it
+ * adds sorting by time to the results.
+ * 
+ * @author Niall Scott
+ */
 public class EdinburghBusStop extends BusStop {
     
-    public EdinburghBusStop(final String stopCode, final String stopName)
-            throws IllegalArgumentException {
+    private boolean disruption = false;
+    
+    /**
+     * Create a new EdinburghBusStop instance.
+     * 
+     * @param stopCode The bus stop code.
+     * @param stopName The bus stop name.
+     * @param disruption The disruption status of the bus stop.
+     * @throws IllegalArgumentException When an illegal argument is passed.
+     */
+    public EdinburghBusStop(final String stopCode, final String stopName,
+            final boolean disruption) throws IllegalArgumentException {
         super(stopCode, stopName);
+        
+        this.disruption = disruption;
     }
     
+    /**
+     * Get the list sorted by time.
+     * 
+     * @return The list sorted by time.
+     */
     public ArrayList<BusService> getSortedByTimeBusServices() {
         ArrayList<BusService> busServices = getBusServices();
         Collections.sort(busServices, serviceComparator);
         return busServices;
+    }
+    
+    /**
+     * Get the disruption status for this bus stop.
+     * 
+     * @return The disruption status of this bus stop.
+     */
+    public boolean getDisruption() {
+        return disruption;
     }
     
     private static Comparator<BusService> serviceComparator =
@@ -53,8 +85,7 @@ public class EdinburghBusStop extends BusStop {
             
             if(busA == null || busB == null) return 0;
             
-            return busA.getArrivalDateObject()
-                    .compareTo(busB.getArrivalDateObject());
+            return busA.getArrivalMinutes() - busB.getArrivalMinutes();
         }
     };
 }

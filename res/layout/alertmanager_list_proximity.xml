@@ -41,13 +41,15 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_menu_mylocation" />
+            android:src="@drawable/ic_menu_proximity"
+            android:contentDescription="@string/alertmanager_prox_image_description" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingLeft="10dp" >
+        android:paddingLeft="10dp" 
+        android:paddingRight="10dp" >
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -63,7 +65,6 @@
             android:id="@+id/btnRemoveProxAlert"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
             android:text="@string/alertmanager_button_remove_single" />
     </LinearLayout>
 </LinearLayout>

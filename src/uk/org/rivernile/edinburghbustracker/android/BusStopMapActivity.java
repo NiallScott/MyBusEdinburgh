@@ -56,6 +56,8 @@ import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.OverlayItem;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
@@ -70,10 +72,8 @@ public class BusStopMapActivity extends MapActivity implements
     private static final int DIALOG_BUSSTOP = 3;
     private static final int DIALOG_CONFIRM_REM_FAV = 4;
     private static final int DIALOG_INSTALL_STREET_VIEW = 5;
-    private static final int DIALOG_ADD_PROX_ALERT = 6;
-    private static final int DIALOG_REM_PROX_ALERT = 7;
-    private static final int DIALOG_ADD_TIME_ALERT = 8;
-    private static final int DIALOG_REM_TIME_ALERT = 9;
+    private static final int DIALOG_REM_PROX_ALERT = 6;
+    private static final int DIALOG_REM_TIME_ALERT = 7;
 
     private static final int DEFAULT_LAT = 55948611;
     private static final int DEFAULT_LONG = -3199811;
@@ -156,7 +156,7 @@ public class BusStopMapActivity extends MapActivity implements
                 myLocation.runOnFirstFix(new Runnable() {
                     @Override
                     public void run() {
-                        mapView.getController().setCenter(myLocation
+                        mapView.getController().animateTo(myLocation
                                 .getMyLocation());
                         mapView.getController().setZoom(17);
                     }
@@ -294,7 +294,7 @@ public class BusStopMapActivity extends MapActivity implements
             case R.id.busstopmap_option_menu_mylocation:
                 GeoPoint ml = myLocation.getMyLocation();
                 if(ml != null) {
-                    mapView.getController().setCenter(ml);
+                    mapView.getController().animateTo(ml);
                     mapView.getController().setZoom(17);
                 } else {
                     Toast.makeText(this, R.string.map_location_unknown,
@@ -306,9 +306,15 @@ public class BusStopMapActivity extends MapActivity implements
                 break;
             case R.id.busstopmap_option_menu_maptype:
                 mapView.setSatellite(!mapView.isSatellite());
+                if(MainActivity.isHoneycombOrGreater()) {
+                    invalidateOptionsMenuSupport();
+                }
                 break;
             case R.id.busstopmap_option_menu_trafficview:
                 mapView.setTraffic(!mapView.isTraffic());
+                if(MainActivity.isHoneycombOrGreater()) {
+                    invalidateOptionsMenuSupport();
+                }
                 break;
             case R.id.busstopmap_option_menu_filter:
                 showDialog(DIALOG_FILTER);
@@ -340,7 +346,14 @@ public class BusStopMapActivity extends MapActivity implements
                 });
                 return prog;
             case DIALOG_SEARCH_RESULTS:
-                AlertDialog.Builder ad = new AlertDialog.Builder(this);
+                AlertDialog.Builder ad;
+                if(MainActivity.isHoneycombOrGreater()) {
+                    //ad = new AlertDialog.Builder(this,
+                            //AlertDialog.THEME_HOLO_DARK);
+                    ad = MainActivity.getHoneycombDialog(this);
+                } else {
+                    ad = new AlertDialog.Builder(this);
+                }
                 LayoutInflater inflater = (LayoutInflater)
                         getSystemService(LAYOUT_INFLATER_SERVICE);
                 View layout = inflater.inflate(
@@ -366,7 +379,14 @@ public class BusStopMapActivity extends MapActivity implements
                 LayoutInflater vi = (LayoutInflater)getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
                 stopDialogView = vi.inflate(R.layout.mapdialog, null);
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                AlertDialog.Builder builder;
+                if(MainActivity.isHoneycombOrGreater()) {
+                    //builder = new AlertDialog.Builder(this,
+                            //AlertDialog.THEME_HOLO_DARK);
+                    builder = MainActivity.getHoneycombDialog(this);
+                } else {
+                    builder = new AlertDialog.Builder(this);
+                }
                 builder.setCancelable(true).setTitle("!");
                 builder.setNegativeButton(R.string.close,
                         new DialogInterface.OnClickListener() {
@@ -391,16 +411,8 @@ public class BusStopMapActivity extends MapActivity implements
                 return createConfirmDeleteFavouriteDialog();
             case DIALOG_INSTALL_STREET_VIEW:
                 return createInstallStreetViewDialog();
-            case DIALOG_ADD_PROX_ALERT:
-                d = alertMan.getAddProxAlertDialog(this);
-                setDialogToDismissAndShowBusStopDialog(d);
-                return d;
             case DIALOG_REM_PROX_ALERT:
                 d = alertMan.getConfirmDeleteProxAlertDialog(this);
-                setDialogToDismissAndShowBusStopDialog(d);
-                return d;
-            case DIALOG_ADD_TIME_ALERT:
-                d = alertMan.getAddTimeAlertDialog(this);
                 setDialogToDismissAndShowBusStopDialog(d);
                 return d;
             case DIALOG_REM_TIME_ALERT:
@@ -458,14 +470,6 @@ public class BusStopMapActivity extends MapActivity implements
 
                 stopDialogAdapter.add(getString(
                         R.string.map_dialog_streetview));
-                break;
-            case DIALOG_ADD_PROX_ALERT:
-                alertMan.editAddProxAlertDialog(stopOverlay.currentItem
-                        .stopCode, (AlertDialog)d);
-                break;
-            case DIALOG_ADD_TIME_ALERT:
-                alertMan.editAddTimeAlertDialog(stopOverlay.currentItem
-                        .stopCode, (AlertDialog)d, null);
                 break;
             default:
                 break;
@@ -589,14 +593,22 @@ public class BusStopMapActivity extends MapActivity implements
                 if(sd.isActiveProximityAlert(stopCode)) {
                     showDialog(DIALOG_REM_PROX_ALERT);
                 } else {
-                    showDialog(DIALOG_ADD_PROX_ALERT);
+                    intent = new Intent(this, AddProximityAlertActivity.class);
+                    intent.putExtra("stopCode", stopCode);
+                    startActivity(intent);
+                    showStopDialog = true;
+                    dismissDialog(DIALOG_BUSSTOP);
                 }
                 break;
             case 3:
                 if(sd.isActiveTimeAlert(stopCode)) {
                     showDialog(DIALOG_REM_TIME_ALERT);
                 } else {
-                    showDialog(DIALOG_ADD_TIME_ALERT);
+                    intent = new Intent(this, AddTimeAlertActivity.class);
+                    intent.putExtra("stopCode", stopCode);
+                    startActivity(intent);
+                    showStopDialog = true;
+                    dismissDialog(DIALOG_BUSSTOP);
                 }
                 break;
             case 4:
@@ -617,6 +629,20 @@ public class BusStopMapActivity extends MapActivity implements
                     }
                 }
                 break;
+        }
+    }
+    
+    private void invalidateOptionsMenuSupport() {
+        try {
+            Method mtd = BusStopMapActivity.class
+                    .getMethod("invalidateOptionsMenu", (Class<?>[]) null);
+            if(mtd != null) mtd.invoke(this, (Object[]) null);
+        } catch(NoSuchMethodException e) {
+            
+        } catch(IllegalAccessException e) {
+            
+        } catch(InvocationTargetException e) {
+            
         }
     }
     

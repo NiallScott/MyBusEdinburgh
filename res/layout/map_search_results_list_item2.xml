@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott & Scott Straughan
+ * Copyright (C) 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,11 +31,13 @@
     android:orientation="horizontal" >
     <ImageView
         android:id="@+id/imgMapSearchIcon"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/mapmarker"
+        android:contentDescription="@string/map_search_stop_icon_description" />
     <include
         layout="@android:layout/simple_list_item_2" />
 </LinearLayout>

@@ -25,39 +25,135 @@
 
 package uk.org.rivernile.edinburghbustracker.android.livetimes.parser;
 
-import java.util.Calendar;
-import java.util.Date;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Bus;
 
+/**
+ * This class contains the Edinburgh specific implementation of the bus tracker
+ * API.
+ * 
+ * @author Niall Scott
+ */
 public class EdinburghBus extends Bus {
     
-    private Date arrivalObj;
+    /** This field is used when the reliability is unknown. */
+    public static final char RELIABILITY_UNKNOWN = 0;
+    /** Denotes a bus which is delayed. */
+    public static final char RELIABILITY_DELAYED = 'B';
+    /** Denotes when a bus has been delocated. */
+    public static final char RELIABILITY_DELOCATED = 'D';
+    /** Denotes a bus which is real-time but not low floor */
+    public static final char RELIABILITY_REAL_TIME_NOT_LOW_FLOOR = 'F';
+    /** Denotes a bus which is real-time and is low floor */
+    public static final char RELIABILITY_REAL_TIME_LOW_FLOOR = 'H';
+    /** Denotes a bus which is immobilised? Broken down perhaps? */
+    public static final char RELIABILITY_IMMOBILISED = 'I';
+    /** Denotes a bus which is neutralised? The army got to it? */
+    public static final char RELIABILITY_NEUTRALISED = 'N';
+    /** Denotes a bus which has a radio fault. */
+    public static final char RELIABILITY_RADIO_FAULT = 'R';
+    /** Denotes a bus for which real-time tracking is not available. */
+    public static final char RELIABILITY_ESTIMATED = 'T';
+    /** Denotes a bus which has been diverted. */
+    public static final char RELIABILITY_DIVERTED = 'V';
     
-    public EdinburghBus(final String serviceName, final String destination,
-            String arrivalTime) throws IllegalArgumentException {
-        super(serviceName, destination, arrivalTime);
+    /** This field is used when the type is unknown. */
+    public static final char TYPE_UNKNOWN = 0;
+    /** Denotes this stop is a terminus on this bus route. */
+    public static final char TYPE_TERMINUS = 'D';
+    /** Denotes this stop is a normal stop on this bus route. */
+    public static final char TYPE_NORMAL = 'N';
+    /** Denotes this service is part route. */
+    public static final char TYPE_PART_ROUTE = 'P';
+    /** Denotes this stop is a timing reference stop on this bus route. */
+    public static final char TYPE_REFERENCE = 'R';
+    
+    private int arrivalMinutes;
+    private char reliability;
+    private char type;
+    private String terminus;
+    
+    /**
+     * Create a new EdinburghBus object.
+     * 
+     * @param destination The destination of this bus.
+     * @param arrivalDay How many days in to the future this bus will arrive at
+     * this stop. 0 = today.
+     * @param arrivalTime The time in HH:mm format that the bus will arrive at
+     * this bus stop.
+     * @param arrivalMinutes How many minutes from when the request was made
+     * until the bus arrives at the bus stop.
+     * @param reliability The reliability of this bus. See the RELIABILITY_*
+     * fields in this class.
+     * @param type The type of stop this bus stop is for this bus. See the
+     * TYPE_* fields in this class.
+     * @param terminus This will be used in the future.
+     */
+    public EdinburghBus(final String destination, final int arrivalDay,
+            final String arrivalTime, final int arrivalMinutes,
+            final char reliability, final char type, final String terminus) {
+        super(destination, arrivalTime);
         
-        Calendar time = Calendar.getInstance();
-        if(arrivalTime.charAt(0) == '*')
-            arrivalTime = arrivalTime.substring(1);
-        try {
-            time.add(Calendar.MINUTE, Integer.parseInt(arrivalTime));
-        } catch(NumberFormatException e) {
-            if(arrivalTime.indexOf(':') != -1) {
-                time.set(Calendar.HOUR_OF_DAY,
-                    Integer.parseInt(arrivalTime.split(":")[0]));
-                time.set(Calendar.MINUTE,
-                    Integer.parseInt(arrivalTime.split(":")[1]));
-                if(time.compareTo(Calendar.getInstance()) < 0)
-                    time.add(Calendar.DAY_OF_WEEK, 1);
-            } else if(!arrivalTime.equals("DUE")) {
-                time.add(Calendar.DAY_OF_WEEK, 2);
-            }
-        }
-        arrivalObj = time.getTime();
+        this.arrivalMinutes = arrivalMinutes;
+        this.reliability = reliability;
+        this.type = type;
+        this.terminus = terminus;
     }
     
-    public Date getArrivalDateObject() {
-        return arrivalObj;
+    /**
+     * Get how many minutes it is between when the request for this information
+     * was made and the bus is due to arrive at the bus stop.
+     * 
+     * @return Minutes until arrival.
+     */
+    public int getArrivalMinutes() {
+        return arrivalMinutes;
+    }
+    
+    /**
+     * Get the reliability of this bus. See the RELIABILITY_* fields in this
+     * class.
+     * 
+     * @return The reliability of this bus.
+     */
+    public char getReliability() {
+        return reliability;
+    }
+    
+    /**
+     * Get the type of this bus stop for this bus. See the TYPE_* fields in this
+     * class.
+     * 
+     * @return The type of this bus stop for this bus.
+     */
+    public char getType() {
+        return type;
+    }
+    
+    /**
+     * To be used in the future.
+     * 
+     * @return Don't know as of yet.
+     */
+    public String getTerminus() {
+        return terminus;
+    }
+    
+    /**
+     * Returns true if this service is delayed, false if not.
+     * 
+     * @return True if this service is delayed, false if not.
+     */
+    public boolean isDelayed() {
+        return (reliability == RELIABILITY_DELAYED);
+    }
+    
+    /**
+     * Returns true if the time is an estimated time (not based on live
+     * tracking), false if not.
+     * 
+     * @return Returns true if the time is an estimated time, otherwise false.
+     */
+    public boolean isEstimated() {
+        return (reliability == RELIABILITY_ESTIMATED);
     }
 }

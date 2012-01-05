@@ -29,19 +29,23 @@
     <item
         android:id="@+id/busstopmap_option_menu_mylocation"
         android:title="@string/map_menu_mylocation"
-        android:icon="@drawable/ic_menu_mylocation" />
+        android:icon="@drawable/ic_menu_mylocation"
+        android:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/busstopmap_option_menu_search"
         android:title="@string/search"
-        android:icon="@drawable/ic_menu_search" />
+        android:icon="@drawable/ic_menu_search"
+        android:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/busstopmap_option_menu_maptype"
-        android:title="@string/map_menu_maptype_mapview" />
+        android:title="@string/map_menu_maptype_mapview"
+        android:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/busstopmap_option_menu_trafficview"
         android:icon="@drawable/ic_menu_trafficview" />
     <item
         android:id="@+id/busstopmap_option_menu_filter"
         android:title="@string/map_menu_filter"
-        android:icon="@drawable/ic_menu_filter" />
+        android:icon="@drawable/ic_menu_filter"
+        android:showAsAction="ifRoom|withText" />
 </menu>

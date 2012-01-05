@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2010 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,14 +27,22 @@
 
 This version of strings.xml is in the developer's locale (en_GB) -->
 <resources>
-    <!-- Application strings -->
-    <string name="app_name">My Bus Edinburgh</string> <!-- Should not be changed -->
+    <!-- 
+    ***********************
+    * Application strings *
+    ***********************
+    -->
+    <string name="app_name">My Bus Edinburgh</string> <!-- Should not be included in localised versions -->
     <string name="app_description">View live bus data in Edinburgh</string>
-    <string name="app_author">Niall Scott</string> <!-- Should not be changed -->
+    <string name="app_author">Niall Scott</string> <!-- Should not be included in localised versions -->
     <string name="search_hint">Search bus stops and places</string>
-    <string name="asset_db_version">1300011079753</string>
+    <string name="asset_db_version">1325739696839</string> <!-- Should not be included in localised versions -->
 
-    <!-- Generic strings -->
+    <!--
+    *******************
+    * Generic strings *
+    *******************
+    -->
     <string name="submit">Submit</string>
     <string name="preferences">Preferences</string>
     <string name="error">Error</string>
@@ -50,16 +58,25 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="distance">Distance</string>
     <string name="select">Select</string>
 
-    <!-- Strings for MainActivity -->
-    <string name="main_favourite_stops">Favourite Stops</string>
-    <string name="main_enter_stop_code">Enter Stop Code</string>
+    <!--
+    ****************************
+    * Strings for MainActivity *
+    ****************************
+    -->
+    <string name="main_favourite_stops">Favourite Bus Stops</string>
+    <string name="main_enter_stop_code">Enter or Scan Code</string>
     <string name="main_bus_stop_map">Bus Stop Map</string>
     <string name="main_db_updated">My Bus Edinburgh: The stop database has
     been updated to the latest version.</string>
     <string name="main_db_no_updates">My Bus Edinburgh: No stop database updates found.</string>
 
-    <!-- String for MainActivity dialogs -->
+    <!--
+    ***********************************
+    * String for MainActivity dialogs *
+    ***********************************
+    -->
     <string name="main_aboutdialog_dbversion">Bus stop DB version</string>
+    <string name="main_aboutdialog_topology">Topology version</string>
     <string name="main_aboutdialog_contact">Website: http://www.rivernile.org.uk/bustracker\nFollow @MyBusEdinburgh on Twitter for the latest updates.</string>
     <string name="main_aboutdialog_body"><b>Thanks to the following people and
     entities for making this application happen:</b>\nGordon Christie (EdinBus for
@@ -72,22 +89,32 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     any data loss or any other issues arising through the usage of this
     application. Usage of this application signifies the user takes complete
     responsibility.</string>
+    <string name="main_aboutdialog_appicon_description">Application icon</string>
 
-    <!-- Strings for EnterStopCodeActivity -->
+    <!--
+    *************************************
+    * Strings for EnterStopCodeActivity *
+    *************************************
+    -->
     <string name="enterstopcode_title">Enter Bus Stop Code</string>
-    <string name="enterstopcode_text">Enter the stop code. This can usually be found on a bus stop\'s timetable.</string>
     <string name="enterstopcode_toast_inputerr">You need to enter a valid bus
         stop code to view bus stop informtion. Usually this is an 8 digit
         number.
     </string>
-    <string name="enterstopcode_edit_hint">Enter bus stop code</string>
-    <string name="enterstopcode_button_scan">Scan</string>
-    <string name="enterstopcode_button_market">Download from Market</string>
-    <string name="enterstopcode_txt_scan_available">Press the \'scan\' button below to scan a QR code.</string>
-    <string name="enterstopcode_txt_scan_notavailable">You can also enter a bus stop code by scanning a QR code, but this requires a third-party application which you do not have installed. Do you wish to download this from the Android Market? The application is called Barcode Scanner by the ZXing Team and is free to download.</string>
+    <string name="enterstopcode_hint">You can manually enter a bus stop code, or you can scan a QR code like the one shown which can be found on the bus timetable at the bus stop.</string>
+    <string name="enterstopcode_edit_hint">Enter 8-digit bus stop code</string>
+    <string name="enterstopcode_button_scan">Scan QR code</string>
+    <string name="enterstopcode_scan_notavailable_title">QR scanning app required</string>
+    <string name="enterstopcode_txt_scan_notavailable">To scan QR codes, your device must have a camera and you must have a compatible QR barcode scanning app installed, which you do not. Do you wish to download this from the Android Market? The application is called Barcode Scanner by the ZXing Team and is free to download.</string>
     <string name="enterstopcode_invalid_qrcode">The scanned QR code does not contain bus stop data. Either the code was not scanned correctly, or the QR code is invalid. Please rescan a valid QR code.</string>
+    <string name="enterstopcode_no_market">The Android Market could not be found on your device.</string>
+    <string name="enterstopcode_stopicon_description">Example bus stop QR code</string>
 
-    <!-- Strings for FavouriteStopsActivity -->
+    <!--
+    **************************************
+    * Strings for FavouriteStopsActivity *
+    **************************************
+    -->
     <string name="favouritestops_title">Favourite Bus Stops</string>
     <string name="favouritestops_nosavedstops"><b>You have no saved favourite bus
     stops.</b>\nYou can add a new favourite from various places in the application,
@@ -96,62 +123,83 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     </string>
     <string name="favouritestops_dialog_confirm_title">Are you sure you want to
     delete this stop?</string>
-    <string name="favouritestops_description">Long press on a stop name to reveal more options.</string>
+    <string name="favouriteshortcut_title">Select favourite stop</string>
+    <string name="favouriteshortcut_label">Favourite bus stop</string>
 
-    <!-- Strings for FavouriteStopsActivity menu -->
+    <!--
+    *******************************************
+    * Strings for FavouriteStopsActivity menu *
+    *******************************************
+    -->
     <string name="favouritestops_menu_view">View stop times</string>
     <string name="favouritestops_menu_edit">Edit stop</string>
     <string name="favouritestops_menu_delete">Delete stop</string>
     <string name="favouritestops_menu_showonmap">Show stop on map</string>
 
-    <!-- Strings for DisplayStopDataActivity -->
+    <!--
+    ***************************************
+    * Strings for DisplayStopDataActivity *
+    ***************************************
+    -->
     <string name="displaystopdata_title">Display Bus Times</string>
-    <string name="displaystopdata_title2">Bus Stop:</string>
-    <string name="displaystopdata_gettingdata">Retrieving data from server...
-    </string>
-    <string name="displaystopdata_empty">There is currently no data to display.
-    </string>
-    <string name="displaystopdata_lastupdated">Last updated: </string>
+    <string name="displaystopdata_gettingdata">Retrieving data from server&#8230;</string>
+    <string name="displaystopdata_empty">There is currently no data to display.</string>
+    <string name="displaystopdata_lastupdated">Last updated </string>
+    <string name="displaystopdata_column_service">Service</string>
+    <string name="displaystopdata_column_destination">Destination</string>
+    <string name="displaystopdata_column_due">Due (mins)</string>
 
-    <!-- Strings for DisplayStopDataActvity errors -->
-    <string name="displaystopdata_err_nocode">No stop code was provided.
-    </string>
-    <string name="displaystopdata_err_parseerr">There was an error whilst trying
-    to parse the incoming data.</string>
-    <string name="displaystopdata_err_noconn">A connection could not be made to
-    the server or an error occurred during transmission.</string>
-    <string name="displaystopdata_err_noresolv">The server could not be
-    resolved.</string>
-    <string name="displaystopdata_err_serverr">The server reported an error.
-    </string>
-    <string name="displaystopdata_err_nodata">There is no data for this bus
-    stop. Are you sure the supplied stop code is correct?</string>
-    <string name="displaystopdata_description">Live Bus Departures</string>
-    <string name="displaystopdata_description2">View live bus departures for your chosen stop. Press the menu key for more options.</string>
+    <!--
+    *********************************************
+    * Strings for DisplayStopDataActvity errors *
+    *********************************************
+    -->
+    <string name="displaystopdata_err_unknown">An unknown error has occurred. Please try again later.</string>
+    <string name="displaystopdata_err_nocode">No stop code was provided. To be able to show bus times, a stop code needs to be provided.</string>
+    <string name="displaystopdata_err_parseerr">There was an error whilst trying to handle the incoming data. Please retry.</string>
+    <string name="displaystopdata_err_noconn">A connection could not be made to the server or an error occurred during transmission. If you are sure you are connected, please retry.</string>
+    <string name="displaystopdata_err_noresolv">The server could not be resolved. Please try again later.</string>
+    <string name="displaystopdata_err_nodata">There is no data for this bus stop. Are you sure the supplied stop code is correct? If so, retry.</string>
+    
+    <string name="displaystopdata_err_api_invalid_key">The service refused to serve this request. The service depends on your device\'s date and time being correct. Please check this in your system preferences. If they are, contact the application developer for further assistance.</string>
+    <string name="displaystopdata_err_api_invalid_parameter">The service did not like this request. If this happens again, please contact the application developer.</string>
+    <string name="displaystopdata_err_api_processing_error">The service encountered a processing error. Please try again later.</string>
+    <string name="displaystopdata_err_api_system_maintenance">The service is currently undergoing maintenance and is currently unavailable. Please try again later.</string>
+    <string name="displaystopdata_err_api_system_overloaded">The system is currently experiencing high load. Please try again later.</string>
 
-    <!-- Strings for DisplayStopDataActivity menu -->
-    <string name="displaystopdata_menu_turnautorefreshon">Turn auto-refresh on
-    </string>
-    <string name="displaystopdata_menu_turnautorefreshoff">Turn auto-refresh off
-    </string>
+    <!--
+    ********************************************
+    * Strings for DisplayStopDataActivity menu *
+    ********************************************
+    -->
+    <string name="displaystopdata_menu_turnautorefreshon">Turn auto-refresh on</string>
+    <string name="displaystopdata_menu_turnautorefreshoff">Turn auto-refresh off</string>
     <string name="displaystopdata_menu_refresh">Refresh</string>
     <string name="displaystopdata_menu_addfav">Add as favourite</string>
     <string name="displaystopdata_menu_remfav">Remove as favourite</string>
     <string name="displaystopdata_menu_sort_service">Sort by service</string>
     <string name="displaystopdata_menu_sort_times">Sort by time</string>
     
-    <!-- Strings for DisplayStopDataActivity context menu -->
-    <string name="displaystopdata_context_title">empty</string>
-    <string name="displaystopdata_context_addalarm">Add new alarm...</string>
+    <!--
+    ****************************************************
+    * Strings for DisplayStopDataActivity context menu *
+    ****************************************************
+    -->
+    <string name="displaystopdata_context_title">Bus actions</string>
+    <string name="displaystopdata_context_addtimealert">Add new arrival alert</string>
 
-    <!-- Strings for PreferencesActivity -->
+    <!--
+    ***********************************
+    * Strings for PreferencesActivity *
+    ***********************************
+    -->
     <string name="preferences_title">Preferences</string>
     
     <string name="preferences_category_general">General</string>
     <string name="preferences_checkbox_general_showfavourites">Show favourites</string>
     <string name="preferences_checkbox_general_showfavourites_ticked">Untick to show the home menu when the application is launched.</string>
     <string name="preferences_checkbox_general_showfavourites_unticked">Tick to show your favourite stops when the application is launched.</string>
-    <string name="preferences_checkbox_general_dbupdate">Auto-update database</string>
+    <string name="preferences_checkbox_general_dbupdate">Auto update database</string>
     <string name="preferences_checkbox_general_dbupdate_ticked">Untick for the stop database to not be auto updated.</string>
     <string name="preferences_checkbox_general_dbupdate_unticked">Tick for the stop database to auto update.</string>
     <string name="preferences_dialog_general_update">Update stop database</string>
@@ -176,7 +224,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_alerts_led_unticked">Tick to flash the device LED during alerts, if your device supports it.</string>
 
     <string name="preferences_category_bustimes">Bus Times Display</string>
-    <string name="preferences_checkbox_bustimes_autorefresh">Auto-refresh</string>
+    <string name="preferences_checkbox_bustimes_autorefresh">Auto refresh</string>
     <string name="preferences_checkbox_bustimes_autorefresh_ticked">Untick to not auto-refresh bus times by default.</string>
     <string name="preferences_checkbox_bustimes_autorefresh_unticked">Tick to auto-refresh bus times by default.</string>
     <string name="preferences_checkbox_bustimes_nightbus">Show night services</string>
@@ -199,18 +247,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">Untick to show a prompt when GPS is disabled whilst viewing nearest bus stops.</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">Tick to not show a prompt when GPS is disabled whilst viewing nearest bus stops.</string>
 
-    <string name="preferences_category_advanced">Advanced</string>
-    <string name="preferences_textbox_advanced_hostname">Hostname</string>
-    <string name="preferences_textbox_advanced_hostname_summary">The hostname of the server. For advanced users only.</string>
-    <string name="preferences_textbox_advanced_port">Port</string>
-    <string name="preferences_textbox_advanced_port_summary">The port on the server.
-    For advanced users only.</string>
-
-    <string name="preferences_invalidhostname">The hostname you have entered is invalid, it has been reset back to the default value.</string>
-    <string name="preferences_invalidport">The port you have entered is invalid, it has been reset back to the default value.</string>
-    <string name="preferences_textbox_hostname_dialog">Edit Hostname</string>
-    <string name="preferences_textbox_port_dialog">Edit Port</string>
-
     <string name="preferences_backup_error_json_read">The backup could not be restored as the backup could not be successfully read.</string>
     <string name="preferences_backup_error_json_write">The data could not be backed up.</string>
     <string name="preferences_backup_error_mediaerror">There is a problem with the external storage. Is it present and not already in use?</string>
@@ -220,36 +256,46 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preference_backup_success">The database was successfully backed up to external storage.</string>
     <string name="preference_restore_success">The database was successfully restored from external storage.</string>
 
-    <!-- Strings for AddEditFavouriteStopActivity -->
+    <!--
+    ********************************************
+    * Strings for AddEditFavouriteStopActivity *
+    ********************************************
+    -->
     <string name="addeditstop_title">Add/Edit Favourite Stop</string>
     <string name="addeditstop_title_add">Add Favourite Stop:</string>
     <string name="addeditstop_title_edit">Edit Stop Details</string>
-    <string name="addeditstop_title_description">You can enter a custom name for this bus stop below.</string>
     <string name="addeditstop_description">Enter a name for this bus stop:
     </string>
     <string name="addeditstop_edit_stopname_hint">Stop name</string>
     <string name="addeditstop_error_blankstopname">You cannot have a blank stop
     name.</string>
 
-    <!-- Strings for BusStopMapActivity -->
+    <!--
+    **********************************
+    * Strings for BusStopMapActivity *
+    **********************************
+    -->
     <string name="map_title">Bus Stop Map</string>
     <string name="map_dialog_showtimes">Show bus times</string>
     <string name="map_dialog_close">Close</string>
     <string name="map_dialog_streetview">Show on Street View</string>
-    <string name="map_dialog_noservices">There are no known services for this
-    stop.</string>
-    <string name="map_finding_location">Trying to determine your location...
-    </string>
-    <string name="map_location_unknown">Your current location is unknown.
-    </string>
-    <string name="map_search_progress_dialog">Searching location...</string>
-    <string name="map_search_dialog_title">Did you mean...?</string>
+    <string name="map_dialog_noservices">There are no known services for this stop.</string>
+    <string name="map_finding_location">Trying to determine your location&#8230;</string>
+    <string name="map_location_unknown">Your current location is unknown.</string>
+    <string name="map_search_progress_dialog">Searching location&#8230;</string>
+    <string name="map_search_dialog_title">Did you mean&#8230;</string>
     <string name="map_search_dialog_noresults">There were no results for your search.</string>
+    <string name="map_search_address_icon_description">Address icon</string>
+    <string name="map_search_stop_icon_description">Stop marker icon</string>
     <string name="map_streetview_dialog_title">Google Street View required</string>
     <string name="map_streetview_dialog_message">You currently do not have Google Street View installed. Do you want to install this from the Android Market now?</string>
     <string name="map_streetview_error_nomarket">The Android Market is not installed on your device. The Market must be installed to install Google Street View.</string>
 
-    <!-- Strings for BusStopMapActivity menu -->
+    <!--
+    ***************************************
+    * Strings for BusStopMapActivity menu *
+    ***************************************
+    -->
     <string name="map_menu_maptype_mapview">Map view</string>
     <string name="map_menu_maptype_satellite">Satellite view</string>
     <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
@@ -257,34 +303,58 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_menu_mylocation">My location</string>
     <string name="map_menu_filter">Filter services</string>
 
-    <!-- Strings for NewsUpdatesActivity -->
+    <!--
+    ***********************************
+    * Strings for NewsUpdatesActivity *
+    ***********************************
+    -->
     <string name="newsupdates_title">News and Updates</string>
-    <string name="newsupdates_description">View news about the application and get the latest bus and traffic updates.</string>
     <string name="newsupdates_empty">There are currently no news or update items to display.</string>
 
-    <!-- Strings for NewsUpdatesActivity errors -->
+    <!--
+    ******************************************
+    * Strings for NewsUpdatesActivity errors *
+    ******************************************
+    -->
     <string name="newsupdates_err_nodata">No data was received from the Twitter server.</string>
     <string name="newsupdates_err_parseerr">There was a parsing error while trying to process the incoming data.</string>
     <string name="newsupdates_err_ioerr">There was an IO error while receiving data from the Twitter server. Sometimes this error will happen when Twitter is experiencing heavy load.</string>
     <string name="newsupdates_err_urlerr">There was a problem formatting the URL to request the data from the Twitter server.</string>
 
-    <!-- Strings for NearestStopsActivity -->
+    <!--
+    ************************************
+    * Strings for NearestStopsActivity *
+    ************************************
+    -->
     <string name="neareststops_title">Nearest Bus Stops</string>
     <string name="neareststops_empty"><b>There is no data to display.</b>\nThis means that either your location could not be determined, or you are not in range of any bus stops.</string>
     <string name="neareststops_turnongps_title">You do not have GPS turned on</string>
     <string name="neareststops_turnongps_message">To get the most precise location information, GPS needs to be turned on. Turn on now?</string>
     <string name="neareststops_turnongps_checkbox">Do not remind me again</string>
-    <!-- Strings for NearestStopsActivity menu -->
+    
+    <!--
+    *****************************************
+    * Strings for NearestStopsActivity menu *
+    *****************************************
+    -->
     <string name="neareststops_menu_filter">Filter services</string>
 
-    <!-- Strings for NearestStopsActivity ListView contextual menu -->
+    <!--
+    *************************************************************
+    * Strings for NearestStopsActivity ListView contextual menu *
+    *************************************************************
+    -->
     <string name="neareststops_context_showonmap">Show stop on map</string>
     <string name="neareststops_context_addasfav">Add stop as favourite</string>
     <string name="neareststops_context_remasfav">Remove stop as favourite</string>
 
-    <!-- Strings for AlertManagerActivity -->
+    <!--
+    ************************************
+    * Strings for AlertManagerActivity *
+    ************************************
+    -->
     <string name="alertmanager_title">Alert Manager</string>
-    <string name="alertmanager_empty"><b>You currently have no alerts set.</b>\nYou can add a proximity alert from your favourite stops listing, the bus stop map or from the nearby bus stops list.\nTo add a time alert, you must show arrival times for a bus stop first.</string>
+    <string name="alertmanager_empty"><b>You currently have no alerts set.</b>\nYou can add time and proximity alerts from your favourite stops listing, the bus stop map, the nearby bus stops list and when viewing arrival times for a bus stop.</string>
     <string name="alertmanager_prox_title"><b>Proximity Alert</b></string>
     <string name="alertmanager_prox_text" formatted="false">You will be alerted when you are within %d metres of bus stop %stop.\n\nFor the most accurate results, ensure GPS is turned on. This alert will be automatically removed 1 hour after being set, or if you restart your device.</string>
     <string name="alertmanager_time_title"><b>Bus Arrival Alert</b></string>
@@ -292,21 +362,39 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="alertmanager_time_text_plural" formatted="false">You will be alerted when any of the following services are due in %minutes minutes or less at the bus stop %busStop:\n\n%services\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</string>
     <string name="alertmanager_button_remove_single">Remove alert</string>
     <string name="alertmanager_button_remove_multiple">Remove all alerts</string>
+    <string name="alertmanager_prox_image_description">Proximity icon</string>
+    <string name="alertmanager_time_image_description">Arrival alert icon</string>
 
-    <!-- Strings for AboutActivity -->
+    <!--
+    *****************************
+    * Strings for AboutActivity *
+    *****************************
+    -->
     <string name="about_title">About</string>
     
-    <!-- Strings for ServiceFilter -->
+    <!--
+    *****************************
+    * Strings for ServiceFilter *
+    *****************************
+    -->
     <string name="servicefilter_title">Select services to filter</string>
     
-    <!-- String related to times -->
+    <!--
+    ***************************
+    * String related to times *
+    ***************************
+    -->
     <string name="times_never">never</string>
     <string name="times_lessthanoneminago">less than 1 minute ago</string>
     <string name="times_oneminago">1 minute ago</string>
     <string name="times_xminsago">%t minutes ago</string>
     <string name="times_greaterthanhour">greater than 1 hour ago</string>
     
-    <!-- Strings for alerts -->
+    <!--
+    **********************
+    * Strings for alerts *
+    **********************
+    -->
     <string name="alert_prox_title">Approaching %stopName</string>
     <string name="alert_prox_summary" formatted="false">You have entered within a %distancem radius of %stopName.</string>
     <string name="alert_prox_ticker">You are approaching %stopName.</string>
@@ -320,7 +408,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="alert_time_add">Add arrival alert</string>
     <string name="alert_time_rem">Remove arrival alert</string>
     
-    <!-- Strings for alert dialogs -->
+    <!--
+    *****************************
+    * Strings for alert dialogs *
+    *****************************
+    -->
     <string name="alert_dialog_prox_title">Add new proximity alert</string>
     <string name="alert_dialog_prox_first">Alert me when I am within</string>
     <string-array name="alert_dialog_prox_distance_array">
@@ -331,12 +423,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>1000 metres (1093 yards)</item>
     </string-array>
     <string name="alert_dialog_prox_second">of bus stop %s.</string>
-    <string name="alert_dialog_prox_note"><b>Note:</b> if you already have a proximity alert active, it will be removed if you set this alert. If you restart your device, the alert will be removed and will not be re-added, although you can manually re-add the alert if you wish. If you do not come within the preset distance of the bus stop within 1 hour of setting this alert, it will be automatically removed and you will not be alerted. This is to prevent alerts lasting an indefinite amount of time.</string>
+    <string name="alert_dialog_prox_note">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Android Market.\n\nIf you already have a proximity alert active, it will be removed if you set this alert.\n\nIf you restart your device, the alert will be removed and will not be re-added, although you can manually re-add the alert if you wish.\n\nIf you do not come within the preset distance of the bus stop within 1 hour of setting this alert, it will be automatically removed and you will not be alerted. This is to prevent alerts lasting an indefinite amount of time.</string>
     <string name="alert_dialog_prox_gps">You do not have GPS turned on. For this feature to work properly, it is strongly advised that GPS is turned on. Tick this if you would like to go to the device preferences after you have set this alert to turn GPS on.</string>
+    <string name="alert_dialog_prox_limitations">Show limitations</string>
+    <string name="alert_dialog_prox_limitations_title">Proximity alert feature limitations</string>
     
     <string name="alert_dialog_time_title">Add new arrival alert</string>
     <string name="alert_dialog_time_first">Alert me when any of these services</string>
-    <string name="alert_dialog_time_noservices">No services selected. You must select at least 1 service is continue.</string>
+    <string name="alert_dialog_time_noservices">No services selected. You must select at least 1 service to continue.</string>
     <string name="alert_dialog_time_isdue">is due</string>
     <string name="alert_dialog_time_spinner_prompt">Select time trigger</string>
     <string name="alert_dialog_time_services_title">Select service(s)</string>
@@ -351,7 +445,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>in 30 minutes</item>
     </string-array>
     <string name="alert_dialog_time_busstop">or less at bus stop %s.</string>
-    <string name="alert_dialog_time_note"><b>Note:</b> this feature should be used as a guide only. An attempt will be made to fetch bus times once per minute until the above criteria is met or the time spent checking exceeds 1 hour. However, your device may prevent this from happening (e.g. lack of data access, device is sleeping). If your device restarts, this alert will be automatically cancelled but you may re-add it again. Be warned, this feature may use a lot of battery power.</string>
+    <string name="alert_dialog_time_note">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Android Market.\n\nThis feature should be used as a guide only.\n\nAn attempt will be made to fetch bus times once per minute until the above criteria is met or the time spent checking exceeds 1 hour. However, your device may prevent this from happening (e.g. lack of data access, device is sleeping).\n\nIf your device restarts, this alert will be automatically cancelled but you may re-add it again.\n\nBe warned, this feature may use a lot of battery power.</string>
+    <string name="alert_dialog_time_limitations">Show limitations</string>
+    <string name="alert_dialog_time_limitations_title">Time alert feature limitations</string>
     
     <string name="alert_time_rem_confirm">Are you sure you want to remove this time alert?</string>
     

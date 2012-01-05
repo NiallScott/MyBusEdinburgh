@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,7 @@
 package uk.org.rivernile.edinburghbustracker.android;
 
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.EditTextPreference;
 import android.preference.PreferenceActivity;
 import android.provider.SearchRecentSuggestions;
 import android.widget.Toast;
@@ -40,17 +37,12 @@ import android.widget.Toast;
  *
  * @author Niall Scott
  */
-public class PreferencesActivity extends PreferenceActivity
-        implements OnSharedPreferenceChangeListener {
+public class PreferencesActivity extends PreferenceActivity {
 
     /** The name of the preferences file. */
     public final static String PREF_FILE = "preferences";
     /** The AUTOREFRESH_STATE key in the preferences. */
     public final static String KEY_AUTOREFRESH_STATE = "pref_autorefresh_state";
-    /** The HOSTNAME key in the preferences */
-    public final static String KEY_HOSTNAME = "pref_server_hostname";
-    /** The PORT key in the preferences */
-    public final static String KEY_PORT = "pref_server_port";
     
     private SettingsDatabase sd;
 
@@ -146,63 +138,5 @@ public class PreferencesActivity extends PreferenceActivity
                 }).start();
             }
         });
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        getPreferenceScreen().getSharedPreferences()
-                .registerOnSharedPreferenceChangeListener(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getPreferenceScreen().getSharedPreferences()
-                .unregisterOnSharedPreferenceChangeListener(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void onSharedPreferenceChanged(final SharedPreferences sp,
-            final String key)
-    {
-        String value;
-        if(key.equals("pref_server_hostname")) {
-            value = sp.getString(key, "");
-            if(value.length() == 0) {
-                EditTextPreference t = (EditTextPreference)getPreferenceScreen()
-                        .findPreference(key);
-                t.setText("bustracker.selfip.org");
-                Toast.makeText(this, R.string.preferences_invalidhostname,
-                        Toast.LENGTH_LONG).show();
-            }
-        } else if(key.equals("pref_server_port")) {
-            value = sp.getString(key, "4876");
-            try {
-                int i = Integer.parseInt(value);
-                if(i < 1 || i > 65535) {
-                    EditTextPreference t =
-                            (EditTextPreference)getPreferenceScreen()
-                            .findPreference(key);
-                    t.setText("4876");
-                    Toast.makeText(this, R.string.preferences_invalidport,
-                            Toast.LENGTH_LONG).show();
-                }
-            } catch(NumberFormatException e) {
-                EditTextPreference t = (EditTextPreference)getPreferenceScreen()
-                        .findPreference(key);
-                t.setText("4876");
-                Toast.makeText(this, R.string.preferences_invalidport,
-                        Toast.LENGTH_LONG).show();
-            }
-        }
     }
 }

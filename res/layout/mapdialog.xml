@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,13 +29,13 @@
               android:layout_height="fill_parent"
               android:orientation="vertical" >
     <TextView android:id="@+id/mapdialog_text_services"
+              style="@style/DialogText"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              android:textColor="#FFF"
               android:textSize="15sp"
               android:paddingTop="10sp"
-              android:paddingLeft="10sp"
-              android:paddingRight="10sp" />
+              android:paddingLeft="15dp"
+              android:paddingRight="15dp" />
     <ListView android:id="@+id/mapdialog_list_options"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"

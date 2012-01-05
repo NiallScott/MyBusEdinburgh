@@ -29,5 +29,6 @@
     <item
         android:id="@+id/newsupdates_option_menu_refresh"
         android:title="@string/displaystopdata_menu_refresh"
-        android:icon="@drawable/ic_menu_refresh" />
+        android:icon="@drawable/ic_menu_refresh"
+        android:showAsAction="ifRoom|withText" />
 </menu>

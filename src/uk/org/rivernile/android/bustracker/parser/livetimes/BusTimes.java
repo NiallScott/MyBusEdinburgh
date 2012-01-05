@@ -36,12 +36,33 @@ import java.util.HashMap;
  */
 public class BusTimes {
     
-    public final static int ERROR_SERVER = 0;
-    public final static int ERROR_NOCONNECTION = 1;
-    public final static int ERROR_CANNOTRESOLVE = 2;
-    public final static int ERROR_NOCODE = 3;
-    public final static int ERROR_PARSEERR = 4;
-    public final static int ERROR_NODATA = 5;
+    /** This error is called when the error has not been defined in code yet. */
+    public static final int ERROR_UNKNOWN = 0;
+    /**
+     * This error is called when a connection could not be made to the server.
+     */
+    public static final int ERROR_NOCONNECTION = 1;
+    /** This error is called when the server name could not be resolved. */
+    public static final int ERROR_CANNOTRESOLVE = 2;
+    /** This error is called when no stop code has been provided. */
+    public static final int ERROR_NOCODE = 3;
+    /** This error is called when there was an error parsing the data. */
+    public static final int ERROR_PARSEERR = 4;
+    /** This error is called when there was no data for this stop. */
+    public static final int ERROR_NODATA = 5;
+    
+    // API errors
+    
+    /** This error is called when an invalid key has been specified. */
+    public static final int ERROR_INVALID_APP_KEY = 6;
+    /** This error is called when an invalid parameter has been specified. */
+    public static final int ERROR_INVALID_PARAMETER = 7;
+    /** This error is called when the system encounters a processing error. */
+    public static final int ERROR_PROCESSING_ERROR = 8;
+    /** This error is called when the system is under maintenance. */
+    public static final int ERROR_SYSTEM_MAINTENANCE = 9;
+    /** This error is called when the system is overloaded. */
+    public static final int ERROR_SYSTEM_OVERLOADED = 10;
     
     private static BusTimes instance;
     

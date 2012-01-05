@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2010 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.SQLException;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -43,23 +44,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.BufferedReader;
+import com.bugsense.trace.BugSenseHandler;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.Calendar;
+import java.util.Random;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * The main activity in the application. This activity displays a the main menu
@@ -70,15 +73,25 @@ import java.util.Calendar;
  * @author Niall Scott
  */
 public class MainActivity extends Activity {
-
-    private ImageButton favouriteButton;
-    private ImageButton stopCodeButton;
-    private ImageButton stopMapButton;
-    private ImageButton preferencesButton;
-
-    private TextView txtDBVersion;
-
+    
     private static final int DIALOG_ABOUT = 0;
+    
+    private static final String DB_API_CHECK_URL =
+            "http://www.mybustracker.co.uk/ws.php?module=json&function=" +
+            "getTopoId&key=";
+    private static final String DB_UPDATE_CHECK_URL =
+            "http://edinb.us/api/DatabaseVersion?schemaType=" +
+            BusStopDatabase.SCHEMA_NAME + "&random=";
+    private static final Random random = new Random();
+
+    private Button favouriteButton;
+    private Button stopCodeButton;
+    private Button stopMapButton;
+    private Button nearestButton;
+    private Button newsButton;
+    private Button alertButton;
+
+    private TextView txtDBVersion, txtTopoVersion;
 
     private static File f;
 
@@ -88,14 +101,20 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        BugSenseHandler.setup(this, ApiKey.BUGSENSE_KEY);
         setContentView(R.layout.home);
+        
+        File toDelete = getDatabasePath("busstops.db");
+        if(toDelete.exists()) toDelete.delete();
 
         f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
-
-        favouriteButton = (ImageButton) findViewById(R.id.favouriteButton);
-        stopCodeButton = (ImageButton) findViewById(R.id.stopCodeButton);
-        stopMapButton = (ImageButton) findViewById(R.id.stopMapButton);
-        preferencesButton = (ImageButton) findViewById(R.id.stopSettingsButton);
+        
+        favouriteButton = (Button)findViewById(R.id.home_btn_favourites);
+        stopCodeButton = (Button)findViewById(R.id.home_btn_entercode);
+        stopMapButton = (Button)findViewById(R.id.home_btn_map);
+        nearestButton = (Button)findViewById(R.id.home_btn_nearest);
+        newsButton = (Button)findViewById(R.id.home_btn_news);
+        alertButton = (Button)findViewById(R.id.home_btn_alerts);
 
         favouriteButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -121,14 +140,30 @@ public class MainActivity extends Activity {
             }
         });
 
-        preferencesButton.setOnClickListener(new OnClickListener() {
+        nearestButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
                 startActivity(new Intent(MainActivity.this,
-                        PreferencesActivity.class));
+                        NearestStopsActivity.class));
             }
         });
 
+        newsButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                startActivity(new Intent(MainActivity.this,
+                        NewsUpdatesActivity.class));
+            }
+        });
+        
+        alertButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                startActivity(new Intent(MainActivity.this,
+                        AlertManagerActivity.class));
+            }
+        });
+        
         new Thread(stopDBTasks).start();
         
         if(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
@@ -153,17 +188,11 @@ public class MainActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.main_option_menu_newsupdates:
-                startActivity(new Intent(this, NewsUpdatesActivity.class));
+            case R.id.main_option_menu_preferences:
+                startActivity(new Intent(this, PreferencesActivity.class));
                 break;
             case R.id.main_option_menu_about:
                 showDialog(DIALOG_ABOUT);
-                break;
-            case R.id.main_option_menu_nearest:
-                startActivity(new Intent(this, NearestStopsActivity.class));
-                break;
-            case R.id.main_option_menu_alertman:
-                startActivity(new Intent(this, AlertManagerActivity.class));
                 break;
             default:
                 break;
@@ -198,8 +227,17 @@ public class MainActivity extends Activity {
 
                 txtDBVersion = (TextView)layout.findViewById(R.id
                         .aboutDBVersion);
+                txtTopoVersion = (TextView)layout.findViewById(
+                        R.id.aboutTopoVersion);
                 
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                AlertDialog.Builder builder;
+                if(isHoneycombOrGreater()) {
+                    //builder = new AlertDialog.Builder(this,
+                            //AlertDialog.THEME_HOLO_DARK);
+                    builder = getHoneycombDialog(this);
+                } else {
+                    builder = new AlertDialog.Builder(this);
+                }
                 builder.setView(layout)
                         .setNegativeButton(R.string.close,
                         new DialogInterface.OnClickListener() {
@@ -209,7 +247,7 @@ public class MainActivity extends Activity {
                                 dialog.dismiss();
                             }
                         });
-
+                
                 return builder.create();
             default:
                 return null;
@@ -222,9 +260,9 @@ public class MainActivity extends Activity {
             case DIALOG_ABOUT:
                 long dbtime;
                 Calendar date = Calendar.getInstance();
+                BusStopDatabase bsd = BusStopDatabase.getInstance(this);
                 try {
-                    dbtime = BusStopDatabase.getInstance(this)
-                            .getLastDBModTime();
+                    dbtime = bsd.getLastDBModTime();
                 } catch(SQLException e) {
                     dbtime = 0;
                 }
@@ -233,92 +271,189 @@ public class MainActivity extends Activity {
                 txtDBVersion.setText(getText(R.string
                         .main_aboutdialog_dbversion) + ": " + dbtime + " (" +
                         date.getTime().toLocaleString() + ")");
+                txtTopoVersion.setText(
+                        getText(R.string.main_aboutdialog_topology) + ": " +
+                        bsd.getTopoId());
                 break;
             default:
                 break;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     private Runnable stopDBTasks = new Runnable() {
         @Override
         public void run() {
             checkForDBUpdates(getApplicationContext(), false);
         }
     };
-
+    
+    public static boolean isHoneycombOrGreater() {
+        Field field;
+        try {
+            field = Build.VERSION.class.getField("SDK_INT");
+        } catch(NoSuchFieldException e) {
+            return false;
+        }
+        
+        if(field == null) return false;
+        int val;
+        try {
+            val = field.getInt(null);
+        } catch(IllegalAccessException e) {
+            return false;
+        }
+        
+        return val >= Build.VERSION_CODES.HONEYCOMB;
+    }
+    
+    public static AlertDialog.Builder getHoneycombDialog(
+            final Context context) {
+        try {
+            Class cls = AlertDialog.Builder.class;
+            Class[] partypes = new Class[2];
+            partypes[0] = Context.class;
+            partypes[1] = Integer.TYPE;
+            Constructor ct = cls.getConstructor(partypes);
+            Object[] arglist = new Object[2];
+            arglist[0] = context;
+            arglist[1] = new Integer(AlertDialog.THEME_HOLO_DARK);
+            return (AlertDialog.Builder)ct.newInstance(arglist);
+        } catch(NoSuchMethodException e) {
+            
+        } catch(InstantiationException e) {
+            
+        } catch(IllegalAccessException e) {
+            
+        } catch(InvocationTargetException e) {
+            
+        }
+        
+        return null;
+    }
+    
     /**
-     * Check with the remote server to see if any database updates exist for the
-     * database. This gets checked upon app startup if it hasn't been checked
-     * for more than 24 hours. If a database update does exist, its downloaded.
+     * Check for updates to the bus stop database. This may happen automatically
+     * if 24 hours have elapsed since the last check, or if the user has forced
+     * the action. If a database update is found, then the new database is
+     * downloaded and placed in the correct location.
+     * 
+     * @param context The context.
+     * @param force True if the user forced the check, false if not.
      */
     public static void checkForDBUpdates(final Context context,
             final boolean force) {
         SharedPreferences sp = context.getSharedPreferences(
                 PreferencesActivity.PREF_FILE, 0);
         boolean autoUpdate = sp.getBoolean("pref_database_autoupdate", true);
-
+        SharedPreferences.Editor edit = sp.edit();
+        
         if(autoUpdate || force) {
             if(!force) {
                 long lastCheck = sp.getLong("lastUpdateCheck", 0);
                 if((System.currentTimeMillis() - lastCheck) < 86400000) return;
             }
-            String remoteHost = sp.getString(PreferencesActivity.KEY_HOSTNAME,
-                    "bustracker.selfip.org");
-            int remotePort;
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append(DB_API_CHECK_URL);
+            sb.append(ApiKey.getHashedKey());
+            sb.append("&random=");
+            sb.append(random.nextInt());
             try {
-                remotePort = Integer.parseInt(sp.getString(
-                        PreferencesActivity.KEY_PORT, "4876"));
-            } catch(NumberFormatException e) {
-                remotePort = 4876;
-            }
-
-            String dbLastModStr = "";
-            String dbURL = "";
-            try {
-                Socket sock = new Socket();
-                sock.setSoTimeout(20000);
-                sock.connect(new InetSocketAddress(remoteHost, remotePort),
-                        20000);
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(sock.getInputStream()));
-                PrintWriter writer = new PrintWriter(sock.getOutputStream(),
-                        true);
-                writer.println("getDBLastModTime");
-                dbLastModStr = reader.readLine();
-                writer.println("getDBURL");
-                dbURL = reader.readLine();
-                writer.println("exit");
-                writer.close();
-                reader.close();
-                sock.close();
-            } catch(UnknownHostException e) {
+                URL url = new URL(sb.toString());
+                sb.setLength(0);
+                HttpURLConnection conn = (HttpURLConnection)url
+                        .openConnection();
+                try {
+                    BufferedInputStream is = new BufferedInputStream(
+                            conn.getInputStream());
+                    int data;
+                    while((data = is.read()) != -1) {
+                        sb.append((char)data);
+                    }
+                } finally {
+                    conn.disconnect();
+                }
+            } catch(MalformedURLException e) {
                 return;
             } catch(IOException e) {
                 return;
             }
-
-            if(dbLastModStr == null || dbLastModStr.length() == 0) return;
-            long dbLastMod;
+            
+            String topoId;
             try {
-                dbLastMod = Long.parseLong(dbLastModStr);
-            } catch(NumberFormatException e) {
+                JSONObject jo = new JSONObject(sb.toString());
+                topoId = jo.getString("topoId");
+            } catch(JSONException e) {
                 return;
             }
-            if(dbLastMod > BusStopDatabase.getInstance(context)
-                    .getLastDBModTime()) {
-                updateStopsDB(context, dbURL);
-            } else {
+            
+            if(topoId == null || topoId.length() == 0) return;
+            
+            BusStopDatabase bsd = BusStopDatabase.getInstance(context);
+            final String dbTopoId = bsd.getTopoId();
+            
+            if(topoId.equals(dbTopoId)) {
+                edit.putLong("lastUpdateCheck", System.currentTimeMillis());
+                edit.commit();
                 if(force) {
                     Looper.prepare();
                     Toast.makeText(context, R.string.main_db_no_updates,
                             Toast.LENGTH_LONG).show();
                     Looper.loop();
                 }
+                return;
             }
-            SharedPreferences.Editor edit = sp.edit();
+            
+            sb.setLength(0);
+            sb.append(DB_UPDATE_CHECK_URL);
+            sb.append(random.nextInt());
+            sb.append("&key=");
+            sb.append(ApiKey.getHashedKey());
+            
+            try {
+                URL url = new URL(sb.toString());
+                sb.setLength(0);
+                HttpURLConnection conn = (HttpURLConnection)url
+                        .openConnection();
+                try {
+                    BufferedInputStream is = new BufferedInputStream(
+                            conn.getInputStream());
+                    int data;
+                    while((data = is.read()) != -1) {
+                        sb.append((char)data);
+                    }
+                } finally {
+                    conn.disconnect();
+                }
+            } catch(MalformedURLException e) {
+                return;
+            } catch(IOException e) {
+                return;
+            }
+            
+            String dbUrl, schemaVersion;
+            try {
+                JSONObject jo = new JSONObject(sb.toString());
+                dbUrl = jo.getString("db_url");
+                schemaVersion = jo.getString("db_schema_version");
+                topoId = jo.getString("topo_id");
+            } catch(JSONException e) {
+                return;
+            }
+            
+            if(!BusStopDatabase.SCHEMA_NAME.equals(schemaVersion)) return;
+            if(topoId == null || topoId.length() == 0) return;
+            if(dbUrl == null || dbUrl.length() == 0) return;
+            
+            if(!topoId.equals(dbTopoId)) {
+                updateStopsDB(context, dbUrl);
+            } else if(force) {
+                Looper.prepare();
+                Toast.makeText(context, R.string.main_db_no_updates,
+                        Toast.LENGTH_LONG).show();
+                Looper.loop();
+            }
+            
             edit.putLong("lastUpdateCheck", System.currentTimeMillis());
             edit.commit();
         }
@@ -341,7 +476,7 @@ public class MainActivity extends Activity {
             InputStream in = con.getInputStream();
             File temp = context.getDatabasePath(BusStopDatabase.STOP_DB_NAME +
                     "_temp");
-            File dest = context.getDatabasePath(BusStopDatabase.STOP_DB_NAME);
+            File dest = f;
             FileOutputStream out = new FileOutputStream(temp);
             BusStopDatabase.getInstance(context).finalize();
             byte[] buf = new byte[1024];

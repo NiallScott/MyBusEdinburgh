@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,6 +42,7 @@ import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
+import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBus;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
         .EdinburghParser;
 
@@ -79,7 +80,7 @@ public class TimeAlertService extends IntentService {
         final String stopCode = intent.getStringExtra("stopCode");
         final String[] services = intent.getStringArrayExtra("services");
         final int timeTrigger = intent.getIntExtra("timeTrigger", 5);
-        final long timeSet = intent.getLongExtra("timeSet", 0);
+        //final long timeSet = intent.getLongExtra("timeSet", 0);
         
         HashMap<String, BusStop> result = null;
         try {
@@ -91,13 +92,15 @@ public class TimeAlertService extends IntentService {
         
         BusStop busStop = result.get(stopCode);
         int time;
+        EdinburghBus edinBs;
         
         for(BusService bs : busStop.getBusServices()) {
-            time = normaliseBusTime(bs.getFirstBus().getArrivalTime());
+            edinBs = (EdinburghBus)bs.getFirstBus();
+            time = edinBs.getArrivalMinutes();
             
             for(String service : services) {
                 if(service.equals(bs.getServiceName()) && time <= timeTrigger) {
-                    if(sd.isActiveTimeAlert(stopCode)) return;
+                    if(!sd.isActiveTimeAlert(stopCode)) return;
                     alertMan.removeTimeAlert();
                     
                     Intent launchIntent = new Intent(this,
@@ -136,7 +139,7 @@ public class TimeAlertService extends IntentService {
                     }
                     
                     n.flags |= Notification.FLAG_AUTO_CANCEL;
-                    n.icon = R.drawable.appicon;
+                    n.icon = R.drawable.ic_status_bus;
                     n.when = System.currentTimeMillis();
                     n.tickerText = summary;
                     n.setLatestEventInfo(this, title, summary,
@@ -164,22 +167,5 @@ public class TimeAlertService extends IntentService {
                 PendingIntent.FLAG_CANCEL_CURRENT);
         alarmMan.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + 60000, pi);
-    }
-    
-    private static int normaliseBusTime(String time) {
-        if(time == null || time.length() == 0) return Integer.MAX_VALUE;
-        
-        if(time.equalsIgnoreCase("due")) return 0;
-        
-        if(time.charAt(0) == '*') time = time.substring(1);
-        
-        int number;
-        try {
-            number = Integer.parseInt(time);
-        } catch(NumberFormatException e) {
-            return Integer.MAX_VALUE;
-        }
-        
-        return number;
     }
 }

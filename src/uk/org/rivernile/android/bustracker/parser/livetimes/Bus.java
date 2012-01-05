@@ -33,7 +33,6 @@ package uk.org.rivernile.android.bustracker.parser.livetimes;
  * @author Niall Scott
  */
 public class Bus {
-    private String serviceName;
     private String destination;
     private String arrivalTime;
     
@@ -42,18 +41,11 @@ public class Bus {
      * arrival time. This class may be extended to suit the needs of a particlar
      * town or city.
      * 
-     * @param serviceName The name of the bus service, for example; 12, 44A,
-     * X48.
      * @param destination The final destination of this bus service.
      * @param arrivalTime The arrival time of this bus service. This is left
      * as a String so that you may format the time in any way you wish.
      */
-    public Bus(final String serviceName, final String destination,
-            final String arrivalTime) {
-        if(serviceName == null || serviceName.length() == 0)
-            throw new IllegalArgumentException("The service name must not " +
-                    "be null or blank.");
-        
+    public Bus(final String destination, final String arrivalTime) {
         if(destination == null || destination.length() == 0)
             throw new IllegalArgumentException("The destination must not be " +
                     "null or blank.");
@@ -61,8 +53,7 @@ public class Bus {
         if(arrivalTime == null || arrivalTime.length() == 0)
             throw new IllegalArgumentException("The arrival time must not be " +
                     "null or blank.");
-        
-        this.serviceName = serviceName;
+
         this.destination = destination;
         this.arrivalTime = arrivalTime;
     }
@@ -83,14 +74,5 @@ public class Bus {
      */
     public String getDestination() {
         return destination;
-    }
-
-    /**
-     * Get the name of this bus service.
-     * 
-     * @return The name of this bus service.
-     */
-    public String getServiceName() {
-        return serviceName;
     }
 }
