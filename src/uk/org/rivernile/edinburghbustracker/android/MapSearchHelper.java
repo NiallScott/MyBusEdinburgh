@@ -100,20 +100,22 @@ public class MapSearchHelper {
             
             Cursor c = bsd.searchDatabase(args[0]);
             String stopCode;
-            while(c.moveToNext()) {
-                pointLocation = new GeoPoint(c.getInt(2), c.getInt(3));
-                stopCode = c.getString(0);
-                result = new SearchResult(pointLocation,
-                        SearchResult.TYPE_STOP, c.getString(1) + " (" +
-                        stopCode + ")");
-                result.stopCode = stopCode;
-                result.services = bsd.getBusServicesForStopAsString(stopCode);
-                if(myLocation != null)
-                    result.distance = calculateGeographicalDistance(
-                            myLocation, pointLocation);
-                res.add(result);
+            if(c != null) {
+                while(c.moveToNext()) {
+                    pointLocation = new GeoPoint(c.getInt(2), c.getInt(3));
+                    stopCode = c.getString(0);
+                    result = new SearchResult(pointLocation,
+                            SearchResult.TYPE_STOP, c.getString(1) + " (" +
+                            stopCode + ")");
+                    result.stopCode = stopCode;
+                    result.services = bsd.getBusServicesForStopAsString(stopCode);
+                    if(myLocation != null)
+                        result.distance = calculateGeographicalDistance(
+                                myLocation, pointLocation);
+                    res.add(result);
+                }
+                c.close();
             }
-            c.close();
 
             Geocoder geo = new Geocoder(mContext);
             try {
@@ -256,8 +258,8 @@ public class MapSearchHelper {
             
             switch(sr.type) {
                 case SearchResult.TYPE_ADDRESS:
-                    if(text2 == null) {
-                        if(convertView != null) row = convertView;
+                    if(text2 == null && convertView != null) {
+                        row = convertView;
                     } else {
                         row = vi.inflate(R.layout.map_search_results_list_item1,
                                 parent, false);

@@ -102,14 +102,6 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         if(instance == null) instance = new BusStopDatabase(context);
         return instance;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void finalize() {
-        getReadableDatabase().close();
-    }
     
     /**
      * Move a copy of the database from the application assets in to the
@@ -125,6 +117,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                     null);
             db.close();
             // End of horrible hack.
+            getReadableDatabase().close();
             InputStream in = context.getAssets().open(STOP_DB_NAME);
             FileOutputStream out = new FileOutputStream(f);
             byte[] buf = new byte[1024];
@@ -172,11 +165,15 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
     public Cursor getBusStopsByCoords(final int minX, final int minY,
             final int maxX, final int maxY)
     {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query("bus_stops", null, "x <= " + minX + " AND y >= " +
-                minY + " AND x >= " + maxX + " AND y <= " + maxY, null, null,
-                null, null);
-        return c;
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query("bus_stops", null, "x <= " + minX + " AND y >= " +
+                    minY + " AND x >= " + maxX + " AND y <= " + maxY, null, null,
+                    null, null);
+            return c;
+        } catch(SQLiteException e) {
+            return null;
+        }
     }
     
     /**
@@ -194,14 +191,19 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      */
     public Cursor getFilteredStopsByCoords(final int minX, final int minY,
             final int maxX, final int maxY, final String filter) {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT bus_stops._id, bus_stops.stopName, " +
-	    "bus_stops.x, bus_stops.y FROM service_stops LEFT JOIN bus_stops " +
-            "ON service_stops.stopCode = bus_stops._id WHERE " +
-            "service_stops.serviceName IN (" + filter + ") AND x <= " + minX +
-            " AND y >= " + minY + " AND x >= " + maxX + " AND y <= " + maxY +
-            " GROUP BY bus_stops._id", null);
-        return c;
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.rawQuery("SELECT bus_stops._id, " +
+                    "bus_stops.stopName, bus_stops.x, bus_stops.y FROM " +
+                    "service_stops LEFT JOIN bus_stops ON " +
+                    "service_stops.stopCode = bus_stops._id WHERE " +
+                    "service_stops.serviceName IN (" + filter + ") AND x <= " +
+                    minX + " AND y >= " + minY + " AND x >= " + maxX +
+                    " AND y <= " + maxY + " GROUP BY bus_stops._id", null);
+            return c;
+        } catch(SQLiteException e) {
+            return null;
+        }
     }
 
     /**
@@ -211,11 +213,14 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @return A Cursor result set.
      */
     public Cursor getBusStopByCode(final String stopCode) {
-        SQLiteDatabase db = getReadableDatabase();
-
-        Cursor c = db.query("bus_stops", null, "_id = " + stopCode, null,
-                null, null, null);
-        return c;
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query("bus_stops", null, "_id = " + stopCode, null,
+                    null, null, null);
+            return c;
+        } catch(SQLiteException e) {
+            return null;
+        }
     }
 
     /**
@@ -225,25 +230,29 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @return A String array of bus services.
      */
     public String[] getBusServicesForStop(final String stopCode) {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(true, "service_stops",
-                new String[] { "serviceName" }, "stopCode = " + stopCode, null,
-                null, null, "CASE WHEN serviceName GLOB '[^0-9.]*' THEN " +
-                "serviceName ELSE cast(serviceName AS int) END", null);
-        int count = c.getCount();
-        int i = 0;
-        if(count > 0) {
-            String[] result = new String[count];
-            while(!c.isLast()) {
-                c.moveToNext();
-                result[i] = c.getString(0);
-                i++;
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(true, "service_stops",
+                    new String[] { "serviceName" }, "stopCode = " + stopCode,
+                    null, null, null,
+                    "CASE WHEN serviceName GLOB '[^0-9.]*' THEN " +
+                    "serviceName ELSE cast(serviceName AS int) END", null);
+            int count = c.getCount();
+            int i = 0;
+            if(count > 0) {
+                String[] result = new String[count];
+                while(c.moveToNext()) {
+                    result[i] = c.getString(0);
+                    i++;
+                }
+                c.close();
+                return result;
+            } else {
+                c.close();
+                return new String[] { };
             }
-            c.close();
-            return result;
-        } else {
-            c.close();
-            return null;
+        } catch(SQLiteException e) {
+            return new String[] { };
         }
     }
     
@@ -278,21 +287,25 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * the value was invalid, 0 is returned.
      */
     public long getLastDBModTime() {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(true, "database_info",
-                new String[] { "updateTS" }, null, null, null, null, null,
-                null);
-        
-        if(c.moveToNext()) {
-            String result = c.getString(0);
-            c.close();
-            try {
-                return Long.parseLong(result);
-            } catch(NumberFormatException e) {
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(true, "database_info",
+                    new String[] { "updateTS" }, null, null, null, null, null,
+                    null);
+
+            if(c.moveToNext()) {
+                String result = c.getString(0);
+                c.close();
+                try {
+                    return Long.parseLong(result);
+                } catch(NumberFormatException e) {
+                    return 0;
+                }
+            } else {
+                c.close();
                 return 0;
             }
-        } else {
-            c.close();
+        } catch(SQLiteException e) {
             return 0;
         }
     }
@@ -304,15 +317,20 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @return The current topology ID.
      */
     public String getTopoId() {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(true, "database_info",
-                new String[] { "current_topo_id" }, null, null, null, null,
-                null, null);
         String result = "";
-        if(c.moveToNext()) {
-            result = c.getString(0);
+        
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(true, "database_info",
+                    new String[] { "current_topo_id" }, null, null, null, null,
+                    null, null);
+            if(c.moveToNext()) {
+                result = c.getString(0);
+            }
+            c.close();
+        } catch(SQLiteException e) {
+            
         }
-        c.close();
         
         return result;
     }
@@ -325,11 +343,16 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @return A Cursor object as a result set.
      */
     public Cursor searchDatabase(final String term) {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query("bus_stops", null, "_id LIKE \"%" + term + "%\"" +
-                " OR stopName LIKE \"%" + term + "%\"", null, null, null, null);
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query("bus_stops", null, "_id LIKE \"%" + term +
+                    "%\" OR stopName LIKE \"%" + term + "%\"", null, null, null,
+                    null);
 
-        return c;
+            return c;
+        } catch(SQLiteException e) {
+            return null;
+        }
     }
     
     /**
@@ -340,24 +363,28 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * array.
      */
     public String[] getBusServiceList() {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(true, "service_stops",
-                new String[] { "serviceName" }, null, null, null, null,
-                "CASE WHEN serviceName GLOB '[^0-9.]*' THEN serviceName " +
-                "ELSE cast(serviceName AS int) END", null);
-        int count = c.getCount();
-        int i = 0;
-        if(count > 0) {
-            String[] result = new String[count];
-            while(!c.isLast()) {
-                c.moveToNext();
-                result[i] = c.getString(0);
-                i++;
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query(true, "service_stops",
+                    new String[] { "serviceName" }, null, null, null, null,
+                    "CASE WHEN serviceName GLOB '[^0-9.]*' THEN serviceName " +
+                    "ELSE cast(serviceName AS int) END", null);
+            int count = c.getCount();
+            int i = 0;
+            if(count > 0) {
+                String[] result = new String[count];
+                while(!c.isLast()) {
+                    c.moveToNext();
+                    result[i] = c.getString(0);
+                    i++;
+                }
+                c.close();
+                return result;
+            } else {
+                c.close();
+                return new String[] { };
             }
-            c.close();
-            return result;
-        } else {
-            c.close();
+        } catch(SQLiteException e) {
             return new String[] { };
         }
     }
@@ -371,17 +398,23 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @return A GeoPoint which specifies a latitude and longitude.
      */
     public GeoPoint getGeoPointForStopCode(final String stopCode) {
-        GeoPoint gp = null;
-        
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query("bus_stops", new String[] { "x", "y" },
-                "_id = " + stopCode, null, null, null, null);
-        
-        if(c.getCount() == 0) return null;
-        c.moveToNext();
-        gp = new GeoPoint(c.getInt(0), c.getInt(1));
-        c.close();
-        return gp;
+        try {
+            GeoPoint gp = null;
+
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query("bus_stops", new String[] { "x", "y" },
+                    "_id = " + stopCode, null, null, null, null);
+
+            if(c.moveToNext()) {
+                gp = new GeoPoint(c.getInt(0), c.getInt(1));
+                c.close();
+                return gp;
+            } else {
+                return null;
+            }
+        } catch(SQLiteException e) {
+            return null;
+        }
     }
     
     /**
@@ -391,13 +424,17 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @return The name of the given bus stop.
      */
     public String getNameForBusStop(final String stopCode) {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query("bus_stops", new String[] { "stopName" },
-                "_id = " + stopCode, null, null, null, null);
-        if(c.getCount() == 0) return null;
-        c.moveToNext();
-        String result = c.getString(0);
-        c.close();
-        return result;
+        try {
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query("bus_stops", new String[] { "stopName" },
+                    "_id = " + stopCode, null, null, null, null);
+            if(c.getCount() == 0) return null;
+            c.moveToNext();
+            String result = c.getString(0);
+            c.close();
+            return result;
+        } catch(SQLiteException e) {
+            return "";
+        }
     }
 }

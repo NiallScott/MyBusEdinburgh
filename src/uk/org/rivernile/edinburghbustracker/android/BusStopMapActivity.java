@@ -156,9 +156,11 @@ public class BusStopMapActivity extends MapActivity implements
                 myLocation.runOnFirstFix(new Runnable() {
                     @Override
                     public void run() {
-                        mapView.getController().animateTo(myLocation
-                                .getMyLocation());
-                        mapView.getController().setZoom(17);
+                        GeoPoint g = myLocation.getMyLocation();
+                        if(g != null) {
+                            mapView.getController().animateTo(g);
+                            mapView.getController().setZoom(17);
+                        }
                     }
                 });
             }
@@ -673,6 +675,7 @@ public class BusStopMapActivity extends MapActivity implements
         
         public BusStopMapOverlay(final Drawable defaultMarker) {
             super(boundCenterBottom(defaultMarker));
+            populate();
         }
         
         @Override
@@ -718,12 +721,14 @@ public class BusStopMapActivity extends MapActivity implements
                     c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
                 }
                 
-                while(c.moveToNext()) {
-                    items.add(new BusStopOverlayItem(new GeoPoint(
-                            c.getInt(2), c.getInt(3)), c.getString(0),
-                            c.getString(1)));
+                if(c != null) {
+                    while(c.moveToNext()) {
+                        items.add(new BusStopOverlayItem(new GeoPoint(
+                                c.getInt(2), c.getInt(3)), c.getString(0),
+                                c.getString(1)));
+                    }
+                    c.close();
                 }
-                c.close();
                 populate();
             }
         }
@@ -746,7 +751,7 @@ public class BusStopMapActivity extends MapActivity implements
             if(currentItem != null) return;
 
             Cursor c = bsd.getBusStopByCode(stopCode);
-            if(c.getCount() != 1) return;
+            if(c == null || c.getCount() != 1) return;
             c.moveToFirst();
             currentItem = new BusStopOverlayItem(new GeoPoint(c.getInt(2),
                     c.getInt(3)), c.getString(0), c.getString(1));

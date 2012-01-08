@@ -50,6 +50,8 @@ import android.widget.Toast;
 import com.bugsense.trace.BugSenseHandler;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,6 +61,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Random;
 import org.json.JSONException;
@@ -93,8 +97,6 @@ public class MainActivity extends Activity {
 
     private TextView txtDBVersion, txtTopoVersion;
 
-    private static File f;
-
     /**
      * {@inheritDoc}
      */
@@ -106,8 +108,6 @@ public class MainActivity extends Activity {
         
         File toDelete = getDatabasePath("busstops.db");
         if(toDelete.exists()) toDelete.delete();
-
-        f = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
         
         favouriteButton = (Button)findViewById(R.id.home_btn_favourites);
         stopCodeButton = (Button)findViewById(R.id.home_btn_entercode);
@@ -431,12 +431,13 @@ public class MainActivity extends Activity {
                 return;
             }
             
-            String dbUrl, schemaVersion;
+            String dbUrl, schemaVersion, checksum;
             try {
                 JSONObject jo = new JSONObject(sb.toString());
                 dbUrl = jo.getString("db_url");
                 schemaVersion = jo.getString("db_schema_version");
                 topoId = jo.getString("topo_id");
+                checksum = jo.getString("checksum");
             } catch(JSONException e) {
                 return;
             }
@@ -444,9 +445,10 @@ public class MainActivity extends Activity {
             if(!BusStopDatabase.SCHEMA_NAME.equals(schemaVersion)) return;
             if(topoId == null || topoId.length() == 0) return;
             if(dbUrl == null || dbUrl.length() == 0) return;
+            if(checksum == null || checksum.length() == 0) return;
             
             if(!topoId.equals(dbTopoId)) {
-                updateStopsDB(context, dbUrl);
+                updateStopsDB(context, dbUrl, checksum);
             } else if(force) {
                 Looper.prepare();
                 Toast.makeText(context, R.string.main_db_no_updates,
@@ -467,18 +469,18 @@ public class MainActivity extends Activity {
      * @param url The URL of the bus stop database to download.
      */
     private static void updateStopsDB(final Context context,
-            final String url)
+            final String url, final String checksum)
     {
-        if(context == null || url == null || url.length() == 0) return;
+        if(context == null || url == null || url.length() == 0 ||
+                checksum == null || checksum.length() == 0) return;
         try {
             URL u = new URL(url);
             HttpURLConnection con = (HttpURLConnection)u.openConnection();
             InputStream in = con.getInputStream();
             File temp = context.getDatabasePath(BusStopDatabase.STOP_DB_NAME +
                     "_temp");
-            File dest = f;
+            File dest = context.getDatabasePath(BusStopDatabase.STOP_DB_NAME);
             FileOutputStream out = new FileOutputStream(temp);
-            BusStopDatabase.getInstance(context).finalize();
             byte[] buf = new byte[1024];
             int len;
             while((len = in.read(buf)) > 0) {
@@ -488,6 +490,11 @@ public class MainActivity extends Activity {
             out.close();
             in.close();
             con.disconnect();
+            if(!md5Checksum(temp).equalsIgnoreCase(checksum)) {
+                temp.delete();
+                return;
+            }
+            BusStopDatabase.getInstance(context).getReadableDatabase().close();
             dest.delete();
             temp.renameTo(dest);
             Looper.prepare();
@@ -496,5 +503,45 @@ public class MainActivity extends Activity {
             Looper.loop();
         } catch(MalformedURLException e) {
         } catch(IOException e) { }
+    }
+    
+    /**
+     * Create a checksum for a File. This is used to ensure that a downloaded
+     * database has not been corrupted or incomplete.
+     * 
+     * See: http://vyshemirsky.blogspot.com/2007/08/computing-md5-digest-checksum-in-java.html
+     * This has been slightly modified.
+     * 
+     * @param file The file to run the MD5 checksum against.
+     * @return The MD5 checksum string.
+     */
+    public static String md5Checksum(final File file) {
+        try {
+            InputStream fin = new FileInputStream(file);
+            MessageDigest md5er = MessageDigest.getInstance("MD5");
+            byte[] buffer = new byte[1024];
+            int read;
+            
+            while((read = fin.read(buffer)) != -1) {
+                if(read > 0) md5er.update(buffer, 0, read);
+            }
+            fin.close();
+            
+            byte[] digest = md5er.digest();
+            if(digest == null) return null;
+            StringBuilder builder = new StringBuilder();
+            for(byte a : digest) {
+                builder.append(Integer.toString((a & 0xff) 
+                + 0x100, 16).substring(1));
+            }
+            
+            return builder.toString();
+        } catch(FileNotFoundException e) {
+            return "";
+        } catch(NoSuchAlgorithmException e) {
+            return "";
+        } catch(IOException e) {
+            return "";
+        }
     }
 }

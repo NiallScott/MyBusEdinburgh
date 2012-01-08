@@ -411,10 +411,8 @@ public class NearestStopsActivity extends ListActivity
 
         SearchResultsArrayAdapter items = new SearchResultsArrayAdapter();
         GeoPoint stopPoint;
-        if(c.getCount() > 0) {
-            while(!c.isLast()) {
-                c.moveToNext();
-
+        if(c != null && c.getCount() > 0) {
+            while(c.moveToNext()) {
                 stopPoint = new GeoPoint(c.getInt(2), c.getInt(3));
                 double distance = MapSearchHelper.calculateGeographicalDistance(
                         currLoc, stopPoint) * 1000;

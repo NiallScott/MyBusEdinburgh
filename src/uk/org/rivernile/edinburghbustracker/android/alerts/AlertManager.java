@@ -72,8 +72,12 @@ public class AlertManager {
         
         removeProximityAlert();
         GeoPoint g = bsd.getGeoPointForStopCode(stopCode);
-        double latitude = (double)(g.getLatitudeE6() / 1E6);
-        double longitude = (double)(g.getLongitudeE6() / 1E6);
+        double latitude = 0;
+        double longitude = 0;
+        if(g != null) {
+            latitude = (double)(g.getLatitudeE6() / 1E6);
+            longitude = (double)(g.getLongitudeE6() / 1E6);
+        }
         
         Intent intent = new Intent(context, ProximityAlertReceiver.class);
         intent.putExtra("stopCode", stopCode);
