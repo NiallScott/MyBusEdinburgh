@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,11 +29,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ExpandableListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -43,7 +41,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.LinearLayout;
@@ -53,8 +50,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Bus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
@@ -80,8 +75,6 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     private final static String SERVICE_NAME_KEY = "SERVICE_NAME";
     private final static String DESTINATION_KEY = "DESTINATION";
     private final static String ARRIVAL_TIME_KEY = "ARRIVAL_TIME";
-    private final static String IS_DELAYED_KEY = "IS_DELAYED";
-    private final static String IS_ESTIMATED_KEY = "IS_ESTIMATED";
 
     /** The ACTION_VIEW_STOP_DATA intent action name. */
     public final static String ACTION_VIEW_STOP_DATA =
@@ -97,7 +90,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     private TextView textLastRefreshed;
     private SettingsDatabase sd;
     private AlertManager alertMan;
-    private BusTimesListAdapter listAdapter;
+    private SimpleExpandableListAdapter listAdapter;
     private BusStopDatabase bsd;
 
     @Override
@@ -566,31 +559,25 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                     timeToDisplay = String.valueOf(mins);
                 }
                 
+                if(bus.isEstimated()) {
+                    timeToDisplay = "*" + timeToDisplay;
+                }
+                
                 if(first) {
                     curGroupMap.put(DESTINATION_KEY, bus.getDestination());
                     curGroupMap.put(ARRIVAL_TIME_KEY, timeToDisplay);
-                    if(bus.isDelayed()) {
-                        curGroupMap.put(IS_DELAYED_KEY, "true");
-                    } else if(bus.isEstimated()) {
-                        curGroupMap.put(IS_ESTIMATED_KEY, "true");
-                    }
                     first = false;
                 } else {
                     curChildMap = new HashMap<String, String>();
                     children.add(curChildMap);
                     curChildMap.put(DESTINATION_KEY, bus.getDestination());
                     curChildMap.put(ARRIVAL_TIME_KEY, timeToDisplay);
-                    if(bus.isDelayed()) {
-                        curChildMap.put(IS_DELAYED_KEY, "true");
-                    } else if(bus.isEstimated()) {
-                        curChildMap.put(IS_ESTIMATED_KEY, "true");
-                    }
                 }
             }
             childData.add(children);
         }
         
-        listAdapter = new BusTimesListAdapter(
+        listAdapter = new SimpleExpandableListAdapter(
                 this, groupData, R.layout.expandable_list_group,
                 new String[] { SERVICE_NAME_KEY, DESTINATION_KEY,
                     ARRIVAL_TIME_KEY },
@@ -650,71 +637,6 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             
         } catch(InvocationTargetException e) {
             
-        }
-    }
-    
-    private static class BusTimesListAdapter
-            extends SimpleExpandableListAdapter {
-        
-        private Context context;
-        
-        public BusTimesListAdapter(Context context,
-                List<? extends Map<String, ?>> groupData, int groupLayout,
-                String[] groupFrom, int[] groupTo,
-                List<? extends List<? extends Map<String, ?>>> childData,
-                int childLayout, String[] childFrom, int[] childTo) {
-            super(context, groupData, groupLayout, groupLayout, groupFrom,
-                    groupTo, childData, childLayout, childLayout, childFrom,
-                    childTo);
-            
-            this.context = context;
-        }
-        
-        @Override
-        public View getGroupView(final int groupPosition,
-                final boolean isExpanded, final View convertView,
-                final ViewGroup parent) {
-            View v = super.getGroupView(groupPosition, isExpanded, convertView,
-                    parent);
-            
-            TextView tv = (TextView)v.findViewById(R.id.buslist_time);
-            HashMap<String, String> data =
-                        (HashMap<String, String>)getGroup(groupPosition);
-            
-            if(tv != null) tv.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
-                
-            if(data.containsKey(IS_ESTIMATED_KEY)) {
-                if(tv != null) {
-                    tv.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
-                    tv.setText(tv.getText() + " ");
-                }
-            }
-            
-            return v;
-        }
-        
-        @Override
-        public View getChildView(final int groupPosition,
-                final int childPosition, final boolean isLastChild,
-                final View convertView, final ViewGroup parent) {
-            View v = super.getChildView(groupPosition, childPosition,
-                    isLastChild, convertView, parent);
-            
-            TextView tv = (TextView)v.findViewById(R.id.buschild_time);
-            HashMap<String, String> data =
-                    (HashMap<String, String>)getChild(groupPosition,
-                    childPosition);
-            
-            if(tv != null) tv.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
-                
-            if(data.containsKey(IS_ESTIMATED_KEY)) {
-                if(tv != null) {
-                    tv.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
-                    tv.setText(tv.getText() + " ");
-                }
-            }
-            
-            return v;
         }
     }
 }

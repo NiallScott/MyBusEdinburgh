@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -714,20 +714,22 @@ public class BusStopMapActivity extends MapActivity implements
                 maxY = g.getLongitudeE6() + longSpan;
                 Cursor c;
                 
-                if(filtered) {
-                    c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY,
-                            serviceFilter.toString());
-                } else {
-                    c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
-                }
-                
-                if(c != null) {
-                    while(c.moveToNext()) {
-                        items.add(new BusStopOverlayItem(new GeoPoint(
-                                c.getInt(2), c.getInt(3)), c.getString(0),
-                                c.getString(1)));
+                synchronized(bsd) {
+                    if(filtered) {
+                        c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY,
+                                serviceFilter.toString());
+                    } else {
+                        c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
                     }
-                    c.close();
+
+                    if(c != null) {
+                        while(c.moveToNext()) {
+                            items.add(new BusStopOverlayItem(new GeoPoint(
+                                    c.getInt(2), c.getInt(3)), c.getString(0),
+                                    c.getString(1)));
+                        }
+                        c.close();
+                    }
                 }
                 populate();
             }
@@ -750,12 +752,14 @@ public class BusStopMapActivity extends MapActivity implements
         public void setCurrentStopCode(final String stopCode) {
             if(currentItem != null) return;
 
-            Cursor c = bsd.getBusStopByCode(stopCode);
-            if(c == null || c.getCount() != 1) return;
-            c.moveToFirst();
-            currentItem = new BusStopOverlayItem(new GeoPoint(c.getInt(2),
-                    c.getInt(3)), c.getString(0), c.getString(1));
-            c.close();
+            synchronized(bsd) {
+                Cursor c = bsd.getBusStopByCode(stopCode);
+                if(c == null || c.getCount() != 1) return;
+                c.moveToFirst();
+                currentItem = new BusStopOverlayItem(new GeoPoint(c.getInt(2),
+                        c.getInt(3)), c.getString(0), c.getString(1));
+                c.close();
+            }
         }
         
         @Override

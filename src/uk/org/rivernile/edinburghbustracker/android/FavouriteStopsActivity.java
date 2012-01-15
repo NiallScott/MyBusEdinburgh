@@ -44,6 +44,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import java.util.HashMap;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 /**
@@ -267,12 +268,21 @@ public class FavouriteStopsActivity extends ListActivity {
     public static class FavouritesCursorAdapter extends SimpleCursorAdapter {
         
         private BusStopDatabase bsd;
+        private final HashMap<String, String> serviceListings =
+                new HashMap<String, String>();
         
         public FavouritesCursorAdapter(final Context context, final int layout,
                 final Cursor c, final String[] from, final int[] to) {
             super(context, layout, c, from, to);
             
             bsd = BusStopDatabase.getInstance(context);
+            
+            String stopCode;
+            while(c.moveToNext()) {
+                stopCode = c.getString(0);
+                serviceListings.put(stopCode,
+                        bsd.getBusServicesForStopAsString(stopCode));
+            }
         }
         
         @Override
@@ -280,9 +290,16 @@ public class FavouriteStopsActivity extends ListActivity {
                 final ViewGroup parent) {
             View v = super.getView(position, convertView, parent);
             
+            String stopCode = getCursor().getString(0);
             TextView services = (TextView)v.findViewById(android.R.id.text2);
-            services.setText(bsd.getBusServicesForStopAsString(
-                    getCursor().getString(0)));
+            
+            if(serviceListings.containsKey(stopCode)) {
+                services.setText(serviceListings.get(stopCode));
+            } else {
+                String s = bsd.getBusServicesForStopAsString(stopCode);
+                services.setText(s);
+                serviceListings.put(stopCode, s);
+            }
             
             return v;
         }

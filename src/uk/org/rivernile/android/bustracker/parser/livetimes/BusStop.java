@@ -25,7 +25,9 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
+import com.davekoelle.alphanum.AlphanumComparator;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * A bus stop is a collection of bus services, in the context of this class.
@@ -95,6 +97,7 @@ public class BusStop {
      * @return The ArrayList of all bus services for this bus stop.
      */
     public ArrayList<BusService> getBusServices() {
+        Collections.sort(busServices, new AlphanumComparator());
         return (ArrayList<BusService>)busServices.clone();
     }
 }

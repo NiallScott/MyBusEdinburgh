@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -98,23 +98,26 @@ public class MapSearchHelper {
             GeoPoint pointLocation;
             SearchResult result;
             
-            Cursor c = bsd.searchDatabase(args[0]);
-            String stopCode;
-            if(c != null) {
-                while(c.moveToNext()) {
-                    pointLocation = new GeoPoint(c.getInt(2), c.getInt(3));
-                    stopCode = c.getString(0);
-                    result = new SearchResult(pointLocation,
-                            SearchResult.TYPE_STOP, c.getString(1) + " (" +
-                            stopCode + ")");
-                    result.stopCode = stopCode;
-                    result.services = bsd.getBusServicesForStopAsString(stopCode);
-                    if(myLocation != null)
-                        result.distance = calculateGeographicalDistance(
-                                myLocation, pointLocation);
-                    res.add(result);
+            synchronized(bsd) {
+                Cursor c = bsd.searchDatabase(args[0]);
+                String stopCode;
+                if(c != null) {
+                    while(c.moveToNext()) {
+                        pointLocation = new GeoPoint(c.getInt(2), c.getInt(3));
+                        stopCode = c.getString(0);
+                        result = new SearchResult(pointLocation,
+                                SearchResult.TYPE_STOP, c.getString(1) + " (" +
+                                stopCode + ")");
+                        result.stopCode = stopCode;
+                        result.services = bsd.getBusServicesForStopAsString(
+                                stopCode);
+                        if(myLocation != null)
+                            result.distance = calculateGeographicalDistance(
+                                    myLocation, pointLocation);
+                        res.add(result);
+                    }
+                    c.close();
                 }
-                c.close();
             }
 
             Geocoder geo = new Geocoder(mContext);

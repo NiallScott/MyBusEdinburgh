@@ -111,4 +111,14 @@ public class BusService {
     public Bus getFirstBus() {    
         return buses.isEmpty() ? null : buses.get(0);
     }
+    
+    /**
+     * Return the name of the bus service.
+     * 
+     * @return The name of the bus service.
+     */
+    @Override
+    public String toString() {
+        return serviceName;
+    }
 }

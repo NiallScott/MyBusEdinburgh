@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -401,30 +401,35 @@ public class NearestStopsActivity extends ListActivity
             serviceFilter = ServiceFilter.getInstance(this);
             serviceFilter.setCallback(this);
         }
+        
         Cursor c;
-        if(serviceFilter.isFiltered()) {
-            c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY,
-                    serviceFilter.toString());
-        } else {
-            c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
-        }
-
         SearchResultsArrayAdapter items = new SearchResultsArrayAdapter();
-        GeoPoint stopPoint;
-        if(c != null && c.getCount() > 0) {
-            while(c.moveToNext()) {
-                stopPoint = new GeoPoint(c.getInt(2), c.getInt(3));
-                double distance = MapSearchHelper.calculateGeographicalDistance(
-                        currLoc, stopPoint) * 1000;
-                String stopCode = c.getString(0);
-                String stopName = c.getString(1);
-                String services = BusStopDatabase.getInstance(this)
-                        .getBusServicesForStopAsString(stopCode);
-                items.add(new SearchResult(stopCode, stopName, services,
-                        distance, stopPoint));
+        
+        synchronized(bsd) {
+            if(serviceFilter.isFiltered()) {
+                c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY,
+                        serviceFilter.toString());
+            } else {
+                c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
+            }
+            
+            GeoPoint stopPoint;
+            if(c != null && c.getCount() > 0) {
+                while(c.moveToNext()) {
+                    stopPoint = new GeoPoint(c.getInt(2), c.getInt(3));
+                    double distance = MapSearchHelper
+                            .calculateGeographicalDistance(currLoc, stopPoint)
+                            * 1000;
+                    String stopCode = c.getString(0);
+                    String stopName = c.getString(1);
+                    String services = BusStopDatabase.getInstance(this)
+                            .getBusServicesForStopAsString(stopCode);
+                    items.add(new SearchResult(stopCode, stopName, services,
+                            distance, stopPoint));
+                }
+                c.close();
             }
         }
-        c.close();
 
         items.sort(mDistanceCompare);
         setListAdapter(items);

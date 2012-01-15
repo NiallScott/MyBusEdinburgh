@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -469,8 +469,7 @@ public class MainActivity extends Activity {
      * @param url The URL of the bus stop database to download.
      */
     private static void updateStopsDB(final Context context,
-            final String url, final String checksum)
-    {
+            final String url, final String checksum) {
         if(context == null || url == null || url.length() == 0 ||
                 checksum == null || checksum.length() == 0) return;
         try {
@@ -490,13 +489,19 @@ public class MainActivity extends Activity {
             out.close();
             in.close();
             con.disconnect();
+            
             if(!md5Checksum(temp).equalsIgnoreCase(checksum)) {
                 temp.delete();
                 return;
             }
-            BusStopDatabase.getInstance(context).getReadableDatabase().close();
-            dest.delete();
-            temp.renameTo(dest);
+            
+            BusStopDatabase bsd = BusStopDatabase.getInstance(context);
+            synchronized(bsd) {
+                bsd.getReadableDatabase().close();
+                dest.delete();
+                temp.renameTo(dest);
+            }
+            
             Looper.prepare();
             Toast.makeText(context, R.string.main_db_updated, Toast.LENGTH_LONG)
                     .show();
