@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -170,7 +170,9 @@ public class EnterStopCodeActivity extends Activity
     public void onClick(final View v) {
         if(v == scanButton) {
             if(barcodePackageAvailable) {
-                startActivityForResult(barcodeIntent, 0);
+                try {
+                    startActivityForResult(barcodeIntent, 0);
+                } catch(ActivityNotFoundException e) { }
             } else {
                 showDialog(DIALOG_INSTALL_SCANNER);
             }
@@ -184,6 +186,12 @@ public class EnterStopCodeActivity extends Activity
             final Intent data) {
         if(resultCode == RESULT_OK) {
             Uri uri = Uri.parse(data.getStringExtra("SCAN_RESULT"));
+            if(!uri.isHierarchical()) {
+                Toast.makeText(this, R.string.enterstopcode_invalid_qrcode,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            
             String stopCode = uri.getQueryParameter("busStopCode");
             if(stopCode != null && stopCode.length() > 0) {
                 txt.setText(stopCode);

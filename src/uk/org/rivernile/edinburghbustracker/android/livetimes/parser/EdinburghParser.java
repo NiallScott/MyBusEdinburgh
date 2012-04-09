@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -79,8 +79,8 @@ public final class EdinburghParser implements BusParser {
      * {@inheritDoc}
      */
     @Override
-    public HashMap<String, BusStop> getBusStopData(final String[] stopCodes)
-            throws BusParserException {
+    public HashMap<String, BusStop> getBusStopData(final String[] stopCodes,
+            final int numDepartures) throws BusParserException {
         if(stopCodes == null || stopCodes.length == 0) return null;
         
         StringBuilder sb = new StringBuilder();
@@ -103,7 +103,9 @@ public final class EdinburghParser implements BusParser {
                 sb.append('&');
             }
         }
-        sb.append("nb=4&random=");
+        sb.append("nb=");
+        sb.append(numDepartures);
+        sb.append("&random=");
         sb.append(rand.nextInt());
         
         try {
@@ -142,11 +144,11 @@ public final class EdinburghParser implements BusParser {
      */
     private HashMap<String, BusStop> parseJSON(final String jsonString)
             throws JSONException, BusParserException {
-        HashMap<String, BusStop> data = new HashMap<String, BusStop>();
+        final HashMap<String, BusStop> data = new HashMap<String, BusStop>();
         JSONObject jo = new JSONObject(jsonString);
         
         if(jo.has("faultcode")) {
-            String err = jo.getString("faultcode");
+            final String err = jo.getString("faultcode");
             if("INVALID_APP_KEY".equals(err)) {
                 throw new BusParserException(BusTimes.ERROR_INVALID_APP_KEY);
             } else if("INVALID_PARAMETER".equals(err)) {

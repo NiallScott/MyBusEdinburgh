@@ -32,6 +32,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -80,6 +81,9 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     public final static String ACTION_VIEW_STOP_DATA =
             "uk.org.rivernile.edinburghbustracker.android."
             + "ACTION_VIEW_STOP_DATA";
+    
+    private static final boolean isHoneycombOrGreater =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
     private String stopCode;
     private String stopName;
@@ -92,24 +96,31 @@ public class DisplayStopDataActivity extends ExpandableListActivity
     private AlertManager alertMan;
     private SimpleExpandableListAdapter listAdapter;
     private BusStopDatabase bsd;
+    private int numDepartures = 4;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
         setContentView(R.layout.displaystopdata);
+        setTitle(R.string.displaystopdata_title);
         
         bsd = BusStopDatabase.getInstance(this);
-        
-        textLastRefreshed = (TextView)findViewById(R.id.displayLastUpdated);
-        setTitle(R.string.displaystopdata_title);
-        Intent intent = getIntent();
-        
         sd = SettingsDatabase.getInstance(this);
         alertMan = AlertManager.getInstance(getApplicationContext());
-
-        busTimes = BusTimes.getInstance(this,
-                EdinburghParser.getInstance());
+        Intent intent = getIntent();
         sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        busTimes = BusTimes.getInstance(this, EdinburghParser.getInstance());
+        
+        textLastRefreshed = (TextView)findViewById(R.id.displayLastUpdated);
+
+        try {
+            numDepartures = Integer.parseInt(
+                    sp.getString("pref_numberOfShownDeparturesPerService",
+                    "4"));
+        } catch(NumberFormatException e) {
+            numDepartures = 4;
+        }
         
         if(Intent.ACTION_VIEW.equals(intent.getAction())) {
             stopCode = intent.getData().getQueryParameter("busStopCode");
@@ -119,9 +130,6 @@ public class DisplayStopDataActivity extends ExpandableListActivity
 
         if(stopCode == null || stopCode.length() == 0)
             handleError(BusTimes.ERROR_NOCODE);
-
-        autoRefresh = sp.getBoolean(PreferencesActivity.KEY_AUTOREFRESH_STATE,
-                false);
 
         if(savedInstanceState != null) {
             autoRefresh = savedInstanceState.getBoolean("autoRefresh", false);
@@ -144,7 +152,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         if(!busTimes.isExecuting()) {
             HashMap<String, BusStop> busStops = busTimes.getBusStops();
             if(busStops == null || !busStops.containsKey(stopCode)) {
-                busTimes.doRequest(new String[] { stopCode });
+                busTimes.doRequest(new String[] { stopCode }, numDepartures);
             } else {
                 displayData();
             }
@@ -152,7 +160,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             showDialog(DIALOG_PROGRESS);
         }
         
-        if(MainActivity.isHoneycombOrGreater()) {
+        if(isHoneycombOrGreater) {
             invalidateOptionsMenuSupport();
         }
     }
@@ -260,7 +268,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                 edit.putBoolean("pref_servicessorting_state", sortByTime);
                 edit.commit();
                 displayData();
-                if(MainActivity.isHoneycombOrGreater()) {
+                if(isHoneycombOrGreater) {
                     invalidateOptionsMenuSupport();
                 }
                 break;
@@ -276,7 +284,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             case R.id.displaystopdata_option_menu_refresh:
                 mHandler.removeMessages(EVENT_REFRESH);
                 showDialog(DIALOG_PROGRESS);
-                busTimes.doRequest(new String[] { stopCode });
+                busTimes.doRequest(new String[] { stopCode }, numDepartures);
                 break;
             case R.id.displaystopdata_option_menu_prox:
                 if(sd.isActiveProximityAlert(stopCode)) {
@@ -366,7 +374,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
                             final int id)
                     {
                         sd.deleteFavouriteStop(stopCode);
-                        if(MainActivity.isHoneycombOrGreater()) {
+                        if(isHoneycombOrGreater) {
                             invalidateOptionsMenuSupport();
                         }
                     }
@@ -416,7 +424,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             switch(msg.what) {
                 case EVENT_REFRESH:
                     showDialog(DIALOG_PROGRESS);
-                    busTimes.doRequest(new String[] { stopCode });
+                    busTimes.doRequest(new String[] { stopCode },
+                            numDepartures);
                     break;
                 case EVENT_UPDATE_TIME:
                     updateLastRefreshed();
@@ -478,7 +487,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             @Override
             public void onClick(final DialogInterface di, final int i) {
                 showDialog(DIALOG_PROGRESS);
-                busTimes.doRequest(new String[] { stopCode });
+                busTimes.doRequest(new String[] { stopCode }, numDepartures);
             }
         }).setNegativeButton(R.string.cancel,
                 new DialogInterface.OnClickListener() {

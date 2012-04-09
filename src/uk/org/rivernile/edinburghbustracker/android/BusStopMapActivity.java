@@ -38,6 +38,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -64,8 +65,6 @@ import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 public class BusStopMapActivity extends MapActivity implements
         OnItemClickListener {
 
-    public static final int SHOW_STOPS = 1;
-
     public static final int DIALOG_PROGRESS = 0;
     public static final int DIALOG_SEARCH_RESULTS = 1;
     private static final int DIALOG_FILTER = 2;
@@ -79,8 +78,11 @@ public class BusStopMapActivity extends MapActivity implements
     private static final int DEFAULT_LONG = -3199811;
     private static final int DEFAULT_ZOOM = 12;
     
-    private final static int ZOOM_LEVEL_STANDARD = 15;
-    private final static int ZOOM_LEVEL_FILTERED = 9;
+    private static final int ZOOM_LEVEL_STANDARD = 15;
+    private static final int ZOOM_LEVEL_FILTERED = 9;
+    
+    private static final boolean isHoneycombOrGreater =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
     private MapView mapView;
     protected MyLocationOverlayFix myLocation;
@@ -308,13 +310,13 @@ public class BusStopMapActivity extends MapActivity implements
                 break;
             case R.id.busstopmap_option_menu_maptype:
                 mapView.setSatellite(!mapView.isSatellite());
-                if(MainActivity.isHoneycombOrGreater()) {
+                if(isHoneycombOrGreater) {
                     invalidateOptionsMenuSupport();
                 }
                 break;
             case R.id.busstopmap_option_menu_trafficview:
                 mapView.setTraffic(!mapView.isTraffic());
-                if(MainActivity.isHoneycombOrGreater()) {
+                if(isHoneycombOrGreater) {
                     invalidateOptionsMenuSupport();
                 }
                 break;
@@ -349,7 +351,7 @@ public class BusStopMapActivity extends MapActivity implements
                 return prog;
             case DIALOG_SEARCH_RESULTS:
                 AlertDialog.Builder ad;
-                if(MainActivity.isHoneycombOrGreater()) {
+                if(isHoneycombOrGreater) {
                     //ad = new AlertDialog.Builder(this,
                             //AlertDialog.THEME_HOLO_DARK);
                     ad = MainActivity.getHoneycombDialog(this);
@@ -382,9 +384,7 @@ public class BusStopMapActivity extends MapActivity implements
                         Context.LAYOUT_INFLATER_SERVICE);
                 stopDialogView = vi.inflate(R.layout.mapdialog, null);
                 AlertDialog.Builder builder;
-                if(MainActivity.isHoneycombOrGreater()) {
-                    //builder = new AlertDialog.Builder(this,
-                            //AlertDialog.THEME_HOLO_DARK);
+                if(isHoneycombOrGreater) {
                     builder = MainActivity.getHoneycombDialog(this);
                 } else {
                     builder = new AlertDialog.Builder(this);
@@ -437,10 +437,18 @@ public class BusStopMapActivity extends MapActivity implements
                 boolean isFavourite = sd.getFavouriteStopExists(stopCode);
 
                 String services = bsd.getBusServicesForStopAsString(stopCode);
+                String locality = stopOverlay.currentItem.getLocality();
                 TextView tv = (TextView)stopDialogView.findViewById(
                         R.id.mapdialog_text_services);
-                d.setTitle(stopOverlay.currentItem.getStopName() + " (" +
-                        stopCode + ")");
+                
+                if(locality == null) {
+                    d.setTitle(stopOverlay.currentItem.getStopName() + " (" +
+                            stopCode + ")");
+                } else {
+                    d.setTitle(stopOverlay.currentItem.getStopName() + ", " +
+                            locality + " (" + stopCode + ")");
+                }
+                
                 if(services == null) {
                     tv.setText(R.string.map_dialog_noservices);
                 } else {
@@ -655,16 +663,21 @@ public class BusStopMapActivity extends MapActivity implements
                 final int position, final long id) {
             MapSearchHelper.SearchResult sr = searcher.searchResults
                     .getItem(position);
-            mapView.getController().setCenter(sr.geoPoint);
+            mapView.getController().animateTo(sr.geoPoint);
             mapView.getController().setZoom(19);
             dismissDialog(DIALOG_SEARCH_RESULTS);
         }
     };
     
+    /**
+     * The BusStopMapOverlay is the overlay containing bus stops to show on the
+     * map.
+     */
     protected class BusStopMapOverlay
             extends ItemizedOverlay<BusStopOverlayItem>
             implements Filterable {
         
+        /** The current selected bus stop item. */
         public BusStopOverlayItem currentItem;
         
         private int lastZoom;
@@ -673,16 +686,79 @@ public class BusStopMapActivity extends MapActivity implements
         private ArrayList<BusStopOverlayItem> items =
                 new ArrayList<BusStopOverlayItem>();
         
+        /**
+         * Create a new BusStopMapOverlay, specifying the default marker to use
+         * when an BusStopOverlayItem has not provided its own.
+         * 
+         * @param defaultMarker The default market drawable to use.
+         * @see BusStopOverlayItem
+         */
         public BusStopMapOverlay(final Drawable defaultMarker) {
             super(boundCenterBottom(defaultMarker));
+            
+            for(int i = 0; i < 8; i++) {
+                if(BusStopOverlayItem.mapIcons[i] == null) {
+                    switch(i) {
+                        case 0:
+                            BusStopOverlayItem.mapIcons[i] = boundCenterBottom(
+                                    getResources().getDrawable(
+                                    R.drawable.mapmarker_n));
+                            break;
+                        case 1:
+                            BusStopOverlayItem.mapIcons[i] = boundCenterBottom(
+                                    getResources().getDrawable(
+                                    R.drawable.mapmarker_ne));
+                            break;
+                        case 2:
+                            BusStopOverlayItem.mapIcons[i] = boundCenterBottom(
+                                    getResources().getDrawable(
+                                    R.drawable.mapmarker_e));
+                            break;
+                        case 3:
+                            BusStopOverlayItem.mapIcons[i] = boundCenterBottom(
+                                    getResources().getDrawable(
+                                    R.drawable.mapmarker_se));
+                            break;
+                        case 4:
+                            BusStopOverlayItem.mapIcons[i] = boundCenterBottom(
+                                    getResources().getDrawable(
+                                    R.drawable.mapmarker_s));
+                            break;
+                        case 5:
+                            BusStopOverlayItem.mapIcons[i] = boundCenterBottom(
+                                    getResources().getDrawable(
+                                    R.drawable.mapmarker_sw));
+                            break;
+                        case 6:
+                            BusStopOverlayItem.mapIcons[i] = boundCenterBottom(
+                                    getResources().getDrawable(
+                                    R.drawable.mapmarker_w));
+                            break;
+                        case 7:
+                            BusStopOverlayItem.mapIcons[i] = boundCenterBottom(
+                                    getResources().getDrawable(
+                                    R.drawable.mapmarker_nw));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            
             populate();
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         protected BusStopOverlayItem createItem(final int i) {
             return items.get(i);
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public int size() {
             return items.size();
@@ -696,22 +772,33 @@ public class BusStopMapActivity extends MapActivity implements
             return true;
         }
         
+        /**
+         * Populate the list of bus stops by clearing the current list, finding
+         * lat/long, working out the span bounds that the user can see (to
+         * prevent unnecessary loading), getting filtered or unfiltered stops
+         * (depending what the user has set) and adding the results to the list.
+         * The map view is then forced to refresh when populate() is called.
+         * 
+         * @see BusStopMapOverlay#populate()
+         */
         private void doPopulateBusStops() {
             setLastFocusedIndex(-1);
             items.clear();
-            populate();
             final boolean filtered = serviceFilter.isFiltered();
             int zoomLevel = filtered ? ZOOM_LEVEL_FILTERED :
                     ZOOM_LEVEL_STANDARD;
             if(mapView.getZoomLevel() >= zoomLevel) {
-                int minX, minY, maxX, maxY, latSpan, longSpan;
+                int minX, minY, maxX, maxY, latSpan, longSpan, latitude,
+                        longitude;
                 GeoPoint g = mapView.getMapCenter();
                 latSpan = (mapView.getLatitudeSpan() / 2) + 1;
                 longSpan = (mapView.getLongitudeSpan() / 2) + 1;
-                minX = g.getLatitudeE6() + latSpan;
-                minY = g.getLongitudeE6() - longSpan;
-                maxX = g.getLatitudeE6() - latSpan;
-                maxY = g.getLongitudeE6() + longSpan;
+                latitude = g.getLatitudeE6();
+                longitude = g.getLongitudeE6();
+                minX = latitude + latSpan;
+                minY = longitude - longSpan;
+                maxX = latitude - latSpan;
+                maxY = longitude + longSpan;
                 Cursor c;
                 
                 synchronized(bsd) {
@@ -726,15 +813,20 @@ public class BusStopMapActivity extends MapActivity implements
                         while(c.moveToNext()) {
                             items.add(new BusStopOverlayItem(new GeoPoint(
                                     c.getInt(2), c.getInt(3)), c.getString(0),
-                                    c.getString(1)));
+                                    c.getString(1), c.getInt(4),
+                                    c.getString(5)));
                         }
                         c.close();
                     }
                 }
-                populate();
             }
+            
+            populate();
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void draw(final Canvas canvas, final MapView mapView,
                 final boolean shadow) {
@@ -742,6 +834,9 @@ public class BusStopMapActivity extends MapActivity implements
             int zoom = mapView.getZoomLevel();
             GeoPoint g = mapView.getMapCenter();
 
+            // Only reload the bus stops if the zoom or center lat/lon has
+            // changed, otherwise we can end up needlessly updating the bus
+            // stops.
             if(zoom != lastZoom || !g.equals(lastCenter)) {
                 lastZoom = zoom;
                 lastCenter = g;
@@ -749,19 +844,27 @@ public class BusStopMapActivity extends MapActivity implements
             }
         }
         
+        /**
+         * Set the stopCode of the currently selected item.
+         * 
+         * @param stopCode The stopCode to set as the currently selected item.
+         */
         public void setCurrentStopCode(final String stopCode) {
             if(currentItem != null) return;
 
             synchronized(bsd) {
                 Cursor c = bsd.getBusStopByCode(stopCode);
-                if(c == null || c.getCount() != 1) return;
-                c.moveToFirst();
+                if(c == null || !c.moveToNext()) return;
                 currentItem = new BusStopOverlayItem(new GeoPoint(c.getInt(2),
-                        c.getInt(3)), c.getString(0), c.getString(1));
+                        c.getInt(3)), c.getString(0), c.getString(1),
+                        c.getInt(4), c.getString(5));
                 c.close();
             }
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public void onFilterSet() {
             doPopulateBusStops();
@@ -776,7 +879,7 @@ public class BusStopMapActivity extends MapActivity implements
      * code cannot be found and then the API just fails. At least with this,
      * the user can continue, albeit with a missing location dot on the map!
      */
-    protected class MyLocationOverlayFix extends MyLocationOverlay {
+    protected static class MyLocationOverlayFix extends MyLocationOverlay {
 
         public MyLocationOverlayFix(final Context context,
                 final MapView mapView) {
@@ -804,25 +907,65 @@ public class BusStopMapActivity extends MapActivity implements
         }
     }
     
-    public class BusStopOverlayItem extends OverlayItem {
+    /**
+     * This class is essentially just a bean class for a bus stop on the map.
+     * All it needs to contain is the bus stop code and the bus stop  name.
+     */
+    public static class BusStopOverlayItem extends OverlayItem {
+        
+        public static Drawable[] mapIcons = new Drawable[8];
 
         private String stopCode;
         private String stopName;
+        private String locality;
 
+        /**
+         * Create a new bus stop overlay item with the given point, stopCode
+         * and stopName.
+         * 
+         * @param point The GeoPoint (lat/lon) for this item.
+         * @param stopCode The stopCode attributed to this item.
+         * @param stopName The stopName attributed to this item.
+         * @param orientation The orientation attributed to this item.
+         * @param locality The locality attributed to this item.
+         */
         public BusStopOverlayItem(final GeoPoint point, final String stopCode,
-                final String stopName)
-        {
+                final String stopName, final int orientation,
+                final String locality) {
             super(point, stopCode, stopName);
             this.stopCode = stopCode;
             this.stopName = stopName;
+            this.locality = locality;
+            
+            if(orientation >= 0 && orientation <= 7)
+                setMarker(mapIcons[orientation]);
         }
 
+        /**
+         * Get the stopCode for this item.
+         * 
+         * @return The stopCode for this item.
+         */
         public String getStopCode() {
             return stopCode;
         }
 
+        /**
+         * Get the stopName for this item.
+         * 
+         * @return The stopName for this item.
+         */
         public String getStopName() {
             return stopName;
+        }
+        
+        /**
+         * Get the locality for this item.
+         * 
+         * @return The locality for this item.
+         */
+        public String getLocality() {
+            return locality;
         }
     }
 }

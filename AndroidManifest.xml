@@ -27,8 +27,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.org.rivernile.edinburghbustracker.android"
-    android:versionCode="7"
-    android:versionName="2.0.2">
+    android:versionCode="8"
+    android:versionName="2.1 development">
         
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -47,7 +47,12 @@
         android:label="@string/app_name"
         android:description="@string/app_description"
         android:icon="@drawable/appicon"
-        android:theme="@style/MyBusEdinburgh">
+        android:theme="@style/MyBusEdinburgh"
+        android:backupAgent="SettingsBackupAgent" >
+            
+        <meta-data
+            android:name="com.google.android.backup.api_key"
+            android:value="AEdPqrEAAAAIgfw_r8tIY0nyXAflwrdH6DJ1K38Gwog80pGrPw" />
             
         <uses-library android:name="com.google.android.maps" />
         
@@ -79,6 +84,9 @@
                 <data android:scheme="http"
                       android:host="mobile.mybustracker.co.uk" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="uk.org.rivernile.edinburghbustracker.android.ACTION_VIEW_STOP_DATA" />
+            </intent-filter>
         </activity>
         
         <activity android:name=".PreferencesActivity"
@@ -90,6 +98,7 @@
                   
         <activity android:name=".BusStopMapActivity"
                   android:label="@string/map_title"
+                  android:theme="@style/MyBusEdinburgh.Dark.MapActivity"
                   android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

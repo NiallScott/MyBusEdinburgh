@@ -41,11 +41,13 @@ public interface BusParser {
      * Get data for a list of bus stops. This is usually bus times.
      * 
      * @param stopCodes The list of stop codes to return data for.
+     * @param numDepartures The max number of departures to show for each
+     * service.
      * @return A HashMap of String -> BusStop.
      * @throws BusParserException When an exception occurs during fetching or
      * parsing. Exceptions are wrapped in BusParserException to return a common
      * type.
      */
-    public HashMap<String, BusStop> getBusStopData(final String[] stopCodes)
-            throws BusParserException;
+    public HashMap<String, BusStop> getBusStopData(final String[] stopCodes,
+            final int numDepartures) throws BusParserException;
 }

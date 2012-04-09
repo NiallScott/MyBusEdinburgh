@@ -153,16 +153,19 @@ public class BusTimes {
      * Do request.
      * @param stopCodes The list of stop codes for which we want to get bus
      * times for.
+     * @param numDepartures The max number of departures to show for each
+     * service.
      * @return true if the task was kicked off, false if not. The task will not
      * be kicked off if another task is already taking place.
      */
-    public boolean doRequest(final String[] stopCodes) {
+    public boolean doRequest(final String[] stopCodes,
+            final int numDepartures) {
         if(stopCodes == null || stopCodes.length == 0)
             throw new IllegalArgumentException("The stop codes array must " +
                     "not be null or empty.");
         
         if(task == null) {
-            task = new GetBusTimesTask();
+            task = new GetBusTimesTask(numDepartures);
             task.execute(stopCodes);
             return true;
         } else {
@@ -174,6 +177,17 @@ public class BusTimes {
             extends AsyncTask<String, Void, HashMap<String, BusStop>> {
         
         private int error = -1;
+        private int numDepartures = 4;
+        
+        public GetBusTimesTask() {
+            super();
+        }
+        
+        public GetBusTimesTask(final int numDepartures) {
+            super();
+            
+            this.numDepartures = numDepartures;
+        }
         
         /**
          * {@inheritDoc}
@@ -192,7 +206,7 @@ public class BusTimes {
             HashMap<String, BusStop> res = null;
             
             try {
-                res = parser.getBusStopData(stopCodes);
+                res = parser.getBusStopData(stopCodes, numDepartures);
                 lastDataRefresh = System.currentTimeMillis();
             } catch(BusParserException e) {
                 error = e.getCode();

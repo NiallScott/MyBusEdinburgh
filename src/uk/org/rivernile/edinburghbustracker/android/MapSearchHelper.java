@@ -101,13 +101,21 @@ public class MapSearchHelper {
             synchronized(bsd) {
                 Cursor c = bsd.searchDatabase(args[0]);
                 String stopCode;
+                String locality;
                 if(c != null) {
                     while(c.moveToNext()) {
                         pointLocation = new GeoPoint(c.getInt(2), c.getInt(3));
                         stopCode = c.getString(0);
-                        result = new SearchResult(pointLocation,
-                                SearchResult.TYPE_STOP, c.getString(1) + " (" +
-                                stopCode + ")");
+                        locality = c.getString(5);
+                        if(locality == null) {
+                            result = new SearchResult(pointLocation,
+                                    SearchResult.TYPE_STOP, c.getString(1) +
+                                    " (" + stopCode + ")");
+                        } else {
+                            result = new SearchResult(pointLocation,
+                                    SearchResult.TYPE_STOP, c.getString(1) +
+                                    ", " + locality + " (" + stopCode + ")");
+                        }
                         result.stopCode = stopCode;
                         result.services = bsd.getBusServicesForStopAsString(
                                 stopCode);
@@ -121,20 +129,21 @@ public class MapSearchHelper {
             }
 
             Geocoder geo = new Geocoder(mContext);
+            StringBuilder sb = new StringBuilder();
             try {
                 List<Address> addrs = geo.getFromLocationName(args[0], 50,
                     55.819447, -3.403363, 56.000000, -2.864143);
-                String locLine;
                 for(Address a : addrs) {
-                    locLine = a.getFeatureName();
-                    if(a.getLocality() != null) locLine += ", " +
-                            a.getLocality();
-                    if(a.getPostalCode() != null) locLine += ", " +
-                            a.getPostalCode();
+                    sb.append(a.getFeatureName());
+                    if(a.getLocality() != null) sb.append(',').append(' ')
+                            .append(a.getLocality());
+                    if(a.getPostalCode() != null) sb.append(',').append(' ')
+                            .append(a.getPostalCode());
                     pointLocation = new GeoPoint((int)(a.getLatitude() * 1E6),
                             (int)(a.getLongitude() * 1E6));
                     result = new SearchResult(pointLocation,
-                            SearchResult.TYPE_ADDRESS, locLine);
+                            SearchResult.TYPE_ADDRESS, sb.toString());
+                    sb.setLength(0);
                     if(myLocation != null)
                         result.distance = calculateGeographicalDistance(
                                 myLocation, pointLocation);

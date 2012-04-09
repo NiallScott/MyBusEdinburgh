@@ -25,13 +25,13 @@
  *     exempt from clause 2.
 */ -->
 <resources>
-    <style name="MyBusEdinburgh" parent="@android:style/Theme.Light">
-    </style>
+    <style name="MyBusEdinburgh" parent="@android:style/Theme.Light" />
     
-    <style name="MyBusEdinburgh.Dark" parent="@android:style/Theme">
-    </style>
+    <style name="MyBusEdinburgh.Dark" parent="@android:style/Theme" />
     
     <style name="MyBusEdinburgh.NoTitleBar">
         <item name="android:windowNoTitle">true</item>
     </style>
+    
+    <style name="MyBusEdinburgh.Dark.MapActivity" />
 </resources>

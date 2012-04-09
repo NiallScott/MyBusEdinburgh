@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,6 +41,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
+/**
+ * Add a new time alert. This allows the user to specify a list of services to
+ * watch and the time trigger in which to alert them. If this activity is
+ * started with no stopCode in the Intent, then the activity will exit
+ * immediately.
+ * 
+ * @author Niall Scott
+ */
 public class AddTimeAlertActivity extends Activity {
     
     private static final int DIALOG_SELECT_SERVICES = 1;
@@ -56,39 +64,87 @@ public class AddTimeAlertActivity extends Activity {
     private Button btnOkay;
     private TextView txtServices;
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        Intent intent = getIntent();
+        // If the intent does not contain "stopCode" in its extra data, then we
+        // finish up and return.
+        final Intent intent = getIntent();
         if(!intent.hasExtra("stopCode")) {
             finish();
             return;
         }
         
-        stopCode = intent.getStringExtra("stopCode");
-        defaultService = intent.getStringExtra("defaultService");
-        
+        // Set the title and content view.
         setTitle(R.string.alert_dialog_time_title);
         setContentView(R.layout.addtimealert);
         
+        // Initialise things.
+        stopCode = intent.getStringExtra("stopCode");
+        defaultService = intent.getStringExtra("defaultService");
         alertMan = AlertManager.getInstance(this);
         bsd = BusStopDatabase.getInstance(this);
-        
         btnOkay = (Button)findViewById(R.id.btnOkay);
+        txtServices = (TextView)findViewById(R.id.txtTimeAlertServices);
+
+        final String locality = bsd.getLocalityForStopCode(stopCode);
+        String stopNameCode;
+        if(locality == null) {
+            // Format the string for when we do not have locality.
+            stopNameCode = bsd.getNameForBusStop(stopCode) + " (" + stopCode +
+                    ")";
+        } else {
+            // Format the string for when we do have locality.
+            stopNameCode = bsd.getNameForBusStop(stopCode) + ", " + locality +
+                    " (" + stopCode + ")";
+        }
+        
+        if(savedInstanceState != null) {
+            // If there was a cofiguration change, such as screen rotation,
+            // use the servicesList and checkBoxes from the previous state.
+            servicesList = savedInstanceState.getStringArray("servicesList");
+            checkBoxes = savedInstanceState.getBooleanArray("checkBoxes");
+        } else {
+            // ...otherwise create a fresh state as it looks like we've been
+            // started fresh.
+            servicesList = bsd.getBusServicesForStop(stopCode);
+            int len = servicesList.length;
+            checkBoxes = new boolean[len];
+            
+            // If we have a fresh start and there's a defaultService available,
+            // populate that in the checkboxes.
+            if(defaultService != null && defaultService.length() > 0) {
+                for(int i = 0; i < len; i++) {
+                    if(servicesList[i].equals(defaultService)) {
+                        checkBoxes[i] = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        populateServicesText();
+        
         btnOkay.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
                 int count = 0;
                 int len = checkBoxes.length;
 
+                // Get a count so we know how long our services array will be.
                 for(boolean b : checkBoxes) {
                     if(b) count++;
                 }
 
                 String[] services = new String[count];
                 int j = 0;
-
+                
+                // Populate the services array in preparation to send it to the
+                // AlertManager.
                 for(int i = 0; i < len; i++) {
                     if(checkBoxes[i]) {
                         services[j] = servicesList[i];
@@ -96,6 +152,7 @@ public class AddTimeAlertActivity extends Activity {
                     }
                 }
 
+                // Add the alert then finish up.
                 alertMan.addTimeAlert(stopCode, services, timeTrigger);
                 finish();
             }
@@ -125,16 +182,12 @@ public class AddTimeAlertActivity extends Activity {
             }
         });
         
-        servicesList = bsd.getBusServicesForStop(stopCode);
-        int len = servicesList.length;
-        checkBoxes = new boolean[len];
-        
-        String stopNameCode = bsd.getNameForBusStop(stopCode) + " (" +
-                stopCode + ")";
+        // Populate the bus stop information TextView.
         TextView tv = (TextView)findViewById(R.id.txtTimeDialogStop);
         tv.setText(getString(R.string.alert_dialog_time_busstop).replace("%s",
                 stopNameCode));
         
+        // Prepare our Spinner.
         final Spinner spinner = (Spinner)findViewById(R.id.time_time_select);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter
                 .createFromResource(this,
@@ -183,19 +236,18 @@ public class AddTimeAlertActivity extends Activity {
                 timeTrigger = 0;
             }
         });
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
         
-        txtServices = (TextView)findViewById(R.id.txtTimeAlertServices);
-        if(defaultService != null && defaultService.length() > 0) {
-            for(int i = 0; i < len; i++) {
-                if(servicesList[i].equals(defaultService)) {
-                    checkBoxes[i] = true;
-                    txtServices.setText(defaultService);
-                    break;
-                }
-            }
-        } else {
-            btnOkay.setEnabled(false);
-        }
+        // Put the services list and checkboxes state in to the outState.
+        outState.putStringArray("servicesList", servicesList);
+        outState.putBooleanArray("checkBoxes", checkBoxes);
     }
     
     /**
@@ -230,25 +282,7 @@ public class AddTimeAlertActivity extends Activity {
                 d.setOnDismissListener(new Dialog.OnDismissListener() {
                     @Override
                     public void onDismiss(final DialogInterface dialog) {
-                        StringBuilder sb = new StringBuilder();
-
-                        int len = servicesList.length;
-                        for(int i = 0; i < len; i++) {
-                            if(checkBoxes[i]) {
-                                if(sb.length() > 0) sb.append(", ");
-
-                                sb.append(servicesList[i]);
-                            }
-                        }
-
-                        if(sb.length() == 0) {
-                            txtServices.setText(getString(R.string
-                                    .alert_dialog_time_noservices));
-                            btnOkay.setEnabled(false);
-                        } else {
-                            txtServices.setText(sb.toString());
-                            btnOkay.setEnabled(true);
-                        }
+                        populateServicesText();
                     }
                 });
 
@@ -272,6 +306,36 @@ public class AddTimeAlertActivity extends Activity {
                 return ad.create();
             default:
                 return null;
+        }
+    }
+    
+    /**
+     * Populate the services list text and set the state of the okay button.
+     * The okay button should only be enabled if there are services selected.
+     */
+    private void populateServicesText() {
+        final StringBuilder sb = new StringBuilder();
+
+        int len = servicesList.length;
+        for(int i = 0; i < len; i++) {
+            if(checkBoxes[i]) {
+                if(sb.length() > 0) sb.append(", ");
+
+                sb.append(servicesList[i]);
+            }
+        }
+
+        if(sb.length() == 0) {
+            // If the services list is empty, put the default text in the view
+            // and disable the okay button.
+            txtServices.setText(getString(R.string
+                    .alert_dialog_time_noservices));
+            btnOkay.setEnabled(false);
+        } else {
+            // If the services list is not empty, put the services list in the
+            // view and enable the okay button.
+            txtServices.setText(sb.toString());
+            btnOkay.setEnabled(true);
         }
     }
 }

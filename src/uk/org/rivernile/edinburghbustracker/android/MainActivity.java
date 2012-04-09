@@ -28,10 +28,12 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.backup.BackupManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.SQLException;
 import android.os.Build;
@@ -56,7 +58,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -87,6 +88,8 @@ public class MainActivity extends Activity {
             "http://edinb.us/api/DatabaseVersion?schemaType=" +
             BusStopDatabase.SCHEMA_NAME + "&random=";
     private static final Random random = new Random();
+    private static final boolean isHoneycombOrGreater =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
     private Button favouriteButton;
     private Button stopCodeButton;
@@ -104,10 +107,11 @@ public class MainActivity extends Activity {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BugSenseHandler.setup(this, ApiKey.BUGSENSE_KEY);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO)
+            this.getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
+                    .registerOnSharedPreferenceChangeListener(
+                    new SharedPreferencesListener(this));
         setContentView(R.layout.home);
-        
-        File toDelete = getDatabasePath("busstops.db");
-        if(toDelete.exists()) toDelete.delete();
         
         favouriteButton = (Button)findViewById(R.id.home_btn_favourites);
         stopCodeButton = (Button)findViewById(R.id.home_btn_entercode);
@@ -231,7 +235,7 @@ public class MainActivity extends Activity {
                         R.id.aboutTopoVersion);
                 
                 AlertDialog.Builder builder;
-                if(isHoneycombOrGreater()) {
+                if(isHoneycombOrGreater) {
                     //builder = new AlertDialog.Builder(this,
                             //AlertDialog.THEME_HOLO_DARK);
                     builder = getHoneycombDialog(this);
@@ -283,28 +287,15 @@ public class MainActivity extends Activity {
     private Runnable stopDBTasks = new Runnable() {
         @Override
         public void run() {
+            File toDelete = getDatabasePath("busstops.db");
+            if(toDelete.exists()) toDelete.delete();
+            
+            toDelete = getDatabasePath("busstops2.db");
+            if(toDelete.exists()) toDelete.delete();
+            
             checkForDBUpdates(getApplicationContext(), false);
         }
     };
-    
-    public static boolean isHoneycombOrGreater() {
-        Field field;
-        try {
-            field = Build.VERSION.class.getField("SDK_INT");
-        } catch(NoSuchFieldException e) {
-            return false;
-        }
-        
-        if(field == null) return false;
-        int val;
-        try {
-            val = field.getInt(null);
-        } catch(IllegalAccessException e) {
-            return false;
-        }
-        
-        return val >= Build.VERSION_CODES.HONEYCOMB;
-    }
     
     public static AlertDialog.Builder getHoneycombDialog(
             final Context context) {
@@ -547,6 +538,30 @@ public class MainActivity extends Activity {
             return "";
         } catch(IOException e) {
             return "";
+        }
+    }
+    
+    public static class BackupSupport {
+        
+        public static void dataChanged(final String packageName) {
+            BackupManager.dataChanged(packageName);
+        }
+    }
+    
+    public static class SharedPreferencesListener
+            implements OnSharedPreferenceChangeListener {
+        
+        final Context context;
+        
+        public SharedPreferencesListener(final Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(final SharedPreferences sp,
+                final String key) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO)
+                BackupSupport.dataChanged(context.getPackageName());
         }
     }
 }

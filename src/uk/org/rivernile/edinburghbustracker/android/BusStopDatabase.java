@@ -46,9 +46,9 @@ import java.io.InputStream;
 public final class BusStopDatabase extends SQLiteOpenHelper {
 
     /** The name of the database. */
-    public static final String STOP_DB_NAME = "busstops2.db";
+    public static final String STOP_DB_NAME = "busstops8.db";
     /** This is the schema name of the database. */
-    public static final String SCHEMA_NAME = "MBE_5";
+    public static final String SCHEMA_NAME = "MBE_8";
     /** The version of the database. For internal use only. */
     protected static final int STOP_DB_VERSION = 1;
 
@@ -189,7 +189,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         try {
             SQLiteDatabase db = getReadableDatabase();
             Cursor c = db.rawQuery("SELECT bus_stops._id, " +
-                    "bus_stops.stopName, bus_stops.x, bus_stops.y FROM " +
+                    "bus_stops.stopName, bus_stops.x, bus_stops.y, " +
+                    "bus_stops.orientation, bus_stops.locality FROM " +
                     "service_stops LEFT JOIN bus_stops ON " +
                     "service_stops.stopCode = bus_stops._id WHERE " +
                     "service_stops.serviceName IN (" + filter + ") AND x <= " +
@@ -406,8 +407,29 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                 c.close();
                 return gp;
             } else {
+                c.close();
                 return null;
             }
+        } catch(SQLiteException e) {
+            return null;
+        }
+    }
+    
+    public synchronized String getLocalityForStopCode(final String stopCode) {
+        try {
+            String result = null;
+            
+            SQLiteDatabase db = getReadableDatabase();
+            Cursor c = db.query("bus_stops", new String[] { "locality" },
+                    "_id = " + stopCode, null, null, null, null);
+            
+            if(c.moveToNext()) {
+                result = c.getString(0);
+            }
+            
+            c.close();
+            
+            return result;
         } catch(SQLiteException e) {
             return null;
         }

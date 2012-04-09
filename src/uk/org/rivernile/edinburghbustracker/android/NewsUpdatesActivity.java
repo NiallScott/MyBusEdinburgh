@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,35 +25,35 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import static uk.org.rivernile.edinburghbustracker.android.fetchers
+        .FetchNewsUpdatesTask.ERROR_NODATA;
+import static uk.org.rivernile.edinburghbustracker.android.fetchers
+        .FetchNewsUpdatesTask.ERROR_PARSEERR;
+import static uk.org.rivernile.edinburghbustracker.android.fetchers
+        .FetchNewsUpdatesTask.ERROR_IOERR;
+import static uk.org.rivernile.edinburghbustracker.android.fetchers
+        .FetchNewsUpdatesTask.ERROR_URLERR;
+
 import uk.org.rivernile.edinburghbustracker.android.fetchers
         .FetchNewsUpdatesTask;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.SimpleAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
+import java.util.Map;
 import uk.org.rivernile.edinburghbustracker.android.fetchers.NewsEvent;
+import uk.org.rivernile.edinburghbustracker.android.fetchers.TwitterNewsItem;
 
 public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
-
-    /* Error constants */
-    public static final int ERROR_NODATA = 0;
-    public static final int ERROR_PARSEERR = 1;
-    public static final int ERROR_IOERR = 2;
-    public static final int ERROR_URLERR = 3;
-
-    /* Constants for menus */
-    private static final int MENU_REFRESH = Menu.FIRST;
 
     /* Constants for dialogs */
     private static final int DIALOG_PROGRESS = 0;
@@ -74,9 +74,9 @@ public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
     public void onResume() {
         super.onResume();
 
-        String temp = fetchTask.getJSONString();
-        if(temp != null && temp.length() > 0) {
-            handleJSONString(temp);
+        final ArrayList<TwitterNewsItem> temp = fetchTask.getNewsItems();
+        if(temp != null && temp.size() > 0) {
+            populateList(temp);
         } else if(!fetchTask.isExecuting()) {
             fetchTask.doTask();
         }
@@ -93,8 +93,7 @@ public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
      */
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.newsupdates_option_menu, menu);
+        getMenuInflater().inflate(R.menu.newsupdates_option_menu, menu);
         return true;
     }
 
@@ -117,7 +116,7 @@ public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
     protected Dialog onCreateDialog(final int id) {
         switch(id) {
             case DIALOG_PROGRESS:
-                ProgressDialog prog = new ProgressDialog(this);
+                final ProgressDialog prog = new ProgressDialog(this);
                 prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
                 prog.setCancelable(true);
                 prog.setMessage(getString(
@@ -141,8 +140,8 @@ public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
     }
     
     @Override
-    public void onNewsAvailable(final String result) {
-        handleJSONString(result);
+    public void onNewsAvailable(final ArrayList<TwitterNewsItem> result) {
+        populateList(result);
     }
     
     @Override
@@ -185,47 +184,42 @@ public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
         });
         builder.create().show();
     }
-
-    private void handleJSONString(final String jsonString) {
-        if(jsonString == null || jsonString.length() == 0) {
+    
+    private void populateList(final ArrayList<TwitterNewsItem> items) {
+        if(items == null || items.isEmpty()) {
             handleError(ERROR_NODATA);
             return;
         }
-
-        JSONArray ja;
-        try {
-            ja = new JSONArray(jsonString);
-            ArrayList<HashMap<String, String>> list =
-                    new ArrayList<HashMap<String, String>>();
-            JSONObject currentObj, user;
-            String[] splitted;
-            int i;
-            int j = ja.length();
-
-            for(i = 0; i < j; i++) {
-                HashMap<String, String> map = new HashMap<String, String>();
-                currentObj = ja.getJSONObject(i);
-                map.put("TEXT", currentObj.getString("text"));
-                user = currentObj.getJSONObject("user");
-                splitted = currentObj.getString("created_at").split("\\s+");
-                if(splitted.length == 6) {
-                    map.put("INFO", user.getString("name") + " - " +
-                            splitted[0] + " " + splitted[2] + " " + splitted[1]
-                            + " " + splitted[5] + " " + splitted[3]);
-                } else {
-                    map.put("INFO", user.getString("name") + " - " +
-                            currentObj.getString("created_at"));
-                }
-                list.add(map);
-            }
-            SimpleAdapter adapter = new SimpleAdapter(this, list,
-                    R.layout.newsupdateslist, new String[] { "TEXT",
-                    "INFO" }, new int[] { R.id.twitText, R.id.twitInfo });
-            setListAdapter(adapter);
-        } catch(JSONException e) {
-            handleError(ERROR_PARSEERR);
+        
+        final ArrayList<HashMap<String, String>> list =
+                new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> map;
+        for(TwitterNewsItem item : items) {
+            map = new HashMap<String, String>();
+            map.put("TEXT", item.getBody());
+            map.put("INFO", item.getPoster() + " - " + item.getDate());
+            list.add(map);
         }
-
+        
+        NewsItemsAdapter adapter = new NewsItemsAdapter(this, list,
+                R.layout.newsupdateslist, new String[] { "TEXT",
+                "INFO" }, new int[] { R.id.twitText, R.id.twitInfo });
+        setListAdapter(adapter);
+        
         if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
+    }
+    
+    private class NewsItemsAdapter extends SimpleAdapter {
+        
+        public NewsItemsAdapter(final Context context,
+                final List<? extends Map<String, ?>> data, final int resource,
+                final String[] from, final int[] to) {
+            super(context, data, resource, from, to);
+        }
+        
+        @Override
+        public boolean isEnabled(final int index) {
+            return false;
+        }
     }
 }

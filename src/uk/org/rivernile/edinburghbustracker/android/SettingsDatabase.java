@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.os.Environment;
 import java.io.BufferedReader;
 import java.io.File;
@@ -67,8 +68,11 @@ public class SettingsDatabase extends SQLiteOpenHelper {
     protected final static String ALERTS_SERVICE_NAMES = "serviceNames";
     protected final static String ALERTS_TIME_TRIGGER = "timeTrigger";
     
-    public final static byte ALERTS_TYPE_PROXIMITY = 1;
-    public final static byte ALERTS_TYPE_TIME = 2;
+    public static final byte ALERTS_TYPE_PROXIMITY = 1;
+    public static final byte ALERTS_TYPE_TIME = 2;
+    
+    private static final boolean isFroyoOrGreater =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
 
     private static SettingsDatabase instance;
 
@@ -210,6 +214,9 @@ public class SettingsDatabase extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getWritableDatabase();
         db.insertOrThrow(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPNAME, cv);
+        
+        if(isFroyoOrGreater) MainActivity.BackupSupport
+                .dataChanged(context.getPackageName());
     }
 
     /**
@@ -225,6 +232,9 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         db.delete(FAVOURITE_STOPS_TABLE,
                 FAVOURITE_STOPS_STOPCODE + " = " + stopCode, null);
+        
+        if(isFroyoOrGreater) MainActivity.BackupSupport
+                .dataChanged(context.getPackageName());
     }
 
     /**
@@ -244,6 +254,9 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         db.update(FAVOURITE_STOPS_TABLE, cv,
                 FAVOURITE_STOPS_STOPCODE + " = " + stopCode, null);
+        
+        if(isFroyoOrGreater) MainActivity.BackupSupport
+                .dataChanged(context.getPackageName());
     }
 
     /**
@@ -349,6 +362,45 @@ public class SettingsDatabase extends SQLiteOpenHelper {
                     String.valueOf(System.currentTimeMillis() - 3600000), null);
         }
     }
+    
+    public JSONObject backupDatabaseAsJSON() throws JSONException {
+        JSONObject root = new JSONObject();
+        JSONArray favStops = new JSONArray();
+        JSONObject stop;
+        
+        root.put("dbVersion", SETTINGS_DB_VERSION);
+        root.put("jsonSchemaVersion", 1);
+        root.put("createTime", System.currentTimeMillis());
+        root.put("favouriteStops", favStops);
+
+        Cursor c = getAllFavouriteStops();
+        while(c.moveToNext()) {
+            stop = new JSONObject();
+            stop.put("stopCode", c.getString(0));
+            stop.put("stopName", c.getString(1));
+            favStops.put(stop);
+        }
+        
+        return root;
+    }
+    
+    public void restoreDatabaseFromJSON(final String jsonString)
+            throws JSONException {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(FAVOURITE_STOPS_TABLE, null, null);
+        
+        JSONObject root, stop;
+        JSONArray favStops;
+        
+        root = new JSONObject(jsonString);
+        favStops = root.getJSONArray("favouriteStops");
+        int len = favStops.length();
+        for(int i = 0; i < len; i++) {
+            stop = favStops.getJSONObject(i);
+            insertFavouriteStop(stop.getString("stopCode"),
+                    stop.getString("stopName"));
+        }
+    }
 
     public String backupDatabase() {
         if(!Environment.getExternalStorageState().equals(
@@ -362,32 +414,16 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         out.mkdirs();
         out = new File(out, "settings.backup");
         
-        JSONObject root = new JSONObject();
-        JSONArray favStops = new JSONArray();
-        JSONObject stop;
+        JSONObject root;
         try {
-            root.put("dbVersion", SETTINGS_DB_VERSION);
-            root.put("jsonSchemaVersion", 1);
-            root.put("createTime", System.currentTimeMillis());
-            root.put("favouriteStops", favStops);
-            
-            Cursor c = getAllFavouriteStops();
-            while(c.moveToNext()) {
-                stop = new JSONObject();
-                stop.put("stopCode", c.getString(0));
-                stop.put("stopName", c.getString(1));
-                favStops.put(stop);
-            }
-        } catch(JSONException e) {
-            return context.getString(
-                    R.string.preferences_backup_error_json_write);
-        }
-        
-        try {
+            root = backupDatabaseAsJSON();
             PrintWriter pw = new PrintWriter(new FileWriter(out));
             pw.println(root.toString());
             pw.flush();
             pw.close();
+        } catch(JSONException e) {
+            return context.getString(
+                    R.string.preferences_backup_error_json_write);
         } catch(IOException e) {
             return context.getString(R.string.preferences_backup_error_ioerror);
         }
@@ -408,33 +444,18 @@ public class SettingsDatabase extends SQLiteOpenHelper {
             return context.getString(R.string.preferences_backup_error_nofile);
         }
         
-        String jsonString = "";
+        StringBuilder jsonString = new StringBuilder();
         try {
             String str;
             BufferedReader reader = new BufferedReader(new FileReader(in));
             while((str = reader.readLine()) != null) {
-                jsonString += str;
+                jsonString.append(str);
             }
             reader.close();
+            
+            restoreDatabaseFromJSON(jsonString.toString());
         } catch(IOException e) {
             return context.getString(R.string.preferences_backup_error_ioerror);
-        }
-        
-        JSONObject root, stop;
-        JSONArray favStops;
-        
-        SQLiteDatabase db = getWritableDatabase();
-        db.delete(FAVOURITE_STOPS_TABLE, null, null);
-        
-        try {
-            root = new JSONObject(jsonString);
-            favStops = root.getJSONArray("favouriteStops");
-            int len = favStops.length();
-            for(int i = 0; i < len; i++) {
-                stop = favStops.getJSONObject(i);
-                insertFavouriteStop(stop.getString("stopCode"),
-                        stop.getString("stopName"));
-            }
         } catch(JSONException e) {
             return context.getString(
                     R.string.preferences_backup_error_json_read);

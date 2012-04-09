@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,8 +28,10 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -42,6 +44,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
+import java.util.List;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 public class AddProximityAlertActivity extends Activity {
@@ -54,6 +57,7 @@ public class AddProximityAlertActivity extends Activity {
     private LocationManager locMan;
     private BusStopDatabase bsd;
     private String stopCode;
+    private Intent locationSettingsIntent;
     
     /**
      * {@inheritDoc}
@@ -69,6 +73,10 @@ public class AddProximityAlertActivity extends Activity {
         }
         
         stopCode = intent.getStringExtra("stopCode");
+        
+        locationSettingsIntent = new Intent(
+                Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        locationSettingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         
         setTitle(R.string.alert_dialog_prox_title);
         setContentView(R.layout.addproxalert);
@@ -125,10 +133,9 @@ public class AddProximityAlertActivity extends Activity {
             public void onClick(final View v) {
                 alertMan.addProximityAlert(stopCode, meters);
                 if(check.isChecked()) {
-                    Intent intent = new Intent(
-                            Settings.ACTION_SECURITY_SETTINGS);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
+                    try {
+                        startActivity(locationSettingsIntent);
+                    } catch(ActivityNotFoundException e) { }
                 }
                 finish();
             }
@@ -150,8 +157,15 @@ public class AddProximityAlertActivity extends Activity {
             }
         });
         
-        String stopNameCode = bsd.getNameForBusStop(stopCode) + " (" +
-                stopCode + ")";
+        String locality = bsd.getLocalityForStopCode(stopCode);
+        String stopNameCode;
+        if(locality == null) {
+            stopNameCode = bsd.getNameForBusStop(stopCode) + " (" + stopCode +
+                    ")";
+        } else {
+            stopNameCode = bsd.getNameForBusStop(stopCode) + ", " + locality +
+                    " (" + stopCode + ")";
+        }
         
         final TextView second = (TextView)findViewById(R.id.textProxDialogStop);
         second.setText(getString(R.string.alert_dialog_prox_second)
@@ -165,10 +179,13 @@ public class AddProximityAlertActivity extends Activity {
     public void onResume() {
         super.onResume();
         
-        if(locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            check.setVisibility(View.GONE);
-        } else {
+        List<ResolveInfo> packages = getPackageManager()
+                .queryIntentActivities(locationSettingsIntent, 0);
+        if(packages != null && !packages.isEmpty() &&
+                !locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             check.setVisibility(View.VISIBLE);
+        } else {
+            check.setVisibility(View.GONE);
         }
     }
     

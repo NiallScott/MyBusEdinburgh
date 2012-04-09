@@ -28,10 +28,12 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
@@ -86,6 +88,8 @@ public class NearestStopsActivity extends ListActivity
     private SharedPreferences sp;
     private SettingsDatabase sd;
     private LayoutInflater vi;
+    private Intent turnOnGpsIntent;
+    private BusStopDatabase bsd;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -94,6 +98,7 @@ public class NearestStopsActivity extends ListActivity
         setContentView(R.layout.neareststops);
         registerForContextMenu(getListView());
         
+        bsd = BusStopDatabase.getInstance(this);
         sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
         sd = SettingsDatabase.getInstance(getApplicationContext());
         alertMan = AlertManager.getInstance(getApplicationContext());
@@ -124,10 +129,16 @@ public class NearestStopsActivity extends ListActivity
             }
         }
         
-        if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                && savedInstanceState == null &&
-                !sp.getBoolean("neareststops_gps_prompt_disable", false)) {
-            showDialog(DIALOG_TURNONGPS);
+        turnOnGpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        
+        List<ResolveInfo> packages = getPackageManager()
+                .queryIntentActivities(turnOnGpsIntent, 0);
+        if(packages != null && !packages.isEmpty()) {
+            if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                    && savedInstanceState == null &&
+                    !sp.getBoolean("neareststops_gps_prompt_disable", false)) {
+                showDialog(DIALOG_TURNONGPS);
+            }
         }
         
         if(savedInstanceState != null) {
@@ -141,7 +152,8 @@ public class NearestStopsActivity extends ListActivity
                                 savedInstanceState.getInt(
                                     "currSelected.latitude"),
                                 savedInstanceState.getInt(
-                                    "currSelected.longitutde")));
+                                    "currSelected.longitutde")),
+                        savedInstanceState.getString("currSelected.locality"));
             }
         }
     }
@@ -159,6 +171,7 @@ public class NearestStopsActivity extends ListActivity
                     currSelected.point.getLatitudeE6());
             outState.putInt("currSelected.longitude",
                     currSelected.point.getLongitudeE6());
+            outState.putString("currSelected.locality", currSelected.locality);
         }
     }
 
@@ -211,8 +224,9 @@ public class NearestStopsActivity extends ListActivity
                     @Override
                     public void onClick(final DialogInterface dialog,
                             final int id) {
-                        startActivity(new Intent(
-                                Settings.ACTION_SECURITY_SETTINGS));
+                        try {
+                            startActivity(turnOnGpsIntent);
+                        } catch(ActivityNotFoundException e) { }
                     }
                 }).setNegativeButton(R.string.no,
                         new DialogInterface.OnClickListener() {
@@ -396,7 +410,6 @@ public class NearestStopsActivity extends ListActivity
         int minY = currLoc.getLongitudeE6() - LONGITUDE_SPAN;
         int maxX = currLoc.getLatitudeE6() - LATITUDE_SPAN;
         int maxY = currLoc.getLongitudeE6() + LONGITUDE_SPAN;
-        BusStopDatabase bsd = BusStopDatabase.getInstance(this);
         if(serviceFilter == null) {
             serviceFilter = ServiceFilter.getInstance(this);
             serviceFilter.setCallback(this);
@@ -421,11 +434,10 @@ public class NearestStopsActivity extends ListActivity
                             .calculateGeographicalDistance(currLoc, stopPoint)
                             * 1000;
                     String stopCode = c.getString(0);
-                    String stopName = c.getString(1);
-                    String services = BusStopDatabase.getInstance(this)
-                            .getBusServicesForStopAsString(stopCode);
-                    items.add(new SearchResult(stopCode, stopName, services,
-                            distance, stopPoint));
+                    String services = bsd.getBusServicesForStopAsString(
+                            stopCode);
+                    items.add(new SearchResult(stopCode, c.getString(1),
+                            services, distance, stopPoint, c.getString(5)));
                 }
                 c.close();
             }
@@ -494,15 +506,17 @@ public class NearestStopsActivity extends ListActivity
         public String services;
         public double distance;
         public GeoPoint point;
+        public String locality;
 
         public SearchResult(final String stopCode, final String stopName,
                 final String services, final double distance,
-                final GeoPoint point) {
+                final GeoPoint point, final String locality) {
             this.stopCode = stopCode;
             this.stopName = stopName;
             this.services = services;
             this.distance = distance;
             this.point = point;
+            this.locality = locality;
         }
     }
 
@@ -536,7 +550,12 @@ public class NearestStopsActivity extends ListActivity
             SearchResult sr = getItem(position);
             distance.setText(getText(R.string.distance) + "\n" +
                     (int)sr.distance + "m");
-            stopDetails.setText(sr.stopName + " (" + sr.stopCode + ")");
+            if(sr.locality == null) {
+                stopDetails.setText(sr.stopName + " (" + sr.stopCode + ")");
+            } else {
+                stopDetails.setText(sr.stopName + ", " + sr.locality + " (" +
+                        sr.stopCode + ")");
+            }
 
             buses.setText(sr.services);
 

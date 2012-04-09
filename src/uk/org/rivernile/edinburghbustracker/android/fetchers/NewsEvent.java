@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,6 +25,8 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fetchers;
 
+import java.util.ArrayList;
+
 /**
  * This interface contains callbacks for the news task.
  * 
@@ -41,9 +43,9 @@ public interface NewsEvent {
      * When the news has been downloaded, this callback is called to announce
      * the data is ready.
      * 
-     * @param jsonString The news in JSON format.
+     * @param newsItems The list of news items.
      */
-    public void onNewsAvailable(String jsonString);
+    public void onNewsAvailable(ArrayList<TwitterNewsItem> newsItems);
     
     /**
      * This is called when an error occurs.

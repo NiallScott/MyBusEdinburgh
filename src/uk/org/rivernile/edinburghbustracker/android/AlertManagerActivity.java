@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -183,8 +183,15 @@ public class AlertManagerActivity extends ListActivity
             Button b;
             CharSequence str;
             String stopCode = cursor.getString(3);
-            String busStop = bsd.getNameForBusStop(stopCode) + " (" + stopCode +
-                    ")";
+            String locality = bsd.getLocalityForStopCode(stopCode);
+            String busStop;
+            if(locality == null) {
+                busStop = bsd.getNameForBusStop(stopCode) + " (" + stopCode +
+                        ")";
+            } else {
+                busStop = bsd.getNameForBusStop(stopCode) + ", " + locality +
+                        " (" + stopCode + ")";
+            }
             
             switch(type) {
                 case SettingsDatabase.ALERTS_TYPE_PROXIMITY:

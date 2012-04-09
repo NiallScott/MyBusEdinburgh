@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,10 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import uk.org.rivernile.edinburghbustracker.android.NewsUpdatesActivity;
+import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * This class fetches the latest updates from the Twitter list of the URL
@@ -42,13 +45,18 @@ import uk.org.rivernile.edinburghbustracker.android.NewsUpdatesActivity;
  * @author Niall Scott
  */
 public class FetchNewsUpdatesTask {
+    
+    public static final int ERROR_NODATA = 0;
+    public static final int ERROR_PARSEERR = 1;
+    public static final int ERROR_IOERR = 2;
+    public static final int ERROR_URLERR = 3;
 
     private final static String REQUEST_URL = "http://api.twitter.com/1/" +
             "NiallScott/lists/bus-tracker-updates/statuses.json";
 
     private static FetchNewsUpdatesTask instance = null;
     private NewsEvent handler;
-    private String newsJsonString;
+    private ArrayList<TwitterNewsItem> newsItems;
     private long lastRequestTime = 0;
     private GetNewsTask task;
 
@@ -94,13 +102,12 @@ public class FetchNewsUpdatesTask {
     }
 
     /**
-     * Get the JSON String this object holds. Be prepared to handle a null or
-     * 0 length String.
+     * Get the list of news items.
      *
-     * @return The JSON String for this object.
+     * @return The news items as a list.
      */
-    public String getJSONString() {
-        return newsJsonString;
+    public ArrayList<TwitterNewsItem> getNewsItems() {
+        return newsItems;
     }
 
     /**
@@ -141,7 +148,8 @@ public class FetchNewsUpdatesTask {
         }
     }
     
-    private class GetNewsTask extends AsyncTask<Void, Void, String> {
+    private class GetNewsTask extends AsyncTask<Void, Void,
+            ArrayList<TwitterNewsItem>> {
         
         private int error = -1;
         
@@ -157,37 +165,63 @@ public class FetchNewsUpdatesTask {
          * {@inheritDoc}
          */
         @Override
-        protected String doInBackground(final Void... v) {
+        protected ArrayList<TwitterNewsItem> doInBackground(final Void... v) {
+            final ArrayList<TwitterNewsItem> items =
+                    new ArrayList<TwitterNewsItem>();
+            
             try {
                 URL u = new URL(REQUEST_URL);
                 URLConnection con = u.openConnection();
                 BufferedReader in = new BufferedReader(new InputStreamReader(
                         con.getInputStream()));
-                String jsonString = "";
+                StringBuilder sb = new StringBuilder();
                 String lineIn;
                 while((lineIn = in.readLine()) != null) {
-                    jsonString = jsonString + lineIn;
+                    sb.append(lineIn);
                 }
                 in.close();
 
                 lastRequestTime = System.currentTimeMillis();
 
-                return jsonString;
+                parseJSON(items, sb.toString());
             } catch(MalformedURLException e) {
-                error = NewsUpdatesActivity.ERROR_URLERR;
+                error = ERROR_URLERR;
             } catch(IOException e) {
-                error = NewsUpdatesActivity.ERROR_IOERR;
+                error = ERROR_IOERR;
+            } catch(JSONException e) {
+                error = ERROR_PARSEERR;
             }
             
-            return null;
+            return items;
+        }
+        
+        private void parseJSON(final ArrayList<TwitterNewsItem> items,
+                final String jsonString) throws JSONException {
+            if(jsonString == null || jsonString.length() == 0) {
+                error = ERROR_NODATA;
+                return;
+            }
+            
+            JSONArray ja = new JSONArray(jsonString);
+            int len = ja.length();
+            JSONObject joTweet, joUser;
+            
+            for(int i = 0; i < len; i++) {
+                joTweet = ja.getJSONObject(i);
+                joUser = joTweet.getJSONObject("user");
+                
+                items.add(new TwitterNewsItem(joTweet.getString("text"),
+                        joUser.getString("name"),
+                        joTweet.getString("created_at")));
+            }
         }
         
         /**
          * {@inheritDoc}
          */
         @Override
-        public void onPostExecute(final String result) {
-            newsJsonString = result;
+        public void onPostExecute(final ArrayList<TwitterNewsItem> result) {
+            newsItems = result;
             if(handler != null) {
                 if(error < 0) {
                     handler.onNewsAvailable(result);

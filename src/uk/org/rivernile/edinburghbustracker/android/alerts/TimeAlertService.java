@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -84,7 +84,7 @@ public class TimeAlertService extends IntentService {
         
         HashMap<String, BusStop> result = null;
         try {
-            result = parser.getBusStopData(new String[] { stopCode });
+            result = parser.getBusStopData(new String[] { stopCode }, 1);
         } catch(BusParserException e) {
             reschedule(intent);
             return;
