@@ -44,7 +44,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     *******************
     -->
     <string name="submit">Submit</string>
-    <string name="preferences">Preferences</string>
     <string name="error">Error</string>
     <string name="okay">OK</string>
     <string name="cancel">Cancel</string>
@@ -193,62 +192,49 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for PreferencesActivity *
     ***********************************
     -->
-    <string name="preferences_title">Preferences</string>
+    <string name="preferences_title">Settings</string>
     
     <string name="preferences_category_general">General</string>
     <string name="preferences_checkbox_general_showfavourites">Show favourites</string>
-    <string name="preferences_checkbox_general_showfavourites_ticked">Untick to show the home menu when the application is launched.</string>
-    <string name="preferences_checkbox_general_showfavourites_unticked">Tick to show your favourite stops when the application is launched.</string>
+    <string name="preferences_checkbox_general_showfavourites_ticked">Untick to show the home menu when the application is launched</string>
+    <string name="preferences_checkbox_general_showfavourites_unticked">Tick to show favourite stops when the application is launched</string>
     <string name="preferences_checkbox_general_dbupdate">Auto update database</string>
-    <string name="preferences_checkbox_general_dbupdate_ticked">Untick for the stop database to not be auto updated.</string>
-    <string name="preferences_checkbox_general_dbupdate_unticked">Tick for the stop database to auto update.</string>
     <string name="preferences_dialog_general_update">Update stop database</string>
-    <string name="preferences_dialog_general_update_summary">Check for stop database updates, and update if a new version is available.</string>
+    <string name="preferences_dialog_general_update_summary">Check for updates, and update if a new version is available</string>
     <string name="preferences_dialog_general_update_message">Are you sure you want to update the bus stop database?</string>
     <string name="preferences_dialog_general_backup">Backup favourites</string>
-    <string name="preferences_dialog_general_backup_summary">Backup the list of favourite stops to the external storage.</string>
+    <string name="preferences_dialog_general_backup_summary">To external storage</string>
     <string name="preferences_dialog_general_backup_message">Are you sure you want to backup your favourite stops list?</string>
     <string name="preferences_dialog_general_restore">Restore favourites</string>
-    <string name="preferences_dialog_general_restore_summary">Restore the list of favourite stops from external storage.</string>
+    <string name="preferences_dialog_general_restore_summary">From external storage</string>
     <string name="preferences_dialog_general_restore_message">Are you sure you want to restore your favourite stops list? Warning: This will overwrite your current favourite stops list.</string>
     
     <string name="preferences_category_alerts">Alerts</string>
-    <string name="preferences_checkbox_alerts_sound">Use alert sound</string>
-    <string name="preferences_checkbox_alerts_sound_ticked">Untick to not use sound during alerts.</string>
-    <string name="preferences_checkbox_alerts_sound_unticked">Tick to use sound during alerts.</string>
+    <string name="preferences_checkbox_alerts_sound">Use sound</string>
     <string name="preferences_checkbox_alerts_vibrate">Use vibration</string>
-    <string name="preferences_checkbox_alerts_vibrate_ticked">Untick to not vibrate during alerts, if your device supports vibration.</string>
-    <string name="preferences_checkbox_alerts_vibrate_unticked">Tick to vibrate during alerts, if your device supports vibration.</string>
+    <string name="preferences_checkbox_alerts_vibrate_summary">If the device supports vibration</string>
     <string name="preferences_checkbox_alerts_led">Flash device LED</string>
-    <string name="preferences_checkbox_alerts_led_ticked">Untick to not flash the device LED during alerts, if your device supports it.</string>
-    <string name="preferences_checkbox_alerts_led_unticked">Tick to flash the device LED during alerts, if your device supports it.</string>
+    <string name="preferences_checkbox_alerts_led_summary">If the device supports it</string>
 
     <string name="preferences_category_bustimes">Bus Times Display</string>
     <string name="preferences_checkbox_bustimes_autorefresh">Auto refresh</string>
-    <string name="preferences_checkbox_bustimes_autorefresh_ticked">Untick to not auto-refresh bus times by default.</string>
-    <string name="preferences_checkbox_bustimes_autorefresh_unticked">Tick to auto-refresh bus times by default.</string>
+    <string name="preferences_checkbox_bustimes_autorefresh_ticked">Untick to not auto refresh by default</string>
+    <string name="preferences_checkbox_bustimes_autorefresh_unticked">Tick to auto refresh by default</string>
     <string name="preferences_checkbox_bustimes_nightbus">Show night services</string>
-    <string name="preferences_checkbox_bustimes_nightbus_ticked">Untick to not show night bus services.</string>
-    <string name="preferences_checkbox_bustimes_nightbus_unticked">Tick to show night bus services.</string>
     <string name="preferences_checkbox_bustimes_sorting">Sort by arrival time</string>
-    <string name="preferences_checkbox_bustimes_sorting_ticked">Untick to sort bus services by service name.</string>
-    <string name="preferences_checkbox_bustimes_sorting_unticked">Tick to sort bus services by arrival time.</string>
     <string name="preferences_list_bustimes_numdepartures">Number of departures</string>
-    <string name="preferences_list_bustimes_summary">Select the maximum number of departures to show per service.</string>
     <string name="preferences_list_bustimes_dialog">Number of departures to show</string>
 
     <string name="preferences_category_map">Bus Stop Map</string>
     <string name="preferences_checkbox_map_autolocation">Auto find location</string>
-    <string name="preferences_checkbox_map_autolocation_ticked">Untick to not find your location on the map.</string>
-    <string name="preferences_checkbox_map_autolocation_unticked">Tick to find your location on the map.</string>
     <string name="preferences_dialog_map_clearsearchhistory">Clear search history</string>
-    <string name="preferences_dialog_map_clearsearchhistory_summary">Remove all previous search terms from the map search facility.</string>
+    <string name="preferences_dialog_map_clearsearchhistory_summary">Remove all previous search terms from the map search facility</string>
     <string name="preferences_dialog_map_clearsearchhistory_message">Are you sure you want to clear your map search history?</string>
     
     <string name="preferences_category_neareststops">Nearest Stops Display</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled">Disable GPS prompt</string>
-    <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">Untick to show a prompt when GPS is disabled whilst viewing nearest bus stops.</string>
-    <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">Tick to not show a prompt when GPS is disabled whilst viewing nearest bus stops.</string>
+    <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">Untick to show a prompt when GPS is disabled</string>
+    <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">Tick to not show a prompt when GPS is disabled</string>
 
     <string name="preferences_backup_error_json_read">The backup could not be restored as the backup could not be successfully read.</string>
     <string name="preferences_backup_error_json_write">The data could not be backed up.</string>
@@ -306,10 +292,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="map_title">Bus Stop Map</string>
     <string name="map_dialog_showtimes">Show bus times</string>
-    <string name="map_dialog_close">Close</string>
     <string name="map_dialog_streetview">Show on Street View</string>
     <string name="map_dialog_noservices">There are no known services for this stop.</string>
-    <string name="map_finding_location">Trying to determine your location&#8230;</string>
     <string name="map_location_unknown">Your current location is unknown.</string>
     <string name="map_search_progress_dialog">Searching location&#8230;</string>
     <string name="map_search_dialog_title">Did you mean&#8230;</string>

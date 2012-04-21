@@ -40,8 +40,6 @@
         <CheckBoxPreference
             android:key="pref_database_autoupdate"
             android:title="@string/preferences_checkbox_general_dbupdate"
-            android:summaryOn="@string/preferences_checkbox_general_dbupdate_ticked"
-            android:summaryOff="@string/preferences_checkbox_general_dbupdate_unticked"
             android:defaultValue="true" />
         <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
             android:key="pref_update_stop_db"
@@ -75,20 +73,16 @@
         <CheckBoxPreference
             android:key="pref_alertsound_state"
             android:title="@string/preferences_checkbox_alerts_sound"
-            android:summaryOn="@string/preferences_checkbox_alerts_sound_ticked"
-            android:summaryOff="@string/preferences_checkbox_alerts_sound_unticked"
             android:defaultValue="true" />
         <CheckBoxPreference
             android:key="pref_alertvibrate_state"
             android:title="@string/preferences_checkbox_alerts_vibrate"
-            android:summaryOn="@string/preferences_checkbox_alerts_vibrate_ticked"
-            android:summaryOff="@string/preferences_checkbox_alerts_vibrate_unticked"
+            android:summary="@string/preferences_checkbox_alerts_vibrate_summary"
             android:defaultValue="true" />
         <CheckBoxPreference
             android:key="pref_alertled_state"
             android:title="@string/preferences_checkbox_alerts_led"
-            android:summaryOn="@string/preferences_checkbox_alerts_led_ticked"
-            android:summaryOff="@string/preferences_checkbox_alerts_led_unticked"
+            android:summary="@string/preferences_checkbox_alerts_led_summary"
             android:defaultValue="true" />
     </PreferenceCategory>
     
@@ -104,19 +98,14 @@
         <CheckBoxPreference
             android:key="pref_nightservices_state"
             android:title="@string/preferences_checkbox_bustimes_nightbus"
-            android:summaryOn="@string/preferences_checkbox_bustimes_nightbus_ticked"
-            android:summaryOff="@string/preferences_checkbox_bustimes_nightbus_unticked"
             android:defaultValue="true" />
         <CheckBoxPreference
             android:key="pref_servicessorting_state"
             android:title="@string/preferences_checkbox_bustimes_sorting"
-            android:summaryOn="@string/preferences_checkbox_bustimes_sorting_ticked"
-            android:summaryOff="@string/preferences_checkbox_bustimes_sorting_unticked"
             android:defaultValue="false" />
         <ListPreference
             android:key="pref_numberOfShownDeparturesPerService"
             android:title="@string/preferences_list_bustimes_numdepartures"
-            android:summary="@string/preferences_list_bustimes_summary"
             android:defaultValue="4"
             android:dialogTitle="@string/preferences_list_bustimes_dialog"
             android:entries="@array/preferences_num_departures_entries"
@@ -129,8 +118,6 @@
         <CheckBoxPreference
             android:key="pref_autolocation_state"
             android:title="@string/preferences_checkbox_map_autolocation"
-            android:summaryOn="@string/preferences_checkbox_map_autolocation_ticked"
-            android:summaryOff="@string/preferences_checkbox_map_autolocation_unticked"
             android:defaultValue="true" />
         <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
             android:key="pref_clear_search_history"

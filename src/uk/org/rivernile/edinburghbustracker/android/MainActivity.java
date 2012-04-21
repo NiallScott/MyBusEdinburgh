@@ -307,7 +307,7 @@ public class MainActivity extends Activity {
             Constructor ct = cls.getConstructor(partypes);
             Object[] arglist = new Object[2];
             arglist[0] = context;
-            arglist[1] = new Integer(AlertDialog.THEME_HOLO_DARK);
+            arglist[1] = Integer.valueOf(AlertDialog.THEME_HOLO_DARK);
             return (AlertDialog.Builder)ct.newInstance(arglist);
         } catch(NoSuchMethodException e) {
             
