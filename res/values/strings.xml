@@ -26,17 +26,18 @@
  */
 
 This version of strings.xml is in the developer's locale (en_GB) -->
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- 
     ***********************
     * Application strings *
     ***********************
     -->
-    <string name="app_name">My Bus Edinburgh</string> <!-- Should not be included in localised versions -->
+    <string name="app_name" tools:ignore="MissingTranslation">My Bus Edinburgh</string> <!-- Should not be included in localised versions -->
     <string name="app_description">View live bus data in Edinburgh</string>
-    <string name="app_author">Niall Scott</string> <!-- Should not be included in localised versions -->
+    <string name="app_author" tools:ignore="MissingTranslation">Niall Scott</string> <!-- Should not be included in localised versions -->
     <string name="search_hint">Search bus stops and places</string>
-    <string name="asset_db_version">1332670125314</string> <!-- Should not be included in localised versions -->
+    <string name="asset_db_version" tools:ignore="MissingTranslation">1332670125314</string> <!-- Should not be included in localised versions -->
 
     <!--
     *******************
@@ -79,8 +80,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="main_aboutdialog_contact">Website: http://www.rivernile.org.uk/bustracker\nFollow @MyBusEdinburgh on Twitter for the latest updates: http://twitter.com/MyBusEdinburgh</string>
     <string name="main_aboutdialog_body"><b>Thanks to the following people and
     entities for making this application happen:</b>\nGordon Christie (EdinBus for
-    iPhone developer)\nThe City of Edinburgh Council\nAnthony Totton (App icon,
-    website and graphics)\nScott Straughan (App interface designer)\n
+    iOS developer)\nThe City of Edinburgh Council\nAnthony Totton (App icon,
+    website and graphics)\nScott Straughan (Version 0.0.x app interface designer)\nMatteo Doni
+    (Italian localisation, testing)\nINEO Systrans\nLothian Buses\n
     \n<b>Disclaimer</b>\nPermission has been granted from The City of Edinburgh Council
     for this application to tie in to their data feed. Neither the author of the
     application, nor The City of Edinburgh Council take any responsibility for
@@ -104,9 +106,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="enterstopcode_edit_hint">Enter 8-digit bus stop code</string>
     <string name="enterstopcode_button_scan">Scan QR code</string>
     <string name="enterstopcode_scan_notavailable_title">QR scanning app required</string>
-    <string name="enterstopcode_txt_scan_notavailable">To scan QR codes, your device must have a camera and you must have a compatible QR barcode scanning app installed, which you do not. Do you wish to download this from the Android Market? The application is called Barcode Scanner by the ZXing Team and is free to download.</string>
+    <string name="enterstopcode_txt_scan_notavailable">To scan QR codes, your device must have a camera and you must have a compatible QR barcode scanning app installed, which you do not. Do you wish to download this from the Google Play Store? The application is called Barcode Scanner by the ZXing Team and is free to download.</string>
     <string name="enterstopcode_invalid_qrcode">The scanned QR code does not contain bus stop data. Either the code was not scanned correctly, or the QR code is invalid. Please rescan a valid QR code.</string>
-    <string name="enterstopcode_no_market">The Android Market could not be found on your device.</string>
+    <string name="enterstopcode_no_market">The Google Play Store could not be found on your device.</string>
     <string name="enterstopcode_stopicon_description">Example bus stop QR code</string>
 
     <!--
@@ -301,8 +303,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_search_address_icon_description">Address icon</string>
     <string name="map_search_stop_icon_description">Stop marker icon</string>
     <string name="map_streetview_dialog_title">Google Street View required</string>
-    <string name="map_streetview_dialog_message">You currently do not have Google Street View installed. Do you want to install this from the Android Market now?</string>
-    <string name="map_streetview_error_nomarket">The Android Market is not installed on your device. The Market must be installed to install Google Street View.</string>
+    <string name="map_streetview_dialog_message">You currently do not have Google Street View installed. Do you want to install this from the Google Play Store now?</string>
+    <string name="map_streetview_error_nomarket">The Google Play Store is not installed on your device. The Market must be installed to install Google Street View.</string>
 
     <!--
     ***************************************
@@ -436,7 +438,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>1000 metres (1093 yards)</item>
     </string-array>
     <string name="alert_dialog_prox_second">of bus stop %s.</string>
-    <string name="alert_dialog_prox_note">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Android Market.\n\nIf you already have a proximity alert active, it will be removed if you set this alert.\n\nIf you restart your device, the alert will be removed and will not be re-added, although you can manually re-add the alert if you wish.\n\nIf you do not come within the preset distance of the bus stop within 1 hour of setting this alert, it will be automatically removed and you will not be alerted. This is to prevent alerts lasting an indefinite amount of time.</string>
+    <string name="alert_dialog_prox_note">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Google Play Store.\n\nIf you already have a proximity alert active, it will be removed if you set this alert.\n\nIf you restart your device, the alert will be removed and will not be re-added, although you can manually re-add the alert if you wish.\n\nIf you do not come within the preset distance of the bus stop within 1 hour of setting this alert, it will be automatically removed and you will not be alerted. This is to prevent alerts lasting an indefinite amount of time.</string>
     <string name="alert_dialog_prox_gps">You do not have GPS turned on. For this feature to work properly, it is strongly advised that GPS is turned on. Tick this if you would like to go to the device preferences after you have set this alert to turn GPS on.</string>
     <string name="alert_dialog_prox_limitations">Show limitations</string>
     <string name="alert_dialog_prox_limitations_title">Proximity alert feature limitations</string>
@@ -458,7 +460,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>in 30 minutes</item>
     </string-array>
     <string name="alert_dialog_time_busstop">or less at bus stop %s.</string>
-    <string name="alert_dialog_time_note">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Android Market.\n\nThis feature should be used as a guide only.\n\nAn attempt will be made to fetch bus times once per minute until the above criteria is met or the time spent checking exceeds 1 hour. However, your device may prevent this from happening (e.g. lack of data access, device is sleeping).\n\nIf your device restarts, this alert will be automatically cancelled but you may re-add it again.\n\nBe warned, this feature may use a lot of battery power.</string>
+    <string name="alert_dialog_time_note">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Google Play Store.\n\nThis feature should be used as a guide only.\n\nAn attempt will be made to fetch bus times once per minute until the above criteria is met or the time spent checking exceeds 1 hour. However, your device may prevent this from happening (e.g. lack of data access, device is sleeping).\n\nIf your device restarts, this alert will be automatically cancelled but you may re-add it again.\n\nBe warned, this feature may use a lot of battery power.</string>
     <string name="alert_dialog_time_limitations">Show limitations</string>
     <string name="alert_dialog_time_limitations_title">Time alert feature limitations</string>
     

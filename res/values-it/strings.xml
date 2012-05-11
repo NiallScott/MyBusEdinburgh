@@ -1,0 +1,443 @@
+<!--
+/*
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott & Matteo 'Todoleo' Doni
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+ */
+
+This version of strings.xml is in Italian (it_IT) -->
+<resources>
+    <!-- 
+    ***********************
+    * Application strings *
+    ***********************
+    -->
+    <string name="app_description">Visualizza orari di bus ad Edimburgo</string>
+    <string name="search_hint">Cerca fermate degli autobus e dei luoghi</string>
+
+    <!--
+    *******************
+    * Generic strings *
+    *******************
+    -->
+    <string name="submit">Invia</string>
+    <string name="error">Errore</string>
+    <string name="okay">OK</string>
+    <string name="cancel">Annulla</string>
+    <string name="retry">Riprova</string>
+    <string name="yes">Sì</string>
+    <string name="no">No</string>
+    <string name="save">Salva</string>
+    <string name="version">Versione</string>
+    <string name="close">Chiudi</string>
+    <string name="search">Cerca</string>
+    <string name="distance">Distanza</string>
+    <string name="select">Seleziona</string>
+
+    <!--
+    ****************************
+    * Strings for MainActivity *
+    ****************************
+    -->
+    <string name="main_favourite_stops">Fermate Salvate</string>
+    <string name="main_enter_stop_code">Codice Fermata</string>
+    <string name="main_bus_stop_map">Mappa Fermate</string>
+    <string name="main_db_updated">My Bus Edinburgh: il database delle fermate è stato aggiornato alla versione più recente.</string>
+    <string name="main_db_no_updates">My Bus Edinburgh: Nessun aggiornamento del database delle fermate trovato.</string>
+
+    <!--
+    ***********************************
+    * String for MainActivity dialogs *
+    ***********************************
+    -->
+    <string name="main_aboutdialog_dbversion">Versione database delle fermate</string>
+    <string name="main_aboutdialog_topology">Versione Topologia</string>
+    <string name="main_aboutdialog_contact">Sito web: http://www.rivernile.org.uk/bustracker\nSegui @MyBusEdinburgh su Twitter per gli aggiornamenti più recenti: http://twitter.com/MyBusEdinburgh</string>
+    <string name="main_aboutdialog_body"><b>Grazie alle seguenti persone ed entità per aver reso possibile questa applicazione:</b>\nGordon Christie (EdinBus per gli sviluppatori iOS)\nThe City of Edinburgh Council\nAnthony Totton (icone app, sito web e grafica)\nScott Straughan (design interfaccia app)\nMatteo Doni (localizzazione italiana, testing)\nINEO Systrans\nLothian Buses\n\n<b>Disclaimer</b>\nPermesso è stato concesso da The City Of Edinburgh Council perche\' questa applicazione si leghi al proprio feed di dati. Né l\'autore dell\'applicazione, né The City Of Edinburgh Council si assumono alcuna responsabilità per la correttezza dei dati forniti da questa applicazione o le sue implicazioni, o qualsiasi perdita di dati o altri problemi derivanti attraverso l\'utilizzo di questa applicazione. L\'utilizzo di questa applicazione significa che l\'utente si assume la responsabilità completa delle proprie azioni.</string>
+    <string name="main_aboutdialog_appicon_description">Icona dell\'applicazione</string>
+
+    <!--
+    *************************************
+    * Strings for EnterStopCodeActivity *
+    *************************************
+    -->
+    <string name="enterstopcode_title">Inserisci codice fermata</string>
+    <string name="enterstopcode_toast_inputerr">È necessario inserire un codice di fermata valido per visualizzare informazioni. Di solito questo è un numero di 8 cifre.</string>
+    <string name="enterstopcode_hint">È possibile inserire manualmente il codice fermata del bus, oppure è possibile eseguire la scansione di un codice a barre come quello mostrato che si può trovare sull\'orario bus alla fermata.</string>
+    <string name="enterstopcode_edit_hint">Inserisci il codice di 8 cifre fermata</string>
+    <string name="enterstopcode_button_scan">Codice QR</string>
+    <string name="enterstopcode_scan_notavailable_title">Scansione QR app richiesta</string>
+    <string name="enterstopcode_txt_scan_notavailable">Per leggere i codici QR, il dispositivo deve avere una macchina fotografica e deve avere una app compatibile con la scansione di codici a barre QR. Volete scaricare questa app dal Google Play Store? L\'applicazione si chiama Barcode Scanner dal Team ZXing ed è gratuita.</string>
+    <string name="enterstopcode_invalid_qrcode">Il codice QR digitalizzato non contiene dati fermata. O il codice non è stato scansionato correttamente, o il codice QR non è valido. Si prega di usare un codice QR valido.</string>
+    <string name="enterstopcode_no_market">Google Play Store non è stato trovato sul dispositivo.</string>
+    <string name="enterstopcode_stopicon_description">Esempio fermata bus codice QR</string>
+
+    <!--
+    **************************************
+    * Strings for FavouriteStopsActivity *
+    **************************************
+    -->
+    <string name="favouritestops_title">Fermate Salvate</string>
+    <string name="favouritestops_nosavedstops"><b>Non hai salvato fermate preferite.</b>\nÈ possibile aggiungere una nuova fermata nell\'applicazione, dalla mappa o dalla fermata dell\'autobus più vicina lista fermate. Se si dispone di un backup delle fermate salvate, è possibile ripristinarle dalle preferenze.</string>
+    <string name="favouritestops_dialog_confirm_title">Vuoi eliminare questa fermata?</string>
+    <string name="favouriteshortcut_title">Seleziona fermata</string>
+    <string name="favouriteshortcut_label">Alla fermata del bus salvata</string>
+
+    <!--
+    *******************************************
+    * Strings for FavouriteStopsActivity menu *
+    *******************************************
+    -->
+    <string name="favouritestops_menu_view">Visualizza orari</string>
+    <string name="favouritestops_menu_edit">Modifica fermata</string>
+    <string name="favouritestops_menu_delete">Elimina fermata</string>
+    <string name="favouritestops_menu_showonmap">Mostra fermata sulla mappa</string>
+
+    <!--
+    ***************************************
+    * Strings for DisplayStopDataActivity *
+    ***************************************
+    -->
+    <string name="displaystopdata_title">Mostra orari degli autobus</string>
+    <string name="displaystopdata_gettingdata">Recupero dei dati dal server&#8230;</string>
+    <string name="displaystopdata_empty">Non ci sono attualmente dati da visualizzare.</string>
+    <string name="displaystopdata_lastupdated">Ultimo aggiornamento </string>
+    <string name="displaystopdata_column_service">Servizio</string>
+    <string name="displaystopdata_column_destination">Destinazione</string>
+    <string name="displaystopdata_column_due">In arrivo (min)</string>
+
+    <!--
+    *********************************************
+    * Strings for DisplayStopDataActvity errors *
+    *********************************************
+    -->
+    <string name="displaystopdata_err_unknown">Un errore sconosciuto. Riprova più tardi.</string>
+    <string name="displaystopdata_err_nocode">Nessun codice di fermata è stato fornito. Per essere in grado di mostrare orari degli autobus, un codice di fermata deve essere fornito.</string>
+    <string name="displaystopdata_err_parseerr">C\'è stato un errore mentre si cercava di gestire i dati in arrivo. Si prega di riprovare.</string>
+    <string name="displaystopdata_err_noconn">Una connessione non può essere fatta con il server o si è verificato un errore durante la trasmissione. Se sei sicuro di essere connesso, riprova.</string>
+    <string name="displaystopdata_err_noresolv">Il server non può essere trovato. Riprova più tardi.</string>
+    <string name="displaystopdata_err_nodata">Non ci sono dati per questa fermata. Sei sicuro che il codice di fermata fornito è corretto? Se è così, riprova.</string>
+    
+    <string name="displaystopdata_err_api_invalid_key">Il servizio si è rifiutato di completare questa richiesta. Il servizio dipende da una data e ora corretta sul tuo dispositivo. Si prega di controllare data e ora nelle preferenze di sistema. Se data e ora sono corrette, contattare lo sviluppatore dell\'applicazione per ulteriore assistenza.</string>
+    <string name="displaystopdata_err_api_invalid_parameter">Al servizio non piace questa richiesta. Se questo accade ancora una volta, si prega di contattare lo sviluppatore dell\'applicazione.</string>
+    <string name="displaystopdata_err_api_processing_error">Il servizio ha rilevato un errore di elaborazione. Riprova più tardi.</string>
+    <string name="displaystopdata_err_api_system_maintenance">Il servizio è attualmente in fase di manutenzione e al momento non è disponibile. Riprova più tardi.</string>
+    <string name="displaystopdata_err_api_system_overloaded">Il sistema sta attualmente gestendo un carico elevato. Riprova più tardi.</string>
+
+    <!--
+    ********************************************
+    * Strings for DisplayStopDataActivity menu *
+    ********************************************
+    -->
+    <string name="displaystopdata_menu_turnautorefreshon">Attiva la funzione di auto-aggiornamento</string>
+    <string name="displaystopdata_menu_turnautorefreshoff">Disattiva auto-aggiornamento</string>
+    <string name="displaystopdata_menu_refresh">Aggiorna</string>
+    <string name="displaystopdata_menu_addfav">Aggiungi ai preferiti</string>
+    <string name="displaystopdata_menu_remfav">Rimuovi dai preferiti</string>
+    <string name="displaystopdata_menu_sort_service">Ordina per servizio</string>
+    <string name="displaystopdata_menu_sort_times">Ordina per orario</string>
+    
+    <!--
+    ****************************************************
+    * Strings for DisplayStopDataActivity context menu *
+    ****************************************************
+    -->
+    <string name="displaystopdata_context_title">Opzioni Bus</string>
+    <string name="displaystopdata_context_addtimealert">Aggiungi un nuovo avviso di arrivo</string>
+
+    <!--
+    ***********************************
+    * Strings for PreferencesActivity *
+    ***********************************
+    -->
+    <string name="preferences_title">Impostazioni</string>
+    
+    <string name="preferences_category_general">Generale</string>
+    <string name="preferences_checkbox_general_showfavourites">Mostra preferiti</string>
+    <string name="preferences_checkbox_general_showfavourites_ticked">Deseleziona per visualizzare fermate salvate quando l\'applicazione viene avviata</string>
+    <string name="preferences_checkbox_general_showfavourites_unticked">Seleziona la casella per visualizzare fermate salvate quando l\'applicazione viene avviata</string>
+    <string name="preferences_checkbox_general_dbupdate">Aggiornamento automatico del database</string>
+    <string name="preferences_dialog_general_update">Aggiornamento del database fermate</string>
+    <string name="preferences_dialog_general_update_summary">Controlla aggiornamenti, e aggiornare se una nuova versione è disponibile</string>
+    <string name="preferences_dialog_general_update_message">Sei sicuro di voler aggiornare il database fermata dell\'autobus?</string>
+    <string name="preferences_dialog_general_backup">Backup fermate salvate</string>
+    <string name="preferences_dialog_general_backup_summary">Ad archiviazione esterna</string>
+    <string name="preferences_dialog_general_backup_message">Sei sicuro di voler eseguire il backup dell\'elenco delle fermate salvate?</string>
+    <string name="preferences_dialog_general_restore">Ripristinare fermate salvate</string>
+    <string name="preferences_dialog_general_restore_summary">Da storage esterno</string>
+    <string name="preferences_dialog_general_restore_message">Sei sicuro di voler ripristinare la lista delle fermate salvate? Attenzione: questo sovrascriverà l\'attuale lista delle fermate salvate.</string>
+    
+    <string name="preferences_category_alerts">Avvisi</string>
+    <string name="preferences_checkbox_alerts_sound">Utilizzare il suono</string>
+    <string name="preferences_checkbox_alerts_vibrate">Utilizzare le vibrazioni</string>
+    <string name="preferences_checkbox_alerts_vibrate_summary">Se il dispositivo supporta la vibrazione</string>
+    <string name="preferences_checkbox_alerts_led">Dispositivo flash LED</string>
+    <string name="preferences_checkbox_alerts_led_summary">Se il dispositivo supporta</string>
+
+    <string name="preferences_category_bustimes">Visualizza Orari Bus</string>
+    <string name="preferences_checkbox_bustimes_autorefresh">Auto aggiornamento</string>
+    <string name="preferences_checkbox_bustimes_autorefresh_ticked">Deselezionare per non auto-aggiornare come default</string>
+    <string name="preferences_checkbox_bustimes_autorefresh_unticked">Selezionare per auto-aggiornare come default</string>
+    <string name="preferences_checkbox_bustimes_nightbus">Mostra servizio notturno</string>
+    <string name="preferences_checkbox_bustimes_sorting">Ordina per orario di arrivo</string>
+    <string name="preferences_list_bustimes_numdepartures">Numero di partenze</string>
+    <string name="preferences_list_bustimes_dialog">Numero di partenze</string>
+
+    <string name="preferences_category_map">Mappa Fermate</string>
+    <string name="preferences_checkbox_map_autolocation">Identifica ubicazione</string>
+    <string name="preferences_dialog_map_clearsearchhistory">Cancella cronologia ricerche</string>
+    <string name="preferences_dialog_map_clearsearchhistory_summary">Rimuovere tutti i termini di ricerca precedenti dalla funzione di ricerca mappa</string>
+    <string name="preferences_dialog_map_clearsearchhistory_message">Sei sicuro di voler cancellare la cronologia ricerche mappa?</string>
+    
+    <string name="preferences_category_neareststops">Visualizza fermate più vicine</string>
+    <string name="preferences_checkbox_neareststops_gpsdisabled">Disattiva GPS</string>
+    <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">Deselezionare per mostrare un messaggio quando il GPS è disattivato</string>
+    <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">Seleziona per non mostrare un messaggio quando il GPS è disattivato</string>
+
+    <string name="preferences_backup_error_json_read">Il backup non può essere ripristinato perchè il backup non può essere letto correttamente.</string>
+    <string name="preferences_backup_error_json_write">Il backup non poteva essere eseguito.</string>
+    <string name="preferences_backup_error_mediaerror">Esiste un problema con la memoria esterna. Può essere che sia già in uso?</string>
+    <string name="preferences_backup_error_ioerror">Si è verificato un errore durante il backup. Il file di backup non può essere letto o scritto.</string>
+    <string name="preferences_backup_error_nofile">Non esiste alcun file di backup compatibile.</string>
+
+    <string name="preference_backup_success">Il backup del database su memoria esterna è riuscito con successo</string>
+    <string name="preference_restore_success">Il database è stato ripristinato correttamente dalla memoria esterna.</string>
+    
+    <string-array name="preferences_num_departures_entries">
+        <item>1 partenza</item>
+        <item>2 partenze</item>
+        <item>3 partenze</item>
+        <item>4 partenze</item>
+        <item>5 partenze</item>
+        <item>6 partenze</item>
+        <item>7 partenze</item>
+        <item>8 partenze</item>
+        <item>9 partenze</item>
+        <item>10 partenze</item>
+    </string-array>
+    
+    <string-array name="preferences_num_departures_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+
+    <!--
+    ********************************************
+    * Strings for AddEditFavouriteStopActivity *
+    ********************************************
+    -->
+    <string name="addeditstop_title">Aggiungi / Modifica Fermata Salvata</string>
+    <string name="addeditstop_title_add">Aggiungi fermata salvata:</string>
+    <string name="addeditstop_title_edit">Modifica dettagli fermata</string>
+    <string name="addeditstop_description">Inserisci un nome di tua scelta per questa fermata del bus:</string>
+    <string name="addeditstop_edit_stopname_hint">Nome Fermata</string>
+    <string name="addeditstop_error_blankstopname">Non si può avere un nome di fermata vuoto.</string>
+
+    <!--
+    **********************************
+    * Strings for BusStopMapActivity *
+    **********************************
+    -->
+    <string name="map_title">Mappa Fermate</string>
+    <string name="map_dialog_showtimes">Mostra orari degli autobus</string>
+    <string name="map_dialog_streetview">Mostra su Street View</string>
+    <string name="map_dialog_noservices">Non ci sono servizi conosciuti per questa fermata.</string>
+    <string name="map_location_unknown">La posizione corrente è sconosciuta.</string>
+    <string name="map_search_progress_dialog">Ricerca ubicazione&#8230;</string>
+    <string name="map_search_dialog_title">Forse cercavi&#8230;</string>
+    <string name="map_search_dialog_noresults">Non c\'erano risultati per la tua ricerca.</string>
+    <string name="map_search_address_icon_description">Icona Indirizzo</string>
+    <string name="map_search_stop_icon_description">Icona Marcata Fermata</string>
+    <string name="map_streetview_dialog_title">Google Street View richiesta</string>
+    <string name="map_streetview_dialog_message">Google Street View non è istallata. Vuoi installarla da Google Play Store ora?</string>
+    <string name="map_streetview_error_nomarket">Google Play Store non è installato sul dispositivo. Questo deve essere installato per installare Google Street View.</string>
+
+    <!--
+    ***************************************
+    * Strings for BusStopMapActivity menu *
+    ***************************************
+    -->
+    <string name="map_menu_maptype_mapview">Vista Mappa</string>
+    <string name="map_menu_maptype_satellite">Vista Satellitare</string>
+    <string name="map_menu_mapoverlay_trafficviewon">Vista Traffico</string>
+    <string name="map_menu_mapoverlay_trafficviewoff">Vista Traffico Off</string>
+    <string name="map_menu_mylocation">La mia posizione</string>
+    <string name="map_menu_filter">Filtra Servizi</string>
+
+    <!--
+    ***********************************
+    * Strings for NewsUpdatesActivity *
+    ***********************************
+    -->
+    <string name="newsupdates_title">Notizie e aggiornamenti</string>
+    <string name="newsupdates_empty">Attualmente non ci sono notizie o aggiornamenti da mostrare.</string>
+
+    <!--
+    ******************************************
+    * Strings for NewsUpdatesActivity errors *
+    ******************************************
+    -->
+    <string name="newsupdates_err_nodata">Nessun dato è stato ricevuto dal server di Twitter.</string>
+    <string name="newsupdates_err_parseerr">C\'è stato un errore durante il tentativo di elaborazione dati in arrivo.</string>
+    <string name="newsupdates_err_ioerr">Si è verificato un errore durante la ricezione dei dati provenienti da Twitter. A volte questo errore si verifica quando Twitter sta gestendo carichi pesanti.</string>
+    <string name="newsupdates_err_urlerr">C\'è stato un problema di formattazione per la URL di richiesta dati dal server di Twitter.</string>
+
+    <!--
+    ************************************
+    * Strings for NearestStopsActivity *
+    ************************************
+    -->
+    <string name="neareststops_title">Fermate Più Vicine</string>
+    <string name="neareststops_empty"><b>Non ci sono dati da visualizzare.</b>\nQuesto significa che o la posizione non può essere determinata, o non siete in vicinanza di una fermata.</string>
+    <string name="neareststops_turnongps_title">Non hai GPS acceso</string>
+    <string name="neareststops_turnongps_message">Per ottenere le informazioni di posizione più precise bisogna attivare il GPS. Attivare ora?</string>
+    <string name="neareststops_turnongps_checkbox">Non ricordarmelo</string>
+    
+    <!--
+    *****************************************
+    * Strings for NearestStopsActivity menu *
+    *****************************************
+    -->
+    <string name="neareststops_menu_filter">Filtra Servizi</string>
+
+    <!--
+    *************************************************************
+    * Strings for NearestStopsActivity ListView contextual menu *
+    *************************************************************
+    -->
+    <string name="neareststops_context_showonmap">Mostra fermata sulla mappa</string>
+    <string name="neareststops_context_addasfav">Aggiungi fermata come salvata</string>
+    <string name="neareststops_context_remasfav">Rimuovi fermata da quelle salvate</string>
+
+    <!--
+    ************************************
+    * Strings for AlertManagerActivity *
+    ************************************
+    -->
+    <string name="alertmanager_title">Manager Avvisi</string>
+    <string name="alertmanager_empty"><b>al momento non ci sono avvisi impostati.</b>\nPuoi aggiungere gli avvisi di prossimità e orario dalla tua lista di fermate salvate, la mappa fermate, le fermate vicine e quando si visualizzano i tempi di arrivo per una fermata dell\'autobus.</string>
+    <string name="alertmanager_prox_title"><b>Avviso Di Prossimita\'</b></string>
+    <string formatted="false" name="alertmanager_prox_text">Sarete avvisati quando ci si trova a pochi metri della fermata %d fermata del bus %stop.\n\nPer i risultati più accurati, assicura GPS è acceso. Questo avviso verrà automaticamente rimosso un\'ora dopo l\'impostazione o se si riavvia il dispositivo.</string>
+    <string name="alertmanager_time_title"><b>Alert Bus Arrivo</b></string>
+    <string formatted="false" name="alertmanager_time_text_singular">Sarete avvisati quando uno dei seguenti servizi è in arrivo alla fermata %busStop: \n\n%services\n\nQuesto avviso verrà automaticamente rimosso un\'ora dopo l\'impostazione o se si riavvia il dispositivo.</string>
+    <string formatted="false" name="alertmanager_time_text_plural">Sarete avvisati quando uno dei seguenti servizi è in arrivo fra pochi minuti alla %minutes fermata:\n\n%services\n\nQuesto avviso verrà automaticamente rimosso un\'ora dopo l\'impostazione o se si riavvia il dispositivo.</string>
+    <string name="alertmanager_button_remove_single">Rimuovere avviso</string>
+    <string name="alertmanager_button_remove_multiple">Rimuovere tutti gli avvisi</string>
+    <string name="alertmanager_prox_image_description">Icona di prossimità</string>
+    <string name="alertmanager_time_image_description">Icona Avviso Fermata</string>
+
+    <!--
+    *****************************
+    * Strings for AboutActivity *
+    *****************************
+    -->
+    <string name="about_title">Info</string>
+    
+    <!--
+    *****************************
+    * Strings for ServiceFilter *
+    *****************************
+    -->
+    <string name="servicefilter_title">Seleziona i servizi da filtrare</string>
+    
+    <!--
+    ***************************
+    * String related to times *
+    ***************************
+    -->
+    <string name="times_never">Mai</string>
+    <string name="times_lessthanoneminago">meno di 1 minuto fa</string>
+    <string name="times_oneminago">1 minuto fa</string>
+    <string name="times_xminsago">%t minuti fa</string>
+    <string name="times_greaterthanhour">superiore ad 1 ora fa</string>
+    
+    <!--
+    **********************
+    * Strings for alerts *
+    **********************
+    -->
+    <string name="alert_prox_title">In Arrivo A %stopName</string>
+    <string formatted="false" name="alert_prox_summary">Sei a un raggio di %distancem da %stopName.</string>
+    <string name="alert_prox_ticker">Si stanno avvicinando %stopName.</string>
+    <string name="alert_prox_rem_confirm">Sei sicuro di voler rimuovere questo avviso di prossimità?</string>
+    <string name="alert_prox_add">Aggiungi avvisi di prossimità</string>
+    <string name="alert_prox_rem">Rimuovi avviso di prossimità</string>
+    
+    <string name="alert_time_title">"Avviso di orario di servizio"</string>
+    <string formatted="false" name="alert_time_summary_plural">Servizio %service è a %mins da %stopName.</string>
+    <string formatted="false" name="alert_time_summary_due">Servizio %service è in arrivo a %stopName</string>
+    <string name="alert_time_add">Aggiungi alert arrivo</string>
+    <string name="alert_time_rem">Rimuovere avviso di arrivo</string>
+    
+    <!--
+    *****************************
+    * Strings for alert dialogs *
+    *****************************
+    -->
+    <string name="alert_dialog_prox_title">Aggiungi un nuovo avviso di prossimità</string>
+    <string name="alert_dialog_prox_first">Avvisami quando sono a un raggio di</string>
+    <string-array name="alert_dialog_prox_distance_array">
+        <item>100 metri (109 yards)</item>
+        <item>250 metri (273 yards)</item>
+        <item>500 metri (546 yards)</item>
+        <item>750 metri (820 yards)</item>
+        <item>1000 metri (1093 yards)</item>
+    </string-array>
+    <string name="alert_dialog_prox_second">di %s fermata dell\'autobus.</string>
+    <string name="alert_dialog_prox_note">Questa è una funzione sperimentale. Se hai problemi con questa funzione, si prega di contattare lo sviluppatore, i dettagli possono essere trovati sul Google Play Store.\n\nSe avete già un avviso di prossimità attivo, verrà rimosso se si imposta questo avviso.\n\nSe si riavvia il dispositivo, l\'avviso verrà rimosso e non puo\' essere nuovamente aggiunto, anche se è possibile manualmente aggiungere nuovamente l\'avviso se lo si desidera.\n\nSe non rientra la distanza preimpostata della fermata entro un\'ora dall\'impostazione di questo avviso, verrà automaticamente rimosso e non sarete avvisati. Questo serve a prevenire che gli avvisi durino fino all\'inifinita\'.</string>
+    <string name="alert_dialog_prox_gps">Non hai GPS acceso. Perchè questa caratteristica funzioni correttamente, è fortemente consigliato che il GPS sia acceso. Spunta questa opzione se vuoi andare alle preferenze dei dispositivi dopo aver impostato questo avviso per attivare il GPS.</string>
+    <string name="alert_dialog_prox_limitations">Mostra limitazioni</string>
+    <string name="alert_dialog_prox_limitations_title">Avviso di limitazione dell\'allerta di prossimità</string>
+    
+    <string name="alert_dialog_time_title">Aggiungi un nuovo avviso di arrivo</string>
+    <string name="alert_dialog_time_first">Avvisami quando uno di questi servizi</string>
+    <string name="alert_dialog_time_noservices">Nessun servizio selezionato. È necessario selezionare almeno 1 servizio per continuare.</string>
+    <string name="alert_dialog_time_isdue">è in arrivo</string>
+    <string name="alert_dialog_time_spinner_prompt">Seleziona orario di countdown</string>
+    <string name="alert_dialog_time_services_title">Scegliere servizio(i)</string>
+    <string-array name="alert_dialog_time_array">
+        <item>Ora</item>
+        <item>in 2 minuti</item>
+        <item>in 5 minuti</item>
+        <item>in 10 minuti</item>
+        <item>in 15 minuti</item>
+        <item>in 20 minuti</item>
+        <item>in 25 minuti</item>
+        <item>in 30 minuti</item>
+    </string-array>
+    <string name="alert_dialog_time_busstop">o meno a %s fermata dell\'autobus.</string>
+    <string name="alert_dialog_time_note">Questa è una caratteristica sperimentale. Se si incontrano problemi, si prega di contattare lo sviluppatore, i dettagli possono essere trovati su Google Play Store.\n\nQuesta funzione dovrebbe essere utilizzata solo come guida.\n\nUn tentativo sarà fatto per prendere orari degli autobus una volta al minuto fino a quando i criteri di cui sopra è soddisfatta o il tempo trascorso di controllo supera un\'ora. Tuttavia, il dispositivo può impedire che ciò accada (ad esempio in caso di mancanza di accesso ai dati, il dispositivo sta dormendo).\n\nSe al riavvio del dispositivo, l\'avviso verrà cancellato automaticamente ma è possibile aggiungerlo nuovamente.\n\nSiete avvertiti, questa caratteristica può consumare un sacco di energia della batteria.</string>
+    <string name="alert_dialog_time_limitations">Mostra limitazioni</string>
+    <string name="alert_dialog_time_limitations_title">Tempo di allarme funzionalità limitazioni</string>
+    
+    <string name="alert_time_rem_confirm">Sei sicuro di voler rimuovere questo avviso orario?</string>
+    
+    <string name="alert_all_rem_confirm">Sei sicuro di voler rimuovere tutti gli avvisi?</string>
+</resources>

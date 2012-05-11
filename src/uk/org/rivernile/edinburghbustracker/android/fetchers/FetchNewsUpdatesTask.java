@@ -26,6 +26,7 @@
 package uk.org.rivernile.edinburghbustracker.android.fetchers;
 
 import android.os.AsyncTask;
+import android.text.Html;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -210,7 +211,8 @@ public class FetchNewsUpdatesTask {
                 joTweet = ja.getJSONObject(i);
                 joUser = joTweet.getJSONObject("user");
                 
-                items.add(new TwitterNewsItem(joTweet.getString("text"),
+                items.add(new TwitterNewsItem(
+                        Html.fromHtml(joTweet.getString("text")).toString(),
                         joUser.getString("name"),
                         joTweet.getString("created_at")));
             }

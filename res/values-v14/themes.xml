@@ -24,15 +24,19 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/main_option_menu_preferences"
-        android:title="@string/preferences_title"
-        android:icon="@drawable/ic_menu_preferences" />
-    <item
-        android:id="@+id/main_option_menu_about"
-        android:title="@string/about_title"
-        android:icon="@drawable/ic_menu_info_details"
-        android:showAsAction="ifRoom|withText" />
-</menu>
+<resources>
+    <style name="MyBusEdinburgh" parent="@android:style/Theme.Holo.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/MainActionBar</item>
+    </style>
+    
+    <style name="MyBusEdinburgh.Dark" parent="@android:style/Theme.Holo" />
+    
+    <style name="MyBusEdinburgh.NoTitleBar">
+        <item name="android:actionBarStyle">@style/MainActionBar</item>
+    </style>
+    
+    <style name="MyBusEdinburgh.Dark.MapActivity">
+        <item name="android:actionBarStyle">@style/MapActionBar</item>
+        <item name="android:windowActionBarOverlay">true</item>
+    </style>
+</resources>

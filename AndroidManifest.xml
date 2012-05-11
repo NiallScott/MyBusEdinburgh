@@ -41,7 +41,7 @@
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
     <uses-sdk android:minSdkVersion="4"
-              android:targetSdkVersion="14"/>
+              android:targetSdkVersion="15"/>
               
     <application
         android:label="@string/app_name"
