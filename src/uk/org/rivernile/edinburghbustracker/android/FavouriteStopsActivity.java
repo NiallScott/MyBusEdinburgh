@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -129,6 +129,8 @@ public class FavouriteStopsActivity extends ListActivity {
         if(isCreateShortcut) {
             intent = new Intent(Intent.ACTION_MAIN);
             intent.setClass(this, DisplayStopDataActivity.class);
+            intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("stopCode", stopCode);
 
             Intent result = new Intent();

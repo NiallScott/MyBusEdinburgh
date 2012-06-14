@@ -125,7 +125,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         if(Intent.ACTION_VIEW.equals(intent.getAction())) {
             stopCode = intent.getData().getQueryParameter("busStopCode");
         } else {
-            stopCode = getIntent().getStringExtra("stopCode");
+            stopCode = intent.getStringExtra("stopCode");
         }
 
         if(stopCode == null || stopCode.length() == 0)
@@ -151,7 +151,8 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         
         if(!busTimes.isExecuting()) {
             HashMap<String, BusStop> busStops = busTimes.getBusStops();
-            if(busStops == null || !busStops.containsKey(stopCode)) {
+            if(busStops == null || !busStops.containsKey(stopCode)
+                    || getIntent().getBooleanExtra("forceLoad", false)) {
                 busTimes.doRequest(new String[] { stopCode }, numDepartures);
             } else {
                 displayData();
@@ -543,7 +544,7 @@ public class DisplayStopDataActivity extends ExpandableListActivity
         ArrayList<HashMap<String, String>> children;
         HashMap<String, String> curChildMap;
         EdinburghBus bus;
-        String timeToDisplay;
+        String timeToDisplay, destination;
         int mins;
         boolean first;
         
@@ -559,27 +560,35 @@ public class DisplayStopDataActivity extends ExpandableListActivity
             first = true;
             for(Bus lBus : busService.getBuses()) {
                 bus = (EdinburghBus)lBus;
-                mins = bus.getArrivalMinutes();
-                if(mins > 59) {
-                    timeToDisplay = bus.getArrivalTime();
-                } else if(mins < 2) {
-                    timeToDisplay = "DUE";
-                } else {
-                    timeToDisplay = String.valueOf(mins);
-                }
+                destination = bus.getDestination();
                 
-                if(bus.isEstimated()) {
-                    timeToDisplay = "*" + timeToDisplay;
+                if(bus.isDiverted()) {
+                    timeToDisplay = "";
+                    destination += " (" +
+                            getString(R.string.displaystopdata_diverted) + ')';
+                } else {
+                    mins = bus.getArrivalMinutes();
+                    if(mins > 59) {
+                        timeToDisplay = bus.getArrivalTime();
+                    } else if(mins < 2) {
+                        timeToDisplay = "DUE";
+                    } else {
+                        timeToDisplay = String.valueOf(mins);
+                    }
+
+                    if(bus.isEstimated()) {
+                        timeToDisplay = '*' + timeToDisplay;
+                    }
                 }
                 
                 if(first) {
-                    curGroupMap.put(DESTINATION_KEY, bus.getDestination());
+                    curGroupMap.put(DESTINATION_KEY, destination);
                     curGroupMap.put(ARRIVAL_TIME_KEY, timeToDisplay);
                     first = false;
                 } else {
                     curChildMap = new HashMap<String, String>();
                     children.add(curChildMap);
-                    curChildMap.put(DESTINATION_KEY, bus.getDestination());
+                    curChildMap.put(DESTINATION_KEY, destination);
                     curChildMap.put(ARRIVAL_TIME_KEY, timeToDisplay);
                 }
             }

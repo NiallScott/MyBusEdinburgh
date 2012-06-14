@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -541,6 +542,7 @@ public class MainActivity extends Activity {
         }
     }
     
+    @TargetApi(8)
     public static class BackupSupport {
         
         public static void dataChanged(final String packageName) {

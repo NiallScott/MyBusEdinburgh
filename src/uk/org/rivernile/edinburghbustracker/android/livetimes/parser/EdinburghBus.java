@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -155,5 +155,14 @@ public class EdinburghBus extends Bus {
      */
     public boolean isEstimated() {
         return (reliability == RELIABILITY_ESTIMATED);
+    }
+    
+    /**
+     * Returns true if this service is diverted, false if not.
+     * 
+     * @return True if this service is diverted, false if not.
+     */
+    public boolean isDiverted() {
+        return (reliability == RELIABILITY_DIVERTED);
     }
 }

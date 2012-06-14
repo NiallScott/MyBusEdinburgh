@@ -90,7 +90,7 @@ public class TimeAlertService extends IntentService {
             return;
         }
         
-        BusStop busStop = result.get(stopCode);
+        final BusStop busStop = result.get(stopCode);
         int time;
         EdinburghBus edinBs;
         
@@ -107,7 +107,9 @@ public class TimeAlertService extends IntentService {
                             DisplayStopDataActivity.class);
                     launchIntent.setAction(DisplayStopDataActivity
                             .ACTION_VIEW_STOP_DATA);
+                    launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     launchIntent.putExtra("stopCode", stopCode);
+                    launchIntent.putExtra("forceLoad", true);
                     
                     String stopName = bsd.getNameForBusStop(stopCode);
                     

@@ -72,7 +72,7 @@ This version of strings.xml is in Italian (it_IT) -->
     <string name="main_aboutdialog_dbversion">Versione database delle fermate</string>
     <string name="main_aboutdialog_topology">Versione Topologia</string>
     <string name="main_aboutdialog_contact">Sito web: http://www.rivernile.org.uk/bustracker\nSegui @MyBusEdinburgh su Twitter per gli aggiornamenti più recenti: http://twitter.com/MyBusEdinburgh</string>
-    <string name="main_aboutdialog_body"><b>Grazie alle seguenti persone ed entità per aver reso possibile questa applicazione:</b>\nGordon Christie (EdinBus per gli sviluppatori iOS)\nThe City of Edinburgh Council\nAnthony Totton (icone app, sito web e grafica)\nScott Straughan (design interfaccia app)\nMatteo Doni (localizzazione italiana, testing)\nINEO Systrans\nLothian Buses\n\n<b>Disclaimer</b>\nPermesso è stato concesso da The City Of Edinburgh Council perche\' questa applicazione si leghi al proprio feed di dati. Né l\'autore dell\'applicazione, né The City Of Edinburgh Council si assumono alcuna responsabilità per la correttezza dei dati forniti da questa applicazione o le sue implicazioni, o qualsiasi perdita di dati o altri problemi derivanti attraverso l\'utilizzo di questa applicazione. L\'utilizzo di questa applicazione significa che l\'utente si assume la responsabilità completa delle proprie azioni.</string>
+    <string name="main_aboutdialog_body"><b>Grazie alle seguenti persone ed entità per aver reso possibile questa applicazione:</b>\nGordon Christie (EdinBus per gli sviluppatori iOS)\nThe City of Edinburgh Council\nAnthony Totton (icone app, sito web e grafica)\nScott Straughan (design interfaccia app)\nMatteo Doni (localizzazione italiana, testing)\nRoss McClymont (testing)\nConnexionz UK (donazione)\nINEO Systrans\nLothian Buses\n\n<b>Disclaimer</b>\nPermesso è stato concesso da The City Of Edinburgh Council perche\' questa applicazione si leghi al proprio feed di dati. Né l\'autore dell\'applicazione, né The City Of Edinburgh Council si assumono alcuna responsabilità per la correttezza dei dati forniti da questa applicazione o le sue implicazioni, o qualsiasi perdita di dati o altri problemi derivanti attraverso l\'utilizzo di questa applicazione. L\'utilizzo di questa applicazione significa che l\'utente si assume la responsabilità completa delle proprie azioni.</string>
     <string name="main_aboutdialog_appicon_description">Icona dell\'applicazione</string>
 
     <!--
@@ -121,6 +121,7 @@ This version of strings.xml is in Italian (it_IT) -->
     <string name="displaystopdata_gettingdata">Recupero dei dati dal server&#8230;</string>
     <string name="displaystopdata_empty">Non ci sono attualmente dati da visualizzare.</string>
     <string name="displaystopdata_lastupdated">Ultimo aggiornamento </string>
+    <string name="displaystopdata_diverted">deviato</string>
     <string name="displaystopdata_column_service">Servizio</string>
     <string name="displaystopdata_column_destination">Destinazione</string>
     <string name="displaystopdata_column_due">In arrivo (min)</string>

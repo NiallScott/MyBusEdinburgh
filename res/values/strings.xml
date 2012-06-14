@@ -82,7 +82,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     entities for making this application happen:</b>\nGordon Christie (EdinBus for
     iOS developer)\nThe City of Edinburgh Council\nAnthony Totton (App icon,
     website and graphics)\nScott Straughan (Version 0.0.x app interface designer)\nMatteo Doni
-    (Italian localisation, testing)\nINEO Systrans\nLothian Buses\n
+    (Italian localisation, testing)\nRoss McClymont (testing)\nConnexionz UK (donation)\nINEO Systrans\nLothian Buses\n
     \n<b>Disclaimer</b>\nPermission has been granted from The City of Edinburgh Council
     for this application to tie in to their data feed. Neither the author of the
     application, nor The City of Edinburgh Council take any responsibility for
@@ -146,6 +146,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_gettingdata">Retrieving data from server&#8230;</string>
     <string name="displaystopdata_empty">There is currently no data to display.</string>
     <string name="displaystopdata_lastupdated">Last updated </string>
+    <string name="displaystopdata_diverted">diverted</string>
     <string name="displaystopdata_column_service">Service</string>
     <string name="displaystopdata_column_destination">Destination</string>
     <string name="displaystopdata_column_due">Due (mins)</string>
@@ -417,7 +418,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="alert_prox_add">Add proximity alert</string>
     <string name="alert_prox_rem">Remove proximity alert</string>
     
-    <string name="alert_time_title">Service time alert</string>
+    <string name="alert_time_title">Bus arrival alert</string>
     <string name="alert_time_summary_plural" formatted="false">Service %service is %mins minutes or less from %stopName.</string>
     <string name="alert_time_summary_due" formatted="false">Service %service is due at %stopName</string>
     <string name="alert_time_add">Add arrival alert</string>
