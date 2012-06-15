@@ -54,7 +54,7 @@ public class FetchNewsUpdatesTask {
 
     private final static String REQUEST_URL = "http://api.twitter.com/1/" +
             "lists/statuses.json?slug=bus-tracker-updates&" +
-            "owner_screen_name=NiallScott&per_page=20";
+            "owner_screen_name=NiallScott&per_page=30";
 
     private static FetchNewsUpdatesTask instance = null;
     private NewsEvent handler;
