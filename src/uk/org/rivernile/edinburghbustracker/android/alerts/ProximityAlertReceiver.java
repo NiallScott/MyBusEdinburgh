@@ -84,14 +84,12 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
         launchIntent.putExtra("stopCode", stopCode);
         launchIntent.putExtra("zoom", 19);
         
-        final String title = context.getString(R.string.alert_prox_title)
-                .replace("%stopName", stopName);
-        final String summary = context.getString(R.string.alert_prox_summary)
-                .replace("%stopName", stopName)
-                .replace("%distance",
-                String.valueOf(intent.getIntExtra("distance", 0)));
-        final String ticker = context.getString(R.string.alert_prox_ticker)
-                .replace("%stopName", stopName);
+        final String title = context.getString(R.string.alert_prox_title,
+                stopName);
+        final String summary = context.getString(R.string.alert_prox_summary,
+                intent.getIntExtra("distance", 0), stopName);
+        final String ticker = context.getString(R.string.alert_prox_ticker,
+                stopName);
         
         final SharedPreferences sp = context
                 .getSharedPreferences(PreferencesActivity.PREF_FILE, 0);

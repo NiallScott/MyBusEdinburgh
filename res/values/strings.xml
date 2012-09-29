@@ -372,10 +372,12 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="alertmanager_title">Alert Manager</string>
     <string name="alertmanager_empty"><b>You currently have no alerts set.</b>\nYou can add time and proximity alerts from your favourite stops listing, the bus stop map, the nearby bus stops list and when viewing arrival times for a bus stop.</string>
     <string name="alertmanager_prox_title"><b>Proximity Alert</b></string>
-    <string name="alertmanager_prox_text" formatted="false">You will be alerted when you are within %d metres of bus stop %stop.\n\nFor the most accurate results, ensure GPS is turned on. This alert will be automatically removed 1 hour after being set, or if you restart your device.</string>
+    <string name="alertmanager_prox_text">You will be alerted when you are within %1$d metres of bus stop %2$s.\n\nFor the most accurate results, ensure GPS is turned on. This alert will be automatically removed 1 hour after being set, or if you restart your device.</string>
     <string name="alertmanager_time_title"><b>Bus Arrival Alert</b></string>
-    <string name="alertmanager_time_text_singular" formatted="false">You will be alerted when any of the following services are due now at the bus stop %busStop:\n\n%services\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</string>
-    <string name="alertmanager_time_text_plural" formatted="false">You will be alerted when any of the following services are due in %minutes minutes or less at the bus stop %busStop:\n\n%services\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</string>
+    <plurals name="alertmanager_time_text">
+        <item quantity="one">You will be alerted when any of the following services are due now at the bus stop %1$s:\n\n%2$s\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</item>
+        <item quantity="other">You will be alerted when any of the following services are due in %3$d minutes or less at the bus stop %1$s:\n\n%2$s\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</item>
+    </plurals>
     <string name="alertmanager_button_remove_single">Remove alert</string>
     <string name="alertmanager_button_remove_multiple">Remove all alerts</string>
     <string name="alertmanager_prox_image_description">Proximity icon</string>
@@ -402,25 +404,29 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="times_never">never</string>
     <string name="times_lessthanoneminago">less than 1 minute ago</string>
-    <string name="times_oneminago">1 minute ago</string>
-    <string name="times_xminsago">%t minutes ago</string>
-    <string name="times_greaterthanhour">greater than 1 hour ago</string>
+    <plurals name="times_minsago">
+        <item quantity="one">1 minute ago</item>
+        <item quantity="other">%d minutes ago</item>
+    </plurals>
+    <string name="times_greaterthanhour">more than 1 hour ago</string>
     
     <!--
     **********************
     * Strings for alerts *
     **********************
     -->
-    <string name="alert_prox_title">Approaching %stopName</string>
-    <string name="alert_prox_summary" formatted="false">You have entered within a %distancem radius of %stopName.</string>
-    <string name="alert_prox_ticker">You are approaching %stopName.</string>
+    <string name="alert_prox_title">Approaching %s</string>
+    <string name="alert_prox_summary">You have entered within a %1$dm radius of %2$s.</string>
+    <string name="alert_prox_ticker">You are approaching %s.</string>
     <string name="alert_prox_rem_confirm">Are you sure you want to remove this proximity alert?</string>
     <string name="alert_prox_add">Add proximity alert</string>
     <string name="alert_prox_rem">Remove proximity alert</string>
     
     <string name="alert_time_title">Bus arrival alert</string>
-    <string name="alert_time_summary_plural" formatted="false">Service %service is %mins minutes or less from %stopName.</string>
-    <string name="alert_time_summary_due" formatted="false">Service %service is due at %stopName</string>
+    <plurals name="alert_time_summary">
+        <item quantity="one">Service %1$s is due at %3$s</item>
+        <item quantity="other">Service %1$s is %2$d minutes or less from %3$s</item>
+    </plurals>
     <string name="alert_time_add">Add arrival alert</string>
     <string name="alert_time_rem">Remove arrival alert</string>
     

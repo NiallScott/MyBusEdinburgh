@@ -249,8 +249,8 @@ public class AddProximityAlertFragment extends Fragment {
         }
         
         // Set the information text.
-        textProxDialogStop.setText(getString(R.string.alert_dialog_prox_second)
-                .replace("%s", stopNameCode));
+        textProxDialogStop.setText(getString(R.string.alert_dialog_prox_second,
+                stopNameCode));
     }
     
     /**

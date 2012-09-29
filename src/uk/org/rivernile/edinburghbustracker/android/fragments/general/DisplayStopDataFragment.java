@@ -863,6 +863,7 @@ public class DisplayStopDataFragment extends Fragment
     private void updateLastRefreshed() {
         final long timeSinceRefresh = System.currentTimeMillis() -
                 lastRefresh;
+        final int mins = (int)(timeSinceRefresh / 60000);
         
         final StringBuilder sb = new StringBuilder();
         
@@ -871,20 +872,15 @@ public class DisplayStopDataFragment extends Fragment
         if(lastRefresh == 0) {
             // The data has never been refreshed.
             sb.append(getString(R.string.times_never));
-        } else if(timeSinceRefresh < 60000) {
-            // The data was refreshed less than 1 minute ago.
-            sb.append(getString(R.string.times_lessthanoneminago));
-        } else if(timeSinceRefresh < 120000) {
-            // The data was refreshed less than 2 minutes ago (shows 1 min).
-            sb.append(getString(R.string.times_oneminago));
-        } else if(timeSinceRefresh > 3600000) {
+        } else if(mins > 59) {
             // The data was refreshed more than 1 hour ago.
             sb.append(getString(R.string.times_greaterthanhour));
+        } else if(mins == 0) {
+            // The data was refreshed less than 1 minute ago.
+            sb.append(getString(R.string.times_lessthanoneminago));
         } else {
-            // Otherwise, show the amount of minutes.
-            byte mins = (byte)(timeSinceRefresh / 60000);
-            sb.append(getString(R.string.times_xminsago).replace("%t",
-                    String.valueOf(mins)));
+            sb.append(getResources()
+                    .getQuantityString(R.plurals.times_minsago, mins, mins));
         }
         
         txtLastRefreshed.setText(sb.toString());

@@ -239,8 +239,8 @@ public class AddTimeAlertFragment extends Fragment
                     " (" + stopCode + ")";
         }
         
-        txtTimeDialogStop.setText(getString(R.string.alert_dialog_time_busstop)
-                .replace("%s", stopNameCode));
+        txtTimeDialogStop.setText(getString(R.string.alert_dialog_time_busstop,
+                stopNameCode));
         
         // Force a refresh of the TextView that shows the services that have
         // been chosen.

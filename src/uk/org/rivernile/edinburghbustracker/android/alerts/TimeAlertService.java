@@ -103,7 +103,7 @@ public class TimeAlertService extends IntentService {
         final int timeTrigger = intent.getIntExtra("timeTrigger", 5);
         final BusParser parser = new EdinburghParser();
         
-        HashMap<String, BusStop> result = null;
+        HashMap<String, BusStop> result;
         try {
             // Get the bus times. Only get 1 bus per service.
             result = parser.getBusStopData(new String[] { stopCode }, 1);
@@ -147,20 +147,11 @@ public class TimeAlertService extends IntentService {
                     
                     final String stopName = bsd.getNameForBusStop(stopCode);
                     
-                    final String title = getString(R.string.alert_time_title)
-                            .replace("%stopName", stopName);
-                    String summary;
-                    // Plurality needs to be correct.
-                    if(time >= 2) {
-                        summary = getString(R.string.alert_time_summary_plural)
-                                .replace("%service", service)
-                                .replace("%mins", String.valueOf(time))
-                                .replace("%stopName", stopName);
-                    } else {
-                        summary = getString(R.string.alert_time_summary_due)
-                                .replace("%service", service)
-                                .replace("%stopName", stopName);
-                    }
+                    final String title = getString(R.string.alert_time_title);
+                    
+                    final String summary = getResources().getQuantityString(
+                            R.plurals.alert_time_summary, time == 0 ? 1 : time,
+                            service, time, stopName);
                     
                     // Build the notification.
                     final NotificationCompat.Builder notifBuilder =

@@ -365,7 +365,6 @@ public class AlertManagerFragment extends ListFragment
             
             Button btn;
             TextView txt;
-            String str;
             
             // How the View is populated depends on the alert type.
             switch(c.getInt(1)) {
@@ -382,10 +381,9 @@ public class AlertManagerFragment extends ListFragment
                     
                     // Set information text.
                     txt = (TextView)view.findViewById(R.id.txtAlertManProx);
-                    str = context.getString(R.string.alertmanager_prox_text)
-                            .replace("%d", String.valueOf(c.getInt(4)))
-                            .replace("%stop", busStop);
-                    txt.setText(str);
+                    txt.setText(context
+                            .getString(R.string.alertmanager_prox_text,
+                            c.getInt(4), busStop));
                     break;
                 case SettingsDatabase.ALERTS_TYPE_TIME:
                     btn = (Button)view.findViewById(R.id.btnRemoveTimeAlert);
@@ -409,21 +407,11 @@ public class AlertManagerFragment extends ListFragment
                         sb.append(service);
                     }
                     
-                    // Show the number of minutes trigger.
-                    if(timeTrigger > 1) {
-                        str = context.getString(
-                                R.string.alertmanager_time_text_plural)
-                                .replace("%busStop", busStop)
-                                .replace("%services", sb.toString())
-                                .replace("%minutes", String.valueOf(
-                                        timeTrigger));
-                    } else {
-                        str = context.getString(
-                                R.string.alertmanager_time_text_singular)
-                                .replace("%busStop", busStop)
-                                .replace("%services", sb.toString());
-                    }
-                    txt.setText(str);
+                    // Get the correct text to display, depending on plurality.
+                    txt.setText(context.getResources().getQuantityString(
+                            R.plurals.alertmanager_time_text,
+                            timeTrigger == 0 ? 1 : timeTrigger, busStop,
+                            sb.toString(), timeTrigger));
                     break;
                 default:
                     break;
