@@ -32,6 +32,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
 import java.util.HashMap;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
@@ -46,6 +47,18 @@ import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBu
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
         .EdinburghParser;
 
+/**
+ * The purpose of the TimeAlertService is run on a once-per-minute basis to load
+ * bus times from the server to see if any of the services the user has filtered
+ * on have arrived at the bus stop within the time trigger time, also set by the
+ * user. If the criteria is not met then it schedules to run again in the next
+ * minute. If the criteria is met, the user is greeted with a notification.
+ * 
+ * As this is an IntentService, it runs in a separate thread and does not block
+ * the UI thread.
+ * 
+ * @author Niall Scott
+ */
 public class TimeAlertService extends IntentService {
     
     private final static int ALERT_ID = 2;
@@ -55,13 +68,19 @@ public class TimeAlertService extends IntentService {
     private NotificationManager notifMan;
     private AlertManager alertMan;
     private AlarmManager alarmMan;
-    private BusParser parser;
     private SharedPreferences sp;
     
+    /**
+     * Create a new instance of the TimeAlertService. This simply calls its
+     * super constructor.
+     */
     public TimeAlertService() {
         super(TimeAlertService.class.getSimpleName());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -71,39 +90,54 @@ public class TimeAlertService extends IntentService {
         notifMan = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         alertMan = AlertManager.getInstance(this);
         alarmMan = (AlarmManager)getSystemService(ALARM_SERVICE);
-        parser = EdinburghParser.getInstance();
         sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onHandleIntent(final Intent intent) {
         final String stopCode = intent.getStringExtra("stopCode");
         final String[] services = intent.getStringArrayExtra("services");
         final int timeTrigger = intent.getIntExtra("timeTrigger", 5);
-        //final long timeSet = intent.getLongExtra("timeSet", 0);
+        final BusParser parser = new EdinburghParser();
         
         HashMap<String, BusStop> result = null;
         try {
+            // Get the bus times. Only get 1 bus per service.
             result = parser.getBusStopData(new String[] { stopCode }, 1);
         } catch(BusParserException e) {
+            // There was an error. No point continuing. Reschedule.
             reschedule(intent);
             return;
         }
         
+        // Get the bus stop we are interested in. It should be the only one in
+        // the HashMap anyway.
         final BusStop busStop = result.get(stopCode);
         int time;
         EdinburghBus edinBs;
         
+        // Loop through all the bus services at this stop.
         for(BusService bs : busStop.getBusServices()) {
+            // We are only interested in the next departure. Also get the time.
             edinBs = (EdinburghBus)bs.getFirstBus();
             time = edinBs.getArrivalMinutes();
             
+            // Loop through all of the services we are interested in.
             for(String service : services) {
+                // The service matches and meets the time criteria.
                 if(service.equals(bs.getServiceName()) && time <= timeTrigger) {
+                    // The alert may have been cancelled by the user recently,
+                    // check it's still active to stay relevant. Cancel the
+                    // alert if we're continuing.
                     if(!sd.isActiveTimeAlert(stopCode)) return;
                     alertMan.removeTimeAlert();
                     
-                    Intent launchIntent = new Intent(this,
+                    // Create the intent that's fired when the notification is
+                    // tapped. It shows the bus times view for that stop.
+                    final Intent launchIntent = new Intent(this,
                             DisplayStopDataActivity.class);
                     launchIntent.setAction(DisplayStopDataActivity
                             .ACTION_VIEW_STOP_DATA);
@@ -111,11 +145,12 @@ public class TimeAlertService extends IntentService {
                     launchIntent.putExtra("stopCode", stopCode);
                     launchIntent.putExtra("forceLoad", true);
                     
-                    String stopName = bsd.getNameForBusStop(stopCode);
+                    final String stopName = bsd.getNameForBusStop(stopCode);
                     
-                    String title = getString(R.string.alert_time_title)
+                    final String title = getString(R.string.alert_time_title)
                             .replace("%stopName", stopName);
                     String summary;
+                    // Plurality needs to be correct.
                     if(time >= 2) {
                         summary = getString(R.string.alert_time_summary_plural)
                                 .replace("%service", service)
@@ -127,8 +162,22 @@ public class TimeAlertService extends IntentService {
                                 .replace("%stopName", stopName);
                     }
                     
-                    Notification n = new Notification();
-                    
+                    // Build the notification.
+                    final NotificationCompat.Builder notifBuilder =
+                            new NotificationCompat.Builder(this);
+                    notifBuilder.setAutoCancel(true);
+                    notifBuilder.setSmallIcon(R.drawable.ic_status_bus);
+                    notifBuilder.setTicker(summary);
+                    notifBuilder.setContentTitle(title);
+                    notifBuilder.setContentText(summary);
+                    // Support for Jelly Bean notifications.
+                    notifBuilder.setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(summary));
+                    notifBuilder.setContentIntent(
+                            PendingIntent.getActivity(this, 0, launchIntent,
+                                PendingIntent.FLAG_ONE_SHOT));
+
+                    final Notification n = notifBuilder.build();
                     if(sp.getBoolean("pref_alertsound_state", true))
                         n.defaults |= Notification.DEFAULT_SOUND;
 
@@ -140,33 +189,42 @@ public class TimeAlertService extends IntentService {
                         n.flags |= Notification.FLAG_SHOW_LIGHTS;
                     }
                     
-                    n.flags |= Notification.FLAG_AUTO_CANCEL;
-                    n.icon = R.drawable.ic_status_bus;
-                    n.when = System.currentTimeMillis();
-                    n.tickerText = summary;
-                    n.setLatestEventInfo(this, title, summary,
-                            PendingIntent.getActivity(this, 0, launchIntent,
-                            PendingIntent.FLAG_ONE_SHOT));
-        
+                    // Send the notification.
                     notifMan.notify(ALERT_ID, n);
                     return;
                 }
             }
         }
         
+        // All the services have been looped through and the criteria didn't
+        // match. This means a reschedule should be attempted.
         reschedule(intent);
     }
     
+    /**
+     * Reschedule the retrieval of bus times from the server because there was
+     * an error loading them or the service/time criteria has not been met.
+     * 
+     * If the rescheduling goes on for an hour, then cancel the checking and
+     * remove the alert otherwise the user's battery will be drained and data
+     * used.
+     * 
+     * @param intent The intent that started this service. This is to be reused
+     * to start the next service at the appropriate time.
+     */
     private void reschedule(final Intent intent) {
         final long timeSet = intent.getLongExtra("timeSet", 0);
         
+        // Checks to see if the alert has been active for the last hour or more.
+        // If so, it gets cancelled.
         if((SystemClock.elapsedRealtime() - timeSet) >= 3600000) {
             alertMan.removeTimeAlert();
             return;
         }
         
-        PendingIntent pi = PendingIntent.getService(this, 0, intent,
+        final PendingIntent pi = PendingIntent.getService(this, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
+        // Reschedule ourself to run again in 60 seconds.
         alarmMan.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + 60000, pi);
     }

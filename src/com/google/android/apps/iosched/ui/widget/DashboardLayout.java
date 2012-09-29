@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +22,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * Custom layout that arranges children in a grid-like manner, optimizing for even horizontal and
- * vertical whitespace.
+ * Custom layout that arranges children in a grid-like manner, optimizing for
+ * even horizontal and vertical whitespace.
+ * 
+ * Modified by Niall Scott to sort code formatting and add Javadoc.
  */
 public class DashboardLayout extends ViewGroup {
 
@@ -32,20 +34,43 @@ public class DashboardLayout extends ViewGroup {
     private int mMaxChildWidth = 0;
     private int mMaxChildHeight = 0;
 
-    public DashboardLayout(Context context) {
+    /**
+     * Create a new DashboardLayout.
+     * 
+     * @param context A Context instance.
+     */
+    public DashboardLayout(final Context context) {
         super(context, null);
     }
 
-    public DashboardLayout(Context context, AttributeSet attrs) {
+    /**
+     * Create a new DashboardLayout.
+     * 
+     * @param context A Context instance.
+     * @param attrs The ViewGroup attributes.
+     */
+    public DashboardLayout(final Context context, final AttributeSet attrs) {
         super(context, attrs, 0);
     }
 
-    public DashboardLayout(Context context, AttributeSet attrs, int defStyle) {
+    /**
+     * Create a new DashboardLayout.
+     * 
+     * @param context A Context instance.
+     * @param attrs The ViewGroup attributes.
+     * @param defStyle The style to use.
+     */
+    public DashboardLayout(final Context context, final AttributeSet attrs,
+            final int defStyle) {
         super(context, attrs, defStyle);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onMeasure(final int widthMeasureSpec,
+            final int heightMeasureSpec) {
         mMaxChildWidth = 0;
         mMaxChildHeight = 0;
 
@@ -57,16 +82,18 @@ public class DashboardLayout extends ViewGroup {
                 MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.AT_MOST);
 
         final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
+        for(int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
+            if(child.getVisibility() == GONE) {
                 continue;
             }
 
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
 
-            mMaxChildWidth = Math.max(mMaxChildWidth, child.getMeasuredWidth());
-            mMaxChildHeight = Math.max(mMaxChildHeight, child.getMeasuredHeight());
+            mMaxChildWidth = Math.max(mMaxChildWidth,
+                    child.getMeasuredWidth());
+            mMaxChildHeight = Math.max(mMaxChildHeight,
+                    child.getMeasuredHeight());
         }
 
         // Measure again for each child to be exactly the same size.
@@ -76,9 +103,9 @@ public class DashboardLayout extends ViewGroup {
         childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(
                 mMaxChildHeight, MeasureSpec.EXACTLY);
 
-        for (int i = 0; i < count; i++) {
+        for(int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
+            if(child.getVisibility() == GONE) {
                 continue;
             }
 
@@ -90,8 +117,12 @@ public class DashboardLayout extends ViewGroup {
                 resolveSize(mMaxChildHeight, heightMeasureSpec));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    protected void onLayout(final boolean changed, final int l, final int t,
+            final int r, final int b) {
         int width = r - l;
         int height = b - t;
 
@@ -99,20 +130,22 @@ public class DashboardLayout extends ViewGroup {
 
         // Calculate the number of visible children.
         int visibleCount = 0;
-        for (int i = 0; i < count; i++) {
+        for(int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
+            if(child.getVisibility() == GONE) {
                 continue;
             }
+            
             ++visibleCount;
         }
 
-        if (visibleCount == 0) {
+        if(visibleCount == 0) {
             return;
         }
 
-        // Calculate what number of rows and columns will optimize for even horizontal and
-        // vertical whitespace between items. Start with a 1 x N grid, then try 2 x N, and so on.
+        // Calculate what number of rows and columns will optimize for even
+        // horizontal and vertical whitespace between items. Start with a 1 x N
+        // grid, then try 2 x N, and so on.
         int bestSpaceDifference = Integer.MAX_VALUE;
         int spaceDifference;
 
@@ -123,28 +156,29 @@ public class DashboardLayout extends ViewGroup {
         int cols = 1;
         int rows;
 
-        while (true) {
+        while(true) {
             rows = (visibleCount - 1) / cols + 1;
 
             hSpace = ((width - mMaxChildWidth * cols) / (cols + 1));
             vSpace = ((height - mMaxChildHeight * rows) / (rows + 1));
 
             spaceDifference = Math.abs(vSpace - hSpace);
-            if (rows * cols != visibleCount) {
+            if(rows * cols != visibleCount) {
                 spaceDifference *= UNEVEN_GRID_PENALTY_MULTIPLIER;
             }
 
-            if (spaceDifference < bestSpaceDifference) {
+            if(spaceDifference < bestSpaceDifference) {
                 // Found a better whitespace squareness/ratio
                 bestSpaceDifference = spaceDifference;
 
-                // If we found a better whitespace squareness and there's only 1 row, this is
-                // the best we can do.
-                if (rows == 1) {
+                // If we found a better whitespace squareness and there's only 1
+                // row, this is the best we can do.
+                if(rows == 1) {
                     break;
                 }
             } else {
-                // This is a worse whitespace ratio, use the previous value of cols and exit.
+                // This is a worse whitespace ratio, use the previous value of
+                // cols and exit.
                 --cols;
                 rows = (visibleCount - 1) / cols + 1;
                 hSpace = ((width - mMaxChildWidth * cols) / (cols + 1));
@@ -155,9 +189,11 @@ public class DashboardLayout extends ViewGroup {
             ++cols;
         }
 
-        // Lay out children based on calculated best-fit number of rows and cols.
+        // Lay out children based on calculated best-fit number of rows and
+        // cols.
 
-        // If we chose a layout that has negative horizontal or vertical space, force it to zero.
+        // If we chose a layout that has negative horizontal or vertical space,
+        // force it to zero.
         hSpace = Math.max(0, hSpace);
         vSpace = Math.max(0, vSpace);
 
@@ -168,9 +204,9 @@ public class DashboardLayout extends ViewGroup {
         int left, top;
         int col, row;
         int visibleIndex = 0;
-        for (int i = 0; i < count; i++) {
+        for(int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.getVisibility() == GONE) {
+            if(child.getVisibility() == GONE) {
                 continue;
             }
 

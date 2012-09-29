@@ -1,10 +1,9 @@
-/*
+/**
  * The Alphanum Algorithm is an improved sorting algorithm for strings
  * containing numbers.  Instead of sorting numbers in ASCII order like
  * a standard sort, this algorithm sorts numbers in numeric order.
  *
  * The Alphanum Algorithm is discussed at http://www.DaveKoelle.com
- *
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,7 +17,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
 
@@ -28,101 +27,99 @@ import java.util.Comparator;
 
 /**
  * This is an updated version with enhancements made by Daniel Migowski,
- * Andre Bogus, and David Koelle
+ * Andre Bogus, and David Koelle.
  *
- * To convert to use Templates (Java 1.5+):
- *   - Change "implements Comparator" to "implements Comparator<String>"
- *   - Change "compare(Object o1, Object o2)" to "compare(String s1, String s2)"
- *   - Remove the type checking and casting in compare().
- *
- * To use this class:
- *   Use the static "sort" method from the java.util.Collections class:
- *   Collections.sort(your list, new AlphanumComparator());
+ * This class has been modified by Niall Scott for better code formatting and
+ * other enhancements.
  */
-public class AlphanumComparator implements Comparator
-{
-    private boolean isDigit(char ch)
-    {
-        return ch >= 48 && ch <= 57;
-    }
+public class AlphanumComparator implements Comparator {
 
-    /** Length of string is passed in for improved efficiency (only need to calculate it once) **/
-    private String getChunk(String s, int slength, int marker)
-    {
-        StringBuilder chunk = new StringBuilder();
-        char c = s.charAt(marker);
-        chunk.append(c);
-        marker++;
-        if (isDigit(c))
-        {
-            while (marker < slength)
-            {
-                c = s.charAt(marker);
-                if (!isDigit(c))
-                    break;
-                chunk.append(c);
-                marker++;
-            }
-        } else
-        {
-            while (marker < slength)
-            {
-                c = s.charAt(marker);
-                if (isDigit(c))
-                    break;
-                chunk.append(c);
-                marker++;
-            }
-        }
-        return chunk.toString();
-    }
-
-    public int compare(Object o1, Object o2)
-    {
-        String s1 = o1.toString();
-        String s2 = o2.toString();
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int compare(final Object o1, final Object o2) {
+        // Get the Strings by calling toString() on the passed in objects.
+        final String s1 = o1.toString();
+        final String s2 = o2.toString();
+        
         int thisMarker = 0;
         int thatMarker = 0;
-        int s1Length = s1.length();
-        int s2Length = s2.length();
+        // Cache their lengths to avoid looking this up later.
+        final int s1Length = s1.length();
+        final int s2Length = s2.length();
 
-        while (thisMarker < s1Length && thatMarker < s2Length)
-        {
-            String thisChunk = getChunk(s1, s1Length, thisMarker);
+        // Keep looping until the end of either String is reached.
+        while(thisMarker < s1Length && thatMarker < s2Length) {
+            final String thisChunk = getChunk(s1, thisMarker);
             thisMarker += thisChunk.length();
 
-            String thatChunk = getChunk(s2, s2Length, thatMarker);
+            final String thatChunk = getChunk(s2, thatMarker);
             thatMarker += thatChunk.length();
 
-            // If both chunks contain numeric characters, sort them numerically
+            // If both chunks contain numeric characters, sort them numerically.
             int result = 0;
-            if (isDigit(thisChunk.charAt(0)) && isDigit(thatChunk.charAt(0)))
-            {
+            if(Character.isDigit(thisChunk.charAt(0)) &&
+                    Character.isDigit(thatChunk.charAt(0))) {
                 // Simple chunk comparison by length.
-                int thisChunkLength = thisChunk.length();
+                final int thisChunkLength = thisChunk.length();
                 result = thisChunkLength - thatChunk.length();
-                // If equal, the first different number counts
-                if (result == 0)
-                {
-                    for (int i = 0; i < thisChunkLength; i++)
-                    {
+                // If equal, the first different number counts.
+                if(result == 0) {
+                    for(int i = 0; i < thisChunkLength; i++) {
                         result = thisChunk.charAt(i) - thatChunk.charAt(i);
-                        if (result != 0)
-                        {
-                            return result;
-                        }
+                        if(result != 0) return result;
                     }
                 }
-            } else
-            {
+            } else {
                 result = thisChunk.compareTo(thatChunk);
             }
 
-            if (result != 0)
-                return result;
+            if(result != 0) return result;
         }
 
         return s1Length - s2Length;
+    }
+    
+    /**
+     * Split the String in to chunks of digits and non-digits.
+     * 
+     * @param s The String to get the chunk from.
+     * @param marker The index of the String to start looking at.
+     * @return A chunk of digits or non-digits.
+     */
+    private static String getChunk(final String s, int marker) {
+        if(s == null) throw new IllegalArgumentException("String is null.");
+        
+        // Cache the character array to avoid repeated calls to String.charAt()
+        final char[] chars = s.toCharArray();
+        final int len = chars.length;
+        if(marker < 0 || marker > (len - 1))
+            throw new IllegalArgumentException("marker is invalid.");
+        
+        final StringBuilder chunk = new StringBuilder();
+        // The first character will always appear in the chunk.
+        chunk.append(chars[marker]);
+        marker++;
+        
+        if(Character.isDigit(chars[marker - 1])) {
+            // If first character is a digit, keep appending characters until we
+            // encounter a non-digit.
+            while(marker < len) {
+                if(!Character.isDigit(chars[marker])) break;
+                chunk.append(chars[marker]);
+                marker++;
+            }
+        } else {
+            // If first character is a non-digit, keep appending character until
+            // we encounter a digit.
+            while(marker < len) {
+                if(Character.isDigit(chars[marker])) break;
+                chunk.append(chars[marker]);
+                marker++;
+            }
+        }
+        
+        return chunk.toString();
     }
 }

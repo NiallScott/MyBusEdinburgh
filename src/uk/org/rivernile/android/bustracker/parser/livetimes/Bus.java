@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,8 @@ package uk.org.rivernile.android.bustracker.parser.livetimes;
  * @author Niall Scott
  */
 public class Bus {
-    private String destination;
-    private String arrivalTime;
+    private final String destination;
+    private final String arrivalTime;
     
     /**
      * Create a single instance of a bus and its corrosponding destination and

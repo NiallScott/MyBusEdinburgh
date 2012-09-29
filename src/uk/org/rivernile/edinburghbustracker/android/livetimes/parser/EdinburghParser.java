@@ -38,7 +38,6 @@ import org.json.JSONObject;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimes;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 
 /**
@@ -49,30 +48,28 @@ import uk.org.rivernile.edinburghbustracker.android.ApiKey;
  */
 public final class EdinburghParser implements BusParser {
     
+    /** This error is called when an invalid key has been specified. */
+    public static final byte ERROR_INVALID_APP_KEY = 6;
+    /** This error is called when an invalid parameter has been specified. */
+    public static final byte ERROR_INVALID_PARAMETER = 7;
+    /** This error is called when the system encounters a processing error. */
+    public static final byte ERROR_PROCESSING_ERROR = 8;
+    /** This error is called when the system is under maintenance. */
+    public static final byte ERROR_SYSTEM_MAINTENANCE = 9;
+    /** This error is called when the system is overloaded. */
+    public static final byte ERROR_SYSTEM_OVERLOADED = 10;
+    
     private static final String URL =
             "http://www.mybustracker.co.uk/ws.php?module=json&key=";
-    private static final Random rand = new Random();
-    
-    private static EdinburghParser instance = null;
+    private static final Random rand = new Random(System.currentTimeMillis());
     
     private boolean globalDisruption = false;
     
     /**
-     * This constructor has been deliberately left blank to control instance
-     * creation.
+     * Create a new EdinburghParser object.
      */
-    private EdinburghParser() {
-        
-    }
-    
-    /**
-     * Get an instance of the EdinburghParser.
-     * 
-     * @return An instance of the EdinburghParser.
-     */
-    public static EdinburghParser getInstance() {
-        if(instance == null) instance = new EdinburghParser();
-        return instance;
+    public EdinburghParser() {
+        // Nothing to do here.
     }
     
     /**
@@ -83,11 +80,13 @@ public final class EdinburghParser implements BusParser {
             final int numDepartures) throws BusParserException {
         if(stopCodes == null || stopCodes.length == 0) return null;
         
-        StringBuilder sb = new StringBuilder();
+        // Build the URL.
+        final StringBuilder sb = new StringBuilder();
         sb.append(URL);
         sb.append(ApiKey.getHashedKey());
         sb.append("&function=getBusTimes&");
-        int len = stopCodes.length;
+        final int len = stopCodes.length;
+        
         if(len == 1) {
             sb.append("stopId=");
             sb.append(stopCodes[0]);
@@ -103,19 +102,25 @@ public final class EdinburghParser implements BusParser {
                 sb.append('&');
             }
         }
+        
         sb.append("nb=");
         sb.append(numDepartures);
+        // Add a random arg so the response isn't cached by the network proxies.
         sb.append("&random=");
         sb.append(rand.nextInt());
         
+        // TODO: review this code. I'm sure it could be done better.
         try {
-            URL url = new URL(sb.toString());
+            final URL url = new URL(sb.toString());
+            // Reset the StringBuilder because we're going to reuse it.
             sb.setLength(0);
-            HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+            final HttpURLConnection conn = (HttpURLConnection)url
+                    .openConnection();
             try {
-                BufferedInputStream is = new BufferedInputStream(
+                final BufferedInputStream is = new BufferedInputStream(
                         conn.getInputStream());
                 int data;
+                
                 while((data = is.read()) != -1) {
                     sb.append((char)data);
                 }
@@ -125,11 +130,11 @@ public final class EdinburghParser implements BusParser {
 
             return parseJSON(sb.toString());
         } catch(MalformedURLException e) {
-            throw new BusParserException(BusTimes.ERROR_CANNOTRESOLVE);
+            throw new BusParserException(ERROR_CANNOTRESOLVE);
         } catch(IOException e) {
-            throw new BusParserException(BusTimes.ERROR_NOCONNECTION);
+            throw new BusParserException(ERROR_NOCONNECTION);
         } catch(JSONException e) {
-            throw new BusParserException(BusTimes.ERROR_PARSEERR);
+            throw new BusParserException(ERROR_PARSEERR);
         }
     }
     
@@ -147,33 +152,35 @@ public final class EdinburghParser implements BusParser {
         final HashMap<String, BusStop> data = new HashMap<String, BusStop>();
         JSONObject jo = new JSONObject(jsonString);
         
+        // Check to see if the API returns errors.
         if(jo.has("faultcode")) {
             final String err = jo.getString("faultcode");
             if("INVALID_APP_KEY".equals(err)) {
-                throw new BusParserException(BusTimes.ERROR_INVALID_APP_KEY);
+                throw new BusParserException(ERROR_INVALID_APP_KEY);
             } else if("INVALID_PARAMETER".equals(err)) {
-                throw new BusParserException(BusTimes.ERROR_INVALID_PARAMETER);
+                throw new BusParserException(ERROR_INVALID_PARAMETER);
             } else if("PROCESSING_ERROR".equals(err)) {
-                throw new BusParserException(BusTimes.ERROR_PROCESSING_ERROR);
+                throw new BusParserException(ERROR_PROCESSING_ERROR);
             } else if("SYSTEM_MAINTENANCE".equals(err)) {
-                throw new BusParserException(BusTimes.ERROR_SYSTEM_MAINTENANCE);
+                throw new BusParserException(ERROR_SYSTEM_MAINTENANCE);
             } else if("SYSTEM_OVERLOADED".equals(err)) {
-                throw new BusParserException(BusTimes.ERROR_SYSTEM_OVERLOADED);
+                throw new BusParserException(ERROR_SYSTEM_OVERLOADED);
             } else {
-                throw new BusParserException(BusTimes.ERROR_UNKNOWN);
+                throw new BusParserException(ERROR_UNKNOWN);
             }
         }
         
-        JSONArray ja = jo.getJSONArray("busTimes");
+        final JSONArray ja = jo.getJSONArray("busTimes");
         JSONArray jBuses;
         JSONObject jBus;
         EdinburghBusStop currentBusStop;
         EdinburghBus currentBus;
         EdinburghBusService currentBusService;
         int i, j, lenDatas;
-        int len = ja.length();
+        // Make sure there's array elements.
+        final int len = ja.length();
         if(len == 0) {
-            throw new BusParserException(BusTimes.ERROR_NODATA);
+            throw new BusParserException(ERROR_NODATA);
         }
         
         String temp;
@@ -182,8 +189,10 @@ public final class EdinburghParser implements BusParser {
         for(i = 0; i < len; i++) {
             jo = ja.getJSONObject(i);
             
+            // Check to see if there are any global disruptions.
             globalDisruption = jo.getBoolean("globalDisruption");
             temp = jo.getString("stopId");
+            // Get data for the bus stop.
             currentBusStop = (EdinburghBusStop)data.get(temp);
             if(currentBusStop == null) {
                 currentBusStop = new EdinburghBusStop(temp,
@@ -192,6 +201,7 @@ public final class EdinburghParser implements BusParser {
                 data.put(temp, currentBusStop);
             }
             
+            // Add a bus service to the current bus stop.
             currentBusService = new EdinburghBusService(
                     jo.getString("mnemoService"),
                     jo.getString("nameService"),
@@ -201,6 +211,7 @@ public final class EdinburghParser implements BusParser {
             jBuses = jo.getJSONArray("timeDatas");
             lenDatas = jBuses.length();
             
+            // Loop through the times for each bus.
             for(j = 0; j < lenDatas; j++) {
                 jBus = jBuses.getJSONObject(j);
                 

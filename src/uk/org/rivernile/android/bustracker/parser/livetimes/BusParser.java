@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,6 +36,21 @@ import java.util.HashMap;
  * @author Niall Scott
  */
 public interface BusParser {
+    
+    /** This error is called when the error has not been defined in code yet. */
+    public static final byte ERROR_UNKNOWN = 0;
+    /**
+     * This error is called when a connection could not be made to the server.
+     */
+    public static final byte ERROR_NOCONNECTION = 1;
+    /** This error is called when the server name could not be resolved. */
+    public static final byte ERROR_CANNOTRESOLVE = 2;
+    /** This error is called when no stop code has been provided. */
+    public static final byte ERROR_NOCODE = 3;
+    /** This error is called when there was an error parsing the data. */
+    public static final byte ERROR_PARSEERR = 4;
+    /** This error is called when there was no data for this stop. */
+    public static final byte ERROR_NODATA = 5;
     
     /**
      * Get data for a list of bus stops. This is usually bus times.

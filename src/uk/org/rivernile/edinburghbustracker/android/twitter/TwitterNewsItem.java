@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.fetchers;
+package uk.org.rivernile.edinburghbustracker.android.twitter;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,73 +25,69 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.app.Activity;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.support.v4.app.FragmentActivity;
+import android.view.MenuItem;
+import uk.org.rivernile.android.utils.ActionBarCompat;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general
+        .AddEditFavouriteStopFragment;
 
-public class AddEditFavouriteStopActivity extends Activity
-        implements View.OnClickListener {
+/**
+ * This Activity allows the user to edit or add a new favourite bus stop. The
+ * work is done inside {@link AddEditFavouriteStopFragment}. This Activity
+ * simply just adds that fragment to the container.
+ * 
+ * @author Niall Scott
+ * @see AddEditFavouriteStopFragment
+ */
+public class AddEditFavouriteStopActivity extends FragmentActivity {
 
     public final static String ACTION_ADD_EDIT_FAVOURITE_STOP =
             "uk.org.rivernile.edinburghbustracker.android." +
             "ACTION_ADD_EDIT_FAVOURITE_STOP";
+    
+    private final static boolean IS_HONEYCOMB_OR_GREATER =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
-    private String stopCode;
-    private String stopName;
-    private EditText edit;
-    private Button okay;
-    private Button cancel;
-    private boolean editing;
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTitle(R.string.addeditstop_title);
-        setContentView(R.layout.addeditfavouritestop);
-
-        stopCode = getIntent().getStringExtra("stopCode");
-        stopName = getIntent().getStringExtra("stopName");
-        SettingsDatabase sd = SettingsDatabase.getInstance(this);
-        if(stopName == null || stopName.length() == 0) {
-            stopName = sd.getNameForStop(stopCode);
+        setContentView(R.layout.single_fragment_container);
+        
+        if(IS_HONEYCOMB_OR_GREATER) {
+            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
         }
-        edit = (EditText)findViewById(R.id.addeditstop_edit_stopname);
-        okay = (Button)findViewById(R.id.addeditstop_button_ok);
-        cancel = (Button)findViewById(R.id.addeditstop_button_cancel);
-        okay.setOnClickListener(this);
-        cancel.setOnClickListener(this);
-        edit.setText(stopName);
-        edit.setSelection(stopName.length());
 
-        editing = sd.getFavouriteStopExists(stopCode);
-        if(editing) {
-            setTitle(getString(R.string.addeditstop_title_edit) + " " +
-                    stopCode);
-        } else {
-            setTitle(getString(R.string.addeditstop_title_add) + " " +
-                    stopCode);
+        // Only add the fragment if there was no previous instance of this
+        // Activity, otherwise this fragment will appear multiple times.
+        if(savedInstanceState == null) {
+            final Intent intent = getIntent();
+            final AddEditFavouriteStopFragment fragment =
+                    AddEditFavouriteStopFragment.newInstance(
+                    intent.getStringExtra("stopCode"),
+                    intent.getStringExtra("stopName"));
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragmentContainer, fragment).commit();
         }
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void onClick(final View v) {
-        if(v == okay) {
-            String s = edit.getText().toString().trim();
-            if(s.length() == 0) {
-                Toast.makeText(this, R.string.addeditstop_error_blankstopname,
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-            SettingsDatabase sd = SettingsDatabase.getInstance(this);
-            if(editing) {
-                sd.modifyFavouriteStop(stopCode, s);
-            } else {
-                sd.insertFavouriteStop(stopCode, s);
-            }
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        finish();
     }
 }

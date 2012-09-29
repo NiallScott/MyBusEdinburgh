@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,9 +38,9 @@ import java.util.ArrayList;
  */
 public class BusService {
     
-    private String serviceName;
-    private String route;
-    private ArrayList<Bus> buses;
+    private final String serviceName;
+    private final String route;
+    private final ArrayList<Bus> buses;
     
     /**
      * Create a new instance of BusService. This is an immutable class.

@@ -41,7 +41,7 @@
             android:key="pref_database_autoupdate"
             android:title="@string/preferences_checkbox_general_dbupdate"
             android:defaultValue="true" />
-        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+        <uk.org.rivernile.android.utils.GenericDialogPreference
             android:key="pref_update_stop_db"
             android:title="@string/preferences_dialog_general_update"
             android:summary="@string/preferences_dialog_general_update_summary"
@@ -49,7 +49,7 @@
             android:dialogMessage="@string/preferences_dialog_general_update_message"
             android:positiveButtonText="@string/yes"
             android:negativeButtonText="@string/no" />
-        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+        <uk.org.rivernile.android.utils.GenericDialogPreference
             android:key="pref_backup_favourites"
             android:title="@string/preferences_dialog_general_backup"
             android:summary="@string/preferences_dialog_general_backup_summary"
@@ -57,7 +57,7 @@
             android:dialogMessage="@string/preferences_dialog_general_backup_message"
             android:positiveButtonText="@string/yes"
             android:negativeButtonText="@string/no" />
-        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+        <uk.org.rivernile.android.utils.GenericDialogPreference
             android:key="pref_restore_favourites"
             android:title="@string/preferences_dialog_general_restore"
             android:summary="@string/preferences_dialog_general_restore_summary"
@@ -119,7 +119,7 @@
             android:key="pref_autolocation_state"
             android:title="@string/preferences_checkbox_map_autolocation"
             android:defaultValue="true" />
-        <uk.org.rivernile.edinburghbustracker.android.GenericDialogPreference
+        <uk.org.rivernile.android.utils.GenericDialogPreference
             android:key="pref_clear_search_history"
             android:title="@string/preferences_dialog_map_clearsearchhistory"
             android:summary="@string/preferences_dialog_map_clearsearchhistory_summary"

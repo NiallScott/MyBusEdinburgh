@@ -25,18 +25,26 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import uk.org.rivernile.android.utils.GenericDialogPreference;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.provider.SearchRecentSuggestions;
+import android.support.v4.app.NavUtils;
+import android.view.MenuItem;
 import android.widget.Toast;
+import uk.org.rivernile.android.utils.ActionBarCompat;
 
 /**
  * The preferences dialog of the application. There is not much code here, it is
  * mostly defined in res/xml/preferences.xml.
+ * 
+ * TODO: convert this in to a PreferenceFragment when Google add it to the
+ * compatibility package.
  *
  * @author Niall Scott
  */
@@ -48,6 +56,9 @@ public class PreferencesActivity extends PreferenceActivity
     /** The AUTOREFRESH_STATE key in the preferences. */
     public final static String KEY_AUTOREFRESH_STATE = "pref_autorefresh_state";
     
+    private final static boolean IS_HONEYCOMB_OR_GREATER =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+    
     private SettingsDatabase sd;
     private ListPreference numberOfDeparturesPref;
     private String[] numberOfDeparturesStrings;
@@ -58,6 +69,11 @@ public class PreferencesActivity extends PreferenceActivity
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        if(IS_HONEYCOMB_OR_GREATER) {
+            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
+        }
+        
         getPreferenceManager().setSharedPreferencesName(PREF_FILE);
         addPreferencesFromResource(R.xml.preferences);
         sd = SettingsDatabase.getInstance(this);
@@ -142,7 +158,7 @@ public class PreferencesActivity extends PreferenceActivity
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        MainActivity.checkForDBUpdates(getApplicationContext(),
+                        Application.checkForDBUpdates(getApplicationContext(),
                                 true);
                     }
                 }).start();
@@ -181,6 +197,24 @@ public class PreferencesActivity extends PreferenceActivity
             final String key) {
         if("pref_numberOfShownDeparturesPerService".equals(key)) {
             setNumberOfDeparturesSummary(sp);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            switch(item.getItemId()) {
+                case android.R.id.home:
+                    NavUtils.navigateUpFromSameTask(this);
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
     

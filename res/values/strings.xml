@@ -124,6 +124,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     </string>
     <string name="favouritestops_dialog_confirm_title">Are you sure you want to
     delete this stop?</string>
+    <string name="favouritestops_loading">Loading favourite stops&#8230;</string>
     <string name="favouriteshortcut_title">Select favourite stop</string>
     <string name="favouriteshortcut_label">Favourite bus stop</string>
 
@@ -142,9 +143,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for DisplayStopDataActivity *
     ***************************************
     -->
-    <string name="displaystopdata_title">Display Bus Times</string>
+    <string name="displaystopdata_title">Live Departures</string>
     <string name="displaystopdata_gettingdata">Retrieving data from server&#8230;</string>
-    <string name="displaystopdata_empty">There is currently no data to display.</string>
     <string name="displaystopdata_lastupdated">Last updated </string>
     <string name="displaystopdata_diverted">diverted</string>
     <string name="displaystopdata_column_service">Service</string>
@@ -156,18 +156,18 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for DisplayStopDataActvity errors *
     *********************************************
     -->
-    <string name="displaystopdata_err_unknown">An unknown error has occurred. Please try again later.</string>
-    <string name="displaystopdata_err_nocode">No stop code was provided. To be able to show bus times, a stop code needs to be provided.</string>
-    <string name="displaystopdata_err_parseerr">There was an error whilst trying to handle the incoming data. Please retry.</string>
-    <string name="displaystopdata_err_noconn">A connection could not be made to the server or an error occurred during transmission. If you are sure you are connected, please retry.</string>
-    <string name="displaystopdata_err_noresolv">The server could not be resolved. Please try again later.</string>
-    <string name="displaystopdata_err_nodata">There is no data for this bus stop. Are you sure the supplied stop code is correct? If so, retry.</string>
+    <string name="displaystopdata_err_unknown"><b>An unknown error has occurred.</b>\nPlease try again later.</string>
+    <string name="displaystopdata_err_nocode"><b>No stop code was provided.</b>\nTo be able to show bus times, a stop code needs to be provided.</string>
+    <string name="displaystopdata_err_parseerr"><b>There was an error whilst trying to handle the incoming data.</b>\nPlease retry.</string>
+    <string name="displaystopdata_err_noconn"><b>A connection could not be made to the server or an error occurred during transmission.</b>\nIf you are sure you are connected, please retry.</string>
+    <string name="displaystopdata_err_noresolv"><b>The server could not be resolved.</b>\nPlease try again later.</string>
+    <string name="displaystopdata_err_nodata"><b>There is no data for this bus stop.</b>\nAre you sure the supplied stop code is correct? If so, retry.</string>
     
-    <string name="displaystopdata_err_api_invalid_key">The service refused to serve this request. The service depends on your device\'s date and time being correct. Please check this in your system preferences. If they are, contact the application developer for further assistance.</string>
-    <string name="displaystopdata_err_api_invalid_parameter">The service did not like this request. If this happens again, please contact the application developer.</string>
-    <string name="displaystopdata_err_api_processing_error">The service encountered a processing error. Please try again later.</string>
-    <string name="displaystopdata_err_api_system_maintenance">The service is currently undergoing maintenance and is currently unavailable. Please try again later.</string>
-    <string name="displaystopdata_err_api_system_overloaded">The system is currently experiencing high load. Please try again later.</string>
+    <string name="displaystopdata_err_api_invalid_key"><b>The service refused to serve this request.</b>\nThe service depends on your device\'s date and time being correct. Please check this in your system preferences. If they are, contact the application developer for further assistance.</string>
+    <string name="displaystopdata_err_api_invalid_parameter"><b>The service did not accept this request.</b>\nIf this happens again, please contact the application developer.</string>
+    <string name="displaystopdata_err_api_processing_error"><b>The service encountered a processing error.</b>\nPlease try again later.</string>
+    <string name="displaystopdata_err_api_system_maintenance"><b>The service is currently undergoing maintenance and is unavailable.</b>\nPlease try again later.</string>
+    <string name="displaystopdata_err_api_system_overloaded"><b>The system is currently experiencing high load.</b>\nPlease try again later.</string>
 
     <!--
     ********************************************

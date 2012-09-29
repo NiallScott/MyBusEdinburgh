@@ -27,109 +27,215 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.org.rivernile.edinburghbustracker.android"
-    android:versionCode="8"
-    android:versionName="2.1">
-        
+    android:versionCode="9"
+    android:versionName="2.2 development" >
+    
+    <!-- Request the required permissions. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <uses-feature android:name="android.hardware.location" android:required="false" />
-    <uses-feature android:name="android.hardware.location.network" android:required="false" />
-    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+    <!-- Tell the Google Play Store that this app uses location features, but
+         app does not require that devices have them. -->
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.network"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
 
-    <uses-sdk android:minSdkVersion="4"
-              android:targetSdkVersion="15"/>
+    <!-- Tell the Google Play Store what versions of Android the app is
+         compatible with. -->
+    <uses-sdk
+        android:minSdkVersion="4"
+        android:targetSdkVersion="16" />
               
     <application
+        android:name=".Application"
         android:label="@string/app_name"
         android:description="@string/app_description"
         android:icon="@drawable/appicon"
         android:theme="@style/MyBusEdinburgh"
         android:backupAgent="SettingsBackupAgent" >
-            
+        
+        <!-- This is the API key used by the backup service. This is linked
+             to the package name. -->
         <meta-data
             android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAIgfw_r8tIY0nyXAflwrdH6DJ1K38Gwog80pGrPw" />
             
+        <!-- Tell the Android system, and the Google Play Store, that this app
+             requires the Google Maps library to function. -->
         <uses-library android:name="com.google.android.maps" />
         
+        <!-- The MainActivity, which is the entry point. -->
         <activity
             android:name=".MainActivity"
             android:theme="@style/MyBusEdinburgh.NoTitleBar" >
+            <!-- This intent filter tells the system to place an app icon in the
+                 launcher and use this Activity when starting the app. -->
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <activity android:name=".EnterStopCodeActivity"
-                  android:label="@string/enterstopcode_title" />
-                  
-        <activity android:name=".FavouriteStopsActivity"
-                  android:label="@string/favouriteshortcut_label">
+        <!-- EnterStopCodeActivity, to let users enter a bus stop code. -->
+        <activity
+            android:name=".EnterStopCodeActivity"
+            android:label="@string/enterstopcode_title"
+            android:parentActivityName=".MainActivity" >
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        
+        <!-- FavouriteStopsActivity, to let the user see a list of their
+             favourite bus stops. -->
+        <activity
+            android:name=".FavouriteStopsActivity"
+            android:label="@string/favouriteshortcut_label"
+            android:parentActivityName=".MainActivity" >
+            <!-- This signifies that this Activity can add shortcuts to the
+                 home screen, and launch this Activity when the user wants to
+                 create a shortcut. -->
             <intent-filter>
                 <action android:name="android.intent.action.CREATE_SHORTCUT" />
             </intent-filter>
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
         
-        <activity android:name=".DisplayStopDataActivity"
-                  android:label="@string/app_name">
+        <!-- DisplayStopDataActivity, to show bus times. -->
+        <activity
+            android:name=".DisplayStopDataActivity"
+            android:label="@string/displaystopdata_title">
+            <!-- This Activity attempts to take over HTTP accessing of
+                 mobile.mybustracker.co.uk. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http"
-                      android:host="mobile.mybustracker.co.uk" />
+                <data
+                    android:scheme="http"
+                    android:host="mobile.mybustracker.co.uk" />
             </intent-filter>
+            <!-- External applications can call this Intent action to load bus
+                 times. -->
             <intent-filter>
                 <action android:name="uk.org.rivernile.edinburghbustracker.android.ACTION_VIEW_STOP_DATA" />
             </intent-filter>
         </activity>
         
-        <activity android:name=".PreferencesActivity"
-                  android:label="@string/preferences_title"
-                  android:theme="@style/MyBusEdinburgh.Dark"/>
-                  
-        <activity android:name=".AddEditFavouriteStopActivity"
-                  android:label="@string/addeditstop_title" />
-                  
-        <activity android:name=".BusStopMapActivity"
-                  android:label="@string/map_title"
-                  android:theme="@style/MyBusEdinburgh.Dark.MapActivity"
-                  android:launchMode="singleTop" >
+        <!-- PreferencesActivity, to let the user change app preferences. -->
+        <activity
+            android:name=".PreferencesActivity"
+            android:label="@string/preferences_title"
+            android:theme="@style/MyBusEdinburgh.Dark"
+            android:parentActivityName=".MainActivity" >
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        
+        <!-- AddEditFavouriteStopActivity, to add or edit a favourite bus
+             stop. -->
+        <activity
+            android:name=".AddEditFavouriteStopActivity"
+            android:label="@string/addeditstop_title" />
+        
+        <!-- BusStopMapActivity, to show bus stops on the map. -->
+        <activity
+            android:name=".BusStopMapActivity"
+            android:label="@string/map_title"
+            android:theme="@style/MyBusEdinburgh.Dark.MapActivity"
+            android:launchMode="singleTop" >
+            <!-- This Activity handles searching. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
+            <!-- Where the search config is located. -->
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
         
-        <activity android:name=".NewsUpdatesActivity"
-                  android:label="@string/newsupdates_title" />
-                  
-        <activity android:name=".NearestStopsActivity"
-                  android:label="@string/neareststops_title" />
-                  
-        <activity android:name=".AlertManagerActivity"
-                  android:label="@string/alertmanager_title" />
-                  
-        <activity android:name=".AddProximityAlertActivity"
-                  android:label="@string/alert_dialog_prox_title" />
-                  
-        <activity android:name=".AddTimeAlertActivity"
-                  android:label="@string/alert_dialog_time_title" />
+        <!-- NewsUpdatesActivity, to show live system and network updates to the
+             user. -->
+        <activity
+            android:name=".NewsUpdatesActivity"
+            android:label="@string/newsupdates_title"
+            android:parentActivityName=".MainActivity" >
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        
+        <!-- NearestStopsActivity, to show a listing of nearest bus stops to the
+             user. -->
+        <activity
+            android:name=".NearestStopsActivity"
+            android:label="@string/neareststops_title"
+            android:parentActivityName=".MainActivity" >
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        
+        <!-- AlertManagerActivity, to let the user view and remove alerts. -->
+        <activity
+            android:name=".AlertManagerActivity"
+            android:label="@string/alertmanager_title"
+            android:parentActivityName=".MainActivity" >
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        
+        <!-- AddProximityAlertActivity, to let the user add a new proximity
+             alert. -->
+        <activity
+            android:name=".AddProximityAlertActivity"
+            android:label="@string/alert_dialog_prox_title" />
+        
+        <!-- AddTimeAlertActivity, to let the user add a new time alert. -->
+        <activity
+            android:name=".AddTimeAlertActivity"
+            android:label="@string/alert_dialog_time_title" />
 
-        <provider android:name=".MapSearchHistoryProvider"
-                  android:authorities="uk.org.rivernile.edinburghbustracker.android.MapSearchHistoryProvider" />
-                  
+        <!-- MapSearchHistoryProvider, to provide previous search history items
+             when typing in a search term. -->
+        <provider
+            android:name=".MapSearchHistoryProvider"
+            android:authorities="uk.org.rivernile.edinburghbustracker.android.MapSearchHistoryProvider" />
+        
+        <!-- ProximityAlertReceiver, where the broadcast is received when the
+             user is within the proximity of a selected bus stop.-->
         <receiver android:name=".alerts.ProximityAlertReceiver" />
         
-        <service android:name=".alerts.TimeAlertService"
-                 android:icon="@drawable/appicon"
-                 android:exported="false" />
+        <!-- TimeAlertService, which checks bus times periodically when the user
+             has set an alert for bus times. -->
+        <service
+            android:name=".alerts.TimeAlertService"
+            android:icon="@drawable/appicon"
+            android:exported="false" />
     </application>
 </manifest>

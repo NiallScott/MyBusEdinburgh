@@ -42,6 +42,7 @@ import java.io.PrintWriter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import uk.org.rivernile.android.utils.BackupCompat;
 
 /**
  * This class deals with the database interaction with the settings database.
@@ -58,7 +59,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
 
     private static final String FAVOURITE_STOPS_TABLE = "favourite_stops";
     private static final String FAVOURITE_STOPS_STOPCODE = "_id";
-    protected static final String FAVOURITE_STOPS_STOPNAME = "stopName";
+    public static final String FAVOURITE_STOPS_STOPNAME = "stopName";
     
     private static final String ALERTS_TABLE = "active_alerts";
     private static final String ALERTS_ID = "_id";
@@ -218,8 +219,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         db.insertOrThrow(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPNAME, cv);
         
-        if(isFroyoOrGreater) MainActivity.BackupSupport
-                .dataChanged(context.getPackageName());
+        if(isFroyoOrGreater) BackupCompat.dataChanged(context.getPackageName());
     }
 
     /**
@@ -235,8 +235,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         db.delete(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPCODE + " = ?",
                 new String[] { stopCode });
         
-        if(isFroyoOrGreater) MainActivity.BackupSupport
-                .dataChanged(context.getPackageName());
+        if(isFroyoOrGreater) BackupCompat.dataChanged(context.getPackageName());
     }
 
     /**
@@ -257,8 +256,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         db.update(FAVOURITE_STOPS_TABLE, cv, FAVOURITE_STOPS_STOPCODE + " = ?",
                 new String[] { stopCode });
         
-        if(isFroyoOrGreater) MainActivity.BackupSupport
-                .dataChanged(context.getPackageName());
+        if(isFroyoOrGreater) BackupCompat.dataChanged(context.getPackageName());
     }
 
     /**

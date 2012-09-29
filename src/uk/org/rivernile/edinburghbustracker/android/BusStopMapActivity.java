@@ -44,6 +44,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -52,11 +53,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.maps.GeoPoint;
-import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.OverlayItem;
+import com.readystatesoftware.maps.OnSingleTapListener;
+import com.readystatesoftware.maps.TapControlledMapView;
+import com.readystatesoftware.mapviewballoons.BalloonItemizedOverlay;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -84,7 +87,7 @@ public class BusStopMapActivity extends MapActivity implements
     private static final boolean isHoneycombOrGreater =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
-    private MapView mapView;
+    private TapControlledMapView mapView;
     protected MyLocationOverlayFix myLocation;
     private BusStopMapOverlay stopOverlay;
     private String searchTerm;
@@ -111,13 +114,13 @@ public class BusStopMapActivity extends MapActivity implements
         alertMan = AlertManager.getInstance(getApplicationContext());
         serviceFilter = ServiceFilter.getInstance(this);
 
-        mapView = (MapView)findViewById(R.id.mapview);
+        mapView = (TapControlledMapView)findViewById(R.id.mapview);
         mapView.setBuiltInZoomControls(true);
         myLocation = new MyLocationOverlayFix(this, mapView);
         mapView.getOverlays().add(myLocation);
         
         stopOverlay = new BusStopMapOverlay(getResources().getDrawable(
-                R.drawable.mapmarker));
+                R.drawable.mapmarker), mapView);
         mapView.getOverlays().add(stopOverlay);
         
         Intent intent = getIntent();
@@ -178,6 +181,14 @@ public class BusStopMapActivity extends MapActivity implements
             searchTerm = intent.getStringExtra(SearchManager.QUERY);
             searcher.doSearch(searchTerm);
         }
+        
+        mapView.setOnSingleTapListener(new OnSingleTapListener() {
+            @Override
+            public boolean onSingleTap(final MotionEvent e) {
+                stopOverlay.hideAllBalloons();
+                return true;
+            }
+        });
     }
 
     /**
@@ -350,14 +361,7 @@ public class BusStopMapActivity extends MapActivity implements
                 });
                 return prog;
             case DIALOG_SEARCH_RESULTS:
-                AlertDialog.Builder ad;
-                if(isHoneycombOrGreater) {
-                    //ad = new AlertDialog.Builder(this,
-                            //AlertDialog.THEME_HOLO_DARK);
-                    ad = MainActivity.getHoneycombDialog(this);
-                } else {
-                    ad = new AlertDialog.Builder(this);
-                }
+                AlertDialog.Builder ad = new AlertDialog.Builder(this);
                 LayoutInflater inflater = (LayoutInflater)
                         getSystemService(LAYOUT_INFLATER_SERVICE);
                 View layout = inflater.inflate(
@@ -383,12 +387,7 @@ public class BusStopMapActivity extends MapActivity implements
                 LayoutInflater vi = (LayoutInflater)getSystemService(
                         Context.LAYOUT_INFLATER_SERVICE);
                 stopDialogView = vi.inflate(R.layout.mapdialog, null);
-                AlertDialog.Builder builder;
-                if(isHoneycombOrGreater) {
-                    builder = MainActivity.getHoneycombDialog(this);
-                } else {
-                    builder = new AlertDialog.Builder(this);
-                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setCancelable(true).setTitle("!");
                 builder.setNegativeButton(R.string.close,
                         new DialogInterface.OnClickListener() {
@@ -674,7 +673,7 @@ public class BusStopMapActivity extends MapActivity implements
      * map.
      */
     protected class BusStopMapOverlay
-            extends ItemizedOverlay<BusStopOverlayItem>
+            extends BalloonItemizedOverlay<BusStopOverlayItem>
             implements Filterable {
         
         /** The current selected bus stop item. */
@@ -691,10 +690,12 @@ public class BusStopMapActivity extends MapActivity implements
          * when an BusStopOverlayItem has not provided its own.
          * 
          * @param defaultMarker The default market drawable to use.
+         * @param mapView The MapView component.
          * @see BusStopOverlayItem
          */
-        public BusStopMapOverlay(final Drawable defaultMarker) {
-            super(boundCenterBottom(defaultMarker));
+        public BusStopMapOverlay(final Drawable defaultMarker,
+                final MapView mapView) {
+            super(boundCenterBottom(defaultMarker), mapView);
             
             for(int i = 0; i < 8; i++) {
                 if(BusStopOverlayItem.mapIcons[i] == null) {
@@ -764,10 +765,13 @@ public class BusStopMapActivity extends MapActivity implements
             return items.size();
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        protected boolean onTap(final int index) {
-            currentItem = items.get(index);
-            mapView.getController().animateTo(currentItem.getPoint());
+        protected boolean onBalloonTap(final int index,
+                final BusStopOverlayItem item) {
+            currentItem = item;
             showDialog(DIALOG_BUSSTOP);
             return true;
         }

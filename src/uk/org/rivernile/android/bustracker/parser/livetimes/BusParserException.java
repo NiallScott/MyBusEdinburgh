@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,13 +35,14 @@ package uk.org.rivernile.android.bustracker.parser.livetimes;
  */
 public class BusParserException extends Exception {
     
-    private int code;
+    private final byte code;
     
     /**
      * Create a new BusParserException instance with the default message.
      */
     public BusParserException() {
         super();
+        code = -1;
     }
     
     /**
@@ -51,6 +52,7 @@ public class BusParserException extends Exception {
      */
     public BusParserException(final String message) {
         super(message);
+        code = -1;
     }
     
     /**
@@ -58,7 +60,7 @@ public class BusParserException extends Exception {
      * 
      * @param code The code related to this exception.
      */
-    public BusParserException(final int code) {
+    public BusParserException(final byte code) {
         super();
         this.code = code;
     }
@@ -69,7 +71,7 @@ public class BusParserException extends Exception {
      * @param message The message related to this exception.
      * @param code The code related to this exception.
      */
-    public BusParserException(final String message, final int code) {
+    public BusParserException(final String message, final byte code) {
         super(message);
         this.code = code;
     }
@@ -79,7 +81,7 @@ public class BusParserException extends Exception {
      * 
      * @return The code of this exception.
      */
-    public int getCode() {
+    public byte getCode() {
         return code;
     }
 }

@@ -67,10 +67,10 @@ public class EdinburghBus extends Bus {
     /** Denotes this stop is a timing reference stop on this bus route. */
     public static final char TYPE_REFERENCE = 'R';
     
-    private int arrivalMinutes;
-    private char reliability;
-    private char type;
-    private String terminus;
+    private final int arrivalMinutes;
+    private final char reliability;
+    private final char type;
+    private final String terminus;
     
     /**
      * Create a new EdinburghBus object.

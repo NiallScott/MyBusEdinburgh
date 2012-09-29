@@ -119,7 +119,6 @@ This version of strings.xml is in Italian (it_IT) -->
     -->
     <string name="displaystopdata_title">Mostra orari degli autobus</string>
     <string name="displaystopdata_gettingdata">Recupero dei dati dal server&#8230;</string>
-    <string name="displaystopdata_empty">Non ci sono attualmente dati da visualizzare.</string>
     <string name="displaystopdata_lastupdated">Ultimo aggiornamento </string>
     <string name="displaystopdata_diverted">deviato</string>
     <string name="displaystopdata_column_service">Servizio</string>

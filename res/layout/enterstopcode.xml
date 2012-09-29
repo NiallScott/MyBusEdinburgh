@@ -62,6 +62,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
+                android:maxLength="8"
                 android:hint="@string/enterstopcode_edit_hint" />
             <LinearLayout
                 android:layout_width="fill_parent"

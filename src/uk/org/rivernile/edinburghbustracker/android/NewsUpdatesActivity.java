@@ -25,201 +25,63 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import static uk.org.rivernile.edinburghbustracker.android.fetchers
-        .FetchNewsUpdatesTask.ERROR_NODATA;
-import static uk.org.rivernile.edinburghbustracker.android.fetchers
-        .FetchNewsUpdatesTask.ERROR_PARSEERR;
-import static uk.org.rivernile.edinburghbustracker.android.fetchers
-        .FetchNewsUpdatesTask.ERROR_IOERR;
-import static uk.org.rivernile.edinburghbustracker.android.fetchers
-        .FetchNewsUpdatesTask.ERROR_URLERR;
-
-import uk.org.rivernile.edinburghbustracker.android.fetchers
-        .FetchNewsUpdatesTask;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ListActivity;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
-import android.view.Menu;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
-import android.widget.SimpleAdapter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import uk.org.rivernile.edinburghbustracker.android.fetchers.NewsEvent;
-import uk.org.rivernile.edinburghbustracker.android.fetchers.TwitterNewsItem;
+import uk.org.rivernile.android.utils.ActionBarCompat;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general
+        .TwitterUpdatesFragment;
 
-public class NewsUpdatesActivity extends ListActivity implements NewsEvent {
-
-    /* Constants for dialogs */
-    private static final int DIALOG_PROGRESS = 0;
-
-    private boolean progressDialogShown = false;
-    private FetchNewsUpdatesTask fetchTask;
-
-    @Override
-    public void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.newsupdates);
-        setTitle(R.string.newsupdates_title);
-
-        fetchTask = FetchNewsUpdatesTask.getInstance(this);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        final ArrayList<TwitterNewsItem> temp = fetchTask.getNewsItems();
-        if(temp != null && temp.size() > 0) {
-            populateList(temp);
-        } else if(!fetchTask.isExecuting()) {
-            fetchTask.doTask();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        fetchTask.setHandler(null);
-    }
+/**
+ * This Activity hosts a TwitterUpdatesFragment which shows users the latest
+ * travel news updates from Twitter.
+ * 
+ * @author Niall Scott
+ * @see TwitterUpdatesFragment
+ */
+public class NewsUpdatesActivity extends FragmentActivity {
+    
+    private final static boolean IS_HONEYCOMB_OR_GREATER =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.newsupdates_option_menu, menu);
-        return true;
-    }
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.single_fragment_container);
 
+        if(IS_HONEYCOMB_OR_GREATER) {
+            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
+        }
+        
+        // Only add the fragment if there was no previous instance of this
+        // Activity, otherwise this fragment will appear multiple times.
+        if(savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragmentContainer, new TwitterUpdatesFragment())
+                    .commit();
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.newsupdates_option_menu_refresh:
-                fetchTask.doTask();
-                break;
-            default:
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected Dialog onCreateDialog(final int id) {
-        switch(id) {
-            case DIALOG_PROGRESS:
-                final ProgressDialog prog = new ProgressDialog(this);
-                prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                prog.setCancelable(true);
-                prog.setMessage(getString(
-                        R.string.displaystopdata_gettingdata));
-                prog.setOnCancelListener(new DialogInterface
-                        .OnCancelListener() {
-                    public void onCancel(DialogInterface di) {
-                        finish();
-                    }
-                });
-                progressDialogShown = true;
-                return prog;
-            default:
-                return null;
-        }
-    }
-    
-    @Override
-    public void onPreExecute() {
-        showDialog(DIALOG_PROGRESS);
-    }
-    
-    @Override
-    public void onNewsAvailable(final ArrayList<TwitterNewsItem> result) {
-        populateList(result);
-    }
-    
-    @Override
-    public void onFetchError(final int error) {
-        handleError(error);
-    }
-
-    private void handleError(final int errorCode) {
-        if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        switch(errorCode) {
-            case ERROR_NODATA:
-                builder.setMessage(R.string.newsupdates_err_nodata);
-                break;
-            case ERROR_PARSEERR:
-                builder.setMessage(R.string.newsupdates_err_parseerr);
-                break;
-            case ERROR_IOERR:
-                builder.setMessage(R.string.newsupdates_err_ioerr);
-                break;
-            case ERROR_URLERR:
-                builder.setMessage(R.string.newsupdates_err_urlerr);
-                break;
-            default:
-                break;
-        }
-        builder.setCancelable(false).setTitle(R.string.error)
-                .setPositiveButton(R.string.retry,
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface di, final int i) {
-                fetchTask.doTask();
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            switch(item.getItemId()) {
+                case android.R.id.home:
+                    NavUtils.navigateUpFromSameTask(this);
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
             }
-        }).setNegativeButton(R.string.cancel,
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface di, final int i) {
-                di.dismiss();
-            }
-        });
-        builder.create().show();
-    }
-    
-    private void populateList(final ArrayList<TwitterNewsItem> items) {
-        if(items == null || items.isEmpty()) {
-            handleError(ERROR_NODATA);
-            return;
-        }
-        
-        final ArrayList<HashMap<String, String>> list =
-                new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> map;
-        for(TwitterNewsItem item : items) {
-            map = new HashMap<String, String>();
-            map.put("TEXT", item.getBody());
-            map.put("INFO", item.getPoster() + " - " + item.getDate());
-            list.add(map);
-        }
-        
-        NewsItemsAdapter adapter = new NewsItemsAdapter(this, list,
-                R.layout.newsupdateslist, new String[] { "TEXT",
-                "INFO" }, new int[] { R.id.twitText, R.id.twitInfo });
-        setListAdapter(adapter);
-        
-        if(progressDialogShown) dismissDialog(DIALOG_PROGRESS);
-    }
-    
-    private class NewsItemsAdapter extends SimpleAdapter {
-        
-        public NewsItemsAdapter(final Context context,
-                final List<? extends Map<String, ?>> data, final int resource,
-                final String[] from, final int[] to) {
-            super(context, data, resource, from, to);
-        }
-        
-        @Override
-        public boolean isEnabled(final int index) {
-            return false;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,9 +36,9 @@ import java.util.Collections;
  */
 public class BusStop {
     
-    private String stopCode;
-    private String stopName;
-    private ArrayList<BusService> busServices;
+    private final String stopCode;
+    private final String stopName;
+    private final ArrayList<BusService> busServices;
     
     /**
      * Create a new BusStop. This is an immutable class.

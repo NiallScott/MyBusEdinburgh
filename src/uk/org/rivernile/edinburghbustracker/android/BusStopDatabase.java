@@ -30,6 +30,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.SpannedString;
 import com.google.android.maps.GeoPoint;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -510,5 +513,25 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         }
         
         return result;
+    }
+    
+    /**
+     * Return Spanned text which takes a String of service names (e.g. "1, 3, 34
+     * X25, N25, N26") and adds colour where appropriate.
+     * 
+     * Current rules;
+     * 
+     * - Wrap the character 'N' with formatting to colour the character red.
+     *   This is for night bus services.
+     * 
+     * @param serviceList A String containing a list of bus services.
+     * @return Spanned text, with added formatting.
+     */
+    public static Spanned getColouredServiceListString(
+            final String serviceList) {
+        if(serviceList == null) return new SpannedString("");
+        
+        return Html.fromHtml(serviceList.replace("N",
+                "<font color=\"red\">N</font>"));
     }
 }

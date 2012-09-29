@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott & Scott Straughan
+ * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott & Scott Straughan
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,12 +35,44 @@
         android:id="@id/android:list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
-    <TextView
+    <LinearLayout
         android:id="@id/android:empty"
-        android:padding="20dp"
-        android:layout_gravity="center_vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/favouritestops_nosavedstops"
-        android:gravity="center" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        <LinearLayout
+            android:id="@+id/layoutProgress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:visibility="gone"
+            android:gravity="center" >
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textStyle="bold"
+                android:text="@string/favouritestops_loading" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layoutEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:visibility="gone"
+            android:gravity="center" >
+            <TextView
+                android:id="@+id/txtError"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:text="@string/favouritestops_nosavedstops" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

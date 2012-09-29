@@ -25,243 +25,63 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ListActivity;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CursorAdapter;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NavUtils;
+import android.view.MenuItem;
+import uk.org.rivernile.android.utils.ActionBarCompat;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general
+        .AlertManagerFragment;
 
-public class AlertManagerActivity extends ListActivity
-        implements View.OnClickListener {
+/**
+ * This Activity hosts the AlertManagerFragment which shows the user which
+ * alerts they have set and the user is able to cancel alerts from here.
+ * 
+ * @author Niall Scott
+ * @see AlertManagerFragment
+ */
+public class AlertManagerActivity extends FragmentActivity {
     
-    private final static int DIALOG_DEL_PROX = 0;
-    private final static int DIALOG_DEL_TIME = 1;
-    private final static int DIALOG_DEL_ALL = 2;
-    
-    private SettingsDatabase sd;
-    private AlertManager alertMan;
-    private LinearLayout topBar;
-    private Button btnRemoveAll;
-    private Cursor c;
-    private AlertCursorAdapter ad;
-    
+    private final static boolean IS_HONEYCOMB_OR_GREATER =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.alertmanager);
-        setTitle(R.string.alertmanager_title);
+        setContentView(R.layout.single_fragment_container);
+
+        if(IS_HONEYCOMB_OR_GREATER) {
+            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
+        }
         
-        sd = SettingsDatabase.getInstance(this);
-        alertMan = AlertManager.getInstance(getApplicationContext());
-        
-        topBar = (LinearLayout)findViewById(R.id.alertManTopBar);
-        btnRemoveAll = (Button)findViewById(R.id.btnAlertRemoveAll);
-        
-        btnRemoveAll.setOnClickListener(this);
-        
-        c = sd.getAllAlerts();
-        startManagingCursor(c);
-        ad = new AlertCursorAdapter();
-        setListAdapter(ad);
+        // Only add the fragment if there was no previous instance of this
+        // Activity, otherwise this fragment will appear multiple times.
+        if(savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragmentContainer, new AlertManagerFragment())
+                    .commit();
+        }
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void onResume() {
-        super.onResume();
-        
-        updateCursor();
-    }
-    
-    @Override
-    protected Dialog onCreateDialog(final int id) {
-        AlertDialog alertDialog;
-        switch(id) {
-            case DIALOG_DEL_PROX:
-                alertDialog = alertMan.getConfirmDeleteProxAlertDialog(this);
-                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE,
-                        getString(R.string.okay),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog,
-                                    final int id) {
-                                alertMan.removeProximityAlert();
-                                updateCursor();
-                            }
-                });
-                return alertDialog;
-            case DIALOG_DEL_TIME:
-                alertDialog = alertMan.getConfirmDeleteTimeAlertDialog(this);
-                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE,
-                        getString(R.string.okay),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog,
-                                    final int id) {
-                                alertMan.removeTimeAlert();
-                                updateCursor();
-                            }
-                });
-                return alertDialog;
-            case DIALOG_DEL_ALL:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setCancelable(true)
-                    .setTitle(R.string.alert_all_rem_confirm)
-                    .setPositiveButton(R.string.okay,
-                    new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog,
-                            final int id)
-                    {
-                        alertMan.removeTimeAlert();
-                        alertMan.removeProximityAlert();
-                        updateCursor();
-                    }
-                }).setNegativeButton(R.string.cancel,
-                        new DialogInterface.OnClickListener() {
-                     public void onClick(final DialogInterface dialog,
-                             final int id)
-                     {
-                        dialog.dismiss();
-                     }
-                });
-                return builder.create();
-            default:
-                return null;
-        }
-    }
-    
-    @Override
-    public void onClick(final View v) {
-        if(v == btnRemoveAll) {
-            showDialog(DIALOG_DEL_ALL);
-        }
-    }
-    
-    private void updateCursor() {
-        stopManagingCursor(c);
-        c = sd.getAllAlerts();
-        startManagingCursor(c);
-        ad.changeCursor(c);
-        if(c.getCount() > 0) {
-            topBar.setVisibility(View.VISIBLE);
-        } else {
-            topBar.setVisibility(View.GONE);
-        }
-    }
-    
-    private class AlertCursorAdapter extends CursorAdapter {
-        
-        private BusStopDatabase bsd;
-        private LayoutInflater vi;
-        
-        public AlertCursorAdapter() {
-            super(AlertManagerActivity.this, c, false);
-            
-            bsd = BusStopDatabase.getInstance(getApplicationContext());
-            vi = LayoutInflater.from(AlertManagerActivity.this);
-        }
-        
-        @Override
-        public View getView(final int position, final View convertView,
-                final ViewGroup parent) {
-            super.getView(position, convertView, parent);
-            
-            Cursor cursor = getCursor();
-            int type = cursor.getInt(1);
-            View v;
-            TextView txt;
-            Button b;
-            CharSequence str;
-            String stopCode = cursor.getString(3);
-            String locality = bsd.getLocalityForStopCode(stopCode);
-            String busStop;
-            if(locality == null) {
-                busStop = bsd.getNameForBusStop(stopCode) + " (" + stopCode +
-                        ")";
-            } else {
-                busStop = bsd.getNameForBusStop(stopCode) + ", " + locality +
-                        " (" + stopCode + ")";
-            }
-            
-            switch(type) {
-                case SettingsDatabase.ALERTS_TYPE_PROXIMITY:
-                    v = vi.inflate(R.layout.alertmanager_list_proximity, parent,
-                            false);
-                    b = (Button)v.findViewById(R.id.btnRemoveProxAlert);
-                    b.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(final View v) {
-                            showDialog(DIALOG_DEL_PROX);
-                        }
-                    });
-                    
-                    txt = (TextView)v.findViewById(R.id.txtAlertManProx);
-                    str = getString(R.string.alertmanager_prox_text)
-                            .replace("%d", String.valueOf(cursor.getInt(4)))
-                            .replace("%stop", busStop);
-                    txt.setText(str);
-                    return v;
-                case SettingsDatabase.ALERTS_TYPE_TIME:
-                    v = vi.inflate(R.layout.alertmanager_list_time, parent,
-                            false);
-                    b = (Button)v.findViewById(R.id.btnRemoveTimeAlert);
-                    b.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(final View v) {
-                            showDialog(DIALOG_DEL_TIME);
-                        }
-                    });
-                    
-                    txt = (TextView)v.findViewById(R.id.txtAlertManTime);
-                    int timeTrigger = cursor.getInt(6);
-                    String[] services = cursor.getString(5).split(",");
-                    StringBuilder sb = new StringBuilder();
-                    
-                    for(String service : services) {
-                        if(sb.length() > 0) sb.append(", ");
-                        
-                        sb.append(service);
-                    }
-                    
-                    if(timeTrigger > 1) {
-                        str = getString(R.string.alertmanager_time_text_plural)
-                                .replace("%busStop", busStop)
-                                .replace("%services", sb.toString())
-                                .replace("%minutes", String.valueOf(
-                                        timeTrigger));
-                    } else {
-                        str = getString(
-                                R.string.alertmanager_time_text_singular)
-                                .replace("%busStop", busStop)
-                                .replace("%services", sb.toString());
-                    }
-                    txt.setText(str);
-                    return v;
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            switch(item.getItemId()) {
+                case android.R.id.home:
+                    NavUtils.navigateUpFromSameTask(this);
+                    return true;
                 default:
-                    return null;
+                    return super.onOptionsItemSelected(item);
             }
-        }
-        
-        @Override
-        public void bindView(final View view, final Context context,
-                final Cursor cursor) {
-            // Do nothing
-        }
-        
-        @Override
-        public View newView(final Context context, final Cursor cursor,
-                final ViewGroup parent) {
-            return null;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 }
