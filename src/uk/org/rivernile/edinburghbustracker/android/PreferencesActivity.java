@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import uk.org.rivernile.android.utils.GenericDialogPreference;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -38,6 +37,7 @@ import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 import uk.org.rivernile.android.utils.ActionBarCompat;
+import uk.org.rivernile.android.utils.GenericDialogPreference;
 
 /**
  * The preferences dialog of the application. There is not much code here, it is
@@ -52,11 +52,50 @@ public class PreferencesActivity extends PreferenceActivity
         implements OnSharedPreferenceChangeListener {
 
     /** The name of the preferences file. */
-    public final static String PREF_FILE = "preferences";
-    /** The AUTOREFRESH_STATE key in the preferences. */
-    public final static String KEY_AUTOREFRESH_STATE = "pref_autorefresh_state";
+    public static final String PREF_FILE = "preferences";
     
-    private final static boolean IS_HONEYCOMB_OR_GREATER =
+    /** The Preference for showing the favourites list on app startup. */
+    public static final String PREF_STARTUP_SHOW_FAVS =
+            "pref_startupshowfavs_state";
+    /** The Preference for automatically updating the bus stop database. */
+    public static final String PREF_DATABASE_AUTO_UPDATE =
+            "pref_database_autoupdate";
+    /** The Preference for forcing a bus stop database update. */
+    public static final String PREF_DATABASE_FORCE_UPDATE =
+            "pref_update_stop_db";
+    /** The Preference for backing up favourites. */
+    public static final String PREF_BACKUP_FAVOURITES =
+            "pref_backup_favourites";
+    /** The Preference for restoring favourites. */
+    public static final String PREF_RESTORE_FAVOURITES =
+            "pref_restore_favourites";
+    /** The Preference for alert sounds. */
+    public static final String PREF_ALERT_SOUND = "pref_alertsound_state";
+    /** The Preference for alert vibration. */
+    public static final String PREF_ALERT_VIBRATE = "pref_alertvibrate_state";
+    /** The Preference for alert lights (LED flash). */
+    public static final String PREF_ALERT_LED = "pref_alertled_state";
+    /** The Preference for auto refresh. */
+    public static final String PREF_AUTO_REFRESH = "pref_autorefresh_state";
+    /** The Preference for showing night bus services. */
+    public static final String PREF_SHOW_NIGHT_BUSES =
+            "pref_nightservices_state";
+    /** The Preference for service sorting. */
+    public static final String PREF_SERVICE_SORTING =
+            "pref_servicessorting_state";
+    /** The Preference for number of shown departures per service. */
+    public static final String PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE =
+            "pref_numberOfShownDeparturesPerService";
+    /** The Preference for automatically showing device location. */
+    public static final String PREF_AUTO_LOCATION = "pref_autolocation_state";
+    /** The Preference for clearing the map search history. */
+    public static final String PREF_CLEAR_MAP_SEARCH_HISTORY =
+            "pref_clear_search_history";
+    /** The Preference for disabling the GPS prompt. */
+    public static final String PREF_DISABLE_GPS_PROMPT =
+            "neareststops_gps_prompt_disable";
+    
+    private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     
     private SettingsDatabase sd;
@@ -81,16 +120,17 @@ public class PreferencesActivity extends PreferenceActivity
                 .getStringArray(R.array.preferences_num_departures_entries);
 
         GenericDialogPreference backupDialog = (GenericDialogPreference)
-                findPreference("pref_backup_favourites");
+                findPreference(PREF_BACKUP_FAVOURITES);
         GenericDialogPreference restoreDialog = (GenericDialogPreference)
-                findPreference("pref_restore_favourites");
+                findPreference(PREF_RESTORE_FAVOURITES);
         GenericDialogPreference clearSearchHistoryDialog =
                 (GenericDialogPreference)findPreference(
-                "pref_clear_search_history");
+                PREF_CLEAR_MAP_SEARCH_HISTORY);
         GenericDialogPreference checkStopDBUpdates =
-                (GenericDialogPreference)findPreference("pref_update_stop_db");
+                (GenericDialogPreference)findPreference(
+                PREF_DATABASE_FORCE_UPDATE);
         numberOfDeparturesPref = (ListPreference)findPreference(
-                "pref_numberOfShownDeparturesPerService");
+                PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE);
 
         backupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
             @Override
@@ -195,7 +235,7 @@ public class PreferencesActivity extends PreferenceActivity
     @Override
     public void onSharedPreferenceChanged(final SharedPreferences sp,
             final String key) {
-        if("pref_numberOfShownDeparturesPerService".equals(key)) {
+        if(PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE.equals(key)) {
             setNumberOfDeparturesSummary(sp);
         }
     }
@@ -224,7 +264,8 @@ public class PreferencesActivity extends PreferenceActivity
      * @param sp An object which represents the SharedPreferences file in use.
      */
     private void setNumberOfDeparturesSummary(final SharedPreferences sp) {
-        String s = sp.getString("pref_numberOfShownDeparturesPerService", "4");
+        final String s =
+                sp.getString(PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE, "4");
         int val;
         
         try {

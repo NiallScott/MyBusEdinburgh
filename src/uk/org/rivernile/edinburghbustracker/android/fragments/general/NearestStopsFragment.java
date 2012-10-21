@@ -145,7 +145,8 @@ public class NearestStopsFragment extends ListFragment
         // Check to see if GPS is enabled then check to see if the GPS prompt
         // dialog has been disabled.
         if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
-                !sp.getBoolean("neareststops_gps_prompt_disable", false)) {
+                !sp.getBoolean(PreferencesActivity.PREF_DISABLE_GPS_PROMPT,
+                false)) {
             // Get the list of Activities which can handle the enabling of
             // location services.
             final List<ResolveInfo> packages = activity.getPackageManager()

@@ -110,13 +110,13 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
                     PendingIntent.FLAG_ONE_SHOT));
         
         final Notification n = notifBuilder.build();
-        if(sp.getBoolean("pref_alertsound_state", true))
+        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_SOUND, true))
             n.defaults |= Notification.DEFAULT_SOUND;
         
-        if(sp.getBoolean("pref_alertvibrate_state", true))
+        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_VIBRATE, true))
             n.defaults |= Notification.DEFAULT_VIBRATE;
         
-        if(sp.getBoolean("pref_alertled_state", true)) {
+        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_LED, true)) {
             n.defaults |= Notification.DEFAULT_LIGHTS;
             n.flags |= Notification.FLAG_SHOW_LIGHTS;
         }

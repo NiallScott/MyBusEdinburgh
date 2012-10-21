@@ -199,7 +199,7 @@ public class BusStopMapActivity extends MapActivity implements
         super.onResume();
 
         if(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
-                .getBoolean("pref_autolocation_state", true)) {
+                .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION, true)) {
             myLocation.enableMyLocation();
         }
         
@@ -279,7 +279,7 @@ public class BusStopMapActivity extends MapActivity implements
 
         MenuItem item = menu.findItem(R.id.busstopmap_option_menu_mylocation);
         item.setEnabled(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
-                .getBoolean("pref_autolocation_state", true));
+                .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION, true));
         
         item = menu.findItem(R.id.busstopmap_option_menu_maptype);
         if(mapView.isSatellite()) {

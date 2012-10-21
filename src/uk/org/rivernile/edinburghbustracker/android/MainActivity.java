@@ -25,6 +25,9 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
+        .PREF_STARTUP_SHOW_FAVS;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -55,7 +58,7 @@ public class MainActivity extends FragmentActivity {
         }
         
         if(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
-                .getBoolean("pref_startupshowfavs_state", false)) {
+                .getBoolean(PREF_STARTUP_SHOW_FAVS, false)) {
             startActivity(new Intent(this, FavouriteStopsActivity.class));
         }
     }

@@ -50,6 +50,7 @@ import android.widget.ProgressBar;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Bus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
@@ -117,6 +118,7 @@ public class DisplayStopDataFragment extends Fragment
     
     private static final String STATE_KEY_AUTOREFRESH = "autoRefresh";
     private static final String STATE_KEY_LAST_REFRESH = "lastRefresh";
+    private static final String STATE_KEY_EXPANDED_ITEMS = "expandedItems";
     
     private DisplayStopDataEvent eventCallback;
     private BusStopDatabase bsd;
@@ -134,6 +136,7 @@ public class DisplayStopDataFragment extends Fragment
     private String stopName;
     private boolean autoRefresh;
     private long lastRefresh = 0;
+    private final ArrayList<String> expandedServices = new ArrayList<String>();
     
     /**
      * {@inheritDoc}
@@ -210,8 +213,8 @@ public class DisplayStopDataFragment extends Fragment
         // Get preferences.
         try {
             numDepartures = Integer.parseInt(
-                    sp.getString("pref_numberOfShownDeparturesPerService",
-                    "4"));
+                    sp.getString(PreferencesActivity
+                    .PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE, "4"));
         } catch(NumberFormatException e) {
             numDepartures = 4;
         }
@@ -219,9 +222,15 @@ public class DisplayStopDataFragment extends Fragment
         if(savedInstanceState != null) {
             autoRefresh = savedInstanceState.getBoolean(STATE_KEY_AUTOREFRESH,
                     false);
+            if(savedInstanceState.containsKey(STATE_KEY_EXPANDED_ITEMS)) {
+                expandedServices.clear();
+                Collections.addAll(expandedServices,
+                        savedInstanceState.getStringArray(
+                        STATE_KEY_EXPANDED_ITEMS));
+            }
         } else {
             autoRefresh = sp.getBoolean(
-                    PreferencesActivity.KEY_AUTOREFRESH_STATE, false);
+                    PreferencesActivity.PREF_AUTO_REFRESH, false);
         }
         
         if(stopCode == null || stopCode.length() == 0)
@@ -282,6 +291,13 @@ public class DisplayStopDataFragment extends Fragment
 
         outState.putBoolean(STATE_KEY_AUTOREFRESH, autoRefresh);
         outState.putLong(STATE_KEY_LAST_REFRESH, lastRefresh);
+        
+        populateExpandedItemsList();
+        if(!expandedServices.isEmpty()) {
+            final String[] items = new String[expandedServices.size()];
+            outState.putStringArray(STATE_KEY_EXPANDED_ITEMS,
+                    expandedServices.toArray(items));
+        }
     }
     
     /**
@@ -348,7 +364,7 @@ public class DisplayStopDataFragment extends Fragment
         }
 
         // Sort by time or service?
-        if(sp.getBoolean("pref_servicessorting_state", false)) {
+        if(sp.getBoolean(PreferencesActivity.PREF_SERVICE_SORTING, false)) {
             sortItem.setTitle(R.string.displaystopdata_menu_sort_service);
         } else {
             sortItem.setTitle(R.string.displaystopdata_menu_sort_times);
@@ -411,11 +427,12 @@ public class DisplayStopDataFragment extends Fragment
                 return true;
             case R.id.displaystopdata_option_menu_sort:
                 // Change the sort preference and ask for a data redisplay.
-                boolean sortByTime = sp.getBoolean("pref_servicessorting_state",
-                        false);
+                boolean sortByTime = sp.getBoolean(
+                        PreferencesActivity.PREF_SERVICE_SORTING, false);
                 sortByTime = !sortByTime;
                 final SharedPreferences.Editor edit = sp.edit();
-                edit.putBoolean("pref_servicessorting_state", sortByTime);
+                edit.putBoolean(PreferencesActivity.PREF_SERVICE_SORTING,
+                        sortByTime);
                 edit.commit();
                 loadBusTimes(false);
                 getActivity().supportInvalidateOptionsMenu();
@@ -738,6 +755,11 @@ public class DisplayStopDataFragment extends Fragment
             return;
         }
         
+        // If this is just a refresh, populate the expanded items list.
+        if(listAdapter != null) {
+            populateExpandedItemsList();
+        }
+        
         // If the stopName could not be set earlier, get it now from the web
         // service.
         if(stopName.length() == 0)
@@ -755,7 +777,7 @@ public class DisplayStopDataFragment extends Fragment
         
         // Get the list of services in the user's preferred order.
         final ArrayList<BusService> services;
-        if(sp.getBoolean("pref_servicessorting_state", false)) {
+        if(sp.getBoolean(PreferencesActivity.PREF_SERVICE_SORTING, false)) {
             services = busStop.getSortedByTimeBusServices();
         } else {
             services = busStop.getBusServices();
@@ -763,7 +785,7 @@ public class DisplayStopDataFragment extends Fragment
         
         // Does the user want to show night services?
         final boolean showNightServices =
-                sp.getBoolean("pref_nightservices_state", true);
+                sp.getBoolean(PreferencesActivity.PREF_SHOW_NIGHT_BUSES, true);
         
         // Declare variables before going in to the loop.
         final ArrayList<HashMap<String, String>> groupData =
@@ -849,6 +871,15 @@ public class DisplayStopDataFragment extends Fragment
                 new String[] { DESTINATION_KEY, ARRIVAL_TIME_KEY },
                 new int[] { R.id.buschild_destination, R.id.buschild_time });
         listView.setAdapter(listAdapter);
+        
+        final int count = groupData.size();
+        for(int i = 0; i < count; i++) {
+            curGroupMap = groupData.get(i);
+            // Re-expand previously expanded items.
+            if(expandedServices.contains(curGroupMap.get(SERVICE_NAME_KEY))) {
+                listView.expandGroup(i, false);
+            }
+        }
 
         showTimes();
         if(autoRefresh) setUpAutoRefresh();
@@ -899,6 +930,35 @@ public class DisplayStopDataFragment extends Fragment
      */
     private void setUpLastUpdated() {
         mHandler.sendEmptyMessageDelayed(EVENT_UPDATE_TIME, 10000);
+    }
+    
+    /**
+     * This method populates the ArrayList of expanded list items. It will clear
+     * the list and loop through the group items in the expanded items to see
+     * if that item is expanded or not. If the item is expanded, the service
+     * name will be added to the list.
+     */
+    private void populateExpandedItemsList() {
+        // Firstly, flush the previous items from the list.
+        expandedServices.clear();
+        
+        // The ListAdapter could be null.
+        if(listAdapter != null) {
+            // Cache the count.
+            final int count = listAdapter.getGroupCount();
+            
+            HashMap<String, String> groupData;
+            // Loop through all group items.
+            for(int i = 0; i < count; i++) {
+                // If the group is expanded, get the service name and add it to
+                // the list.
+                if(listView.isGroupExpanded(i)) {
+                    groupData = (HashMap<String, String>)listAdapter
+                            .getGroup(i);
+                    expandedServices.add(groupData.get(SERVICE_NAME_KEY));
+                }
+            }
+        }
     }
 
     /**

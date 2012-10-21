@@ -25,6 +25,9 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
+        .PREF_DATABASE_AUTO_UPDATE;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -122,7 +125,7 @@ public class Application extends android.app.Application {
         // Check to see if the user wants their database automatically updated.
         final SharedPreferences sp = context.getSharedPreferences(
                 PreferencesActivity.PREF_FILE, 0);
-        final boolean autoUpdate = sp.getBoolean("pref_database_autoupdate",
+        final boolean autoUpdate = sp.getBoolean(PREF_DATABASE_AUTO_UPDATE,
                 true);
         SharedPreferences.Editor edit = sp.edit();
         

@@ -84,7 +84,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
             public void onCheckedChanged(final CompoundButton v,
                     boolean isChecked) {
                 SharedPreferences.Editor edit = sp.edit();
-                edit.putBoolean("neareststops_gps_prompt_disable",
+                edit.putBoolean(PreferencesActivity.PREF_DISABLE_GPS_PROMPT,
                         isChecked);
                 edit.commit();
             }
