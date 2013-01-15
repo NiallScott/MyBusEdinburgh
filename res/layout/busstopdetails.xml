@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott & Scott Straughan
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,21 +24,13 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:orientation="vertical" >
-    <TextView android:id="@+id/mapdialog_text_services"
-              style="@style/DialogText"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:textSize="15sp"
-              android:paddingTop="10sp"
-              android:paddingLeft="15dp"
-              android:paddingRight="15dp" />
-    <ListView android:id="@+id/mapdialog_list_options"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:cacheColorHint="#00000000"
-              android:background="#000000FF" />
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </LinearLayout>

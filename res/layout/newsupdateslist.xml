@@ -25,22 +25,22 @@
  *     exempt from clause 2.
 */ -->
 <LinearLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="10dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <TextView
         android:id="@+id/twitText"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autoLink="web|email|map"
-        android:textSize="16dp"
+        android:textSize="16sp"
         android:singleLine="false" />
     <TextView
         android:id="@+id/twitInfo"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:textSize="12dp" />
+        android:textSize="12sp" />
 </LinearLayout>

@@ -52,6 +52,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class TurnOnGpsDialogFragment extends DialogFragment {
     
+    /** The Intent to use to show the GPS settings Activity. */
     public static final Intent TURN_ON_GPS_INTENT =
             new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
     
@@ -76,7 +77,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
         final Activity activity = getActivity();
         final LayoutInflater inflater = LayoutInflater.from(activity);
         
-        final View v = inflater.inflate(R.layout.neareststops_gpsdialog, null);
+        final View v = inflater.inflate(R.layout.turn_on_gps, null);
         final CheckBox cb = (CheckBox)v.findViewById(R.id.chkTurnongps);
         cb.setOnCheckedChangeListener(new CompoundButton
                 .OnCheckedChangeListener() {
@@ -92,7 +93,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setCancelable(true)
-                .setTitle(R.string.neareststops_turnongps_title)
+                .setTitle(R.string.turnongpsdialog_title)
                 .setView(v)
                 .setInverseBackgroundForced(true)
                 .setPositiveButton(R.string.yes,

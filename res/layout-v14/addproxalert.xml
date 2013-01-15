@@ -26,12 +26,12 @@
 */ -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
     <LinearLayout
         android:id="@+id/buttonBar"
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         style="@android:style/ButtonBar">
@@ -49,37 +49,37 @@
             android:text="@string/okay" />
     </LinearLayout>
     <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@id/buttonBar">
         <LinearLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="10dp" >
             <TextView
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#000" 
                 android:text="@string/alert_dialog_prox_first"
                 android:textSize="16sp" />
             <Spinner
                 android:id="@+id/prox_distance_select"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:prompt="@string/alert_dialog_prox_first"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp" />
             <TextView
                 android:id="@+id/textProxDialogStop"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#000"
                 android:paddingBottom="10dp"
                 android:textSize="16sp"/>
             <CheckBox
                 android:id="@+id/checkProxGPS"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/alert_dialog_prox_gps"
                 android:textColor="#000"
@@ -87,7 +87,7 @@
                 android:paddingBottom="10dp" />
             <Button
                 android:id="@+id/btnLimitations"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/alert_dialog_prox_limitations" />
         </LinearLayout>

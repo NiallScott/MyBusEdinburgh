@@ -352,8 +352,6 @@ public class NearestStopsFragment extends ListFragment
                     // AddEditFavouriteStopAcitivity.
                     intent = new Intent(getActivity(),
                             AddEditFavouriteStopActivity.class);
-                    intent.setAction(AddEditFavouriteStopActivity
-                            .ACTION_ADD_EDIT_FAVOURITE_STOP);
                     intent.putExtra("stopCode", selectedStop.stopCode);
                     intent.putExtra("stopName", selectedStop.stopName);
                     startActivity(intent);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,11 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
 public class AddProximityAlertActivity extends FragmentActivity
         implements AlertFragmentEvent {
     
-    private final static boolean IS_HONEYCOMB_OR_GREATER =
+    /** The stopCode argument. */
+    public static final String ARG_STOPCODE =
+            AddProximityAlertFragment.ARG_STOPCODE;
+    
+    private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     
     /**
@@ -60,12 +64,12 @@ public class AddProximityAlertActivity extends FragmentActivity
             ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
         }
         
-                // Only add the fragment if there was no previous instance of this
+        // Only add the fragment if there was no previous instance of this
         // Activity, otherwise this fragment will appear multiple times.
         if(savedInstanceState == null) {
             final AddProximityAlertFragment fragment =
-                    new AddProximityAlertFragment();
-            fragment.setArguments(getIntent().getExtras());
+                    AddProximityAlertFragment.newInstance(getIntent()
+                            .getStringExtra(ARG_STOPCODE));
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragmentContainer, fragment).commit();

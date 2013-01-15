@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott & Scott Straughan
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,18 +26,24 @@
 */ -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:padding="0dp"
+    android:gravity="center" >
+    <Button
+        android:id="@+id/btnBusTimes"
+        style="@style/BusStopDetailsButtons"
+        android:text="@string/busstopdetails_btn_showtimes" />
     <ImageView
-        android:id="@+id/imgMapSearchIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/house"
-        android:contentDescription="@string/map_search_address_icon_description" />
-    <include
-        layout="@android:layout/simple_list_item_1" />
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:src="#D8D8D8" />
+    <Button
+        android:id="@+id/btnStreetView"
+        style="@style/BusStopDetailsButtons"
+        android:text="@string/busstopdetails_btn_streetview"
+        android:drawableTop="@drawable/ic_bubble_action_streetview"/>
 </LinearLayout>

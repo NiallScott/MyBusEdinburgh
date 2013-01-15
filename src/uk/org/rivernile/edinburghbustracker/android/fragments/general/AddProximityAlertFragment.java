@@ -60,7 +60,8 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  */
 public class AddProximityAlertFragment extends Fragment {
     
-    private static final String ARG_STOPCODE = "stopCode";
+    /** The stopCode argument. */
+    public static final String ARG_STOPCODE = "stopCode";
     
     private static final String LIMITATIONS_DIALOG_TAG =
             "proxLimitationsDialog";
@@ -91,7 +92,7 @@ public class AddProximityAlertFragment extends Fragment {
      * @param stopCode The stopCode this alert setting should be for.
      * @return A new instance of this Fragment.
      */
-    public AddProximityAlertFragment newInstance(final String stopCode) {
+    public static AddProximityAlertFragment newInstance(final String stopCode) {
         final AddProximityAlertFragment f = new AddProximityAlertFragment();
         final Bundle b = new Bundle();
         b.putString(ARG_STOPCODE, stopCode);

@@ -61,7 +61,7 @@ import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
  */
 public class TimeAlertService extends IntentService {
     
-    private final static int ALERT_ID = 2;
+    private static final int ALERT_ID = 2;
     
     private SettingsDatabase sd;
     private BusStopDatabase bsd;

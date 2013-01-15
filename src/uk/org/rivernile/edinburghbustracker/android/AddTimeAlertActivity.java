@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -46,7 +47,13 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
 public class AddTimeAlertActivity extends FragmentActivity
         implements AlertFragmentEvent {
     
-    private final static boolean IS_HONEYCOMB_OR_GREATER =
+    /** The stopCode argument.*/
+    public static final String ARG_STOPCODE = AddTimeAlertFragment.ARG_STOPCODE;
+    /** The default service argument. */
+    public static final String ARG_DEFAULT_SERVICE = AddTimeAlertFragment
+            .ARG_DEFAULT_SERVICE;
+    
+    private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     
     /**
@@ -64,9 +71,18 @@ public class AddTimeAlertActivity extends FragmentActivity
         // Only add the fragment if there was no previous instance of this
         // Activity, otherwise this fragment will appear multiple times.
         if(savedInstanceState == null) {
-            final AddTimeAlertFragment fragment = new AddTimeAlertFragment();
-            fragment.setArguments(getIntent().getExtras());
-
+            final Intent intent = getIntent();
+            AddTimeAlertFragment fragment;
+            
+            if(intent.hasExtra(ARG_DEFAULT_SERVICE)) {
+                fragment = AddTimeAlertFragment.newInstance(
+                        intent.getStringExtra(ARG_STOPCODE),
+                        intent.getStringExtra(ARG_DEFAULT_SERVICE));
+            } else {
+                fragment = AddTimeAlertFragment.newInstance(
+                        intent.getStringExtra(ARG_STOPCODE));
+            }
+            
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragmentContainer, fragment).commit();
         }

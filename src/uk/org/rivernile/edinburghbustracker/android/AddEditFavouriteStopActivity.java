@@ -43,12 +43,15 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @see AddEditFavouriteStopFragment
  */
 public class AddEditFavouriteStopActivity extends FragmentActivity {
-
-    public final static String ACTION_ADD_EDIT_FAVOURITE_STOP =
-            "uk.org.rivernile.edinburghbustracker.android." +
-            "ACTION_ADD_EDIT_FAVOURITE_STOP";
     
-    private final static boolean IS_HONEYCOMB_OR_GREATER =
+    /** The stopCode argument name. */
+    public static final String ARG_STOPCODE =
+            AddEditFavouriteStopFragment.ARG_STOPCODE;
+    /** The stopName argument name. */
+    public static final String ARG_STOPNAME =
+            AddEditFavouriteStopFragment.ARG_STOPNAME;
+    
+    private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
     /**
@@ -69,8 +72,8 @@ public class AddEditFavouriteStopActivity extends FragmentActivity {
             final Intent intent = getIntent();
             final AddEditFavouriteStopFragment fragment =
                     AddEditFavouriteStopFragment.newInstance(
-                    intent.getStringExtra("stopCode"),
-                    intent.getStringExtra("stopName"));
+                    intent.getStringExtra(ARG_STOPCODE),
+                    intent.getStringExtra(ARG_STOPNAME));
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragmentContainer, fragment).commit();

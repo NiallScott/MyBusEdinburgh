@@ -58,6 +58,9 @@ public class AddTimeAlertFragment extends Fragment
     
     /** The argument for the stopCode. */
     public static final String ARG_STOPCODE = "stopCode";
+    /** The argument for the default service. */
+    public static final String ARG_DEFAULT_SERVICE =
+            ServicesChooserDialogFragment.ARG_DEFAULT_SERVICE;
     
     private static final String LIMITATIONS_DIALOG_TAG =
             "timeLimitationsDialog";
@@ -73,6 +76,38 @@ public class AddTimeAlertFragment extends Fragment
     
     private Button btnOkay;
     private TextView txtServices, txtTimeDialogStop;
+    
+    /**
+     * Create a new instance of the AddTimeAlertFragment.
+     * 
+     * @param stopCode The stopCode this alert setting should be for.
+     * @return A new instance of this Fragment.
+     */
+    public static AddTimeAlertFragment newInstance(final String stopCode) {
+        final AddTimeAlertFragment f = new AddTimeAlertFragment();
+        final Bundle b = new Bundle();
+        b.putString(ARG_STOPCODE, stopCode);
+        f.setArguments(b);
+        
+        return f;
+    }
+    
+    /**
+     * Create a new instance of the AddTimeAlertFragment.
+     * 
+     * @param stopCode The stopCode this alert setting should be for.
+     * @return A new instance of this Fragment.
+     */
+    public static AddTimeAlertFragment newInstance(final String stopCode,
+            final String defaultService) {
+        final AddTimeAlertFragment f = new AddTimeAlertFragment();
+        final Bundle b = new Bundle();
+        b.putString(ARG_STOPCODE, stopCode);
+        b.putString(ARG_DEFAULT_SERVICE, defaultService);
+        f.setArguments(b);
+        
+        return f;
+    }
     
     /**
      * {@inheritDoc}
@@ -113,8 +148,7 @@ public class AddTimeAlertFragment extends Fragment
             servicesChooser = ServicesChooserDialogFragment.newInstance(
                     bsd.getBusServicesForStop(stopCode),
                     getString(R.string.alert_dialog_time_services_title),
-                    args.getString(ServicesChooserDialogFragment
-                    .ARG_DEFAULT_SERVICE), this);
+                    args.getString(ARG_DEFAULT_SERVICE), this);
         } else {
             servicesChooser = ServicesChooserDialogFragment.newInstance(
                     bsd.getBusServicesForStop(stopCode),

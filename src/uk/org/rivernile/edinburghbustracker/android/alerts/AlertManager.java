@@ -33,7 +33,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.SystemClock;
-import com.google.android.maps.GeoPoint;
+import com.google.android.gms.maps.model.LatLng;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
@@ -98,12 +98,12 @@ public class AlertManager {
         // Remove any other existing proximity alerts.
         removeProximityAlert();
         // Get the coordinates of the bus stop.
-        final GeoPoint g = bsd.getGeoPointForStopCode(stopCode);
+        final LatLng point = bsd.getLatLngForStopCode(stopCode);
         double latitude = 0;
         double longitude = 0;
-        if(g != null) {
-            latitude = (double)(g.getLatitudeE6() / 1E6);
-            longitude = (double)(g.getLongitudeE6() / 1E6);
+        if(point != null) {
+            latitude = point.latitude;
+            longitude = point.longitude;
         }
         
         // The intent to send to the BroadcastReceiver when the distance

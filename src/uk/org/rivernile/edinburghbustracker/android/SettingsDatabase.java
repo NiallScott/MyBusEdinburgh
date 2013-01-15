@@ -169,7 +169,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      * @return A Cursor object to all the favourite stop items.
      */
     public Cursor getAllFavouriteStops() {
-        SQLiteDatabase db = getReadableDatabase();
+        final SQLiteDatabase db = getReadableDatabase();
         return db.query(true, FAVOURITE_STOPS_TABLE,
                 new String[] { FAVOURITE_STOPS_STOPCODE,
                 FAVOURITE_STOPS_STOPNAME },
@@ -184,11 +184,11 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      * @param stopCode The stopCode to check for.
      * @return True if it already exists, false if it doesn't.
      */
-    public boolean getFavouriteStopExists(final String stopCode)
-    {
+    public boolean getFavouriteStopExists(final String stopCode) {
         if(stopCode == null || stopCode.length() == 0) return false;
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(FAVOURITE_STOPS_TABLE,
+        
+        final SQLiteDatabase db = getReadableDatabase();
+        final Cursor c = db.query(FAVOURITE_STOPS_TABLE,
                 new String[] { FAVOURITE_STOPS_STOPCODE },
                 FAVOURITE_STOPS_STOPCODE + " = ?", new String[] { stopCode },
                 null, null, null);
@@ -196,6 +196,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
             c.close();
             return true;
         }
+        
         c.close();
         return false;
     }
@@ -212,11 +213,11 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         if(stopCode == null || stopName == null || stopCode.length() == 0
                 || stopName.length() == 0) return;
         if(getFavouriteStopExists(stopCode)) return;
-        ContentValues cv = new ContentValues();
+        final ContentValues cv = new ContentValues();
         cv.put(FAVOURITE_STOPS_STOPCODE, stopCode);
         cv.put(FAVOURITE_STOPS_STOPNAME, stopName);
 
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         db.insertOrThrow(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPNAME, cv);
         
         if(isFroyoOrGreater) BackupCompat.dataChanged(context.getPackageName());
@@ -231,7 +232,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         if(stopCode == null || stopCode.length() == 0) return;
         if(!getFavouriteStopExists(stopCode)) return;
 
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         db.delete(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPCODE + " = ?",
                 new String[] { stopCode });
         
@@ -249,10 +250,10 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         if(stopCode == null || stopName == null || stopCode.length() == 0
                 || stopName.length() == 0) return;
         if(!getFavouriteStopExists(stopCode)) return;
-        ContentValues cv = new ContentValues();
+        final ContentValues cv = new ContentValues();
         cv.put(FAVOURITE_STOPS_STOPNAME, stopName);
 
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         db.update(FAVOURITE_STOPS_TABLE, cv, FAVOURITE_STOPS_STOPCODE + " = ?",
                 new String[] { stopCode });
         
@@ -269,8 +270,8 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         if(stopCode == null || stopCode.length() == 0
                 || !getFavouriteStopExists(stopCode)) return null;
 
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(FAVOURITE_STOPS_TABLE,
+        final SQLiteDatabase db = getReadableDatabase();
+        final Cursor c = db.query(FAVOURITE_STOPS_TABLE,
                 new String[] { FAVOURITE_STOPS_STOPNAME },
                 FAVOURITE_STOPS_STOPCODE + " = ?", new String[] { stopCode },
                 null, null, null);
@@ -293,10 +294,10 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      */
     public void insertNewProximityAlert(final String stopCode,
             final int distance) {
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         cleanupAlerts(db);
         
-        ContentValues cv = new ContentValues();
+        final ContentValues cv = new ContentValues();
         cv.put(ALERTS_TYPE, ALERTS_TYPE_PROXIMITY);
         cv.put(ALERTS_TIME_ADDED, System.currentTimeMillis());
         cv.put(ALERTS_STOPCODE, stopCode);
@@ -317,11 +318,11 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      */
     public void insertNewTimeAlert(final String stopCode,
             final String[] serviceNames, final int timeTrigger) {
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         cleanupAlerts(db);
         
         int len = serviceNames.length;
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for(int i = 0; i < len; i++) {
             sb.append(serviceNames[i]);
             if(i != len-1) {
@@ -329,7 +330,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
             }
         }
         
-        ContentValues cv = new ContentValues();
+        final ContentValues cv = new ContentValues();
         cv.put(ALERTS_TYPE, ALERTS_TYPE_TIME);
         cv.put(ALERTS_TIME_ADDED, System.currentTimeMillis());
         cv.put(ALERTS_STOPCODE, stopCode);
@@ -349,7 +350,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      * @see SettingsDatabase#ALERTS_TYPE_TIME
      */
     public void deleteAllAlertsOfType(final byte type) {
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         cleanupAlerts(db);
         db.delete(ALERTS_TABLE, ALERTS_TYPE + " = ?",
                 new String[] { String.valueOf(type) });
@@ -389,9 +390,10 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      */
     public boolean isActiveAlertOfType(final String stopCode, final int type) {
         if(stopCode == null || stopCode.length() == 0) return false;
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         cleanupAlerts(db);
-        Cursor c = db.query(ALERTS_TABLE, new String[] { ALERTS_STOPCODE },
+        final Cursor c = db.query(ALERTS_TABLE,
+                new String[] { ALERTS_STOPCODE },
                 ALERTS_STOPCODE + " = ? AND " + ALERTS_TYPE + " = ?",
                 new String[] { stopCode, String.valueOf(type)}, null, null,
                 null);
@@ -399,6 +401,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
             c.close();
             return true;
         }
+        
         c.close();
         return false;
     }
@@ -411,7 +414,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      * @return A Cursor containing all alerts known in the database.
      */
     public Cursor getAllAlerts() {
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         
         cleanupAlerts(db);
         return db.query(ALERTS_TABLE, null, null, null, null, null, null);
@@ -448,7 +451,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         root.put(BACKUP_CREATE_TIME, System.currentTimeMillis());
         root.put(BACKUP_FAVOURITE_STOPS, favStops);
 
-        Cursor c = getAllFavouriteStops();
+        final Cursor c = getAllFavouriteStops();
         while(c.moveToNext()) {
             stop = new JSONObject();
             stop.put(BACKUP_STOPCODE, c.getString(0));
@@ -468,14 +471,14 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      */
     public void restoreDatabaseFromJSON(final String jsonString)
             throws JSONException {
-        SQLiteDatabase db = getWritableDatabase();
+        final SQLiteDatabase db = getWritableDatabase();
         db.delete(FAVOURITE_STOPS_TABLE, null, null);
         
         final JSONObject root = new JSONObject(jsonString);
         final JSONArray favStops = root.getJSONArray(BACKUP_FAVOURITE_STOPS);
         JSONObject stop;
         
-        int len = favStops.length();
+        final int len = favStops.length();
         for(int i = 0; i < len; i++) {
             stop = favStops.getJSONObject(i);
             insertFavouriteStop(stop.getString(BACKUP_STOPCODE),
@@ -502,7 +505,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         
         try {
             final JSONObject root = backupDatabaseAsJSON();
-            PrintWriter pw = new PrintWriter(new FileWriter(out));
+            final PrintWriter pw = new PrintWriter(new FileWriter(out));
             pw.println(root.toString());
             pw.flush();
             pw.close();
@@ -538,7 +541,8 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         final StringBuilder jsonString = new StringBuilder();
         try {
             String str;
-            BufferedReader reader = new BufferedReader(new FileReader(in));
+            final BufferedReader reader = new BufferedReader(
+                    new FileReader(in));
             while((str = reader.readLine()) != null) {
                 jsonString.append(str);
             }

@@ -25,7 +25,8 @@
  *     exempt from clause 2.
 */ -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" >
     <item
         android:id="@+id/favouritestops_context_menu_view"
         android:title="@string/favouritestops_menu_view" />
@@ -36,9 +37,11 @@
         android:id="@+id/favouritestops_context_menu_delete"
         android:title="@string/favouritestops_menu_delete" />
     <item
-        android:id="@+id/favouritestops_context_menu_prox_alert" />
+        android:id="@+id/favouritestops_context_menu_prox_alert"
+        tools:ignore="MenuTitle" />
     <item
-        android:id="@+id/favouritestops_context_menu_time_alert" />
+        android:id="@+id/favouritestops_context_menu_time_alert"
+        tools:ignore="MenuTitle" />
     <item
         android:id="@+id/favouritestops_context_menu_showonmap"
         android:title="@string/favouritestops_menu_showonmap" />

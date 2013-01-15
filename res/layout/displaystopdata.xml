@@ -26,14 +26,14 @@
  */ -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:layout_gravity="center_horizontal"
     android:gravity="center">
     <LinearLayout
         android:id="@+id/layoutTopBar"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="#D1D1D1"
@@ -70,7 +70,7 @@
                 android:visibility="invisible" />
         </LinearLayout>
         <RelativeLayout
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
             android:paddingTop="8dp">
@@ -147,7 +147,7 @@
     </LinearLayout>
     <ExpandableListView
         android:id="@id/android:list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:visibility="gone" />
 </LinearLayout>

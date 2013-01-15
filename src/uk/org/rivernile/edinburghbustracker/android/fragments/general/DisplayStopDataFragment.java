@@ -98,15 +98,17 @@ public class DisplayStopDataFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<BusTimesResult>,
         DeleteFavouriteDialogFragment.EventListener {
     
-    private final static int EVENT_REFRESH = 1;
-    private final static int EVENT_UPDATE_TIME = 2;
+    private static final int EVENT_REFRESH = 1;
+    private static final int EVENT_UPDATE_TIME = 2;
     
-    private final static String SERVICE_NAME_KEY = "SERVICE_NAME";
-    private final static String DESTINATION_KEY = "DESTINATION";
-    private final static String ARRIVAL_TIME_KEY = "ARRIVAL_TIME";
+    private static final String SERVICE_NAME_KEY = "SERVICE_NAME";
+    private static final String DESTINATION_KEY = "DESTINATION";
+    private static final String ARRIVAL_TIME_KEY = "ARRIVAL_TIME";
     
     /** This is the stop code argument. */
-    public static final String ARG_STOP_CODE = "stopCode";
+    public static final String ARG_STOPCODE = "stopCode";
+    /** This is the argument required to force a reload of data. */
+    public static final String ARG_FORCELOAD = "forceLoad";
     
     private static final String DELETE_FAV_DIALOG_TAG = "deleteFav";
     private static final String DELETE_TIME_DIALOG_TAG = "delTimeAlert";
@@ -139,6 +141,40 @@ public class DisplayStopDataFragment extends Fragment
     private final ArrayList<String> expandedServices = new ArrayList<String>();
     
     /**
+     * Create a new instance of this Fragment, specifying the bus stop code.
+     * 
+     * @param stopCode The stopCode to load times for.
+     * @return A new instance of this Fragment.
+     */
+    public static DisplayStopDataFragment newInstance(final String stopCode) {
+        final DisplayStopDataFragment f = new DisplayStopDataFragment();
+        final Bundle b = new Bundle();
+        b.putString(ARG_STOPCODE, stopCode);
+        f.setArguments(b);
+        
+        return f;
+    }
+    
+    /**
+     * Create a new instance of this Fragment, specifying the bus stop code and
+     * if a load of the data should be forced.
+     * 
+     * @param stopCode The stopCode to load times for.
+     * @param forceLoad true if data is to be refreshed, false if not.
+     * @return A new instance of this Fragment.
+     */
+    public static DisplayStopDataFragment newInstance(final String stopCode,
+            final boolean forceLoad) {
+        final DisplayStopDataFragment f = new DisplayStopDataFragment();
+        final Bundle b = new Bundle();
+        b.putString(ARG_STOPCODE, stopCode);
+        b.putBoolean(ARG_FORCELOAD, forceLoad);
+        f.setArguments(b);
+        
+        return f;
+    }
+    
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -152,7 +188,7 @@ public class DisplayStopDataFragment extends Fragment
         sp = context.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
         
         // Get the stop code from the arguments bundle.
-        stopCode = getArguments().getString(ARG_STOP_CODE);
+        stopCode = getArguments().getString(ARG_STOPCODE);
         
         if(savedInstanceState != null) {
             lastRefresh = savedInstanceState.getLong(STATE_KEY_LAST_REFRESH, 0);
@@ -417,8 +453,6 @@ public class DisplayStopDataFragment extends Fragment
                     // Show the add favourite stop Activity.
                     intent = new Intent(getActivity(),
                             AddEditFavouriteStopActivity.class);
-                    intent.setAction(AddEditFavouriteStopActivity
-                            .ACTION_ADD_EDIT_FAVOURITE_STOP);
                     intent.putExtra("stopCode", stopCode);
                     intent.putExtra("stopName", stopName);
                     startActivity(intent);
@@ -877,7 +911,7 @@ public class DisplayStopDataFragment extends Fragment
             curGroupMap = groupData.get(i);
             // Re-expand previously expanded items.
             if(expandedServices.contains(curGroupMap.get(SERVICE_NAME_KEY))) {
-                listView.expandGroup(i, false);
+                listView.expandGroup(i);
             }
         }
 

@@ -83,7 +83,7 @@ public class DeleteTimeAlertDialogFragment extends DialogFragment {
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(getActivity());
         builder.setCancelable(true)
-            .setTitle(R.string.alert_time_rem_confirm)
+            .setTitle(R.string.deletetimedialog_title)
             .setPositiveButton(R.string.okay,
             new DialogInterface.OnClickListener() {
             @Override

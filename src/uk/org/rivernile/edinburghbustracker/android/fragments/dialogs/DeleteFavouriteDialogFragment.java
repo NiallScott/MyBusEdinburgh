@@ -100,7 +100,7 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(getActivity());
         builder.setCancelable(true)
-                .setTitle(R.string.favouritestops_dialog_confirm_title)
+                .setTitle(R.string.deletefavouritedialog_title)
                 .setPositiveButton(R.string.okay,
                 new DialogInterface.OnClickListener() {
                     @Override

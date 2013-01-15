@@ -83,7 +83,7 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(getActivity());
         builder.setCancelable(true)
-            .setTitle(R.string.alert_prox_rem_confirm)
+            .setTitle(R.string.deleteproxdialog_title)
             .setPositiveButton(R.string.okay,
             new DialogInterface.OnClickListener() {
             @Override

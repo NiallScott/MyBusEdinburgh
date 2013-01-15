@@ -84,7 +84,7 @@ public class DeleteAllAlertsDialogFragment extends DialogFragment {
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(getActivity());
         builder.setCancelable(true)
-            .setTitle(R.string.alert_all_rem_confirm)
+            .setTitle(R.string.deleteallalerts_title)
             .setPositiveButton(R.string.okay,
             new DialogInterface.OnClickListener() {
             @Override

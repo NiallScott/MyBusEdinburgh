@@ -54,11 +54,18 @@ public class DisplayStopDataActivity extends FragmentActivity
         implements DisplayStopDataFragment.DisplayStopDataEvent {
     
     /** The ACTION_VIEW_STOP_DATA intent action name. */
-    public final static String ACTION_VIEW_STOP_DATA =
+    public static final String ACTION_VIEW_STOP_DATA =
             "uk.org.rivernile.edinburghbustracker.android."
             + "ACTION_VIEW_STOP_DATA";
     
-    private final static boolean IS_HONEYCOMB_OR_GREATER =
+    /** The Intent argument for the stop code. */
+    public static final String ARG_STOPCODE =
+            DisplayStopDataFragment.ARG_STOPCODE;
+    /** The Intent argument to force a load. */
+    public static final String ARG_FORCELOAD =
+            DisplayStopDataFragment.ARG_FORCELOAD;
+    
+    private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     
     /**
@@ -75,18 +82,26 @@ public class DisplayStopDataActivity extends FragmentActivity
         }
         
         if(savedInstanceState == null) {
-            final DisplayStopDataFragment fragment =
-                    new DisplayStopDataFragment();
+            DisplayStopDataFragment fragment;
             final Intent intent = getIntent();
             
             if(Intent.ACTION_VIEW.equals(intent.getAction())) {
-                final Bundle b = new Bundle();
-                // The query parameter comes from the URL.
-                b.putString(DisplayStopDataFragment.ARG_STOP_CODE,
+                fragment = DisplayStopDataFragment.newInstance(
                         intent.getData().getQueryParameter("busStopCode"));
-                fragment.setArguments(b);
             } else {
-                fragment.setArguments(intent.getExtras());
+                if(!intent.hasExtra(ARG_STOPCODE)) {
+                    throw new IllegalArgumentException(
+                            "A stopCode MUST be provided.");
+                }
+                
+                final String stopCode = intent.getStringExtra(ARG_STOPCODE);
+                
+                if(intent.hasExtra(ARG_FORCELOAD)) {
+                    fragment = DisplayStopDataFragment.newInstance(stopCode,
+                            intent.getBooleanExtra(ARG_FORCELOAD, false));
+                } else {
+                    fragment = DisplayStopDataFragment.newInstance(stopCode);
+                }
             }
             
             getSupportFragmentManager().beginTransaction()

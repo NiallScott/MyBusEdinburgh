@@ -50,7 +50,7 @@ import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
  */
 public class ProximityAlertReceiver extends BroadcastReceiver {
     
-    private final static int ALERT_ID = 1;
+    private static final int ALERT_ID = 1;
     
     /**
      * {@inheritDoc}

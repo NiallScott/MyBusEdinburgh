@@ -236,7 +236,6 @@ public class EnterStopCodeFragment extends Fragment
         if(txt.getText().length() == 0) {
             Toast.makeText(activity, R.string.enterstopcode_toast_inputerr,
                     Toast.LENGTH_LONG).show();
-            return;
         } else {
             // Load bus times.
             final Intent intent = new Intent(activity,

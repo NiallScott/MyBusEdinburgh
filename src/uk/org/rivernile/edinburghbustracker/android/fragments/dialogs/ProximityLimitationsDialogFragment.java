@@ -50,7 +50,7 @@ public class ProximityLimitationsDialogFragment extends DialogFragment {
         final Activity activity = getActivity();
         
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(R.string.alert_dialog_prox_limitations_title)
+        builder.setTitle(R.string.proxlimitationsdialog_title)
                 .setCancelable(true)
                 .setView(LayoutInflater.from(activity)
                         .inflate(R.layout.addproxalert_dialog, null))

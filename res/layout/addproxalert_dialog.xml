@@ -26,12 +26,12 @@
 */ -->
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <TextView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/alert_dialog_prox_note"
+        android:text="@string/proxlimitationsdialog_message"
         android:textSize="18sp"
         android:textColor="#000"
         android:padding="10dp" />

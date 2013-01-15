@@ -50,7 +50,7 @@ public class TimeLimitationsDialogFragment extends DialogFragment {
         final Activity activity = getActivity();
         
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(R.string.alert_dialog_time_limitations_title)
+        builder.setTitle(R.string.timelimitationsdialog_title)
                 .setCancelable(true)
                 .setView(LayoutInflater.from(activity)
                         .inflate(R.layout.addtimealert_dialog, null))

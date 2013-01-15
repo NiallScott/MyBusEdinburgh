@@ -26,19 +26,19 @@
 */ -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="20dp"
     android:layout_gravity="center_vertical">
     <TextView
         android:id="@+id/addeditstop_text_description"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/addeditstop_description"
         android:paddingBottom="5dp" />
     <EditText
         android:id="@+id/addeditstop_edit_stopname"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/addeditstop_text_description"
         android:hint="@string/addeditstop_edit_stopname_hint"

@@ -270,8 +270,6 @@ public class FavouriteStopsFragment extends ListFragment
                 // Allow the user to edit the name of the favourite stop.
                 intent = new Intent(activity,
                         AddEditFavouriteStopActivity.class);
-                intent.setAction(AddEditFavouriteStopActivity
-                        .ACTION_ADD_EDIT_FAVOURITE_STOP);
                 intent.putExtra("stopCode", String.valueOf(info.id));
                 startActivity(intent);
                 return true;

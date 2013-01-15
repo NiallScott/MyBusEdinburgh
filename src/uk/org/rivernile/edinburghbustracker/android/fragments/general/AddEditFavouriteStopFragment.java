@@ -48,9 +48,9 @@ public class AddEditFavouriteStopFragment extends Fragment
         implements View.OnClickListener {
     
     /** The stopCode argument key. */
-    private static final String ARG_STOPCODE = "stopCode";
+    public static final String ARG_STOPCODE = "stopCode";
     /** The stopName argument key. */
-    private static final String ARG_STOPNAME = "stopName";
+    public static final String ARG_STOPNAME = "stopName";
     
     private String stopCode;
     private String stopName;

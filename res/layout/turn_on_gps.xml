@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 Niall 'Rivernile' Scott & Scott Straughan
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,22 @@
 */ -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    <com.readystatesoftware.maps.TapControlledMapView
-        android:id="@+id/mapview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:enabled="true"
-        android:clickable="true"
-        android:apiKey="0m4LU68_mob7KZZE852UT0PWi1bRZAr3hXnjKPQ" />
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp" >
+    <TextView
+        android:id="@+id/textTurnongps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/turnongpsdialog_message"
+        android:textSize="18sp"
+        android:paddingBottom="10dp"
+        android:textColor="#000000" />
+    <CheckBox
+        android:id="@+id/chkTurnongps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/turnongpsdialog_checkbox"
+        android:textColor="#000000" />
 </LinearLayout>

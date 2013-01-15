@@ -25,27 +25,21 @@
  *     exempt from clause 2.
 */ -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/busstopmap_option_menu_mylocation"
-        android:title="@string/map_menu_mylocation"
-        android:icon="@drawable/ic_menu_mylocation"
-        android:showAsAction="ifRoom|withText" />
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" >
     <item
         android:id="@+id/busstopmap_option_menu_search"
         android:title="@string/search"
-        android:icon="@drawable/ic_menu_search"
-        android:showAsAction="ifRoom|withText" />
+        android:icon="@drawable/ic_menu_search" />
     <item
         android:id="@+id/busstopmap_option_menu_maptype"
-        android:title="@string/map_menu_maptype_mapview"
-        android:showAsAction="ifRoom|withText" />
+        android:title="@string/map_menu_maptype_mapview" />
     <item
         android:id="@+id/busstopmap_option_menu_trafficview"
-        android:icon="@drawable/ic_menu_trafficview" />
+        android:icon="@drawable/ic_menu_trafficview"
+        tools:ignore="MenuTitle" />
     <item
         android:id="@+id/busstopmap_option_menu_filter"
         android:title="@string/map_menu_filter"
-        android:icon="@drawable/ic_menu_filter"
-        android:showAsAction="ifRoom|withText" />
+        android:icon="@drawable/ic_menu_filter" />
 </menu>

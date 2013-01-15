@@ -58,7 +58,7 @@ public class TwitterUpdatesLoader
     /** There was a problem parsing the URL. Should never happen. */
     public static final byte ERROR_URLERR = 3;
     
-    private final static String REQUEST_URL = "http://api.twitter.com/1/" +
+    private static final String REQUEST_URL = "http://api.twitter.com/1/" +
             "lists/statuses.json?slug=bus-tracker-updates&" +
             "owner_screen_name=NiallScott&per_page=30";
     

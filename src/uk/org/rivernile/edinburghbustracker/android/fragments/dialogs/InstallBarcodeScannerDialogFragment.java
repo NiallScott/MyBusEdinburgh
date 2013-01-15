@@ -56,9 +56,9 @@ public class InstallBarcodeScannerDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.enterstopcode_scan_notavailable_title)
+        builder.setTitle(R.string.barcodescannerdialog_title)
                 .setCancelable(true)
-                .setMessage(R.string.enterstopcode_txt_scan_notavailable)
+                .setMessage(R.string.barcodescannerdialog_message)
                 .setPositiveButton(R.string.yes,
                         new DialogInterface.OnClickListener() {
                     @Override
@@ -71,7 +71,7 @@ public class InstallBarcodeScannerDialogFragment extends DialogFragment {
                             startActivity(intent);
                         } catch(ActivityNotFoundException e) {
                             Toast.makeText(getActivity(),
-                                    R.string.enterstopcode_no_market,
+                                    R.string.barcodescannerdialog_noplaystore,
                                     Toast.LENGTH_LONG).show();
                         }
                         

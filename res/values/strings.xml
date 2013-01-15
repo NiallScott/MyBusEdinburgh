@@ -45,7 +45,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     *******************
     -->
     <string name="submit">Submit</string>
-    <string name="error">Error</string>
     <string name="okay">OK</string>
     <string name="cancel">Cancel</string>
     <string name="retry">Retry</string>
@@ -99,16 +98,13 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="enterstopcode_title">Enter Bus Stop Code</string>
     <string name="enterstopcode_toast_inputerr">You need to enter a valid bus
-        stop code to view bus stop informtion. Usually this is an 8 digit
+        stop code to view bus stop information. Usually this is an 8 digit
         number.
     </string>
     <string name="enterstopcode_hint">You can manually enter a bus stop code, or you can scan a QR code like the one shown which can be found on the bus timetable at the bus stop.</string>
     <string name="enterstopcode_edit_hint">Enter 8-digit bus stop code</string>
     <string name="enterstopcode_button_scan">Scan QR code</string>
-    <string name="enterstopcode_scan_notavailable_title">QR scanning app required</string>
-    <string name="enterstopcode_txt_scan_notavailable">To scan QR codes, your device must have a camera and you must have a compatible QR barcode scanning app installed, which you do not. Do you wish to download this from the Google Play Store? The application is called Barcode Scanner by the ZXing Team and is free to download.</string>
     <string name="enterstopcode_invalid_qrcode">The scanned QR code does not contain bus stop data. Either the code was not scanned correctly, or the QR code is invalid. Please rescan a valid QR code.</string>
-    <string name="enterstopcode_no_market">The Google Play Store could not be found on your device.</string>
     <string name="enterstopcode_stopicon_description">Example bus stop QR code</string>
 
     <!--
@@ -122,8 +118,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     such as from the bus stop map or from the nearest stops list. If you have
     a backup of your favourite stops, you can restore them from the preferences.
     </string>
-    <string name="favouritestops_dialog_confirm_title">Are you sure you want to
-    delete this stop?</string>
     <string name="favouritestops_loading">Loading favourite stops&#8230;</string>
     <string name="favouriteshortcut_title">Select favourite stop</string>
     <string name="favouriteshortcut_label">Favourite bus stop</string>
@@ -294,18 +288,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************************
     -->
     <string name="map_title">Bus Stop Map</string>
-    <string name="map_dialog_showtimes">Show bus times</string>
-    <string name="map_dialog_streetview">Show on Street View</string>
-    <string name="map_dialog_noservices">There are no known services for this stop.</string>
-    <string name="map_location_unknown">Your current location is unknown.</string>
-    <string name="map_search_progress_dialog">Searching location&#8230;</string>
-    <string name="map_search_dialog_title">Did you mean&#8230;</string>
-    <string name="map_search_dialog_noresults">There were no results for your search.</string>
-    <string name="map_search_address_icon_description">Address icon</string>
-    <string name="map_search_stop_icon_description">Stop marker icon</string>
-    <string name="map_streetview_dialog_title">Google Street View required</string>
-    <string name="map_streetview_dialog_message">You currently do not have Google Street View installed. Do you want to install this from the Google Play Store now?</string>
-    <string name="map_streetview_error_nomarket">The Google Play Store is not installed on your device. The Market must be installed to install Google Street View.</string>
 
     <!--
     ***************************************
@@ -313,7 +295,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***************************************
     -->
     <string name="map_menu_maptype_mapview">Map view</string>
-    <string name="map_menu_maptype_satellite">Satellite view</string>
     <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
     <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
     <string name="map_menu_mylocation">My location</string>
@@ -344,9 +325,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="neareststops_title">Nearest Bus Stops</string>
     <string name="neareststops_empty"><b>There is no data to display.</b>\nThis means that either your location could not be determined, or you are not in range of any bus stops.</string>
-    <string name="neareststops_turnongps_title">You do not have GPS turned on</string>
-    <string name="neareststops_turnongps_message">To get the most precise location information, GPS needs to be turned on. Turn on now?</string>
-    <string name="neareststops_turnongps_checkbox">Do not remind me again</string>
     
     <!--
     *****************************************
@@ -445,10 +423,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>1000 metres (1093 yards)</item>
     </string-array>
     <string name="alert_dialog_prox_second">of bus stop %s.</string>
-    <string name="alert_dialog_prox_note">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Google Play Store.\n\nIf you already have a proximity alert active, it will be removed if you set this alert.\n\nIf you restart your device, the alert will be removed and will not be re-added, although you can manually re-add the alert if you wish.\n\nIf you do not come within the preset distance of the bus stop within 1 hour of setting this alert, it will be automatically removed and you will not be alerted. This is to prevent alerts lasting an indefinite amount of time.</string>
     <string name="alert_dialog_prox_gps">You do not have GPS turned on. For this feature to work properly, it is strongly advised that GPS is turned on. Tick this if you would like to go to the device preferences after you have set this alert to turn GPS on.</string>
     <string name="alert_dialog_prox_limitations">Show limitations</string>
-    <string name="alert_dialog_prox_limitations_title">Proximity alert feature limitations</string>
     
     <string name="alert_dialog_time_title">Add new arrival alert</string>
     <string name="alert_dialog_time_first">Alert me when any of these services</string>
@@ -467,11 +443,121 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>in 30 minutes</item>
     </string-array>
     <string name="alert_dialog_time_busstop">or less at bus stop %s.</string>
-    <string name="alert_dialog_time_note">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Google Play Store.\n\nThis feature should be used as a guide only.\n\nAn attempt will be made to fetch bus times once per minute until the above criteria is met or the time spent checking exceeds 1 hour. However, your device may prevent this from happening (e.g. lack of data access, device is sleeping).\n\nIf your device restarts, this alert will be automatically cancelled but you may re-add it again.\n\nBe warned, this feature may use a lot of battery power.</string>
     <string name="alert_dialog_time_limitations">Show limitations</string>
-    <string name="alert_dialog_time_limitations_title">Time alert feature limitations</string>
     
-    <string name="alert_time_rem_confirm">Are you sure you want to remove this time alert?</string>
+    <!--
+    **************************************
+    * Strings for BusStopDetailsActivity *
+    **************************************
+    -->
+    <string name="busstopdetails_title">Bus Stop Details</string>
     
-    <string name="alert_all_rem_confirm">Are you sure you want to remove all alerts?</string>
+    <!--
+    **************************************
+    * Strings for BusStopDetailsFragment *
+    **************************************
+    -->
+    <string name="busstopdetails_btn_showtimes">Bus times</string>
+    <string name="busstopdetails_btn_streetview">Street view</string>
+    <string name="busstopdetails_noservices">No known services for this stop</string>
+    
+    <!--
+    **********************************
+    * Strings for BusStopMapFragment *
+    **********************************
+    -->
+    <string name="busstopmapfragment_nosearchresults">No results found.</string>
+    <string name="busstopmapfragment_progress_message">Searching for:\n%s</string>
+    <string name="busstopmapfragment_location_unknown">Location unknown</string>
+    
+    <!--
+    **********************
+    **********************
+    ** Dialog Fragments **
+    **********************
+    **********************
+    -->
+    
+    <!--
+    *********************************************
+    * Strings for DeleteAllAlertsDialogFragment *
+    *********************************************
+    -->
+    <string name="deleteallalerts_title">Are you sure you want to remove all alerts?</string>
+    
+    <!--
+    *********************************************
+    * Strings for DeleteFavouriteDialogFragment *
+    *********************************************
+    -->
+    <string name="deletefavouritedialog_title">Are you sure you want to remove this stop as a favourite?</string>
+    
+    <!--
+    **************************************************
+    * Strings for DeleteProximityAlertDialogFragment *
+    **************************************************
+    -->
+    <string name="deleteproxdialog_title">Are you sure you want to remove this proximity alert?</string>
+    
+    <!--
+    *********************************************
+    * Strings for DeleteTimeAlertDialogFragment *
+    *********************************************
+    -->
+    <string name="deletetimedialog_title">Are you sure you want to remove this time alert?</string>
+    
+    <!--
+    ***************************************************
+    * Strings for InstallBarcodeScannerDialogFragment *
+    ***************************************************
+    -->
+    <string name="barcodescannerdialog_title">QR scanning app required</string>
+    <string name="barcodescannerdialog_message">To scan QR codes, your device must have a camera and you must have a compatible QR barcode scanning app installed, which you do not. Do you wish to download this from the Google Play Store? The application is called Barcode Scanner by the ZXing Team and is free to download.</string>
+    <string name="barcodescannerdialog_noplaystore">Google Play Store is missing.</string>
+    
+    <!--
+    ***********************************************
+    * Strings for InstallStreetViewDialogFragment *
+    ***********************************************
+    -->
+    <string name="streetviewdialog_title">Install Street View</string>
+    <string name="streetviewdialog_message">This feature requires that the Google Street View app is installed. Proceed to the Google Play Store?</string>
+    <string name="streetviewdialog_noplaystore">Google Play Store is missing.</string>
+    
+    <!--
+    ********************************************
+    * Strings for MapTypeChooserDialogFragment *
+    ********************************************
+    -->
+    <string name="maptypechooserdialog_title">Choose map type</string>
+    <string-array name="maptypechooserdialog_items">
+        <item>Normal</item>
+        <item>Satellite</item>
+        <item>Terrain</item>
+    </string-array>
+    
+    <!--
+    **************************************************
+    * Strings for ProximityLimitationsDialogFragment *
+    **************************************************
+    -->
+    <string name="proxlimitationsdialog_title">Proximity alert limitations</string>
+    <string name="proxlimitationsdialog_message">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Google Play Store.\n\nIf you already have a proximity alert active, it will be removed if you set this alert.\n\nIf you restart your device, the alert will be removed and will not be re-added, although you can manually re-add the alert if you wish.\n\nIf you do not come within the preset distance of the bus stop within 1 hour of setting this alert, it will be automatically removed and you will not be alerted. This is to prevent alerts lasting an indefinite amount of time.</string>
+    
+    <!--
+    *********************************************
+    * Strings for TimeLimitationsDialogFragment *
+    *********************************************
+    -->
+    <string name="timelimitationsdialog_title">Time alert limitations</string>
+    <string name="timelimitationsdialog_message">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Google Play Store.\n\nThis feature should be used as a guide only.\n\nAn attempt will be made to fetch bus times once per minute until the above criteria is met or the time spent checking exceeds 1 hour. However, your device may prevent this from happening (e.g. lack of data access, device is sleeping).\n\nIf your device restarts, this alert will be automatically cancelled but you may re-add it again.\n\nBe warned, this feature may use a lot of battery power.</string>
+    
+    <!--
+    ***************************************
+    * Strings for TurnOnGpsDialogFragment *
+    ***************************************
+    -->
+    <string name="turnongpsdialog_title">You do not have GPS turned on</string>
+    <string name="turnongpsdialog_message">To get the most precise location information, GPS needs to be turned on. Turn on now?</string>
+    <string name="turnongpsdialog_checkbox">Do not remind me again</string>
 </resources>

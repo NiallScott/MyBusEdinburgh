@@ -25,10 +25,12 @@
  *     exempt from clause 2.
 */ -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" >
     <item
         android:id="@+id/displaystopdata_option_menu_favourite"
-        android:showAsAction="ifRoom|withText" />
+        android:showAsAction="ifRoom|withText"
+        tools:ignore="MenuTitle" />
     <item
         android:id="@+id/displaystopdata_option_menu_refresh"
         android:title="@string/displaystopdata_menu_refresh"
@@ -37,12 +39,16 @@
     <item
         android:id="@+id/displaystopdata_option_menu_sort"
         android:icon="@drawable/ic_menu_sort"
-        android:showAsAction="ifRoom|withText" />
+        android:showAsAction="ifRoom|withText"
+        tools:ignore="MenuTitle" />
     <item
         android:id="@+id/displaystopdata_option_menu_autorefresh"
-        android:icon="@drawable/ic_menu_autorefresh" />
+        android:icon="@drawable/ic_menu_autorefresh"
+        tools:ignore="MenuTitle" />
     <item
-        android:id="@+id/displaystopdata_option_menu_prox" />
+        android:id="@+id/displaystopdata_option_menu_prox"
+        tools:ignore="MenuTitle" />
     <item
-        android:id="@+id/displaystopdata_option_menu_time" />
+        android:id="@+id/displaystopdata_option_menu_time"
+        tools:ignore="MenuTitle" />
 </menu>

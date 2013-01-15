@@ -180,8 +180,8 @@ public class PreferencesActivity extends PreferenceActivity
                 }
                 SearchRecentSuggestions suggestions =
                         new SearchRecentSuggestions(PreferencesActivity.this,
-                        MapSearchHistoryProvider.AUTHORITY,
-                        MapSearchHistoryProvider.MODE);
+                        MapSearchSuggestionsProvider.AUTHORITY,
+                        MapSearchSuggestionsProvider.MODE);
                 suggestions.clearHistory();
             }
         });

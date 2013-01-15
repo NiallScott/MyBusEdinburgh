@@ -41,6 +41,7 @@
              
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.annotation.SuppressLint;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -57,7 +58,8 @@ public final class ApiKey {
             };
             
     public static final String BUGSENSE_KEY = "]]></echo><echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" append="true">${bugsense.key}</echo><echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" append="true"><![CDATA[";
-            
+    
+    @SuppressLint({"SimpleDateFormat"})
     private static final SimpleDateFormat formatter =
             new SimpleDateFormat("yyyyMMddHH");
     
@@ -75,15 +77,17 @@ public final class ApiKey {
      * @return The hashed version of the API key.
      */
     public static String getHashedKey() {
-        String combinedKey = new String(API_KEY) + formatter.format(new Date());
+        final String combinedKey = new String(API_KEY) +
+                formatter.format(new Date());
         
         try {
-            MessageDigest m = MessageDigest.getInstance("MD5");
+            final MessageDigest m = MessageDigest.getInstance("MD5");
             m.update(combinedKey.getBytes(), 0, combinedKey.length());
             String hashedKey = new BigInteger(1, m.digest()).toString(16);
             while(hashedKey.length() < 32) {
                 hashedKey = "0" + hashedKey;
             }
+        
             return hashedKey;
         } catch(NoSuchAlgorithmException e) {
             return "";

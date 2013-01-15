@@ -26,7 +26,7 @@
 */ -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingTop="15dp"
@@ -45,7 +45,7 @@
             android:contentDescription="@string/alertmanager_prox_image_description" />
     </LinearLayout>
     <LinearLayout
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingLeft="10dp" 
@@ -57,7 +57,7 @@
             android:textSize="20sp" />
         <TextView
             android:id="@+id/txtAlertManProx"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="10dp"
             android:textSize="15sp" />

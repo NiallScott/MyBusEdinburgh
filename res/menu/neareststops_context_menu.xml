@@ -25,16 +25,20 @@
  *     exempt from clause 2.
 */ -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" >
     <item
         android:id="@+id/neareststops_context_menu_view"
         android:title="@string/favouritestops_menu_view" />
     <item
-        android:id="@+id/neareststops_context_menu_favourite" />
+        android:id="@+id/neareststops_context_menu_favourite"
+        tools:ignore="MenuTitle" />
     <item
-        android:id="@+id/neareststops_context_menu_prox_alert" />
+        android:id="@+id/neareststops_context_menu_prox_alert"
+        tools:ignore="MenuTitle" />
     <item
-        android:id="@+id/neareststops_context_menu_time_alert" />
+        android:id="@+id/neareststops_context_menu_time_alert"
+        tools:ignore="MenuTitle" />
     <item
         android:id="@+id/neareststops_context_menu_showonmap"
         android:title="@string/neareststops_context_showonmap" />

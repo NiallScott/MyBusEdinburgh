@@ -43,7 +43,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  */
 public class EnterStopCodeActivity extends FragmentActivity {
     
-    private final static boolean IS_HONEYCOMB_OR_GREATER =
+    private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
 
     /**
