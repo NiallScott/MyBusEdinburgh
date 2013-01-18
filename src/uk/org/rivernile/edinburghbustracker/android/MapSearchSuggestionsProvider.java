@@ -128,9 +128,9 @@ public class MapSearchSuggestionsProvider extends
                     // Populate bus stop records.
                     result = new SearchResult();
                     
-                    result.stopCode = c.getString(0);
-                    result.latitude = (double)c.getInt(2) / 1E6;
-                    result.longitude = (double)c.getInt(3) / 1E6;
+                    result.stopCode = c.getString(1);
+                    result.latitude = c.getDouble(3);
+                    result.longitude = c.getDouble(4);
                     result.services = bsd.getBusServicesForStopAsString(
                             result.stopCode);
                     if(location != null) {
@@ -145,13 +145,15 @@ public class MapSearchSuggestionsProvider extends
                     // If there's locality information, append it.
                     locality = bsd.getLocalityForStopCode(result.stopCode);
                     if(locality != null) {
-                        result.stopName = c.getString(1) + ", " + locality;
+                        result.stopName = c.getString(2) + ", " + locality;
                     } else {
-                        result.stopName = c.getString(1);
+                        result.stopName = c.getString(2);
                     }
                     
                     results.add(result);
                 }
+                
+                c.close();
             }
         }
         

@@ -54,10 +54,10 @@ public class BusStopMarkerLoader
     
     private final BusStopDatabase bsd;
     
-    private final int minX;
-    private final int minY;
-    private final int maxX;
-    private final int maxY;
+    private final double minX;
+    private final double minY;
+    private final double maxX;
+    private final double maxY;
     private final float zoom;
     private String[] filteredServices;
     
@@ -78,10 +78,10 @@ public class BusStopMarkerLoader
         
         bsd = BusStopDatabase.getInstance(context.getApplicationContext());
         
-        this.minX = (int)(minX * 1E6);
-        this.minY = (int)(minY * 1E6);
-        this.maxX = (int)(maxX * 1E6);
-        this.maxY = (int)(maxY * 1E6);
+        this.minX = minX;
+        this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
         this.zoom = zoom;
     }
     
@@ -157,8 +157,7 @@ public class BusStopMarkerLoader
                     stopCode = c.getString(0);
                     
                     // Set the latitude and longitude.
-                    mo.position(new LatLng((double)c.getInt(2) / 1E6,
-                            (double)c.getInt(3) / 1E6));
+                    mo.position(new LatLng(c.getDouble(2), c.getDouble(3)));
                     
                     locality = c.getString(5);
                     sb.append(c.getString(1));

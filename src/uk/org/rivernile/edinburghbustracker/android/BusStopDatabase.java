@@ -49,14 +49,14 @@ import java.io.InputStream;
 public final class BusStopDatabase extends SQLiteOpenHelper {
 
     /** The name of the database. */
-    public static final String STOP_DB_NAME = "busstops8.db";
+    public static final String STOP_DB_NAME = "busstops9.db";
     /** This is the schema name of the database. */
-    public static final String SCHEMA_NAME = "MBE_8";
+    public static final String SCHEMA_NAME = "MBE_9";
     /** The version of the database. For internal use only. */
     protected static final int STOP_DB_VERSION = 1;
     
     private static final String BUS_STOPS_TABLE = "bus_stops";
-    private static final String BUS_STOPS_STOPCODE = "_id";
+    private static final String BUS_STOPS_STOPCODE = "stopCode";
     private static final String BUS_STOPS_STOPNAME = "stopName";
     private static final String BUS_STOPS_X = "x";
     private static final String BUS_STOPS_Y = "y";
@@ -70,6 +70,9 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
     private static final String SERVICE_STOPS_TABLE = "service_stops";
     private static final String SERVICE_STOPS_STOPCODE = "stopCode";
     private static final String SERVICE_STOPS_SERVICE_NAME = "serviceName";
+    
+    private static final String SERVICE_TABLE = "service";
+    private static final String SERVICE_SERVICE_NAME = "name";
 
     private static BusStopDatabase instance = null;
     
@@ -88,7 +91,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         
         f = context.getDatabasePath(STOP_DB_NAME);
         if(!f.exists()) {
-            restoreDBFromAssets();
+            new Thread(new RestoreDBFromAssetsTask(this)).start();
         } else {
             final long assetVersion = Long.parseLong(context.getString(
                     R.string.asset_db_version));
@@ -97,13 +100,13 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                 currentVersion = getLastDBModTime();
             } catch(SQLiteException e) {
                 f.delete();
-                restoreDBFromAssets();
+                new Thread(new RestoreDBFromAssetsTask(this)).start();
                 return;
             }
 
             if(assetVersion > currentVersion) {
                 f.delete();
-                restoreDBFromAssets();
+                new Thread(new RestoreDBFromAssetsTask(this)).start();
             }
         }
     }
@@ -144,6 +147,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
             out.close();
             in.close();
             
+            setUpIndexes(getWritableDatabase());
+            
             return true;
         } catch(IOException e) {
             return false;
@@ -166,6 +171,23 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
             final int newVersion) {
         // Do nothing.
     }
+    
+    /**
+     * Set up the indexes on the database to increase performance. Creating
+     * index will cause the database to increase in size.
+     * 
+     * @param db The database to create the indexes on.
+     */
+    public static void setUpIndexes(final SQLiteDatabase db) {
+        try {
+            db.execSQL("CREATE INDEX service_point_index ON " +
+                    "service_point(service_id, chainage, order_value)");
+        } catch(SQLiteException e) {
+            // Nothing to do, except now when route lines are drawn, the app
+            // run like shit. This is most likely caused because we're out of
+            // disk space.
+        }
+    }
 
     /**
      * Get information for a bus stop based on a boxed area. This is used to
@@ -177,11 +199,20 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @param maxY The maximum latitude to return results for.
      * @return A database Cursor object with the result set.
      */
-    public synchronized Cursor getBusStopsByCoords(final int minX,
-            final int minY, final int maxX, final int maxY) {
+    public synchronized Cursor getBusStopsByCoords(final double minX,
+            final double minY, final double maxX, final double maxY) {
         try {
+            final String[] projection = new String[] {
+                BUS_STOPS_STOPCODE,
+                BUS_STOPS_STOPNAME,
+                BUS_STOPS_X,
+                BUS_STOPS_Y,
+                BUS_STOPS_ORIENTATION,
+                BUS_STOPS_LOCALITY
+            };
+            
             final SQLiteDatabase db = getReadableDatabase();
-            return db.query(BUS_STOPS_TABLE, null,
+            return db.query(BUS_STOPS_TABLE, projection,
                     '(' + BUS_STOPS_X + " BETWEEN ? AND ?) AND " +
                     '(' + BUS_STOPS_Y + " BETWEEN ? AND ?)",
                     new String[] { String.valueOf(minX), String.valueOf(maxX),
@@ -205,8 +236,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * defined by the SQL 'IN' parameter.
      * @return A database Cursor object with the result set.
      */
-    public synchronized Cursor getFilteredStopsByCoords(final int minX,
-            final int minY, final int maxX, final int maxY,
+    public synchronized Cursor getFilteredStopsByCoords(final double minX,
+            final double minY, final double maxX, final double maxY,
             final String filter) {
         try {
             final SQLiteDatabase db = getReadableDatabase();
@@ -404,12 +435,12 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         
         try {
             final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(true, SERVICE_STOPS_TABLE,
-                    new String[] { SERVICE_STOPS_SERVICE_NAME },
+            final Cursor c = db.query(true, SERVICE_TABLE,
+                    new String[] { SERVICE_SERVICE_NAME },
                     null, null, null, null,
-                    "CASE WHEN " + SERVICE_STOPS_SERVICE_NAME +
-                    " GLOB '[^0-9.]*' THEN " + SERVICE_STOPS_SERVICE_NAME +
-                    " ELSE cast(" + SERVICE_STOPS_SERVICE_NAME + " AS int) END",
+                    "CASE WHEN " + SERVICE_SERVICE_NAME +
+                    " GLOB '[^0-9.]*' THEN " + SERVICE_SERVICE_NAME +
+                    " ELSE cast(" + SERVICE_SERVICE_NAME + " AS int) END",
                     null);
             final int count = c.getCount();
             if(count > 0) {
@@ -450,8 +481,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                     null, null, null);
 
             if(c.moveToNext()) {
-                point = new LatLng((double)c.getInt(0) / 1E6,
-                        (double)c.getInt(1) / 1E6);
+                point = new LatLng(c.getDouble(0), c.getDouble(1));
             }
             
             c.close();
@@ -535,5 +565,36 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         
         return Html.fromHtml(serviceList.replace("N",
                 "<font color=\"red\">N</font>"));
+    }
+    
+    /**
+     * This task is run when a database needs to be restored from the assets
+     * directory.
+     */
+    private static class RestoreDBFromAssetsTask implements Runnable {
+        
+        private final BusStopDatabase bsd;
+        
+        /**
+         * Create a new task.
+         * 
+         * @param bsd A reference to the BusStopDatabase.
+         */
+        public RestoreDBFromAssetsTask(final BusStopDatabase bsd) {
+            if(bsd == null) {
+                throw new IllegalArgumentException("A reference to the " +
+                        "BusStopDatabase must be provided.");
+            }
+            
+            this.bsd = bsd;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void run() {
+            bsd.restoreDBFromAssets();
+        }
     }
 }

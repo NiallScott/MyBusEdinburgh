@@ -631,9 +631,9 @@ public class NearestStopsFragment extends ListFragment
         public static final String ARG_FILTERED_SERVICES = "filteredServices";
         
         /** If modifying for another city, check that this value is correct. */
-        private static final int LATITUDE_SPAN = 4499;
+        private static final double LATITUDE_SPAN = 0.004499;
         /** If modifying for another city, check that this value is correct. */
-        private static final int LONGITUDE_SPAN = 8001;
+        private static final double LONGITUDE_SPAN = 0.008001;
         
         private final BusStopDatabase bsd;
         private final Bundle args;
@@ -677,16 +677,11 @@ public class NearestStopsFragment extends ListFragment
             final double latitude = args.getDouble(ARG_LATITUDE);
             final double longitude = args.getDouble(ARG_LONGITUDE);
             
-            // Convert the latitude and longitude to the Google Maps/database
-            // friendly integer version.
-            final int latitude1e6 = (int)(latitude * 1E6);
-            final int longitude1e6 = (int)(longitude * 1E6);
-            
             // Calculate the bounds.
-            final int minX = latitude1e6 + LATITUDE_SPAN;
-            final int minY = longitude1e6 - LONGITUDE_SPAN;
-            final int maxX = latitude1e6 - LATITUDE_SPAN;
-            final int maxY = longitude1e6 + LONGITUDE_SPAN;
+            final double minX = latitude - LATITUDE_SPAN;
+            final double minY = longitude - LONGITUDE_SPAN;
+            final double maxX = latitude + LATITUDE_SPAN;
+            final double maxY = longitude + LONGITUDE_SPAN;
             
             // Do not let anything else touch the stop database while we are
             // querying it.
@@ -716,8 +711,7 @@ public class NearestStopsFragment extends ListFragment
                         // compute the distance between the handset and the bus
                         // stop.
                         Location.distanceBetween(latitude, longitude,
-                                (double)c.getInt(2) / 1E6,
-                                (double)c.getInt(3) / 1E6, distance);
+                                c.getDouble(2), c.getDouble(3), distance);
                         final String stopCode = c.getString(0);
                         // Create a new SearchResult and add it to the results
                         // list.

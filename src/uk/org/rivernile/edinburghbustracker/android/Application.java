@@ -31,6 +31,8 @@ import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Build;
 import android.os.Looper;
 import android.widget.Toast;
@@ -103,7 +105,19 @@ public class Application extends android.app.Application {
             File toDelete = getDatabasePath("busstops.db");
             if(toDelete.exists()) toDelete.delete();
             
+            toDelete = getDatabasePath("busstops.db-journal");
+            if(toDelete.exists()) toDelete.delete();
+            
             toDelete = getDatabasePath("busstops2.db");
+            if(toDelete.exists()) toDelete.delete();
+            
+            toDelete = getDatabasePath("busstops2.db-journal");
+            if(toDelete.exists()) toDelete.delete();
+            
+            toDelete = getDatabasePath("busstops8.db");
+            if(toDelete.exists()) toDelete.delete();
+            
+            toDelete = getDatabasePath("busstops8.db-journal");
             if(toDelete.exists()) toDelete.delete();
             
             // Start update task.
@@ -341,6 +355,17 @@ public class Application extends android.app.Application {
                 return;
             }
             
+            try {
+                // Open the temp database and execute the index operation on it.
+                final SQLiteDatabase db = SQLiteDatabase.openDatabase(
+                        temp.getAbsolutePath(), null,
+                        SQLiteDatabase.OPEN_READWRITE);
+                BusStopDatabase.setUpIndexes(db);
+                db.close();
+            } catch(SQLiteException e) {
+                // 
+            }
+            
             // Close a currently open database. Delete the old database then
             // move the downloaded file in to its place. Do this while
             // synchronized to make sure noting else uses the database in this
@@ -351,6 +376,12 @@ public class Application extends android.app.Application {
                 dest.delete();
                 temp.renameTo(dest);
             }
+            
+            // Delete the associated journal file because we no longer need it.
+            final File journalFile = context
+                    .getDatabasePath(BusStopDatabase.STOP_DB_NAME +
+                    "_temp-journal");
+            if(journalFile.exists()) journalFile.delete();
             
             // Alert the user that the database has been updated.
             Looper.prepare();

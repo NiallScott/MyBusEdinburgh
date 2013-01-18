@@ -624,12 +624,12 @@ public class BusStopDetailsFragment extends ListFragment
             return;
         }
         
-        stopCode = c.getString(0);
-        stopName = c.getString(1);
-        latitude = (double)c.getInt(2) / 1E6;
-        longitude = (double)c.getInt(3) / 1E6;
-        orientation = c.getInt(4);
-        locality = c.getString(5);
+        stopCode = c.getString(1);
+        stopName = c.getString(2);
+        latitude = c.getDouble(3);
+        longitude = c.getDouble(4);
+        orientation = c.getInt(5);
+        locality = c.getString(6);
         
         c.close();
         
