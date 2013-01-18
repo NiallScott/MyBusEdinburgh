@@ -51,6 +51,11 @@ public interface BusParser {
     public static final byte ERROR_PARSEERR = 4;
     /** This error is called when there was no data for this stop. */
     public static final byte ERROR_NODATA = 5;
+    /**
+     * This error is called when the URL the client thought it was requesting
+     * data from differs from the URL it is receiving data from.
+     */
+    public static final byte ERROR_URLMISMATCH = 6;
     
     /**
      * Get data for a list of bus stops. This is usually bus times.

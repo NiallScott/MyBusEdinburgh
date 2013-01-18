@@ -300,7 +300,8 @@ public class AddTimeAlertFragment extends Fragment
         } else {
             // If the services list is not empty, put the services list in the
             // view and enable the okay button.
-            txtServices.setText(services);
+            txtServices.setText(
+                    BusStopDatabase.getColouredServiceListString(services));
             btnOkay.setEnabled(true);
         }
     }

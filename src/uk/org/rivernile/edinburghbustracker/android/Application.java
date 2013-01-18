@@ -127,7 +127,7 @@ public class Application extends android.app.Application {
                 PreferencesActivity.PREF_FILE, 0);
         final boolean autoUpdate = sp.getBoolean(PREF_DATABASE_AUTO_UPDATE,
                 true);
-        SharedPreferences.Editor edit = sp.edit();
+        final SharedPreferences.Editor edit = sp.edit();
         
         // Continue to check if the user has enabled it, or a check has been
         // forced (from the Preferences).
@@ -156,6 +156,13 @@ public class Application extends android.app.Application {
                 try {
                     final BufferedInputStream is = new BufferedInputStream(
                             conn.getInputStream());
+                    
+                    if(!url.getHost().equals(conn.getURL().getHost())) {
+                        is.close();
+                        conn.disconnect();
+                        return;
+                    }
+                    
                     // Read the incoming data.
                     int data;
                     while((data = is.read()) != -1) {
@@ -174,7 +181,7 @@ public class Application extends android.app.Application {
             String topoId;
             try {
                 // Parse the JSON and get the topoId from it.
-                JSONObject jo = new JSONObject(sb.toString());
+                final JSONObject jo = new JSONObject(sb.toString());
                 topoId = jo.getString("topoId");
             } catch(JSONException e) {
                 return;
@@ -214,11 +221,18 @@ public class Application extends android.app.Application {
                 // Connection stuff.
                 final URL url = new URL(sb.toString());
                 sb.setLength(0);
-                HttpURLConnection conn = (HttpURLConnection)url
+                final HttpURLConnection conn = (HttpURLConnection)url
                         .openConnection();
                 try {
-                    BufferedInputStream is = new BufferedInputStream(
+                    final BufferedInputStream is = new BufferedInputStream(
                             conn.getInputStream());
+                    
+                    if(!url.getHost().equals(conn.getURL().getHost())) {
+                        is.close();
+                        conn.disconnect();
+                        return;
+                    }
+                    
                     int data;
                     // Read the incoming data.
                     while((data = is.read()) != -1) {
@@ -237,7 +251,7 @@ public class Application extends android.app.Application {
             String dbUrl, schemaVersion, checksum;
             try {
                 // Get the data from tje returned JSON.
-                JSONObject jo = new JSONObject(sb.toString());
+                final JSONObject jo = new JSONObject(sb.toString());
                 dbUrl = jo.getString("db_url");
                 schemaVersion = jo.getString("db_schema_version");
                 topoId = jo.getString("topo_id");
@@ -289,6 +303,14 @@ public class Application extends android.app.Application {
             final URL u = new URL(url);
             final HttpURLConnection con = (HttpURLConnection)u.openConnection();
             final InputStream in = con.getInputStream();
+            
+            // Make sure the URL is what we expect.
+            if(!u.getHost().equals(con.getURL().getHost())) {
+                in.close();
+                con.disconnect();
+                return;
+            }
+            
             // The location the file should be downloaded to.
             final File temp = context
                     .getDatabasePath(BusStopDatabase.STOP_DB_NAME + "_temp");
@@ -353,7 +375,7 @@ public class Application extends android.app.Application {
         try {
             final InputStream fin = new FileInputStream(file);
             final MessageDigest md5er = MessageDigest.getInstance("MD5");
-            byte[] buffer = new byte[1024];
+            final byte[] buffer = new byte[1024];
             int read;
             
             while((read = fin.read(buffer)) != -1) {
@@ -361,7 +383,7 @@ public class Application extends android.app.Application {
             }
             fin.close();
             
-            byte[] digest = md5er.digest();
+            final byte[] digest = md5er.digest();
             if(digest == null) return null;
             final StringBuilder builder = new StringBuilder();
             for(byte a : digest) {

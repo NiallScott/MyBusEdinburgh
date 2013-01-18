@@ -49,15 +49,15 @@ import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 public final class EdinburghParser implements BusParser {
     
     /** This error is called when an invalid key has been specified. */
-    public static final byte ERROR_INVALID_APP_KEY = 6;
+    public static final byte ERROR_INVALID_APP_KEY = 7;
     /** This error is called when an invalid parameter has been specified. */
-    public static final byte ERROR_INVALID_PARAMETER = 7;
+    public static final byte ERROR_INVALID_PARAMETER = 8;
     /** This error is called when the system encounters a processing error. */
-    public static final byte ERROR_PROCESSING_ERROR = 8;
+    public static final byte ERROR_PROCESSING_ERROR = 9;
     /** This error is called when the system is under maintenance. */
-    public static final byte ERROR_SYSTEM_MAINTENANCE = 9;
+    public static final byte ERROR_SYSTEM_MAINTENANCE = 10;
     /** This error is called when the system is overloaded. */
-    public static final byte ERROR_SYSTEM_OVERLOADED = 10;
+    public static final byte ERROR_SYSTEM_OVERLOADED = 11;
     
     private static final String URL =
             "http://www.mybustracker.co.uk/ws.php?module=json&key=";
@@ -119,6 +119,13 @@ public final class EdinburghParser implements BusParser {
             try {
                 final BufferedInputStream is = new BufferedInputStream(
                         conn.getInputStream());
+                // Check to see if the URL we connected to was what we expected.
+                if(!url.getHost().equals(conn.getURL().getHost())) {
+                    is.close();
+                    conn.disconnect();
+                    throw new BusParserException(ERROR_URLMISMATCH);
+                }
+                
                 int data;
                 
                 while((data = is.read()) != -1) {

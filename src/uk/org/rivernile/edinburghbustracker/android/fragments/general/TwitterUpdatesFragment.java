@@ -33,6 +33,8 @@ import static uk.org.rivernile.edinburghbustracker.android.twitter
         .TwitterUpdatesLoader.ERROR_IOERR;
 import static uk.org.rivernile.edinburghbustracker.android.twitter
         .TwitterUpdatesLoader.ERROR_URLERR;
+import static uk.org.rivernile.edinburghbustracker.android.twitter
+        .TwitterUpdatesLoader.ERROR_URLMISMATCH;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -222,6 +224,9 @@ public class TwitterUpdatesFragment extends ListFragment
                 break;
             case ERROR_URLERR:
                 txtError.setText(R.string.newsupdates_err_urlerr);
+                break;
+            case ERROR_URLMISMATCH:
+                txtError.setText(R.string.newsupdates_err_urlmismatch);
                 break;
         }
         

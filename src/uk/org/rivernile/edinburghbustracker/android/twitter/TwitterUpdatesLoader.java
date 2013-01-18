@@ -30,9 +30,9 @@ import android.text.Html;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +57,11 @@ public class TwitterUpdatesLoader
     public static final byte ERROR_IOERR = 2;
     /** There was a problem parsing the URL. Should never happen. */
     public static final byte ERROR_URLERR = 3;
+    /**
+     * Error code for when the URL the client thought it was requesting data
+     * from differs from the URL it is receiving data from.
+     */
+    public static final byte ERROR_URLMISMATCH = 4;
     
     private static final String REQUEST_URL = "http://api.twitter.com/1/" +
             "lists/statuses.json?slug=bus-tracker-updates&" +
@@ -78,30 +83,37 @@ public class TwitterUpdatesLoader
     public TwitterLoaderResult loadInBackground() {
         final ArrayList<TwitterNewsItem> items =
                 new ArrayList<TwitterNewsItem>();
-        byte error = -1;
+        byte error;
 
         try {
             // Create URL object.
             final URL u = new URL(REQUEST_URL);
             // Open the connection to the HTTP server.
-            final URLConnection con = u.openConnection();
+            final HttpURLConnection con = (HttpURLConnection)u.openConnection();
             // Buffer the input.
             final BufferedReader in = new BufferedReader(new InputStreamReader(
                     con.getInputStream()));
-            // All text will be put in to a StringBuilder.
-            final StringBuilder sb = new StringBuilder();
-            String lineIn;
             
-            // Keep accepting input until there is no more.
-            while((lineIn = in.readLine()) != null) {
-                sb.append(lineIn);
+            // Check to see if the URL we've connected to is what we expected.
+            if(u.getHost().equals(con.getURL().getHost())) {
+                // All text will be put in to a StringBuilder.
+                final StringBuilder sb = new StringBuilder();
+                String lineIn;
+
+                // Keep accepting input until there is no more.
+                while((lineIn = in.readLine()) != null) {
+                    sb.append(lineIn);
+                }
+                
+                // Parse the JSON.
+                error = parseJSON(items, sb.toString());
+            } else {
+                error = ERROR_URLMISMATCH;
             }
             
             // Remember to release resources.
             in.close();
-
-            // Parse the JSON.
-            error = parseJSON(items, sb.toString());
+            con.disconnect();
         } catch(MalformedURLException e) {
             error = ERROR_URLERR;
         } catch(IOException e) {

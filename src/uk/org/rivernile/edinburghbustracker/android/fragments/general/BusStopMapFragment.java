@@ -105,7 +105,6 @@ public class BusStopMapFragment extends SupportMapFragment
     private static final String LOADER_ARG_MIN_Y = "minY";
     private static final String LOADER_ARG_MAX_X = "maxX";
     private static final String LOADER_ARG_MAX_Y = "maxY";
-    private static final String LOADER_ARG_BEARING = "bearing";
     private static final String LOADER_ARG_ZOOM = "zoom";
     private static final String LOADER_ARG_FILTERED_SERVICES =
             "filteredServices";
@@ -164,6 +163,8 @@ public class BusStopMapFragment extends SupportMapFragment
                 uiSettings.setZoomControlsEnabled(false);
                 uiSettings.setRotateGesturesEnabled(false);
                 uiSettings.setCompassEnabled(false);
+                // Only show the My Location button pre-Honeycomb. After
+                // Honeycomb, it is shown in the ActionBar.
                 uiSettings.setMyLocationButtonEnabled(
                         Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB);
                 
@@ -173,10 +174,10 @@ public class BusStopMapFragment extends SupportMapFragment
                 map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         new LatLng(DEFAULT_LAT, DEFAULT_LONG), DEFAULT_ZOOM));
+                
+                refreshBusStops(null);
             }
         }
-        
-        refreshBusStops(null);
     }
     
     /**
@@ -186,10 +187,13 @@ public class BusStopMapFragment extends SupportMapFragment
     public void onResume() {
         super.onResume();
         
-        map.setMyLocationEnabled(
-                getActivity().getSharedPreferences(
-                        PreferencesActivity.PREF_FILE, 0)
-                    .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION, true));
+        if(map != null) {
+            map.setMyLocationEnabled(
+                    getActivity().getSharedPreferences(
+                            PreferencesActivity.PREF_FILE, 0)
+                        .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION,
+                                true));
+        }
     }
     
     /**
@@ -247,8 +251,11 @@ public class BusStopMapFragment extends SupportMapFragment
                 return true;
             case R.id.busstopmap_option_menu_trafficview:
                 // Toggle the traffic view.
-                map.setTrafficEnabled(!map.isTrafficEnabled());
-                getActivity().supportInvalidateOptionsMenu();
+                if(map != null) {
+                    map.setTrafficEnabled(!map.isTrafficEnabled());
+                    getActivity().supportInvalidateOptionsMenu();
+                }
+                
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -317,7 +324,6 @@ public class BusStopMapFragment extends SupportMapFragment
                             bundle.getDouble(LOADER_ARG_MAX_X),
                             bundle.getDouble(LOADER_ARG_MAX_Y),
                             bundle.getFloat(LOADER_ARG_ZOOM),
-                            bundle.getFloat(LOADER_ARG_BEARING),
                             bundle.getStringArray(LOADER_ARG_FILTERED_SERVICES)
                         );
                 } else {
@@ -327,8 +333,7 @@ public class BusStopMapFragment extends SupportMapFragment
                             bundle.getDouble(LOADER_ARG_MIN_Y),
                             bundle.getDouble(LOADER_ARG_MAX_X),
                             bundle.getDouble(LOADER_ARG_MAX_Y),
-                            bundle.getFloat(LOADER_ARG_ZOOM),
-                            bundle.getFloat(LOADER_ARG_BEARING)
+                            bundle.getFloat(LOADER_ARG_ZOOM)
                         );
                 }
             case LOADER_ID_GEO_SEARCH:
@@ -385,7 +390,9 @@ public class BusStopMapFragment extends SupportMapFragment
     @Override
     public void onMapTypeChosen(final int mapType) {
         // When the user selects a new map type, change the map type.
-        map.setMapType(mapType);
+        if(map != null) {
+            map.setMapType(mapType);
+        }
     }
     
     /**
@@ -441,6 +448,10 @@ public class BusStopMapFragment extends SupportMapFragment
      * @param searchTerm What to search for.
      */
     public void onSearch(final String searchTerm) {
+        if(map == null) {
+            return;
+        }
+        
         final Matcher m = STOP_CODE_SEARCH_PATTERN.matcher(searchTerm);
         
         if(m.matches()) {
@@ -482,6 +493,10 @@ public class BusStopMapFragment extends SupportMapFragment
      * doesn't need to be looked up again. If it's not available, use null.
      */
     private void refreshBusStops(CameraPosition position) {
+        if(map == null) {
+            return;
+        }
+        
         // Populate the CameraPosition if it wasn't given.
         if(position == null) {
             position = map.getCameraPosition();
@@ -497,7 +512,6 @@ public class BusStopMapFragment extends SupportMapFragment
         b.putDouble(LOADER_ARG_MIN_Y, lastVisibleBounds.southwest.longitude);
         b.putDouble(LOADER_ARG_MAX_X, lastVisibleBounds.northeast.latitude);
         b.putDouble(LOADER_ARG_MAX_Y, lastVisibleBounds.northeast.longitude);
-        b.putFloat(LOADER_ARG_BEARING, position.bearing);
         b.putFloat(LOADER_ARG_ZOOM, position.zoom);
 
         final String[] chosenServices = servicesChooser.getChosenServices();
@@ -519,6 +533,10 @@ public class BusStopMapFragment extends SupportMapFragment
      */
     private void addBusStopMarkers(
             final HashMap<String, MarkerOptions> result) {
+        if(map == null) {
+            return;
+        }
+        
         // Get an array of the stopCodes that are currently on the map. This is
         // given to us as an array of Objects, which cannot be cast to an array
         // of Strings.
@@ -587,6 +605,10 @@ public class BusStopMapFragment extends SupportMapFragment
             progressDialog = null;
         }
         
+        if(map == null) {
+            return;
+        }
+        
         // Remove all of the existing search markers from the map.
         for(Marker m : geoSearchMarkers) {
             m.remove();
@@ -635,6 +657,10 @@ public class BusStopMapFragment extends SupportMapFragment
      * no location, false if not.
      */
     private void moveCameraToMyLocation(final boolean verbose) {
+        if(map == null) {
+            return;
+        }
+        
         final Location myLocation = map.getMyLocation();
         
         if(myLocation != null) {

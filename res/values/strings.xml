@@ -156,6 +156,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_err_noconn"><b>A connection could not be made to the server or an error occurred during transmission.</b>\nIf you are sure you are connected, please retry.</string>
     <string name="displaystopdata_err_noresolv"><b>The server could not be resolved.</b>\nPlease try again later.</string>
     <string name="displaystopdata_err_nodata"><b>There is no data for this bus stop.</b>\nAre you sure the supplied stop code is correct? If so, retry.</string>
+    <string name="displaystopdata_err_urlmismatch"><b>Network sign on required.</b>\nPlease sign on through your web browser and try again.</string>
     
     <string name="displaystopdata_err_api_invalid_key"><b>The service refused to serve this request.</b>\nThe service depends on your device\'s date and time being correct. Please check this in your system preferences. If they are, contact the application developer for further assistance.</string>
     <string name="displaystopdata_err_api_invalid_parameter"><b>The service did not accept this request.</b>\nIf this happens again, please contact the application developer.</string>
@@ -317,6 +318,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="newsupdates_err_parseerr">There was an error while trying to process the incoming data.</string>
     <string name="newsupdates_err_ioerr">There was an error while receiving data from Twitter. Sometimes this error will happen when Twitter is experiencing heavy load.</string>
     <string name="newsupdates_err_urlerr">There was a problem formatting the URL to request the data from the Twitter server.</string>
+    <string name="newsupdates_err_urlmismatch">Please sign on to the network through your web browser and try again.</string>
 
     <!--
     ************************************

@@ -44,7 +44,8 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
 public class BusStopDetailsActivity extends FragmentActivity {
     
     /** The Intent argument for stopCode. */
-    public static final String ARG_STOPCODE = "stopCode";
+    public static final String ARG_STOPCODE =
+            BusStopDetailsFragment.ARG_STOPCODE;
     
     private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;

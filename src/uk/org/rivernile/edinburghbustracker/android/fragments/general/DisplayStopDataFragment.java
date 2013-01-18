@@ -663,6 +663,9 @@ public class DisplayStopDataFragment extends Fragment
             case BusParser.ERROR_NODATA:
                 txtError.setText(R.string.displaystopdata_err_nodata);
                 break;
+            case BusParser.ERROR_URLMISMATCH:
+                txtError.setText(R.string.displaystopdata_err_urlmismatch);
+                break;
             case EdinburghParser.ERROR_INVALID_APP_KEY:
                 txtError.setText(R.string
                         .displaystopdata_err_api_invalid_key);

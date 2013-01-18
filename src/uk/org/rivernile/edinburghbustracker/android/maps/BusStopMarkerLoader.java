@@ -58,7 +58,6 @@ public class BusStopMarkerLoader
     private final int minY;
     private final int maxX;
     private final int maxY;
-    private final float bearing;
     private final float zoom;
     private String[] filteredServices;
     
@@ -71,11 +70,10 @@ public class BusStopMarkerLoader
      * @param maxX The maximum X coordinate.
      * @param maxY The maximum Y coordinate.
      * @param zoom The zoom level from Google Maps.
-     * @param bearing The direction the "camera" is facing.
      */
     public BusStopMarkerLoader(final Context context, final double minX,
             final double minY, final double maxX, final double maxY,
-            final float zoom, final float bearing) {
+            final float zoom) {
         super(context);
         
         bsd = BusStopDatabase.getInstance(context.getApplicationContext());
@@ -85,7 +83,6 @@ public class BusStopMarkerLoader
         this.maxX = (int)(maxX * 1E6);
         this.maxY = (int)(maxY * 1E6);
         this.zoom = zoom;
-        this.bearing = bearing;
     }
     
     /**
@@ -97,14 +94,12 @@ public class BusStopMarkerLoader
      * @param maxX The maximum X coordinate.
      * @param maxY The maximum Y coordinate.
      * @param zoom The zoom level from Google Maps.
-     * @param bearing The direction the "camera" is facing.
      * @param filteredServices A String array of the only services to show.
      */
     public BusStopMarkerLoader(final Context context, final double minX,
             final double minY, final double maxX, final double maxY,
-            final float zoom, final float bearing,
-            final String[] filteredServices) {
-        this(context, minX, minY, maxX, maxY, zoom, bearing);
+            final float zoom, final String[] filteredServices) {
+        this(context, minX, minY, maxX, maxY, zoom);
         
         this.filteredServices = filteredServices;
     }
@@ -147,7 +142,8 @@ public class BusStopMarkerLoader
             if(c != null) {
                 MarkerOptions mo;
                 int orientation;
-                String str, stopCode;
+                String locality, stopCode;
+                final StringBuilder sb = new StringBuilder();
                 
                 // Loop through all rows in the Cursor.
                 while(c.moveToNext()) {
@@ -164,18 +160,18 @@ public class BusStopMarkerLoader
                     mo.position(new LatLng((double)c.getInt(2) / 1E6,
                             (double)c.getInt(3) / 1E6));
                     
-                    str = c.getString(5);
+                    locality = c.getString(5);
+                    sb.append(c.getString(1));
                     // Check to see if a locality is available.
-                    if(str == null) {
-                        str = c.getString(1) + " (" + stopCode + ')';
-                    } else {
-                        str = c.getString(1) + ", " + str + " (" +
-                                stopCode + ')';
+                    if(locality != null) {
+                        sb.append(',').append(' ').append(locality);
                     }
                     
-                    mo.title(str);
+                    sb.append(' ').append('(').append(stopCode).append(')');
+                    mo.title(sb.toString());
+                    sb.setLength(0);
                     
-                    orientation = (c.getInt(4) + ((int)bearing / 45)) % 8;
+                    orientation = c.getInt(4);
                     
                     // The icon to use depends on the orientation.
                     switch(orientation) {

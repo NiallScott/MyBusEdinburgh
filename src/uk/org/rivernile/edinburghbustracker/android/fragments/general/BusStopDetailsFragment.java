@@ -320,7 +320,7 @@ public class BusStopDetailsFragment extends ListFragment
         
         if(savedInstanceState == null) {
             // Start the bus stop information Loader.
-            getLoaderManager().initLoader(0, null, this);
+            getLoaderManager().restartLoader(0, null, this);
         } else {
             // If there is already information, then just jump straight to
             // populateView()
