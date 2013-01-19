@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 
 /**
  * This class deals with the handling of the Bus Stop Database. It deals with
@@ -72,7 +73,19 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
     private static final String SERVICE_STOPS_SERVICE_NAME = "serviceName";
     
     private static final String SERVICE_TABLE = "service";
+    private static final String SERVICE_ID = "_id";
     private static final String SERVICE_SERVICE_NAME = "name";
+    
+    private static final String SERVICE_COLOUR_TABLE = "service_colour";
+    private static final String SERVICE_COLOUR_ID = "_id";
+    private static final String SERVICE_COLOUR_HEX_COLOUR = "hex_colour";
+    
+    private static final String SERVICE_POINT_TABLE = "service_point";
+    private static final String SERVICE_POINT_SERVICE_ID = "service_id";
+    private static final String SERVICE_POINT_ORDER_VALUE = "order_value";
+    private static final String SERVICE_POINT_CHAINAGE = "chainage";
+    private static final String SERVICE_POINT_LATITUDE = "latitude";
+    private static final String SERVICE_POINT_LONGITUDE = "longitude";
 
     private static BusStopDatabase instance = null;
     
@@ -545,6 +558,108 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         }
         
         return result;
+    }
+    
+    /**
+     * Get a HashMap which contains the mapping of service names to service
+     * colours.
+     * 
+     * @param serviceList A String array of services. A null or empty list will
+     * mean that all services are returned.
+     * @return A mapping of service names to colours.
+     */
+    public synchronized HashMap<String, String> getServiceColours(
+            final String[] serviceList) {
+        // Create the HashMap now. We may need to return an empty version later
+        // if there's an error.
+        final HashMap<String, String> result = new HashMap<String, String>();
+        
+        try {
+            final SQLiteDatabase db = getReadableDatabase();
+            Cursor c;
+            
+            if(serviceList == null || serviceList.length == 0) {
+                // If the serviceList is null or empty, get all services.
+                c = db.rawQuery("SELECT " +
+                        SERVICE_TABLE + '.' + SERVICE_SERVICE_NAME + ", " +
+                        SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_HEX_COLOUR +
+                        " FROM " + SERVICE_COLOUR_TABLE + " LEFT JOIN " +
+                        SERVICE_TABLE + " ON " +
+                        SERVICE_TABLE + '.' + SERVICE_ID + " = " +
+                        SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_ID, null);
+            } else {
+                // If we've been given a list, we need to construct the parts
+                // of the 'IN' clause.
+                // Format: 'A','B','C'
+                final StringBuilder sb = new StringBuilder();
+                final int len = serviceList.length;
+                
+                for(int i = 0; i < len; i++) {
+                    if(i > 0) {
+                        sb.append(',');
+                    }
+                    
+                    sb.append('\'').append(serviceList[i]).append('\'');
+                }
+                
+                // Android selectArgs doesn't work with IN because the arguments
+                // inside the IN require their own single quotes, and Android
+                // comes along and puts its own single quotes in and bad things
+                // happen.
+                c = db.rawQuery("SELECT " +
+                        SERVICE_TABLE + '.' + SERVICE_SERVICE_NAME + ", " +
+                        SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_HEX_COLOUR +
+                        " FROM " + SERVICE_COLOUR_TABLE + " LEFT JOIN " +
+                        SERVICE_TABLE + " ON " +
+                        SERVICE_TABLE + '.' + SERVICE_ID + " = " +
+                        SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_ID +
+                        " WHERE " + SERVICE_TABLE + '.' + SERVICE_SERVICE_NAME +
+                        " IN (" + sb.toString() + ')', null);
+            }
+            
+            if(c != null) {
+                // Loop through the Cursor, putting each element in the HashMap.
+                while(c.moveToNext()) {
+                    result.put(c.getString(0), c.getString(1));
+                }
+                
+                c.close();
+            }
+        } catch(SQLiteException e) {
+            
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Get a Cursor which contains all the known route points for a given
+     * service.
+     * 
+     * @param serviceName The serviceName to get the route points for.
+     * @return A Cursor containing the route points for the service.
+     */
+    public synchronized Cursor getServicePointsForService(
+            final String serviceName) {
+        if(serviceName == null || serviceName.length() == 0) {
+            throw new IllegalArgumentException("The serviceName cannot be " +
+                    "null or blank.");
+        }
+        
+        try {
+            final SQLiteDatabase db = getReadableDatabase();
+            return db.rawQuery("SELECT " + SERVICE_POINT_CHAINAGE + ", " + 
+                    SERVICE_POINT_LATITUDE + ", " + SERVICE_POINT_LONGITUDE +
+                    " FROM " + SERVICE_POINT_TABLE + " WHERE " +
+                    SERVICE_POINT_SERVICE_ID + " = (SELECT " + SERVICE_ID +
+                    " FROM " + SERVICE_TABLE + " WHERE " +
+                    SERVICE_SERVICE_NAME + " = ?) ORDER BY " +
+                    SERVICE_POINT_CHAINAGE + " ASC, " +
+                    SERVICE_POINT_ORDER_VALUE + " ASC",
+                    new String[] { serviceName });
+        } catch(SQLiteException e) {
+            return null;
+        }
     }
     
     /**

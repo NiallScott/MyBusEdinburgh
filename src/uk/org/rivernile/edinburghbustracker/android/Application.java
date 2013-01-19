@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -363,7 +363,9 @@ public class Application extends android.app.Application {
                 BusStopDatabase.setUpIndexes(db);
                 db.close();
             } catch(SQLiteException e) {
-                // 
+                // If we couldn't create the index, continue anyway. The user
+                // will still be able to use the database, it will just run
+                // slowly if they want route lines.
             }
             
             // Close a currently open database. Delete the old database then

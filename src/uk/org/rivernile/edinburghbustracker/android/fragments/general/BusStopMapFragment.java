@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,8 +45,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
@@ -63,6 +66,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.maps.BusStopMarkerLoader;
 import uk.org.rivernile.edinburghbustracker.android.maps.GeoSearchLoader;
+import uk.org.rivernile.edinburghbustracker.android.maps.RouteLineLoader;
 
 /**
  * The BusStopMapFragment shows a Google Maps v2 MapView and depending on the
@@ -112,6 +116,7 @@ public class BusStopMapFragment extends SupportMapFragment
     
     private static final int LOADER_ID_BUS_STOPS = 0;
     private static final int LOADER_ID_GEO_SEARCH = 1;
+    private static final int LOADER_ID_ROUTE_LINES = 2;
     
     private BusStopDatabase bsd;
     private GoogleMap map;
@@ -120,6 +125,8 @@ public class BusStopMapFragment extends SupportMapFragment
     private IndeterminateProgressDialogFragment progressDialog;
     private final HashMap<String, Marker> busStopMarkers =
             new HashMap<String, Marker>();
+    private final HashMap<String, LinkedList<Polyline>> routeLines =
+            new HashMap<String, LinkedList<Polyline>>();
     private HashSet<Marker> geoSearchMarkers = new HashSet<Marker>();
     private String searchedBusStop = null;
     
@@ -344,6 +351,9 @@ public class BusStopMapFragment extends SupportMapFragment
                 }
                 
                 return new GeoSearchLoader(getActivity(), query);
+            case LOADER_ID_ROUTE_LINES:
+                return new RouteLineLoader(getActivity(),
+                        bundle.getStringArray(LOADER_ARG_FILTERED_SERVICES));
             default:
                 return null;
         }
@@ -360,6 +370,9 @@ public class BusStopMapFragment extends SupportMapFragment
                 break;
             case LOADER_ID_GEO_SEARCH:
                 addGeoSearchResults((HashSet<MarkerOptions>)d);
+                break;
+            case LOADER_ID_ROUTE_LINES:
+                addRouteLines((HashMap<String, LinkedList<PolylineOptions>>)d);
                 break;
             default:
                 break;
@@ -382,6 +395,63 @@ public class BusStopMapFragment extends SupportMapFragment
         // If the user has chosen services in the services filter, force a
         // refresh of the marker icons.
         refreshBusStops(null);
+        
+        final LinkedList<String> tempList = new LinkedList<String>();
+        // Get the chosen services.
+        final String[] filteredServices = servicesChooser.getChosenServices();
+        boolean found;
+        
+        // Loop through the existing route lines. If a service doesn't exist in
+        // the chosen services list, add it to the to-be-removed list.
+        for(String key : routeLines.keySet()) {
+            found = false;
+            
+            for(String fs : filteredServices) {
+                if(key.equals(fs)) {
+                    found = true;
+                    break;
+                }
+            }
+            
+            if(!found) {
+                tempList.add(key);
+            }
+        }
+        
+        LinkedList<Polyline> polyLines;
+        // Loop through the to-be-removed list and remove the Polylines and the
+        // entry from the routeLines HashMap.
+        for(String toRemove : tempList) {
+            polyLines = routeLines.get(toRemove);
+            routeLines.remove(toRemove);
+            
+            for(Polyline pl : polyLines) {
+                pl.remove();
+            }
+        }
+        
+        // The tempList is going to be reused, so clear it out.
+        tempList.clear();
+        
+        // Loop through the filteredServices array. If the element does not
+        // appear in the existing route lines, then add it to the to-be-added
+        // list.
+        for(String fs : filteredServices) {
+            if(!routeLines.containsKey(fs)) {
+                tempList.add(fs);
+            }
+        }
+        
+        final int size = tempList.size();
+        // Execute the load if there are routes to be loaded.
+        if(size > 0) {
+            final String[] servicesToLoad = new String[size];
+            tempList.toArray(servicesToLoad);
+
+            final Bundle b = new Bundle();
+            b.putStringArray(LOADER_ARG_FILTERED_SERVICES, servicesToLoad);
+            getLoaderManager().restartLoader(LOADER_ID_ROUTE_LINES, b, this);
+        }
     }
     
     /**
@@ -645,6 +715,39 @@ public class BusStopMapFragment extends SupportMapFragment
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(
                         marker.getPosition(), DEFAULT_SEARCH_ZOOM));
                 marker.showInfoWindow();
+            }
+        }
+    }
+    
+    /**
+     * Add route lines to the Map. This is called when the route lines loader
+     * has finished loading the route lines.
+     * 
+     * @param result A HashMap, mapping the service name to a LinkedList of
+     * PolylineOptions objects. This is a LinkedList because a service may have
+     * more than one Polyline.
+     */
+    private void addRouteLines(
+            final HashMap<String, LinkedList<PolylineOptions>> result) {
+        if(map == null) {
+            return;
+        }
+        
+        LinkedList<PolylineOptions> polyLineOptions;
+        LinkedList<Polyline> newPolyLines;
+        
+        // Loop through all services in the HashMap.
+        for(String service : result.keySet()) {
+            polyLineOptions = result.get(service);
+            // Create the LinkedList that the Polylines will be stored in.
+            newPolyLines = new LinkedList<Polyline>();
+            // Add the LinkedList to the routeLines HashMap.
+            routeLines.put(service, newPolyLines);
+            
+            // Loop through all the PolylineOptions for this service, and add
+            // them to the map and the Polyline LinkedList.
+            for(PolylineOptions plo : polyLineOptions) {
+                newPolyLines.add(map.addPolyline(plo));
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,8 +49,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
 public class BusStopMarkerLoader
         extends SimpleResultLoader<HashMap<String, MarkerOptions>> {
     
-    private static final int ZOOM_LEVEL_STANDARD = 14;
-    private static final int ZOOM_LEVEL_FILTERED = 9;
+    private static final int MIN_ZOOM_LEVEL = 14;
     
     private final BusStopDatabase bsd;
     
@@ -112,16 +111,8 @@ public class BusStopMarkerLoader
         final HashMap<String, MarkerOptions> result =
                 new HashMap<String, MarkerOptions>();
         
-        // Has a filter been applied?
-        final boolean isFiltered = filteredServices != null &&
-                filteredServices.length > 0;
-        
-        // What should the mininum zoom level be?
-        final int minZoom = isFiltered ? ZOOM_LEVEL_FILTERED :
-                ZOOM_LEVEL_STANDARD;
-        
         // Does the zoom level satisfy the mininum zoom requirement?
-        if(zoom < minZoom) return result;
+        if(zoom < MIN_ZOOM_LEVEL) return result;
         
         // When dealing with the Cursor externally to BusStopDatabase, then the
         // BusStopDatabase instance needs to be synchronized. This is so that
@@ -131,7 +122,7 @@ public class BusStopMarkerLoader
             
             // What query to execute depends on whether filtering has been
             // enabled or not.
-            if(isFiltered) {
+            if(filteredServices != null && filteredServices.length > 0) {
                 c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY,
                         ServicesChooserDialogFragment
                             .getChosenServicesForSql(filteredServices));
