@@ -28,29 +28,33 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-    android:paddingTop="15dp"
-    android:paddingBottom="15dp" >
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft" >
     <TextView
         android:id="@+id/buslist_service"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_width="50dp"
         android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
         android:singleLine="true"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFF" />
     <TextView
         android:id="@+id/buslist_destination"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_toRightOf="@id/buslist_service"
+        android:layout_centerVertical="true"
+        android:paddingLeft="8dp"
         android:singleLine="true"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     <TextView
         android:id="@+id/buslist_time"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_width="70dp"
         android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
         android:paddingRight="10dp"
         android:gravity="right"
         android:singleLine="true"

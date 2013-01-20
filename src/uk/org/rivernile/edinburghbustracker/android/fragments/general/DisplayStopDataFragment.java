@@ -28,6 +28,9 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -129,7 +132,7 @@ public class DisplayStopDataFragment extends Fragment
     
     private ExpandableListView listView;
     private TextView txtLastRefreshed, txtStopName, txtServices, txtError;
-    private SimpleExpandableListAdapter listAdapter;
+    private BusTimesExpandableListAdapter listAdapter;
     private View layoutProgress, layoutError, layoutTopBar;
     private ProgressBar progress;
     
@@ -898,7 +901,7 @@ public class DisplayStopDataFragment extends Fragment
         }
         
         // Create the adatper. This is ugly.
-        listAdapter = new SimpleExpandableListAdapter(
+        listAdapter = new BusTimesExpandableListAdapter(
                 getActivity(), groupData, R.layout.expandable_list_group,
                 new String[] { SERVICE_NAME_KEY, DESTINATION_KEY,
                     ARRIVAL_TIME_KEY },
@@ -1026,5 +1029,123 @@ public class DisplayStopDataFragment extends Fragment
          * This is called when the user cancels after an error.
          */
         public void onCancel();
+    }
+    
+    /**
+     * This custom ExpandableListAdapter attributes colours to service names
+     * in the ExpandableListView.
+     */
+    private static class BusTimesExpandableListAdapter
+            extends SimpleExpandableListAdapter {
+        
+        private static final int DEFAULT_COLOUR = 0xFF4291BC;
+        
+        private final Context context;
+        private final HashMap<String, String> colours;
+        
+        /**
+         * Create a new BusTimesExpandableListAdapter.
+         * 
+         * @param context A Context instance.
+         * @param groupData The group data.
+         * @param groupLayout The layout to use for the group View.
+         * @param groupFrom An array of keys to use for the group items.
+         * @param groupTo The TextViews to load the keys in to.
+         * @param childData The child data.
+         * @param childLayout The layout to use for the child View.
+         * @param childFrom An array of keys to use for the child View.
+         * @param childTo The TextViews to load the keys in to.
+         */
+        public BusTimesExpandableListAdapter(final Context context,
+                final ArrayList<HashMap<String, String>> groupData,
+                final int groupLayout, final String[] groupFrom,
+                final int[] groupTo,
+                final ArrayList<ArrayList<HashMap<String, String>>> childData,
+                final int childLayout,
+                final String[] childFrom, final int[] childTo) {
+            super(context, groupData, groupLayout, groupFrom, groupTo,
+                    childData, childLayout, childFrom, childTo);
+            
+            // The superclass has no way to get the context again, so cache it
+            // here.
+            this.context = context;
+            
+            final BusStopDatabase bsd = BusStopDatabase.getInstance(
+                    context.getApplicationContext());
+            final int size = groupData.size();
+            // Create an array of String to hold the loaded services.
+            final String[] services = new String[size];
+            int i = 0;
+            
+            // Get the service list from the group data and put it in the
+            // service array.
+            for(HashMap<String, String> map : groupData) {
+                services[i] = map.get(SERVICE_NAME_KEY);
+                i++;
+            }
+            
+            if(size > 0) {
+                colours = bsd.getServiceColours(services);
+            } else {
+                colours = null;
+            }
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public View getGroupView(final int groupPosition,
+                final boolean isExpanded, final View convertView,
+                final ViewGroup parent) {
+            final View v = super.getGroupView(groupPosition, isExpanded,
+                    convertView, parent);
+            final TextView txtService = (TextView)v.findViewById(
+                    R.id.buslist_service);
+            // Get the HashMap for the groupPosition.
+            final HashMap<String, String> group =
+                    (HashMap<String, String>)getGroup(groupPosition);
+            // Get the name of the service.
+            final String service = group.get(SERVICE_NAME_KEY);
+            // Get the Drawable which makes up the retangle in the background
+            // with the rounded corners. Make it mutable so it doesn't affect
+            // other instances of the same Drawable.
+            final Drawable background = context.getResources()
+                    .getDrawable(R.drawable.bus_service_rounded_background)
+                    .mutate();
+            
+            // Night services are treated differently to the rest.
+            if(service.startsWith("N")) {
+                // Give it a black background.
+                background.setColorFilter(Color.BLACK,
+                        PorterDuff.Mode.MULTIPLY);
+                // We need to replace the text in the TextView because HTML
+                // formatting has been applied to it, to make the 'N' red.
+                txtService.setText(
+                        BusStopDatabase.getColouredServiceListString(service));
+            } else if(colours != null && colours.containsKey(service)) {
+                try {
+                    // If the colour for the service can be parsed, set the
+                    // background here.
+                    background.setColorFilter(
+                            Color.parseColor(colours.get(service)),
+                            PorterDuff.Mode.MULTIPLY);
+                } catch(IllegalArgumentException e) {
+                    // If it cannot be parsed, use the default background
+                    // colour.
+                    background.setColorFilter(DEFAULT_COLOUR,
+                            PorterDuff.Mode.MULTIPLY);
+                }
+            } else {
+                // If not a night service, and a colour doesn't exist for the
+                // service, use the default colour.
+                background.setColorFilter(DEFAULT_COLOUR,
+                        PorterDuff.Mode.MULTIPLY);
+            }
+            
+            // Set the background and return the View for the group.
+            txtService.setBackground(background);
+            return v;
+        }
     }
 }
