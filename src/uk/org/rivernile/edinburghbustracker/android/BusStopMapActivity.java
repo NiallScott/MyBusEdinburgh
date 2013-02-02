@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,10 +32,18 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
+import com.google.android.gms.maps.model.LatLng;
 import uk.org.rivernile.android.utils.ActionBarCompat;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.BusStopMapFragment;
 
 public class BusStopMapActivity extends FragmentActivity {
+    
+    /** The stopCode argument for the Intent. */
+    public static final String ARG_STOPCODE = BusStopMapFragment.ARG_STOPCODE;
+    /** The latitude argument for the Intent. */
+    public static final String ARG_LATITUDE = BusStopMapFragment.ARG_LATITUDE;
+    /** The longitude argument for the Intent. */
+    public static final String ARG_LONGITUDE = BusStopMapFragment.ARG_LONGITUDE;
     
     private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
@@ -55,10 +63,27 @@ public class BusStopMapActivity extends FragmentActivity {
         // Only add the fragment if there was no previous instance of this
         // Activity, otherwise this fragment will appear multiple times.
         if(savedInstanceState == null) {
+            final Intent intent = getIntent();
+            BusStopMapFragment f;
+            
+            if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
+                f = BusStopMapFragment.newInstanceWithSearch(
+                        intent.getStringExtra(SearchManager.QUERY));
+            } else if(intent.hasExtra(ARG_STOPCODE)) {
+                f = BusStopMapFragment.newInstance(
+                        intent.getStringExtra(ARG_STOPCODE));
+            } else if(intent.hasExtra(ARG_LATITUDE) &&
+                    intent.hasExtra(ARG_LONGITUDE)) {
+                f = BusStopMapFragment.newInstance(
+                        intent.getDoubleExtra(ARG_LATITUDE, 0),
+                        intent.getDoubleExtra(ARG_LONGITUDE, 0));
+            } else {
+                f = new BusStopMapFragment();
+            }
+            
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragmentContainer, new BusStopMapFragment())
+                    .add(R.id.fragmentContainer, f)
                     .commit();
-            handleIntent(getIntent());
         }
     }
     
@@ -69,21 +94,23 @@ public class BusStopMapActivity extends FragmentActivity {
     public void onNewIntent(final Intent newIntent) {
         super.onNewIntent(newIntent);
         
-        handleIntent(newIntent);
-    }
-    
-    /**
-     * Checks to see if the incoming Intent is a ACTION_SEARCH Intent.
-     * 
-     * @param intent The Intent to handle.
-     */
-    private void handleIntent(final Intent intent) {
-        if(Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            final BusStopMapFragment f = (BusStopMapFragment)
-                    getSupportFragmentManager()
-                    .findFragmentById(R.id.fragmentContainer);
-            
-            f.onSearch(intent.getStringExtra(SearchManager.QUERY));
+        final BusStopMapFragment f = (BusStopMapFragment)
+                getSupportFragmentManager()
+                .findFragmentById(R.id.fragmentContainer);
+        if(f == null) {
+            return;
+        }
+        
+        if(Intent.ACTION_SEARCH.equals(newIntent.getAction())) {
+            f.onSearch(newIntent.getStringExtra(SearchManager.QUERY));
+        } else if(newIntent.hasExtra(ARG_STOPCODE)) {
+            f.moveCameraToBusStop(newIntent.getStringExtra(ARG_STOPCODE));
+        } else if(newIntent.hasExtra(ARG_LATITUDE) &&
+                newIntent.hasExtra(ARG_LONGITUDE)) {
+            f.moveCameraToLocation(
+                    new LatLng(newIntent.getDoubleExtra(ARG_LATITUDE, 0),
+                        newIntent.getDoubleExtra(ARG_LONGITUDE, 0)),
+                    BusStopMapFragment.DEFAULT_SEARCH_ZOOM, false);
         }
     }
     

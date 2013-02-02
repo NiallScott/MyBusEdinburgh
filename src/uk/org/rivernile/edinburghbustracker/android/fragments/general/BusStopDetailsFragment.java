@@ -118,6 +118,7 @@ public class BusStopDetailsFragment extends ListFragment
     
     private MapView mapView;
     private GoogleMap map;
+    private ImageButton favouriteBtn;
     private TextView txtName, txtServices, txtDistance;
     private ArrayAdapter<String> listAdapter;
     
@@ -235,9 +236,9 @@ public class BusStopDetailsFragment extends ListFragment
             }
         });
         
-        final ImageButton imgBtn = (ImageButton)header1
+        favouriteBtn = (ImageButton)header1
                 .findViewById(R.id.imgbtnFavourite);
-        imgBtn.setOnClickListener(new OnClickListener() {
+        favouriteBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
                 // Add/remove as favourite.
@@ -352,6 +353,12 @@ public class BusStopDetailsFragment extends ListFragment
                             PreferencesActivity.PREF_FILE, 0)
                         .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION,
                                 true));
+        }
+        
+        if(sd.getFavouriteStopExists(getArguments().getString(ARG_STOPCODE))) {
+            favouriteBtn.setBackgroundResource(R.drawable.ic_list_favourite);
+        } else {
+            favouriteBtn.setBackgroundResource(R.drawable.ic_list_unfavourite);
         }
         
         // Repopulate the list. Things might have changed since we were last
@@ -529,7 +536,7 @@ public class BusStopDetailsFragment extends ListFragment
      */
     @Override
     public void onConfirmFavouriteDeletion() {
-        // TODO: change star imgBtn image.
+        favouriteBtn.setBackgroundResource(R.drawable.ic_list_unfavourite);
     }
 
     /**

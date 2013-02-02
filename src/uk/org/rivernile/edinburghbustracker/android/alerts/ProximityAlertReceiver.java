@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -81,8 +81,7 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
         // The Intent which launches the bus stop map at the selected stop.
         final Intent launchIntent = new Intent(context,
                 BusStopMapActivity.class);
-        launchIntent.putExtra("stopCode", stopCode);
-        launchIntent.putExtra("zoom", 19);
+        launchIntent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
         
         final String title = context.getString(R.string.alert_prox_title,
                 stopName);

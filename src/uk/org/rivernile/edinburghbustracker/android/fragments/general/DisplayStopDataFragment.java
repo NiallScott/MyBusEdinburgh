@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,12 +25,14 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -1095,6 +1097,7 @@ public class DisplayStopDataFragment extends Fragment
          * {@inheritDoc}
          */
         @Override
+        @SuppressLint({"NewAPI"})
         public View getGroupView(final int groupPosition,
                 final boolean isExpanded, final View convertView,
                 final ViewGroup parent) {
@@ -1144,7 +1147,12 @@ public class DisplayStopDataFragment extends Fragment
             }
             
             // Set the background and return the View for the group.
-            txtService.setBackground(background);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                txtService.setBackground(background);
+            } else {
+                txtService.setBackgroundDrawable(background);
+            }
+            
             return v;
         }
     }

@@ -25,7 +25,9 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -36,6 +38,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -89,10 +92,23 @@ public class BusStopMapFragment extends SupportMapFragment
         MapTypeChooserDialogFragment.EventListener,
         IndeterminateProgressDialogFragment.EventListener {
     
-    private static final double DEFAULT_LAT = 55.948611;
-    private static final double DEFAULT_LONG = -3.199811;
-    private static final float DEFAULT_ZOOM = 11f;
-    private static final float DEFAULT_SEARCH_ZOOM =  16f;
+    /** The stopCode argument. */
+    public static final String ARG_STOPCODE = "stopCode";
+    /** The latitude argument. */
+    public static final String ARG_LATITUDE = "latitude";
+    /** The longitude argument. */
+    public static final String ARG_LONGITUDE = "longitude";
+    /** The search argument. */
+    public static final String ARG_SEARCH = "searchTerm";
+    
+    /** The default latitude. */
+    public static final double DEFAULT_LAT = 55.948611;
+    /** The default longitude. */
+    public static final double DEFAULT_LONG = -3.199811;
+    /** The default zoom. */
+    public static final float DEFAULT_ZOOM = 11f;
+    /** The default search zoom. */
+    public static final float DEFAULT_SEARCH_ZOOM =  16f;
     
     private static final Pattern STOP_CODE_PATTERN =
             Pattern.compile("(\\d{8})\\)$");
@@ -120,6 +136,7 @@ public class BusStopMapFragment extends SupportMapFragment
     
     private BusStopDatabase bsd;
     private GoogleMap map;
+    private SharedPreferences sp;
     
     private ServicesChooserDialogFragment servicesChooser;
     private IndeterminateProgressDialogFragment progressDialog;
@@ -129,6 +146,58 @@ public class BusStopMapFragment extends SupportMapFragment
             new HashMap<String, LinkedList<Polyline>>();
     private HashSet<Marker> geoSearchMarkers = new HashSet<Marker>();
     private String searchedBusStop = null;
+    
+    /**
+     * Create a new instance of the BusStopMapFragment, setting the initial
+     * location to that of the stopCode provided.
+     * 
+     * @param stopCode The stopCode to go to.
+     * @return A new instance of this Fragment.
+     */
+    public static BusStopMapFragment newInstance(final String stopCode) {
+        final BusStopMapFragment f = new BusStopMapFragment();
+        final Bundle b = new Bundle();
+        b.putString(ARG_STOPCODE, stopCode);
+        f.setArguments(b);
+        
+        return f;
+    }
+    
+    /**
+     * Create a new instance of the BusStopMapFragment, setting the initial
+     * location specified by latitude and longitude.
+     * 
+     * @param latitude The latitude to go to.
+     * @param longitude The longitude to go to.
+     * @return A new instance of this Fragment.
+     */
+    public static BusStopMapFragment newInstance(final double latitude,
+            final double longitude) {
+        final BusStopMapFragment f = new BusStopMapFragment();
+        final Bundle b = new Bundle();
+        b.putDouble(ARG_LATITUDE, latitude);
+        b.putDouble(ARG_LONGITUDE, longitude);
+        f.setArguments(b);
+        
+        return f;
+    }
+    
+    /**
+     * Create a new instance of the BusStopMapFragment, specifying a search
+     * term. The item will be searched as soon as the Fragment is ready.
+     * 
+     * @param searchTerm The search term.
+     * @return A new instance of this Fragment.
+     */
+    public static BusStopMapFragment newInstanceWithSearch(
+            final String searchTerm) {
+        final BusStopMapFragment f = new BusStopMapFragment();
+        final Bundle b = new Bundle();
+        b.putString(ARG_SEARCH, searchTerm);
+        f.setArguments(b);
+        
+        return f;
+    }
     
     /**
      * {@inheritDoc}
@@ -142,8 +211,9 @@ public class BusStopMapFragment extends SupportMapFragment
         // This Fragment shows an options menu.
         setHasOptionsMenu(true);
         
-        bsd = BusStopDatabase.getInstance(getActivity()
-                .getApplicationContext());
+        final Context context = getActivity();
+        bsd = BusStopDatabase.getInstance(context.getApplicationContext());
+        sp = context.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
         
         // The reference to the ServicesChooserDialogFragment should be held
         // throughout the lifecycle of this Fragment so that the user's choices
@@ -178,11 +248,19 @@ public class BusStopMapFragment extends SupportMapFragment
                 map.setOnCameraChangeListener(this);
                 map.setOnMarkerClickListener(this);
                 map.setOnInfoWindowClickListener(this);
-                map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(DEFAULT_LAT, DEFAULT_LONG), DEFAULT_ZOOM));
+                map.setMapType(sp.getInt(
+                        PreferencesActivity.PREF_MAP_LAST_MAP_TYPE,
+                        GoogleMap.MAP_TYPE_NORMAL));
+                moveCameraToInitialLocation();
                 
                 refreshBusStops(null);
+                
+                // Check to see if a search is to be done.
+                final Bundle args = getArguments();
+                if(args != null && args.containsKey(ARG_SEARCH)) {
+                    onSearch(args.getString(ARG_SEARCH));
+                    args.remove(ARG_SEARCH);
+                }
             }
         }
     }
@@ -200,6 +278,32 @@ public class BusStopMapFragment extends SupportMapFragment
                             PreferencesActivity.PREF_FILE, 0)
                         .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION,
                                 true));
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        
+        if(map != null) {
+            // Save the camera location to SharedPreferences, so the user is
+            // shown this location when they load the map again.
+            final SharedPreferences.Editor edit = sp.edit();
+            final CameraPosition position = map.getCameraPosition();
+            final LatLng latLng = position.target;
+            
+            edit.putString(PreferencesActivity.PREF_MAP_LAST_LATITUDE,
+                    String.valueOf(latLng.latitude));
+            edit.putString(PreferencesActivity.PREF_MAP_LAST_LONGITUDE,
+                    String.valueOf(latLng.longitude));
+            edit.putFloat(PreferencesActivity.PREF_MAP_LAST_ZOOM,
+                    position.zoom);
+            edit.putInt(PreferencesActivity.PREF_MAP_LAST_MAP_TYPE,
+                    map.getMapType());
+            edit.commit();
         }
     }
     
@@ -512,7 +616,7 @@ public class BusStopMapFragment extends SupportMapFragment
     }
     
     /**
-     * This methid is called by the underlying Activity when a search has been
+     * This method is called by the underlying Activity when a search has been
      * initiated.
      * 
      * @param searchTerm What to search for.
@@ -527,10 +631,7 @@ public class BusStopMapFragment extends SupportMapFragment
         if(m.matches()) {
             // If the searchTerm is a stop code, then move the camera to the bus
             // stop.
-            searchedBusStop = searchTerm;
-            final LatLng location = bsd.getLatLngForStopCode(searchTerm);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(location,
-                    DEFAULT_SEARCH_ZOOM));
+            moveCameraToBusStop(searchTerm);
         } else {
             // If it's not a stop code, then do a geo search.
             final Bundle b = new Bundle();
@@ -551,6 +652,45 @@ public class BusStopMapFragment extends SupportMapFragment
                         getString(R.string.busstopmapfragment_progress_message,
                         new Object[] { searchTerm }));
             progressDialog.show(getFragmentManager(), PROGRESS_DIALOG_TAG);
+        }
+    }
+    
+    /**
+     * Move the camera to a given stopCode, and show the info window for that
+     * stopCode when the camera gets there.
+     * 
+     * @param stopCode The stopCode to move to.
+     */
+    public void moveCameraToBusStop(final String stopCode) {
+        if(stopCode == null || stopCode.length() == 0) {
+            return;
+        }
+        
+        searchedBusStop = stopCode;
+        moveCameraToLocation(bsd.getLatLngForStopCode(stopCode),
+                DEFAULT_SEARCH_ZOOM, true);
+    }
+    
+    /**
+     * Move the camera to a given LatLng location.
+     * 
+     * @param location Where to move the camera to.
+     * @param zoomLevel The zoom level of the camera.
+     * @param animate Whether the transition should be animated or not.
+     */
+    public void moveCameraToLocation(final LatLng location,
+            final float zoomLevel, final boolean animate) {
+        if(location == null) {
+            return;
+        }
+        
+        final CameraUpdate update = CameraUpdateFactory.newLatLngZoom(location,
+                zoomLevel);
+        
+        if(animate) {
+            map.animateCamera(update);
+        } else {
+            map.moveCamera(update);
         }
     }
     
@@ -712,8 +852,8 @@ public class BusStopMapFragment extends SupportMapFragment
                 // bus stop marker.
                 isFirst = false;
                 
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                        marker.getPosition(), DEFAULT_SEARCH_ZOOM));
+                moveCameraToLocation(marker.getPosition(), DEFAULT_SEARCH_ZOOM,
+                        true);
                 marker.showInfoWindow();
             }
         }
@@ -767,13 +907,59 @@ public class BusStopMapFragment extends SupportMapFragment
         final Location myLocation = map.getMyLocation();
         
         if(myLocation != null) {
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(myLocation.getLatitude(),
-                            myLocation.getLongitude()), DEFAULT_SEARCH_ZOOM));
+            moveCameraToLocation(new LatLng(myLocation.getLatitude(),
+                            myLocation.getLongitude()), DEFAULT_SEARCH_ZOOM,
+                            true);
         } else if(verbose) {
             Toast.makeText(getActivity(),
                     R.string.busstopmapfragment_location_unknown,
                     Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    /**
+     * Move the camera to the initial location. The initial location is
+     * determined by the following order;
+     * 
+     * - If the args contains a stopCode, go there.
+     * - If the args contains a latitude AND a longitude, go there.
+     * - If the SharedPreferences have mappings for a previous location, then
+     *   go there.
+     * - Otherwise, go to the default map location, as defined by
+     *   {@link #DEFAULT_LAT} and {@link #DEFAULT_LONG) at
+     *   {@link #DEFAULT_ZOOM}.
+     */
+    private void moveCameraToInitialLocation() {
+        final Bundle args = getArguments();
+        
+        if(args != null && args.containsKey(ARG_STOPCODE)) {
+            moveCameraToBusStop(args.getString(ARG_STOPCODE));
+            args.remove(ARG_STOPCODE);
+        } else if(args != null && args.containsKey(ARG_LATITUDE) &&
+                args.containsKey(ARG_LONGITUDE)) {
+            moveCameraToLocation(new LatLng(args.getDouble(ARG_LATITUDE),
+                    args.getDouble(ARG_LONGITUDE)), DEFAULT_SEARCH_ZOOM, false);
+            args.remove(ARG_LATITUDE);
+            args.remove(ARG_LONGITUDE);
+        } else if(map != null) {
+            // The Lat/Lons have to be treated as Strings because
+            // SharedPreferences has no support for doubles.
+            final String latitude = sp.getString(
+                    PreferencesActivity.PREF_MAP_LAST_LATITUDE,
+                    String.valueOf(DEFAULT_LAT));
+            final String longitude = sp.getString(
+                    PreferencesActivity.PREF_MAP_LAST_LONGITUDE,
+                    String.valueOf(DEFAULT_LONG));
+            final float zoom = sp.getFloat(
+                    PreferencesActivity.PREF_MAP_LAST_ZOOM, DEFAULT_ZOOM);
+            
+            try {
+                moveCameraToLocation(new LatLng(Double.parseDouble(latitude),
+                        Double.parseDouble(longitude)), zoom, false);
+            } catch(NumberFormatException e) {
+                moveCameraToLocation(new LatLng(DEFAULT_LAT, DEFAULT_LONG),
+                        DEFAULT_ZOOM, false);
+            }
         }
     }
 }

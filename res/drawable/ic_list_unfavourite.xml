@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,20 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/busstopmap_option_menu_search"
-        android:title="@string/search"
-        android:icon="@drawable/ic_menu_search" />
+        android:drawable="@drawable/ic_list_star_unfavourited_pressed"
+        android:state_focused="true"
+        android:state_pressed="true" />
     <item
-        android:id="@+id/busstopmap_option_menu_maptype"
-        android:icon="@drawable/ic_menu_maptype"
-        android:title="@string/map_menu_maptype" />
+        android:drawable="@drawable/ic_list_star_unfavourited_pressed"
+        android:state_focused="false"
+        android:state_pressed="true" />
     <item
-        android:id="@+id/busstopmap_option_menu_trafficview"
-        android:icon="@drawable/ic_menu_trafficview"
-        tools:ignore="MenuTitle" />
+        android:drawable="@drawable/ic_list_star_unfavourited_selected"
+        android:state_focused="true" />
     <item
-        android:id="@+id/busstopmap_option_menu_filter"
-        android:title="@string/map_menu_filter"
-        android:icon="@drawable/ic_menu_filter" />
-</menu>
+        android:drawable="@drawable/ic_list_star_unfavourited_default"
+        android:state_focused="false"
+        android:state_pressed="false" />
+</selector>

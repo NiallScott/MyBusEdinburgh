@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.edinburghbustracker.android.twitter;
 
+import android.annotation.SuppressLint;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,6 +38,7 @@ import java.util.Locale;
  */
 public final class TwitterNewsItem {
     
+    @SuppressLint({"SimpleDateFormat"})
     private static final SimpleDateFormat inDateFormat =
             new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZZ yyyy",
                     Locale.ENGLISH);

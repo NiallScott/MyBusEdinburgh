@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -394,8 +394,8 @@ public class NearestStopsFragment extends ListFragment
                 // Start the BusStopMapActivity, giving it a stopCode and zoom
                 // level to center upon.
                 intent = new Intent(getActivity(), BusStopMapActivity.class);
-                intent.putExtra("stopCode", selectedStop.stopCode);
-                intent.putExtra("zoom", 19);
+                intent.putExtra(BusStopMapActivity.ARG_STOPCODE,
+                        selectedStop.stopCode);
                 startActivity(intent);
                 
                 return true;

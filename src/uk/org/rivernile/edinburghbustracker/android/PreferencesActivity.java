@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -94,6 +94,17 @@ public class PreferencesActivity extends PreferenceActivity
     /** The Preference for disabling the GPS prompt. */
     public static final String PREF_DISABLE_GPS_PROMPT =
             "neareststops_gps_prompt_disable";
+    /** The Preference for the last known map latitude (not shown). */
+    public static final String PREF_MAP_LAST_LATITUDE =
+            "pref_map_last_latitude";
+    /** The Preference for the last known map longitude (not shown). */
+    public static final String PREF_MAP_LAST_LONGITUDE =
+            "pref_map_last_longitude";
+    /** The Preference for the last known map zoom level (not shown). */
+    public static final String PREF_MAP_LAST_ZOOM = "pref_map_last_zoom";
+    /** The Preference for the last known map type (not shown). */
+    public static final String PREF_MAP_LAST_MAP_TYPE =
+            "pref_map_last_map_type";
     
     private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
@@ -41,9 +42,13 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.TouchDelegate;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import java.util.HashMap;
@@ -84,7 +89,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  */
 public class FavouriteStopsFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor>,
-        DeleteFavouriteDialogFragment.EventListener {
+        DeleteFavouriteDialogFragment.EventListener, OnClickListener{
     
     /** The argument to signify create shortcut mode. */
     public static final String CREATE_SHORTCUT = "CREATE_SHORTCUT";
@@ -113,14 +118,13 @@ public class FavouriteStopsFragment extends ListFragment
         
         // Get an instance of the SettingsDatabase.
         sd = SettingsDatabase.getInstance(activity.getApplicationContext());
-        // Create the ListAdapter.
-        ca = new FavouritesCursorAdapter(activity,
-                android.R.layout.simple_list_item_2, null,
-                new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
-                new int[] { android.R.id.text1 });
-        
         // Determine the mode this Fragment should be in.
         isCreateShortcut = getArguments().getBoolean(CREATE_SHORTCUT);
+        // Create the ListAdapter.
+        ca = new FavouritesCursorAdapter(activity,
+                R.layout.favouritestops_list_item, null,
+                new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
+                new int[] { android.R.id.text1 }, isCreateShortcut, this);
     }
     
     /**
@@ -256,7 +260,6 @@ public class FavouriteStopsFragment extends ListFragment
                 (AdapterContextMenuInfo)item.getMenuInfo();
         final Activity activity = getActivity();
         Intent intent;
-        Bundle bundle;
         
         switch (item.getItemId()) {
             case R.id.favouritestops_context_menu_view:
@@ -283,8 +286,8 @@ public class FavouriteStopsFragment extends ListFragment
             case R.id.favouritestops_context_menu_showonmap:
                 // Show the selected bus stop on the map.
                 intent = new Intent(activity, BusStopMapActivity.class);
-                intent.putExtra("stopCode", String.valueOf(info.id));
-                intent.putExtra("zoom", 19);
+                intent.putExtra(BusStopMapActivity.ARG_STOPCODE,
+                        String.valueOf(info.id));
                 startActivity(intent);
                 return true;
             case R.id.favouritestops_context_menu_prox_alert:
@@ -371,6 +374,23 @@ public class FavouriteStopsFragment extends ListFragment
     public void onCancelFavouriteDeletion() {
         // Do nothing.
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onClick(final View v) {
+        final int position = getListView().getPositionForView(v);
+        if(position != AdapterView.INVALID_POSITION) {
+            final Cursor c = ca.getCursor();
+            if(c != null && c.moveToPosition(position)) {
+                final DeleteFavouriteDialogFragment deleteFavFrag =
+                        DeleteFavouriteDialogFragment.newInstance(
+                        c.getString(0), this);
+                deleteFavFrag.show(getFragmentManager(), DELETE_FAV_DIALOG_TAG);
+            }
+        }
+    }
     
     /**
      * This Loader loads the user's list of favourite bus stops.
@@ -408,11 +428,14 @@ public class FavouriteStopsFragment extends ListFragment
      * This is a custom Cursor adapter to add a services list to the row being
      * displayed.
      */
-    public static class FavouritesCursorAdapter extends SimpleCursorAdapter {
+    public class FavouritesCursorAdapter extends SimpleCursorAdapter {
         
         private BusStopDatabase bsd;
         private final HashMap<String, Spanned> serviceListings =
                 new HashMap<String, Spanned>();
+        private final boolean isCreateShortcut;
+        private final OnClickListener starClickListener;
+        private final float density;
         
         /**
          * Create a new FavouritesCursorAdapter.
@@ -424,10 +447,51 @@ public class FavouriteStopsFragment extends ListFragment
          * @param to An array of resource IDs to map the from Strings to.
          */
         public FavouritesCursorAdapter(final Context context, final int layout,
-                final Cursor c, final String[] from, final int[] to) {
+                final Cursor c, final String[] from, final int[] to,
+                final boolean isCreateShortcut,
+                final OnClickListener starClickListener) {
             super(context, layout, c, from, to);
             
             bsd = BusStopDatabase.getInstance(context);
+            this.isCreateShortcut = isCreateShortcut;
+            this.starClickListener = starClickListener;
+            this.density = context.getResources().getDisplayMetrics().density;
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public View newView(final Context context, final Cursor cursor,
+                final ViewGroup parent) {
+            final View v = super.newView(context, cursor, parent);
+            final ImageButton imgbtnFavourite = (ImageButton)v
+                    .findViewById(R.id.imgbtnFavourite);
+            if(!isCreateShortcut) {
+                imgbtnFavourite.setFocusable(false);
+                imgbtnFavourite.setFocusableInTouchMode(false);
+                imgbtnFavourite.setOnClickListener(starClickListener);
+                
+                v.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        final int vertical = ((v.getHeight() -
+                                imgbtnFavourite.getHeight()) / 2) + 1;
+                        final Rect rect = new Rect();
+                        imgbtnFavourite.getHitRect(rect);
+                        rect.right += v.getPaddingRight();
+                        rect.top -= vertical;
+                        rect.bottom += vertical;
+                        rect.left -= (int)(25 * density);
+                        v.setTouchDelegate(new TouchDelegate(rect,
+                                imgbtnFavourite));
+                    }
+                });
+            } else {
+                imgbtnFavourite.setVisibility(View.GONE);
+            }
+            
+            return v;
         }
         
         /**
@@ -438,7 +502,7 @@ public class FavouriteStopsFragment extends ListFragment
                 final Cursor cursor) {
             super.bindView(v, context, cursor);
             
-            final String stopCode = getCursor().getString(0);
+            final String stopCode = cursor.getString(0);
             final TextView services = (TextView)v.findViewById(
                     android.R.id.text2);
             
