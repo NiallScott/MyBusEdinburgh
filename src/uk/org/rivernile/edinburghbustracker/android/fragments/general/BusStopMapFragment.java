@@ -69,6 +69,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.maps.BusStopMarkerLoader;
 import uk.org.rivernile.edinburghbustracker.android.maps.GeoSearchLoader;
+import uk.org.rivernile.edinburghbustracker.android.maps.MapInfoWindow;
 import uk.org.rivernile.edinburghbustracker.android.maps.RouteLineLoader;
 
 /**
@@ -245,6 +246,7 @@ public class BusStopMapFragment extends SupportMapFragment
                 uiSettings.setMyLocationButtonEnabled(
                         Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB);
                 
+                map.setInfoWindowAdapter(new MapInfoWindow(getActivity()));
                 map.setOnCameraChangeListener(this);
                 map.setOnMarkerClickListener(this);
                 map.setOnInfoWindowClickListener(this);

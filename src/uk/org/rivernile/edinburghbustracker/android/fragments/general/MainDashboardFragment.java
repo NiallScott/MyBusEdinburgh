@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,9 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -36,6 +38,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import uk.org.rivernile.edinburghbustracker.android.AlertManagerActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.EnterStopCodeActivity;
@@ -65,6 +70,10 @@ public class MainDashboardFragment extends Fragment
     private Button nearestButton;
     private Button newsButton;
     private Button alertButton;
+    private Button resolveButton;
+    private View layoutPlayServicesBar;
+    private ConnectionResult connectionResult;
+    private TextView txtPlayServicesError;
     
     /**
      * {@inheritDoc}
@@ -91,6 +100,10 @@ public class MainDashboardFragment extends Fragment
         nearestButton = (Button)v.findViewById(R.id.home_btn_nearest);
         newsButton = (Button)v.findViewById(R.id.home_btn_news);
         alertButton = (Button)v.findViewById(R.id.home_btn_alerts);
+        resolveButton = (Button)v.findViewById(R.id.btnResolve);
+        layoutPlayServicesBar = v.findViewById(R.id.layoutPlayServicesBar);
+        txtPlayServicesError = (TextView)v.findViewById(
+                R.id.txtPlayServicesError);
         
         favouriteButton.setOnClickListener(this);
         stopCodeButton.setOnClickListener(this);
@@ -98,8 +111,67 @@ public class MainDashboardFragment extends Fragment
         nearestButton.setOnClickListener(this);
         newsButton.setOnClickListener(this);
         alertButton.setOnClickListener(this);
+        resolveButton.setOnClickListener(this);
         
         return v;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        
+        // Check to see if the Google Play Store services are available and up
+        // to date.
+        final Context context = getActivity();
+        final int errorCode = GooglePlayServicesUtil
+                .isGooglePlayServicesAvailable(context);
+        if(errorCode == ConnectionResult.SUCCESS) {
+            // All is okay.
+            layoutPlayServicesBar.setVisibility(View.GONE);
+            stopMapButton.setEnabled(true);
+            connectionResult = null;
+            return;
+        } else {
+            // Otherwise don't let the user try to use the map, as there is no
+            // point. It won't work.
+            layoutPlayServicesBar.setVisibility(View.VISIBLE);
+            stopMapButton.setEnabled(false);
+        }
+        
+        // If the problem is user recoverable, then show a button which lets the
+        // user take action.
+        if(GooglePlayServicesUtil.isUserRecoverableError(errorCode)) {
+            resolveButton.setVisibility(View.VISIBLE);
+            connectionResult = new ConnectionResult(errorCode,
+                    GooglePlayServicesUtil.getErrorPendingIntent(errorCode,
+                        context, 0));
+        } else {
+            resolveButton.setVisibility(View.GONE);
+            connectionResult = new ConnectionResult(errorCode, null);
+        }
+        
+        // Customise the text for the error.
+        switch(errorCode) {
+            case ConnectionResult.SERVICE_MISSING:
+                txtPlayServicesError.setText(R.string
+                        .main_play_services_missing_text);
+                break;
+            case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
+                txtPlayServicesError.setText(R.string
+                        .main_play_services_update_text);
+                break;
+            case ConnectionResult.SERVICE_DISABLED:
+                txtPlayServicesError.setText(R.string
+                        .main_play_services_disabled_text);
+                break;
+            case ConnectionResult.SERVICE_INVALID:
+                txtPlayServicesError.setText(R.string
+                        .main_play_services_invalid_text);
+                break;
+        }
     }
     
     /**
@@ -121,6 +193,14 @@ public class MainDashboardFragment extends Fragment
             startActivity(new Intent(activity, NewsUpdatesActivity.class));
         } else if(v == alertButton) {
             startActivity(new Intent(activity, AlertManagerActivity.class));
+        } else if(v == resolveButton) {
+            if(connectionResult != null && connectionResult.hasResolution()) {
+                try {
+                    connectionResult.startResolutionForResult(activity, 0);
+                } catch(SendIntentException e) {
+                    
+                }
+            }
         }
     }
     

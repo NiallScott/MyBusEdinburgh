@@ -34,6 +34,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.support.v4.app.NotificationCompat;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
@@ -78,11 +80,6 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
                 0);
         locMan.removeProximityAlert(pi);
         
-        // The Intent which launches the bus stop map at the selected stop.
-        final Intent launchIntent = new Intent(context,
-                BusStopMapActivity.class);
-        launchIntent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
-        
         final String title = context.getString(R.string.alert_prox_title,
                 stopName);
         final String summary = context.getString(R.string.alert_prox_summary,
@@ -104,9 +101,16 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
         // Support for Jelly Bean notifications.
         notifBuilder.setStyle(new NotificationCompat.BigTextStyle()
                 .bigText(summary));
-        notifBuilder.setContentIntent(
-                PendingIntent.getActivity(context, 0, launchIntent,
-                    PendingIntent.FLAG_ONE_SHOT));
+        if(GooglePlayServicesUtil.isGooglePlayServicesAvailable(context) ==
+                ConnectionResult.SUCCESS) {
+            // The Intent which launches the bus stop map at the selected stop.
+            final Intent launchIntent = new Intent(context,
+                    BusStopMapActivity.class);
+            launchIntent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
+            notifBuilder.setContentIntent(
+                    PendingIntent.getActivity(context, 0, launchIntent,
+                        PendingIntent.FLAG_ONE_SHOT));
+        }
         
         final Notification n = notifBuilder.build();
         if(sp.getBoolean(PreferencesActivity.PREF_ALERT_SOUND, true))

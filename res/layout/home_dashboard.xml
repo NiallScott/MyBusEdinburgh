@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2013 Niall 'Rivernile' Scott
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+*/ -->
+<com.google.android.apps.iosched.ui.widget.DashboardLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f3f3f3" >
+
+    <Button
+        android:id="@+id/home_btn_favourites"
+        style="@style/DashboardButton"
+        android:text="@string/main_favourite_stops"
+        android:drawableTop="@drawable/home_btn_fav" />
+
+    <Button
+        android:id="@+id/home_btn_entercode"
+        style="@style/DashboardButton"
+        android:text="@string/main_enter_stop_code"
+        android:drawableTop="@drawable/home_btn_enter" />
+
+    <Button
+        android:id="@+id/home_btn_map"
+        style="@style/DashboardButton"
+        android:text="@string/main_bus_stop_map"
+        android:drawableTop="@drawable/home_btn_map" />
+
+    <Button
+        android:id="@+id/home_btn_nearest"
+        style="@style/DashboardButton"
+        android:text="@string/neareststops_title"
+        android:drawableTop="@drawable/home_btn_near" />
+
+    <Button
+        android:id="@+id/home_btn_news"
+        style="@style/DashboardButton"
+        android:text="@string/newsupdates_title"
+        android:drawableTop="@drawable/home_btn_news" />
+
+    <Button
+        android:id="@+id/home_btn_alerts"
+        style="@style/DashboardButton"
+        android:text="@string/alertmanager_title"
+        android:drawableTop="@drawable/home_btn_alert" />
+</com.google.android.apps.iosched.ui.widget.DashboardLayout>

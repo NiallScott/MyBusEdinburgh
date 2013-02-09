@@ -68,6 +68,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="main_db_updated">My Bus Edinburgh: The stop database has
     been updated to the latest version.</string>
     <string name="main_db_no_updates">My Bus Edinburgh: No stop database updates found.</string>
+    <string name="main_play_services_missing_text">To use the Bus Stop Map, Google Play Services needs to be installed.</string>
+    <string name="main_play_services_update_text">To use the Bus Stop Map, Google Play Services needs to be updated.</string>
+    <string name="main_play_services_disabled_text">To use the Bus Stop Map, Google Play Services needs to be enabled.</string>
+    <string name="main_play_services_invalid_text">To use the Bus Stop Map, a genuine version of the Google Play Services needs to be installed.</string>
+    <string name="main_play_services_resolve_button">Resolve</string>
 
     <!--
     ***********************************

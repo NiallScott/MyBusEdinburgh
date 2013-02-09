@@ -51,6 +51,8 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import java.util.HashMap;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android
@@ -160,9 +162,17 @@ public class FavouriteStopsFragment extends ListFragment
             // Allow the context menu to be shown in normal mode.
             registerForContextMenu(getListView());
         }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
         
         // Create the Loader.
-        getLoaderManager().initLoader(0, null, this);
+        getLoaderManager().restartLoader(0, null, this);
     }
     
     /**
@@ -247,6 +257,16 @@ public class FavouriteStopsFragment extends ListFragment
             item.setTitle(R.string.alert_time_rem);
         } else {
             item.setTitle(R.string.alert_time_add);
+        }
+        
+        // If the Google Play Services is not available, then don't show the
+        // option to show the stop on the map.
+        item = menu.findItem(R.id.favouritestops_context_menu_showonmap);
+        
+        if(GooglePlayServicesUtil
+                .isGooglePlayServicesAvailable(getActivity()) !=
+                    ConnectionResult.SUCCESS) {
+            item.setVisible(false);
         }
     }
 

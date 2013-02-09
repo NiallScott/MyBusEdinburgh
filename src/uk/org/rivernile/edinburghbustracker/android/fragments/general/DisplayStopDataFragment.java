@@ -30,8 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +50,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
@@ -137,6 +137,7 @@ public class DisplayStopDataFragment extends Fragment
     private BusTimesExpandableListAdapter listAdapter;
     private View layoutProgress, layoutError, layoutTopBar;
     private ProgressBar progress;
+    private ImageButton imgbtnFavourite;
     
     private int numDepartures = 4;
     private String stopCode;
@@ -219,6 +220,7 @@ public class DisplayStopDataFragment extends Fragment
         txtServices = (TextView)v.findViewById(R.id.txtServices);
         txtError = (TextView)v.findViewById(R.id.txtError);
         progress = (ProgressBar)v.findViewById(R.id.progress);
+        imgbtnFavourite = (ImageButton)v.findViewById(R.id.imgbtnFavourite);
         
         // If the cancel button is clicked, let the activity decide what to do.
         final Button btn = (Button)v.findViewById(R.id.btnCancel);
@@ -226,6 +228,26 @@ public class DisplayStopDataFragment extends Fragment
             @Override
             public void onClick(final View v) {
                 eventCallback.onCancel();
+            }
+        });
+        
+        imgbtnFavourite.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                // Add/remove as favourite.
+                if(sd.getFavouriteStopExists(stopCode)) {
+                    DeleteFavouriteDialogFragment.newInstance(stopCode,
+                                DisplayStopDataFragment.this)
+                            .show(getFragmentManager(), DELETE_FAV_DIALOG_TAG);
+                } else {
+                    final Intent intent = new Intent(getActivity(),
+                            AddEditFavouriteStopActivity.class);
+                    intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
+                            stopCode);
+                    intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME,
+                            stopName);
+                    startActivity(intent);
+                }
             }
         });
         
@@ -285,8 +307,8 @@ public class DisplayStopDataFragment extends Fragment
         txtServices.setText(BusStopDatabase.getColouredServiceListString(
                 bsd.getBusServicesForStopAsString(stopCode)));
         
-        if(lastRefresh > 0 && getArguments().getBoolean("forceLoad", false)) {
-            getArguments().remove("forceLoad");
+        if(lastRefresh > 0 && getArguments().getBoolean(ARG_FORCELOAD, false)) {
+            getArguments().remove(ARG_FORCELOAD);
             loadBusTimes(true);
         } else {
             loadBusTimes(false);
@@ -308,6 +330,14 @@ public class DisplayStopDataFragment extends Fragment
         
         // Refresh the menu.
         getActivity().supportInvalidateOptionsMenu();
+        
+        // Set the favourite ImageButton.
+        if(sd.getFavouriteStopExists(stopCode)) {
+            imgbtnFavourite.setBackgroundResource(R.drawable.ic_list_favourite);
+        } else {
+            imgbtnFavourite.setBackgroundResource(
+                    R.drawable.ic_list_unfavourite);
+        }
     }
     
     /**
@@ -359,8 +389,6 @@ public class DisplayStopDataFragment extends Fragment
         super.onPrepareOptionsMenu(menu);
         
         // Get the menu items.
-        final MenuItem favItem = menu.findItem(
-                R.id.displaystopdata_option_menu_favourite);
         final MenuItem sortItem = menu.findItem(
                 R.id.displaystopdata_option_menu_sort);
         final MenuItem autoRefreshItem = menu.findItem(
@@ -382,26 +410,15 @@ public class DisplayStopDataFragment extends Fragment
         
         // If there's no bus times, disable all other menu items.
         if(listView.getVisibility() == View.VISIBLE) {
-            favItem.setEnabled(true);
             sortItem.setEnabled(true);
             autoRefreshItem.setEnabled(true);
             proxItem.setEnabled(true);
             timeItem.setEnabled(true);
         } else {
-            favItem.setEnabled(false);
             sortItem.setEnabled(false);
             autoRefreshItem.setEnabled(false);
             proxItem.setEnabled(false);
             timeItem.setEnabled(false);
-        }
-
-        // Add or remove favourite stops?
-        if(sd.getFavouriteStopExists(stopCode)) {
-            favItem.setTitle(R.string.displaystopdata_menu_remfav)
-                    .setIcon(R.drawable.ic_menu_delete);
-        } else {
-            favItem.setTitle(R.string.displaystopdata_menu_addfav)
-                    .setIcon(R.drawable.ic_menu_add);
         }
 
         // Sort by time or service?
@@ -446,24 +463,6 @@ public class DisplayStopDataFragment extends Fragment
     public boolean onOptionsItemSelected(final MenuItem item) {
         Intent intent;
         switch(item.getItemId()) {
-            case R.id.displaystopdata_option_menu_favourite:
-                if(sd.getFavouriteStopExists(stopCode)) {
-                    // Show the delete favourite stop DialogFragment.
-                    final DeleteFavouriteDialogFragment deleteFavFrag =
-                            DeleteFavouriteDialogFragment.newInstance(stopCode,
-                            this);
-                    deleteFavFrag.show(getFragmentManager(),
-                            DELETE_FAV_DIALOG_TAG);
-                } else {
-                    // Show the add favourite stop Activity.
-                    intent = new Intent(getActivity(),
-                            AddEditFavouriteStopActivity.class);
-                    intent.putExtra("stopCode", stopCode);
-                    intent.putExtra("stopName", stopName);
-                    startActivity(intent);
-                }
-                
-                return true;
             case R.id.displaystopdata_option_menu_sort:
                 // Change the sort preference and ask for a data redisplay.
                 boolean sortByTime = sp.getBoolean(
@@ -1008,8 +1007,7 @@ public class DisplayStopDataFragment extends Fragment
      */
     @Override
     public void onConfirmFavouriteDeletion() {
-        // Refresh the menu/Action items.
-        getActivity().supportInvalidateOptionsMenu();
+        imgbtnFavourite.setBackgroundResource(R.drawable.ic_list_unfavourite);
     }
 
     /**
@@ -1040,9 +1038,8 @@ public class DisplayStopDataFragment extends Fragment
     private static class BusTimesExpandableListAdapter
             extends SimpleExpandableListAdapter {
         
-        private static final int DEFAULT_COLOUR = 0xFF4291BC;
-        
         private final Context context;
+        private final int defaultColour;
         private final HashMap<String, String> colours;
         
         /**
@@ -1074,6 +1071,8 @@ public class DisplayStopDataFragment extends Fragment
             
             final BusStopDatabase bsd = BusStopDatabase.getInstance(
                     context.getApplicationContext());
+            defaultColour = context.getResources().getColor(R.color
+                    .defaultBusColour);
             final int size = groupData.size();
             // Create an array of String to hold the loaded services.
             final String[] services = new String[size];
@@ -1113,15 +1112,20 @@ public class DisplayStopDataFragment extends Fragment
             // Get the Drawable which makes up the retangle in the background
             // with the rounded corners. Make it mutable so it doesn't affect
             // other instances of the same Drawable.
-            final Drawable background = context.getResources()
-                    .getDrawable(R.drawable.bus_service_rounded_background)
-                    .mutate();
+            final GradientDrawable background;
+            try {
+                background = (GradientDrawable)context.getResources()
+                        .getDrawable(R.drawable.bus_service_rounded_background)
+                        .mutate();
+            } catch(ClassCastException e) {
+                txtService.setTextColor(Color.BLACK);
+                return v;
+            }
             
             // Night services are treated differently to the rest.
             if(service.startsWith("N")) {
                 // Give it a black background.
-                background.setColorFilter(Color.BLACK,
-                        PorterDuff.Mode.MULTIPLY);
+                background.setColor(Color.BLACK);
                 // We need to replace the text in the TextView because HTML
                 // formatting has been applied to it, to make the 'N' red.
                 txtService.setText(
@@ -1130,20 +1134,17 @@ public class DisplayStopDataFragment extends Fragment
                 try {
                     // If the colour for the service can be parsed, set the
                     // background here.
-                    background.setColorFilter(
-                            Color.parseColor(colours.get(service)),
-                            PorterDuff.Mode.MULTIPLY);
+                    background.setColor(Color.parseColor(
+                            colours.get(service)));
                 } catch(IllegalArgumentException e) {
                     // If it cannot be parsed, use the default background
                     // colour.
-                    background.setColorFilter(DEFAULT_COLOUR,
-                            PorterDuff.Mode.MULTIPLY);
+                    background.setColor(defaultColour);
                 }
             } else {
                 // If not a night service, and a colour doesn't exist for the
                 // service, use the default colour.
-                background.setColorFilter(DEFAULT_COLOUR,
-                        PorterDuff.Mode.MULTIPLY);
+                background.setColor(defaultColour);
             }
             
             // Set the background and return the View for the group.

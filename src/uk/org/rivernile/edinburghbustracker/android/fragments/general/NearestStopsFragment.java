@@ -51,6 +51,8 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -318,6 +320,16 @@ public class NearestStopsFragment extends ListFragment
             item.setTitle(R.string.alert_time_rem);
         } else {
             item.setTitle(R.string.alert_time_add);
+        }
+        
+        // If the Google Play Services is not available, then don't show the
+        // option to show the stop on the map.
+        item = menu.findItem(R.id.neareststops_context_menu_showonmap);
+        
+        if(GooglePlayServicesUtil
+                .isGooglePlayServicesAvailable(getActivity()) !=
+                    ConnectionResult.SUCCESS) {
+            item.setVisible(false);
         }
     }
     
@@ -795,7 +807,7 @@ public class NearestStopsFragment extends ListFragment
             final SearchResult sr = getItem(position);
             // Set the distance text.
             distance.setText(getContext().getText(R.string.distance) + "\n" +
-                    (int)sr.distance + "m");
+                    (int)sr.distance + " m");
             // If locality exists, append it. Show the stop name and stop code.
             if(sr.locality == null) {
                 stopDetails.setText(sr.stopName + " (" + sr.stopCode + ")");

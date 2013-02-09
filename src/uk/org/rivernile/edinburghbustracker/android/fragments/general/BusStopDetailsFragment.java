@@ -47,9 +47,12 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -62,6 +65,7 @@ import uk.org.rivernile.edinburghbustracker.android
 import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
+import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -159,9 +163,9 @@ public class BusStopDetailsFragment extends ListFragment
         sd = SettingsDatabase.getInstance(context);
         locMan = (LocationManager)context
                 .getSystemService(Context.LOCATION_SERVICE);
+        stopCode = getArguments().getString(ARG_STOPCODE);
         
         if(savedInstanceState != null) {
-            stopCode = savedInstanceState.getString(STATE_KEY_STOPCODE);
             stopName = savedInstanceState.getString(STATE_KEY_STOPNAME);
             latitude = savedInstanceState.getDouble(STATE_KEY_LATITUDE);
             longitude = savedInstanceState.getDouble(STATE_KEY_LONGITUDE);
@@ -314,6 +318,15 @@ public class BusStopDetailsFragment extends ListFragment
             mapUi.setMyLocationButtonEnabled(false);
             mapUi.setZoomControlsEnabled(false);
             map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            map.setOnMapClickListener(new OnMapClickListener() {
+                @Override
+                public void onMapClick(final LatLng point) {
+                    final Intent intent = new Intent(getActivity(),
+                            BusStopMapActivity.class);
+                    intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
+                    startActivity(intent);
+                }
+            });
         } else {
             // If the MapView is null, then hide it.
             mapView.setVisibility(View.GONE);
@@ -390,7 +403,6 @@ public class BusStopDetailsFragment extends ListFragment
         // Feed back life cycle events back to the MapView.
         mapView.onSaveInstanceState(outState);
         
-        outState.putString(STATE_KEY_STOPCODE, stopCode);
         outState.putString(STATE_KEY_STOPNAME, stopName);
         outState.putDouble(STATE_KEY_LATITUDE, latitude);
         outState.putDouble(STATE_KEY_LONGITUDE, longitude);
@@ -425,8 +437,7 @@ public class BusStopDetailsFragment extends ListFragment
      */
     @Override
     public Loader<Cursor> onCreateLoader(final int i, final Bundle bundle) {
-        return new BusStopDetailsLoader(getActivity(),
-                getArguments().getString(ARG_STOPCODE));
+        return new BusStopDetailsLoader(getActivity(), stopCode);
     }
 
     /**
@@ -630,8 +641,7 @@ public class BusStopDetailsFragment extends ListFragment
             
             return;
         }
-        
-        stopCode = c.getString(1);
+
         stopName = c.getString(2);
         latitude = c.getDouble(3);
         longitude = c.getDouble(4);
@@ -678,6 +688,18 @@ public class BusStopDetailsFragment extends ListFragment
      */
     private void setMapLocation() {
         if(map != null) {
+            // This is a bit of a hack to stop the map crashing the app. The
+            // CameraUpdateFactory depends on being initialised before use. It
+            // seems to work well when the Fragment is first run, but if the app
+            // is killed then later resumed with this Fragment being what is
+            // returned to, the app crashes. This code forces initialisation to
+            // happen.
+            try {
+                MapsInitializer.initialize(getActivity());
+            } catch(GooglePlayServicesNotAvailableException e) {
+                return;
+            }
+            
             // Move the camera to the position of the bus stop marker.
             final LatLng position = new LatLng(latitude, longitude);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(position,

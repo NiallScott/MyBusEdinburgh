@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,10 +28,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
     <item
-        android:id="@+id/displaystopdata_option_menu_favourite"
-        android:showAsAction="ifRoom|withText"
-        tools:ignore="MenuTitle" />
-    <item
         android:id="@+id/displaystopdata_option_menu_refresh"
         android:title="@string/displaystopdata_menu_refresh"
         android:icon="@drawable/ic_menu_refresh"
@@ -44,6 +40,7 @@
     <item
         android:id="@+id/displaystopdata_option_menu_autorefresh"
         android:icon="@drawable/ic_menu_autorefresh"
+        android:showAsAction="ifRoom|withText"
         tools:ignore="MenuTitle" />
     <item
         android:id="@+id/displaystopdata_option_menu_prox"
