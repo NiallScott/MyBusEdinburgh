@@ -334,9 +334,13 @@ public class DisplayStopDataFragment extends Fragment
         // Set the favourite ImageButton.
         if(sd.getFavouriteStopExists(stopCode)) {
             imgbtnFavourite.setBackgroundResource(R.drawable.ic_list_favourite);
+            imgbtnFavourite.setContentDescription(
+                    getString(R.string.favourite_rem));
         } else {
             imgbtnFavourite.setBackgroundResource(
                     R.drawable.ic_list_unfavourite);
+            imgbtnFavourite.setContentDescription(
+                    getString(R.string.favourite_add));
         }
     }
     
@@ -439,19 +443,19 @@ public class DisplayStopDataFragment extends Fragment
         
         // Proximity alert active or not?
         if(sd.isActiveProximityAlert(stopCode)) {
-            proxItem.setTitle(R.string.alert_prox_rem)
+            proxItem.setTitle(R.string.displaystopdata_menu_prox_rem)
                     .setIcon(R.drawable.ic_menu_proximityremove);
         } else {
-            proxItem.setTitle(R.string.alert_prox_add)
+            proxItem.setTitle(R.string.displaystopdata_menu_prox_add)
                     .setIcon(R.drawable.ic_menu_proximityadd);
         }
         
         // Time alert active or not?
         if(sd.isActiveTimeAlert(stopCode)) {
-            timeItem.setTitle(R.string.alert_time_rem)
+            timeItem.setTitle(R.string.displaystopdata_menu_time_rem)
                     .setIcon(R.drawable.ic_menu_arrivalremove);
         } else {
-            timeItem.setTitle(R.string.alert_time_add)
+            timeItem.setTitle(R.string.displaystopdata_menu_time_add)
                     .setIcon(R.drawable.ic_menu_arrivaladd);
         }
     }
@@ -1008,6 +1012,8 @@ public class DisplayStopDataFragment extends Fragment
     @Override
     public void onConfirmFavouriteDeletion() {
         imgbtnFavourite.setBackgroundResource(R.drawable.ic_list_unfavourite);
+        imgbtnFavourite.setContentDescription(
+                getString(R.string.favourite_add));
     }
 
     /**

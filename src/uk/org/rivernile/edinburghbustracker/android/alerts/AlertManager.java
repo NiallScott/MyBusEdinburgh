@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,13 @@
 package uk.org.rivernile.edinburghbustracker.android.alerts;
 
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.SystemClock;
 import com.google.android.gms.maps.model.LatLng;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
@@ -205,57 +202,5 @@ public class AlertManager {
         alMan.cancel(pi);
         // Make sure the PendingIntent is cancelled and invalid too.
         pi.cancel();
-    }
-    
-    /**
-     * Get an instance of the Dialog which confirms a proximity alert deletion.
-     * 
-     * @param context A Context object.
-     * @return An AlertDialog instance.
-     */
-    public AlertDialog getConfirmDeleteProxAlertDialog(final Context context) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setCancelable(true)
-            .setTitle(R.string.alert_prox_rem_confirm)
-            .setPositiveButton(R.string.okay,
-            new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int id) {
-                removeProximityAlert();
-            }
-        }).setNegativeButton(R.string.cancel,
-                new DialogInterface.OnClickListener() {
-             public void onClick(final DialogInterface dialog, final int id) {
-                dialog.dismiss();
-             }
-        });
-        
-        return builder.create();
-    }
-    
-    /**
-     * Get an instance of the Dialog which confirms a time alert deletion.
-     * 
-     * @param context A Context object.
-     * @return An AlertDialog instance.
-     */
-    public AlertDialog getConfirmDeleteTimeAlertDialog(final Context context) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setCancelable(true)
-            .setTitle(R.string.alert_time_rem_confirm)
-            .setPositiveButton(R.string.okay,
-            new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int id) {
-                removeTimeAlert();
-            }
-        }).setNegativeButton(R.string.cancel,
-                new DialogInterface.OnClickListener() {
-             public void onClick(final DialogInterface dialog, final int id) {
-                dialog.dismiss();
-             }
-        });
-        
-        return builder.create();
     }
 }

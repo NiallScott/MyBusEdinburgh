@@ -142,7 +142,7 @@ public class NearestStopsFragment extends ListFragment
         // Initialise the services chooser Dialog.
         servicesChooser = ServicesChooserDialogFragment.newInstance(
                 bsd.getBusServiceList(),
-                getString(R.string.servicefilter_title), this);
+                getString(R.string.neareststops_service_chooser_title), this);
         
         // Check to see if GPS is enabled then check to see if the GPS prompt
         // dialog has been disabled.
@@ -309,17 +309,17 @@ public class NearestStopsFragment extends ListFragment
         // not.
         item = menu.findItem(R.id.neareststops_context_menu_prox_alert);
         if(sd.isActiveProximityAlert(selectedStop.stopCode)) {
-            item.setTitle(R.string.alert_prox_rem);
+            item.setTitle(R.string.neareststops_menu_prox_rem);
         } else {
-            item.setTitle(R.string.alert_prox_add);
+            item.setTitle(R.string.neareststops_menu_prox_add);
         }
         
         // Title depends on whether a time alert has already been added or not.
         item = menu.findItem(R.id.neareststops_context_menu_time_alert);
         if(sd.isActiveTimeAlert(selectedStop.stopCode)) {
-            item.setTitle(R.string.alert_time_rem);
+            item.setTitle(R.string.neareststops_menu_time_rem);
         } else {
-            item.setTitle(R.string.alert_time_add);
+            item.setTitle(R.string.neareststops_menu_time_add);
         }
         
         // If the Google Play Services is not available, then don't show the
@@ -591,6 +591,7 @@ public class NearestStopsFragment extends ListFragment
         public String stopName;
         public Spanned services;
         public float distance;
+        public int orientation;
         public String locality;
 
         /**
@@ -602,15 +603,17 @@ public class NearestStopsFragment extends ListFragment
          * stop.
          * @param distance The distance from the handset to this bus stop.
          * @param point The location of this bus stop.
+         * @param orientation The direction the bus stop faces.
          * @param locality The locality for this bus stop.
          */
         public SearchResult(final String stopCode, final String stopName,
                 final Spanned services, final float distance,
-                final String locality) {
+                final int orientation, final String locality) {
             this.stopCode = stopCode;
             this.stopName = stopName;
             this.services = services;
             this.distance = distance;
+            this.orientation = orientation;
             this.locality = locality;
         }
 
@@ -730,7 +733,7 @@ public class NearestStopsFragment extends ListFragment
                         result.add(new SearchResult(stopCode, c.getString(1),
                                 BusStopDatabase.getColouredServiceListString(
                                 bsd.getBusServicesForStopAsString(stopCode)),
-                                distance[0], c.getString(5)));
+                                distance[0], c.getInt(4), c.getString(5)));
                     }
                     
                     // Cursor is no longer needed, free the resource.
@@ -806,8 +809,7 @@ public class NearestStopsFragment extends ListFragment
             // Get the SearchResult at position.
             final SearchResult sr = getItem(position);
             // Set the distance text.
-            distance.setText(getContext().getText(R.string.distance) + "\n" +
-                    (int)sr.distance + " m");
+            distance.setText((int)sr.distance + " m");
             // If locality exists, append it. Show the stop name and stop code.
             if(sr.locality == null) {
                 stopDetails.setText(sr.stopName + " (" + sr.stopCode + ")");
@@ -817,6 +819,46 @@ public class NearestStopsFragment extends ListFragment
             }
 
             buses.setText(sr.services);
+            
+            // Set the bus stop marker icon.
+            switch(sr.orientation) {
+                case 0:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker_n, 0, 0);
+                    break;
+                case 1:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker_ne, 0, 0);
+                    break;
+                case 2:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker_e, 0, 0);
+                    break;
+                case 3:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker_se, 0, 0);
+                    break;
+                case 4:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker_s, 0, 0);
+                    break;
+                case 5:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker_sw, 0, 0);
+                    break;
+                case 6:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker_w, 0, 0);
+                    break;
+                case 7:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker_nw, 0, 0);
+                    break;
+                default:
+                    distance.setCompoundDrawablesWithIntrinsicBounds(0,
+                            R.drawable.mapmarker, 0, 0);
+                    break;
+            }
 
             return row;
         }

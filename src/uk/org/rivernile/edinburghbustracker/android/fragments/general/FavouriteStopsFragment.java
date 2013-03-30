@@ -123,10 +123,17 @@ public class FavouriteStopsFragment extends ListFragment
         // Determine the mode this Fragment should be in.
         isCreateShortcut = getArguments().getBoolean(CREATE_SHORTCUT);
         // Create the ListAdapter.
-        ca = new FavouritesCursorAdapter(activity,
-                R.layout.favouritestops_list_item, null,
-                new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
-                new int[] { android.R.id.text1 }, isCreateShortcut, this);
+        if(isCreateShortcut) {
+            ca = new FavouritesCursorAdapter(activity,
+                    android.R.layout.simple_list_item_2, null,
+                    new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
+                    new int[] { android.R.id.text1 }, null);
+        } else {
+            ca = new FavouritesCursorAdapter(activity,
+                    R.layout.favouritestops_list_item, null,
+                    new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
+                    new int[] { android.R.id.text1 }, this);
+        }
     }
     
     /**
@@ -194,7 +201,7 @@ public class FavouriteStopsFragment extends ListFragment
             intent.setClass(activity, DisplayStopDataActivity.class);
             intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("stopCode", stopCode);
+            intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
 
             // Set the Activity result to send back to the launcher, which
             // contains a name, Intent and icon.
@@ -203,7 +210,7 @@ public class FavouriteStopsFragment extends ListFragment
             result.putExtra(Intent.EXTRA_SHORTCUT_NAME,
                     sd.getNameForStop(stopCode));
             final Parcelable icon = Intent.ShortcutIconResource
-                    .fromContext(activity, R.drawable.appicon);
+                    .fromContext(activity, R.drawable.appicon_favourite);
             result.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, icon);
 
             // Set the Activity result and exit.
@@ -213,7 +220,8 @@ public class FavouriteStopsFragment extends ListFragment
             // View bus stop times.
             intent = new Intent(activity, DisplayStopDataActivity.class);
             intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-            intent.putExtra("stopCode", String.valueOf(id));
+            intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
+                    String.valueOf(id));
             startActivity(intent);
         }
     }
@@ -244,9 +252,9 @@ public class FavouriteStopsFragment extends ListFragment
                 R.id.favouritestops_context_menu_prox_alert);
         
         if(sd.isActiveProximityAlert(selectedStopCode)) {
-            item.setTitle(R.string.alert_prox_rem);
+            item.setTitle(R.string.favouritestops_menu_prox_rem);
         } else {
-            item.setTitle(R.string.alert_prox_add);
+            item.setTitle(R.string.favouritestops_menu_prox_add);
         }
         
         // Set the title of the time alert item depending whether one is set or
@@ -254,9 +262,9 @@ public class FavouriteStopsFragment extends ListFragment
         item = menu.findItem(R.id.favouritestops_context_menu_time_alert);
         
         if(sd.isActiveTimeAlert(selectedStopCode)) {
-            item.setTitle(R.string.alert_time_rem);
+            item.setTitle(R.string.favouritestops_menu_time_rem);
         } else {
-            item.setTitle(R.string.alert_time_add);
+            item.setTitle(R.string.favouritestops_menu_time_add);
         }
         
         // If the Google Play Services is not available, then don't show the
@@ -453,7 +461,6 @@ public class FavouriteStopsFragment extends ListFragment
         private BusStopDatabase bsd;
         private final HashMap<String, Spanned> serviceListings =
                 new HashMap<String, Spanned>();
-        private final boolean isCreateShortcut;
         private final OnClickListener starClickListener;
         private final float density;
         
@@ -465,15 +472,14 @@ public class FavouriteStopsFragment extends ListFragment
          * @param c The Cursor to populate the list from.
          * @param from An array of Strings to map to UI components.
          * @param to An array of resource IDs to map the from Strings to.
+         * @param starClickListener The callback for when the star is clicked.
          */
         public FavouritesCursorAdapter(final Context context, final int layout,
                 final Cursor c, final String[] from, final int[] to,
-                final boolean isCreateShortcut,
                 final OnClickListener starClickListener) {
             super(context, layout, c, from, to);
             
             bsd = BusStopDatabase.getInstance(context);
-            this.isCreateShortcut = isCreateShortcut;
             this.starClickListener = starClickListener;
             this.density = context.getResources().getDisplayMetrics().density;
         }
@@ -487,7 +493,7 @@ public class FavouriteStopsFragment extends ListFragment
             final View v = super.newView(context, cursor, parent);
             final ImageButton imgbtnFavourite = (ImageButton)v
                     .findViewById(R.id.imgbtnFavourite);
-            if(!isCreateShortcut) {
+            if(imgbtnFavourite != null) {
                 imgbtnFavourite.setFocusable(false);
                 imgbtnFavourite.setFocusableInTouchMode(false);
                 imgbtnFavourite.setOnClickListener(starClickListener);
@@ -507,8 +513,6 @@ public class FavouriteStopsFragment extends ListFragment
                                 imgbtnFavourite));
                     }
                 });
-            } else {
-                imgbtnFavourite.setVisibility(View.GONE);
             }
             
             return v;

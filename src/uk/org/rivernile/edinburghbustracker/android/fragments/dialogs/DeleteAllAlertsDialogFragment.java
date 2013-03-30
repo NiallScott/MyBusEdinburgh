@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -84,7 +84,7 @@ public class DeleteAllAlertsDialogFragment extends DialogFragment {
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(getActivity());
         builder.setCancelable(true)
-            .setTitle(R.string.deleteallalerts_title)
+            .setTitle(R.string.deleteallalertsdialog_title)
             .setPositiveButton(R.string.okay,
             new DialogInterface.OnClickListener() {
             @Override

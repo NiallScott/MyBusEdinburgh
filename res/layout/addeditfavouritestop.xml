@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott & Scott Straughan
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,7 +50,7 @@
         android:layout_below="@id/addeditstop_edit_stopname"
         android:layout_alignParentRight="true"
         android:layout_marginLeft="10dp"
-        android:text="@string/save" />
+        android:text="@string/addeditstop_btn_save" />
     <Button
         android:id="@+id/addeditstop_button_cancel"
         android:layout_width="wrap_content"

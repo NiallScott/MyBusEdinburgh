@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -201,7 +201,7 @@ public class AddProximityAlertFragment extends Fragment {
         // Sort the distance spinner.
         final ArrayAdapter<CharSequence> adapter = ArrayAdapter
                 .createFromResource(getActivity(),
-                    R.array.alert_dialog_prox_distance_array,
+                    R.array.addproxalert_distance_array,
                     android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
@@ -250,7 +250,7 @@ public class AddProximityAlertFragment extends Fragment {
         }
         
         // Set the information text.
-        textProxDialogStop.setText(getString(R.string.alert_dialog_prox_second,
+        textProxDialogStop.setText(getString(R.string.addproxalert_second,
                 stopNameCode));
     }
     

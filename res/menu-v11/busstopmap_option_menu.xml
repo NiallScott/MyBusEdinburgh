@@ -47,8 +47,8 @@
         android:icon="@drawable/ic_menu_trafficview"
         tools:ignore="MenuTitle" />
     <item
-        android:id="@+id/busstopmap_option_menu_filter"
-        android:title="@string/map_menu_filter"
+        android:id="@+id/busstopmap_option_menu_services"
+        android:title="@string/map_menu_services"
         android:icon="@drawable/ic_menu_filter"
         android:showAsAction="ifRoom|withText" />
 </menu>

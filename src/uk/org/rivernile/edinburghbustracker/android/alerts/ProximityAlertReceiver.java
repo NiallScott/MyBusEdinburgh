@@ -80,12 +80,13 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
                 0);
         locMan.removeProximityAlert(pi);
         
-        final String title = context.getString(R.string.alert_prox_title,
-                stopName);
-        final String summary = context.getString(R.string.alert_prox_summary,
+        final String title = context.getString(
+                R.string.proxreceiver_notification_title, stopName);
+        final String summary = context.getString(
+                R.string.proxreceiver_notification_summary,
                 intent.getIntExtra("distance", 0), stopName);
-        final String ticker = context.getString(R.string.alert_prox_ticker,
-                stopName);
+        final String ticker = context.getString(
+                R.string.proxreceiver_notification_ticker, stopName);
         
         final SharedPreferences sp = context
                 .getSharedPreferences(PreferencesActivity.PREF_FILE, 0);

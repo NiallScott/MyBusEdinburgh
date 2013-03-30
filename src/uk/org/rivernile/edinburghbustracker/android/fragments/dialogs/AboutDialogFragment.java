@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -72,12 +73,13 @@ public class AboutDialogFragment extends DialogFragment {
         
         // Set the version text.
         try {
-            temp.setText(getText(R.string.version) + " " +
+            temp.setText(getString(R.string.aboutdialog_version, new Object[] {
                 activity.getPackageManager()
                     .getPackageInfo(activity.getPackageName(), 0)
-                    .versionName + " (#" + activity.getPackageManager()
-                    .getPackageInfo(activity.getPackageName(), 0).versionCode +
-                    ")");
+                    .versionName,
+                activity.getPackageManager()
+                    .getPackageInfo(activity.getPackageName(), 0).versionCode
+            }));
         } catch(NameNotFoundException e) {
             // This should never occur.
             temp.setText("Unknown");
@@ -101,12 +103,11 @@ public class AboutDialogFragment extends DialogFragment {
         date.setTimeInMillis(dbtime);
 
         // Set the DB version text.
-        txtDBVersion.setText(getText(R.string
-                .main_aboutdialog_dbversion) + ": " + dbtime + " (" +
-                dateFormat.format(date.getTime()) + ")");
+        txtDBVersion.setText(getString(R.string.aboutdialog_dbversion,
+                new Object[] { dbtime, dateFormat.format(date.getTime()) }));
         // Set the topology ID text.
-        txtTopoVersion.setText(getText(R.string.main_aboutdialog_topology) +
-                ": " + bsd.getTopoId());
+        txtTopoVersion.setText(getString(R.string.aboutdialog_topology,
+                new Object[] { bsd.getTopoId() }));
 
         // Get the AlertDialog.Builder with the correct theme set.
         AlertDialog.Builder builder;
@@ -137,6 +138,7 @@ public class AboutDialogFragment extends DialogFragment {
      * @param context The Activity context.
      * @return An AlertDialog.Builder instance to create the Dialog on top of.
      */
+    @TargetApi(11)
     public static AlertDialog.Builder getHoneycombDialog(
             final Context context) {
         try {

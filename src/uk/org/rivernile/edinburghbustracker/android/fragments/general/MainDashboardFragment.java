@@ -29,6 +29,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -42,6 +44,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import uk.org.rivernile.edinburghbustracker.android.AlertManagerActivity;
+import uk.org.rivernile.edinburghbustracker.android.BusStopDetailsActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.EnterStopCodeActivity;
 import uk.org.rivernile.edinburghbustracker.android.FavouriteStopsActivity;
@@ -141,9 +144,24 @@ public class MainDashboardFragment extends Fragment
             stopMapButton.setEnabled(false);
         }
         
+        // There's no point in displaying the resolve button if the issue
+        // cannot be resolved.
+        boolean playStoreExists = false;
+        try {
+            final PackageInfo playStoreInfo = context.getPackageManager()
+                    .getPackageInfo(
+                        GooglePlayServicesUtil.GOOGLE_PLAY_STORE_PACKAGE, 0);
+            if(playStoreInfo != null) {
+                playStoreExists = true;
+            }
+        } catch(PackageManager.NameNotFoundException e) {
+            // playStoreExists will already be false.
+        }
+        
         // If the problem is user recoverable, then show a button which lets the
         // user take action.
-        if(GooglePlayServicesUtil.isUserRecoverableError(errorCode)) {
+        if(GooglePlayServicesUtil.isUserRecoverableError(errorCode) &&
+                playStoreExists) {
             resolveButton.setVisibility(View.VISIBLE);
             connectionResult = new ConnectionResult(errorCode,
                     GooglePlayServicesUtil.getErrorPendingIntent(errorCode,

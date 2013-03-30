@@ -31,18 +31,23 @@
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:orientation="horizontal"
-        android:background="#990000">
+        android:background="@color/actionBarColour"
+        android:gravity="center_vertical" >
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:paddingLeft="12dp"
+            android:src="@drawable/appicon"
+            android:contentDescription="@string/main_app_icon_description" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#fff"
             android:textStyle="bold"
             android:textSize="16sp"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingLeft="8dp"
             android:text="@string/app_name" />
     </LinearLayout>
     <include

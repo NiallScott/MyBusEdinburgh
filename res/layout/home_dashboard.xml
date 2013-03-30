@@ -51,18 +51,18 @@
     <Button
         android:id="@+id/home_btn_nearest"
         style="@style/DashboardButton"
-        android:text="@string/neareststops_title"
+        android:text="@string/main_nearest_bus_stops"
         android:drawableTop="@drawable/home_btn_near" />
 
     <Button
         android:id="@+id/home_btn_news"
         style="@style/DashboardButton"
-        android:text="@string/newsupdates_title"
+        android:text="@string/main_news_and_updates"
         android:drawableTop="@drawable/home_btn_news" />
 
     <Button
         android:id="@+id/home_btn_alerts"
         style="@style/DashboardButton"
-        android:text="@string/alertmanager_title"
+        android:text="@string/main_alert_manager"
         android:drawableTop="@drawable/home_btn_alert" />
 </com.google.android.apps.iosched.ui.widget.DashboardLayout>

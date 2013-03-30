@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -131,6 +131,8 @@ public class MapSearchSuggestionsProvider extends
                     result.stopCode = c.getString(1);
                     result.latitude = c.getDouble(3);
                     result.longitude = c.getDouble(4);
+                    result.orientation = c.getInt(5);
+                    locality = c.getString(6);
                     result.services = bsd.getBusServicesForStopAsString(
                             result.stopCode);
                     if(location != null) {
@@ -143,7 +145,6 @@ public class MapSearchSuggestionsProvider extends
                     }
                     
                     // If there's locality information, append it.
-                    locality = bsd.getLocalityForStopCode(result.stopCode);
                     if(locality != null) {
                         result.stopName = c.getString(2) + ", " + locality;
                     } else {
@@ -161,16 +162,46 @@ public class MapSearchSuggestionsProvider extends
         Collections.sort(results);
         
         final int count = results.size();
+        int drawable;
         for(int i = 0; i < count; i++) {
             // Loop though all of the results and add them to the MatrixCursor.
             result = results.get(i);
 
             sb.append(result.stopName).append(' ').append('(')
                     .append(result.stopCode).append(')');
+            
+            switch(result.orientation) {
+                case 1:
+                    drawable = R.drawable.ic_map_busstopne;
+                    break;
+                case 2:
+                    drawable = R.drawable.ic_map_busstope;
+                    break;
+                case 3:
+                    drawable = R.drawable.ic_map_busstopse;
+                    break;
+                case 4:
+                    drawable = R.drawable.ic_map_busstops;
+                    break;
+                case 5:
+                    drawable = R.drawable.ic_map_busstopsw;
+                    break;
+                case 6:
+                    drawable = R.drawable.ic_map_busstopw;
+                    break;
+                case 7:
+                    drawable = R.drawable.ic_map_busstopnw;
+                    break;
+                case 0:
+                default:
+                    drawable = R.drawable.ic_map_busstopn;
+                    break;
+            }
 
             cursor.addRow(new Object[] {
                 null,
-                null,
+                "android.resource://" + getContext().getPackageName() + '/' +
+                    drawable,
                 sb.toString(),
                 result.services,
                 result.stopCode,
@@ -228,6 +259,7 @@ public class MapSearchSuggestionsProvider extends
         public String stopCode;
         public String stopName;
         public String services;
+        public int orientation;
         
         /**
          * {@inheritDoc}

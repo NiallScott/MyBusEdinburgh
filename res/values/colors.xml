@@ -26,4 +26,5 @@
 */ -->
 <resources>
     <color name="defaultBusColour">#4291BC</color>
+    <color name="actionBarColour">#990000</color>
 </resources>

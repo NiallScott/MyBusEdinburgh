@@ -373,9 +373,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                     null, null, null, null);
 
             if(c.moveToNext()) {
-                try {
-                    result = Long.parseLong(c.getString(0));
-                } catch(NumberFormatException e) { }
+                result = c.getLong(0);
             }
             
             c.close();

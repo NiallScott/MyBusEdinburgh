@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott & Scott Straughan
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,11 +55,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textIsSelectable="true" />
                 <TextView
                     android:id="@+id/txtServices"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:textIsSelectable="true" />
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -68,7 +70,8 @@
                         android:id="@+id/txtLastUpdated"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingRight="10dp" />
+                        android:paddingRight="10dp"
+                        android:textIsSelectable="false" />
                     <ProgressBar
                         android:id="@+id/progress"
                         style="@android:style/Widget.ProgressBar.Small"
@@ -82,7 +85,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
-                android:background="@drawable/ic_list_favourite" />
+                android:background="@drawable/ic_list_favourite"
+                android:contentDescription="@string/favourite_add" />
         </LinearLayout>
         <RelativeLayout
             android:layout_width="match_parent"
@@ -154,7 +158,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:gravity="center" />
+            android:gravity="center"
+            android:textIsSelectable="true" />
         <Button
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"

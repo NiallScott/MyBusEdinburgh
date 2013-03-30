@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott & Scott Straughan
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,16 +34,18 @@
     <Button
         android:id="@+id/btnBusTimes"
         style="@style/BusStopDetailsButtons"
-        android:text="@string/busstopdetails_btn_showtimes" />
+        android:text="@string/busstopdetails_btn_showtimes"
+        android:drawableTop="@drawable/ic_bubble_action_bustimes" />
     <ImageView
         android:layout_width="1dp"
         android:layout_height="match_parent"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        android:src="#D8D8D8" />
+        android:src="#D8D8D8"
+        android:contentDescription="@null" />
     <Button
         android:id="@+id/btnStreetView"
         style="@style/BusStopDetailsButtons"
         android:text="@string/busstopdetails_btn_streetview"
-        android:drawableTop="@drawable/ic_bubble_action_streetview"/>
+        android:drawableTop="@drawable/ic_bubble_action_streetview" />
 </LinearLayout>

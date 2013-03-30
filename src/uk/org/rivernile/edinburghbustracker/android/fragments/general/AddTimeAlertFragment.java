@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -147,12 +147,12 @@ public class AddTimeAlertFragment extends Fragment
                 ServicesChooserDialogFragment.ARG_DEFAULT_SERVICE)) {
             servicesChooser = ServicesChooserDialogFragment.newInstance(
                     bsd.getBusServicesForStop(stopCode),
-                    getString(R.string.alert_dialog_time_services_title),
+                    getString(R.string.addtimealert_services_title),
                     args.getString(ARG_DEFAULT_SERVICE), this);
         } else {
             servicesChooser = ServicesChooserDialogFragment.newInstance(
                     bsd.getBusServicesForStop(stopCode),
-                    getString(R.string.alert_dialog_time_services_title), this);
+                    getString(R.string.addtimealert_services_title), this);
         }
     }
     
@@ -184,7 +184,7 @@ public class AddTimeAlertFragment extends Fragment
         final Spinner spinner = (Spinner)v.findViewById(R.id.time_time_select);
         final ArrayAdapter<CharSequence> adapter = ArrayAdapter
                 .createFromResource(getActivity(),
-                    R.array.alert_dialog_time_array,
+                    R.array.addtimealert_array,
                     android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
@@ -273,7 +273,7 @@ public class AddTimeAlertFragment extends Fragment
                     " (" + stopCode + ")";
         }
         
-        txtTimeDialogStop.setText(getString(R.string.alert_dialog_time_busstop,
+        txtTimeDialogStop.setText(getString(R.string.addtimealert_busstop,
                 stopNameCode));
         
         // Force a refresh of the TextView that shows the services that have
@@ -294,8 +294,7 @@ public class AddTimeAlertFragment extends Fragment
         if(services.length() == 0) {
             // If the services list is empty, put the default text in the view
             // and disable the okay button.
-            txtServices.setText(getString(R.string
-                    .alert_dialog_time_noservices));
+            txtServices.setText(getString(R.string.addtimealert_noservices));
             btnOkay.setEnabled(false);
         } else {
             // If the services list is not empty, put the services list in the

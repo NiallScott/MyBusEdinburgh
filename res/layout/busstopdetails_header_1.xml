@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott & Scott Straughan
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,21 +49,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textIsSelectable="true" />
             <TextView
                 android:id="@+id/txtServices"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textIsSelectable="true" />
             <TextView
                 android:id="@+id/txtDistance"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#989898" />
+                android:textColor="#989898"
+                android:drawablePadding="5dp"
+                android:textIsSelectable="false" />
         </LinearLayout>
         <ImageButton
             android:id="@+id/imgbtnFavourite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp" />
+            android:layout_marginLeft="8dp"
+            android:contentDescription="@string/favourite_add" />
     </LinearLayout>
 </LinearLayout>

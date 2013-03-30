@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,9 @@
         android:drawable="@drawable/home_btn_map_pressed"
         android:state_focused="true"
         android:state_pressed="true" />
+    <item
+        android:drawable="@drawable/home_btn_map_disabled"
+        android:state_enabled="false" />
     <item
         android:drawable="@drawable/home_btn_map_pressed"
         android:state_focused="false"

@@ -26,6 +26,7 @@
 package uk.org.rivernile.edinburghbustracker.android.twitter;
 
 import android.annotation.SuppressLint;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -42,8 +43,8 @@ public final class TwitterNewsItem {
     private static final SimpleDateFormat inDateFormat =
             new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZZ yyyy",
                     Locale.ENGLISH);
-    private static final SimpleDateFormat outDateFormat =
-            new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss");
+    private static final DateFormat outDateFormat =
+            DateFormat.getDateTimeInstance();
     
     private String body;
     private String poster;

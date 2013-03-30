@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,28 +26,16 @@
 */ -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SelectableText"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
+    <include
+        layout="@layout/button_bar_ok_cancel"
         android:id="@+id/buttonBar"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        style="@android:style/ButtonBar">
-        <Button
-            android:id="@+id/btnOkay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/okay" />
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/cancel" />
-    </LinearLayout>
+        android:layout_alignParentBottom="true" />
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -61,7 +49,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#000"
-                android:text="@string/alert_dialog_time_first"
+                android:text="@string/addtimealert_first"
                 android:textSize="16sp"
                 android:paddingBottom="10dp" />
             <LinearLayout
@@ -76,7 +64,7 @@
                     android:layout_height="wrap_content"
                     android:textColor="#000"
                     android:textSize="16sp"
-                    android:text="@string/alert_dialog_time_noservices"
+                    android:text="@string/addtimealert_noservices"
                     android:paddingRight="10dp"
                     android:layout_weight="1" />
                 <Button
@@ -98,12 +86,12 @@
                     android:textSize="16sp"
                     android:paddingBottom="10dp"
                     android:paddingRight="10dp"
-                    android:text="@string/alert_dialog_time_isdue" />
+                    android:text="@string/addtimealert_isdue" />
                 <Spinner
                     android:id="@+id/time_time_select"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:prompt="@string/alert_dialog_time_spinner_prompt"
+                    android:prompt="@string/addtimealert_spinner_prompt"
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp" />
             </LinearLayout>
@@ -118,7 +106,7 @@
                 android:id="@+id/btnLimitations"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/alert_dialog_time_limitations" />
+                android:text="@string/addtimealert_limitations" />
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>

@@ -221,7 +221,9 @@ public class BusStopMapFragment extends SupportMapFragment
         // are remembered.
         servicesChooser = ServicesChooserDialogFragment.newInstance(
                 bsd.getBusServiceList(),
-                    getString(R.string.servicefilter_title), this);
+                    getString(
+                        R.string.busstopmapfragment_service_chooser_title),
+                        this);
     }
     
     /**
@@ -352,7 +354,7 @@ public class BusStopMapFragment extends SupportMapFragment
                 // Tell the underlying Activity to initiate a search.
                 getActivity().onSearchRequested();
                 return true;
-            case R.id.busstopmap_option_menu_filter:
+            case R.id.busstopmap_option_menu_services:
                 // Show the services chooser Dialog.
                 servicesChooser.show(getFragmentManager(),
                         SERVICES_CHOOSER_DIALOG_TAG);

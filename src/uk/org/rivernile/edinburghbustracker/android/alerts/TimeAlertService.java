@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -142,16 +142,19 @@ public class TimeAlertService extends IntentService {
                     launchIntent.setAction(DisplayStopDataActivity
                             .ACTION_VIEW_STOP_DATA);
                     launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    launchIntent.putExtra("stopCode", stopCode);
-                    launchIntent.putExtra("forceLoad", true);
+                    launchIntent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
+                            stopCode);
+                    launchIntent.putExtra(DisplayStopDataActivity.ARG_FORCELOAD,
+                            true);
                     
                     final String stopName = bsd.getNameForBusStop(stopCode);
                     
-                    final String title = getString(R.string.alert_time_title);
+                    final String title = getString(R.string
+                            .timeservice_notification_title);
                     
                     final String summary = getResources().getQuantityString(
-                            R.plurals.alert_time_summary, time == 0 ? 1 : time,
-                            service, time, stopName);
+                            R.plurals.timeservice_notification_summary,
+                            time == 0 ? 1 : time, service, time, stopName);
                     
                     // Build the notification.
                     final NotificationCompat.Builder notifBuilder =

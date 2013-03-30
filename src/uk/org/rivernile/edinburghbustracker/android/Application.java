@@ -216,7 +216,7 @@ public class Application extends android.app.Application {
                     // It was forced, alert the user there is no update
                     // available.
                     Looper.prepare();
-                    Toast.makeText(context, R.string.main_db_no_updates,
+                    Toast.makeText(context, R.string.bus_stop_db_no_updates,
                             Toast.LENGTH_LONG).show();
                     Looper.loop();
                 }
@@ -290,7 +290,7 @@ public class Application extends android.app.Application {
             } else if(force) {
                 // Tell the user there is no update available.
                 Looper.prepare();
-                Toast.makeText(context, R.string.main_db_no_updates,
+                Toast.makeText(context, R.string.bus_stop_db_no_updates,
                         Toast.LENGTH_LONG).show();
                 Looper.loop();
             }
@@ -387,8 +387,8 @@ public class Application extends android.app.Application {
             
             // Alert the user that the database has been updated.
             Looper.prepare();
-            Toast.makeText(context, R.string.main_db_updated, Toast.LENGTH_LONG)
-                    .show();
+            Toast.makeText(context, R.string.bus_stop_db_updated,
+                    Toast.LENGTH_LONG).show();
             Looper.loop();
         } catch(MalformedURLException e) {
         } catch(IOException e) { }

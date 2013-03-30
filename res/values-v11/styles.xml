@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,9 +24,10 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools">
     <style name="MainActionBar" parent="@android:style/Widget.Holo.ActionBar">
-        <item name="android:background">#990000</item>
+        <item name="android:background">@color/actionBarColour</item>
         <item name="android:titleTextStyle">@style/MainActionBarText</item>
     </style>
     
@@ -34,7 +35,7 @@
         <item name="android:background">#90000000</item>
     </style>
     
-    <style name="MainActionBarText" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+    <style name="MainActionBarText" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title" tools:ignore="NewApi">
         <item name="android:textColor">#FFF</item>
     </style>
     

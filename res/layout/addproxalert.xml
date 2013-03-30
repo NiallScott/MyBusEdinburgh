@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,28 +26,16 @@
 */ -->
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="SelectableText"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
+    <include
+        layout="@layout/button_bar_ok_cancel"
         android:id="@+id/buttonBar"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        style="@android:style/ButtonBar">
-        <Button
-            android:id="@+id/btnOkay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/okay" />
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/cancel" />
-    </LinearLayout>
+        android:layout_alignParentBottom="true" />
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -61,13 +49,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="#000" 
-                android:text="@string/alert_dialog_prox_first"
+                android:text="@string/addproxalert_first"
                 android:textSize="16sp" />
             <Spinner
                 android:id="@+id/prox_distance_select"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:prompt="@string/alert_dialog_prox_first"
+                android:prompt="@string/addproxalert_first"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp" />
             <TextView
@@ -81,7 +69,7 @@
                 android:id="@+id/checkProxGPS"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/alert_dialog_prox_gps"
+                android:text="@string/addproxalert_gps"
                 android:textColor="#000"
                 android:visibility="gone"
                 android:paddingBottom="10dp" />
@@ -89,7 +77,7 @@
                 android:id="@+id/btnLimitations"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/alert_dialog_prox_limitations" />
+                android:text="@string/addproxalert_limitations" />
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>
