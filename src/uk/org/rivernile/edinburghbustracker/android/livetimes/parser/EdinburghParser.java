@@ -178,12 +178,8 @@ public final class EdinburghParser implements BusParser {
         }
         
         final JSONArray ja = jo.getJSONArray("busTimes");
-        JSONArray jBuses;
-        JSONObject jBus;
         EdinburghBusStop currentBusStop;
-        EdinburghBus currentBus;
         EdinburghBusService currentBusService;
-        int i, j, lenDatas;
         // Make sure there's array elements.
         final int len = ja.length();
         if(len == 0) {
@@ -191,9 +187,8 @@ public final class EdinburghParser implements BusParser {
         }
         
         String temp;
-        char reliability, type;
         
-        for(i = 0; i < len; i++) {
+        for(int i = 0; i < len; i++) {
             jo = ja.getJSONObject(i);
             
             // Check to see if there are any global disruptions.
@@ -202,37 +197,103 @@ public final class EdinburghParser implements BusParser {
             // Get data for the bus stop.
             currentBusStop = (EdinburghBusStop)data.get(temp);
             if(currentBusStop == null) {
-                currentBusStop = new EdinburghBusStop(temp,
-                        jo.getString("stopName"),
-                        jo.getBoolean("busStopDisruption"));
-                data.put(temp, currentBusStop);
+                currentBusStop = parseEdinburghBusStop(jo);
+                if(currentBusStop != null) {
+                    data.put(temp, currentBusStop);
+                } else {
+                    continue;
+                }
             }
             
             // Add a bus service to the current bus stop.
-            currentBusService = new EdinburghBusService(
-                    jo.getString("mnemoService"),
-                    jo.getString("nameService"),
-                    jo.getBoolean("serviceDisruption"));
-            currentBusStop.addBusService(currentBusService);
-            
-            jBuses = jo.getJSONArray("timeDatas");
-            lenDatas = jBuses.length();
-            
-            // Loop through the times for each bus.
-            for(j = 0; j < lenDatas; j++) {
-                jBus = jBuses.getJSONObject(j);
-                
-                reliability = jBus.getString("reliability").charAt(0);
-                type = jBus.getString("type").charAt(0);
-                currentBus = new EdinburghBus(jBus.getString("nameDest"),
-                        jBus.getInt("day"), jBus.getString("time"),
-                        jBus.getInt("minutes"), reliability, type,
-                        jBus.getString("terminus"));
-                currentBusService.addBus(currentBus);
+            currentBusService = parseEdinburghBusService(jo);
+            if(currentBusService != null) {
+                currentBusStop.addBusService(currentBusService);
             }
         }
         
         return data;
+    }
+    
+    /**
+     * Create an EdinburghBusStop object from a JSONObject.
+     * 
+     * @param joStop The JSONObject to parse.
+     * @return An EdinburghBusStop object, or null if there was a problem.
+     */
+    private static EdinburghBusStop parseEdinburghBusStop(
+            final JSONObject joStop) {
+        try {
+            return new EdinburghBusStop(joStop.getString("stopId"),
+                    joStop.getString("stopName"),
+                    joStop.getBoolean("busStopDisruption"));
+        } catch(JSONException e) {
+            // Nothing to do.
+        } catch(IllegalArgumentException e) {
+            // Nothing to do.
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Create an EdinburghBus object from a JSONObject.
+     * 
+     * @param joService The JSONObject to parse.
+     * @return An EdinburghBusService object, or null if there was a problem.
+     */
+    private static EdinburghBusService parseEdinburghBusService(
+            final JSONObject joService) {
+        try {
+            final EdinburghBusService service = new EdinburghBusService(
+                    joService.getString("mnemoService"),
+                    joService.getString("nameService"),
+                    joService.getBoolean("serviceDisruption"));
+            final JSONArray jaBuses = joService.getJSONArray("timeDatas");
+            final int len = jaBuses.length();
+            EdinburghBus currentBus;
+            
+            // Loop through the times for each bus.
+            for(int i = 0; i < len; i++) {
+                currentBus = parseEdinburghBus(jaBuses.getJSONObject(i));
+                
+                if(currentBus != null) {
+                    service.addBus(currentBus);
+                }
+            }
+            
+            return service;
+        } catch(JSONException e) {
+            // Nothing to do.
+        } catch(IllegalArgumentException e) {
+            // Nothing to do.
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Create an EdinburghBus object from a JSONObject.
+     * 
+     * @param joBus The JSONObject to parse.
+     * @return An EdinburghBus object, or null if there was a problem.
+     */
+    private static EdinburghBus parseEdinburghBus(final JSONObject joBus) {
+        try {
+            final char reliability = joBus.getString("reliability").charAt(0);
+            final char type = joBus.getString("type").charAt(0);
+            
+            return new EdinburghBus(joBus.getString("nameDest"),
+                        joBus.getInt("day"), joBus.getString("time"),
+                        joBus.getInt("minutes"), reliability, type,
+                        joBus.getString("terminus"));
+        } catch(JSONException e) {
+            // Nothing to do.
+        } catch(IllegalArgumentException e) {
+            // Nothing to do.
+        }
+        
+        return null;
     }
     
     /**

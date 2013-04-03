@@ -37,7 +37,7 @@ public class Bus {
     private final String arrivalTime;
     
     /**
-     * Create a single instance of a bus and its corrosponding destination and
+     * Create a single instance of a bus and its corresponding destination and
      * arrival time. This class may be extended to suit the needs of a particlar
      * town or city.
      * 
@@ -46,10 +46,6 @@ public class Bus {
      * as a String so that you may format the time in any way you wish.
      */
     public Bus(final String destination, final String arrivalTime) {
-        if(destination == null || destination.length() == 0)
-            throw new IllegalArgumentException("The destination must not be " +
-                    "null or blank.");
-        
         if(arrivalTime == null || arrivalTime.length() == 0)
             throw new IllegalArgumentException("The arrival time must not be " +
                     "null or blank.");
@@ -68,9 +64,9 @@ public class Bus {
     }
 
     /**
-     * Get the destination of the bus service.
+     * Get the destination of the bus service. Can be null.
      * 
-     * @return The destination of the bus service.
+     * @return The destination of the bus service. Can be null.
      */
     public String getDestination() {
         return destination;

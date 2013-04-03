@@ -53,10 +53,6 @@ public class BusService {
             throw new IllegalArgumentException("The service name must not be " +
                     "null or blank");
         
-        if(route == null || route.length() == 0)
-            throw new IllegalArgumentException("The route must not be null " +
-                    "or blank.");
-        
         this.serviceName = serviceName;
         this.route = route;
         
@@ -73,10 +69,11 @@ public class BusService {
     }
     
     /**
-     * Get the String which describes the route that this bus service takes.
+     * Get the String which describes the route that this bus service takes. Can
+     * be null.
      * 
      * @return  The String which describes the route that this bus service
-     * takes.
+     * takes. Can be null.
      */
     public String getRoute() {
         return route;

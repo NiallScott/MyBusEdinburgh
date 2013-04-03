@@ -865,8 +865,17 @@ public class DisplayStopDataFragment extends Fragment
                 if(bus.isDiverted()) {
                     // Special case if diverted.
                     timeToDisplay = "";
-                    destination += " (" +
-                            getString(R.string.displaystopdata_diverted) + ')';
+                    
+                    // Destination may be null when it comes back from the web
+                    // service. Display diverted notice accordingly.
+                    if(destination != null) {
+                        destination += " (" +
+                                getString(R.string.displaystopdata_diverted) +
+                                ')';
+                    } else {
+                        destination = getString(R.string
+                                .displaystopdata_diverted);
+                    }
                 } else {
                     // Get the number of minutes until arrival.
                     mins = bus.getArrivalMinutes();
@@ -885,6 +894,12 @@ public class DisplayStopDataFragment extends Fragment
                     // If the time is estimated, prefix this to the time shown.
                     if(bus.isEstimated()) {
                         timeToDisplay = '*' + timeToDisplay;
+                    }
+                    
+                    // If the destination is null, make it the empty string to
+                    // prevent future problems.
+                    if(destination == null) {
+                        destination = "";
                     }
                 }
                 
