@@ -38,6 +38,8 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -53,6 +55,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class AboutDialogFragment extends DialogFragment {
     
+    private static final String LICENSE_DIALOG_TAG = "licenseDialog";
     private static final boolean isHoneycombOrGreater =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     private static final DateFormat dateFormat =
@@ -108,9 +111,19 @@ public class AboutDialogFragment extends DialogFragment {
         // Set the topology ID text.
         txtTopoVersion.setText(getString(R.string.aboutdialog_topology,
                 new Object[] { bsd.getTopoId() }));
+        
+        final Button btnLicenses = (Button)layout
+                .findViewById(R.id.btnLicenses);
+        btnLicenses.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                new OpenSourceLicenseDialogFragment().show(getFragmentManager(),
+                        LICENSE_DIALOG_TAG);
+            }
+        });
 
         // Get the AlertDialog.Builder with the correct theme set.
-        AlertDialog.Builder builder;
+        final AlertDialog.Builder builder;
         if(isHoneycombOrGreater) {
             builder = getHoneycombDialog(activity);
         } else {

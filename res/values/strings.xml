@@ -469,6 +469,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     application. Usage of this application signifies the user takes complete
     responsibility.</string>
     <string name="aboutdialog_appicon_description">Application icon</string>
+    <string name="aboutdialog_btn_licenses">Open source licenses</string>
     
     <!--
     *********************************************
@@ -527,6 +528,13 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>Satellite</item>
         <item>Terrain</item>
     </string-array>
+    
+    <!--
+    ***********************************************
+    * Strings for OpenSourceLicenseDialogFragment *
+    ***********************************************
+    -->
+    <string name="opensourcelicensedialog_title">Open source licenses</string>
     
     <!--
     **************************************************

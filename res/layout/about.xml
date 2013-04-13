@@ -94,5 +94,11 @@
             android:layout_height="match_parent"
             android:autoLink="web|email|map"
             android:text="@string/aboutdialog_body" />
+        <Button
+            android:id="@+id/btnLicenses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:text="@string/aboutdialog_btn_licenses" />
     </LinearLayout>
 </ScrollView>
