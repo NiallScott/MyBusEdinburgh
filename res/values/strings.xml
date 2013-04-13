@@ -359,7 +359,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***************************************
     -->
     <string name="displaystopdata_gettingdata">Retrieving data from server&#8230;</string>
-    <string name="displaystopdata_lastupdated">Last updated </string>
+    <string name="displaystopdata_lastupdated">Last updated %s</string>
     <string name="displaystopdata_diverted">diverted</string>
     <string name="displaystopdata_column_service">Service</string>
     <string name="displaystopdata_column_destination">Destination</string>

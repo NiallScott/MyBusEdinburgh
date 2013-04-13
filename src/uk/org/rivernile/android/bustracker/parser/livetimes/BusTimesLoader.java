@@ -26,6 +26,7 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 import android.content.Context;
+import android.os.SystemClock;
 import java.util.HashMap;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
 
@@ -93,9 +94,9 @@ public class BusTimesLoader extends SimpleResultLoader<BusTimesResult> {
         // If there's an error, give the result an error code, otherwise give
         // it the result HashMap.
         if(error < 0) {
-            return new BusTimesResult(res, System.currentTimeMillis());
+            return new BusTimesResult(res, SystemClock.elapsedRealtime());
         } else {
-            return new BusTimesResult(error, System.currentTimeMillis());
+            return new BusTimesResult(error, SystemClock.elapsedRealtime());
         }
     }
 }

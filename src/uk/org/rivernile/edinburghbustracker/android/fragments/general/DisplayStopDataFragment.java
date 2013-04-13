@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -127,6 +128,9 @@ public class DisplayStopDataFragment extends Fragment
     private static final String STATE_KEY_LAST_REFRESH = "lastRefresh";
     private static final String STATE_KEY_EXPANDED_ITEMS = "expandedItems";
     
+    private static final int AUTO_REFRESH_PERIOD = 60000;
+    private static final int LAST_REFRESH_PERIOD = 10000;
+    
     private DisplayStopDataEvent eventCallback;
     private BusStopDatabase bsd;
     private SettingsDatabase sd;
@@ -196,8 +200,29 @@ public class DisplayStopDataFragment extends Fragment
         // Get the stop code from the arguments bundle.
         stopCode = getArguments().getString(ARG_STOPCODE);
         
+        // Get preferences.
+        try {
+            numDepartures = Integer.parseInt(
+                    sp.getString(PreferencesActivity
+                        .PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE, "4"));
+        } catch(NumberFormatException e) {
+            numDepartures = 4;
+        }
+        
         if(savedInstanceState != null) {
             lastRefresh = savedInstanceState.getLong(STATE_KEY_LAST_REFRESH, 0);
+            autoRefresh = savedInstanceState.getBoolean(STATE_KEY_AUTOREFRESH,
+                    false);
+            
+            if(savedInstanceState.containsKey(STATE_KEY_EXPANDED_ITEMS)) {
+                expandedServices.clear();
+                Collections.addAll(expandedServices,
+                        savedInstanceState.getStringArray(
+                        STATE_KEY_EXPANDED_ITEMS));
+            }
+        } else {
+            autoRefresh = sp.getBoolean(PreferencesActivity.PREF_AUTO_REFRESH,
+                    false);
         }
     }
     
@@ -273,46 +298,26 @@ public class DisplayStopDataFragment extends Fragment
                     "fragment must implement DisplayStopDataEvent.");
         }
         
-        // Get preferences.
-        try {
-            numDepartures = Integer.parseInt(
-                    sp.getString(PreferencesActivity
-                    .PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE, "4"));
-        } catch(NumberFormatException e) {
-            numDepartures = 4;
-        }
-        
-        if(savedInstanceState != null) {
-            autoRefresh = savedInstanceState.getBoolean(STATE_KEY_AUTOREFRESH,
-                    false);
-            if(savedInstanceState.containsKey(STATE_KEY_EXPANDED_ITEMS)) {
-                expandedServices.clear();
-                Collections.addAll(expandedServices,
-                        savedInstanceState.getStringArray(
-                        STATE_KEY_EXPANDED_ITEMS));
-            }
-        } else {
-            autoRefresh = sp.getBoolean(
-                    PreferencesActivity.PREF_AUTO_REFRESH, false);
-        }
-        
-        if(stopCode == null || stopCode.length() == 0)
-            handleError(BusParser.ERROR_NOCODE);
-        
         // Tell the fragment that there is an options menu.
         setHasOptionsMenu(true);
-        setStopName();
-        // Since there is a stop code, there is no reason the bus service list
-        // cannot be populated.
-        txtServices.setText(BusStopDatabase.getColouredServiceListString(
-                bsd.getBusServicesForStopAsString(stopCode)));
         
-        if(lastRefresh > 0 && getArguments().getBoolean(ARG_FORCELOAD, false)) {
-            getArguments().remove(ARG_FORCELOAD);
-            loadBusTimes(true);
+        if(stopCode != null && stopCode.length() != 0) {
+            setStopName();
+            // Since there is a stop code, there is no reason the bus service
+            // list cannot be populated.
+            txtServices.setText(BusStopDatabase.getColouredServiceListString(
+                    bsd.getBusServicesForStopAsString(stopCode)));
+            
+            if(getArguments().getBoolean(ARG_FORCELOAD, false)) {
+                loadBusTimes(true);
+            } else {
+                loadBusTimes(false);
+            }
         } else {
-            loadBusTimes(false);
+            handleError(BusParser.ERROR_NOCODE);
         }
+        
+        getArguments().remove(ARG_FORCELOAD);
     }
     
     /**
@@ -352,7 +357,6 @@ public class DisplayStopDataFragment extends Fragment
         super.onPause();
 
         // Stop the background tasks when we're pasued.
-        autoRefresh = false;
         mHandler.removeMessages(EVENT_REFRESH);
         mHandler.removeMessages(EVENT_UPDATE_TIME);
     }
@@ -415,12 +419,10 @@ public class DisplayStopDataFragment extends Fragment
         // If there's no bus times, disable all other menu items.
         if(listView.getVisibility() == View.VISIBLE) {
             sortItem.setEnabled(true);
-            autoRefreshItem.setEnabled(true);
             proxItem.setEnabled(true);
             timeItem.setEnabled(true);
         } else {
             sortItem.setEnabled(false);
-            autoRefreshItem.setEnabled(false);
             proxItem.setEnabled(false);
             timeItem.setEnabled(false);
         }
@@ -506,7 +508,8 @@ public class DisplayStopDataFragment extends Fragment
                     // Show the Activity for adding a new proximity alert.
                     intent = new Intent(getActivity(),
                             AddProximityAlertActivity.class);
-                    intent.putExtra("stopCode", stopCode);
+                    intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
+                            stopCode);
                     startActivity(intent);
                 }
                 
@@ -520,7 +523,8 @@ public class DisplayStopDataFragment extends Fragment
                     // Show the Activity for adding a new time alert.
                     intent = new Intent(getActivity(),
                             AddTimeAlertActivity.class);
-                    intent.putExtra("stopCode", stopCode);
+                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
+                            stopCode);
                     startActivity(intent);
                 }
                 
@@ -638,6 +642,8 @@ public class DisplayStopDataFragment extends Fragment
      * Request new bus times.
      */
     private void loadBusTimes(final boolean reload) {
+        mHandler.removeMessages(EVENT_REFRESH);
+        
         final Bundle args = new Bundle();
         args.putStringArray(LOADER_ARG_STOPCODES, new String[] { stopCode });
         args.putInt(LOADER_ARG_NUMBER_OF_DEPARTURES, numDepartures);
@@ -700,6 +706,10 @@ public class DisplayStopDataFragment extends Fragment
         }
         
         showError();
+        
+        if(autoRefresh) {
+            setUpAutoRefresh();
+        }
     }
     
     /**
@@ -952,36 +962,43 @@ public class DisplayStopDataFragment extends Fragment
      * seconds.
      */
     private void updateLastRefreshed() {
-        final long timeSinceRefresh = System.currentTimeMillis() -
+        final long timeSinceRefresh = SystemClock.elapsedRealtime() -
                 lastRefresh;
         final int mins = (int)(timeSinceRefresh / 60000);
+        final String text;
         
-        final StringBuilder sb = new StringBuilder();
-        
-        sb.append(getString(R.string.displaystopdata_lastupdated)).append(' ');
-        
-        if(lastRefresh == 0) {
+        if(lastRefresh <= 0) {
             // The data has never been refreshed.
-            sb.append(getString(R.string.times_never));
+            text = getString(R.string.times_never);
         } else if(mins > 59) {
             // The data was refreshed more than 1 hour ago.
-            sb.append(getString(R.string.times_greaterthanhour));
+            text = getString(R.string.times_greaterthanhour);
         } else if(mins == 0) {
             // The data was refreshed less than 1 minute ago.
-            sb.append(getString(R.string.times_lessthanoneminago));
+            text = getString(R.string.times_lessthanoneminago);
         } else {
-            sb.append(getResources()
-                    .getQuantityString(R.plurals.times_minsago, mins, mins));
+            text = getResources()
+                    .getQuantityString(R.plurals.times_minsago, mins, mins);
         }
         
-        txtLastRefreshed.setText(sb.toString());
+        txtLastRefreshed.setText(getString(R.string.displaystopdata_lastupdated,
+                new Object[] { text }));
     }
     
     /**
-     * Schedule the auto-refresh to execute again in 60 seconds.
+     * Schedule the auto-refresh to execute again 60 seconds after the data was
+     * last refreshed.
      */
     private void setUpAutoRefresh() {
-        mHandler.sendEmptyMessageDelayed(EVENT_REFRESH, 60000);
+        mHandler.removeMessages(EVENT_REFRESH);
+        final long time = (lastRefresh + AUTO_REFRESH_PERIOD) -
+                SystemClock.elapsedRealtime();
+        
+        if(time > 0) {
+            mHandler.sendEmptyMessageDelayed(EVENT_REFRESH, time);
+        } else {
+            mHandler.sendEmptyMessage(EVENT_REFRESH);
+        }
     }
     
     /**
@@ -989,7 +1006,8 @@ public class DisplayStopDataFragment extends Fragment
      * seconds.
      */
     private void setUpLastUpdated() {
-        mHandler.sendEmptyMessageDelayed(EVENT_UPDATE_TIME, 10000);
+        mHandler.sendEmptyMessageDelayed(EVENT_UPDATE_TIME,
+                LAST_REFRESH_PERIOD);
     }
     
     /**

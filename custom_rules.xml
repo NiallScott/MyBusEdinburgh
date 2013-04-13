@@ -47,6 +47,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
              
 public final class ApiKey {
 
@@ -60,8 +61,12 @@ public final class ApiKey {
     public static final String BUGSENSE_KEY = "]]></echo><echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" append="true">${bugsense.key}</echo><echo file="gen/uk/org/rivernile/edinburghbustracker/android/ApiKey.java" append="true"><![CDATA[";
     
     @SuppressLint({"SimpleDateFormat"})
-    private static final SimpleDateFormat formatter =
-            new SimpleDateFormat("yyyyMMddHH");
+    private static final SimpleDateFormat formatter;
+        
+    static {
+        formatter = new SimpleDateFormat("yyyyMMddHH");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
     
     /**
      * This constructor has intentionally been left blank so that this class

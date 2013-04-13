@@ -44,7 +44,6 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import uk.org.rivernile.edinburghbustracker.android.AlertManagerActivity;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDetailsActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.EnterStopCodeActivity;
 import uk.org.rivernile.edinburghbustracker.android.FavouriteStopsActivity;
