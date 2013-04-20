@@ -73,7 +73,7 @@
                         android:paddingRight="10dp"
                         android:textIsSelectable="false" />
                     <ProgressBar
-                        android:id="@+id/progress"
+                        android:id="@+id/progressSmall"
                         style="@android:style/Widget.ProgressBar.Small"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -126,47 +126,19 @@
                 android:text="@string/displaystopdata_column_due"/>
         </RelativeLayout>
     </LinearLayout>
-    <LinearLayout
-        android:id="@+id/layoutProgress"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
+    <ProgressBar
+        android:id="@+id/progressBig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/txtError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
         android:padding="20dp"
         android:visibility="gone"
-        android:gravity="center" >
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:textStyle="bold"
-            android:text="@string/displaystopdata_gettingdata" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/layoutError"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="20dp"
-        android:visibility="gone"
-        android:gravity="center" >
-        <TextView
-            android:id="@+id/txtError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center"
-            android:textIsSelectable="true" />
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="@string/cancel" />
-    </LinearLayout>
+        android:textIsSelectable="true" />
     <ExpandableListView
         android:id="@id/android:list"
         android:layout_width="match_parent"

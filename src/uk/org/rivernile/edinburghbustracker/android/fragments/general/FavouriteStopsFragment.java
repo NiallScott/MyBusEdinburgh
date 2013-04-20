@@ -103,10 +103,9 @@ public class FavouriteStopsFragment extends ListFragment
             "delProxAlertDialog";
     
     private SimpleCursorAdapter ca;
-    private String selectedStopCode;
     private SettingsDatabase sd;
     private boolean isCreateShortcut = false;
-    private View layoutProgress, layoutEmpty;
+    private View progress, txtError;
     
     /**
      * {@inheritDoc}
@@ -145,8 +144,8 @@ public class FavouriteStopsFragment extends ListFragment
         final View v = inflater.inflate(R.layout.favouritestops, container,
                 false);
         
-        layoutProgress = v.findViewById(R.id.layoutProgress);
-        layoutEmpty = v.findViewById(R.id.layoutEmpty);
+        progress = v.findViewById(R.id.progress);
+        txtError = v.findViewById(R.id.txtError);
         
         return v;
     }
@@ -237,12 +236,19 @@ public class FavouriteStopsFragment extends ListFragment
         // Get the menu inflater.
         final MenuInflater inflater = getActivity().getMenuInflater();
         final AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
+        final Cursor c = (Cursor)ca.getItem(info.position);
+        final String selectedStopCode;
+        
         // Get the stopCode.
-        selectedStopCode = String.valueOf(info.id);
+        if(c != null) {
+            selectedStopCode = String.valueOf(c.getString(0));
+        } else {
+            selectedStopCode = "";
+        }
         
         // Set the header title of the context menu.
-        menu.setHeaderTitle(sd.getNameForStop(String.valueOf(info.id)) + " (" +
-                String.valueOf(info.id) + ")");
+        menu.setHeaderTitle(getString(R.string.busstop,
+                sd.getNameForStop(selectedStopCode), selectedStopCode));
         // Inflate the menu from XML.
         inflater.inflate(R.menu.favouritestops_context_menu, menu);
         
@@ -287,21 +293,23 @@ public class FavouriteStopsFragment extends ListFragment
         final AdapterContextMenuInfo info =
                 (AdapterContextMenuInfo)item.getMenuInfo();
         final Activity activity = getActivity();
+        final Cursor c = (Cursor)ca.getItem(info.position);
+        final String selectedStopCode;
         Intent intent;
         
+        if(c != null) {
+            selectedStopCode = c.getString(0);
+        } else {
+            selectedStopCode = "";
+        }
+        
         switch (item.getItemId()) {
-            case R.id.favouritestops_context_menu_view:
-                // Show bus times.
-                intent = new Intent(activity, DisplayStopDataActivity.class);
-                intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-                intent.putExtra("stopCode", String.valueOf(info.id));
-                startActivity(intent);
-                return true;
             case R.id.favouritestops_context_menu_modify:
                 // Allow the user to edit the name of the favourite stop.
                 intent = new Intent(activity,
                         AddEditFavouriteStopActivity.class);
-                intent.putExtra("stopCode", String.valueOf(info.id));
+                intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
+                        selectedStopCode);
                 startActivity(intent);
                 return true;
             case R.id.favouritestops_context_menu_delete:
@@ -315,34 +323,36 @@ public class FavouriteStopsFragment extends ListFragment
                 // Show the selected bus stop on the map.
                 intent = new Intent(activity, BusStopMapActivity.class);
                 intent.putExtra(BusStopMapActivity.ARG_STOPCODE,
-                        String.valueOf(info.id));
+                        selectedStopCode);
                 startActivity(intent);
                 return true;
             case R.id.favouritestops_context_menu_prox_alert:
                 // Either show the Activity which allows the user to add a
                 // proximity alert, or the DialogFragment to confirm the alert's
                 // removal.
-                if(sd.isActiveProximityAlert(String.valueOf(info.id))) {
+                if(sd.isActiveProximityAlert(selectedStopCode)) {
                     new DeleteProximityAlertDialogFragment()
                             .show(getFragmentManager(),
                             DELETE_PROX_ALERT_DIALOG_TAG);
                 } else {
                     intent = new Intent(activity, AddProximityAlertActivity
                             .class);
-                    intent.putExtra("stopCode", String.valueOf(info.id));
+                    intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
+                            selectedStopCode);
                     startActivity(intent);
                 }
                 return true;
             case R.id.favouritestops_context_menu_time_alert:
                 // Either show the Activity which allows the user to add a time
                 // alert, or the DialogFragment to confirm the alert's removal.
-                if(sd.isActiveTimeAlert(String.valueOf(info.id))) {
+                if(sd.isActiveTimeAlert(selectedStopCode)) {
                     new DeleteTimeAlertDialogFragment()
                             .show(getFragmentManager(),
                             DELETE_TIME_ALERT_DIALOG_TAG);
                 } else {
                     intent = new Intent(activity, AddTimeAlertActivity.class);
-                    intent.putExtra("stopCode", String.valueOf(info.id));
+                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
+                            selectedStopCode);
                     startActivity(intent);
                 }
             default:
@@ -355,8 +365,8 @@ public class FavouriteStopsFragment extends ListFragment
      */
     @Override
     public Loader<Cursor> onCreateLoader(final int i, final Bundle bundle) {
-        layoutProgress.setVisibility(View.VISIBLE);
-        layoutEmpty.setVisibility(View.GONE);
+        progress.setVisibility(View.VISIBLE);
+        txtError.setVisibility(View.GONE);
         
         // Return the only Loader of this Fragment.
         return new FavouritesCursorLoader(getActivity());
@@ -372,8 +382,8 @@ public class FavouriteStopsFragment extends ListFragment
         ca.swapCursor(c);
         
         if(c == null || c.getCount() == 0) {
-            layoutProgress.setVisibility(View.GONE);
-            layoutEmpty.setVisibility(View.VISIBLE);
+            progress.setVisibility(View.GONE);
+            txtError.setVisibility(View.VISIBLE);
         }
     }
 

@@ -39,6 +39,7 @@ import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.Html;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -48,7 +49,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ImageButton;
@@ -131,7 +131,6 @@ public class DisplayStopDataFragment extends Fragment
     private static final int AUTO_REFRESH_PERIOD = 60000;
     private static final int LAST_REFRESH_PERIOD = 10000;
     
-    private DisplayStopDataEvent eventCallback;
     private BusStopDatabase bsd;
     private SettingsDatabase sd;
     private SharedPreferences sp;
@@ -139,13 +138,14 @@ public class DisplayStopDataFragment extends Fragment
     private ExpandableListView listView;
     private TextView txtLastRefreshed, txtStopName, txtServices, txtError;
     private BusTimesExpandableListAdapter listAdapter;
-    private View layoutProgress, layoutError, layoutTopBar;
-    private ProgressBar progress;
+    private View layoutTopBar;
+    private ProgressBar progressSmall, progressBig;
     private ImageButton imgbtnFavourite;
     
     private int numDepartures = 4;
     private String stopCode;
     private String stopName;
+    private String stopLocality;
     private boolean autoRefresh;
     private long lastRefresh = 0;
     private final ArrayList<String> expandedServices = new ArrayList<String>();
@@ -238,23 +238,13 @@ public class DisplayStopDataFragment extends Fragment
         // Get the UI components we need.
         listView = (ExpandableListView)v.findViewById(android.R.id.list);
         txtLastRefreshed = (TextView)v.findViewById(R.id.txtLastUpdated);
-        layoutProgress = v.findViewById(R.id.layoutProgress);
-        layoutError = v.findViewById(R.id.layoutError);
         layoutTopBar = v.findViewById(R.id.layoutTopBar);
         txtStopName = (TextView)v.findViewById(R.id.txtStopName);
         txtServices = (TextView)v.findViewById(R.id.txtServices);
         txtError = (TextView)v.findViewById(R.id.txtError);
-        progress = (ProgressBar)v.findViewById(R.id.progress);
+        progressSmall = (ProgressBar)v.findViewById(R.id.progressSmall);
+        progressBig = (ProgressBar)v.findViewById(R.id.progressBig);
         imgbtnFavourite = (ImageButton)v.findViewById(R.id.imgbtnFavourite);
-        
-        // If the cancel button is clicked, let the activity decide what to do.
-        final Button btn = (Button)v.findViewById(R.id.btnCancel);
-        btn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                eventCallback.onCancel();
-            }
-        });
         
         imgbtnFavourite.setOnClickListener(new OnClickListener() {
             @Override
@@ -269,8 +259,16 @@ public class DisplayStopDataFragment extends Fragment
                             AddEditFavouriteStopActivity.class);
                     intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
                             stopCode);
-                    intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME,
-                            stopName);
+                    if(stopLocality != null) {
+                        intent.putExtra(
+                                AddEditFavouriteStopActivity.ARG_STOPNAME,
+                                stopName + ", " + stopLocality);
+                    } else {
+                        intent.putExtra(
+                                AddEditFavouriteStopActivity.ARG_STOPNAME,
+                                stopName);
+                    }
+                    
                     startActivity(intent);
                 }
             }
@@ -288,15 +286,6 @@ public class DisplayStopDataFragment extends Fragment
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        
-        // Get the event callback and make sure it casts correctly (ie, the
-        // underlying activity implements DisplayStopDataEvent).
-        try {
-            eventCallback = (DisplayStopDataEvent)getActivity();
-        } catch(ClassCastException e) {
-            throw new IllegalStateException("The Activity hosting this " +
-                    "fragment must implement DisplayStopDataEvent.");
-        }
         
         // Tell the fragment that there is an options menu.
         setHasOptionsMenu(true);
@@ -409,8 +398,8 @@ public class DisplayStopDataFragment extends Fragment
                 R.id.displaystopdata_option_menu_refresh);
         
         // If progress is being shown, disable the refresh button.
-        if(layoutProgress.getVisibility() == View.VISIBLE ||
-                progress.getVisibility() == View.VISIBLE) {
+        if(progressBig.getVisibility() == View.VISIBLE ||
+                progressSmall.getVisibility() == View.VISIBLE) {
             refreshItem.setEnabled(false);
         } else {
             refreshItem.setEnabled(true);
@@ -719,16 +708,15 @@ public class DisplayStopDataFragment extends Fragment
      * indicator.
      */
     private void showProgress() {
-        layoutError.setVisibility(View.GONE);
+        txtError.setVisibility(View.GONE);
         
         if(listView.getVisibility() == View.GONE) {
             layoutTopBar.setVisibility(View.GONE);
-            layoutProgress.setVisibility(View.VISIBLE);
+            progressBig.setVisibility(View.VISIBLE);
         } else {
             layoutTopBar.setVisibility(View.VISIBLE);
-            layoutProgress.setVisibility(View.GONE);
-            progress.setVisibility(View.VISIBLE);
-            txtLastRefreshed.setText(R.string.displaystopdata_gettingdata);
+            progressBig.setVisibility(View.GONE);
+            progressSmall.setVisibility(View.VISIBLE);
         }
         
         getActivity().supportInvalidateOptionsMenu();
@@ -739,9 +727,9 @@ public class DisplayStopDataFragment extends Fragment
      * show the top bar and ListView.
      */
     private void showTimes() {
-        layoutProgress.setVisibility(View.GONE);
-        layoutError.setVisibility(View.GONE);
-        progress.setVisibility(View.INVISIBLE);
+        progressBig.setVisibility(View.GONE);
+        txtError.setVisibility(View.GONE);
+        progressSmall.setVisibility(View.INVISIBLE);
         
         layoutTopBar.setVisibility(View.VISIBLE);
         listView.setVisibility(View.VISIBLE);
@@ -756,10 +744,10 @@ public class DisplayStopDataFragment extends Fragment
     private void showError() {
         layoutTopBar.setVisibility(View.GONE);
         listView.setVisibility(View.GONE);
-        layoutProgress.setVisibility(View.GONE);
-        progress.setVisibility(View.GONE);
+        progressBig.setVisibility(View.GONE);
+        progressSmall.setVisibility(View.GONE);
         
-        layoutError.setVisibility(View.VISIBLE);
+        txtError.setVisibility(View.VISIBLE);
         
         getActivity().supportInvalidateOptionsMenu();
     }
@@ -776,19 +764,23 @@ public class DisplayStopDataFragment extends Fragment
             stopName = sd.getNameForStop(stopCode);
         } else {
             stopName = bsd.getNameForBusStop(stopCode);
+            stopLocality = bsd.getLocalityForStopCode(stopCode);
         }
         
         if(stopName == null || stopName.length() == 0) {
             txtStopName.setText(stopCode);
             stopName = "";
         } else {
-            final StringBuilder sb = new StringBuilder();
-            sb.append(stopName);
-            sb.append(' ');
-            sb.append('(');
-            sb.append(stopCode);
-            sb.append(')');
-            txtStopName.setText(sb.toString());
+            final String name;
+            
+            if(stopLocality != null) {
+                name = getString(R.string.busstop_locality_coloured,
+                        stopName, stopLocality, stopCode);
+            } else {
+                name = getString(R.string.busstop_coloured, stopName, stopCode);
+            }
+            
+            txtStopName.setText(Html.fromHtml(name));
         }
     }
     
@@ -817,18 +809,15 @@ public class DisplayStopDataFragment extends Fragment
         
         // If the stopName could not be set earlier, get it now from the web
         // service.
-        if(stopName.length() == 0)
+        if(stopName == null || stopName.length() == 0) {
             stopName = busStop.getStopName();
         
-        final StringBuilder sb = new StringBuilder();
-        sb.append(stopName);
-        sb.append(' ');
-        sb.append('(');
-        sb.append(stopCode);
-        sb.append(')');
-        
-        // Show the user the stop name and stop code.
-        txtStopName.setText(sb.toString());
+            final String name = getString(R.string.busstop_coloured, stopName,
+                    stopCode);
+
+            // Show the user the stop name and stop code.
+            txtStopName.setText(Html.fromHtml(name));
+        }
         
         // Get the list of services in the user's preferred order.
         final ArrayList<BusService> services;
@@ -982,7 +971,7 @@ public class DisplayStopDataFragment extends Fragment
         }
         
         txtLastRefreshed.setText(getString(R.string.displaystopdata_lastupdated,
-                new Object[] { text }));
+                text));
     }
     
     /**
@@ -1055,19 +1044,6 @@ public class DisplayStopDataFragment extends Fragment
     @Override
     public void onCancelFavouriteDeletion() {
         // Nothing to do here.
-    }
-    
-    /**
-     * This interface is used to send events back to the Activity hosting the
-     * DisplayStopDataFragment. Generally the events in here are ones which may
-     * be handled differently on a phone or a tablet.
-     */
-    public interface DisplayStopDataEvent {
-
-        /**
-         * This is called when the user cancels after an error.
-         */
-        public void onCancel();
     }
     
     /**

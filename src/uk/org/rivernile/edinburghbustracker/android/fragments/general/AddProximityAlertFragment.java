@@ -34,6 +34,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -240,18 +241,19 @@ public class AddProximityAlertFragment extends Fragment {
         
         // Get locality information, if there is any.
         final String locality = bsd.getLocalityForStopCode(stopCode);
-        String stopNameCode;
-        if(locality == null) {
-            stopNameCode = bsd.getNameForBusStop(stopCode) + " (" + stopCode +
-                    ")";
+        final String name;
+        
+        if(locality != null) {
+            name = getString(R.string.busstop_locality_coloured,
+                    bsd.getNameForBusStop(stopCode), locality, stopCode);
         } else {
-            stopNameCode = bsd.getNameForBusStop(stopCode) + ", " + locality +
-                    " (" + stopCode + ")";
+            name = getString(R.string.busstop_coloured,
+                    bsd.getNameForBusStop(stopCode), stopCode);
         }
         
         // Set the information text.
-        textProxDialogStop.setText(getString(R.string.addproxalert_second,
-                stopNameCode));
+        textProxDialogStop.setText(Html.fromHtml(
+                getString(R.string.addproxalert_second, name)));
     }
     
     /**

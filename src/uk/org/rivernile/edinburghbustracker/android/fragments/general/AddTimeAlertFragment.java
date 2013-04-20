@@ -28,6 +28,7 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -262,19 +263,18 @@ public class AddTimeAlertFragment extends Fragment
         // Set a piece of informative text with the stopCode, stopName and
         // locality (if available).
         final String locality = bsd.getLocalityForStopCode(stopCode);
-        String stopNameCode;
-        if(locality == null) {
-            // Format the string for when we do not have locality.
-            stopNameCode = bsd.getNameForBusStop(stopCode) + " (" + stopCode +
-                    ")";
+        final String name;
+        
+        if(locality != null) {
+            name = getString(R.string.busstop_locality_coloured,
+                    bsd.getNameForBusStop(stopCode), locality, stopCode);
         } else {
-            // Format the string for when we do have locality.
-            stopNameCode = bsd.getNameForBusStop(stopCode) + ", " + locality +
-                    " (" + stopCode + ")";
+            name = getString(R.string.busstop_coloured,
+                    bsd.getNameForBusStop(stopCode), stopCode);
         }
         
-        txtTimeDialogStop.setText(getString(R.string.addtimealert_busstop,
-                stopNameCode));
+        txtTimeDialogStop.setText(Html.fromHtml(
+                getString(R.string.addtimealert_busstop, name)));
         
         // Force a refresh of the TextView that shows the services that have
         // been chosen.

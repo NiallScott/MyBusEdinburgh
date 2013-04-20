@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,9 +46,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import java.util.ArrayList;
@@ -71,7 +69,7 @@ import uk.org.rivernile.edinburghbustracker.android.twitter
 public class TwitterUpdatesFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<TwitterLoaderResult> {
     
-    private View layoutProgress, layoutError;
+    private View progress;
     private TextView txtError;
     
     /**
@@ -82,19 +80,8 @@ public class TwitterUpdatesFragment extends ListFragment
             final ViewGroup container, final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.newsupdates, container, false);
         
-        layoutProgress = v.findViewById(R.id.layoutProgress);
-        layoutError = v.findViewById(R.id.layoutError);
+        progress = v.findViewById(R.id.progress);
         txtError = (TextView)v.findViewById(R.id.txtError);
-        
-        final Button btnRetry = (Button)v.findViewById(R.id.btnRetry);
-        btnRetry.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                // Attempt a retry.
-                getLoaderManager().restartLoader(0, null,
-                        TwitterUpdatesFragment.this);
-            }
-        });
         
         return v;
     }
@@ -134,7 +121,7 @@ public class TwitterUpdatesFragment extends ListFragment
         final MenuItem refreshItem = menu.findItem(
                 R.id.newsupdates_option_menu_refresh);
         
-        if(layoutProgress.getVisibility() == View.VISIBLE) {
+        if(progress.getVisibility() == View.VISIBLE) {
             // Disable the refresh item if a refresh is in progress.
             refreshItem.setEnabled(false);
         } else {
@@ -198,8 +185,8 @@ public class TwitterUpdatesFragment extends ListFragment
         setListAdapter(null);
         
         // Show the progress.
-        layoutError.setVisibility(View.GONE);
-        layoutProgress.setVisibility(View.VISIBLE);
+        txtError.setVisibility(View.GONE);
+        progress.setVisibility(View.VISIBLE);
         
         // Invalidate so that the refresh item gets disabled.
         getActivity().supportInvalidateOptionsMenu();
@@ -231,8 +218,8 @@ public class TwitterUpdatesFragment extends ListFragment
         }
         
         // Show the error layout.
-        layoutProgress.setVisibility(View.GONE);
-        layoutError.setVisibility(View.VISIBLE);
+        progress.setVisibility(View.GONE);
+        txtError.setVisibility(View.VISIBLE);
         // Invalidate the options menu so that the refresh item is shown again.
         getActivity().supportInvalidateOptionsMenu();
     }
@@ -250,8 +237,8 @@ public class TwitterUpdatesFragment extends ListFragment
         }
         
         // Ensure that the progress and error layouts are removed.
-        layoutError.setVisibility(View.GONE);
-        layoutProgress.setVisibility(View.GONE);
+        txtError.setVisibility(View.GONE);
+        progress.setVisibility(View.GONE);
         
         // Fun and magic happens here.
         final ArrayList<HashMap<String, String>> list =

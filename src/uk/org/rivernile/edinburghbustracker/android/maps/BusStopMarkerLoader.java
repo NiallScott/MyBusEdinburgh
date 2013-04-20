@@ -133,8 +133,7 @@ public class BusStopMarkerLoader
             if(c != null) {
                 MarkerOptions mo;
                 int orientation;
-                String locality, stopCode;
-                final StringBuilder sb = new StringBuilder();
+                String locality, stopCode, title;
                 
                 // Loop through all rows in the Cursor.
                 while(c.moveToNext()) {
@@ -151,15 +150,17 @@ public class BusStopMarkerLoader
                     mo.position(new LatLng(c.getDouble(2), c.getDouble(3)));
                     
                     locality = c.getString(5);
-                    sb.append(c.getString(1));
-                    // Check to see if a locality is available.
+                    
                     if(locality != null) {
-                        sb.append(',').append(' ').append(locality);
+                        title = getContext().getString(
+                                R.string.busstop_locality, c.getString(1),
+                                locality, stopCode);
+                    } else {
+                        title = getContext().getString(
+                                R.string.busstop, c.getString(1), stopCode);
                     }
                     
-                    sb.append(' ').append('(').append(stopCode).append(')');
-                    mo.title(sb.toString());
-                    sb.setLength(0);
+                    mo.title(title);
                     
                     orientation = c.getInt(4);
                     

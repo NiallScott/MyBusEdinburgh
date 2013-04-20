@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -199,7 +199,7 @@ public class EnterStopCodeFragment extends Fragment
                 final Intent intent = new Intent(activity,
                         DisplayStopDataActivity.class);
                 intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-                intent.putExtra("stopCode", stopCode);
+                intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
                 startActivity(intent);
             } else {
                 Toast.makeText(activity, R.string.enterstopcode_invalid_qrcode,
@@ -241,7 +241,8 @@ public class EnterStopCodeFragment extends Fragment
             final Intent intent = new Intent(activity,
                     DisplayStopDataActivity.class);
             intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-            intent.putExtra("stopCode", txt.getText().toString().trim());
+            intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
+                    txt.getText().toString().trim());
             startActivity(intent);
         }
     }

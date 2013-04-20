@@ -61,6 +61,15 @@ import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
  */
 public class TimeAlertService extends IntentService {
     
+    /** Argument for the stopCode. */
+    public static final String ARG_STOPCODE = "stopCode";
+    /** Argument for the list of services to check against. */
+    public static final String ARG_SERVICES = "services";
+    /** Argument for the time threshold to trigger an alert. */
+    public static final String ARG_TIME_TRIGGER = "timeTrigger";
+    /** Argument for the time that the alert was set at. */
+    public static final String ARG_TIME_SET = "timeSet";
+    
     private static final int ALERT_ID = 2;
     
     private SettingsDatabase sd;
@@ -98,9 +107,9 @@ public class TimeAlertService extends IntentService {
      */
     @Override
     protected void onHandleIntent(final Intent intent) {
-        final String stopCode = intent.getStringExtra("stopCode");
-        final String[] services = intent.getStringArrayExtra("services");
-        final int timeTrigger = intent.getIntExtra("timeTrigger", 5);
+        final String stopCode = intent.getStringExtra(ARG_STOPCODE);
+        final String[] services = intent.getStringArrayExtra(ARG_SERVICES);
+        final int timeTrigger = intent.getIntExtra(ARG_TIME_TRIGGER, 5);
         final BusParser parser = new EdinburghParser();
         
         HashMap<String, BusStop> result;
@@ -210,7 +219,7 @@ public class TimeAlertService extends IntentService {
      * to start the next service at the appropriate time.
      */
     private void reschedule(final Intent intent) {
-        final long timeSet = intent.getLongExtra("timeSet", 0);
+        final long timeSet = intent.getLongExtra(ARG_TIME_SET, 0);
         
         // Checks to see if the alert has been active for the last hour or more.
         // If so, it gets cancelled.

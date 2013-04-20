@@ -131,7 +131,7 @@ public class BusStopDetailsFragment extends ListFragment
     private GoogleMap map;
     private ImageButton favouriteBtn;
     private TextView txtName, txtServices, txtDistance, txtEmpty;
-    private View layoutProgress;
+    private View progress;
     private ArrayAdapter<String> listAdapter;
     
     private Location lastLocation;
@@ -210,7 +210,7 @@ public class BusStopDetailsFragment extends ListFragment
         mapView = (MapView)header1.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         
-        layoutProgress = v.findViewById(R.id.layoutProgress);
+        progress = v.findViewById(R.id.progress);
         txtEmpty = (TextView)v.findViewById(android.R.id.empty);
         txtName = (TextView)header1.findViewById(R.id.txtName);
         txtServices = (TextView)header1.findViewById(R.id.txtServices);
@@ -270,8 +270,16 @@ public class BusStopDetailsFragment extends ListFragment
                             AddEditFavouriteStopActivity.class);
                     intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
                             stopCode);
-                    intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME,
-                            stopName);
+                    if(locality != null) {
+                        intent.putExtra(
+                                AddEditFavouriteStopActivity.ARG_STOPNAME,
+                                stopName + ", " + locality);
+                    } else {
+                        intent.putExtra(
+                                AddEditFavouriteStopActivity.ARG_STOPNAME,
+                                stopName);
+                    }
+                    
                     startActivity(intent);
                 }
             }
@@ -453,7 +461,7 @@ public class BusStopDetailsFragment extends ListFragment
     @Override
     public Loader<Cursor> onCreateLoader(final int i, final Bundle bundle) {
         // Show the progress indicator.
-        layoutProgress.setVisibility(View.VISIBLE);
+        progress.setVisibility(View.VISIBLE);
         txtEmpty.setVisibility(View.GONE);
         getListView().setVisibility(View.GONE);
         return new BusStopDetailsLoader(getActivity(), stopCode);
@@ -745,22 +753,20 @@ public class BusStopDetailsFragment extends ListFragment
     private void populateView() {
         getListView().setVisibility(View.VISIBLE);
         txtEmpty.setVisibility(View.GONE);
-        layoutProgress.setVisibility(View.GONE);
+        progress.setVisibility(View.GONE);
         
         setMapLocation();
         
-        final StringBuilder sb = new StringBuilder();
-        sb.append(stopName);
+        final String name;
         
         if(locality != null) {
-            sb.append(',').append(' ').append(locality);
+            name = getString(R.string.busstop_locality_coloured, stopName,
+                    locality, stopCode);
+        } else {
+            name = getString(R.string.busstop_coloured, stopName, stopCode);
         }
         
-        sb.append(' ').append("<font color=\"#989898\">(")
-                .append(stopCode).append(")</font>");
-        
-        // Set the bus stop name text.
-        txtName.setText(Html.fromHtml(sb.toString()));
+        txtName.setText(Html.fromHtml(name));
         
         // Set the services list text.
         final String services = bsd.getBusServicesForStopAsString(stopCode);
@@ -850,7 +856,7 @@ public class BusStopDetailsFragment extends ListFragment
     private void showLoadFailedError() {
         getListView().setVisibility(View.GONE);
         txtEmpty.setVisibility(View.VISIBLE);
-        layoutProgress.setVisibility(View.GONE);
+        progress.setVisibility(View.GONE);
     }
     
     /**

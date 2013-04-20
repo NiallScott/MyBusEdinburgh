@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -76,13 +76,13 @@ public class AboutDialogFragment extends DialogFragment {
         
         // Set the version text.
         try {
-            temp.setText(getString(R.string.aboutdialog_version, new Object[] {
+            temp.setText(getString(R.string.aboutdialog_version,
                 activity.getPackageManager()
                     .getPackageInfo(activity.getPackageName(), 0)
                     .versionName,
                 activity.getPackageManager()
                     .getPackageInfo(activity.getPackageName(), 0).versionCode
-            }));
+            ));
         } catch(NameNotFoundException e) {
             // This should never occur.
             temp.setText("Unknown");
@@ -106,11 +106,11 @@ public class AboutDialogFragment extends DialogFragment {
         date.setTimeInMillis(dbtime);
 
         // Set the DB version text.
-        txtDBVersion.setText(getString(R.string.aboutdialog_dbversion,
-                new Object[] { dbtime, dateFormat.format(date.getTime()) }));
+        txtDBVersion.setText(getString(R.string.aboutdialog_dbversion, dbtime,
+                dateFormat.format(date.getTime())));
         // Set the topology ID text.
         txtTopoVersion.setText(getString(R.string.aboutdialog_topology,
-                new Object[] { bsd.getTopoId() }));
+                bsd.getTopoId()));
         
         final Button btnLicenses = (Button)layout
                 .findViewById(R.id.btnLicenses);

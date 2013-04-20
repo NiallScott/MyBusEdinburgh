@@ -78,9 +78,19 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="times_lessthanoneminago">less than 1 minute ago</string>
     <plurals name="times_minsago">
         <item quantity="one">1 minute ago</item>
-        <item quantity="other">%d minutes ago</item>
+        <item quantity="other">%d minutes ago</item> <!-- %d = number of minutes. -->
     </plurals>
     <string name="times_greaterthanhour">more than 1 hour ago</string>
+    
+    <!--
+    ******************************************
+    * Strings for formatting bus stop names. *
+    ******************************************
+    -->
+    <string name="busstop">%1$s (%2$s)</string>
+    <string name="busstop_locality">%1$s, %2$s (%3$s)</string>
+    <string name="busstop_coloured"><![CDATA[%1$s <font color="#989898">(%2$s)</font>]]></string>
+    <string name="busstop_locality_coloured"><![CDATA[%1$s, %2$s <font color="#989898">(%3$s)</font>]]></string>
     
     <!--
     ****************
@@ -284,7 +294,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>750 metres (820 yards)</item>
         <item>1000 metres (1093 yards)</item>
     </string-array>
-    <string name="addproxalert_second">of bus stop %s.</string>
+    <string name="addproxalert_second">of bus stop %s.</string> <!-- %s = bus stop name and code. -->
     <string name="addproxalert_gps">For this feature to work properly, it is strongly advised that GPS is turned on. Tick this if you would like to go to the device preferences after you have set this alert to turn GPS on.</string>
     <string name="addproxalert_limitations">Show limitations</string>
     
@@ -308,7 +318,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>in 25 minutes</item>
         <item>in 30 minutes</item>
     </string-array>
-    <string name="addtimealert_busstop">or less at bus stop %s.</string>
+    <string name="addtimealert_busstop">or less at bus stop %s.</string> <!-- %s = bus stop name and code. -->
     <string name="addtimealert_limitations">Show limitations</string>
     
     <!--
@@ -318,11 +328,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="alertmanager_empty"><b>You currently have no alerts set.</b>\nYou can add time and proximity alerts from your favourite stops listing, the bus stop map, the nearby bus stops list and when viewing arrival times for a bus stop.</string>
     <string name="alertmanager_prox_title"><b>Proximity Alert</b></string>
-    <string name="alertmanager_prox_text">You will be alerted when you are within %1$d metres of bus stop %2$s.\n\nFor the most accurate results, ensure GPS is turned on. This alert will be automatically removed 1 hour after being set, or if you restart your device.</string>
+    <string name="alertmanager_prox_text">You will be alerted when you are within %1$d metres of bus stop %2$s.\n\nFor the most accurate results, ensure GPS is turned on. This alert will be automatically removed 1 hour after being set, or if you restart your device.</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
     <string name="alertmanager_time_title"><b>Bus Arrival Alert</b></string>
     <plurals name="alertmanager_time_text">
-        <item quantity="one">You will be alerted when any of the following services are due now at the bus stop %1$s:\n\n%2$s\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</item>
-        <item quantity="other">You will be alerted when any of the following services are due in %3$d minutes or less at the bus stop %1$s:\n\n%2$s\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</item>
+        <item quantity="one">You will be alerted when any of the following services are due now at the bus stop %1$s:\n\n%2$s\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</item> <!-- %1$s = bus stop name and code. %2$s = list of service names. -->
+        <item quantity="other">You will be alerted when any of the following services are due in %3$d minutes or less at the bus stop %1$s:\n\n%2$s\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</item> <!-- %3$d = number of minutes. %1$s = bus stop name and code. %3$s = list of service names. -->
     </plurals>
     <string name="alertmanager_button_remove_single">Remove alert</string>
     <string name="alertmanager_prox_image_description">Proximity icon</string>
@@ -336,7 +346,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="busstopdetails_btn_showtimes">Bus times</string>
     <string name="busstopdetails_btn_streetview">Street view</string>
     <string name="busstopdetails_noservices">No known services for this stop</string>
-    <string name="busstopdetails_loading">Loading bus stop data&#8230;</string>
     <string name="busstopdetails_load_failed"><b>Problem loading stop</b>\nThis bus stop could not be found in the bus stop database.</string>
     <string name="busstopdetails_prox_add">@string/prox_alert_add</string>
     <string name="busstopdetails_prox_rem">@string/prox_alert_rem</string>
@@ -349,7 +358,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************************
     -->
     <string name="busstopmapfragment_nosearchresults">No results found.</string>
-    <string name="busstopmapfragment_progress_message">Searching for:\n%s</string>
+    <string name="busstopmapfragment_progress_message">Searching for:\n%s</string> <!-- %s = search term. -->
     <string name="busstopmapfragment_location_unknown">Location unknown</string>
     <string name="busstopmapfragment_service_chooser_title">Select route(s) to show</string>
     
@@ -358,8 +367,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for DisplayStopDataFragment *
     ***************************************
     -->
-    <string name="displaystopdata_gettingdata">Retrieving data from server&#8230;</string>
-    <string name="displaystopdata_lastupdated">Last updated %s</string>
+    <string name="displaystopdata_lastupdated">Last updated %s</string> <!-- %s = last updated text, e.g. "5 minutes ago." -->
     <string name="displaystopdata_diverted">diverted</string>
     <string name="displaystopdata_column_service">Service</string>
     <string name="displaystopdata_column_destination">Destination</string>
@@ -397,7 +405,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **************************************
     -->
     <string name="favouritestops_nosavedstops"><b>You have no saved favourite bus stops.</b>\nYou can add a new favourite from various places in the application, such as from the bus stop map or from the nearest stops list. If you have a backup of your favourite stops, you can restore them from Settings.</string>
-    <string name="favouritestops_loading">Loading favourite stops&#8230;</string>
     <string name="favouriteshortcut_title">Select favourite stop</string>
     <string name="favouriteshortcut_label">Favourite bus stop</string>
     
@@ -432,7 +439,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for NewsUpdatesFragment *
     ***********************************
     -->
-    <string name="newsupdates_btn_retry">Retry</string>
     <string name="newsupdates_err_nodata">There are currently no news or update items to display.</string>
     <string name="newsupdates_err_parseerr">There was an error while trying to process the incoming data.</string>
     <string name="newsupdates_err_ioerr">There was an error while receiving data from Twitter. Sometimes this error will happen when Twitter is experiencing heavy load.</string>
@@ -452,9 +458,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for AboutDialogFragment *
     ***********************************
     -->
-    <string name="aboutdialog_version">Version %1$s (#%2$d)</string>
-    <string name="aboutdialog_dbversion">Bus stop DB version: %1$d (%2$s)</string>
-    <string name="aboutdialog_topology">Topology version: %s</string>
+    <string name="aboutdialog_version">Version %1$s (#%2$d)</string> <!-- %1$s = external version number. %2$d = internal version number. -->
+    <string name="aboutdialog_dbversion">Bus stop DB version: %1$d (%2$s)</string> <!-- %1$d = bus stop database timestamp. %2$s = human readable date. -->
+    <string name="aboutdialog_topology">Topology version: %s</string> <!--  %s = topology string. -->
     <string name="aboutdialog_contact">Website: http://www.rivernile.org.uk/bustracker\nFollow @MyBusEdinburgh on Twitter for the latest updates: http://twitter.com/MyBusEdinburgh</string>
     <string name="aboutdialog_body"><b>Thanks to the following people and
     entities for making this application happen:</b>\nGordon Christie (EdinBus for
@@ -616,10 +622,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for FavouriteStopsFragment ListView context menu *
     ************************************************************
     -->
-    <string name="favouritestops_menu_view">View stop times</string>
-    <string name="favouritestops_menu_edit">Edit stop</string>
-    <string name="favouritestops_menu_delete">Delete stop</string>
-    <string name="favouritestops_menu_showonmap">Show stop on map</string>
+    <string name="favouritestops_menu_edit">Edit name</string>
+    <string name="favouritestops_menu_delete">Delete</string>
+    <string name="favouritestops_menu_showonmap">Show on map</string>
     <string name="favouritestops_menu_prox_add">@string/prox_alert_add</string>
     <string name="favouritestops_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="favouritestops_menu_time_add">@string/time_alert_add</string>
@@ -666,9 +671,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * ProximityAlertReceiver *
     **************************
     -->
-    <string name="proxreceiver_notification_title">Approaching %s</string>
-    <string name="proxreceiver_notification_summary">You have entered within a %1$dm radius of %2$s.</string>
-    <string name="proxreceiver_notification_ticker">You are approaching %s.</string>
+    <string name="proxreceiver_notification_title">Approaching %s</string> <!-- %s = bus stop name and code. -->
+    <string name="proxreceiver_notification_summary">You have entered within a %1$dm radius of %2$s.</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
+    <string name="proxreceiver_notification_ticker">You are approaching %s.</string> <!-- %s = bus stop name and code. -->
     
     <!--
     **************
@@ -685,7 +690,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="timeservice_notification_title">Bus arrival alert</string>
     <plurals name="timeservice_notification_summary">
-        <item quantity="one">Service %1$s is due at %3$s</item>
-        <item quantity="other">Service %1$s is %2$d minutes or less from %3$s</item>
+        <item quantity="one">Service %1$s is due at %3$s</item> <!-- %1$s = service name. %3$s = bus stop name and code. -->
+        <item quantity="other">Service %1$s is %2$d minutes or less from %3$s</item> <!-- %1$s = service name. %2$d = number of minutes. %3$s = bus stop name and code. -->
     </plurals>
 </resources>

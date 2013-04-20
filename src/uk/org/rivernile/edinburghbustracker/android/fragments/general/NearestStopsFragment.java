@@ -38,6 +38,7 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.Html;
 import android.text.Spanned;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -282,18 +283,21 @@ public class NearestStopsFragment extends ListFragment
         final AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
         // Get the item relating to the selected item.
         selectedStop = ad.getItem(info.position);
+
+        final String name;
         
-        // Append the locality if it is available.
-        final StringBuilder sb = new StringBuilder();
-        sb.append(selectedStop.stopName);
         if(selectedStop.locality != null) {
-            sb.append(',').append(' ').append(selectedStop.locality);
+            name = getString(R.string.busstop_locality,
+                    selectedStop.stopName, selectedStop.locality,
+                        selectedStop.stopCode);
+        } else {
+            name = getString(R.string.busstop, selectedStop.stopName,
+                        selectedStop.stopCode);
         }
         
-        sb.append(' ').append('(').append(selectedStop.stopCode).append(')');
-        
         // Set the title of the context menu.
-        menu.setHeaderTitle(sb.toString());
+        menu.setHeaderTitle(name);
+        
         // Inflate the menu from XML.
         inflater.inflate(R.menu.neareststops_context_menu, menu);
         
@@ -343,15 +347,6 @@ public class NearestStopsFragment extends ListFragment
         Intent intent;
         
         switch(item.getItemId()) {
-            case R.id.neareststops_context_menu_view:
-                // Show the DisplayStopDataActivity.
-                intent = new Intent(getActivity(),
-                        DisplayStopDataActivity.class);
-                intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-                intent.putExtra("stopCode", selectedStop.stopCode);
-                startActivity(intent);
-                
-                return true;
             case R.id.neareststops_context_menu_favourite:
                 // See if this stop exists as a favourite already.
                 if(sd.getFavouriteStopExists(selectedStop.stopCode)) {
@@ -364,8 +359,18 @@ public class NearestStopsFragment extends ListFragment
                     // AddEditFavouriteStopAcitivity.
                     intent = new Intent(getActivity(),
                             AddEditFavouriteStopActivity.class);
-                    intent.putExtra("stopCode", selectedStop.stopCode);
-                    intent.putExtra("stopName", selectedStop.stopName);
+                    intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
+                            selectedStop.stopCode);
+                    if(selectedStop.locality != null) {
+                        intent.putExtra(
+                                AddEditFavouriteStopActivity.ARG_STOPNAME,
+                                selectedStop.stopName + ", " +
+                                    selectedStop.locality);
+                    } else {
+                        intent.putExtra(
+                                AddEditFavouriteStopActivity.ARG_STOPNAME,
+                                selectedStop.stopName);
+                    }
                     startActivity(intent);
                 }
                 
@@ -381,7 +386,8 @@ public class NearestStopsFragment extends ListFragment
                     // If it doesn't exist, show the AddProximityAlertActivity.
                     intent = new Intent(getActivity(),
                             AddProximityAlertActivity.class);
-                    intent.putExtra("stopCode", selectedStop.stopCode);
+                    intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
+                            selectedStop.stopCode);
                     startActivity(intent);
                 }
                 
@@ -397,7 +403,8 @@ public class NearestStopsFragment extends ListFragment
                     // If it doesn't exist, show the AddTimeAlertActivity.
                     intent = new Intent(getActivity(),
                             AddTimeAlertActivity.class);
-                    intent.putExtra("stopCode", selectedStop.stopCode);
+                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
+                            selectedStop.stopCode);
                     startActivity(intent);
                 }
                 
@@ -533,7 +540,8 @@ public class NearestStopsFragment extends ListFragment
             final Intent intent = new Intent(getActivity(),
                     DisplayStopDataActivity.class);
             intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-            intent.putExtra("stopCode", ad.getItem(position).stopCode);
+            intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
+                    ad.getItem(position).stopCode);
             startActivity(intent);
         }
     }
@@ -790,7 +798,7 @@ public class NearestStopsFragment extends ListFragment
         @Override
         public View getView(final int position, final View convertView,
                 final ViewGroup parent) {
-            View row;
+            final View row;
             // If a previous row exists, use that so that XML doesn't need to
             // be inflated.
             if(convertView != null) {
@@ -810,13 +818,19 @@ public class NearestStopsFragment extends ListFragment
             final SearchResult sr = getItem(position);
             // Set the distance text.
             distance.setText((int)sr.distance + " m");
-            // If locality exists, append it. Show the stop name and stop code.
-            if(sr.locality == null) {
-                stopDetails.setText(sr.stopName + " (" + sr.stopCode + ")");
+            
+            final String name;
+            
+            if(sr.locality != null) {
+                name = getContext().getString(
+                        R.string.busstop_locality_coloured, sr.stopName,
+                        sr.locality, sr.stopCode);
             } else {
-                stopDetails.setText(sr.stopName + ", " + sr.locality + " (" +
-                        sr.stopCode + ")");
+                name = getContext().getString(
+                        R.string.busstop_coloured, sr.stopName, sr.stopCode);
             }
+            
+            stopDetails.setText(Html.fromHtml(name));
 
             buses.setText(sr.services);
             

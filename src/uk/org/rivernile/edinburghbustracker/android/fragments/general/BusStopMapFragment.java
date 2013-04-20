@@ -654,7 +654,7 @@ public class BusStopMapFragment extends SupportMapFragment
             progressDialog = IndeterminateProgressDialogFragment
                     .newInstance(this,
                         getString(R.string.busstopmapfragment_progress_message,
-                        new Object[] { searchTerm }));
+                        searchTerm));
             progressDialog.show(getFragmentManager(), PROGRESS_DIALOG_TAG);
         }
     }

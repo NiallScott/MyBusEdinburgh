@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,8 +50,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see DisplayStopDataFragment
  */
-public class DisplayStopDataActivity extends FragmentActivity
-        implements DisplayStopDataFragment.DisplayStopDataEvent {
+public class DisplayStopDataActivity extends FragmentActivity {
     
     /** The ACTION_VIEW_STOP_DATA intent action name. */
     public static final String ACTION_VIEW_STOP_DATA =
@@ -126,13 +125,5 @@ public class DisplayStopDataActivity extends FragmentActivity
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCancel() {
-        finish();
     }
 }

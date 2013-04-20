@@ -52,6 +52,11 @@ import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
  */
 public class ProximityAlertReceiver extends BroadcastReceiver {
     
+    /** Argument for the stopCode. */
+    public static final String ARG_STOPCODE = "stopCode";
+    /** Argument for the distance. */
+    public static final String ARG_DISTANCE = "distance";
+    
     private static final int ALERT_ID = 1;
     
     /**
@@ -60,7 +65,7 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {  
         final SettingsDatabase db = SettingsDatabase.getInstance(context);
-        final String stopCode = intent.getStringExtra("stopCode");
+        final String stopCode = intent.getStringExtra(ARG_STOPCODE);
         // Make sure the alert is still active to remain relevant.
         if(!db.isActiveProximityAlert(stopCode)) return;
         
@@ -84,7 +89,7 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
                 R.string.proxreceiver_notification_title, stopName);
         final String summary = context.getString(
                 R.string.proxreceiver_notification_summary,
-                intent.getIntExtra("distance", 0), stopName);
+                intent.getIntExtra(ARG_DISTANCE, 0), stopName);
         final String ticker = context.getString(
                 R.string.proxreceiver_notification_ticker, stopName);
         

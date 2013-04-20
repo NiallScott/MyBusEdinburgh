@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -352,15 +353,15 @@ public class AlertManagerFragment extends ListFragment
             // Get the stopCode and locality information.
             final String stopCode = c.getString(3);
             final String locality = bsd.getLocalityForStopCode(stopCode);
-            String busStop;
+            final String busStop;
             
             // Append the locality if it is available.
-            if(locality == null) {
-                busStop = bsd.getNameForBusStop(stopCode) + " (" + stopCode +
-                        ")";
+            if(locality != null) {
+                busStop = context.getString(R.string.busstop_locality_coloured,
+                        bsd.getNameForBusStop(stopCode), locality, stopCode);
             } else {
-                busStop = bsd.getNameForBusStop(stopCode) + ", " + locality +
-                        " (" + stopCode + ")";
+                busStop = context.getString(R.string.busstop_coloured,
+                        bsd.getNameForBusStop(stopCode), stopCode);
             }
             
             Button btn;
@@ -381,9 +382,9 @@ public class AlertManagerFragment extends ListFragment
                     
                     // Set information text.
                     txt = (TextView)view.findViewById(R.id.txtAlertManProx);
-                    txt.setText(context
+                    txt.setText(Html.fromHtml(context
                             .getString(R.string.alertmanager_prox_text,
-                            c.getInt(4), busStop));
+                                c.getInt(4), busStop)));
                     break;
                 case SettingsDatabase.ALERTS_TYPE_TIME:
                     btn = (Button)view.findViewById(R.id.btnRemoveTimeAlert);
@@ -408,10 +409,11 @@ public class AlertManagerFragment extends ListFragment
                     }
                     
                     // Get the correct text to display, depending on plurality.
-                    txt.setText(context.getResources().getQuantityString(
-                            R.plurals.alertmanager_time_text,
-                            timeTrigger == 0 ? 1 : timeTrigger, busStop,
-                            sb.toString(), timeTrigger));
+                    txt.setText(Html.fromHtml(
+                            context.getResources().getQuantityString(
+                                R.plurals.alertmanager_time_text,
+                                timeTrigger == 0 ? 1 : timeTrigger, busStop,
+                                sb.toString(), timeTrigger)));
                     break;
                 default:
                     break;

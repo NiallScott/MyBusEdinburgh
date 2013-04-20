@@ -106,10 +106,8 @@ public class AlertManager {
         // The intent to send to the BroadcastReceiver when the distance
         // criteria has been met.
         final Intent intent = new Intent(context, ProximityAlertReceiver.class);
-        intent.putExtra("stopCode", stopCode);
-        intent.putExtra("distance", distance);
-        intent.putExtra("latitude", latitude);
-        intent.putExtra("longitude", longitude);
+        intent.putExtra(ProximityAlertReceiver.ARG_STOPCODE, stopCode);
+        intent.putExtra(ProximityAlertReceiver.ARG_DISTANCE, distance);
         
         final PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
@@ -170,10 +168,11 @@ public class AlertManager {
         
         // The intent to send to the service which monitors the bus times.
         final Intent intent = new Intent(context, TimeAlertService.class);
-        intent.putExtra("stopCode", stopCode);
-        intent.putExtra("services", services);
-        intent.putExtra("timeTrigger", timeTrigger);
-        intent.putExtra("timeSet", SystemClock.elapsedRealtime());
+        intent.putExtra(TimeAlertService.ARG_STOPCODE, stopCode);
+        intent.putExtra(TimeAlertService.ARG_SERVICES, services);
+        intent.putExtra(TimeAlertService.ARG_TIME_TRIGGER, timeTrigger);
+        intent.putExtra(TimeAlertService.ARG_TIME_SET,
+                SystemClock.elapsedRealtime());
         
         final PendingIntent pi = PendingIntent.getService(context, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);

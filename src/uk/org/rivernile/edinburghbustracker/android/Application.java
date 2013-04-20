@@ -85,7 +85,7 @@ public class Application extends android.app.Application {
     public void onCreate() {
         super.onCreate();
         // Register the BugSense handler.
-        BugSenseHandler.setup(this, ApiKey.BUGSENSE_KEY);
+        BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY);
         
         // If the API level is Froyo or greater, then register the
         // SharedPreference listener.
