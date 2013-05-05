@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
  * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
@@ -30,20 +30,123 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center" >
-    <ListView
-        android:id="@android:id/list"
+    <ScrollView
+        android:id="@+id/layoutContent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="gone" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/mapView"
+                android:layout_width="match_parent"
+                android:layout_height="150dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp" >
+                <LinearLayout
+                    android:id="@+id/layoutDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="8dp" >
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="1" >
+                        <TextView
+                            android:id="@+id/txtName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textIsSelectable="true" />
+                        <TextView
+                            android:id="@+id/txtServices"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textIsSelectable="true" />
+                        <TextView
+                            android:id="@+id/txtDistance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#989898"
+                            android:drawablePadding="5dp"
+                            android:textIsSelectable="false" />
+                    </LinearLayout>
+                    <ImageButton
+                        android:id="@+id/imgbtnFavourite"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:contentDescription="@string/favourite_add" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="0dp"
+                    android:gravity="center" >
+                    <Button
+                        android:id="@+id/btnBusTimes"
+                        style="@style/BusStopDetailsButtons"
+                        android:text="@string/busstopdetails_btn_showtimes"
+                        android:drawableTop="@drawable/ic_bubble_action_bustimes" />
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="?android:attr/listDivider" />
+                    <Button
+                        android:id="@+id/btnStreetView"
+                        style="@style/BusStopDetailsButtons"
+                        android:text="@string/busstopdetails_btn_streetview"
+                        android:drawableTop="@drawable/ic_bubble_action_streetview" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider" />
+                <TextView
+                    android:id="@+id/txtProxAlert"
+                    style="@style/BusStopDetailsListItem"
+                    android:textIsSelectable="false" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider" />
+                <TextView
+                    android:id="@+id/txtTimeAlert"
+                    style="@style/BusStopDetailsListItem"
+                    android:textIsSelectable="false" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="?android:attr/listDivider" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
     <TextView
         android:id="@android:id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="20dp"
-        android:text="@string/busstopdetails_load_failed" />
+        android:text="@string/busstopdetails_load_failed"
+        android:visibility="gone" />
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
+        android:layout_height="wrap_content" />
 </LinearLayout>

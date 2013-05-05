@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,11 @@
         <item name="android:textColor">#FFF</item>
     </style>
     
-    <style name="BusStopDetailsButtons">
+    <style name="SelectableItemBackground">
+        <item name="android:background">@android:drawable/list_selector_background</item>
+    </style>
+    
+    <style name="BusStopDetailsButtons" parent="@style/SelectableItemBackground" >
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
@@ -49,6 +53,15 @@
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
         <item name="android:textSize">@dimen/text_size_medium</item>
-        <item name="android:background">@android:drawable/list_selector_background</item>
+    </style>
+    
+    <style name="BusStopDetailsListItem" parent="@style/SelectableItemBackground" >
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:minHeight">?android:attr/listPreferredItemHeight</item>
+        <item name="android:focusable">true</item>
     </style>
 </resources>

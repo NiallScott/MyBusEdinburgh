@@ -32,6 +32,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
@@ -43,19 +44,18 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Surface;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -96,7 +96,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  * 
  * @author Niall Scott
  */
-public class BusStopDetailsFragment extends ListFragment
+public class BusStopDetailsFragment extends Fragment
         implements LocationListener, SensorEventListener,
         LoaderManager.LoaderCallbacks<Cursor>,
         DeleteProximityAlertDialogFragment.EventListener,
@@ -130,9 +130,9 @@ public class BusStopDetailsFragment extends ListFragment
     private MapView mapView;
     private GoogleMap map;
     private ImageButton favouriteBtn;
-    private TextView txtName, txtServices, txtDistance, txtEmpty;
-    private View progress;
-    private ArrayAdapter<String> listAdapter;
+    private TextView txtName, txtServices, txtDistance, txtEmpty, txtProxAlert,
+            txtTimeAlert;
+    private View layoutContent, layoutDetails, progress;
     
     private Location lastLocation;
     private String stopCode;
@@ -184,9 +184,6 @@ public class BusStopDetailsFragment extends ListFragment
         accelerometer = sensMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         stopCode = getArguments().getString(ARG_STOPCODE);
-        
-        listAdapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_list_item_1);
     }
     
     /**
@@ -195,41 +192,37 @@ public class BusStopDetailsFragment extends ListFragment
     @Override
     public View onCreateView(final LayoutInflater inflater,
             final ViewGroup container, final Bundle savedInstanceState) {
-        // This is the View that contains the ListView.
+        // This is the View that contains the root view.
         final View v = inflater.inflate(R.layout.busstopdetails, container,
                 false);
-        // We need the ListView to add the headers.
-        final ListView lv = (ListView)v.findViewById(android.R.id.list);
-        // Inflate the headers.
-        final View header1 = inflater.inflate(R.layout.busstopdetails_header_1,
-                lv, false);
-        final View header2 = inflater.inflate(R.layout.busstopdetails_header_2,
-                lv, false);
         
         // Get the MapView and send it the onCreate event.
-        mapView = (MapView)header1.findViewById(R.id.mapView);
+        mapView = (MapView)v.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         
+        layoutContent = v.findViewById(R.id.layoutContent);
+        layoutDetails = v.findViewById(R.id.layoutDetails);
         progress = v.findViewById(R.id.progress);
         txtEmpty = (TextView)v.findViewById(android.R.id.empty);
-        txtName = (TextView)header1.findViewById(R.id.txtName);
-        txtServices = (TextView)header1.findViewById(R.id.txtServices);
-        txtDistance = (TextView)header1.findViewById(R.id.txtDistance);
+        txtName = (TextView)v.findViewById(R.id.txtName);
+        txtServices = (TextView)v.findViewById(R.id.txtServices);
+        txtDistance = (TextView)v.findViewById(R.id.txtDistance);
+        txtProxAlert = (TextView)v.findViewById(R.id.txtProxAlert);
+        txtTimeAlert = (TextView)v.findViewById(R.id.txtTimeAlert);
         
-        Button b = (Button)header2.findViewById(R.id.btnBusTimes);
+        Button b = (Button)v.findViewById(R.id.btnBusTimes);
         b.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
                 // Show the bus times.
                 final Intent intent = new Intent(getActivity(),
                         DisplayStopDataActivity.class);
-                intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
-                        getArguments().getString(ARG_STOPCODE));
+                intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
                 startActivity(intent);
             }
         });
         
-        b = (Button)header2.findViewById(R.id.btnStreetView);
+        b = (Button)v.findViewById(R.id.btnStreetView);
         b.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -254,8 +247,7 @@ public class BusStopDetailsFragment extends ListFragment
             }
         });
         
-        favouriteBtn = (ImageButton)header1
-                .findViewById(R.id.imgbtnFavourite);
+        favouriteBtn = (ImageButton)v.findViewById(R.id.imgbtnFavourite);
         favouriteBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -285,9 +277,41 @@ public class BusStopDetailsFragment extends ListFragment
             }
         });
         
-        // Add the headers to the ListView.
-        lv.addHeaderView(header1);
-        lv.addHeaderView(header2);
+        txtProxAlert.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                if(sd.isActiveProximityAlert(stopCode)) {
+                    DeleteProximityAlertDialogFragment
+                            .newInstance(BusStopDetailsFragment.this)
+                            .show(getFragmentManager(),
+                            DELETE_PROX_ALERT_DIALOG_TAG);
+                } else {
+                    final Intent intent = new Intent(getActivity(),
+                            AddProximityAlertActivity.class);
+                    intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
+                            stopCode);
+                    startActivity(intent);
+                }
+            }
+        });
+        
+        txtTimeAlert.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                if(sd.isActiveTimeAlert(stopCode)) {
+                    DeleteTimeAlertDialogFragment
+                            .newInstance(BusStopDetailsFragment.this)
+                            .show(getFragmentManager(), 
+                            DELETE_TIME_ALERT_DIALOG_TAG);
+                } else {
+                    final Intent intent = new Intent(getActivity(),
+                            AddTimeAlertActivity.class);
+                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
+                            stopCode);
+                    startActivity(intent);
+                }
+            }
+        });
         
         return v;
     }
@@ -303,7 +327,6 @@ public class BusStopDetailsFragment extends ListFragment
         // coordinate system.
         screenRotation = getActivity().getWindowManager().getDefaultDisplay()
                 .getRotation();
-        setListAdapter(listAdapter);
         
         // See http://android-developers.blogspot.com/2011/06/deep-dive-into-location.html
         // Get the most recent, most accurate cached Location.
@@ -391,7 +414,7 @@ public class BusStopDetailsFragment extends ListFragment
                                 true));
         }
         
-        if(sd.getFavouriteStopExists(getArguments().getString(ARG_STOPCODE))) {
+        if(sd.getFavouriteStopExists(stopCode)) {
             favouriteBtn.setBackgroundResource(R.drawable.ic_list_favourite);
             favouriteBtn.setContentDescription(
                     getString(R.string.favourite_rem));
@@ -401,9 +424,17 @@ public class BusStopDetailsFragment extends ListFragment
                     getString(R.string.favourite_add));
         }
         
-        // Repopulate the list. Things might have changed since we were last
-        // shown.
-        populateList();
+        if(sd.isActiveProximityAlert(stopCode)) {
+            txtProxAlert.setText(R.string.busstopdetails_prox_rem);
+        } else {
+            txtProxAlert.setText(R.string.busstopdetails_prox_add);
+        }
+        
+        if(sd.isActiveTimeAlert(stopCode)) {
+            txtTimeAlert.setText(R.string.busstopdetails_time_rem);
+        } else {
+            txtTimeAlert.setText(R.string.busstopdetails_time_add);
+        }
     }
     
     /**
@@ -463,7 +494,7 @@ public class BusStopDetailsFragment extends ListFragment
         // Show the progress indicator.
         progress.setVisibility(View.VISIBLE);
         txtEmpty.setVisibility(View.GONE);
-        getListView().setVisibility(View.GONE);
+        layoutContent.setVisibility(View.GONE);
         return new BusStopDetailsLoader(getActivity(), stopCode);
     }
 
@@ -592,48 +623,6 @@ public class BusStopDetailsFragment extends ListFragment
      * {@inheritDoc}
      */
     @Override
-    public void onListItemClick(final ListView l, final View v,
-            final int position, final long id) {
-        Intent intent;
-        
-        switch(position) {
-            case 2:
-                if(sd.isActiveProximityAlert(stopCode)) {
-                    DeleteProximityAlertDialogFragment.newInstance(this)
-                            .show(getFragmentManager(),
-                            DELETE_PROX_ALERT_DIALOG_TAG);
-                } else {
-                    intent = new Intent(getActivity(),
-                            AddProximityAlertActivity.class);
-                    intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
-                            stopCode);
-                    startActivity(intent);
-                }
-                
-                break;
-            case 3:
-                if(sd.isActiveTimeAlert(stopCode)) {
-                    DeleteTimeAlertDialogFragment.newInstance(this)
-                            .show(getFragmentManager(), 
-                            DELETE_TIME_ALERT_DIALOG_TAG);
-                } else {
-                    intent = new Intent(getActivity(),
-                            AddTimeAlertActivity.class);
-                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
-                            stopCode);
-                    startActivity(intent);
-                }
-                
-                break;
-            default:
-                break;
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void onConfirmFavouriteDeletion() {
         favouriteBtn.setBackgroundResource(R.drawable.ic_list_unfavourite);
         favouriteBtn.setContentDescription(getString(R.string.favourite_add));
@@ -652,7 +641,7 @@ public class BusStopDetailsFragment extends ListFragment
      */
     @Override
     public void onConfirmProximityAlertDeletion() {
-        populateList();
+        txtProxAlert.setText(R.string.busstopdetails_prox_add);
     }
 
     /**
@@ -668,7 +657,7 @@ public class BusStopDetailsFragment extends ListFragment
      */
     @Override
     public void onConfirmTimeAlertDeletion() {
-        populateList();
+        txtTimeAlert.setText(R.string.busstopdetails_time_add);
     }
 
     /**
@@ -694,27 +683,6 @@ public class BusStopDetailsFragment extends ListFragment
             return LocationManager.NETWORK_PROVIDER;
         } else {
             return null;
-        }
-    }
-    
-    /**
-     * Populate the ListView items with other actions that can be taken on the
-     * bus stop.
-     */
-    private void populateList() {
-        final String code = getArguments().getString(ARG_STOPCODE);
-        listAdapter.clear();
-        
-        if(sd.isActiveProximityAlert(code)) {
-            listAdapter.add(getString(R.string.busstopdetails_prox_rem));
-        } else {
-            listAdapter.add(getString(R.string.busstopdetails_prox_add));
-        }
-        
-        if(sd.isActiveTimeAlert(code)) {
-            listAdapter.add(getString(R.string.busstopdetails_time_rem));
-        } else {
-            listAdapter.add(getString(R.string.busstopdetails_time_add));
         }
     }
     
@@ -751,9 +719,32 @@ public class BusStopDetailsFragment extends ListFragment
      * views with data.
      */
     private void populateView() {
-        getListView().setVisibility(View.VISIBLE);
+        layoutContent.setVisibility(View.VISIBLE);
         txtEmpty.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
+        
+        layoutDetails.post(new Runnable() {
+            @Override
+            public void run() {
+                final Rect rect = new Rect();
+                favouriteBtn.getHitRect(rect);
+                // Assume it's a square
+                final int newSize = (int)(48 * getActivity().getResources()
+                        .getDisplayMetrics().density);
+                final int adjustBy = (int)
+                        ((newSize - (rect.bottom - rect.top)) / 2);
+
+                if(adjustBy > 0) {
+                    rect.top -= adjustBy;
+                    rect.bottom += adjustBy;
+                    rect.left -= adjustBy;
+                    rect.right += adjustBy;
+                }
+
+                layoutDetails.setTouchDelegate(new TouchDelegate(rect,
+                        favouriteBtn));
+            }
+        });
         
         setMapLocation();
         
@@ -854,7 +845,7 @@ public class BusStopDetailsFragment extends ListFragment
      * bus stop does not exist in the database.
      */
     private void showLoadFailedError() {
-        getListView().setVisibility(View.GONE);
+        layoutContent.setVisibility(View.GONE);
         txtEmpty.setVisibility(View.VISIBLE);
         progress.setVisibility(View.GONE);
     }

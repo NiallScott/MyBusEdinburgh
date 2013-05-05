@@ -511,14 +511,20 @@ public class FavouriteStopsFragment extends ListFragment
                 v.post(new Runnable() {
                     @Override
                     public void run() {
-                        final int vertical = ((v.getHeight() -
-                                imgbtnFavourite.getHeight()) / 2) + 1;
                         final Rect rect = new Rect();
                         imgbtnFavourite.getHitRect(rect);
-                        rect.right += v.getPaddingRight();
-                        rect.top -= vertical;
-                        rect.bottom += vertical;
-                        rect.left -= (int)(25 * density);
+                        // Assume it's a square
+                        final int newSize = (int)(48 * density);
+                        final int adjustBy = (int)
+                                ((newSize - (rect.bottom - rect.top)) / 2);
+                        
+                        if(adjustBy > 0) {
+                            rect.top -= adjustBy;
+                            rect.bottom += adjustBy;
+                            rect.left -= adjustBy;
+                            rect.right += adjustBy;
+                        }
+                        
                         v.setTouchDelegate(new TouchDelegate(rect,
                                 imgbtnFavourite));
                     }

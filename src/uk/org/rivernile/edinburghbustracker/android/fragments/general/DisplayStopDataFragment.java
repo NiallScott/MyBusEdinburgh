@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -735,6 +737,29 @@ public class DisplayStopDataFragment extends Fragment
         listView.setVisibility(View.VISIBLE);
         
         getActivity().supportInvalidateOptionsMenu();
+        
+        layoutTopBar.post(new Runnable() {
+            @Override
+            public void run() {
+                final Rect rect = new Rect();
+                imgbtnFavourite.getHitRect(rect);
+                // Assume it's a square
+                final int newSize = (int)(48 * getActivity().getResources()
+                        .getDisplayMetrics().density);
+                final int adjustBy = (int)
+                        ((newSize - (rect.bottom - rect.top)) / 2);
+
+                if(adjustBy > 0) {
+                    rect.top -= adjustBy;
+                    rect.bottom += adjustBy;
+                    rect.left -= adjustBy;
+                    rect.right += adjustBy;
+                }
+
+                layoutTopBar.setTouchDelegate(new TouchDelegate(rect,
+                        imgbtnFavourite));
+            }
+        });
     }
     
     /**

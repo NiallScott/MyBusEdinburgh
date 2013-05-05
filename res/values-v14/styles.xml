@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,15 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources
-    xmlns:tools="http://schemas.android.com/tools">
-    <style name="MainActionBar" parent="@android:style/Widget.Holo.ActionBar">
-        <item name="android:background">@color/actionBarColour</item>
-        <item name="android:titleTextStyle">@style/MainActionBarText</item>
-    </style>
-    
-    <style name="MapActionBar" parent="@android:style/Widget.Holo.ActionBar">
-        <item name="android:background">#90000000</item>
-    </style>
-    
-    <style name="MainActionBarText" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title" tools:ignore="NewApi">
-        <item name="android:textColor">#FFF</item>
-    </style>
-    
-    <style name="SelectableItemBackground">
-        <item name="android:background">?android:attr/selectableItemBackground</item>
+<resources>
+    <style name="BusStopDetailsListItem" parent="@style/SelectableItemBackground" >
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceListItemSmall</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">?android:attr/listPreferredItemPaddingStart</item>
+        <item name="android:paddingRight">?android:attr/listPreferredItemPaddingEnd</item>
+        <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
+        <item name="android:focusable">true</item>
     </style>
 </resources>
