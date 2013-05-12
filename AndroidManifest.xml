@@ -194,6 +194,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
+            <!-- External applications can call this Intent action to show the
+                 bus stop map. -->
+            <intent-filter>
+                <action android:name="uk.org.rivernile.edinburghbustracker.android.ACTION_VIEW_BUS_STOP_MAP" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
