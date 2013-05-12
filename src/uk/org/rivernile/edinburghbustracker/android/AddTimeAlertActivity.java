@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.ActionBarCompat;
+import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .AddTimeAlertFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
@@ -95,7 +96,8 @@ public class AddTimeAlertActivity extends FragmentActivity
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home:
-                finish();
+                NavigationUtils
+                        .navigateUpOnActivityWithMultipleEntryPoints(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

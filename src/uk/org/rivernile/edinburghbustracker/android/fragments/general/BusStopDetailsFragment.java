@@ -767,6 +767,8 @@ public class BusStopDetailsFragment extends Fragment
             txtServices.setText(BusStopDatabase.getColouredServiceListString(
                     services));
         }
+        
+        updateLocation();
     }
     
     /**

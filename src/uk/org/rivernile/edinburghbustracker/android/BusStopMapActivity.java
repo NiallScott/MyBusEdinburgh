@@ -30,11 +30,12 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import com.google.android.gms.maps.model.LatLng;
 import uk.org.rivernile.android.utils.ActionBarCompat;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general.BusStopMapFragment;
+import uk.org.rivernile.android.utils.NavigationUtils;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general
+        .BusStopMapFragment;
 
 public class BusStopMapActivity extends FragmentActivity {
     
@@ -119,16 +120,13 @@ public class BusStopMapActivity extends FragmentActivity {
      */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            switch(item.getItemId()) {
-                case android.R.id.home:
-                    NavUtils.navigateUpFromSameTask(this);
-                    return true;
-                default:
-                    return super.onOptionsItemSelected(item);
-            }
-        } else {
-            return super.onOptionsItemSelected(item);
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                NavigationUtils
+                        .navigateUpOnActivityWithMultipleEntryPoints(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
     

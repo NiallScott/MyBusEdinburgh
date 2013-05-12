@@ -69,6 +69,7 @@ public class EnterStopCodeFragment extends Fragment
     static {
         // Set up this Intent statically as it can be reused.
         BARCODE_INTENT = new Intent("com.google.zxing.client.android.SCAN");
+        BARCODE_INTENT.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         BARCODE_INTENT.putExtra("QR_CODE_MODE", true);
     }
     

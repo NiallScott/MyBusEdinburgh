@@ -30,8 +30,8 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textAppearance">?android:attr/textAppearanceListItemSmall</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingLeft">?android:attr/listPreferredItemPaddingStart</item>
-        <item name="android:paddingRight">?android:attr/listPreferredItemPaddingEnd</item>
+        <item name="android:paddingLeft">?android:attr/listPreferredItemPaddingLeft</item>
+        <item name="android:paddingRight">?android:attr/listPreferredItemPaddingRight</item>
         <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
         <item name="android:focusable">true</item>
     </style>

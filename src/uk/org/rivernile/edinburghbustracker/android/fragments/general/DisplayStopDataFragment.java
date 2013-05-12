@@ -151,6 +151,7 @@ public class DisplayStopDataFragment extends Fragment
     private boolean autoRefresh;
     private long lastRefresh = 0;
     private final ArrayList<String> expandedServices = new ArrayList<String>();
+    private boolean busTimesLoading = false;
     
     /**
      * Create a new instance of this Fragment, specifying the bus stop code.
@@ -323,6 +324,10 @@ public class DisplayStopDataFragment extends Fragment
         // Set it up again.
         updateLastRefreshed();
         setUpLastUpdated();
+        
+        if (autoRefresh && !busTimesLoading) {
+            setUpAutoRefresh();
+        }
         
         // Refresh the menu.
         getActivity().supportInvalidateOptionsMenu();
@@ -580,6 +585,7 @@ public class DisplayStopDataFragment extends Fragment
         if(args == null) return null;
         
         showProgress();
+        busTimesLoading = true;
         
         return new BusTimesLoader(getActivity(), new EdinburghParser(),
                 args.getStringArray(LOADER_ARG_STOPCODES),
@@ -592,6 +598,8 @@ public class DisplayStopDataFragment extends Fragment
     @Override
     public void onLoadFinished(final Loader<BusTimesResult> loader,
             final BusTimesResult result) {
+        busTimesLoading = false;
+        
         if(result != null) {
             lastRefresh = result.getLastRefresh();
             if(result.hasError()) {

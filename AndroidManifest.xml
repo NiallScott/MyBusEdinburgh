@@ -133,7 +133,8 @@
         <!-- DisplayStopDataActivity, to show bus times. -->
         <activity
             android:name=".DisplayStopDataActivity"
-            android:label="@string/displaystopdata_title">
+            android:label="@string/displaystopdata_title"
+            android:parentActivityName=".MainActivity" >
             <!-- This Activity attempts to take over HTTP accessing of
                  mobile.mybustracker.co.uk. -->
             <intent-filter>
@@ -148,7 +149,13 @@
                  times. -->
             <intent-filter>
                 <action android:name="uk.org.rivernile.edinburghbustracker.android.ACTION_VIEW_STOP_DATA" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
         
         <!-- PreferencesActivity, to let the user change app preferences. -->
@@ -167,14 +174,22 @@
              stop. -->
         <activity
             android:name=".AddEditFavouriteStopActivity"
-            android:label="@string/addeditstop_title" />
+            android:label="@string/addeditstop_title"
+            android:parentActivityName=".MainActivity" >
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
         
         <!-- BusStopMapActivity, to show bus stops on the map. -->
         <activity
             android:name=".BusStopMapActivity"
             android:label="@string/map_title"
             android:launchMode="singleTop"
-            android:theme="@style/MyBusEdinburgh.Dark.MapActivity" >
+            android:theme="@style/MyBusEdinburgh.Dark.MapActivity"
+            android:parentActivityName=".MainActivity" >
             <!-- This Activity handles searching. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -182,6 +197,11 @@
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
         </activity>
         
         <!-- NewsUpdatesActivity, to show live system and network updates to the
@@ -226,23 +246,37 @@
              alert. -->
         <activity
             android:name=".AddProximityAlertActivity"
-            android:label="@string/addproxalert_title" />
+            android:label="@string/addproxalert_title"
+            android:parentActivityName=".MainActivity">
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
         
         <!-- AddTimeAlertActivity, to let the user add a new time alert. -->
         <activity
             android:name=".AddTimeAlertActivity"
-            android:label="@string/addtimealert_title" />
+            android:label="@string/addtimealert_title"
+            android:parentActivityName=".MainActivity">
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
         
         <!-- AddTimeAlertActivity, to let the user add a new time alert. -->
         <activity
             android:name=".BusStopDetailsActivity"
             android:label="@string/busstopdetails_title"
-            android:parentActivityName=".BusStopMapActivity" >
+            android:parentActivityName=".MainActivity" >
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".BusStopMapActivity" />
+                android:value=".MainActivity" />
         </activity>
 
         <!-- MapSearchHistoryProvider, to provide previous search history items

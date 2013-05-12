@@ -33,11 +33,11 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.provider.SearchRecentSuggestions;
-import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 import uk.org.rivernile.android.utils.ActionBarCompat;
 import uk.org.rivernile.android.utils.GenericDialogPreference;
+import uk.org.rivernile.android.utils.NavigationUtils;
 
 /**
  * The preferences dialog of the application. There is not much code here, it is
@@ -256,16 +256,12 @@ public class PreferencesActivity extends PreferenceActivity
      */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            switch(item.getItemId()) {
-                case android.R.id.home:
-                    NavUtils.navigateUpFromSameTask(this);
-                    return true;
-                default:
-                    return super.onOptionsItemSelected(item);
-            }
-        } else {
-            return super.onOptionsItemSelected(item);
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                NavigationUtils.navigateUpOnActivityWithSingleEntryPoint(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
     

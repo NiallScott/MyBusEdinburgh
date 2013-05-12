@@ -568,7 +568,7 @@ public class NearestStopsFragment extends ListFragment
      * Cause the data to refresh. The refresh happens asynchronously in another
      * thread.
      */
-    public void doUpdate() {
+    private void doUpdate() {
         if(lastLocation == null) return;
         
         // Stuff the arguments Bundle.

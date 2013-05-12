@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,9 +28,9 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.ActionBarCompat;
+import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .TwitterUpdatesFragment;
 
@@ -72,16 +72,12 @@ public class NewsUpdatesActivity extends FragmentActivity {
      */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            switch(item.getItemId()) {
-                case android.R.id.home:
-                    NavUtils.navigateUpFromSameTask(this);
-                    return true;
-                default:
-                    return super.onOptionsItemSelected(item);
-            }
-        } else {
-            return super.onOptionsItemSelected(item);
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                NavigationUtils.navigateUpOnActivityWithSingleEntryPoint(this);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }
