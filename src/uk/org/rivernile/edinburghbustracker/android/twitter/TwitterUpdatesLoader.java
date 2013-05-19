@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,10 +34,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
+import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 
 /**
  * This Loader handles fetching data from Twitter to display as news items
@@ -63,9 +65,10 @@ public class TwitterUpdatesLoader
      */
     public static final byte ERROR_URLMISMATCH = 4;
     
-    private static final String REQUEST_URL = "http://api.twitter.com/1/" +
-            "lists/statuses.json?slug=bus-tracker-updates&" +
-            "owner_screen_name=NiallScott&per_page=30";
+    private static final String REQUEST_URL = "http://edinb.us/api/" +
+            "TwitterStatuses?appName=MBE&key=";
+    
+    private static final Random random = new Random(System.currentTimeMillis());
     
     /**
      * Create a new TwitterUpdatesLoader.
@@ -83,11 +86,16 @@ public class TwitterUpdatesLoader
     public TwitterLoaderResult loadInBackground() {
         final ArrayList<TwitterNewsItem> items =
                 new ArrayList<TwitterNewsItem>();
+        
+        final StringBuilder urlBuilder = new StringBuilder(REQUEST_URL);
+        urlBuilder.append(ApiKey.getHashedKey());
+        urlBuilder.append("&random=").append(random.nextInt());
+        
         byte error;
 
         try {
             // Create URL object.
-            final URL u = new URL(REQUEST_URL);
+            final URL u = new URL(urlBuilder.toString());
             // Open the connection to the HTTP server.
             final HttpURLConnection con = (HttpURLConnection)u.openConnection();
             // Buffer the input.

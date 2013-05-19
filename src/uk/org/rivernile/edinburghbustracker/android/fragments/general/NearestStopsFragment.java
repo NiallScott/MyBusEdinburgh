@@ -57,6 +57,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
 import uk.org.rivernile.edinburghbustracker.android
         .AddEditFavouriteStopActivity;
@@ -185,33 +186,8 @@ public class NearestStopsFragment extends ListFragment
         // Set the ListView adapter.
         setListAdapter(ad);
         
-        // See http://android-developers.blogspot.com/2011/06/deep-dive-into-location.html
-        // Get the most recent, most accurate cached Location.
-        final List<String> matchingProviders = locMan.getAllProviders();
-        float accuracy, bestAccuracy = Float.MAX_VALUE;
-        long time, bestTime = Long.MIN_VALUE;
-        Location location;
-        
-        // Loop through all providers.
-        for(String provider : matchingProviders) {
-            // Get the cached Location for this provider.
-            location = locMan.getLastKnownLocation(provider);
-            if(location != null) {
-                // Get the accuracy and time of this Location.
-                accuracy = location.getAccuracy();
-                time = location.getTime();
-        
-                if(time > REQUEST_PERIOD && accuracy < bestAccuracy) {
-                    lastLocation = location;
-                    bestAccuracy = accuracy;
-                    bestTime = time;
-                } else if(time < REQUEST_PERIOD && 
-                    bestAccuracy == Float.MAX_VALUE && time > bestTime) {
-                    lastLocation = location;
-                    bestTime = time;
-                }
-            }
-        }
+        // Initialise the lastLocation to the best known location.
+        lastLocation = LocationUtils.getBestInitialLocation(locMan);
         
         // Force an update to initially show data.
         doUpdate();
@@ -224,12 +200,16 @@ public class NearestStopsFragment extends ListFragment
     public void onResume() {
         super.onResume();
         
-        // Get the best Location provider.
-        final String provider = getBestLocationProvider();
-        if(provider != null)
-            // Request location updates.
-            locMan.requestLocationUpdates(provider, REQUEST_PERIOD,
-                    MIN_DISTANCE, this);
+        // Start the location providers if they are enabled.
+        if(locMan.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            locMan.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+                    REQUEST_PERIOD, MIN_DISTANCE, this);
+        }
+        
+        if(locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            locMan.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    REQUEST_PERIOD, MIN_DISTANCE, this);
+        }
     }
     
     /**
@@ -479,8 +459,10 @@ public class NearestStopsFragment extends ListFragment
     public void onLocationChanged(final Location location) {
         // When the location has changed, cache the new location and force an
         // update.
-        lastLocation = location;
-        doUpdate();
+        if(LocationUtils.isBetterLocation(location, lastLocation)) {
+            lastLocation = location;
+            doUpdate();
+        }
     }
 
     /**
@@ -497,11 +479,10 @@ public class NearestStopsFragment extends ListFragment
      */
     @Override
     public void onProviderEnabled(final String provider) {
-        // If GPS has been enabled, make sure we're using that.
-        if(LocationManager.GPS_PROVIDER.equals(provider)) {
-            locMan.removeUpdates(this);
-            locMan.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    REQUEST_PERIOD, MIN_DISTANCE, this);
+        if (LocationManager.GPS_PROVIDER.equals(provider) ||
+                LocationManager.NETWORK_PROVIDER.equals(provider)) {
+            locMan.requestLocationUpdates(provider, REQUEST_PERIOD,
+                    MIN_DISTANCE, this);
         }
     }
 
@@ -510,12 +491,7 @@ public class NearestStopsFragment extends ListFragment
      */
     @Override
     public void onProviderDisabled(final String provider) {
-        // If GPS has been disabled, revert back to network location.
-        if(LocationManager.GPS_PROVIDER.equals(provider)) {
-            locMan.removeUpdates(this);
-            locMan.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                    REQUEST_PERIOD, MIN_DISTANCE, this);
-        }
+        // Nothing to do here.
     }
 
     /**
@@ -543,24 +519,6 @@ public class NearestStopsFragment extends ListFragment
             intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
                     ad.getItem(position).stopCode);
             startActivity(intent);
-        }
-    }
-    
-    /**
-     * Get the best location provider based on what is enabled. The following
-     * are tried;
-     * 
-     * GPS -> Network -> None
-     * 
-     * @return The best location provider available.
-     */
-    public String getBestLocationProvider() {
-        if(locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            return LocationManager.GPS_PROVIDER;
-        } else if(locMan.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            return LocationManager.NETWORK_PROVIDER;
-        } else {
-            return null;
         }
     }
     
