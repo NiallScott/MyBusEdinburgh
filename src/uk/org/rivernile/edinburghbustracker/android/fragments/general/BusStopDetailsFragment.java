@@ -45,6 +45,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Html;
@@ -356,6 +357,30 @@ public class BusStopDetailsFragment extends Fragment
         }
         
         getLoaderManager().restartLoader(0, null, this);
+        
+        // If any of the deletion Dialogs are showing, make sure their listeners
+        // are updated.
+        final FragmentManager fragMan = getFragmentManager();
+        final DeleteFavouriteDialogFragment deleteDialog =
+                (DeleteFavouriteDialogFragment)fragMan
+                        .findFragmentByTag(DELETE_FAVOURITE_DIALOG_TAG);
+        if(deleteDialog != null) {
+            deleteDialog.setListener(this);
+        }
+        
+        final DeleteTimeAlertDialogFragment deleteTimeDialog =
+                (DeleteTimeAlertDialogFragment)fragMan
+                        .findFragmentByTag(DELETE_TIME_ALERT_DIALOG_TAG);
+        if(deleteTimeDialog != null) {
+            deleteTimeDialog.setListener(this);
+        }
+        
+        final DeleteProximityAlertDialogFragment deleteProxDialog =
+                (DeleteProximityAlertDialogFragment)fragMan
+                        .findFragmentByTag(DELETE_PROX_ALERT_DIALOG_TAG);
+        if(deleteProxDialog != null) {
+            deleteProxDialog.setListener(this);
+        }
     }
     
     /**

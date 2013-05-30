@@ -310,6 +310,15 @@ public class DisplayStopDataFragment extends Fragment
         }
         
         getArguments().remove(ARG_FORCELOAD);
+        
+        // If any of the deletion Dialogs are showing, make sure their listeners
+        // are updated.
+        final DeleteFavouriteDialogFragment deleteDialog =
+                (DeleteFavouriteDialogFragment)getFragmentManager()
+                        .findFragmentByTag(DELETE_FAV_DIALOG_TAG);
+        if(deleteDialog != null) {
+            deleteDialog.setListener(this);
+        }
     }
     
     /**
@@ -487,6 +496,8 @@ public class DisplayStopDataFragment extends Fragment
                     autoRefresh = true;
                     setUpAutoRefresh();
                 }
+                
+                getActivity().supportInvalidateOptionsMenu();
                 
                 return true;
             case R.id.displaystopdata_option_menu_refresh:

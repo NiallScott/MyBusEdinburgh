@@ -28,6 +28,7 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -68,6 +69,10 @@ public class AlertManagerFragment extends ListFragment
     
     private static final String DELETE_ALL_ALERTS_DIALOG_TAG =
             "delAllAlertsDialog";
+    private static final String DELETE_TIME_ALERT_DIALOG_TAG =
+            "delTimeAlertDialog";
+    private static final String DELETE_PROX_ALERT_DIALOG_TAG =
+            "delProxAlertDialog";
     
     private AlertCursorAdapter ad;
     private DeleteAllAlertsDialogFragment delAllDialog;
@@ -106,6 +111,38 @@ public class AlertManagerFragment extends ListFragment
     public View onCreateView(final LayoutInflater inflater,
             final ViewGroup container, final Bundle savedInstanceState) {
         return inflater.inflate(R.layout.alertmanager, container, false);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onActivityCreated(final Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        
+        // If any of the deletion Dialogs are showing, make sure their listeners
+        // are updated.
+        final FragmentManager fragMan = getFragmentManager();
+        final DeleteAllAlertsDialogFragment deleteAllDialog =
+                (DeleteAllAlertsDialogFragment)fragMan
+                        .findFragmentByTag(DELETE_ALL_ALERTS_DIALOG_TAG);
+        if(deleteAllDialog != null) {
+            deleteAllDialog.setListener(this);
+        }
+        
+        final DeleteTimeAlertDialogFragment deleteTimeDialog =
+                (DeleteTimeAlertDialogFragment)fragMan
+                        .findFragmentByTag(DELETE_TIME_ALERT_DIALOG_TAG);
+        if(deleteTimeDialog != null) {
+            deleteTimeDialog.setListener(this);
+        }
+        
+        final DeleteProximityAlertDialogFragment deleteProxDialog =
+                (DeleteProximityAlertDialogFragment)fragMan
+                        .findFragmentByTag(DELETE_PROX_ALERT_DIALOG_TAG);
+        if(deleteProxDialog != null) {
+            deleteProxDialog.setListener(this);
+        }
     }
     
     /**
@@ -270,11 +307,6 @@ public class AlertManagerFragment extends ListFragment
      * This CursorAdapter shows a list of alerts that have been set by the user.
      */
     private class AlertCursorAdapter extends CursorAdapter {
-        
-        private static final String DELETE_TIME_ALERT_DIALOG_TAG =
-            "delTimeAlertDialog";
-        private static final String DELETE_PROX_ALERT_DIALOG_TAG =
-            "delProxAlertDialog";
         
         private BusStopDatabase bsd;
         

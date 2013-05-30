@@ -191,6 +191,15 @@ public class NearestStopsFragment extends ListFragment
         
         // Force an update to initially show data.
         doUpdate();
+        
+        // If the services chooser Dialog is showing, make sure its listener is
+        // updated.
+        final ServicesChooserDialogFragment servicesDialog =
+                (ServicesChooserDialogFragment)getFragmentManager()
+                        .findFragmentByTag(SERVICES_CHOOSER_DIALOG_TAG);
+        if(servicesDialog != null) {
+            servicesDialog.setListener(this);
+        }
     }
     
     /**
@@ -332,7 +341,7 @@ public class NearestStopsFragment extends ListFragment
                 if(sd.getFavouriteStopExists(selectedStop.stopCode)) {
                     // If exists, show the DeleteFavouriteDialogFragment.
                     DeleteFavouriteDialogFragment.newInstance(
-                            selectedStop.stopCode,null)
+                            selectedStop.stopCode, null)
                             .show(getFragmentManager(), DELETE_FAV_DIALOG_TAG);
                 } else {
                     // If it doesn't exist, show the

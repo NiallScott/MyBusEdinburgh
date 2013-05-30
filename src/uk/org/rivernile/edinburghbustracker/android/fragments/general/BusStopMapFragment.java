@@ -32,6 +32,7 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.Menu;
@@ -266,6 +267,30 @@ public class BusStopMapFragment extends SupportMapFragment
                     args.remove(ARG_SEARCH);
                 }
             }
+        }
+        
+        // If the services chooser Dialog is showing, make sure its listener is
+        // updated.
+        final FragmentManager fragMan = getFragmentManager();
+        final ServicesChooserDialogFragment servicesDialog =
+                (ServicesChooserDialogFragment)fragMan
+                        .findFragmentByTag(SERVICES_CHOOSER_DIALOG_TAG);
+        if(servicesDialog != null) {
+            servicesDialog.setListener(this);
+        }
+        
+        final MapTypeChooserDialogFragment mapTypeDialog =
+                (MapTypeChooserDialogFragment)fragMan
+                .findFragmentByTag(MAP_TYPE_CHOOSER_DIALOG_TAG);
+        if(mapTypeDialog != null) {
+            mapTypeDialog.setListener(this);
+        }
+        
+        final IndeterminateProgressDialogFragment progressDialog =
+                (IndeterminateProgressDialogFragment)fragMan
+                        .findFragmentByTag(PROGRESS_DIALOG_TAG);
+        if(progressDialog != null) {
+            progressDialog.setListener(this);
         }
     }
     

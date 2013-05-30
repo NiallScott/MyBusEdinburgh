@@ -168,6 +168,15 @@ public class FavouriteStopsFragment extends ListFragment
             // Allow the context menu to be shown in normal mode.
             registerForContextMenu(getListView());
         }
+        
+        // If any of the deletion Dialogs are showing, make sure their listeners
+        // are updated.
+        final DeleteFavouriteDialogFragment deleteDialog =
+                (DeleteFavouriteDialogFragment)getFragmentManager()
+                        .findFragmentByTag(DELETE_FAV_DIALOG_TAG);
+        if(deleteDialog != null) {
+            deleteDialog.setListener(this);
+        }
     }
     
     /**

@@ -282,6 +282,23 @@ public class AddTimeAlertFragment extends Fragment
         
         return v;
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onActivityCreated(final Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        
+        // If the services chooser Dialog is showing, make sure its listener is
+        // updated.
+        final ServicesChooserDialogFragment servicesDialog =
+                (ServicesChooserDialogFragment)getFragmentManager()
+                        .findFragmentByTag(SERVICES_CHOOSER_DIALOG_TAG);
+        if(servicesDialog != null) {
+            servicesDialog.setListener(this);
+        }
+    }
 
     /**
      * {@inheritDoc}
