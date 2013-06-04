@@ -24,39 +24,38 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_gravity="center_horizontal">
+    android:layout_height="match_parent" >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#D1D1D1"
-        android:padding="10dp" >
-        <TextView
-            android:layout_width="0dp"
+        android:orientation="vertical" >
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:textSize="16sp"
-            android:paddingRight="10dp"
-            android:text="@string/enterstopcode_hint"/>
-        <ImageView
-            android:layout_width="75dp"
-            android:layout_height="100dp"
-            android:src="@drawable/stopcode"
-            android:contentDescription="@string/enterstopcode_stopicon_description" />
-    </LinearLayout>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+            android:orientation="horizontal"
+            android:background="#D1D1D1"
+            android:padding="10dp" >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:textSize="16sp"
+                android:paddingRight="10dp"
+                android:text="@string/enterstopcode_hint" />
+            <ImageView
+                android:layout_width="75dp"
+                android:layout_height="100dp"
+                android:src="@drawable/stopcode"
+                android:contentDescription="@string/enterstopcode_stopicon_description" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="20dp"
-            android:orientation="vertical">
+            android:orientation="vertical" >
             <EditText
                 android:id="@+id/enterstopcode_entry"
                 android:layout_width="match_parent"
@@ -80,8 +79,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/enterstopcode_button_scan"/>
+                    android:text="@string/enterstopcode_button_scan" />
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

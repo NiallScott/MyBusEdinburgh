@@ -88,6 +88,9 @@ public class PreferencesActivity extends PreferenceActivity
             "pref_numberOfShownDeparturesPerService";
     /** The Preference for automatically showing device location. */
     public static final String PREF_AUTO_LOCATION = "pref_autolocation_state";
+    /** The Preference for showing zoom buttons on the map. */
+    public static final String PREF_ZOOM_BUTTONS =
+            "pref_map_zoom_buttons_state";
     /** The Preference for clearing the map search history. */
     public static final String PREF_CLEAR_MAP_SEARCH_HISTORY =
             "pref_clear_search_history";

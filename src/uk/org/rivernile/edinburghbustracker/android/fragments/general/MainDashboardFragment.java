@@ -43,6 +43,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import uk.org.rivernile.android.utils.GraphicsUtils;
 import uk.org.rivernile.edinburghbustracker.android.AlertManagerActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.EnterStopCodeActivity;
@@ -125,9 +126,18 @@ public class MainDashboardFragment extends Fragment
     public void onResume() {
         super.onResume();
         
+        // Check the OpenGL ES version.
+        final Context context = getActivity();
+        if (GraphicsUtils.getOpenGLESVersion(context) < 2) {
+            txtPlayServicesError.setText(R.string.main_maps_incompatible);
+            layoutPlayServicesBar.setVisibility(View.VISIBLE);
+            stopMapButton.setEnabled(false);
+            resolveButton.setVisibility(View.GONE);
+            return;
+        }
+        
         // Check to see if the Google Play Store services are available and up
         // to date.
-        final Context context = getActivity();
         final int errorCode = GooglePlayServicesUtil
                 .isGooglePlayServicesAvailable(context);
         if(errorCode == ConnectionResult.SUCCESS) {

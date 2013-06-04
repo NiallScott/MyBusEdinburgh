@@ -52,11 +52,10 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
 import uk.org.rivernile.edinburghbustracker.android
@@ -319,9 +318,7 @@ public class NearestStopsFragment extends ListFragment
         // option to show the stop on the map.
         item = menu.findItem(R.id.neareststops_context_menu_showonmap);
         
-        if(GooglePlayServicesUtil
-                .isGooglePlayServicesAvailable(getActivity()) !=
-                    ConnectionResult.SUCCESS) {
+        if(GenericUtils.isGoogleMapsAvailable(getActivity())) {
             item.setVisible(false);
         }
     }

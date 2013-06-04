@@ -51,9 +51,8 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import java.util.HashMap;
+import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android
         .AddEditFavouriteStopActivity;
@@ -286,9 +285,7 @@ public class FavouriteStopsFragment extends ListFragment
         // option to show the stop on the map.
         item = menu.findItem(R.id.favouritestops_context_menu_showonmap);
         
-        if(GooglePlayServicesUtil
-                .isGooglePlayServicesAvailable(getActivity()) !=
-                    ConnectionResult.SUCCESS) {
+        if(GenericUtils.isGoogleMapsAvailable(getActivity())) {
             item.setVisible(false);
         }
     }

@@ -241,7 +241,6 @@ public class BusStopMapFragment extends SupportMapFragment
                 getActivity().supportInvalidateOptionsMenu();
                 
                 final UiSettings uiSettings = map.getUiSettings();
-                uiSettings.setZoomControlsEnabled(false);
                 uiSettings.setRotateGesturesEnabled(false);
                 uiSettings.setCompassEnabled(false);
                 // Only show the My Location button pre-Honeycomb. After
@@ -302,11 +301,12 @@ public class BusStopMapFragment extends SupportMapFragment
         super.onResume();
         
         if(map != null) {
-            map.setMyLocationEnabled(
-                    getActivity().getSharedPreferences(
-                            PreferencesActivity.PREF_FILE, 0)
-                        .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION,
-                                true));
+            final SharedPreferences sharedPrefs = getActivity()
+                    .getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+            map.setMyLocationEnabled(sharedPrefs
+                    .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION, true));
+            map.getUiSettings().setZoomControlsEnabled(sharedPrefs
+                    .getBoolean(PreferencesActivity.PREF_ZOOM_BUTTONS, true));
         }
     }
     

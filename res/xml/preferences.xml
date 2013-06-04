@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -118,6 +118,10 @@
         <CheckBoxPreference
             android:key="pref_autolocation_state"
             android:title="@string/preferences_checkbox_map_autolocation"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="pref_map_zoom_buttons_state"
+            android:title="@string/preferences_checkbox_map_zoom_buttons"
             android:defaultValue="true" />
         <uk.org.rivernile.android.utils.GenericDialogPreference
             android:key="pref_clear_search_history"

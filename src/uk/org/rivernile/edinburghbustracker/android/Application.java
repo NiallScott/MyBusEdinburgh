@@ -86,6 +86,8 @@ public class Application extends android.app.Application {
         super.onCreate();
         // Register the BugSense handler.
         BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY);
+        // Cause the bus stop database to be extracted straight away.
+        BusStopDatabase.getInstance(this);
         
         // If the API level is Froyo or greater, then register the
         // SharedPreference listener.

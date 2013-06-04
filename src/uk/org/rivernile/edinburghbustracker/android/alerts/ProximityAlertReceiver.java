@@ -34,8 +34,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.support.v4.app.NotificationCompat;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
@@ -107,8 +106,7 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
         // Support for Jelly Bean notifications.
         notifBuilder.setStyle(new NotificationCompat.BigTextStyle()
                 .bigText(summary));
-        if(GooglePlayServicesUtil.isGooglePlayServicesAvailable(context) ==
-                ConnectionResult.SUCCESS) {
+        if(GenericUtils.isGoogleMapsAvailable(context)) {
             // The Intent which launches the bus stop map at the selected stop.
             final Intent launchIntent = new Intent(context,
                     BusStopMapActivity.class);

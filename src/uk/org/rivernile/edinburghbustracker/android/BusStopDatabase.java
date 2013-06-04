@@ -112,13 +112,11 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
             try {
                 currentVersion = getLastDBModTime();
             } catch(SQLiteException e) {
-                f.delete();
                 new Thread(new RestoreDBFromAssetsTask(this)).start();
                 return;
             }
 
             if(assetVersion > currentVersion) {
-                f.delete();
                 new Thread(new RestoreDBFromAssetsTask(this)).start();
             }
         }
@@ -147,6 +145,7 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
     private synchronized boolean restoreDBFromAssets() {
         try {
             getWritableDatabase().close();
+            f.delete();
             final InputStream in = context.getAssets().open(STOP_DB_NAME);
             final FileOutputStream out = new FileOutputStream(f);
             final byte[] buf = new byte[1024];
@@ -419,16 +418,23 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @return A Cursor object as a result set.
      */
     public synchronized Cursor searchDatabase(String term) {
+        final boolean searchCodes = term != null && term.length() >= 7;
+        
+        String whereClause = BUS_STOPS_STOPNAME + " LIKE ? OR " +
+                    BUS_STOPS_LOCALITY + " LIKE ?";
         term = '%' + term + '%';
+        final String[] whereArgs;
+        if (searchCodes) {
+            whereClause += " OR " + BUS_STOPS_STOPCODE + " LIKE ?";
+            whereArgs = new String[] { term, term, term };
+        } else {
+            whereArgs = new String[] { term, term };
+        }
+        
         try {
             final SQLiteDatabase db = getReadableDatabase();
-            final Cursor c = db.query(BUS_STOPS_TABLE, null,
-                    BUS_STOPS_STOPCODE + " LIKE ? OR " + BUS_STOPS_STOPNAME +
-                    " LIKE ? OR " + BUS_STOPS_LOCALITY + " LIKE ?",
-                    new String[] { term, term, term }, BUS_STOPS_STOPCODE,
-                    null, null);
-
-            return c;
+            return db.query(BUS_STOPS_TABLE, null, whereClause, whereArgs,
+                    BUS_STOPS_STOPCODE, null, null);
         } catch(SQLiteException e) {
             return null;
         }
