@@ -929,21 +929,19 @@ public class BusStopMapFragment extends SupportMapFragment
      * no location, false if not.
      */
     private void moveCameraToMyLocation(final boolean verbose) {
-        if(map == null) {
-            return;
+        if (map != null && map.isMyLocationEnabled()) {
+            final Location myLocation = map.getMyLocation();
+            
+            if(myLocation != null) {
+                moveCameraToLocation(new LatLng(myLocation.getLatitude(),
+                        myLocation.getLongitude()), DEFAULT_SEARCH_ZOOM, true);
+                return;
+            }
         }
-        
-        final Location myLocation = map.getMyLocation();
-        
-        if(myLocation != null) {
-            moveCameraToLocation(new LatLng(myLocation.getLatitude(),
-                            myLocation.getLongitude()), DEFAULT_SEARCH_ZOOM,
-                            true);
-        } else if(verbose) {
-            Toast.makeText(getActivity(),
-                    R.string.busstopmapfragment_location_unknown,
-                    Toast.LENGTH_LONG).show();
-        }
+
+        Toast.makeText(getActivity(),
+                R.string.busstopmapfragment_location_unknown,
+                Toast.LENGTH_LONG).show();
     }
     
     /**

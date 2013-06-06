@@ -285,7 +285,7 @@ public class FavouriteStopsFragment extends ListFragment
         // option to show the stop on the map.
         item = menu.findItem(R.id.favouritestops_context_menu_showonmap);
         
-        if(GenericUtils.isGoogleMapsAvailable(getActivity())) {
+        if(!GenericUtils.isGoogleMapsAvailable(getActivity())) {
             item.setVisible(false);
         }
     }

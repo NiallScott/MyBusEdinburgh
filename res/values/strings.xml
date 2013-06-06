@@ -379,7 +379,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_err_parseerr"><b>There was an error whilst trying to handle the incoming data.</b>\nPlease retry.</string>
     <string name="displaystopdata_err_noconn"><b>A connection could not be made to the server or an error occurred during transmission.</b>\nIf you are sure you are connected, please retry.</string>
     <string name="displaystopdata_err_noresolv"><b>The server could not be resolved.</b>\nPlease try again later.</string>
-    <string name="displaystopdata_err_nodata"><b>No scheduled departures.</b>\nPlease try again later.</string>
+    <string name="displaystopdata_err_nodata"><b>No scheduled departures.</b>\nEither the stop code is incorrect, or there are no departures in the near future.</string>
     <string name="displaystopdata_err_urlmismatch"><b>Network sign on required.</b>\nPlease sign on through your web browser and try again.</string>
     
     <string name="displaystopdata_err_api_invalid_key"><b>The service refused to serve this request.</b>\nThe service depends on your device\'s date and time being correct. Please check this in your system preferences. If they are, contact the application developer for further assistance.</string>
@@ -433,7 +433,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for NearestStopsFragment *
     ************************************
     -->
-    <string name="neareststops_empty"><b>There is no data to display.</b>\nThis means that either your location could not be determined, or you are not in range of any bus stops.</string>
+    <string name="neareststops_empty"><b>There is no data to display.</b>\nThis means that either your location could not be determined, or you are not in range of any bus stops, or no nearby stops match your filter.</string>
     <string name="neareststops_service_chooser_title">Select service(s) to filter</string>
     
     <!--
