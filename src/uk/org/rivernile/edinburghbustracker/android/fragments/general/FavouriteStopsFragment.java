@@ -478,7 +478,7 @@ public class FavouriteStopsFragment extends ListFragment
         private final HashMap<String, Spanned> serviceListings =
                 new HashMap<String, Spanned>();
         private final OnClickListener starClickListener;
-        private final float density;
+        private int hitboxSize;
         
         /**
          * Create a new FavouritesCursorAdapter.
@@ -497,7 +497,8 @@ public class FavouriteStopsFragment extends ListFragment
             
             bsd = BusStopDatabase.getInstance(context);
             this.starClickListener = starClickListener;
-            this.density = context.getResources().getDisplayMetrics().density;
+            hitboxSize = context.getResources()
+                    .getDimensionPixelOffset(R.dimen.star_hitbox_size);
         }
         
         /**
@@ -520,9 +521,8 @@ public class FavouriteStopsFragment extends ListFragment
                         final Rect rect = new Rect();
                         imgbtnFavourite.getHitRect(rect);
                         // Assume it's a square
-                        final int newSize = (int)(48 * density);
                         final int adjustBy = (int)
-                                ((newSize - (rect.bottom - rect.top)) / 2);
+                                ((hitboxSize - (rect.bottom - rect.top)) / 2);
                         
                         if(adjustBy > 0) {
                             rect.top -= adjustBy;

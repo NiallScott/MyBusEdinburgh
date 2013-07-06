@@ -210,8 +210,6 @@ public class BusStopMapFragment extends SupportMapFragment
         
         // Retain the instance to this Fragment.
         setRetainInstance(true);
-        // This Fragment shows an options menu.
-        setHasOptionsMenu(true);
         
         final Context context = getActivity();
         bsd = BusStopDatabase.getInstance(context.getApplicationContext());
@@ -220,11 +218,17 @@ public class BusStopMapFragment extends SupportMapFragment
         // The reference to the ServicesChooserDialogFragment should be held
         // throughout the lifecycle of this Fragment so that the user's choices
         // are remembered.
-        servicesChooser = ServicesChooserDialogFragment.newInstance(
-                bsd.getBusServiceList(),
-                    getString(
-                        R.string.busstopmapfragment_service_chooser_title),
-                        this);
+        final String[] services = bsd.getBusServiceList();
+        if (services != null && services.length > 0) {
+            servicesChooser = ServicesChooserDialogFragment.newInstance(
+                    services,
+                        getString(
+                            R.string.busstopmapfragment_service_chooser_title),
+                            this);
+        }
+        
+        // This Fragment shows an options menu.
+        setHasOptionsMenu(true);
     }
     
     /**
@@ -352,7 +356,7 @@ public class BusStopMapFragment extends SupportMapFragment
     public void onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
         
-        final MenuItem item =
+        MenuItem item =
                 menu.findItem(R.id.busstopmap_option_menu_trafficview);
         if(map != null && map.isTrafficEnabled()) {
             item.setTitle(R.string.map_menu_mapoverlay_trafficviewoff);
@@ -360,9 +364,10 @@ public class BusStopMapFragment extends SupportMapFragment
             item.setTitle(R.string.map_menu_mapoverlay_trafficviewon);
         }
         
-        if(map == null) {
-            item.setEnabled(false);
-        }
+        item.setEnabled(map != null);
+        
+        item = menu.findItem(R.id.busstopmap_option_menu_services);
+        item.setEnabled(servicesChooser != null);
     }
     
     /**

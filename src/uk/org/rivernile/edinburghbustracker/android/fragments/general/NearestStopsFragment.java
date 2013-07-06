@@ -126,9 +126,6 @@ public class NearestStopsFragment extends ListFragment
         // Tell the underlying Activity to retain the instance during
         // configuration changes.
         setRetainInstance(true);
-        // Tell the underlying Activity that this Fragment contains an options
-        // menu.
-        setHasOptionsMenu(true);
         
         final Activity activity = getActivity();
         // Get references to required resources.
@@ -141,9 +138,13 @@ public class NearestStopsFragment extends ListFragment
         ad = new NearestStopsArrayAdapter(activity);
         
         // Initialise the services chooser Dialog.
-        servicesChooser = ServicesChooserDialogFragment.newInstance(
-                bsd.getBusServiceList(),
-                getString(R.string.neareststops_service_chooser_title), this);
+        final String[] services = bsd.getBusServiceList();
+        if (services != null && services.length > 0) {
+            servicesChooser = ServicesChooserDialogFragment.newInstance(
+                    services,
+                    getString(R.string.neareststops_service_chooser_title),
+                    this);
+        }
         
         // Check to see if GPS is enabled then check to see if the GPS prompt
         // dialog has been disabled.
@@ -162,6 +163,10 @@ public class NearestStopsFragment extends ListFragment
                     TURN_ON_GPS_DIALOG_TAG);
             }
         }
+        
+        // Tell the underlying Activity that this Fragment contains an options
+        // menu.
+        setHasOptionsMenu(true);
     }
     
     /**
@@ -239,6 +244,18 @@ public class NearestStopsFragment extends ListFragment
             final MenuInflater inflater) {
         // Inflate the menu.
         inflater.inflate(R.menu.neareststops_option_menu, menu);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onPrepareOptionsMenu(final Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        
+        final MenuItem item = menu
+                .findItem(R.id.neareststops_option_menu_filter);
+        item.setEnabled(servicesChooser != null);
     }
     
     /**

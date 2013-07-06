@@ -152,6 +152,7 @@ public class DisplayStopDataFragment extends Fragment
     private long lastRefresh = 0;
     private final ArrayList<String> expandedServices = new ArrayList<String>();
     private boolean busTimesLoading = false;
+    private int hitboxSize;
     
     /**
      * Create a new instance of this Fragment, specifying the bus stop code.
@@ -199,6 +200,8 @@ public class DisplayStopDataFragment extends Fragment
         bsd = BusStopDatabase.getInstance(context);
         sd = SettingsDatabase.getInstance(context);
         sp = context.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        hitboxSize = getResources()
+                .getDimensionPixelOffset(R.dimen.star_hitbox_size);
         
         // Get the stop code from the arguments bundle.
         stopCode = getArguments().getString(ARG_STOPCODE);
@@ -632,6 +635,10 @@ public class DisplayStopDataFragment extends Fragment
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
+            if (!isAdded()) {
+                return;
+            }
+            
             switch(msg.what) {
                 case EVENT_REFRESH:
                     // Do a refresh.
@@ -763,10 +770,8 @@ public class DisplayStopDataFragment extends Fragment
                 final Rect rect = new Rect();
                 imgbtnFavourite.getHitRect(rect);
                 // Assume it's a square
-                final int newSize = (int)(48 * getActivity().getResources()
-                        .getDisplayMetrics().density);
                 final int adjustBy = (int)
-                        ((newSize - (rect.bottom - rect.top)) / 2);
+                        ((hitboxSize - (rect.bottom - rect.top)) / 2);
 
                 if(adjustBy > 0) {
                     rect.top -= adjustBy;

@@ -144,16 +144,20 @@ public class AddTimeAlertFragment extends Fragment
             throw new IllegalArgumentException("A stop code must be " +
                     "supplied.");
         
-        if(args.containsKey(
-                ServicesChooserDialogFragment.ARG_DEFAULT_SERVICE)) {
-            servicesChooser = ServicesChooserDialogFragment.newInstance(
-                    bsd.getBusServicesForStop(stopCode),
-                    getString(R.string.addtimealert_services_title),
-                    args.getString(ARG_DEFAULT_SERVICE), this);
-        } else {
-            servicesChooser = ServicesChooserDialogFragment.newInstance(
-                    bsd.getBusServicesForStop(stopCode),
-                    getString(R.string.addtimealert_services_title), this);
+        final String[] services = bsd.getBusServicesForStop(stopCode);
+        
+        if (services != null && services.length > 0) {
+            if(args.containsKey(
+                    ServicesChooserDialogFragment.ARG_DEFAULT_SERVICE)) {
+                servicesChooser = ServicesChooserDialogFragment.newInstance(
+                        services,
+                        getString(R.string.addtimealert_services_title),
+                        args.getString(ARG_DEFAULT_SERVICE), this);
+            } else {
+                servicesChooser = ServicesChooserDialogFragment.newInstance(
+                        services,
+                        getString(R.string.addtimealert_services_title), this);
+            }
         }
     }
     
@@ -241,14 +245,18 @@ public class AddTimeAlertFragment extends Fragment
         });
         
         btn = (Button)v.findViewById(R.id.btnAlertTimeServices);
-        btn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                // Show the services chooser DialogFragment.
-                servicesChooser.show(getFragmentManager(),
-                        SERVICES_CHOOSER_DIALOG_TAG);
-            }
-        });
+        if (servicesChooser != null) {
+            btn.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    // Show the services chooser DialogFragment.
+                    servicesChooser.show(getFragmentManager(),
+                            SERVICES_CHOOSER_DIALOG_TAG);
+                }
+            });
+        } else {
+            btn.setEnabled(false);
+        }
         
         btn = (Button)v.findViewById(R.id.btnLimitations);
         btn.setOnClickListener(new OnClickListener() {

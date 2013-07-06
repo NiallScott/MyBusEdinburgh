@@ -134,6 +134,7 @@ public class BusStopDetailsFragment extends Fragment
     private TextView txtName, txtServices, txtDistance, txtEmpty, txtProxAlert,
             txtTimeAlert;
     private View layoutContent, layoutDetails, progress;
+    private int hitboxSize;
     
     private Location lastLocation;
     private String stopCode;
@@ -185,6 +186,8 @@ public class BusStopDetailsFragment extends Fragment
         accelerometer = sensMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         stopCode = getArguments().getString(ARG_STOPCODE);
+        hitboxSize = getResources()
+                .getDimensionPixelOffset(R.dimen.star_hitbox_size);
     }
     
     /**
@@ -709,10 +712,8 @@ public class BusStopDetailsFragment extends Fragment
                 final Rect rect = new Rect();
                 favouriteBtn.getHitRect(rect);
                 // Assume it's a square
-                final int newSize = (int)(48 * getActivity().getResources()
-                        .getDisplayMetrics().density);
                 final int adjustBy = (int)
-                        ((newSize - (rect.bottom - rect.top)) / 2);
+                        ((hitboxSize - (rect.bottom - rect.top)) / 2);
 
                 if(adjustBy > 0) {
                     rect.top -= adjustBy;
