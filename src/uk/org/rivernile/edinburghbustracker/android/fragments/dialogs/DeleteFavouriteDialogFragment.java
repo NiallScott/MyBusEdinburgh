@@ -30,6 +30,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
@@ -49,7 +50,7 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
     private static final String ARG_STOPCODE = "stopCode";
     
     private SettingsDatabase sd;
-    private EventListener listener;
+    private WeakReference<EventListener> listener;
     private String stopCode;
     
     /**
@@ -109,7 +110,10 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
                         sd.deleteFavouriteStop(stopCode);
                         
                         if(listener != null) {
-                            listener.onConfirmFavouriteDeletion();
+                            final EventListener listenerRef = listener.get();
+                            if (listenerRef != null) {
+                                listenerRef.onConfirmFavouriteDeletion();
+                            }
                         }
                     }
                 }).setNegativeButton(R.string.cancel,
@@ -120,7 +124,10 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
                         dismiss();
                         
                         if(listener != null) {
-                            listener.onCancelFavouriteDeletion();
+                            final EventListener listenerRef = listener.get();
+                            if (listenerRef != null) {
+                                listenerRef.onCancelFavouriteDeletion();
+                            }
                         }
                      }
         });
@@ -133,7 +140,11 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
      * @param listener Where to call back to.
      */
     public void setListener(final EventListener listener) {
-        this.listener = listener;
+        if (listener == null) {
+            this.listener = null;
+        } else {
+            this.listener = new WeakReference<EventListener>(listener);
+        }
     }
     
     /**

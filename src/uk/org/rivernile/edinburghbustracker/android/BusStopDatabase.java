@@ -50,9 +50,9 @@ import java.util.HashMap;
 public final class BusStopDatabase extends SQLiteOpenHelper {
 
     /** The name of the database. */
-    public static final String STOP_DB_NAME = "busstops9.db";
+    public static final String STOP_DB_NAME = "busstops10.db";
     /** This is the schema name of the database. */
-    public static final String SCHEMA_NAME = "MBE_9";
+    public static final String SCHEMA_NAME = "MBE_10";
     /** The version of the database. For internal use only. */
     protected static final int STOP_DB_VERSION = 1;
     

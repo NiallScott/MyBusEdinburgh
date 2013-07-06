@@ -30,6 +30,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import java.lang.ref.WeakReference;
 
 /**
  * This DialogFragment contains an indeterminate progress Dialog. It is up to
@@ -39,7 +40,7 @@ import android.support.v4.app.DialogFragment;
  */
 public class IndeterminateProgressDialogFragment extends DialogFragment {
     
-    private EventListener listener;
+    private WeakReference<EventListener> listener;
     private String message;
     
     /**
@@ -91,7 +92,10 @@ public class IndeterminateProgressDialogFragment extends DialogFragment {
         super.onCancel(di);
         
         if(listener != null) {
-            listener.onProgressCancel();
+            final EventListener listenerRef = listener.get();
+            if (listenerRef != null) {
+                listenerRef.onProgressCancel();
+            }
         }
     }
     
@@ -101,7 +105,11 @@ public class IndeterminateProgressDialogFragment extends DialogFragment {
      * @param listener Where to call back to.
      */
     public void setListener(final EventListener listener) {
-        this.listener = listener;
+        if (listener == null) {
+            this.listener = null;
+        } else {
+            this.listener = new WeakReference<EventListener>(listener);
+        }
     }
     
     /**

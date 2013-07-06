@@ -30,6 +30,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
@@ -46,7 +47,7 @@ import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 public class DeleteProximityAlertDialogFragment extends DialogFragment {
     
     private AlertManager alertMan;
-    private EventListener listener;
+    private WeakReference<EventListener> listener;
     
     /**
      * Create a new instance of the DeleteProximityAlertDialogFragment.
@@ -90,7 +91,12 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
             public void onClick(final DialogInterface dialog, final int id) {
                 alertMan.removeProximityAlert();
                 
-                if(listener != null) listener.onConfirmProximityAlertDeletion();
+                if(listener != null) {
+                    final EventListener listenerRef = listener.get();
+                    if (listenerRef != null) {
+                        listenerRef.onConfirmProximityAlertDeletion();
+                    }
+                }
             }
         }).setNegativeButton(R.string.cancel,
                 new DialogInterface.OnClickListener() {
@@ -98,7 +104,12 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
              public void onClick(final DialogInterface dialog, final int id) {
                 dismiss();
                 
-                if(listener != null) listener.onCancelProximityAlertDeletion();
+                if(listener != null) {
+                    final EventListener listenerRef = listener.get();
+                    if (listenerRef != null) {
+                        listenerRef.onCancelProximityAlertDeletion();
+                    }
+                }
              }
         });
         
@@ -111,7 +122,11 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
      * @param listener Where to call back to.
      */
     public void setListener(final EventListener listener) {
-        this.listener = listener;
+        if (listener == null) {
+            this.listener = null;
+        } else {
+            this.listener = new WeakReference<EventListener>(listener);
+        }
     }
     
     /**

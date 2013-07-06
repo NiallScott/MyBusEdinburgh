@@ -53,6 +53,7 @@ public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
             Pattern.compile("(\\d{8})\\)$");
     
     private final LayoutInflater inflater;
+    private View rootView;
     
     /**
      * Create a new MapInfoWindow.
@@ -60,7 +61,7 @@ public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
      * @param context A Context instance, must be non-null.
      */
     public MapInfoWindow(final Context context) {
-        if(context == null) {
+        if (context == null) {
             throw new IllegalArgumentException("The context must not be null.");
         }
         
@@ -85,20 +86,23 @@ public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
     public View getInfoContents(final Marker marker) {
         final Matcher matcher = STOP_CODE_PATTERN.matcher(marker.getTitle());
         // If the Marker is a bus stop, we want to provide our own View.
-        if(matcher.find()) {
+        if (matcher.find()) {
             // Inflate the View from XML.
-            final View v = inflater.inflate(R.layout.map_info_window, null,
-                    false);
-            TextView txt = (TextView)v.findViewById(R.id.txtTitle);
+            if (rootView == null) {
+                rootView = inflater.inflate(R.layout.map_info_window, null,
+                        false);
+            }
+            
+            TextView txt = (TextView)rootView.findViewById(R.id.txtTitle);
             // Set the title TextView.
             txt.setText(marker.getTitle());
             
-            txt = (TextView)v.findViewById(R.id.txtSnippet);
+            txt = (TextView)rootView.findViewById(R.id.txtSnippet);
             // Set the snippet TextView to that of a coloured list String.
             txt.setText(BusStopDatabase.getColouredServiceListString(
                     marker.getSnippet()));
             
-            return v;
+            return rootView;
         }
         
         // If not a bus stop, return null so that Google Maps uses the default

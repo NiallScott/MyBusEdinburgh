@@ -30,6 +30,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -53,7 +54,7 @@ public class ServicesChooserDialogFragment extends DialogFragment {
     private String[] services;
     private boolean[] checkBoxes;
     private String dialogTitle;
-    private EventListener listener;
+    private WeakReference<EventListener> listener;
     
     /**
      * Create a new instance of the ServicesChooserDialogFragment, without
@@ -180,7 +181,12 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         super.onDismiss(dialog);
         
         // Tell the listener that there may be changes.
-        if(listener != null) listener.onServicesChosen();
+        if (listener != null) {
+            final EventListener listenerRef = listener.get();
+            if (listenerRef != null) {
+                listenerRef.onServicesChosen();
+            }
+        }
     }
     
     /**
@@ -227,7 +233,11 @@ public class ServicesChooserDialogFragment extends DialogFragment {
      * @param listener Where to call back to.
      */
     public void setListener(final EventListener listener) {
-        this.listener = listener;
+        if (listener == null) {
+            this.listener = null;
+        } else {
+            this.listener = new WeakReference<EventListener>(listener);
+        }
     }
     
     /**

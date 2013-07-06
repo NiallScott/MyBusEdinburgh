@@ -30,6 +30,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
@@ -46,7 +47,7 @@ import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 public class DeleteTimeAlertDialogFragment extends DialogFragment {
     
     private AlertManager alertMan;
-    private EventListener listener;
+    private WeakReference<EventListener> listener;
     
     /**
      * Create a new instance of the DeleteTimeAlertDialogFragment.
@@ -91,7 +92,12 @@ public class DeleteTimeAlertDialogFragment extends DialogFragment {
                 // The user has confirmed they want to delete the alert.
                 alertMan.removeTimeAlert();
                 
-                if(listener != null) listener.onConfirmTimeAlertDeletion();
+                if(listener != null) {
+                    final EventListener listenerRef = listener.get();
+                    if (listenerRef != null) {
+                        listenerRef.onConfirmTimeAlertDeletion();
+                    }
+                }
             }
         }).setNegativeButton(R.string.cancel,
                 new DialogInterface.OnClickListener() {
@@ -99,7 +105,12 @@ public class DeleteTimeAlertDialogFragment extends DialogFragment {
              public void onClick(final DialogInterface dialog, final int id) {
                 dismiss();
                 
-                if(listener != null) listener.onCancelTimeAlertDeletion();
+                if(listener != null) {
+                    final EventListener listenerRef = listener.get();
+                    if (listenerRef != null) {
+                        listenerRef.onCancelTimeAlertDeletion();
+                    }
+                }
              }
         });
         
@@ -112,7 +123,11 @@ public class DeleteTimeAlertDialogFragment extends DialogFragment {
      * @param listener Where to call back to.
      */
     public void setListener(final EventListener listener) {
-        this.listener = listener;
+        if (listener == null) {
+            this.listener = null;
+        } else {
+            this.listener = new WeakReference<EventListener>(listener);
+        }
     }
     
     /**

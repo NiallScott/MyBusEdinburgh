@@ -31,6 +31,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import com.google.android.gms.maps.GoogleMap;
+import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -41,7 +42,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class MapTypeChooserDialogFragment extends DialogFragment {
     
-    private EventListener listener;
+    private WeakReference<EventListener> listener;
     
     /**
      * Create a new instance of this DialogFragment, specifying the listener
@@ -75,16 +76,18 @@ public class MapTypeChooserDialogFragment extends DialogFragment {
                 // If there's no listener to call back to, no point in
                 // continuing.
                 if(listener == null) return;
+                final EventListener listenerRef = listener.get();
+                if (listenerRef == null) return;
                 
                 switch(which) {
                     case 0:
-                        listener.onMapTypeChosen(GoogleMap.MAP_TYPE_NORMAL);
+                        listenerRef.onMapTypeChosen(GoogleMap.MAP_TYPE_NORMAL);
                         break;
                     case 1:
-                        listener.onMapTypeChosen(GoogleMap.MAP_TYPE_HYBRID);
+                        listenerRef.onMapTypeChosen(GoogleMap.MAP_TYPE_HYBRID);
                         break;
                     case 2:
-                        listener.onMapTypeChosen(GoogleMap.MAP_TYPE_TERRAIN);
+                        listenerRef.onMapTypeChosen(GoogleMap.MAP_TYPE_TERRAIN);
                         break;
                 }
             }
@@ -99,7 +102,11 @@ public class MapTypeChooserDialogFragment extends DialogFragment {
      * @param listener Where to call back to.
      */
     public void setListener(final EventListener listener) {
-        this.listener = listener;
+        if (listener == null) {
+            this.listener = null;
+        } else {
+            this.listener = new WeakReference<EventListener>(listener);
+        }
     }
     
     /**
