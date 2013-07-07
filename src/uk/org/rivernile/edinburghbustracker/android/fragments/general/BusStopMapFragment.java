@@ -289,11 +289,11 @@ public class BusStopMapFragment extends SupportMapFragment
             mapTypeDialog.setListener(this);
         }
         
-        final IndeterminateProgressDialogFragment progressDialog =
+        final IndeterminateProgressDialogFragment progDialog =
                 (IndeterminateProgressDialogFragment)fragMan
                         .findFragmentByTag(PROGRESS_DIALOG_TAG);
-        if(progressDialog != null) {
-            progressDialog.setListener(this);
+        if(progDialog != null) {
+            progDialog.setListener(this);
         }
     }
     
@@ -758,10 +758,11 @@ public class BusStopMapFragment extends SupportMapFragment
         b.putDouble(LOADER_ARG_MAX_Y, lastVisibleBounds.northeast.longitude);
         b.putFloat(LOADER_ARG_ZOOM, position.zoom);
 
-        final String[] chosenServices = servicesChooser.getChosenServices();
+        final String[] chosenServices = servicesChooser != null ?
+                servicesChooser.getChosenServices() : null;
         // If there are chosen services, then set the filtered services
         // argument.
-        if(chosenServices.length > 0) {
+        if(chosenServices != null && chosenServices.length > 0) {
             b.putStringArray(LOADER_ARG_FILTERED_SERVICES, chosenServices);
         }
         

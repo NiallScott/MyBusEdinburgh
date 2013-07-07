@@ -560,8 +560,9 @@ public class NearestStopsFragment extends ListFragment
                 lastLocation.getLongitude());
         
         // Only put this argument in if chosen services exist.
-        final String[] chosenServices = servicesChooser.getChosenServices();
-        if(chosenServices.length > 0)
+        final String[] chosenServices = servicesChooser != null ?
+                servicesChooser.getChosenServices() : null;
+        if(chosenServices != null && chosenServices.length > 0)
             args.putStringArray(NearestStopsLoader.ARG_FILTERED_SERVICES,
                     chosenServices);
         

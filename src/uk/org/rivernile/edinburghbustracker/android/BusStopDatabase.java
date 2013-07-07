@@ -26,6 +26,7 @@
 package uk.org.rivernile.edinburghbustracker.android;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -38,6 +39,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -146,23 +149,40 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         try {
             getWritableDatabase().close();
             f.delete();
-            final InputStream in = context.getAssets().open(STOP_DB_NAME);
+            final AssetManager assetMan = context.getAssets();
+            
+            final ArrayList<String> dbFiles = new ArrayList<String>();
+            final String[] files = assetMan.list("");
+            
+            for (String s : files) {
+                if (s.startsWith(STOP_DB_NAME)) {
+                    dbFiles.add(s);
+                }
+            }
+            
+            Collections.sort(dbFiles);
+            
+            InputStream in;
             final FileOutputStream out = new FileOutputStream(f);
             final byte[] buf = new byte[1024];
             int len;
-            
-            while((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
+            for (String s : dbFiles) {
+                in = assetMan.open(s);
+                
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                
+                in.close();
             }
             
             out.flush();
             out.close();
-            in.close();
             
             setUpIndexes(getWritableDatabase());
             
             return true;
-        } catch(IOException e) {
+        } catch (IOException e) {
             return false;
         }
     }

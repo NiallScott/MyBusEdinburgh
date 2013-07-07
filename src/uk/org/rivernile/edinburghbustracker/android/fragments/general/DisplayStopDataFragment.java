@@ -614,7 +614,7 @@ public class DisplayStopDataFragment extends Fragment
             final BusTimesResult result) {
         busTimesLoading = false;
         
-        if(result != null) {
+        if(result != null && isAdded()) {
             lastRefresh = result.getLastRefresh();
             if(result.hasError()) {
                 handleError(result.getError());

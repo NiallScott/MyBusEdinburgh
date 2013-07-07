@@ -90,7 +90,8 @@ public class FavouriteStopsActivity extends FragmentActivity {
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home:
-                NavigationUtils.navigateUpOnActivityWithSingleEntryPoint(this);
+                NavigationUtils
+                        .navigateUpOnActivityWithMultipleEntryPoints(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
