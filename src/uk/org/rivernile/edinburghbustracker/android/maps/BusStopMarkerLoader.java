@@ -34,8 +34,6 @@ import java.util.HashMap;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .ServicesChooserDialogFragment;
 
 /**
  * This Loader retrieves the bus stops for a given area from the bus stop
@@ -124,8 +122,7 @@ public class BusStopMarkerLoader
             // enabled or not.
             if(filteredServices != null && filteredServices.length > 0) {
                 c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY,
-                        ServicesChooserDialogFragment
-                            .getChosenServicesForSql(filteredServices));
+                        filteredServices);
             } else {
                 c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
             }

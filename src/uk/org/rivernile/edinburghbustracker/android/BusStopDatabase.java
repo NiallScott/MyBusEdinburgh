@@ -28,9 +28,11 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.SpannedString;
@@ -147,7 +149,16 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      */
     private synchronized boolean restoreDBFromAssets() {
         try {
-            getWritableDatabase().close();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                try {
+                    getWritableDatabase().close();
+                } catch (SQLiteCantOpenDatabaseException e) {
+                    // Nothing to do here. Assume it's already closed.
+                }
+            } else {
+                getWritableDatabase().close();
+            }
+            
             f.delete();
             final AssetManager assetMan = context.getAssets();
             
@@ -264,13 +275,12 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      * @param minY The minimum latitude to return results for.
      * @param maxX The maximum longitude to return results for.
      * @param maxY The maximum latitude to return results for.
-     * @param filter Bus services to filter by, as a comma separated list as
-     * defined by the SQL 'IN' parameter.
+     * @param services Bus services to filter by, as a String array.
      * @return A database Cursor object with the result set.
      */
     public synchronized Cursor getFilteredStopsByCoords(final double minX,
             final double minY, final double maxX, final double maxY,
-            final String filter) {
+            final String[] services) {
         try {
             final SQLiteDatabase db = getReadableDatabase();
             return db.rawQuery("SELECT " +
@@ -285,9 +295,9 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                     SERVICE_STOPS_TABLE + '.' + SERVICE_STOPS_STOPCODE + " = " +
                     BUS_STOPS_TABLE + '.' + BUS_STOPS_STOPCODE + " WHERE " +
                     SERVICE_STOPS_TABLE + '.' + SERVICE_STOPS_SERVICE_NAME +
-                    " IN (" + filter + ") AND " +
-                    '(' + BUS_STOPS_X + " BETWEEN ? AND ?) AND " +
-                    '(' + BUS_STOPS_Y + " BETWEEN ? AND ?) " +
+                    " IN (" + getStringFormattedForSqlIn(services) + ") AND (" +
+                    BUS_STOPS_X + " BETWEEN ? AND ?) AND " + '(' +
+                    BUS_STOPS_Y + " BETWEEN ? AND ?) " +
                     "GROUP BY " + BUS_STOPS_TABLE + '.' + BUS_STOPS_STOPCODE,
                     new String[] { String.valueOf(minX), String.valueOf(maxX),
                         String.valueOf(minY), String.valueOf(maxY)});
@@ -612,20 +622,6 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                         SERVICE_TABLE + '.' + SERVICE_ID + " = " +
                         SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_ID, null);
             } else {
-                // If we've been given a list, we need to construct the parts
-                // of the 'IN' clause.
-                // Format: 'A','B','C'
-                final StringBuilder sb = new StringBuilder();
-                final int len = serviceList.length;
-                
-                for(int i = 0; i < len; i++) {
-                    if(i > 0) {
-                        sb.append(',');
-                    }
-                    
-                    sb.append('\'').append(serviceList[i]).append('\'');
-                }
-                
                 // Android selectArgs doesn't work with IN because the arguments
                 // inside the IN require their own single quotes, and Android
                 // comes along and puts its own single quotes in and bad things
@@ -638,7 +634,8 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                         SERVICE_TABLE + '.' + SERVICE_ID + " = " +
                         SERVICE_COLOUR_TABLE + '.' + SERVICE_COLOUR_ID +
                         " WHERE " + SERVICE_TABLE + '.' + SERVICE_SERVICE_NAME +
-                        " IN (" + sb.toString() + ')', null);
+                        " IN (" + getStringFormattedForSqlIn(serviceList) + ')',
+                        null);
             }
             
             if(c != null) {
@@ -684,6 +681,33 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
         } catch(SQLiteException e) {
             return null;
         }
+    }
+    
+    /**
+     * Constructs the arguments used in the SQL 'IN' clause. If arr has the
+     * elements ["Apple", "Banana", "Carrot"], then this method will return
+     * "'Apple','Banana','Carrot'".
+     * 
+     * @param arr The String array of items to add to the String.
+     * @return A String version of the input arr, suitable for SQL 'IN'.
+     */
+    public static String getStringFormattedForSqlIn(final String[] arr) {
+        if (arr == null || arr.length == 0) {
+            return "";
+        }
+        
+        final StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+        for (String s : arr) {
+            if (!isFirst) {
+                sb.append(',');
+            }
+            
+            sb.append('\'').append(s).append('\'');
+            isFirst = false;
+        }
+        
+        return sb.toString();
     }
     
     /**

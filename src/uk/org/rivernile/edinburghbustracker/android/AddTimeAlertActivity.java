@@ -50,9 +50,9 @@ public class AddTimeAlertActivity extends FragmentActivity
     
     /** The stopCode argument.*/
     public static final String ARG_STOPCODE = AddTimeAlertFragment.ARG_STOPCODE;
-    /** The default service argument. */
-    public static final String ARG_DEFAULT_SERVICE = AddTimeAlertFragment
-            .ARG_DEFAULT_SERVICE;
+    /** The default services argument. */
+    public static final String ARG_DEFAULT_SERVICES = AddTimeAlertFragment
+            .ARG_DEFAULT_SERVICES;
     
     private static final boolean IS_HONEYCOMB_OR_GREATER =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
@@ -75,10 +75,10 @@ public class AddTimeAlertActivity extends FragmentActivity
             final Intent intent = getIntent();
             AddTimeAlertFragment fragment;
             
-            if(intent.hasExtra(ARG_DEFAULT_SERVICE)) {
+            if(intent.hasExtra(ARG_DEFAULT_SERVICES)) {
                 fragment = AddTimeAlertFragment.newInstance(
                         intent.getStringExtra(ARG_STOPCODE),
-                        intent.getStringExtra(ARG_DEFAULT_SERVICE));
+                        intent.getStringArrayExtra(ARG_DEFAULT_SERVICES));
             } else {
                 fragment = AddTimeAlertFragment.newInstance(
                         intent.getStringExtra(ARG_STOPCODE));

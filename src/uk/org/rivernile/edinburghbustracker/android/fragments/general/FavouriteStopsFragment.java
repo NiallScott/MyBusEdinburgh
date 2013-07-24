@@ -383,13 +383,19 @@ public class FavouriteStopsFragment extends ListFragment
      */
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
-        // When loading is complete, swap the Cursor. The old Cursor is
-        // automatically closed.
-        ca.swapCursor(c);
-        
-        if(c == null || c.getCount() == 0) {
-            progress.setVisibility(View.GONE);
-            txtError.setVisibility(View.VISIBLE);
+        if (isAdded()) {
+            // When loading is complete, swap the Cursor. The old Cursor is
+            // automatically closed.
+            ca.swapCursor(c);
+
+            if(c == null || c.getCount() == 0) {
+                progress.setVisibility(View.GONE);
+                txtError.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (c != null) {
+                c.close();
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,20 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:layout_gravity="center_horizontal"
-    android:gravity="center">
-    <ListView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    <TextView
-        android:id="@android:id/empty"
-        android:padding="20dp"
-        android:layout_gravity="center_vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/neareststops_empty"
-        android:gravity="center" />
-</LinearLayout>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/ic_list_star_unfavourited_pressed"
+        android:state_focused="true"
+        android:state_pressed="true" />
+    <item
+        android:drawable="@drawable/ic_list_star_unfavourited_pressed"
+        android:state_focused="false"
+        android:state_pressed="true" />
+    <item
+        android:drawable="@drawable/ic_list_star_unfavourited_light_selected"
+        android:state_focused="true" />
+    <item
+        android:drawable="@drawable/ic_list_star_unfavourited_light_default"
+        android:state_focused="false"
+        android:state_pressed="false" />
+</selector>

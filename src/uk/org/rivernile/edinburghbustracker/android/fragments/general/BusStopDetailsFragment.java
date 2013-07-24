@@ -348,10 +348,13 @@ public class BusStopDetailsFragment extends Fragment
             map.setOnMapClickListener(new OnMapClickListener() {
                 @Override
                 public void onMapClick(final LatLng point) {
-                    final Intent intent = new Intent(getActivity(),
-                            BusStopMapActivity.class);
-                    intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
-                    startActivity(intent);
+                    if (isAdded()) {
+                        final Intent intent = new Intent(getActivity(),
+                                BusStopMapActivity.class);
+                        intent.putExtra(BusStopMapActivity.ARG_STOPCODE,
+                                stopCode);
+                        startActivity(intent);
+                    }
                 }
             });
         } else {
@@ -359,6 +362,8 @@ public class BusStopDetailsFragment extends Fragment
             mapView.setVisibility(View.GONE);
         }
         
+        // The loader is restarted each time incase a new bus stop database has
+        // become available.
         getLoaderManager().restartLoader(0, null, this);
         
         // If any of the deletion Dialogs are showing, make sure their listeners
@@ -508,7 +513,13 @@ public class BusStopDetailsFragment extends Fragment
      */
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
-        populateData(c);
+        if (isAdded()) {
+            populateData(c);
+        } else {
+            if (c != null) {
+                c.close();
+            }
+        }
     }
 
     /**
@@ -1029,7 +1040,14 @@ public class BusStopDetailsFragment extends Fragment
          */
         @Override
         public Cursor loadInBackground() {
-            return bsd.getBusStopByCode(stopCode);
+            final Cursor c = bsd.getBusStopByCode(stopCode);
+            
+            // This ensures the Cursor window is set properly.
+            if (c != null) {
+                c.getCount();
+            }
+            
+            return c;
         }
     }
 }

@@ -351,7 +351,7 @@ public class DisplayStopDataFragment extends Fragment
                     getString(R.string.favourite_rem));
         } else {
             imgbtnFavourite.setBackgroundResource(
-                    R.drawable.ic_list_unfavourite);
+                    R.drawable.ic_list_unfavourite_light);
             imgbtnFavourite.setContentDescription(
                     getString(R.string.favourite_add));
         }
@@ -579,9 +579,10 @@ public class DisplayStopDataFragment extends Fragment
                     // Fire off the Activity.
                     final Intent intent = new Intent(getActivity(),
                             AddTimeAlertActivity.class);
-                    intent.putExtra("stopCode", stopCode);
-                    intent.putExtra("defaultService",
-                            groupData.get(SERVICE_NAME_KEY));
+                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
+                            stopCode);
+                    intent.putExtra(AddTimeAlertActivity.ARG_DEFAULT_SERVICES,
+                            new String[] { groupData.get(SERVICE_NAME_KEY) });
                     startActivity(intent);
                 }
                 return true;
@@ -1082,7 +1083,8 @@ public class DisplayStopDataFragment extends Fragment
      */
     @Override
     public void onConfirmFavouriteDeletion() {
-        imgbtnFavourite.setBackgroundResource(R.drawable.ic_list_unfavourite);
+        imgbtnFavourite.setBackgroundResource(
+                R.drawable.ic_list_unfavourite_light);
         imgbtnFavourite.setContentDescription(
                 getString(R.string.favourite_add));
     }

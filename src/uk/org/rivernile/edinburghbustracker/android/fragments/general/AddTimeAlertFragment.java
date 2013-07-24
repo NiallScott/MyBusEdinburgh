@@ -59,9 +59,10 @@ public class AddTimeAlertFragment extends Fragment
     
     /** The argument for the stopCode. */
     public static final String ARG_STOPCODE = "stopCode";
-    /** The argument for the default service. */
-    public static final String ARG_DEFAULT_SERVICE =
-            ServicesChooserDialogFragment.ARG_DEFAULT_SERVICE;
+    /** The argument for the default services. */
+    public static final String ARG_DEFAULT_SERVICES = "defaultServices";
+    /** The argument used in saving the instance state.*/
+    private static final String ARG_SELECTED_SERVICES = "selectedServices";
     
     private static final String LIMITATIONS_DIALOG_TAG =
             "timeLimitationsDialog";
@@ -72,8 +73,9 @@ public class AddTimeAlertFragment extends Fragment
     private AlertManager alertMan;
     private AlertFragmentEvent callback;
     private String stopCode;
+    private String[] services;
+    private String[] selectedServices;
     private int timeTrigger = 0;
-    private ServicesChooserDialogFragment servicesChooser;
     
     private Button btnOkay;
     private TextView txtServices, txtTimeDialogStop;
@@ -97,14 +99,15 @@ public class AddTimeAlertFragment extends Fragment
      * Create a new instance of the AddTimeAlertFragment.
      * 
      * @param stopCode The stopCode this alert setting should be for.
+     * @param defaultServices The default services to show.
      * @return A new instance of this Fragment.
      */
     public static AddTimeAlertFragment newInstance(final String stopCode,
-            final String defaultService) {
+            final String[] defaultServices) {
         final AddTimeAlertFragment f = new AddTimeAlertFragment();
         final Bundle b = new Bundle();
         b.putString(ARG_STOPCODE, stopCode);
-        b.putString(ARG_DEFAULT_SERVICE, defaultService);
+        b.putStringArray(ARG_DEFAULT_SERVICES, defaultServices);
         f.setArguments(b);
         
         return f;
@@ -116,10 +119,6 @@ public class AddTimeAlertFragment extends Fragment
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        // Tell the underlying Activity that the instance must be retained
-        // across configuration changes.
-        setRetainInstance(true);
         
         // Cast the hosting Activity to our callback interface. If this fails,
         // throw an IllegalStateException.
@@ -144,20 +143,13 @@ public class AddTimeAlertFragment extends Fragment
             throw new IllegalArgumentException("A stop code must be " +
                     "supplied.");
         
-        final String[] services = bsd.getBusServicesForStop(stopCode);
+        services = bsd.getBusServicesForStop(stopCode);
         
-        if (services != null && services.length > 0) {
-            if(args.containsKey(
-                    ServicesChooserDialogFragment.ARG_DEFAULT_SERVICE)) {
-                servicesChooser = ServicesChooserDialogFragment.newInstance(
-                        services,
-                        getString(R.string.addtimealert_services_title),
-                        args.getString(ARG_DEFAULT_SERVICE), this);
-            } else {
-                servicesChooser = ServicesChooserDialogFragment.newInstance(
-                        services,
-                        getString(R.string.addtimealert_services_title), this);
-            }
+        if (savedInstanceState != null) {
+            selectedServices = savedInstanceState
+                    .getStringArray(ARG_SELECTED_SERVICES);
+        } else {
+            selectedServices = args.getStringArray(ARG_DEFAULT_SERVICES);
         }
     }
     
@@ -178,8 +170,7 @@ public class AddTimeAlertFragment extends Fragment
             @Override
             public void onClick(final View v) {
                 // Add the alert.
-                alertMan.addTimeAlert(stopCode,
-                        servicesChooser.getChosenServices(), timeTrigger);
+                alertMan.addTimeAlert(stopCode, selectedServices, timeTrigger);
                 // Tell the underlying Activity that a new alert has been added.
                 callback.onAlertAdded();
             }
@@ -245,13 +236,17 @@ public class AddTimeAlertFragment extends Fragment
         });
         
         btn = (Button)v.findViewById(R.id.btnAlertTimeServices);
-        if (servicesChooser != null) {
+        if (services != null && services.length > 0) {
             btn.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(final View v) {
                     // Show the services chooser DialogFragment.
-                    servicesChooser.show(getFragmentManager(),
-                            SERVICES_CHOOSER_DIALOG_TAG);
+                    ServicesChooserDialogFragment
+                            .newInstance(services, selectedServices,
+                                getString(R.string.addtimealert_services_title),
+                                    AddTimeAlertFragment.this)
+                            .show(getFragmentManager(),
+                                    SERVICES_CHOOSER_DIALOG_TAG);
                 }
             });
         } else {
@@ -286,7 +281,7 @@ public class AddTimeAlertFragment extends Fragment
         
         // Force a refresh of the TextView that shows the services that have
         // been chosen.
-        onServicesChosen();
+        onServicesChosen(selectedServices);
         
         return v;
     }
@@ -312,21 +307,33 @@ public class AddTimeAlertFragment extends Fragment
      * {@inheritDoc}
      */
     @Override
-    public void onServicesChosen() {
-        // Get the services String.
-        final String services = servicesChooser.getChosenServicesAsString();
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
         
-        if(services.length() == 0) {
-            // If the services list is empty, put the default text in the view
-            // and disable the okay button.
-            txtServices.setText(getString(R.string.addtimealert_noservices));
-            btnOkay.setEnabled(false);
-        } else {
+        outState.putStringArray(ARG_SELECTED_SERVICES, selectedServices);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onServicesChosen(final String[] chosenServices) {
+        selectedServices = chosenServices;
+        
+        if (chosenServices != null && chosenServices.length > 0) {
             // If the services list is not empty, put the services list in the
             // view and enable the okay button.
             txtServices.setText(
-                    BusStopDatabase.getColouredServiceListString(services));
+                    BusStopDatabase.getColouredServiceListString(
+                            ServicesChooserDialogFragment
+                                    .getChosenServicesAsString(
+                                            chosenServices)));
             btnOkay.setEnabled(true);
+        } else {
+            // If the services list is empty, put the default text in the view
+            // and disable the okay button.
+            txtServices.setText(R.string.addtimealert_noservices);
+            btnOkay.setEnabled(false);
         }
     }
 }

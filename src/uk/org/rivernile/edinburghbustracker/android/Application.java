@@ -31,6 +31,7 @@ import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Build;
@@ -376,7 +377,16 @@ public class Application extends android.app.Application {
             // time.
             final BusStopDatabase bsd = BusStopDatabase.getInstance(context);
             synchronized(bsd) {
-                bsd.getReadableDatabase().close();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    try {
+                        bsd.getReadableDatabase().close();
+                    } catch (SQLiteCantOpenDatabaseException e) {
+                        // Nothing to do here. Assume it's already closed.
+                    }
+                } else {
+                    bsd.getReadableDatabase().close();
+                }
+                
                 dest.delete();
                 temp.renameTo(dest);
             }

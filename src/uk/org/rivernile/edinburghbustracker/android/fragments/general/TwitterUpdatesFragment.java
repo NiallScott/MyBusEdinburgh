@@ -162,10 +162,12 @@ public class TwitterUpdatesFragment extends ListFragment
     @Override
     public void onLoadFinished(final Loader<TwitterLoaderResult> loader,
             final TwitterLoaderResult result) {
-        if(result.hasError()) {
-            handleError(result.getError());
-        } else {
-            populateList(result.getResult());
+        if (isAdded()) {
+            if(result.hasError()) {
+                handleError(result.getError());
+            } else {
+                populateList(result.getResult());
+            }
         }
     }
     

@@ -44,71 +44,39 @@ public class ServicesChooserDialogFragment extends DialogFragment {
     
     /** The argument name for services. */
     private static final String ARG_SERVICES = "services";
+    /** The argument name for the default selected services. */
+    private static final String ARG_SELECTED_SERVICES = "selectedServices";
     /** The argument name for the dialog title. */
     private static final String ARG_TITLE = "dialogTitle";
-    /** The argument name for the default service. */
-    public static final String ARG_DEFAULT_SERVICE = "defaultService";
     /** The argument name for check boxes, stored in the instance state. */
     private static final String ARG_CHECK_BOXES = "checkBoxes";
     
     private String[] services;
     private boolean[] checkBoxes;
-    private String dialogTitle;
     private WeakReference<EventListener> listener;
     
     /**
-     * Create a new instance of the ServicesChooserDialogFragment, without
-     * providing a default service.
+     * Create a new instance of this Fragment, providing a list of services to
+     * select from, a list of services to select by default, the title for the
+     * Dialog and a listener where to send the events back to.
      * 
-     * @param services The list of services to choose from.
-     * @param dialogTitle The title to display in the Dialog.
-     * @param listener Where events should be called back to.
-     * @return A new instance of this DialogFragment.
-     * @see #newInstance(java.lang.String[], java.lang.String,
-     * java.lang.String,
-     * uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-     * .ServicesChooserDialogFragment.EventListener) 
+     * @param services The list of services to show to the user.
+     * @param selectedServices The services to select by default, null if none.
+     * @param dialogTitle The title to use for the Dialog.
+     * @param listener Where to send events to.
+     * @return A new instance of this Fragment.
      */
     public static ServicesChooserDialogFragment newInstance(
-            final String[] services, final String dialogTitle,
-            final EventListener listener) {
+            final String[] services, final String[] selectedServices,
+            final String dialogTitle, final EventListener listener) {
         final ServicesChooserDialogFragment f =
                 new ServicesChooserDialogFragment();
         final Bundle b = new Bundle();
         b.putStringArray(ARG_SERVICES, services);
+        b.putStringArray(ARG_SELECTED_SERVICES, selectedServices);
         b.putString(ARG_TITLE, dialogTitle);
         f.setArguments(b);
         f.setListener(listener);
-        f.setup();
-        
-        return f;
-    }
-    
-    /**
-     * Create a new instance of the ServicesChooserDialogFragment, providing a
-     * default service.
-     * 
-     * @param services The list of services to choose from.
-     * @param dialogTitle The title to display in the Dialog.
-     * @param defaultService A service which is selected by default.
-     * @param listener Where events should be called back to.
-     * @return A new instance of this DialogFragment.
-     * @see #newInstance(java.lang.String[], java.lang.String,
-     * uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-     * .ServicesChooserDialogFragment.EventListener) 
-     */
-    public static ServicesChooserDialogFragment newInstance(
-            final String[] services, final String dialogTitle,
-            final String defaultService, final EventListener listener) {
-        final ServicesChooserDialogFragment f =
-                new ServicesChooserDialogFragment();
-        final Bundle b = new Bundle();
-        b.putStringArray(ARG_SERVICES, services);
-        b.putString(ARG_TITLE, dialogTitle);
-        b.putString(ARG_DEFAULT_SERVICE, defaultService);
-        f.setArguments(b);
-        f.setListener(listener);
-        f.setup();
         
         return f;
     }
@@ -120,12 +88,37 @@ public class ServicesChooserDialogFragment extends DialogFragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        final Bundle args = getArguments();
+        services = args.getStringArray(ARG_SERVICES);
+        
+        // Do sanity checks.
+        if(services == null || services.length == 0) {
+            throw new IllegalArgumentException("A list of services must " +
+                    "be supplied.");
+        }
+        
         if(savedInstanceState != null) {
             // If there is a previous instance, get the args from the saved
             // instance state.
-            services = savedInstanceState.getStringArray(ARG_SERVICES);
-            dialogTitle = savedInstanceState.getString(ARG_TITLE);
             checkBoxes = savedInstanceState.getBooleanArray(ARG_CHECK_BOXES);
+        } else {
+            final String[] selectedServices = args
+                    .getStringArray(ARG_SELECTED_SERVICES);
+            
+            checkBoxes = new boolean[services.length];
+            
+            if (selectedServices != null && selectedServices.length > 0) {
+                int i;
+                final int len = services.length;
+                for (i = 0; i < len; i++) {
+                    for (String s : selectedServices) {
+                        if (services[i].equals(s)) {
+                            checkBoxes[i] = true;
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -137,8 +130,6 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         super.onSaveInstanceState(outState);
         
         // Save the state.
-        outState.putString(ARG_TITLE, dialogTitle);
-        outState.putStringArray(ARG_SERVICES, services);
         outState.putBooleanArray(ARG_CHECK_BOXES, checkBoxes);
     }
     
@@ -150,7 +141,7 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         // Build the Dialog.
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(getActivity());
-        builder.setTitle(dialogTitle);
+        builder.setTitle(getArguments().getString(ARG_TITLE));
         builder.setMultiChoiceItems(services, checkBoxes,
                 new DialogInterface.OnMultiChoiceClickListener() {
             @Override
@@ -183,46 +174,8 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         // Tell the listener that there may be changes.
         if (listener != null) {
             final EventListener listenerRef = listener.get();
-            if (listenerRef != null) {
-                listenerRef.onServicesChosen();
-            }
-        }
-    }
-    
-    /**
-     * Initialise the data held within the Fragment before the Dialog is shown.
-     */
-    private void setup() {
-        final Bundle b = getArguments();
-        if(b == null)
-            throw new IllegalStateException("Arguments were not supplied " +
-                    "to ServicesChooserDialogFragment.");
-        
-        services = b.getStringArray(ARG_SERVICES);
-        dialogTitle = b.getString(ARG_TITLE);
-
-        // Do sanity checks.
-        if(services == null || services.length == 0)
-            throw new IllegalArgumentException("A list of services must " +
-                    "be supplied.");
-
-        if(dialogTitle == null)
-            throw new IllegalArgumentException("The dialogTitle cannot " +
-                    "be null.");
-
-        // Create a parallell array which is the same size as the services
-        // array.
-        checkBoxes = new boolean[services.length];
-
-        if(b.containsKey(ARG_DEFAULT_SERVICE)) {
-            final String defaultService = b.getString(ARG_DEFAULT_SERVICE);
-
-            final int len = services.length;
-            for(int i = 0; i < len; i++) {
-                if(services[i].equals(defaultService)) {
-                    checkBoxes[i] = true;
-                    break;
-                }
+            if (listenerRef != null && isAdded()) {
+                listenerRef.onServicesChosen(getChosenServices());
             }
         }
     }
@@ -284,58 +237,31 @@ public class ServicesChooserDialogFragment extends DialogFragment {
     }
     
     /**
-     * Get the chosen services as a String suitable for the SQL IN clause.
-     * 
-     * @return A String of chosen services suitable for the SQL IN clause.
-     */
-    public String getChosenServicesForSql() {
-        return getChosenServicesForSql(getChosenServices());
-    }
-    
-    /**
-     * Get the chosen services as a String suitable for the SQL IN clause.
-     * 
-     * This static version exists for when it's not possible to hold an object
-     * reference for this class but a list of services is known.
-     * 
-     * @param services A String array of services.
-     * @return A String of chosen services suitable for the SQL IN clause.
-     */
-    public static String getChosenServicesForSql(final String[] chosen) {
-        // If there are no chosen services, return an empty String.
-        if(chosen == null || chosen.length == 0) return null;
-        
-        final StringBuilder sb = new StringBuilder();
-        boolean isFirst = true;
-        
-        for(String s : chosen) {
-            if(isFirst) {
-                // Used to format the String correctly.
-                sb.append('\'').append(s).append('\'');
-                isFirst = false;
-            } else {
-                sb.append(',').append('\'').append(s).append('\'');
-            }
-        }
-        
-        return sb.toString();
-    }
-    
-    /**
      * Get a String representation of the chosen services.
      * 
      * @return A String representation of the chosen services.
      */
     public String getChosenServicesAsString() {
-        // No point in doing this work again.
-        final String[] chosen = getChosenServices();
+        return getChosenServicesAsString(getChosenServices());
+    }
+    
+    /**
+     * Get a String representation of the chosen services.
+     * 
+     * @param chosenServices A String array of chosen services.
+     * @return A String representation of the chosen services.
+     */
+    public static String getChosenServicesAsString(
+            final String[] chosenServices) {
         // If there are no chosen services, return an empty String.
-        if(chosen.length == 0) return "";
+        if(chosenServices == null || chosenServices.length == 0) {
+            return "";
+        }
         
         final StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
         
-        for(String s : chosen) {
+        for(String s : chosenServices) {
             if(isFirst) {
                 // Used to format the String correctly.
                 sb.append(s);
@@ -358,7 +284,9 @@ public class ServicesChooserDialogFragment extends DialogFragment {
          * This is called when the user dismisses the service chooser dialog.
          * This will get called even when no services are chosen, and may not
          * necessarily mean that the user has made a new selection.
+         * 
+         * @param chosenServices A String array of chosen services.
          */
-        public void onServicesChosen();
+        public void onServicesChosen(String[] chosenServices);
     }
 }

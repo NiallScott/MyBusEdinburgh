@@ -75,9 +75,6 @@ public class AlertManagerFragment extends ListFragment
             "delProxAlertDialog";
     
     private AlertCursorAdapter ad;
-    private DeleteAllAlertsDialogFragment delAllDialog;
-    private DeleteProximityAlertDialogFragment delProxDialog;
-    private DeleteTimeAlertDialogFragment delTimeDialog;
     
     /**
      * {@inheritDoc}
@@ -86,19 +83,10 @@ public class AlertManagerFragment extends ListFragment
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Retain the instance between rotation changes.
-        setRetainInstance(true);
-        // Create the various DialogFragments.
-        delAllDialog = DeleteAllAlertsDialogFragment.newInstance(this);
-        delProxDialog = DeleteProximityAlertDialogFragment.newInstance(this);
-        delTimeDialog = DeleteTimeAlertDialogFragment.newInstance(this);
-        
         // Create the adapter.
         ad = new AlertCursorAdapter(getActivity(), null);
         setListAdapter(ad);
         
-        // Create the Loader.
-        getLoaderManager().initLoader(0, null, this);
         // Tell the underlying Activity that this Fragment hosts an options
         // menu.
         setHasOptionsMenu(true);
@@ -144,6 +132,17 @@ public class AlertManagerFragment extends ListFragment
             deleteProxDialog.setListener(this);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        
+        // Reload the data every time onResume is called.
+        getLoaderManager().restartLoader(0, null, this);
+    }
     
     /**
      * {@inheritDoc}
@@ -182,8 +181,9 @@ public class AlertManagerFragment extends ListFragment
         switch(item.getItemId()) {
             case R.id.alertmanager_option_menu_delete_all:
                 // Show the 'Delete all alerts' confirmation DialogFragment.
-                delAllDialog.show(getFragmentManager(),
-                        DELETE_ALL_ALERTS_DIALOG_TAG);
+                DeleteAllAlertsDialogFragment.newInstance(this)
+                        .show(getFragmentManager(),
+                                DELETE_ALL_ALERTS_DIALOG_TAG);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -204,11 +204,17 @@ public class AlertManagerFragment extends ListFragment
      */
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
-        // Swap in the new Cursor. The superclass deals with closing the old
-        // Cursor object.
-        ad.swapCursor(c);
-        // There may be change in status so refresh the options menu.
-        getActivity().supportInvalidateOptionsMenu();
+        if (isAdded()) {
+            // Swap in the new Cursor. The superclass deals with closing the old
+            // Cursor object.
+            ad.swapCursor(c);
+            // There may be change in status so refresh the options menu.
+            getActivity().supportInvalidateOptionsMenu();
+        } else {
+            if (c != null) {
+                c.close();
+            }
+        }
     }
 
     /**
@@ -407,8 +413,10 @@ public class AlertManagerFragment extends ListFragment
                         @Override
                         public void onClick(final View v) {
                             // Show the proximity alert delete DialogFragment.
-                            delProxDialog.show(getFragmentManager(),
-                                    DELETE_PROX_ALERT_DIALOG_TAG);
+                            DeleteProximityAlertDialogFragment
+                                    .newInstance(AlertManagerFragment.this)
+                                    .show(getFragmentManager(),
+                                            DELETE_PROX_ALERT_DIALOG_TAG);
                         }
                     });
                     
@@ -424,8 +432,10 @@ public class AlertManagerFragment extends ListFragment
                         @Override
                         public void onClick(final View v) {
                             // Show the time alert delete DialogFragment.
-                            delTimeDialog.show(getFragmentManager(),
-                                    DELETE_TIME_ALERT_DIALOG_TAG);
+                            DeleteTimeAlertDialogFragment
+                                    .newInstance(AlertManagerFragment.this)
+                                    .show(getFragmentManager(),
+                                            DELETE_TIME_ALERT_DIALOG_TAG);
                         }
                     });
                     

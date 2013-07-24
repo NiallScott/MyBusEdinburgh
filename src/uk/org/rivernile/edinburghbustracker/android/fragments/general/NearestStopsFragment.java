@@ -94,6 +94,8 @@ public class NearestStopsFragment extends ListFragment
         ArrayList<NearestStopsFragment.SearchResult>>,
         LocationListener, ServicesChooserDialogFragment.EventListener {
     
+    private static final String ARG_CHOSEN_SERVICES = "chosenServices";
+    
     private static final String DELETE_FAV_DIALOG_TAG = "deleteFavDialog";
     private static final String DELETE_TIME_ALERT_DIALOG_TAG =
             "delTimeAlertDialog";
@@ -113,8 +115,9 @@ public class NearestStopsFragment extends ListFragment
     private Location lastLocation;
     private SearchResult selectedStop;
     
-    private ServicesChooserDialogFragment servicesChooser;
     private NearestStopsArrayAdapter ad;
+    private String[] services;
+    private String[] chosenServices;
     
     /**
      * {@inheritDoc}
@@ -122,10 +125,6 @@ public class NearestStopsFragment extends ListFragment
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        // Tell the underlying Activity to retain the instance during
-        // configuration changes.
-        setRetainInstance(true);
         
         final Activity activity = getActivity();
         // Get references to required resources.
@@ -138,29 +137,28 @@ public class NearestStopsFragment extends ListFragment
         ad = new NearestStopsArrayAdapter(activity);
         
         // Initialise the services chooser Dialog.
-        final String[] services = bsd.getBusServiceList();
-        if (services != null && services.length > 0) {
-            servicesChooser = ServicesChooserDialogFragment.newInstance(
-                    services,
-                    getString(R.string.neareststops_service_chooser_title),
-                    this);
-        }
+        services = bsd.getBusServiceList();
         
-        // Check to see if GPS is enabled then check to see if the GPS prompt
-        // dialog has been disabled.
-        if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
-                !sp.getBoolean(PreferencesActivity.PREF_DISABLE_GPS_PROMPT,
-                false)) {
-            // Get the list of Activities which can handle the enabling of
-            // location services.
-            final List<ResolveInfo> packages = activity.getPackageManager()
-                    .queryIntentActivities(
-                    TurnOnGpsDialogFragment.TURN_ON_GPS_INTENT, 0);
-            // If the list is not empty, this means Activities do exist. Show
-            // Dialog asking users if they want to turn on GPS.
-            if(packages != null && !packages.isEmpty()) {
-                new TurnOnGpsDialogFragment().show(getFragmentManager(),
-                    TURN_ON_GPS_DIALOG_TAG);
+        if (savedInstanceState != null) {
+            chosenServices = savedInstanceState
+                    .getStringArray(ARG_CHOSEN_SERVICES);
+        } else {
+            // Check to see if GPS is enabled then check to see if the GPS
+            // prompt dialog has been disabled.
+            if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+                    !sp.getBoolean(PreferencesActivity.PREF_DISABLE_GPS_PROMPT,
+                    false)) {
+                // Get the list of Activities which can handle the enabling of
+                // location services.
+                final List<ResolveInfo> packages = activity.getPackageManager()
+                        .queryIntentActivities(
+                        TurnOnGpsDialogFragment.TURN_ON_GPS_INTENT, 0);
+                // If the list is not empty, this means Activities do exist.
+                // Show Dialog asking users if they want to turn on GPS.
+                if(packages != null && !packages.isEmpty()) {
+                    new TurnOnGpsDialogFragment().show(getFragmentManager(),
+                        TURN_ON_GPS_DIALOG_TAG);
+                }
             }
         }
         
@@ -194,7 +192,7 @@ public class NearestStopsFragment extends ListFragment
         lastLocation = LocationUtils.getBestInitialLocation(locMan);
         
         // Force an update to initially show data.
-        doUpdate();
+        doUpdate(true);
         
         // If the services chooser Dialog is showing, make sure its listener is
         // updated.
@@ -235,6 +233,16 @@ public class NearestStopsFragment extends ListFragment
         // When the Activity is being paused, cancel location updates.
         locMan.removeUpdates(this);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        outState.putStringArray(ARG_CHOSEN_SERVICES, chosenServices);
+    }
     
     /**
      * {@inheritDoc}
@@ -255,7 +263,7 @@ public class NearestStopsFragment extends ListFragment
         
         final MenuItem item = menu
                 .findItem(R.id.neareststops_option_menu_filter);
-        item.setEnabled(servicesChooser != null);
+        item.setEnabled(services != null && services.length > 0);
     }
     
     /**
@@ -266,8 +274,12 @@ public class NearestStopsFragment extends ListFragment
         switch(item.getItemId()) {
             case R.id.neareststops_option_menu_filter:
                 // Show the services chooser Dialog.
-                servicesChooser.show(getFragmentManager(),
-                        SERVICES_CHOOSER_DIALOG_TAG);
+                ServicesChooserDialogFragment
+                        .newInstance(services, chosenServices, getString(
+                                R.string.neareststops_service_chooser_title),
+                                this)
+                        .show(getFragmentManager(),
+                                SERVICES_CHOOSER_DIALOG_TAG);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -442,27 +454,29 @@ public class NearestStopsFragment extends ListFragment
     @Override
     public void onLoadFinished(final Loader<ArrayList<SearchResult>> loader,
             final ArrayList<SearchResult> results) {
-        final ListView lv = getListView();
-        // Get the first visible position so the scroll position is restored
-        // later.
-        int currentIndex = lv.getFirstVisiblePosition();
-        final View v = lv.getChildAt(0);
-        
-        // When loading has finished, clear the ArrayAdapter and add in all the
-        // new results.
-        ad.clear();
-        ad.addAll(results);
-        
-        final int lastIndex = results.size() - 1;
-        
-        if(lastIndex < currentIndex) {
-            // If the final index is less than the index before, then scroll to
-            // the new final index.
-            lv.setSelectionFromTop(lastIndex, 0);
-        } else {
-            // Otherwise, go to the previous exact scroll position.
-            lv.setSelectionFromTop(currentIndex,
-                            (v == null) ? 0 : v.getTop());
+        if (isAdded()) {
+            final ListView lv = getListView();
+            // Get the first visible position so the scroll position is restored
+            // later.
+            int currentIndex = lv.getFirstVisiblePosition();
+            final View v = lv.getChildAt(0);
+
+            // When loading has finished, clear the ArrayAdapter and add in all
+            // the new results.
+            ad.clear();
+            ad.addAll(results);
+
+            final int lastIndex = results.size() - 1;
+
+            if(lastIndex < currentIndex) {
+                // If the final index is less than the index before, then scroll
+                // to the new final index.
+                lv.setSelectionFromTop(lastIndex, 0);
+            } else {
+                // Otherwise, go to the previous exact scroll position.
+                lv.setSelectionFromTop(currentIndex,
+                                (v == null) ? 0 : v.getTop());
+            }
         }
     }
 
@@ -484,7 +498,7 @@ public class NearestStopsFragment extends ListFragment
         // update.
         if(LocationUtils.isBetterLocation(location, lastLocation)) {
             lastLocation = location;
-            doUpdate();
+            doUpdate(false);
         }
     }
 
@@ -521,10 +535,12 @@ public class NearestStopsFragment extends ListFragment
      * {@inheritDoc}
      */
     @Override
-    public void onServicesChosen() {
+    public void onServicesChosen(final String[] chosenServices) {
+        this.chosenServices = chosenServices;
+        
         // The user has been in the services chooser Dialog, so force an update
         // incase anything has changed.
-        doUpdate();
+        doUpdate(false);
     }
     
     /**
@@ -548,8 +564,10 @@ public class NearestStopsFragment extends ListFragment
     /**
      * Cause the data to refresh. The refresh happens asynchronously in another
      * thread.
+     * 
+     * @param isFirst Is this the first load?
      */
-    private void doUpdate() {
+    private void doUpdate(final boolean isFirst) {
         if(lastLocation == null) return;
         
         // Stuff the arguments Bundle.
@@ -560,14 +578,15 @@ public class NearestStopsFragment extends ListFragment
                 lastLocation.getLongitude());
         
         // Only put this argument in if chosen services exist.
-        final String[] chosenServices = servicesChooser != null ?
-                servicesChooser.getChosenServices() : null;
         if(chosenServices != null && chosenServices.length > 0)
             args.putStringArray(NearestStopsLoader.ARG_FILTERED_SERVICES,
                     chosenServices);
         
-        // Restart the Loader.
-        getLoaderManager().restartLoader(0, args, this);
+        if (isFirst) {
+            getLoaderManager().initLoader(0, args, this);
+        } else {
+            getLoaderManager().restartLoader(0, args, this);
+        }
     }
     
     /**
@@ -696,9 +715,7 @@ public class NearestStopsFragment extends ListFragment
                 // filtered or not.
                 if(args.containsKey(ARG_FILTERED_SERVICES)) {
                     c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY,
-                            ServicesChooserDialogFragment
-                            .getChosenServicesForSql(
-                            args.getStringArray(ARG_FILTERED_SERVICES)));
+                            args.getStringArray(ARG_FILTERED_SERVICES));
                 } else {
                     c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
                 }

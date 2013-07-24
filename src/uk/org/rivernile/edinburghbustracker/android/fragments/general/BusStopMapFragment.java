@@ -103,6 +103,8 @@ public class BusStopMapFragment extends SupportMapFragment
     /** The search argument. */
     public static final String ARG_SEARCH = "searchTerm";
     
+    private static final String ARG_CHOSEN_SERVICES = "chosenServices";
+    
     /** The default latitude. */
     public static final double DEFAULT_LAT = 55.948611;
     /** The default longitude. */
@@ -140,14 +142,14 @@ public class BusStopMapFragment extends SupportMapFragment
     private GoogleMap map;
     private SharedPreferences sp;
     
-    private ServicesChooserDialogFragment servicesChooser;
-    private IndeterminateProgressDialogFragment progressDialog;
     private final HashMap<String, Marker> busStopMarkers =
             new HashMap<String, Marker>();
     private final HashMap<String, LinkedList<Polyline>> routeLines =
             new HashMap<String, LinkedList<Polyline>>();
     private HashSet<Marker> geoSearchMarkers = new HashSet<Marker>();
     private String searchedBusStop = null;
+    private String[] services;
+    private String[] chosenServices;
     
     /**
      * Create a new instance of the BusStopMapFragment, setting the initial
@@ -214,17 +216,12 @@ public class BusStopMapFragment extends SupportMapFragment
         final Context context = getActivity();
         bsd = BusStopDatabase.getInstance(context.getApplicationContext());
         sp = context.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+
+        services = bsd.getBusServiceList();
         
-        // The reference to the ServicesChooserDialogFragment should be held
-        // throughout the lifecycle of this Fragment so that the user's choices
-        // are remembered.
-        final String[] services = bsd.getBusServiceList();
-        if (services != null && services.length > 0) {
-            servicesChooser = ServicesChooserDialogFragment.newInstance(
-                    services,
-                        getString(
-                            R.string.busstopmapfragment_service_chooser_title),
-                            this);
+        if (savedInstanceState != null) {
+            chosenServices = savedInstanceState
+                    .getStringArray(ARG_CHOSEN_SERVICES);
         }
         
         // This Fragment shows an options menu.
@@ -339,6 +336,16 @@ public class BusStopMapFragment extends SupportMapFragment
             edit.commit();
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        outState.putStringArray(ARG_CHOSEN_SERVICES, chosenServices);
+    }
     
     /**
      * {@inheritDoc}
@@ -367,7 +374,7 @@ public class BusStopMapFragment extends SupportMapFragment
         item.setEnabled(map != null);
         
         item = menu.findItem(R.id.busstopmap_option_menu_services);
-        item.setEnabled(servicesChooser != null);
+        item.setEnabled(services != null && services.length > 0);
     }
     
     /**
@@ -386,8 +393,12 @@ public class BusStopMapFragment extends SupportMapFragment
                 return true;
             case R.id.busstopmap_option_menu_services:
                 // Show the services chooser Dialog.
-                servicesChooser.show(getFragmentManager(),
-                        SERVICES_CHOOSER_DIALOG_TAG);
+                ServicesChooserDialogFragment
+                        .newInstance(services, chosenServices, getString(
+                            R.string.busstopmapfragment_service_chooser_title),
+                        this)
+                        .show(getFragmentManager(),
+                                SERVICES_CHOOSER_DIALOG_TAG);
                 return true;
             case R.id.busstopmap_option_menu_maptype:
                 MapTypeChooserDialogFragment.newInstance(this)
@@ -502,18 +513,21 @@ public class BusStopMapFragment extends SupportMapFragment
      */
     @Override
     public void onLoadFinished(final Loader loader, final Object d) {
-        switch(loader.getId()) {
-            case LOADER_ID_BUS_STOPS:
-                addBusStopMarkers((HashMap<String, MarkerOptions>)d);
-                break;
-            case LOADER_ID_GEO_SEARCH:
-                addGeoSearchResults((HashSet<MarkerOptions>)d);
-                break;
-            case LOADER_ID_ROUTE_LINES:
-                addRouteLines((HashMap<String, LinkedList<PolylineOptions>>)d);
-                break;
-            default:
-                break;
+        if (isAdded()) {
+            switch (loader.getId()) {
+                case LOADER_ID_BUS_STOPS:
+                    addBusStopMarkers((HashMap<String, MarkerOptions>)d);
+                    break;
+                case LOADER_ID_GEO_SEARCH:
+                    addGeoSearchResults((HashSet<MarkerOptions>)d);
+                    break;
+                case LOADER_ID_ROUTE_LINES:
+                    addRouteLines((HashMap<String,
+                            LinkedList<PolylineOptions>>)d);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -529,14 +543,14 @@ public class BusStopMapFragment extends SupportMapFragment
      * {@inheritDoc}
      */
     @Override
-    public void onServicesChosen() {
+    public void onServicesChosen(final String[] chosenServices) {
+        this.chosenServices = chosenServices;
+        
         // If the user has chosen services in the services filter, force a
         // refresh of the marker icons.
         refreshBusStops(null);
         
         final LinkedList<String> tempList = new LinkedList<String>();
-        // Get the chosen services.
-        final String[] filteredServices = servicesChooser.getChosenServices();
         boolean found;
         
         // Loop through the existing route lines. If a service doesn't exist in
@@ -544,7 +558,7 @@ public class BusStopMapFragment extends SupportMapFragment
         for(String key : routeLines.keySet()) {
             found = false;
             
-            for(String fs : filteredServices) {
+            for(String fs : chosenServices) {
                 if(key.equals(fs)) {
                     found = true;
                     break;
@@ -574,7 +588,7 @@ public class BusStopMapFragment extends SupportMapFragment
         // Loop through the filteredServices array. If the element does not
         // appear in the existing route lines, then add it to the to-be-added
         // list.
-        for(String fs : filteredServices) {
+        for(String fs : chosenServices) {
             if(!routeLines.containsKey(fs)) {
                 tempList.add(fs);
             }
@@ -681,11 +695,11 @@ public class BusStopMapFragment extends SupportMapFragment
             // Start the search loader.
             getLoaderManager().restartLoader(LOADER_ID_GEO_SEARCH, b, this);
             // Show the progress Dialog.
-            progressDialog = IndeterminateProgressDialogFragment
+            IndeterminateProgressDialogFragment
                     .newInstance(this,
                         getString(R.string.busstopmapfragment_progress_message,
-                        searchTerm));
-            progressDialog.show(getFragmentManager(), PROGRESS_DIALOG_TAG);
+                        searchTerm))
+                    .show(getFragmentManager(), PROGRESS_DIALOG_TAG);
         }
     }
     
@@ -737,7 +751,7 @@ public class BusStopMapFragment extends SupportMapFragment
      * doesn't need to be looked up again. If it's not available, use null.
      */
     private void refreshBusStops(CameraPosition position) {
-        if(map == null) {
+        if(map == null || !isAdded()) {
             return;
         }
         
@@ -758,8 +772,6 @@ public class BusStopMapFragment extends SupportMapFragment
         b.putDouble(LOADER_ARG_MAX_Y, lastVisibleBounds.northeast.longitude);
         b.putFloat(LOADER_ARG_ZOOM, position.zoom);
 
-        final String[] chosenServices = servicesChooser != null ?
-                servicesChooser.getChosenServices() : null;
         // If there are chosen services, then set the filtered services
         // argument.
         if(chosenServices != null && chosenServices.length > 0) {
@@ -845,9 +857,11 @@ public class BusStopMapFragment extends SupportMapFragment
      */
     private void addGeoSearchResults(final HashSet<MarkerOptions> result) {
         // If there is a progress Dialog, get rid of it.
-        if(progressDialog != null) {
+        final IndeterminateProgressDialogFragment progressDialog =
+                (IndeterminateProgressDialogFragment) getFragmentManager()
+                        .findFragmentByTag(PROGRESS_DIALOG_TAG);
+        if (progressDialog != null) {
             progressDialog.dismissAllowingStateLoss();
-            progressDialog = null;
         }
         
         if(map == null) {
