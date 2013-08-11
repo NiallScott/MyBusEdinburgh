@@ -26,6 +26,7 @@
 package uk.org.rivernile.android.utils;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.app.Activity;
 
 /**
@@ -55,6 +56,9 @@ public class ActionBarCompat {
      */
     public static void setDisplayHomeAsUpEnabled(final Activity activity,
             final boolean showHomeAsUp) {
-        activity.getActionBar().setDisplayHomeAsUpEnabled(showHomeAsUp);
+        final ActionBar actionBar = activity.getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(showHomeAsUp);
+        }
     }
 }

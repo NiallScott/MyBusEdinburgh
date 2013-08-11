@@ -25,10 +25,11 @@
  *     exempt from clause 2.
 */ -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:compat="http://schemas.android.com/apk/res-auto" >
     <item
         android:id="@+id/neareststops_option_menu_filter"
         android:title="@string/neareststops_menu_filter"
         android:icon="@drawable/ic_menu_filter"
-        android:showAsAction="ifRoom|withText" />
+        compat:showAsAction="ifRoom|withText" />
 </menu>

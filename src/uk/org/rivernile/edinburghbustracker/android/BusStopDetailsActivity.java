@@ -26,11 +26,9 @@
 package uk.org.rivernile.edinburghbustracker.android;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
-import uk.org.rivernile.android.utils.ActionBarCompat;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .BusStopDetailsFragment;
@@ -41,14 +39,11 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * 
  * @author Niall Scott
  */
-public class BusStopDetailsActivity extends FragmentActivity {
+public class BusStopDetailsActivity extends ActionBarActivity {
     
     /** The Intent argument for stopCode. */
     public static final String ARG_STOPCODE =
             BusStopDetailsFragment.ARG_STOPCODE;
-    
-    private static final boolean IS_HONEYCOMB_OR_GREATER =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     
     /**
      * {@inheritDoc}
@@ -59,9 +54,7 @@ public class BusStopDetailsActivity extends FragmentActivity {
         
         setContentView(R.layout.single_fragment_container);
         
-        if(IS_HONEYCOMB_OR_GREATER) {
-            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
-        }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         
         if(savedInstanceState == null) {
             final Intent intent = getIntent();

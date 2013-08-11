@@ -399,7 +399,6 @@ This version of strings.xml is in Italian (it_IT) -->
     * Strings for MainDashboardFragment *
     *************************************
     -->
-    <string name="main_app_icon_description">"Icona applicazione"</string>
     <string name="main_favourite_stops">"Fermate Salvate"</string>
     <string name="main_enter_stop_code">"Invio o la scansione del codice"</string>
     <string name="main_bus_stop_map">"Mappa Fermate"</string>

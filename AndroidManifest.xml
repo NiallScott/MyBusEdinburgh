@@ -82,8 +82,7 @@
         
         <!-- The MainActivity, which is the entry point. -->
         <activity
-            android:name=".MainActivity"
-            android:theme="@style/MyBusEdinburgh.NoTitleBar" >
+            android:name=".MainActivity" >
             <!-- This intent filter tells the system to place an app icon in the
                  launcher and use this Activity when starting the app. -->
             <intent-filter>
@@ -182,7 +181,7 @@
             android:name=".BusStopMapActivity"
             android:label="@string/map_title"
             android:launchMode="singleTop"
-            android:theme="@style/MyBusEdinburgh.Dark.MapActivity"
+            android:theme="@style/MyBusEdinburgh.Light.MapActivity"
             android:parentActivityName=".MainActivity" >
             <!-- This Activity handles searching. -->
             <intent-filter>

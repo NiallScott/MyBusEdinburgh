@@ -28,11 +28,9 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteCantOpenDatabaseException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Build;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.SpannedString;
@@ -149,14 +147,10 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
      */
     private synchronized boolean restoreDBFromAssets() {
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                try {
-                    getWritableDatabase().close();
-                } catch (SQLiteCantOpenDatabaseException e) {
-                    // Nothing to do here. Assume it's already closed.
-                }
-            } else {
+            try {
                 getWritableDatabase().close();
+            } catch (SQLiteException e) {
+                // Nothing to do here. Assume it's already closed.
             }
             
             f.delete();

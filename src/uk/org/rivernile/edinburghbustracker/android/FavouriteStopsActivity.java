@@ -26,11 +26,9 @@
 package uk.org.rivernile.edinburghbustracker.android;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
-import uk.org.rivernile.android.utils.ActionBarCompat;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .FavouriteStopsFragment;
@@ -42,10 +40,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see FavouriteStopsFragment
  */
-public class FavouriteStopsActivity extends FragmentActivity {
-    
-    private static final boolean IS_HONEYCOMB_OR_GREATER =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+public class FavouriteStopsActivity extends ActionBarActivity {
 
     /**
      * {@inheritDoc}
@@ -55,9 +50,7 @@ public class FavouriteStopsActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.single_fragment_container);
         
-        if(IS_HONEYCOMB_OR_GREATER) {
-            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
-        }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         
         final boolean isCreateShortcut = Intent.ACTION_CREATE_SHORTCUT.equals(
                 getIntent().getAction());

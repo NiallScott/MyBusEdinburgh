@@ -25,10 +25,11 @@
  *     exempt from clause 2.
 */ -->
 <menu
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:compat="http://schemas.android.com/apk/res-auto" >
     <item
         android:id="@+id/newsupdates_option_menu_refresh"
         android:title="@string/displaystopdata_menu_refresh"
         android:icon="@drawable/ic_menu_refresh"
-        android:showAsAction="ifRoom|withText" />
+        compat:showAsAction="ifRoom|withText" />
 </menu>

@@ -414,7 +414,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for MainDashboardFragment *
     *************************************
     -->
-    <string name="main_app_icon_description">Application icon</string>
     <string name="main_favourite_stops">Favourite Bus Stops</string>
     <string name="main_enter_stop_code">Enter or Scan Code</string>
     <string name="main_bus_stop_map">Bus Stop Map</string>

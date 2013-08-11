@@ -24,7 +24,26 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools" >
+    <style name="MainActionBar" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/actionBarColour</item>
+        <item name="background">@color/actionBarColour</item>
+        <item name="android:titleTextStyle" tools:ignore="NewApi">@style/MainActionBarText</item>
+        <item name="titleTextStyle">@style/MainActionBarText</item>
+    </style>
+    
+    <style name="MapActionBar" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/mapActionBarColour</item>
+        <item name="background">@color/mapActionBarColour</item>
+        <item name="android:titleTextStyle" tools:ignore="NewApi">@style/MainActionBarText</item>
+        <item name="titleTextStyle">@style/MainActionBarText</item>
+    </style>
+    
+    <style name="MainActionBarText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title" >
+        <item name="android:textColor">#FFF</item>
+    </style>
+    
     <style name="DashboardButton">
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:layout_width">wrap_content</item>

@@ -26,11 +26,9 @@
 package uk.org.rivernile.edinburghbustracker.android;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
-import uk.org.rivernile.android.utils.ActionBarCompat;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .AddTimeAlertFragment;
@@ -45,7 +43,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see AddTimeAlertFragment
  */
-public class AddTimeAlertActivity extends FragmentActivity
+public class AddTimeAlertActivity extends ActionBarActivity
         implements AlertFragmentEvent {
     
     /** The stopCode argument.*/
@@ -54,9 +52,6 @@ public class AddTimeAlertActivity extends FragmentActivity
     public static final String ARG_DEFAULT_SERVICES = AddTimeAlertFragment
             .ARG_DEFAULT_SERVICES;
     
-    private static final boolean IS_HONEYCOMB_OR_GREATER =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-    
     /**
      * {@inheritDoc}
      */
@@ -64,10 +59,8 @@ public class AddTimeAlertActivity extends FragmentActivity
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.single_fragment_container);
-        
-        if(IS_HONEYCOMB_OR_GREATER) {
-            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
-        }
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         
         // Only add the fragment if there was no previous instance of this
         // Activity, otherwise this fragment will appear multiple times.

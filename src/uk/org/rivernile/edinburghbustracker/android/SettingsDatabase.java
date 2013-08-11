@@ -25,13 +25,13 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.app.backup.BackupManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Build;
 import android.os.Environment;
 import java.io.BufferedReader;
 import java.io.File;
@@ -42,7 +42,6 @@ import java.io.PrintWriter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import uk.org.rivernile.android.utils.BackupCompat;
 
 /**
  * This class deals with the database interaction with the settings database.
@@ -83,9 +82,6 @@ public class SettingsDatabase extends SQLiteOpenHelper {
     public static final byte ALERTS_TYPE_PROXIMITY = 1;
     /** A time alert type. */
     public static final byte ALERTS_TYPE_TIME = 2;
-    
-    private static final boolean isFroyoOrGreater =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
 
     private static SettingsDatabase instance;
 
@@ -220,7 +216,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         final SQLiteDatabase db = getWritableDatabase();
         db.insertOrThrow(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPNAME, cv);
         
-        if(isFroyoOrGreater) BackupCompat.dataChanged(context.getPackageName());
+        BackupManager.dataChanged(context.getPackageName());
     }
 
     /**
@@ -236,7 +232,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         db.delete(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPCODE + " = ?",
                 new String[] { stopCode });
         
-        if(isFroyoOrGreater) BackupCompat.dataChanged(context.getPackageName());
+        BackupManager.dataChanged(context.getPackageName());
     }
 
     /**
@@ -257,7 +253,7 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         db.update(FAVOURITE_STOPS_TABLE, cv, FAVOURITE_STOPS_STOPCODE + " = ?",
                 new String[] { stopCode });
         
-        if(isFroyoOrGreater) BackupCompat.dataChanged(context.getPackageName());
+        BackupManager.dataChanged(context.getPackageName());
     }
 
     /**

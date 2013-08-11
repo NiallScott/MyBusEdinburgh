@@ -26,19 +26,6 @@
 */ -->
 <resources
     xmlns:tools="http://schemas.android.com/tools">
-    <style name="MainActionBar" parent="@android:style/Widget.Holo.ActionBar">
-        <item name="android:background">@color/actionBarColour</item>
-        <item name="android:titleTextStyle">@style/MainActionBarText</item>
-    </style>
-    
-    <style name="MapActionBar" parent="@android:style/Widget.Holo.ActionBar">
-        <item name="android:background">#90000000</item>
-    </style>
-    
-    <style name="MainActionBarText" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title" tools:ignore="NewApi">
-        <item name="android:textColor">#FFF</item>
-    </style>
-    
     <style name="SelectableItemBackground">
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>

@@ -30,7 +30,7 @@ import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .MainDashboardFragment;
 
@@ -40,7 +40,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see MainDashboardFragment
  */
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends ActionBarActivity {
 
     /**
      * {@inheritDoc}

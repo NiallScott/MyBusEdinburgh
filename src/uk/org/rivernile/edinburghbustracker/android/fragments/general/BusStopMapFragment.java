@@ -29,7 +29,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.FragmentManager;
@@ -244,10 +243,7 @@ public class BusStopMapFragment extends SupportMapFragment
                 final UiSettings uiSettings = map.getUiSettings();
                 uiSettings.setRotateGesturesEnabled(false);
                 uiSettings.setCompassEnabled(false);
-                // Only show the My Location button pre-Honeycomb. After
-                // Honeycomb, it is shown in the ActionBar.
-                uiSettings.setMyLocationButtonEnabled(
-                        Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB);
+                uiSettings.setMyLocationButtonEnabled(false);
                 
                 map.setInfoWindowAdapter(new MapInfoWindow(getActivity()));
                 map.setOnCameraChangeListener(this);

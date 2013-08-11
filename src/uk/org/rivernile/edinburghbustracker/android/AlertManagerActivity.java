@@ -25,11 +25,9 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
-import uk.org.rivernile.android.utils.ActionBarCompat;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .AlertManagerFragment;
@@ -41,10 +39,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see AlertManagerFragment
  */
-public class AlertManagerActivity extends FragmentActivity {
-    
-    private static final boolean IS_HONEYCOMB_OR_GREATER =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
+public class AlertManagerActivity extends ActionBarActivity {
 
     /**
      * {@inheritDoc}
@@ -54,9 +49,7 @@ public class AlertManagerActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.single_fragment_container);
 
-        if(IS_HONEYCOMB_OR_GREATER) {
-            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
-        }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         
         // Only add the fragment if there was no previous instance of this
         // Activity, otherwise this fragment will appear multiple times.
