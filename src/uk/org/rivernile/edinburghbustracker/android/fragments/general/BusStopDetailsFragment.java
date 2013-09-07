@@ -151,6 +151,7 @@ public class BusStopDetailsFragment extends Fragment
     private float[] magnetometerValues;
     private GeomagneticField geoField;
     private int screenRotation;
+    private Bitmap needleBitmap;
     
     /**
      * Get a new instance of this Fragment. A bus stop code must be supplied.
@@ -853,6 +854,8 @@ public class BusStopDetailsFragment extends Fragment
             txtDistance.setText("");
             txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null,
                     null, null);
+            recycleNeedleBitmapIfNotNull(null);
+            
             return;
         }
         
@@ -887,6 +890,8 @@ public class BusStopDetailsFragment extends Fragment
             // Make sure the needle isn't showing.
             txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null,
                     null, null);
+            recycleNeedleBitmapIfNotNull(null);
+            
             return;
         }
         
@@ -964,17 +969,26 @@ public class BusStopDetailsFragment extends Fragment
             // Apply the rotation matrix to the Bitmap, to create a new Bitmap.
             final Bitmap needleOut = Bitmap.createBitmap(needleIn, 0, 0,
                     needleIn.getWidth(), needleIn.getHeight(), m, true);
+            
+            // Recycle the needle read in if it's not the same as the rotated
+            // needle.
+            if (needleIn != needleOut) {
+                needleIn.recycle();
+            }
+            
             // This Bitmap needs to be converted to a Drawable type.
             final BitmapDrawable drawable = new BitmapDrawable(getResources(),
                     needleOut);
             // Set the new needle to be on the right hand side of the TextView.
             txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null,
                     drawable, null);
+            recycleNeedleBitmapIfNotNull(needleOut);
         } else {
             // If the Fragment is not added to the Activity, then make sure
             // there's no needle.
             txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null,
                     null, null);
+            recycleNeedleBitmapIfNotNull(null);
         }
     }
     
@@ -1011,6 +1025,19 @@ public class BusStopDetailsFragment extends Fragment
         for(int i = 0; i < len; i++) {
             oldValues[i] += 0.2f * (newValues[i] - oldValues[i]);
         }
+    }
+    
+    /**
+     * Recycle the needle Bitmap if it's no longer in use.
+     * 
+     * @param newNeedle The new needle Bitmap. Can be null.
+     */
+    private void recycleNeedleBitmapIfNotNull(final Bitmap newNeedle) {
+        if (needleBitmap != null) {
+            needleBitmap.recycle();
+        }
+        
+        needleBitmap = newNeedle;
     }
     
     /**

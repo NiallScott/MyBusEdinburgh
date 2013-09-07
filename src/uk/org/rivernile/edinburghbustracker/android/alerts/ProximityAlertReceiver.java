@@ -36,6 +36,7 @@ import android.location.LocationManager;
 import android.support.v4.app.NotificationCompat;
 import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
+import uk.org.rivernile.edinburghbustracker.android.BusStopDetailsActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -106,15 +107,21 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
         // Support for Jelly Bean notifications.
         notifBuilder.setStyle(new NotificationCompat.BigTextStyle()
                 .bigText(summary));
-        if(GenericUtils.isGoogleMapsAvailable(context)) {
+        
+        final Intent launchIntent;
+        if (GenericUtils.isGoogleMapsAvailable(context)) {
             // The Intent which launches the bus stop map at the selected stop.
-            final Intent launchIntent = new Intent(context,
-                    BusStopMapActivity.class);
+            launchIntent = new Intent(context, BusStopMapActivity.class);
             launchIntent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
-            notifBuilder.setContentIntent(
+        } else {
+            launchIntent = new Intent(context, BusStopDetailsActivity.class);
+            launchIntent.putExtra(BusStopDetailsActivity.ARG_STOPCODE,
+                    stopCode);
+        }
+        
+        notifBuilder.setContentIntent(
                     PendingIntent.getActivity(context, 0, launchIntent,
                         PendingIntent.FLAG_ONE_SHOT));
-        }
         
         final Notification n = notifBuilder.build();
         if(sp.getBoolean(PreferencesActivity.PREF_ALERT_SOUND, true))

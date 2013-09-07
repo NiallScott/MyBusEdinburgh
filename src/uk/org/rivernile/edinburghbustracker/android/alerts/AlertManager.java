@@ -60,8 +60,8 @@ public class AlertManager {
         locMan = (LocationManager)context.getSystemService(
                 Context.LOCATION_SERVICE);
         alMan = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        bsd = BusStopDatabase.getInstance(context);
-        sd = SettingsDatabase.getInstance(context);
+        bsd = BusStopDatabase.getInstance(context.getApplicationContext());
+        sd = SettingsDatabase.getInstance(context.getApplicationContext());
     }
     
     /**

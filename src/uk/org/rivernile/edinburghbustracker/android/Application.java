@@ -207,7 +207,8 @@ public class Application extends android.app.Application {
             if(topoId == null || topoId.length() == 0) return;
             
             // Get the current topoId from the database.
-            final BusStopDatabase bsd = BusStopDatabase.getInstance(context);
+            final BusStopDatabase bsd = BusStopDatabase
+                    .getInstance(context.getApplicationContext());
             final String dbTopoId = bsd.getTopoId();
             
             // If the topoIds match, write our check time to SharedPreferences.
@@ -374,7 +375,8 @@ public class Application extends android.app.Application {
             // move the downloaded file in to its place. Do this while
             // synchronized to make sure noting else uses the database in this
             // time.
-            final BusStopDatabase bsd = BusStopDatabase.getInstance(context);
+            final BusStopDatabase bsd = BusStopDatabase
+                    .getInstance(context.getApplicationContext());
             synchronized(bsd) {
                 try {
                     bsd.getReadableDatabase().close();

@@ -132,6 +132,10 @@ public class TimeAlertService extends IntentService {
         for(BusService bs : busStop.getBusServices()) {
             // We are only interested in the next departure. Also get the time.
             edinBs = (EdinburghBus)bs.getFirstBus();
+            if (edinBs == null) {
+                continue;
+            }
+            
             time = edinBs.getArrivalMinutes();
             
             // Loop through all of the services we are interested in.

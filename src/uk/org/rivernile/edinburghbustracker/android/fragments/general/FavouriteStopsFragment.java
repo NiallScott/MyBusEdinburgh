@@ -501,7 +501,7 @@ public class FavouriteStopsFragment extends ListFragment
                 final OnClickListener starClickListener) {
             super(context, layout, c, from, to);
             
-            bsd = BusStopDatabase.getInstance(context);
+            bsd = BusStopDatabase.getInstance(context.getApplicationContext());
             this.starClickListener = starClickListener;
             hitboxSize = context.getResources()
                     .getDimensionPixelOffset(R.dimen.star_hitbox_size);

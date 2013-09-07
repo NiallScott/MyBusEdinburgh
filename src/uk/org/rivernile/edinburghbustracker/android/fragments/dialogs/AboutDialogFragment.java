@@ -96,7 +96,8 @@ public class AboutDialogFragment extends DialogFragment {
         // Get the database mod time.
         long dbtime;
         final Calendar date = Calendar.getInstance();
-        final BusStopDatabase bsd = BusStopDatabase.getInstance(activity);
+        final BusStopDatabase bsd = BusStopDatabase.getInstance(
+                activity.getApplicationContext());
         try {
             dbtime = bsd.getLastDBModTime();
         } catch(SQLException e) {

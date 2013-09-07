@@ -129,7 +129,7 @@ public class PreferencesActivity extends PreferenceActivity
         
         getPreferenceManager().setSharedPreferencesName(PREF_FILE);
         addPreferencesFromResource(R.xml.preferences);
-        sd = SettingsDatabase.getInstance(this);
+        sd = SettingsDatabase.getInstance(getApplication());
         numberOfDeparturesStrings = getResources()
                 .getStringArray(R.array.preferences_num_departures_entries);
 
