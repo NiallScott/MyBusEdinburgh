@@ -26,8 +26,8 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -66,20 +66,12 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimesLoader;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimesResult;
-import uk.org.rivernile.edinburghbustracker.android
-        .AddEditFavouriteStopActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteFavouriteDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
         .EdinburghBus;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
@@ -104,7 +96,7 @@ import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
  */
 public class DisplayStopDataFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<BusTimesResult>,
-        DeleteFavouriteDialogFragment.EventListener {
+        DeleteFavouriteDialogFragment.Callbacks {
     
     private static final int EVENT_REFRESH = 1;
     private static final int EVENT_UPDATE_TIME = 2;
@@ -118,10 +110,6 @@ public class DisplayStopDataFragment extends Fragment
     /** This is the argument required to force a reload of data. */
     public static final String ARG_FORCELOAD = "forceLoad";
     
-    private static final String DELETE_FAV_DIALOG_TAG = "deleteFav";
-    private static final String DELETE_TIME_DIALOG_TAG = "delTimeAlert";
-    private static final String DELETE_PROX_DIALOG_TAG = "delProxAlert";
-    
     private static final String LOADER_ARG_STOPCODES = "stopCodes";
     private static final String LOADER_ARG_NUMBER_OF_DEPARTURES =
             "numberOfDepartures";
@@ -133,6 +121,7 @@ public class DisplayStopDataFragment extends Fragment
     private static final int AUTO_REFRESH_PERIOD = 60000;
     private static final int LAST_REFRESH_PERIOD = 10000;
     
+    private Callbacks callbacks;
     private BusStopDatabase bsd;
     private SettingsDatabase sd;
     private SharedPreferences sp;
@@ -186,6 +175,21 @@ public class DisplayStopDataFragment extends Fragment
         f.setArguments(b);
         
         return f;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -257,25 +261,11 @@ public class DisplayStopDataFragment extends Fragment
             public void onClick(final View v) {
                 // Add/remove as favourite.
                 if(sd.getFavouriteStopExists(stopCode)) {
-                    DeleteFavouriteDialogFragment.newInstance(stopCode,
-                                DisplayStopDataFragment.this)
-                            .show(getFragmentManager(), DELETE_FAV_DIALOG_TAG);
+                    callbacks.onShowConfirmFavouriteDeletion(stopCode);
                 } else {
-                    final Intent intent = new Intent(getActivity(),
-                            AddEditFavouriteStopActivity.class);
-                    intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
-                            stopCode);
-                    if(stopLocality != null) {
-                        intent.putExtra(
-                                AddEditFavouriteStopActivity.ARG_STOPNAME,
-                                stopName + ", " + stopLocality);
-                    } else {
-                        intent.putExtra(
-                                AddEditFavouriteStopActivity.ARG_STOPNAME,
-                                stopName);
-                    }
-                    
-                    startActivity(intent);
+                    callbacks.onShowAddFavouriteStop(stopCode,
+                            stopLocality != null ?
+                                    stopName + ", " + stopLocality : stopName);
                 }
             }
         });
@@ -313,15 +303,6 @@ public class DisplayStopDataFragment extends Fragment
         }
         
         getArguments().remove(ARG_FORCELOAD);
-        
-        // If any of the deletion Dialogs are showing, make sure their listeners
-        // are updated.
-        final DeleteFavouriteDialogFragment deleteDialog =
-                (DeleteFavouriteDialogFragment)getFragmentManager()
-                        .findFragmentByTag(DELETE_FAV_DIALOG_TAG);
-        if(deleteDialog != null) {
-            deleteDialog.setListener(this);
-        }
     }
     
     /**
@@ -475,7 +456,6 @@ public class DisplayStopDataFragment extends Fragment
      */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        Intent intent;
         switch(item.getItemId()) {
             case R.id.displaystopdata_option_menu_sort:
                 // Change the sort preference and ask for a data redisplay.
@@ -511,31 +491,19 @@ public class DisplayStopDataFragment extends Fragment
                 return true;
             case R.id.displaystopdata_option_menu_prox:
                 if(sd.isActiveProximityAlert(stopCode)) {
-                    // Show the DialogFragment for deleting a proximity alert.
-                    new DeleteProximityAlertDialogFragment()
-                            .show(getFragmentManager(), DELETE_PROX_DIALOG_TAG);
+                    callbacks.onShowConfirmDeleteProximityAlert();
                 } else {
                     // Show the Activity for adding a new proximity alert.
-                    intent = new Intent(getActivity(),
-                            AddProximityAlertActivity.class);
-                    intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
-                            stopCode);
-                    startActivity(intent);
+                    callbacks.onShowAddProximityAlert(stopCode);
                 }
                 
                 return true;
             case R.id.displaystopdata_option_menu_time:
                 if(sd.isActiveTimeAlert(stopCode)) {
-                    // Show the DialogFragment for deleting a time alert,
-                    new DeleteTimeAlertDialogFragment()
-                            .show(getFragmentManager(), DELETE_TIME_DIALOG_TAG);
+                    callbacks.onShowConfirmDeleteTimeAlert();
                 } else {
                     // Show the Activity for adding a new time alert.
-                    intent = new Intent(getActivity(),
-                            AddTimeAlertActivity.class);
-                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
-                            stopCode);
-                    startActivity(intent);
+                    callbacks.onShowAddTimeAlert(stopCode, null);
                 }
                 
                 return true;
@@ -577,13 +545,8 @@ public class DisplayStopDataFragment extends Fragment
                             (HashMap<String, String>)listAdapter
                             .getGroup(position);
                     // Fire off the Activity.
-                    final Intent intent = new Intent(getActivity(),
-                            AddTimeAlertActivity.class);
-                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
-                            stopCode);
-                    intent.putExtra(AddTimeAlertActivity.ARG_DEFAULT_SERVICES,
+                    callbacks.onShowAddTimeAlert(stopCode,
                             new String[] { groupData.get(SERVICE_NAME_KEY) });
-                    startActivity(intent);
                 }
                 return true;
             default:
@@ -1222,5 +1185,59 @@ public class DisplayStopDataFragment extends Fragment
             
             return v;
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete a favourite bus stop.
+         * 
+         * @param stopCode The bus stop that the user may want to delete.
+         */
+        public void onShowConfirmFavouriteDeletion(String stopCode);
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete the proximity alert.
+         */
+        public void onShowConfirmDeleteProximityAlert();
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete the time alert.
+         */
+        public void onShowConfirmDeleteTimeAlert();
+        
+        /**
+         * This is called when the user wants to add a new favourite bus stop.
+         * 
+         * @param stopCode The stop code of the bus stop to add.
+         * @param stopName The default name to use for the bus stop.
+         */
+        public void onShowAddFavouriteStop(String stopCode, String stopName);
+        
+        /**
+         * This is called when the user wants to view the interface to add a new
+         * proximity alert.
+         * 
+         * @param stopCode The stopCode the proximity alert should be added for.
+         */
+        public void onShowAddProximityAlert(String stopCode);
+        
+        /**
+         * This is called when the user wants to view the interface to add a new
+         * time alert.
+         * 
+         * @param stopCode The stopCode the time alert should be added for.
+         * @param defaultServices The services that should be selected by
+         * default. Set to null if no services should be selected.
+         */
+        public void onShowAddTimeAlert(String stopCode,
+                String[] defaultServices);
     }
 }

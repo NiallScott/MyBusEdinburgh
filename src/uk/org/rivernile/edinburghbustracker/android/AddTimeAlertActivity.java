@@ -30,10 +30,12 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .ServicesChooserDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .TimeLimitationsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .AddTimeAlertFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .AlertFragmentEvent;
 
 /**
  * Add a new time alert. This allows the user to specify a list of services to
@@ -44,13 +46,19 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @see AddTimeAlertFragment
  */
 public class AddTimeAlertActivity extends ActionBarActivity
-        implements AlertFragmentEvent {
+        implements AddTimeAlertFragment.Callbacks,
+        ServicesChooserDialogFragment.Callbacks {
     
     /** The stopCode argument.*/
     public static final String ARG_STOPCODE = AddTimeAlertFragment.ARG_STOPCODE;
     /** The default services argument. */
     public static final String ARG_DEFAULT_SERVICES = AddTimeAlertFragment
             .ARG_DEFAULT_SERVICES;
+    
+    private static final String DIALOG_TIME_ALERT_LIMITATIONS =
+            "timeLimitationsDialog";
+    private static final String DIALOG_SERVICES_CHOOSER =
+            "servicesChooserDialog";
     
     /**
      * {@inheritDoc}
@@ -101,7 +109,28 @@ public class AddTimeAlertActivity extends ActionBarActivity
      * {@inheritDoc}
      */
     @Override
-    public void onAlertAdded() {
+    public void onShowTimeAlertLimitations() {
+        new TimeLimitationsDialogFragment()
+                .show(getSupportFragmentManager(),
+                        DIALOG_TIME_ALERT_LIMITATIONS);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowServicesChooser(final String[] services,
+                final String[] selectedServices, final String title) {
+        ServicesChooserDialogFragment
+                .newInstance(services, selectedServices, title)
+                .show(getSupportFragmentManager(), DIALOG_SERVICES_CHOOSER);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onTimeAlertAdded() {
         finish();
     }
 
@@ -109,7 +138,25 @@ public class AddTimeAlertActivity extends ActionBarActivity
      * {@inheritDoc}
      */
     @Override
-    public void onCancel() {
+    public void onCancelAddTimeAlert() {
         finish();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onServicesChosen(final String[] chosenServices) {
+        try {
+            final ServicesChooserDialogFragment.Callbacks child =
+                    (ServicesChooserDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onServicesChosen(chosenServices);
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
     }
 }

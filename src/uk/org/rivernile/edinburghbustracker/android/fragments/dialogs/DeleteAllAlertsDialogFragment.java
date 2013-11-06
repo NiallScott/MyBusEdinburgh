@@ -25,44 +25,39 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 /**
  * This Fragment will show a Dialog which asks the user to confirm if they wish
- * to delete all alerts or not. Objects can ask for callbacks by implementing
- * {@link DeleteProximityAlertDialogFragment.EventListener} and registering a
- * callback with
- * {@link #setListener(uk.org.rivernile.edinburghbustracker.android.fragments
- * .dialogs.DeleteProximityAlertDialogFragment.EventListener)}
+ * to delete all alerts or not.
  * 
  * @author Niall Scott
  */
 public class DeleteAllAlertsDialogFragment extends DialogFragment {
     
     private AlertManager alertMan;
-    private WeakReference<EventListener> listener;
+    private Callbacks callbacks;
     
     /**
-     * Create a new instance of the DeleteAllAlertsDialogFragment, specifying a
-     * listener to call back to.
-     * 
-     * @param listener Where events should be called back to.
-     * @return A new instance of this DialogFragment.
+     * {@inheritDoc}
      */
-    public static DeleteAllAlertsDialogFragment newInstance(
-            final EventListener listener) {
-        final DeleteAllAlertsDialogFragment f =
-                new DeleteAllAlertsDialogFragment();
-        f.setListener(listener);
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
         
-        return f;
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -93,25 +88,13 @@ public class DeleteAllAlertsDialogFragment extends DialogFragment {
                 alertMan.removeTimeAlert();
                 alertMan.removeProximityAlert();
                 
-                if(listener != null) {
-                    final EventListener listenerRef = listener.get();
-                    if (listenerRef != null) {
-                        listenerRef.onConfirmAllAlertsDeletion();
-                    }
-                }
+                callbacks.onConfirmAllAlertsDeletion();
             }
         }).setNegativeButton(R.string.cancel,
                 new DialogInterface.OnClickListener() {
              @Override
              public void onClick(final DialogInterface dialog, final int id) {
-                dismiss();
-                
-                if(listener != null) {
-                    final EventListener listenerRef = listener.get();
-                    if (listenerRef != null) {
-                        listenerRef.onCancelAllAlertsDeletion();
-                    }
-                }
+                callbacks.onCancelAllAlertsDeletion();
              }
         });
         
@@ -119,23 +102,10 @@ public class DeleteAllAlertsDialogFragment extends DialogFragment {
     }
     
     /**
-     * Set the listener which listens out for dialog events.
-     * 
-     * @param listener Where to call back to.
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
      */
-    public void setListener(final EventListener listener) {
-        if (listener == null) {
-            this.listener = null;
-        } else {
-            this.listener = new WeakReference<EventListener>(listener);
-        }
-    }
-    
-    /**
-     * The EventListener is an interface that any class which wants callbacks
-     * from this Fragment should implement.
-     */
-    public interface EventListener {
+    public interface Callbacks {
         
         /**
          * This is called when the user has confirmed that they wish for all

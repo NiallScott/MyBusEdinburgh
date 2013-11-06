@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -44,8 +45,6 @@ import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .ServicesChooserDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .TimeLimitationsDialogFragment;
 
 /**
  * This fragment allows the user to add a new time alert. This alerts the user
@@ -55,7 +54,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  * @author Niall Scott
  */
 public class AddTimeAlertFragment extends Fragment
-        implements ServicesChooserDialogFragment.EventListener {
+        implements ServicesChooserDialogFragment.Callbacks {
     
     /** The argument for the stopCode. */
     public static final String ARG_STOPCODE = "stopCode";
@@ -64,14 +63,9 @@ public class AddTimeAlertFragment extends Fragment
     /** The argument used in saving the instance state.*/
     private static final String ARG_SELECTED_SERVICES = "selectedServices";
     
-    private static final String LIMITATIONS_DIALOG_TAG =
-            "timeLimitationsDialog";
-    private static final String SERVICES_CHOOSER_DIALOG_TAG =
-            "servicesChooserDialogTag";
-    
+    private Callbacks callbacks;
     private BusStopDatabase bsd;
     private AlertManager alertMan;
-    private AlertFragmentEvent callback;
     private String stopCode;
     private String[] services;
     private String[] selectedServices;
@@ -117,17 +111,23 @@ public class AddTimeAlertFragment extends Fragment
      * {@inheritDoc}
      */
     @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        // Cast the hosting Activity to our callback interface. If this fails,
-        // throw an IllegalStateException.
-        try {
-            callback = (AlertFragmentEvent)getActivity();
-        } catch(ClassCastException e) {
-            throw new IllegalStateException("The underlying Activity must " +
-                    "implement AlertFragmentEvent.");
-        }
         
         // Get the various resources.
         final Context context = getActivity().getApplicationContext();
@@ -172,7 +172,7 @@ public class AddTimeAlertFragment extends Fragment
                 // Add the alert.
                 alertMan.addTimeAlert(stopCode, selectedServices, timeTrigger);
                 // Tell the underlying Activity that a new alert has been added.
-                callback.onAlertAdded();
+                callbacks.onTimeAlertAdded();
             }
         });
         
@@ -231,7 +231,7 @@ public class AddTimeAlertFragment extends Fragment
             @Override
             public void onClick(final View v) {
                 // Tell the underlying Activity that the user has cancelled.
-                callback.onCancel();
+                callbacks.onCancelAddTimeAlert();
             }
         });
         
@@ -240,13 +240,8 @@ public class AddTimeAlertFragment extends Fragment
             btn.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    // Show the services chooser DialogFragment.
-                    ServicesChooserDialogFragment
-                            .newInstance(services, selectedServices,
-                                getString(R.string.addtimealert_services_title),
-                                    AddTimeAlertFragment.this)
-                            .show(getFragmentManager(),
-                                    SERVICES_CHOOSER_DIALOG_TAG);
+                    callbacks.onShowServicesChooser(services, selectedServices,
+                            getString(R.string.addtimealert_services_title));
                 }
             });
         } else {
@@ -257,9 +252,7 @@ public class AddTimeAlertFragment extends Fragment
         btn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                // Show the DialogFragment.
-                new TimeLimitationsDialogFragment()
-                        .show(getFragmentManager(), LIMITATIONS_DIALOG_TAG);
+                callbacks.onShowTimeAlertLimitations();
             }
         });
         
@@ -284,23 +277,6 @@ public class AddTimeAlertFragment extends Fragment
         onServicesChosen(selectedServices);
         
         return v;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        
-        // If the services chooser Dialog is showing, make sure its listener is
-        // updated.
-        final ServicesChooserDialogFragment servicesDialog =
-                (ServicesChooserDialogFragment)getFragmentManager()
-                        .findFragmentByTag(SERVICES_CHOOSER_DIALOG_TAG);
-        if(servicesDialog != null) {
-            servicesDialog.setListener(this);
-        }
     }
 
     /**
@@ -335,5 +311,40 @@ public class AddTimeAlertFragment extends Fragment
             txtServices.setText(R.string.addtimealert_noservices);
             btnOkay.setEnabled(false);
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user wants to read the text about the time
+         * alert limitations.
+         */
+        public void onShowTimeAlertLimitations();
+        
+        /**
+         * This is called when the user wishes to select services, for example,
+         * for filtering.
+         * 
+         * @param services The services to choose from.
+         * @param selectedServices Any services that should be selected by
+         * default.
+         * @param title A title to show on the chooser.
+         */
+        public void onShowServicesChooser(String[] services,
+                String[] selectedServices, String title);
+        
+        /**
+         * This is called when the user has added a new time alert.
+         */
+        public void onTimeAlertAdded();
+        
+        /**
+         * This is called when the user wants to cancel adding a new time alert.
+         */
+        public void onCancelAddTimeAlert();
     }
 }

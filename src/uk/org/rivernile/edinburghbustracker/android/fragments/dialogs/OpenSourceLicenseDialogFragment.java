@@ -28,7 +28,6 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -75,13 +74,7 @@ public class OpenSourceLicenseDialogFragment extends DialogFragment {
         builder.setCancelable(true)
                 .setTitle(R.string.opensourcelicensedialog_title)
                 .setMessage(appLicenses)
-                .setPositiveButton(R.string.close,
-                    new DialogInterface.OnClickListener() {
-             @Override
-             public void onClick(final DialogInterface dialog, final int id) {
-                dismiss();
-             }
-        });
+                .setPositiveButton(R.string.close, null);
         
         return builder.create();
     }

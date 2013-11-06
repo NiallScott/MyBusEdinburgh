@@ -25,11 +25,22 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
+import android.widget.Toast;
 import uk.org.rivernile.android.utils.NavigationUtils;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteFavouriteDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteProximityAlertDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteTimeAlertDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .InstallStreetViewDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .BusStopDetailsFragment;
 
@@ -39,11 +50,26 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * 
  * @author Niall Scott
  */
-public class BusStopDetailsActivity extends ActionBarActivity {
+public class BusStopDetailsActivity extends ActionBarActivity
+        implements BusStopDetailsFragment.Callbacks,
+        DeleteFavouriteDialogFragment.Callbacks,
+        DeleteProximityAlertDialogFragment.Callbacks,
+        DeleteTimeAlertDialogFragment.Callbacks,
+        InstallStreetViewDialogFragment.Callbacks {
     
     /** The Intent argument for stopCode. */
     public static final String ARG_STOPCODE =
             BusStopDetailsFragment.ARG_STOPCODE;
+    
+    private static final String STREET_VIEW_APP_PACKAGE =
+            "market://details?id=com.google.android.street";
+    
+    private static final String DIALOG_CONFIRM_DELETE_FAVOURITE =
+            "deleteFavDialog";
+    private static final String DIALOG_DELETE_PROX_ALERT = "delProxAlertDialog";
+    private static final String DIALOG_DELETE_TIME_ALERT = "delTimeAlertDialog";
+    private static final String DIALOG_INSTALL_STREET_VIEW =
+            "installStreetViewDialog";
     
     /**
      * {@inheritDoc}
@@ -84,6 +110,231 @@ public class BusStopDetailsActivity extends ActionBarActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmFavouriteDeletion(final String stopCode) {
+        DeleteFavouriteDialogFragment.newInstance(stopCode)
+                .show(getSupportFragmentManager(),
+                        DIALOG_CONFIRM_DELETE_FAVOURITE);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmDeleteProximityAlert() {
+        new DeleteProximityAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_DELETE_PROX_ALERT);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmDeleteTimeAlert() {
+        new DeleteTimeAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_DELETE_TIME_ALERT);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowBusTimes(final String stopCode) {
+        final Intent intent = new Intent(this, DisplayStopDataActivity.class);
+        intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+    
+    @Override
+    public void onShowStreetView(final double latitude,
+            final double longitude) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("google.streetview:cbll=");
+        sb.append(latitude);
+        sb.append(',');
+        sb.append(longitude);
+        sb.append("&cbp=1,0,,0,1.0&mz=19");
+        
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse(sb.toString())));
+        } catch (ActivityNotFoundException e) {
+            new InstallStreetViewDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_INSTALL_STREET_VIEW);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowInstallStreetView() {
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(STREET_VIEW_APP_PACKAGE));
+
+        try {
+            startActivity(intent);
+        } catch(ActivityNotFoundException e) {
+            Toast.makeText(this, R.string.streetviewdialog_noplaystore,
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAddProximityAlert(final String stopCode) {
+        final Intent intent = new Intent(this, AddProximityAlertActivity.class);
+        intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAddTimeAlert(final String stopCode) {
+        final Intent intent = new Intent(this, AddTimeAlertActivity.class);
+        intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowBusStopMapWithStopCode(final String stopCode) {
+        final Intent intent = new Intent(this, BusStopMapActivity.class);
+        intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAddFavouriteStop(final String stopCode,
+            final String stopName) {
+        final Intent intent = new Intent(this,
+                AddEditFavouriteStopActivity.class);
+        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
+        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME, stopName);
+        
+        startActivity(intent);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmFavouriteDeletion() {
+        try {
+            final DeleteFavouriteDialogFragment.Callbacks child =
+                    (DeleteFavouriteDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmFavouriteDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCancelFavouriteDeletion() {
+        try {
+            final DeleteFavouriteDialogFragment.Callbacks child =
+                    (DeleteFavouriteDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelFavouriteDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmProximityAlertDeletion() {
+        try {
+            final DeleteProximityAlertDialogFragment.Callbacks child =
+                    (DeleteProximityAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmProximityAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCancelProximityAlertDeletion() {
+        try {
+            final DeleteProximityAlertDialogFragment.Callbacks child =
+                    (DeleteProximityAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelProximityAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmTimeAlertDeletion() {
+        try {
+            final DeleteTimeAlertDialogFragment.Callbacks child =
+                    (DeleteTimeAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmTimeAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCancelTimeAlertDeletion() {
+        try {
+            final DeleteTimeAlertDialogFragment.Callbacks child =
+                    (DeleteTimeAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelTimeAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
         }
     }
 }

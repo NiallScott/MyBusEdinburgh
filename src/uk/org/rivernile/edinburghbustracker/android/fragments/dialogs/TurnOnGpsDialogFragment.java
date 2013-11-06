@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,6 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -53,10 +52,31 @@ import uk.org.rivernile.edinburghbustracker.android.R;
 public class TurnOnGpsDialogFragment extends DialogFragment {
     
     /** The Intent to use to show the GPS settings Activity. */
-    public static final Intent TURN_ON_GPS_INTENT =
-            new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+    public static final Intent TURN_ON_GPS_INTENT;
     
+    private Callbacks callbacks;
     private SharedPreferences sp;
+    
+    static {
+        TURN_ON_GPS_INTENT = new Intent(Settings
+                .ACTION_LOCATION_SOURCE_SETTINGS);
+        TURN_ON_GPS_INTENT.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }
     
     /**
      * {@inheritDoc}
@@ -99,21 +119,23 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.yes,
                 new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(final DialogInterface dialog,
-                    final int id) {
-                try {
-                    startActivity(TURN_ON_GPS_INTENT);
-                } catch(ActivityNotFoundException e) { }
+            public void onClick(final DialogInterface dialog, final int id) {
+                callbacks.onShowGpsPreferences();
             }
-        }).setNegativeButton(R.string.no,
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog,
-                    final int id) {
-                dismiss();
-            }
-        });
+        }).setNegativeButton(R.string.no, null);
         
         return builder.create();
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user wants to turn on GPS on their device.
+         */
+        public void onShowGpsPreferences();
     }
 }

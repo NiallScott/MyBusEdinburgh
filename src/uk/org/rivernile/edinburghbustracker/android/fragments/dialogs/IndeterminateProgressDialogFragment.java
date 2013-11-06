@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,12 +25,12 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import java.lang.ref.WeakReference;
 
 /**
  * This DialogFragment contains an indeterminate progress Dialog. It is up to
@@ -40,23 +40,24 @@ import java.lang.ref.WeakReference;
  */
 public class IndeterminateProgressDialogFragment extends DialogFragment {
     
-    private WeakReference<EventListener> listener;
-    private String message;
+    private static final String ARG_MESSAGE = "message";
+    
+    private Callbacks callbacks;
     
     /**
      * Create a new instance of this DialogFragment, specifying the listener
      * callback and the message to display to the user.
      * 
-     * @param listener Where to send events back to.
      * @param message The message to display to the user.
      * @return A new instance of this DialogFragment.
      */
     public static IndeterminateProgressDialogFragment newInstance(
-            final EventListener listener, final String message) {
+            final String message) {
         final IndeterminateProgressDialogFragment f =
                 new IndeterminateProgressDialogFragment();
-        f.setListener(listener);
-        f.setMessage(message);
+        final Bundle b = new Bundle();
+        b.putString(ARG_MESSAGE, message);
+        f.setArguments(b);
         
         return f;
     }
@@ -65,10 +66,15 @@ public class IndeterminateProgressDialogFragment extends DialogFragment {
      * {@inheritDoc}
      */
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
         
-        setRetainInstance(true);
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -79,7 +85,7 @@ public class IndeterminateProgressDialogFragment extends DialogFragment {
         final ProgressDialog d = new ProgressDialog(getActivity());
         d.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         d.setCancelable(true);
-        d.setMessage(message);
+        d.setMessage(getArguments().getString(ARG_MESSAGE));
         
         return d;
     }
@@ -91,41 +97,14 @@ public class IndeterminateProgressDialogFragment extends DialogFragment {
     public void onCancel(final DialogInterface di) {
         super.onCancel(di);
         
-        if(listener != null) {
-            final EventListener listenerRef = listener.get();
-            if (listenerRef != null) {
-                listenerRef.onProgressCancel();
-            }
-        }
-    }
-    
-    /**
-     * Set the listener which listens out for dialog events.
-     * 
-     * @param listener Where to call back to.
-     */
-    public void setListener(final EventListener listener) {
-        if (listener == null) {
-            this.listener = null;
-        } else {
-            this.listener = new WeakReference<EventListener>(listener);
-        }
-    }
-    
-    /**
-     * Set the message to be displayed to the user.
-     * 
-     * @param message The message to be displayed to the user.
-     */
-    public void setMessage(final String message) {
-        this.message = message;
+        callbacks.onProgressCancel();
     }
     
     /**
      * The EventListener is an interface that any class which wants callbacks
      * from this Fragment should implement.
      */
-    public interface EventListener {
+    public interface Callbacks {
         
         /**
          * When the user cancels this DialogFragment, this method is called upon

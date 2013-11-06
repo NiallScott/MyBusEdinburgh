@@ -30,7 +30,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.SQLException;
 import android.os.Build;
@@ -55,11 +54,24 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class AboutDialogFragment extends DialogFragment {
     
-    private static final String LICENSE_DIALOG_TAG = "licenseDialog";
     private static final boolean isHoneycombOrGreater =
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
     private static final DateFormat dateFormat =
             DateFormat.getDateTimeInstance();
+    
+    private Callbacks callbacks;
+
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }
     
     /**
      * {@inheritDoc}
@@ -118,8 +130,7 @@ public class AboutDialogFragment extends DialogFragment {
         btnLicenses.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                new OpenSourceLicenseDialogFragment().show(getFragmentManager(),
-                        LICENSE_DIALOG_TAG);
+                callbacks.onShowLicences();
             }
         });
 
@@ -132,15 +143,7 @@ public class AboutDialogFragment extends DialogFragment {
         }
         
         // Build the Dialog.
-        builder.setView(layout)
-                .setNegativeButton(R.string.close,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog,
-                            final int id) {
-                        dismiss();
-                    }
-                });
+        builder.setView(layout).setNegativeButton(R.string.close, null);
 
         return builder.create();
     }
@@ -181,5 +184,17 @@ public class AboutDialogFragment extends DialogFragment {
         }
         
         return null;
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user wants to see the open source licences.
+         */
+        public void onShowLicences();
     }
 }

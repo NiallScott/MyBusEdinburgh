@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,10 @@ import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .AboutDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .OpenSourceLicenseDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .MainDashboardFragment;
 
@@ -40,7 +44,12 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see MainDashboardFragment
  */
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity
+        implements MainDashboardFragment.Callbacks,
+        AboutDialogFragment.Callbacks {
+    
+    private static final String DIALOG_ABOUT = "aboutDialog";
+    private static final String DIALOG_LICENCE = "licenseDialog";
 
     /**
      * {@inheritDoc}
@@ -61,5 +70,79 @@ public class MainActivity extends ActionBarActivity {
                 .getBoolean(PREF_STARTUP_SHOW_FAVS, false)) {
             startActivity(new Intent(this, FavouriteStopsActivity.class));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowFavourites() {
+        startActivity(new Intent(this, FavouriteStopsActivity.class));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowStopCodeEntry() {
+        startActivity(new Intent(this, EnterStopCodeActivity.class));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowBusStopMap() {
+        startActivity(new Intent(this, BusStopMapActivity.class));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowNearestStops() {
+        startActivity(new Intent(this, NearestStopsActivity.class));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowNewsUpdates() {
+        startActivity(new Intent(this, NewsUpdatesActivity.class));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAlertManager() {
+        startActivity(new Intent(this, AlertManagerActivity.class));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAppPreferences() {
+        startActivity(new Intent(this, PreferencesActivity.class));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAboutInformation() {
+        new AboutDialogFragment()
+                .show(getSupportFragmentManager(),DIALOG_ABOUT);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowLicences() {
+        new OpenSourceLicenseDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_LICENCE);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,12 +25,12 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
@@ -47,24 +47,22 @@ import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 public class DeleteTimeAlertDialogFragment extends DialogFragment {
     
     private AlertManager alertMan;
-    private WeakReference<EventListener> listener;
+    private Callbacks callbacks;
     
     /**
-     * Create a new instance of the DeleteTimeAlertDialogFragment.
-     * 
-     * @param listener Where events should be called back to.
-     * @return A new instance of this DialogFragment.
+     * {@inheritDoc}
      */
-    public static DeleteTimeAlertDialogFragment newInstance(
-            final EventListener listener) {
-        final DeleteTimeAlertDialogFragment f =
-                new DeleteTimeAlertDialogFragment();
-        f.setListener(listener);
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
         
-        return f;
-    }
-    
-    /**
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }/**
      * {@inheritDoc}
      */
     @Override
@@ -92,25 +90,13 @@ public class DeleteTimeAlertDialogFragment extends DialogFragment {
                 // The user has confirmed they want to delete the alert.
                 alertMan.removeTimeAlert();
                 
-                if(listener != null) {
-                    final EventListener listenerRef = listener.get();
-                    if (listenerRef != null) {
-                        listenerRef.onConfirmTimeAlertDeletion();
-                    }
-                }
+                callbacks.onConfirmTimeAlertDeletion();
             }
         }).setNegativeButton(R.string.cancel,
                 new DialogInterface.OnClickListener() {
              @Override
              public void onClick(final DialogInterface dialog, final int id) {
-                dismiss();
-                
-                if(listener != null) {
-                    final EventListener listenerRef = listener.get();
-                    if (listenerRef != null) {
-                        listenerRef.onCancelTimeAlertDeletion();
-                    }
-                }
+                callbacks.onCancelTimeAlertDeletion();
              }
         });
         
@@ -118,23 +104,10 @@ public class DeleteTimeAlertDialogFragment extends DialogFragment {
     }
     
     /**
-     * Set the listener which listens out for dialog events.
-     * 
-     * @param listener Where to call back to.
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
      */
-    public void setListener(final EventListener listener) {
-        if (listener == null) {
-            this.listener = null;
-        } else {
-            this.listener = new WeakReference<EventListener>(listener);
-        }
-    }
-    
-    /**
-     * The EventListener is an interface that any class which wants callbacks
-     * from this Fragment should implement.
-     */
-    public interface EventListener {
+    public interface Callbacks {
         
         /**
          * This is called when the user has confirmed that they wish for the

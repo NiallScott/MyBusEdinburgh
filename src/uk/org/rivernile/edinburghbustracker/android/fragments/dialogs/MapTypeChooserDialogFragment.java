@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,13 +25,13 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import com.google.android.gms.maps.GoogleMap;
-import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -42,22 +42,21 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class MapTypeChooserDialogFragment extends DialogFragment {
     
-    private WeakReference<EventListener> listener;
+    private Callbacks callbacks;
     
     /**
-     * Create a new instance of this DialogFragment, specifying the listener
-     * object.
-     * 
-     * @param listener Where the event callbacks should go back to.
-     * @return A new instance of this DialogFragment.
+     * {@inheritDoc}
      */
-    public static MapTypeChooserDialogFragment newInstance(
-            final EventListener listener) {
-        final MapTypeChooserDialogFragment f =
-                new MapTypeChooserDialogFragment();
-        f.setListener(listener);
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
         
-        return f;
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -73,21 +72,15 @@ public class MapTypeChooserDialogFragment extends DialogFragment {
                     new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
-                // If there's no listener to call back to, no point in
-                // continuing.
-                if(listener == null) return;
-                final EventListener listenerRef = listener.get();
-                if (listenerRef == null) return;
-                
                 switch(which) {
                     case 0:
-                        listenerRef.onMapTypeChosen(GoogleMap.MAP_TYPE_NORMAL);
+                        callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_NORMAL);
                         break;
                     case 1:
-                        listenerRef.onMapTypeChosen(GoogleMap.MAP_TYPE_HYBRID);
+                        callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_HYBRID);
                         break;
                     case 2:
-                        listenerRef.onMapTypeChosen(GoogleMap.MAP_TYPE_TERRAIN);
+                        callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_TERRAIN);
                         break;
                 }
             }
@@ -97,23 +90,10 @@ public class MapTypeChooserDialogFragment extends DialogFragment {
     }
     
     /**
-     * Set the listener which listens out for dialog events.
-     * 
-     * @param listener Where to call back to.
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
      */
-    public void setListener(final EventListener listener) {
-        if (listener == null) {
-            this.listener = null;
-        } else {
-            this.listener = new WeakReference<EventListener>(listener);
-        }
-    }
-    
-    /**
-     * The EventListener is an interface that any class which wants callbacks
-     * from this Fragment should implement.
-     */
-    public interface EventListener {
+    public interface Callbacks {
         
         /**
          * When the user makes a selection, this event is called on the event

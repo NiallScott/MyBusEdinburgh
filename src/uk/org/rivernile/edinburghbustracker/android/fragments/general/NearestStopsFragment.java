@@ -27,7 +27,6 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
@@ -58,22 +57,10 @@ import java.util.List;
 import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
-import uk.org.rivernile.edinburghbustracker.android
-        .AddEditFavouriteStopActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
-import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteFavouriteDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -92,22 +79,14 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
 public class NearestStopsFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<
         ArrayList<NearestStopsFragment.SearchResult>>,
-        LocationListener, ServicesChooserDialogFragment.EventListener {
+        LocationListener, ServicesChooserDialogFragment.Callbacks {
     
     private static final String ARG_CHOSEN_SERVICES = "chosenServices";
-    
-    private static final String DELETE_FAV_DIALOG_TAG = "deleteFavDialog";
-    private static final String DELETE_TIME_ALERT_DIALOG_TAG =
-            "delTimeAlertDialog";
-    private static final String DELETE_PROX_ALERT_DIALOG_TAG =
-            "delProxAlertDialog";
-    private static final String TURN_ON_GPS_DIALOG_TAG = "turnOnGpsDialog";
-    private static final String SERVICES_CHOOSER_DIALOG_TAG =
-            "servicesChooserDialogTag";
     
     private static final int REQUEST_PERIOD = 10000;
     private static final float MIN_DISTANCE = 3.0f;
     
+    private Callbacks callbacks;
     private LocationManager locMan;
     private SharedPreferences sp;
     private BusStopDatabase bsd;
@@ -118,6 +97,21 @@ public class NearestStopsFragment extends ListFragment
     private NearestStopsArrayAdapter ad;
     private String[] services;
     private String[] chosenServices;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }
     
     /**
      * {@inheritDoc}
@@ -156,8 +150,7 @@ public class NearestStopsFragment extends ListFragment
                 // If the list is not empty, this means Activities do exist.
                 // Show Dialog asking users if they want to turn on GPS.
                 if(packages != null && !packages.isEmpty()) {
-                    new TurnOnGpsDialogFragment().show(getFragmentManager(),
-                        TURN_ON_GPS_DIALOG_TAG);
+                    callbacks.onAskTurnOnGps();
                 }
             }
         }
@@ -193,15 +186,6 @@ public class NearestStopsFragment extends ListFragment
         
         // Force an update to initially show data.
         doUpdate(true);
-        
-        // If the services chooser Dialog is showing, make sure its listener is
-        // updated.
-        final ServicesChooserDialogFragment servicesDialog =
-                (ServicesChooserDialogFragment)getFragmentManager()
-                        .findFragmentByTag(SERVICES_CHOOSER_DIALOG_TAG);
-        if(servicesDialog != null) {
-            servicesDialog.setListener(this);
-        }
     }
     
     /**
@@ -273,13 +257,8 @@ public class NearestStopsFragment extends ListFragment
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
             case R.id.neareststops_option_menu_filter:
-                // Show the services chooser Dialog.
-                ServicesChooserDialogFragment
-                        .newInstance(services, chosenServices, getString(
-                                R.string.neareststops_service_chooser_title),
-                                this)
-                        .show(getFragmentManager(),
-                                SERVICES_CHOOSER_DIALOG_TAG);
+                callbacks.onShowServicesChooser(services, chosenServices,
+                        getString(R.string.neareststops_service_chooser_title));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -359,78 +338,45 @@ public class NearestStopsFragment extends ListFragment
     public boolean onContextItemSelected(final MenuItem item) {
         // Make sure that the selectedStop exists.
         if(selectedStop == null) return false;
-        Intent intent;
         
         switch(item.getItemId()) {
             case R.id.neareststops_context_menu_favourite:
                 // See if this stop exists as a favourite already.
                 if(sd.getFavouriteStopExists(selectedStop.stopCode)) {
-                    // If exists, show the DeleteFavouriteDialogFragment.
-                    DeleteFavouriteDialogFragment.newInstance(
-                            selectedStop.stopCode, null)
-                            .show(getFragmentManager(), DELETE_FAV_DIALOG_TAG);
-                } else {
-                    // If it doesn't exist, show the
-                    // AddEditFavouriteStopAcitivity.
-                    intent = new Intent(getActivity(),
-                            AddEditFavouriteStopActivity.class);
-                    intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
+                    callbacks.onShowConfirmFavouriteDeletion(
                             selectedStop.stopCode);
-                    if(selectedStop.locality != null) {
-                        intent.putExtra(
-                                AddEditFavouriteStopActivity.ARG_STOPNAME,
-                                selectedStop.stopName + ", " +
-                                    selectedStop.locality);
-                    } else {
-                        intent.putExtra(
-                                AddEditFavouriteStopActivity.ARG_STOPNAME,
-                                selectedStop.stopName);
-                    }
-                    startActivity(intent);
+                } else {
+                    // If it doesn't exist, show the Add Favourite Stop
+                    // interface.
+                    callbacks.onShowAddFavouriteStop(selectedStop.stopCode,
+                            selectedStop.locality != null ?
+                                    selectedStop.stopName + ", " +
+                                    selectedStop.locality :
+                                    selectedStop.stopName);
                 }
                 
                 return true;
             case R.id.neareststops_context_menu_prox_alert:
                 // See if this stop exists as a proximity alert.
                 if(sd.isActiveProximityAlert(selectedStop.stopCode)) {
-                    // If exists, show the DeleteProximityAlertDialogFragment.
-                    DeleteProximityAlertDialogFragment.newInstance(null)
-                            .show(getFragmentManager(),
-                            DELETE_PROX_ALERT_DIALOG_TAG);
+                    callbacks.onShowConfirmDeleteProximityAlert();
                 } else {
-                    // If it doesn't exist, show the AddProximityAlertActivity.
-                    intent = new Intent(getActivity(),
-                            AddProximityAlertActivity.class);
-                    intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
-                            selectedStop.stopCode);
-                    startActivity(intent);
+                    callbacks.onShowAddProximityAlert(selectedStop.stopCode);
                 }
                 
                 return true;
             case R.id.neareststops_context_menu_time_alert:
                 // See if this stop exists as a time alert.
                 if(sd.isActiveTimeAlert(selectedStop.stopCode)) {
-                    // If exists, show the DeleteTimeAlertDialogFragment.
-                    DeleteTimeAlertDialogFragment.newInstance(null)
-                            .show(getFragmentManager(), 
-                            DELETE_TIME_ALERT_DIALOG_TAG);
+                    callbacks.onShowConfirmDeleteTimeAlert();
                 } else {
-                    // If it doesn't exist, show the AddTimeAlertActivity.
-                    intent = new Intent(getActivity(),
-                            AddTimeAlertActivity.class);
-                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
-                            selectedStop.stopCode);
-                    startActivity(intent);
+                    callbacks.onShowAddTimeAlert(selectedStop.stopCode);
                 }
                 
                 return true;
             case R.id.neareststops_context_menu_showonmap:
-                // Start the BusStopMapActivity, giving it a stopCode and zoom
-                // level to center upon.
-                intent = new Intent(getActivity(), BusStopMapActivity.class);
-                intent.putExtra(BusStopMapActivity.ARG_STOPCODE,
-                        selectedStop.stopCode);
-                startActivity(intent);
+                // Start the BusStopMapActivity, giving it a stopCode.
+                callbacks.onShowBusStopMapWithStopCode(selectedStop.stopCode);
                 
                 return true;
             default:
@@ -552,12 +498,7 @@ public class NearestStopsFragment extends ListFragment
         // Ensure that the position is within range.
         if(position < ad.getCount()) {
             // Show the DisplayStopDataActivity.
-            final Intent intent = new Intent(getActivity(),
-                    DisplayStopDataActivity.class);
-            intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-            intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
-                    ad.getItem(position).stopCode);
-            startActivity(intent);
+            callbacks.onShowBusTimes(ad.getItem(position).stopCode);
         }
     }
     
@@ -875,5 +816,89 @@ public class NearestStopsFragment extends ListFragment
 
             return row;
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user should be asked if they want to turn on
+         * GPS or not.
+         */
+        public void onAskTurnOnGps();
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete a favourite bus stop.
+         * 
+         * @param stopCode The bus stop that the user may want to delete.
+         */
+        public void onShowConfirmFavouriteDeletion(String stopCode);
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete the proximity alert.
+         */
+        public void onShowConfirmDeleteProximityAlert();
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete the time alert.
+         */
+        public void onShowConfirmDeleteTimeAlert();
+        
+        /**
+         * This is called when the user wishes to select services, for example,
+         * for filtering.
+         * 
+         * @param services The services to choose from.
+         * @param selectedServices Any services that should be selected by
+         * default.
+         * @param title A title to show on the chooser.
+         */
+        public void onShowServicesChooser(String[] services,
+                String[] selectedServices, String title);
+        
+        /**
+         * This is called when the user wants to add a new favourite bus stop.
+         * 
+         * @param stopCode The stop code of the bus stop to add.
+         * @param stopName The default name to use for the bus stop.
+         */
+        public void onShowAddFavouriteStop(String stopCode, String stopName);
+        
+        /**
+         * This is called when the user wants to view the interface to add a new
+         * proximity alert.
+         * 
+         * @param stopCode The stopCode the proximity alert should be added for.
+         */
+        public void onShowAddProximityAlert(String stopCode);
+        
+        /**
+         * This is called when the user wants to view the interface to add a new
+         * time alert.
+         * 
+         * @param stopCode The stopCode the time alert should be added for.
+         */
+        public void onShowAddTimeAlert(String stopCode);
+        
+        /**
+         * This is called when the user wants to view the bus stop map centered
+         * on a specific bus stop.
+         * 
+         * @param stopCode The stopCode that the map should center on.
+         */
+        public void onShowBusStopMapWithStopCode(String stopCode);
+        
+        /**
+         * This is called when the user wishes to view bus stop times.
+         * 
+         * @param stopCode The bus stop to view times for.
+         */
+        public void onShowBusTimes(String stopCode);
     }
 }

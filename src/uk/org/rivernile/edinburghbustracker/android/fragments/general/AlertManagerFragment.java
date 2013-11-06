@@ -25,10 +25,10 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -63,18 +63,27 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  */
 public class AlertManagerFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor>,
-        DeleteAllAlertsDialogFragment.EventListener,
-        DeleteProximityAlertDialogFragment.EventListener,
-        DeleteTimeAlertDialogFragment.EventListener {
+        DeleteAllAlertsDialogFragment.Callbacks,
+        DeleteProximityAlertDialogFragment.Callbacks,
+        DeleteTimeAlertDialogFragment.Callbacks {
     
-    private static final String DELETE_ALL_ALERTS_DIALOG_TAG =
-            "delAllAlertsDialog";
-    private static final String DELETE_TIME_ALERT_DIALOG_TAG =
-            "delTimeAlertDialog";
-    private static final String DELETE_PROX_ALERT_DIALOG_TAG =
-            "delProxAlertDialog";
-    
+    private Callbacks callbacks;
     private AlertCursorAdapter ad;
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }
     
     /**
      * {@inheritDoc}
@@ -101,38 +110,6 @@ public class AlertManagerFragment extends ListFragment
         return inflater.inflate(R.layout.alertmanager, container, false);
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        
-        // If any of the deletion Dialogs are showing, make sure their listeners
-        // are updated.
-        final FragmentManager fragMan = getFragmentManager();
-        final DeleteAllAlertsDialogFragment deleteAllDialog =
-                (DeleteAllAlertsDialogFragment)fragMan
-                        .findFragmentByTag(DELETE_ALL_ALERTS_DIALOG_TAG);
-        if(deleteAllDialog != null) {
-            deleteAllDialog.setListener(this);
-        }
-        
-        final DeleteTimeAlertDialogFragment deleteTimeDialog =
-                (DeleteTimeAlertDialogFragment)fragMan
-                        .findFragmentByTag(DELETE_TIME_ALERT_DIALOG_TAG);
-        if(deleteTimeDialog != null) {
-            deleteTimeDialog.setListener(this);
-        }
-        
-        final DeleteProximityAlertDialogFragment deleteProxDialog =
-                (DeleteProximityAlertDialogFragment)fragMan
-                        .findFragmentByTag(DELETE_PROX_ALERT_DIALOG_TAG);
-        if(deleteProxDialog != null) {
-            deleteProxDialog.setListener(this);
-        }
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -181,9 +158,7 @@ public class AlertManagerFragment extends ListFragment
         switch(item.getItemId()) {
             case R.id.alertmanager_option_menu_delete_all:
                 // Show the 'Delete all alerts' confirmation DialogFragment.
-                DeleteAllAlertsDialogFragment.newInstance(this)
-                        .show(getFragmentManager(),
-                                DELETE_ALL_ALERTS_DIALOG_TAG);
+                callbacks.onShowConfirmDeleteAllAlerts();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -412,11 +387,7 @@ public class AlertManagerFragment extends ListFragment
                     btn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(final View v) {
-                            // Show the proximity alert delete DialogFragment.
-                            DeleteProximityAlertDialogFragment
-                                    .newInstance(AlertManagerFragment.this)
-                                    .show(getFragmentManager(),
-                                            DELETE_PROX_ALERT_DIALOG_TAG);
+                            callbacks.onShowConfirmDeleteProximityAlert();
                         }
                     });
                     
@@ -431,11 +402,7 @@ public class AlertManagerFragment extends ListFragment
                     btn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(final View v) {
-                            // Show the time alert delete DialogFragment.
-                            DeleteTimeAlertDialogFragment
-                                    .newInstance(AlertManagerFragment.this)
-                                    .show(getFragmentManager(),
-                                            DELETE_TIME_ALERT_DIALOG_TAG);
+                            callbacks.onShowConfirmDeleteTimeAlert();
                         }
                     });
                     
@@ -461,5 +428,30 @@ public class AlertManagerFragment extends ListFragment
                     break;
             }
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete all alerts.
+         */
+        public void onShowConfirmDeleteAllAlerts();
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete the proximity alert.
+         */
+        public void onShowConfirmDeleteProximityAlert();
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete the time alert.
+         */
+        public void onShowConfirmDeleteTimeAlert();
     }
 }

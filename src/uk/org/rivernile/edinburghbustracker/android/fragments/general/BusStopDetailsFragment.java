@@ -25,9 +25,8 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
-import android.content.ActivityNotFoundException;
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,10 +41,8 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Html;
@@ -71,13 +68,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.NumberFormat;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
-import uk.org.rivernile.edinburghbustracker.android
-        .AddEditFavouriteStopActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
-import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
@@ -87,8 +78,6 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteProximityAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteTimeAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .InstallStreetViewDialogFragment;
 
 /**
  * This Fragment shows details for a bus stop. The bus stop code is passed in
@@ -100,9 +89,9 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
 public class BusStopDetailsFragment extends Fragment
         implements LocationListener, SensorEventListener,
         LoaderManager.LoaderCallbacks<Cursor>,
-        DeleteProximityAlertDialogFragment.EventListener,
-        DeleteTimeAlertDialogFragment.EventListener,
-        DeleteFavouriteDialogFragment.EventListener {
+        DeleteProximityAlertDialogFragment.Callbacks,
+        DeleteTimeAlertDialogFragment.Callbacks,
+        DeleteFavouriteDialogFragment.Callbacks {
     
     private static final NumberFormat distanceFormat =
             NumberFormat.getInstance();
@@ -114,13 +103,7 @@ public class BusStopDetailsFragment extends Fragment
     private static final float MIN_DISTANCE = 3.0f;
     private static final float MAP_ZOOM = 15f;
     
-    private static final String DELETE_TIME_ALERT_DIALOG_TAG =
-            "delTimeAlertDialog";
-    private static final String DELETE_PROX_ALERT_DIALOG_TAG =
-            "delProxAlertDialog";
-    private static final String DELETE_FAVOURITE_DIALOG_TAG = "delFavDialog";
-    private static final String INSTALL_DIALOG_TAG = "installStreetViewDialog";
-    
+    private Callbacks callbacks;
     private BusStopDatabase bsd;
     private SettingsDatabase sd;
     private LocationManager locMan;
@@ -166,6 +149,21 @@ public class BusStopDetailsFragment extends Fragment
         f.setArguments(b);
         
         return f;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -220,10 +218,7 @@ public class BusStopDetailsFragment extends Fragment
             @Override
             public void onClick(final View v) {
                 // Show the bus times.
-                final Intent intent = new Intent(getActivity(),
-                        DisplayStopDataActivity.class);
-                intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
-                startActivity(intent);
+                callbacks.onShowBusTimes(stopCode);
             }
         });
         
@@ -232,23 +227,7 @@ public class BusStopDetailsFragment extends Fragment
             @Override
             public void onClick(final View v) {
                 // Show StreetView.
-                final StringBuilder sb = new StringBuilder();
-                sb.append("google.streetview:cbll=");
-                sb.append(latitude);
-                sb.append(',');
-                sb.append(longitude);
-                sb.append("&cbp=1,0,,0,1.0&mz=19");
-                
-                try {
-                    // Attempt to show StreetView.
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse(sb.toString())));
-                } catch(ActivityNotFoundException e) {
-                    // Ask the user if they want to install StreetView when it
-                    // isn't already installed.
-                    new InstallStreetViewDialogFragment().show(
-                            getFragmentManager(), INSTALL_DIALOG_TAG);
-                }
+                callbacks.onShowStreetView(latitude, longitude);
             }
         });
         
@@ -258,26 +237,11 @@ public class BusStopDetailsFragment extends Fragment
             public void onClick(final View v) {
                 // Add/remove as favourite.
                 if(sd.getFavouriteStopExists(stopCode)) {
-                    DeleteFavouriteDialogFragment.newInstance(stopCode,
-                                BusStopDetailsFragment.this)
-                            .show(getFragmentManager(),
-                                DELETE_FAVOURITE_DIALOG_TAG);
+                    callbacks.onShowConfirmFavouriteDeletion(stopCode);
                 } else {
-                    final Intent intent = new Intent(getActivity(),
-                            AddEditFavouriteStopActivity.class);
-                    intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
-                            stopCode);
-                    if(locality != null) {
-                        intent.putExtra(
-                                AddEditFavouriteStopActivity.ARG_STOPNAME,
-                                stopName + ", " + locality);
-                    } else {
-                        intent.putExtra(
-                                AddEditFavouriteStopActivity.ARG_STOPNAME,
-                                stopName);
-                    }
-                    
-                    startActivity(intent);
+                    callbacks.onShowAddFavouriteStop(stopCode,
+                            locality != null ?
+                            stopName + ", " + locality : stopName);
                 }
             }
         });
@@ -286,16 +250,9 @@ public class BusStopDetailsFragment extends Fragment
             @Override
             public void onClick(final View v) {
                 if(sd.isActiveProximityAlert(stopCode)) {
-                    DeleteProximityAlertDialogFragment
-                            .newInstance(BusStopDetailsFragment.this)
-                            .show(getFragmentManager(),
-                            DELETE_PROX_ALERT_DIALOG_TAG);
+                    callbacks.onShowConfirmDeleteProximityAlert();
                 } else {
-                    final Intent intent = new Intent(getActivity(),
-                            AddProximityAlertActivity.class);
-                    intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
-                            stopCode);
-                    startActivity(intent);
+                    callbacks.onShowAddProximityAlert(stopCode);
                 }
             }
         });
@@ -304,16 +261,9 @@ public class BusStopDetailsFragment extends Fragment
             @Override
             public void onClick(final View v) {
                 if(sd.isActiveTimeAlert(stopCode)) {
-                    DeleteTimeAlertDialogFragment
-                            .newInstance(BusStopDetailsFragment.this)
-                            .show(getFragmentManager(), 
-                            DELETE_TIME_ALERT_DIALOG_TAG);
+                    callbacks.onShowConfirmDeleteTimeAlert();
                 } else {
-                    final Intent intent = new Intent(getActivity(),
-                            AddTimeAlertActivity.class);
-                    intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
-                            stopCode);
-                    startActivity(intent);
+                    callbacks.onShowAddTimeAlert(stopCode);
                 }
             }
         });
@@ -349,13 +299,7 @@ public class BusStopDetailsFragment extends Fragment
             map.setOnMapClickListener(new OnMapClickListener() {
                 @Override
                 public void onMapClick(final LatLng point) {
-                    if (isAdded()) {
-                        final Intent intent = new Intent(getActivity(),
-                                BusStopMapActivity.class);
-                        intent.putExtra(BusStopMapActivity.ARG_STOPCODE,
-                                stopCode);
-                        startActivity(intent);
-                    }
+                    callbacks.onShowBusStopMapWithStopCode(stopCode);
                 }
             });
         } else {
@@ -366,30 +310,6 @@ public class BusStopDetailsFragment extends Fragment
         // The loader is restarted each time incase a new bus stop database has
         // become available.
         getLoaderManager().restartLoader(0, null, this);
-        
-        // If any of the deletion Dialogs are showing, make sure their listeners
-        // are updated.
-        final FragmentManager fragMan = getFragmentManager();
-        final DeleteFavouriteDialogFragment deleteDialog =
-                (DeleteFavouriteDialogFragment)fragMan
-                        .findFragmentByTag(DELETE_FAVOURITE_DIALOG_TAG);
-        if(deleteDialog != null) {
-            deleteDialog.setListener(this);
-        }
-        
-        final DeleteTimeAlertDialogFragment deleteTimeDialog =
-                (DeleteTimeAlertDialogFragment)fragMan
-                        .findFragmentByTag(DELETE_TIME_ALERT_DIALOG_TAG);
-        if(deleteTimeDialog != null) {
-            deleteTimeDialog.setListener(this);
-        }
-        
-        final DeleteProximityAlertDialogFragment deleteProxDialog =
-                (DeleteProximityAlertDialogFragment)fragMan
-                        .findFragmentByTag(DELETE_PROX_ALERT_DIALOG_TAG);
-        if(deleteProxDialog != null) {
-            deleteProxDialog.setListener(this);
-        }
     }
     
     /**
@@ -1076,5 +996,79 @@ public class BusStopDetailsFragment extends Fragment
             
             return c;
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete a favourite bus stop.
+         * 
+         * @param stopCode The bus stop that the user may want to delete.
+         */
+        public void onShowConfirmFavouriteDeletion(String stopCode);
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete the proximity alert.
+         */
+        public void onShowConfirmDeleteProximityAlert();
+        
+        /**
+         * This is called when it should be confirmed with the user that they
+         * want to delete the time alert.
+         */
+        public void onShowConfirmDeleteTimeAlert();
+        
+        /**
+         * This is called when the user wishes to view bus stop times.
+         * 
+         * @param stopCode The bus stop to view times for.
+         */
+        public void onShowBusTimes(String stopCode);
+        
+        /**
+         * This is called when the user wishes to see a location on Street View.
+         * 
+         * @param latitude The latitude of the location to show.
+         * @param longitude The longitude of the location to show.
+         */
+        public void onShowStreetView(double latitude, double longitude);
+        
+        /**
+         * This is called when the user wants to view the interface to add a new
+         * proximity alert.
+         * 
+         * @param stopCode The stopCode the proximity alert should be added for.
+         */
+        public void onShowAddProximityAlert(String stopCode);
+        
+        /**
+         * This is called when the user wants to view the interface to add a new
+         * time alert.
+         * 
+         * @param stopCode The stopCode the time alert should be added for.
+         */
+        public void onShowAddTimeAlert(String stopCode);
+        
+        /**
+         * This is called when the user wants to view the bus stop map centered
+         * on a specific bus stop.
+         * 
+         * @param stopCode The stopCode that the map should center on.
+         */
+        public void onShowBusStopMapWithStopCode(String stopCode);
+        
+        /**
+         * This is called when the user wants to add a new favourite bus stop.
+         * 
+         * @param stopCode The stop code of the bus stop to add.
+         * @param stopName The default name to use for the bus stop.
+         */
+        public void onShowAddFavouriteStop(String stopCode, String stopName);
     }
 }

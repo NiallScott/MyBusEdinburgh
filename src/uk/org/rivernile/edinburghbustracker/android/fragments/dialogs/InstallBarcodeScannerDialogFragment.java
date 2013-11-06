@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,15 +25,12 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.widget.Toast;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -46,8 +43,22 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class InstallBarcodeScannerDialogFragment extends DialogFragment {
     
-    private static final String BARCODE_APP_PACKAGE =
-            "market://details?id=com.google.zxing.client.android";
+    private Callbacks callbacks;
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }
     
     /**
      * {@inheritDoc}
@@ -64,30 +75,24 @@ public class InstallBarcodeScannerDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(final DialogInterface dialog,
                             final int which) {
-                        final Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse(BARCODE_APP_PACKAGE));
-                        
-                        try {
-                            startActivity(intent);
-                        } catch(ActivityNotFoundException e) {
-                            Toast.makeText(getActivity(),
-                                    R.string.barcodescannerdialog_noplaystore,
-                                    Toast.LENGTH_LONG).show();
-                        }
-                        
-                        dismiss();
+                        callbacks.onShowInstallBarcodeScanner();
                     }
                 })
-                .setNegativeButton(R.string.no,
-                        new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog,
-                            final int which) {
-                        dismiss();
-                    }
-                })
+                .setNegativeButton(R.string.no, null)
                 .setInverseBackgroundForced(true);
 
         return builder.create();
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user wants to install a barcode scanner.
+         */
+        public void onShowInstallBarcodeScanner();
     }
 }

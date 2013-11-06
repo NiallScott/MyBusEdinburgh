@@ -29,6 +29,12 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteAllAlertsDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteProximityAlertDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .AlertManagerFragment;
 
@@ -39,7 +45,18 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see AlertManagerFragment
  */
-public class AlertManagerActivity extends ActionBarActivity {
+public class AlertManagerActivity extends ActionBarActivity
+        implements AlertManagerFragment.Callbacks,
+        DeleteAllAlertsDialogFragment.Callbacks,
+        DeleteProximityAlertDialogFragment.Callbacks,
+        DeleteTimeAlertDialogFragment.Callbacks {
+    
+    private static final String DIALOG_DELETE_ALL_ALERTS_TAG =
+            "delAllAlertsDialog";
+    private static final String DIALOG_DELETE_PROX_ALERT =
+            "delProxAlertDialog";
+    private static final String DIALOG_DELETE_TIME_ALERT =
+            "delTimeAlertDialog";
 
     /**
      * {@inheritDoc}
@@ -71,6 +88,140 @@ public class AlertManagerActivity extends ActionBarActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmDeleteAllAlerts() {
+        new DeleteAllAlertsDialogFragment().show(getSupportFragmentManager(),
+                DIALOG_DELETE_ALL_ALERTS_TAG);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmDeleteProximityAlert() {
+        new DeleteProximityAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_DELETE_PROX_ALERT);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmDeleteTimeAlert() {
+        new DeleteTimeAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_DELETE_TIME_ALERT);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmAllAlertsDeletion() {
+        try {
+            final DeleteAllAlertsDialogFragment.Callbacks child =
+                    (DeleteAllAlertsDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmAllAlertsDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void onCancelAllAlertsDeletion() {
+        try {
+            final DeleteAllAlertsDialogFragment.Callbacks child =
+                    (DeleteAllAlertsDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelAllAlertsDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmProximityAlertDeletion() {
+        try {
+            final DeleteProximityAlertDialogFragment.Callbacks child =
+                    (DeleteProximityAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmProximityAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCancelProximityAlertDeletion() {
+        try {
+            final DeleteProximityAlertDialogFragment.Callbacks child =
+                    (DeleteProximityAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelProximityAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmTimeAlertDeletion() {
+        try {
+            final DeleteTimeAlertDialogFragment.Callbacks child =
+                    (DeleteTimeAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmTimeAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCancelTimeAlertDeletion() {
+        try {
+            final DeleteTimeAlertDialogFragment.Callbacks child =
+                    (DeleteTimeAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelTimeAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
         }
     }
 }

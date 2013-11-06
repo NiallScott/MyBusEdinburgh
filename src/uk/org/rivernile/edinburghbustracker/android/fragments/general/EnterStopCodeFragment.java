@@ -44,10 +44,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import java.util.List;
-import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .InstallBarcodeScannerDialogFragment;
 
 /**
  * This Fragment allows the user to manually enter a bus stop code or to
@@ -59,8 +56,8 @@ public class EnterStopCodeFragment extends Fragment
         implements View.OnClickListener, View.OnKeyListener {
     
     private static final Intent BARCODE_INTENT;
-    private static final String INSTALL_DIALOG_TAG = "installDialog";
     
+    private Callbacks callbacks;
     private EditText txt;
     private InputMethodManager imm;
     private boolean barcodePackageAvailable = false;
@@ -71,6 +68,21 @@ public class EnterStopCodeFragment extends Fragment
         BARCODE_INTENT = new Intent("com.google.zxing.client.android.SCAN");
         BARCODE_INTENT.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         BARCODE_INTENT.putExtra("QR_CODE_MODE", true);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -161,8 +173,7 @@ public class EnterStopCodeFragment extends Fragment
             } else {
                 // The barcode scanning Activity is not available, alert the
                 // user.
-                new InstallBarcodeScannerDialogFragment()
-                        .show(getFragmentManager(), INSTALL_DIALOG_TAG);
+                callbacks.onAskInstallBarcodeScanner();
             }
         } else if(v == submitButton) {
             // The user typed in a stop code, load the bus times.
@@ -197,11 +208,7 @@ public class EnterStopCodeFragment extends Fragment
                 // Set the EditText to the value of this stop code.
                 txt.setText(stopCode);
                 // Launch bus times.
-                final Intent intent = new Intent(activity,
-                        DisplayStopDataActivity.class);
-                intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-                intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
-                startActivity(intent);
+                callbacks.onShowBusTimes(stopCode);
             } else {
                 Toast.makeText(activity, R.string.enterstopcode_invalid_qrcode,
                         Toast.LENGTH_LONG).show();
@@ -239,12 +246,27 @@ public class EnterStopCodeFragment extends Fragment
                     Toast.LENGTH_LONG).show();
         } else {
             // Load bus times.
-            final Intent intent = new Intent(activity,
-                    DisplayStopDataActivity.class);
-            intent.setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
-            intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
-                    txt.getText().toString().trim());
-            startActivity(intent);
+            callbacks.onShowBusTimes(txt.getText().toString().trim());
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user is asked if they want to install
+         * a barcode scanner or not.
+         */
+        public void onAskInstallBarcodeScanner();
+        
+        /**
+         * This is called when the user wishes to view bus stop times.
+         * 
+         * @param stopCode The bus stop to view times for.
+         */
+        public void onShowBusTimes(String stopCode);
     }
 }

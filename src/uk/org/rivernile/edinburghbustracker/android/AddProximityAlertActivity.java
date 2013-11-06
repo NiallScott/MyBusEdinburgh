@@ -25,14 +25,15 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.content.ActivityNotFoundException;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .ProximityLimitationsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .AddProximityAlertFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .AlertFragmentEvent;
 
 /**
  * This Activity hosts a AddProximityAlertFragment which lets users add a new
@@ -42,11 +43,14 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @see AddProximityAlertFragment
  */
 public class AddProximityAlertActivity extends ActionBarActivity
-        implements AlertFragmentEvent {
+        implements AddProximityAlertFragment.Callbacks {
     
     /** The stopCode argument. */
     public static final String ARG_STOPCODE =
             AddProximityAlertFragment.ARG_STOPCODE;
+    
+    private static final String DIALOG_PROX_ALERT_LIMITATIONS =
+            "proxLimitationsDialog";
     
     /**
      * {@inheritDoc}
@@ -89,7 +93,29 @@ public class AddProximityAlertActivity extends ActionBarActivity
      * {@inheritDoc}
      */
     @Override
-    public void onAlertAdded() {
+    public void onShowProximityAlertLimitations() {
+        new ProximityLimitationsDialogFragment()
+                .show(getSupportFragmentManager(),
+                        DIALOG_PROX_ALERT_LIMITATIONS);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowGpsPreferences() {
+        try {
+            startActivity(AddProximityAlertFragment.LOCATION_SETTINGS_INTENT);
+        } catch (ActivityNotFoundException e) {
+            // Fail silently.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onProximityAlertAdded() {
         finish();
     }
 
@@ -97,7 +123,7 @@ public class AddProximityAlertActivity extends ActionBarActivity
      * {@inheritDoc}
      */
     @Override
-    public void onCancel() {
+    public void onCancelAddProximityAlert() {
         finish();
     }
 }

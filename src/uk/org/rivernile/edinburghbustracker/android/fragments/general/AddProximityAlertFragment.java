@@ -26,7 +26,6 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -50,8 +49,6 @@ import java.util.List;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .ProximityLimitationsDialogFragment;
 
 /**
  * This fragment allows the user to add a new proximity alert. This alerts the
@@ -64,12 +61,10 @@ public class AddProximityAlertFragment extends Fragment {
     /** The stopCode argument. */
     public static final String ARG_STOPCODE = "stopCode";
     
-    private static final String LIMITATIONS_DIALOG_TAG =
-            "proxLimitationsDialog";
+    /** The Intent used to show users device location settings. */
+    public static final Intent LOCATION_SETTINGS_INTENT;
     
-    private static final Intent LOCATION_SETTINGS_INTENT;
-    
-    private AlertFragmentEvent callback;
+    private Callbacks callbacks;
     private AlertManager alertMan;
     private LocationManager locMan;
     private BusStopDatabase bsd;
@@ -84,7 +79,8 @@ public class AddProximityAlertFragment extends Fragment {
         // be constantly repeated.
         LOCATION_SETTINGS_INTENT = new Intent(
                 Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        LOCATION_SETTINGS_INTENT.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        LOCATION_SETTINGS_INTENT.addFlags(
+                Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
     }
     
     /**
@@ -100,6 +96,21 @@ public class AddProximityAlertFragment extends Fragment {
         f.setArguments(b);
         
         return f;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -152,12 +163,10 @@ public class AddProximityAlertFragment extends Fragment {
                 // Start the GPS preference Activity if the user has checked
                 // the box.
                 if(checkProxGps.isChecked()) {
-                    try {
-                        startActivity(LOCATION_SETTINGS_INTENT);
-                    } catch(ActivityNotFoundException e) { }
+                    callbacks.onShowGpsPreferences();
                 }
                 // Tell the hosting Activity that a new alert has been added.
-                callback.onAlertAdded();
+                callbacks.onProximityAlertAdded();
             }
         });
         
@@ -166,7 +175,7 @@ public class AddProximityAlertFragment extends Fragment {
             @Override
             public void onClick(final View v) {
                 // Tell the hosting Activity that the user has cancelled.
-                callback.onCancel();
+                callbacks.onCancelAddProximityAlert();
             }
         });
         
@@ -174,9 +183,7 @@ public class AddProximityAlertFragment extends Fragment {
         btn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                // Show the DialogFragment.
-                new ProximityLimitationsDialogFragment()
-                        .show(getFragmentManager(), LIMITATIONS_DIALOG_TAG);
+                callbacks.onShowProximityAlertLimitations();
             }
         });
         
@@ -189,15 +196,6 @@ public class AddProximityAlertFragment extends Fragment {
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        
-        // Cast the hosting Activity to our callback interface. If this fails,
-        // throw an IllegalStateException.
-        try {
-            callback = (AlertFragmentEvent)getActivity();
-        } catch(ClassCastException e) {
-            throw new IllegalStateException("The underlying Activity must " +
-                    "implement AlertFragmentEvent.");
-        }
         
         // Sort the distance spinner.
         final ArrayAdapter<CharSequence> adapter = ArrayAdapter
@@ -275,5 +273,34 @@ public class AddProximityAlertFragment extends Fragment {
             // enabled.
             checkProxGps.setVisibility(View.GONE);
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user wants to read the text about the
+         * proximity alert limitations.
+         */
+        public void onShowProximityAlertLimitations();
+        
+        /**
+         * This is called when the user has added a new proximity alert.
+         */
+        public void onProximityAlertAdded();
+        
+        /**
+         * This is called when the user wants to cancel adding a new proximity
+         * alert.
+         */
+        public void onCancelAddProximityAlert();
+        
+        /**
+         * This is called when the user wants to turn on GPS on their device.
+         */
+        public void onShowGpsPreferences();
     }
 }

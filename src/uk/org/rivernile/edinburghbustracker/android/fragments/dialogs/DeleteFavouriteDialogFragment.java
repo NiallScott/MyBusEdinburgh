@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,22 +25,18 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
  * This Fragment will show a Dialog which asks the user to confirm if they wish
- * to delete the favourite bus stop or not. Objects can ask for callbacks by
- * implementing {@link DeleteFavouriteDialogFragment.EventListener} and
- * registering a callback with
- * {@link #setListener(uk.org.rivernile.edinburghbustracker.android.fragments
- * .dialogs.DeleteFavouriteDialogFragment.EventListener)}
+ * to delete the favourite bus stop or not.
  * 
  * @author Niall Scott
  */
@@ -50,7 +46,7 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
     private static final String ARG_STOPCODE = "stopCode";
     
     private SettingsDatabase sd;
-    private WeakReference<EventListener> listener;
+    private Callbacks callbacks;
     private String stopCode;
     
     /**
@@ -58,19 +54,32 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
      * stopCode as the argument.
      * 
      * @param stopCode The stopCode to potentially delete.
-     * @param listener Where events should be called back to.
      * @return A new instance of this DialogFragment.
      */
     public static DeleteFavouriteDialogFragment newInstance(
-            final String stopCode, final EventListener listener) {
+            final String stopCode) {
         final DeleteFavouriteDialogFragment f =
                 new DeleteFavouriteDialogFragment();
         final Bundle b = new Bundle();
         b.putString(ARG_STOPCODE, stopCode);
         f.setArguments(b);
-        f.setListener(listener);
         
         return f;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -109,49 +118,25 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
                             final int id) {
                         sd.deleteFavouriteStop(stopCode);
                         
-                        if(listener != null) {
-                            final EventListener listenerRef = listener.get();
-                            if (listenerRef != null) {
-                                listenerRef.onConfirmFavouriteDeletion();
-                            }
-                        }
+                        callbacks.onConfirmFavouriteDeletion();
                     }
                 }).setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
                      @Override
                      public void onClick(final DialogInterface dialog,
                              final int id) {
-                        dismiss();
-                        
-                        if(listener != null) {
-                            final EventListener listenerRef = listener.get();
-                            if (listenerRef != null) {
-                                listenerRef.onCancelFavouriteDeletion();
-                            }
-                        }
+                        callbacks.onCancelFavouriteDeletion();
                      }
         });
+        
         return builder.create();
     }
     
     /**
-     * Set the listener which listens out for dialog events.
-     * 
-     * @param listener Where to call back to.
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
      */
-    public void setListener(final EventListener listener) {
-        if (listener == null) {
-            this.listener = null;
-        } else {
-            this.listener = new WeakReference<EventListener>(listener);
-        }
-    }
-    
-    /**
-     * The EventListener is an interface that any class which wants callbacks
-     * from this Fragment should implement.
-     */
-    public interface EventListener {
+    public interface Callbacks {
         
         /**
          * This is called when the user has confirmed that they wish for the

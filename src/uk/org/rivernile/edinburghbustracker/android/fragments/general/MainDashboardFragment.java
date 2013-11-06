@@ -27,7 +27,6 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -44,16 +43,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import uk.org.rivernile.android.utils.GraphicsUtils;
-import uk.org.rivernile.edinburghbustracker.android.AlertManagerActivity;
-import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
-import uk.org.rivernile.edinburghbustracker.android.EnterStopCodeActivity;
-import uk.org.rivernile.edinburghbustracker.android.FavouriteStopsActivity;
-import uk.org.rivernile.edinburghbustracker.android.NearestStopsActivity;
-import uk.org.rivernile.edinburghbustracker.android.NewsUpdatesActivity;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .AboutDialogFragment;
 
 /**
  * The MainDashboardFragment contains the main menu to the application. It
@@ -65,8 +55,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
 public class MainDashboardFragment extends Fragment
         implements View.OnClickListener {
     
-    private static final String ABOUT_DIALOG_TAG = "aboutDialog";
-    
+    private Callbacks callbacks;
     private Button favouriteButton;
     private Button stopCodeButton;
     private Button stopMapButton;
@@ -77,6 +66,21 @@ public class MainDashboardFragment extends Fragment
     private View layoutPlayServicesBar;
     private ConnectionResult connectionResult;
     private TextView txtPlayServicesError;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }
     
     /**
      * {@inheritDoc}
@@ -206,24 +210,22 @@ public class MainDashboardFragment extends Fragment
      */
     @Override
     public void onClick(final View v) {
-        final Activity activity = getActivity();
-        
         if(v == favouriteButton) {
-            startActivity(new Intent(activity, FavouriteStopsActivity.class));
+            callbacks.onShowFavourites();
         } else if(v == stopCodeButton) {
-            startActivity(new Intent(activity, EnterStopCodeActivity.class));
+            callbacks.onShowStopCodeEntry();
         } else if(v == stopMapButton) {
-            startActivity(new Intent(activity, BusStopMapActivity.class));
+            callbacks.onShowBusStopMap();
         } else if(v == nearestButton) {
-            startActivity(new Intent(activity, NearestStopsActivity.class));
+            callbacks.onShowNearestStops();
         } else if(v == newsButton) {
-            startActivity(new Intent(activity, NewsUpdatesActivity.class));
+            callbacks.onShowNewsUpdates();
         } else if(v == alertButton) {
-            startActivity(new Intent(activity, AlertManagerActivity.class));
+            callbacks.onShowAlertManager();
         } else if(v == resolveButton) {
             if(connectionResult != null && connectionResult.hasResolution()) {
                 try {
-                    connectionResult.startResolutionForResult(activity, 0);
+                    connectionResult.startResolutionForResult(getActivity(), 0);
                 } catch(SendIntentException e) {
                     
                 }
@@ -247,15 +249,63 @@ public class MainDashboardFragment extends Fragment
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
             case R.id.main_option_menu_preferences:
-                startActivity(new Intent(getActivity(),
-                        PreferencesActivity.class));
+                callbacks.onShowAppPreferences();
                 return true;
             case R.id.main_option_menu_about:
-                new AboutDialogFragment().show(getFragmentManager(),
-                        ABOUT_DIALOG_TAG);
+                callbacks.onShowAboutInformation();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user wants to navigate to their favourites.
+         */
+        public void onShowFavourites();
+        
+        /**
+         * This is called when the user wants to enter a bus stop code.
+         */
+        public void onShowStopCodeEntry();
+        
+        /**
+         * This is called when the user wants to navigate to the bus stop map.
+         */
+        public void onShowBusStopMap();
+        
+        /**
+         * This is called when the user wants to navigate to the nearest bus
+         * stops.
+         */
+        public void onShowNearestStops();
+        
+        /**
+         * This is called when the user wants to navigate to news updates.
+         */
+        public void onShowNewsUpdates();
+        
+        /**
+         * This is called when the user wants to navigate to the alert manager.
+         */
+        public void onShowAlertManager();
+        
+        /**
+         * This is called when the user wants to navigate to the application
+         * preferences.
+         */
+        public void onShowAppPreferences();
+        
+        /**
+         * This is called when the user wants to navigate to the application
+         * About information.
+         */
+        public void onShowAboutInformation();
     }
 }

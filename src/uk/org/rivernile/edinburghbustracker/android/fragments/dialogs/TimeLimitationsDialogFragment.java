@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,6 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -54,14 +53,7 @@ public class TimeLimitationsDialogFragment extends DialogFragment {
                 .setCancelable(true)
                 .setView(LayoutInflater.from(activity)
                         .inflate(R.layout.addtimealert_dialog, null))
-                .setNegativeButton(R.string.close,
-                        new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog,
-                            final int which) {
-                        dismiss();
-                    }
-                })
+                .setNegativeButton(R.string.close, null)
                 .setInverseBackgroundForced(true);
 
         return builder.create();

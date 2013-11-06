@@ -25,10 +25,22 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteFavouriteDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteProximityAlertDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteTimeAlertDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .ServicesChooserDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .TurnOnGpsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .NearestStopsFragment;
 
@@ -39,7 +51,21 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see NearestStopsFragment
  */
-public class NearestStopsActivity extends ActionBarActivity {
+public class NearestStopsActivity extends ActionBarActivity
+        implements NearestStopsFragment.Callbacks,
+        TurnOnGpsDialogFragment.Callbacks,
+        DeleteFavouriteDialogFragment.Callbacks,
+        DeleteProximityAlertDialogFragment.Callbacks,
+        DeleteTimeAlertDialogFragment.Callbacks,
+        ServicesChooserDialogFragment.Callbacks {
+    
+    private static final String DIALOG_TURN_ON_GPS = "turnOnGpsDialog";
+    private static final String DIALOG_CONFIRM_DELETE_FAVOURITE =
+            "deleteFavDialog";
+    private static final String DIALOG_DELETE_PROX_ALERT = "delProxAlertDialog";
+    private static final String DIALOG_DELETE_TIME_ALERT = "delTimeAlertDialog";
+    private static final String DIALOG_SERVICES_CHOOSER =
+            "servicesChooserDialog";
 
     /**
      * {@inheritDoc}
@@ -71,6 +97,246 @@ public class NearestStopsActivity extends ActionBarActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAskTurnOnGps() {
+        new TurnOnGpsDialogFragment().show(getSupportFragmentManager(),
+                        DIALOG_TURN_ON_GPS);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowGpsPreferences() {
+        try {
+            startActivity(TurnOnGpsDialogFragment.TURN_ON_GPS_INTENT);
+        } catch (ActivityNotFoundException e) {
+            // Do nothing.
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmFavouriteDeletion(final String stopCode) {
+        DeleteFavouriteDialogFragment.newInstance(stopCode)
+                .show(getSupportFragmentManager(),
+                        DIALOG_CONFIRM_DELETE_FAVOURITE);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmDeleteProximityAlert() {
+        new DeleteProximityAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_DELETE_PROX_ALERT);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowConfirmDeleteTimeAlert() {
+        new DeleteTimeAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_DELETE_TIME_ALERT);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowServicesChooser(final String[] services,
+                final String[] selectedServices, final String title) {
+        ServicesChooserDialogFragment
+                .newInstance(services, selectedServices, title)
+                .show(getSupportFragmentManager(), DIALOG_SERVICES_CHOOSER);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAddFavouriteStop(final String stopCode,
+            final String stopName) {
+        final Intent intent = new Intent(this,
+                AddEditFavouriteStopActivity.class);
+        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
+        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME, stopName);
+        
+        startActivity(intent);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAddProximityAlert(final String stopCode) {
+        final Intent intent = new Intent(this, AddProximityAlertActivity.class);
+        intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowAddTimeAlert(final String stopCode) {
+        final Intent intent = new Intent(this, AddTimeAlertActivity.class);
+        intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowBusStopMapWithStopCode(final String stopCode) {
+        final Intent intent = new Intent(this, BusStopMapActivity.class);
+        intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowBusTimes(final String stopCode) {
+        final Intent intent = new Intent(this, DisplayStopDataActivity.class);
+        intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmFavouriteDeletion() {
+        try {
+            final DeleteFavouriteDialogFragment.Callbacks child =
+                    (DeleteFavouriteDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmFavouriteDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCancelFavouriteDeletion() {
+        try {
+            final DeleteFavouriteDialogFragment.Callbacks child =
+                    (DeleteFavouriteDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelFavouriteDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmProximityAlertDeletion() {
+        try {
+            final DeleteProximityAlertDialogFragment.Callbacks child =
+                    (DeleteProximityAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmProximityAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCancelProximityAlertDeletion() {
+        try {
+            final DeleteProximityAlertDialogFragment.Callbacks child =
+                    (DeleteProximityAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelProximityAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onConfirmTimeAlertDeletion() {
+        try {
+            final DeleteTimeAlertDialogFragment.Callbacks child =
+                    (DeleteTimeAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onConfirmTimeAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onCancelTimeAlertDeletion() {
+        try {
+            final DeleteTimeAlertDialogFragment.Callbacks child =
+                    (DeleteTimeAlertDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onCancelTimeAlertDeletion();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onServicesChosen(final String[] chosenServices) {
+        try {
+            final ServicesChooserDialogFragment.Callbacks child =
+                    (ServicesChooserDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onServicesChosen(chosenServices);
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
         }
     }
 }

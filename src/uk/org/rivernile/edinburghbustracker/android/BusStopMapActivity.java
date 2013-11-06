@@ -32,10 +32,20 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import com.google.android.gms.maps.model.LatLng;
 import uk.org.rivernile.android.utils.NavigationUtils;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .IndeterminateProgressDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .MapTypeChooserDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .BusStopMapFragment;
 
-public class BusStopMapActivity extends ActionBarActivity {
+public class BusStopMapActivity extends ActionBarActivity
+        implements BusStopMapFragment.Callbacks,
+        MapTypeChooserDialogFragment.Callbacks,
+        ServicesChooserDialogFragment.Callbacks,
+        IndeterminateProgressDialogFragment.Callbacks {
     
     /** The stopCode argument for the Intent. */
     public static final String ARG_STOPCODE = BusStopMapFragment.ARG_STOPCODE;
@@ -43,6 +53,11 @@ public class BusStopMapActivity extends ActionBarActivity {
     public static final String ARG_LATITUDE = BusStopMapFragment.ARG_LATITUDE;
     /** The longitude argument for the Intent. */
     public static final String ARG_LONGITUDE = BusStopMapFragment.ARG_LONGITUDE;
+    
+    private static final String DIALOG_MAP_TYPE_CHOOSER = "mapTypeDialog";
+    private static final String DIALOG_SERVICES_CHOOSER =
+            "servicesChooserDialog";
+    private static final String DIALOG_PROGRESS = "progressDialog";
     
     /**
      * {@inheritDoc}
@@ -134,6 +149,110 @@ public class BusStopMapActivity extends ActionBarActivity {
         
         if(!f.onBackPressed()) {
             super.onBackPressed();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowMapTypeSelection() {
+        new MapTypeChooserDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_MAP_TYPE_CHOOSER);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowServicesChooser(final String[] services,
+                final String[] selectedServices, final String title) {
+        ServicesChooserDialogFragment
+                .newInstance(services, selectedServices, title)
+                .show(getSupportFragmentManager(), DIALOG_SERVICES_CHOOSER);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowSearchProgress(final String message) {
+        IndeterminateProgressDialogFragment.newInstance(message)
+                .show(getSupportFragmentManager(), DIALOG_PROGRESS);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onDismissSearchProgress() {
+        final IndeterminateProgressDialogFragment progressDialog =
+                (IndeterminateProgressDialogFragment)
+                        getSupportFragmentManager()
+                                .findFragmentByTag(DIALOG_PROGRESS);
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onShowBusStopDetails(final String stopCode) {
+        final Intent intent = new Intent(this, BusStopDetailsActivity.class);
+        intent.putExtra(BusStopDetailsActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onMapTypeChosen(final int mapType) {
+        try {
+            final MapTypeChooserDialogFragment.Callbacks child =
+                    (MapTypeChooserDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onMapTypeChosen(mapType);
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onServicesChosen(final String[] chosenServices) {
+        try {
+            final ServicesChooserDialogFragment.Callbacks child =
+                    (ServicesChooserDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onServicesChosen(chosenServices);
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
+        }
+    }
+
+    @Override
+    public void onProgressCancel() {
+        try {
+            final IndeterminateProgressDialogFragment.Callbacks child =
+                    (IndeterminateProgressDialogFragment.Callbacks)
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.fragmentContainer);
+            if (child != null) {
+                child.onProgressCancel();
+            }
+        } catch (ClassCastException e) {
+            // Unable to pass the callback on. Silently fail.
         }
     }
 }

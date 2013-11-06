@@ -58,7 +58,7 @@
          compatible with. -->
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="19" />
               
     <application
         android:name=".Application"
@@ -79,6 +79,10 @@
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyAv1VYsySkSWNqZ9UQ5jA2TEitLk2lIKIM" />
+        
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
         
         <!-- The MainActivity, which is the entry point. -->
         <activity

@@ -25,13 +25,12 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.Menu;
@@ -56,7 +55,6 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDetailsActivity;
 import uk.org.rivernile.edinburghbustracker.android
         .MapSearchSuggestionsProvider;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
@@ -89,9 +87,9 @@ public class BusStopMapFragment extends SupportMapFragment
         GoogleMap.OnMarkerClickListener,
         GoogleMap.OnInfoWindowClickListener,
         LoaderManager.LoaderCallbacks,
-        ServicesChooserDialogFragment.EventListener,
-        MapTypeChooserDialogFragment.EventListener,
-        IndeterminateProgressDialogFragment.EventListener {
+        ServicesChooserDialogFragment.Callbacks,
+        MapTypeChooserDialogFragment.Callbacks,
+        IndeterminateProgressDialogFragment.Callbacks {
     
     /** The stopCode argument. */
     public static final String ARG_STOPCODE = "stopCode";
@@ -118,12 +116,6 @@ public class BusStopMapFragment extends SupportMapFragment
     private static final Pattern STOP_CODE_SEARCH_PATTERN =
             Pattern.compile("^\\d{8}$");
     
-    private static final String SERVICES_CHOOSER_DIALOG_TAG =
-            "servicesChooserDialogTag";
-    private static final String MAP_TYPE_CHOOSER_DIALOG_TAG =
-            "mapTypeChooserDialogTag";
-    private static final String PROGRESS_DIALOG_TAG = "progressDialog";
-    
     private static final String LOADER_ARG_MIN_X = "minX";
     private static final String LOADER_ARG_MIN_Y = "minY";
     private static final String LOADER_ARG_MAX_X = "maxX";
@@ -137,6 +129,7 @@ public class BusStopMapFragment extends SupportMapFragment
     private static final int LOADER_ID_GEO_SEARCH = 1;
     private static final int LOADER_ID_ROUTE_LINES = 2;
     
+    private Callbacks callbacks;
     private BusStopDatabase bsd;
     private GoogleMap map;
     private SharedPreferences sp;
@@ -206,6 +199,21 @@ public class BusStopMapFragment extends SupportMapFragment
      * {@inheritDoc}
      */
     @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
@@ -263,30 +271,6 @@ public class BusStopMapFragment extends SupportMapFragment
                     args.remove(ARG_SEARCH);
                 }
             }
-        }
-        
-        // If the services chooser Dialog is showing, make sure its listener is
-        // updated.
-        final FragmentManager fragMan = getFragmentManager();
-        final ServicesChooserDialogFragment servicesDialog =
-                (ServicesChooserDialogFragment)fragMan
-                        .findFragmentByTag(SERVICES_CHOOSER_DIALOG_TAG);
-        if(servicesDialog != null) {
-            servicesDialog.setListener(this);
-        }
-        
-        final MapTypeChooserDialogFragment mapTypeDialog =
-                (MapTypeChooserDialogFragment)fragMan
-                .findFragmentByTag(MAP_TYPE_CHOOSER_DIALOG_TAG);
-        if(mapTypeDialog != null) {
-            mapTypeDialog.setListener(this);
-        }
-        
-        final IndeterminateProgressDialogFragment progDialog =
-                (IndeterminateProgressDialogFragment)fragMan
-                        .findFragmentByTag(PROGRESS_DIALOG_TAG);
-        if(progDialog != null) {
-            progDialog.setListener(this);
         }
     }
     
@@ -388,18 +372,12 @@ public class BusStopMapFragment extends SupportMapFragment
                 getActivity().onSearchRequested();
                 return true;
             case R.id.busstopmap_option_menu_services:
-                // Show the services chooser Dialog.
-                ServicesChooserDialogFragment
-                        .newInstance(services, chosenServices, getString(
-                            R.string.busstopmapfragment_service_chooser_title),
-                        this)
-                        .show(getFragmentManager(),
-                                SERVICES_CHOOSER_DIALOG_TAG);
+                callbacks.onShowServicesChooser(services, chosenServices,
+                        getString(R.string
+                                .busstopmapfragment_service_chooser_title));
                 return true;
             case R.id.busstopmap_option_menu_maptype:
-                MapTypeChooserDialogFragment.newInstance(this)
-                        .show(getFragmentManager(),
-                            MAP_TYPE_CHOOSER_DIALOG_TAG);
+                callbacks.onShowMapTypeSelection();
                 return true;
             case R.id.busstopmap_option_menu_trafficview:
                 // Toggle the traffic view.
@@ -452,11 +430,7 @@ public class BusStopMapFragment extends SupportMapFragment
             final Matcher matcher = STOP_CODE_PATTERN.matcher(
                     marker.getTitle());
             if(matcher.find()) {
-                final Intent intent = new Intent(getActivity(),
-                        BusStopDetailsActivity.class);
-                intent.putExtra(BusStopDetailsActivity.ARG_STOPCODE,
-                        matcher.group(1));
-                startActivity(intent);
+                callbacks.onShowBusStopDetails(matcher.group(1));
             }
         }
     }
@@ -690,12 +664,10 @@ public class BusStopMapFragment extends SupportMapFragment
             
             // Start the search loader.
             getLoaderManager().restartLoader(LOADER_ID_GEO_SEARCH, b, this);
-            // Show the progress Dialog.
-            IndeterminateProgressDialogFragment
-                    .newInstance(this,
-                        getString(R.string.busstopmapfragment_progress_message,
-                        searchTerm))
-                    .show(getFragmentManager(), PROGRESS_DIALOG_TAG);
+
+            callbacks.onShowSearchProgress(
+                    getString(R.string.busstopmapfragment_progress_message,
+                            searchTerm));
         }
     }
     
@@ -853,12 +825,7 @@ public class BusStopMapFragment extends SupportMapFragment
      */
     private void addGeoSearchResults(final HashSet<MarkerOptions> result) {
         // If there is a progress Dialog, get rid of it.
-        final IndeterminateProgressDialogFragment progressDialog =
-                (IndeterminateProgressDialogFragment) getFragmentManager()
-                        .findFragmentByTag(PROGRESS_DIALOG_TAG);
-        if (progressDialog != null) {
-            progressDialog.dismissAllowingStateLoss();
-        }
+        callbacks.onDismissSearchProgress();
         
         if(map == null) {
             return;
@@ -1004,5 +971,50 @@ public class BusStopMapFragment extends SupportMapFragment
                         DEFAULT_ZOOM, false);
             }
         }
+    }
+    
+    /**
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
+     */
+    public static interface Callbacks {
+        
+        /**
+         * This is called when the user wishes to select their preferred map
+         * type.
+         */
+        public void onShowMapTypeSelection();
+        
+        /**
+         * This is called when the user wishes to select services, for example,
+         * for filtering.
+         * 
+         * @param services The services to choose from.
+         * @param selectedServices Any services that should be selected by
+         * default.
+         * @param title A title to show on the chooser.
+         */
+        public void onShowServicesChooser(String[] services,
+                String[] selectedServices, String title);
+        
+        /**
+         * This is called when the user has initiated a search and progress
+         * should be shown.
+         * 
+         * @param message The message to show the user.
+         */
+        public void onShowSearchProgress(String message);
+        
+        /**
+         * This is called when the search progress should be dimissed.
+         */
+        public void onDismissSearchProgress();
+        
+        /**
+         * This is called when the user wants to see details about a bus stop.
+         * 
+         * @param stopCode The bus stop code the user wants to see details for.
+         */
+        public void onShowBusStopDetails(String stopCode);
     }
 }

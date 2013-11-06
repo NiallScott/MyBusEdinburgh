@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,12 +25,12 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import java.lang.ref.WeakReference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -51,24 +51,23 @@ public class ServicesChooserDialogFragment extends DialogFragment {
     /** The argument name for check boxes, stored in the instance state. */
     private static final String ARG_CHECK_BOXES = "checkBoxes";
     
+    private Callbacks callbacks;
     private String[] services;
     private boolean[] checkBoxes;
-    private WeakReference<EventListener> listener;
     
     /**
      * Create a new instance of this Fragment, providing a list of services to
-     * select from, a list of services to select by default, the title for the
-     * Dialog and a listener where to send the events back to.
+     * select from, a list of services to select by default and a title for the
+     * Dialog.
      * 
      * @param services The list of services to show to the user.
      * @param selectedServices The services to select by default, null if none.
      * @param dialogTitle The title to use for the Dialog.
-     * @param listener Where to send events to.
      * @return A new instance of this Fragment.
      */
     public static ServicesChooserDialogFragment newInstance(
             final String[] services, final String[] selectedServices,
-            final String dialogTitle, final EventListener listener) {
+            final String dialogTitle) {
         final ServicesChooserDialogFragment f =
                 new ServicesChooserDialogFragment();
         final Bundle b = new Bundle();
@@ -76,9 +75,23 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         b.putStringArray(ARG_SELECTED_SERVICES, selectedServices);
         b.putString(ARG_TITLE, dialogTitle);
         f.setArguments(b);
-        f.setListener(listener);
         
         return f;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onAttach(final Activity activity) {
+        super.onAttach(activity);
+        
+        try {
+            callbacks = (Callbacks) activity;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(activity.getClass().getName() +
+                    " does not implement " + Callbacks.class.getName());
+        }
     }
     
     /**
@@ -172,25 +185,7 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         super.onDismiss(dialog);
         
         // Tell the listener that there may be changes.
-        if (listener != null) {
-            final EventListener listenerRef = listener.get();
-            if (listenerRef != null && isAdded()) {
-                listenerRef.onServicesChosen(getChosenServices());
-            }
-        }
-    }
-    
-    /**
-     * Set the listener which listens out for dialog events.
-     * 
-     * @param listener Where to call back to.
-     */
-    public void setListener(final EventListener listener) {
-        if (listener == null) {
-            this.listener = null;
-        } else {
-            this.listener = new WeakReference<EventListener>(listener);
-        }
+        callbacks.onServicesChosen(getChosenServices());
     }
     
     /**
@@ -275,10 +270,10 @@ public class ServicesChooserDialogFragment extends DialogFragment {
     }
     
     /**
-     * The EventListener is an interface that any class which wants callbacks
-     * from this Fragment should implement.
+     * Any Activities which host this Fragment must implement this interface to
+     * handle navigation events.
      */
-    public static interface EventListener {
+    public static interface Callbacks {
         
         /**
          * This is called when the user dismisses the service chooser dialog.
