@@ -65,16 +65,11 @@ public class FavouriteStopsActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.single_fragment_container);
         
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        
         final boolean isCreateShortcut = Intent.ACTION_CREATE_SHORTCUT.equals(
                 getIntent().getAction());
         
-        if(isCreateShortcut) {
-            setTitle(R.string.favouriteshortcut_title);
-        } else {
-            setTitle(R.string.favouritestops_title);
-        }
+        setTitle(isCreateShortcut ? R.string.favouriteshortcut_title
+                : R.string.favouritestops_title);
         
         // Only add the fragment if there was no previous instance of this
         // Activity, otherwise this fragment will appear multiple times.

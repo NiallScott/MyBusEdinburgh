@@ -86,8 +86,6 @@ public class DisplayStopDataActivity extends ActionBarActivity
         
         setContentView(R.layout.single_fragment_container);
         
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        
         if(savedInstanceState == null) {
             DisplayStopDataFragment fragment;
             final Intent intent = getIntent();

@@ -68,7 +68,7 @@ public class MainActivity extends ActionBarActivity
         
         if(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
                 .getBoolean(PREF_STARTUP_SHOW_FAVS, false)) {
-            startActivity(new Intent(this, FavouriteStopsActivity.class));
+            onShowFavourites();
         }
     }
 

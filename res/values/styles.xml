@@ -26,21 +26,26 @@
 */ -->
 <resources
     xmlns:tools="http://schemas.android.com/tools" >
-    <style name="MainActionBar" parent="@style/Widget.AppCompat.ActionBar">
+    <style name="AppActionBar" parent="@style/Widget.AppCompat.ActionBar">
         <item name="android:background">@color/actionBarColour</item>
         <item name="background">@color/actionBarColour</item>
-        <item name="android:titleTextStyle" tools:ignore="NewApi">@style/MainActionBarText</item>
-        <item name="titleTextStyle">@style/MainActionBarText</item>
+        <item name="android:titleTextStyle" tools:ignore="NewApi">@style/ActionBarText</item>
+        <item name="titleTextStyle">@style/ActionBarText</item>
+        <item name="android:displayOptions" tools:ignore="NewApi">showHome|homeAsUp|showTitle</item>
+        <item name="displayOptions">showHome|homeAsUp|showTitle</item>
     </style>
     
-    <style name="MapActionBar" parent="@style/Widget.AppCompat.ActionBar">
+    <style name="AppActionBar.Main">
+        <item name="android:displayOptions" tools:ignore="NewApi">showHome|showTitle</item>
+        <item name="displayOptions">showHome|showTitle</item>
+    </style>
+    
+    <style name="AppActionBar.Map">
         <item name="android:background">@color/mapActionBarColour</item>
         <item name="background">@color/mapActionBarColour</item>
-        <item name="android:titleTextStyle" tools:ignore="NewApi">@style/MainActionBarText</item>
-        <item name="titleTextStyle">@style/MainActionBarText</item>
     </style>
     
-    <style name="MainActionBarText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title" >
+    <style name="ActionBarText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title" >
         <item name="android:textColor">#FFF</item>
     </style>
     

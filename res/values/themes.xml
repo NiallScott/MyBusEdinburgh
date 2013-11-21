@@ -27,15 +27,18 @@
 <resources
     xmlns:tools="http://schemas.android.com/tools" >
     <style name="MyBusEdinburgh" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/MainActionBar</item>
-        <item name="actionBarStyle">@style/MainActionBar</item>
+        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/AppActionBar</item>
+        <item name="actionBarStyle">@style/AppActionBar</item>
     </style>
     
-    <style name="MyBusEdinburgh.Dark" parent="@style/Theme.AppCompat" />
+    <style name="MyBusEdinburgh.MainActivity">
+        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/AppActionBar.Main</item>
+        <item name="actionBarStyle">@style/AppActionBar.Main</item>
+    </style>
     
-    <style name="MyBusEdinburgh.Light.MapActivity" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/MapActionBar</item>
-        <item name="actionBarStyle">@style/MapActionBar</item>
+    <style name="MyBusEdinburgh.MapActivity">
+        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/AppActionBar.Map</item>
+        <item name="actionBarStyle">@style/AppActionBar.Map</item>
         <item name="android:windowActionBarOverlay" tools:ignore="NewApi">true</item>
         <item name="windowActionBarOverlay">true</item>
     </style>

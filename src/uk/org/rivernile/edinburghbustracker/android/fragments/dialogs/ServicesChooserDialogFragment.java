@@ -165,14 +165,7 @@ public class ServicesChooserDialogFragment extends DialogFragment {
             }
         });
 
-        builder.setPositiveButton(R.string.close,
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog,
-                    final int id) {
-                dismiss();
-            }
-        });
+        builder.setPositiveButton(R.string.close, null);
 
         return builder.create();
     }

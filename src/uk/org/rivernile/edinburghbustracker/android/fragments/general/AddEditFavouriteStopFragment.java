@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -138,20 +138,12 @@ public class AddEditFavouriteStopFragment extends Fragment
         btnOkay.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
         
-        return v;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onActivityCreated(final Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState == null && stopName != null) {
+            edit.setText(stopName);
+            edit.setSelection(stopName.length());
+        }
         
-        // Set the default text in the text box to the known name and set the
-        // cursor to the end of the string.
-        edit.setText(stopName);
-        edit.setSelection(stopName.length());
+        return v;
     }
     
     /**

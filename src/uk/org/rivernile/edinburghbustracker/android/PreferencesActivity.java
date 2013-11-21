@@ -28,14 +28,12 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 import android.provider.SearchRecentSuggestions;
 import android.view.MenuItem;
 import android.widget.Toast;
-import uk.org.rivernile.android.utils.ActionBarCompat;
 import uk.org.rivernile.android.utils.GenericDialogPreference;
 import uk.org.rivernile.android.utils.NavigationUtils;
 
@@ -109,9 +107,6 @@ public class PreferencesActivity extends PreferenceActivity
     public static final String PREF_MAP_LAST_MAP_TYPE =
             "pref_map_last_map_type";
     
-    private static final boolean IS_HONEYCOMB_OR_GREATER =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-    
     private SettingsDatabase sd;
     private ListPreference numberOfDeparturesPref;
     private String[] numberOfDeparturesStrings;
@@ -122,10 +117,6 @@ public class PreferencesActivity extends PreferenceActivity
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        if(IS_HONEYCOMB_OR_GREATER) {
-            ActionBarCompat.setDisplayHomeAsUpEnabled(this, true);
-        }
         
         getPreferenceManager().setSharedPreferencesName(PREF_FILE);
         addPreferencesFromResource(R.xml.preferences);

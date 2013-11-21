@@ -191,6 +191,14 @@ public class EnterStopCodeFragment extends Fragment
         
         // The result code signified success.
         if(resultCode == Activity.RESULT_OK) {
+            // Make sure there is a data Intent. There have been some crashes
+            // caused by this being null.
+            if (data == null) {
+                Toast.makeText(activity, R.string.enterstopcode_scan_error,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            
             // Get the data from the Intent.
             final Uri uri = Uri.parse(data.getStringExtra("SCAN_RESULT"));
             // We can only handle hierarchical URIs. Make sure it is so.

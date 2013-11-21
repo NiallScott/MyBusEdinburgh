@@ -67,8 +67,6 @@ public class AddTimeAlertActivity extends ActionBarActivity
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.single_fragment_container);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         
         // Only add the fragment if there was no previous instance of this
         // Activity, otherwise this fragment will appear multiple times.
