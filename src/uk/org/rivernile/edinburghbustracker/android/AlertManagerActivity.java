@@ -64,15 +64,8 @@ public class AlertManagerActivity extends ActionBarActivity
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.single_fragment_container);
         
-        // Only add the fragment if there was no previous instance of this
-        // Activity, otherwise this fragment will appear multiple times.
-        if(savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragmentContainer, new AlertManagerFragment())
-                    .commit();
-        }
+        setContentView(R.layout.alertmanager_activity);
     }
     
     /**
@@ -125,7 +118,8 @@ public class AlertManagerActivity extends ActionBarActivity
             final DeleteAllAlertsDialogFragment.Callbacks child =
                     (DeleteAllAlertsDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentAlertManager);
             if (child != null) {
                 child.onConfirmAllAlertsDeletion();
             }
@@ -142,7 +136,8 @@ public class AlertManagerActivity extends ActionBarActivity
             final DeleteAllAlertsDialogFragment.Callbacks child =
                     (DeleteAllAlertsDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentAlertManager);
             if (child != null) {
                 child.onCancelAllAlertsDeletion();
             }
@@ -160,7 +155,8 @@ public class AlertManagerActivity extends ActionBarActivity
             final DeleteProximityAlertDialogFragment.Callbacks child =
                     (DeleteProximityAlertDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentAlertManager);
             if (child != null) {
                 child.onConfirmProximityAlertDeletion();
             }
@@ -178,7 +174,8 @@ public class AlertManagerActivity extends ActionBarActivity
             final DeleteProximityAlertDialogFragment.Callbacks child =
                     (DeleteProximityAlertDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentAlertManager);
             if (child != null) {
                 child.onCancelProximityAlertDeletion();
             }
@@ -196,7 +193,8 @@ public class AlertManagerActivity extends ActionBarActivity
             final DeleteTimeAlertDialogFragment.Callbacks child =
                     (DeleteTimeAlertDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentAlertManager);
             if (child != null) {
                 child.onConfirmTimeAlertDeletion();
             }
@@ -214,7 +212,8 @@ public class AlertManagerActivity extends ActionBarActivity
             final DeleteTimeAlertDialogFragment.Callbacks child =
                     (DeleteTimeAlertDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentAlertManager);
             if (child != null) {
                 child.onCancelTimeAlertDeletion();
             }

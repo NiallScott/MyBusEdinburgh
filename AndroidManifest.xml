@@ -87,6 +87,7 @@
         <!-- The MainActivity, which is the entry point. -->
         <activity
             android:name=".MainActivity"
+            android:label="@string/app_name"
             android:theme="@style/MyBusEdinburgh.MainActivity" >
             <!-- This intent filter tells the system to place an app icon in the
                  launcher and use this Activity when starting the app. -->

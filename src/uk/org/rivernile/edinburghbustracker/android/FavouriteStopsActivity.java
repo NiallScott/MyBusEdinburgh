@@ -74,12 +74,8 @@ public class FavouriteStopsActivity extends ActionBarActivity
         // Only add the fragment if there was no previous instance of this
         // Activity, otherwise this fragment will appear multiple times.
         if(savedInstanceState == null) {
-            final Bundle b = new Bundle();
-            b.putBoolean(FavouriteStopsFragment.CREATE_SHORTCUT,
-                    isCreateShortcut);
-            final FavouriteStopsFragment fragment =
-                    new FavouriteStopsFragment();
-            fragment.setArguments(b);
+            final FavouriteStopsFragment fragment = FavouriteStopsFragment
+                    .newInstance(isCreateShortcut);
 
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragmentContainer, fragment).commit();

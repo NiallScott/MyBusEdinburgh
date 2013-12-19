@@ -57,14 +57,8 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.single_fragment_container);
-        setTitle(R.string.app_name);
         
-        if(savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragmentContainer, new MainDashboardFragment())
-                    .commit();
-        }
+        setContentView(R.layout.home_activity);
         
         if(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
                 .getBoolean(PREF_STARTUP_SHOW_FAVS, false)) {

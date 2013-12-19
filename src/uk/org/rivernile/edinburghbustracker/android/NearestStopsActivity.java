@@ -73,15 +73,8 @@ public class NearestStopsActivity extends ActionBarActivity
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.single_fragment_container);
         
-        // Only add the fragment if there was no previous instance of this
-        // Activity, otherwise this fragment will appear multiple times.
-        if(savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragmentContainer, new NearestStopsFragment())
-                    .commit();
-        }
+        setContentView(R.layout.neareststops_activity);
     }
     
     /**
@@ -221,7 +214,8 @@ public class NearestStopsActivity extends ActionBarActivity
             final DeleteFavouriteDialogFragment.Callbacks child =
                     (DeleteFavouriteDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentNearestStops);
             if (child != null) {
                 child.onConfirmFavouriteDeletion();
             }
@@ -239,7 +233,8 @@ public class NearestStopsActivity extends ActionBarActivity
             final DeleteFavouriteDialogFragment.Callbacks child =
                     (DeleteFavouriteDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentNearestStops);
             if (child != null) {
                 child.onCancelFavouriteDeletion();
             }
@@ -257,7 +252,8 @@ public class NearestStopsActivity extends ActionBarActivity
             final DeleteProximityAlertDialogFragment.Callbacks child =
                     (DeleteProximityAlertDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentNearestStops);
             if (child != null) {
                 child.onConfirmProximityAlertDeletion();
             }
@@ -275,7 +271,8 @@ public class NearestStopsActivity extends ActionBarActivity
             final DeleteProximityAlertDialogFragment.Callbacks child =
                     (DeleteProximityAlertDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentNearestStops);
             if (child != null) {
                 child.onCancelProximityAlertDeletion();
             }
@@ -293,7 +290,8 @@ public class NearestStopsActivity extends ActionBarActivity
             final DeleteTimeAlertDialogFragment.Callbacks child =
                     (DeleteTimeAlertDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentNearestStops);
             if (child != null) {
                 child.onConfirmTimeAlertDeletion();
             }
@@ -311,7 +309,8 @@ public class NearestStopsActivity extends ActionBarActivity
             final DeleteTimeAlertDialogFragment.Callbacks child =
                     (DeleteTimeAlertDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentNearestStops);
             if (child != null) {
                 child.onCancelTimeAlertDeletion();
             }
@@ -329,7 +328,8 @@ public class NearestStopsActivity extends ActionBarActivity
             final ServicesChooserDialogFragment.Callbacks child =
                     (ServicesChooserDialogFragment.Callbacks)
                             getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                                    .findFragmentById(R.id
+                                            .fragmentNearestStops);
             if (child != null) {
                 child.onServicesChosen(chosenServices);
             }

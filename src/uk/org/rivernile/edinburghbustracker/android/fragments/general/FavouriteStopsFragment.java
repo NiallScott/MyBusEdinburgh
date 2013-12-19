@@ -63,15 +63,15 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
 
 /**
  * This Fragment shows the user a list of their favourite bus stops. What this
- * Fragment does depends on the CREATE_SHORTCUT argument.
+ * Fragment does depends on the ARG_CREATE_SHORTCUT argument.
  * 
- * If CREATE_SHORTCUT is set to true;
+ * If ARG_CREATE_SHORTCUT is set to true;
  * 
  * - Do not show the context menu when the user long presses on a list item.
  * - When the user selects a list item, set the Activity result with an Intent
  * which sets the shortcut icon.
  * 
- * If CREATE_SHORTCUT is set to false;
+ * If ARG_CREATE_SHORTCUT is set to false;
  * 
  * - Allow the user to bring up a context menu when they long press on a list
  * item.
@@ -84,13 +84,31 @@ public class FavouriteStopsFragment extends ListFragment
         DeleteFavouriteDialogFragment.Callbacks, OnClickListener{
     
     /** The argument to signify create shortcut mode. */
-    public static final String CREATE_SHORTCUT = "CREATE_SHORTCUT";
+    public static final String ARG_CREATE_SHORTCUT = "createShortcut";
     
     private Callbacks callbacks;
     private SimpleCursorAdapter ca;
     private SettingsDatabase sd;
     private boolean isCreateShortcut = false;
     private View progress, txtError;
+    
+    /**
+     * Create a new instance of this Fragment, specifying whether it should be
+     * in shortcuts mode, or favourites mode.
+     * 
+     * @param isCreateShortcut true if the user wants to add a shortcut, false
+     * if not.
+     * @return A new instance of this Fragment. 
+     */
+    public static FavouriteStopsFragment newInstance(
+            final boolean isCreateShortcut) {
+        final FavouriteStopsFragment f = new FavouriteStopsFragment();
+        final Bundle b = new Bundle();
+        b.putBoolean(ARG_CREATE_SHORTCUT, isCreateShortcut);
+        f.setArguments(b);
+        
+        return f;
+    }
     
     /**
      * {@inheritDoc}
@@ -120,7 +138,7 @@ public class FavouriteStopsFragment extends ListFragment
         // Get an instance of the SettingsDatabase.
         sd = SettingsDatabase.getInstance(activity.getApplicationContext());
         // Determine the mode this Fragment should be in.
-        isCreateShortcut = getArguments().getBoolean(CREATE_SHORTCUT);
+        isCreateShortcut = getArguments().getBoolean(ARG_CREATE_SHORTCUT);
         // Create the ListAdapter.
         if(isCreateShortcut) {
             ca = new FavouritesCursorAdapter(activity,
@@ -286,10 +304,8 @@ public class FavouriteStopsFragment extends ListFragment
         // Get the info so we can get the stopCode.
         final AdapterContextMenuInfo info =
                 (AdapterContextMenuInfo)item.getMenuInfo();
-        final Activity activity = getActivity();
         final Cursor c = (Cursor)ca.getItem(info.position);
         final String selectedStopCode;
-        Intent intent;
         
         if(c != null) {
             selectedStopCode = c.getString(0);
@@ -444,7 +460,7 @@ public class FavouriteStopsFragment extends ListFragment
      * This is a custom Cursor adapter to add a services list to the row being
      * displayed.
      */
-    public class FavouritesCursorAdapter extends SimpleCursorAdapter {
+    private class FavouritesCursorAdapter extends SimpleCursorAdapter {
         
         private BusStopDatabase bsd;
         private final HashMap<String, Spanned> serviceListings =

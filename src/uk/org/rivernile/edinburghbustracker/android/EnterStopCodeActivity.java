@@ -61,16 +61,8 @@ public class EnterStopCodeActivity extends ActionBarActivity
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.single_fragment_container);
-        setTitle(R.string.enterstopcode_title);
-
-        // Only add the fragment if there was no previous instance of this
-        // Activity, otherwise this fragment will appear multiple times.
-        if(savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragmentContainer, new EnterStopCodeFragment())
-                    .commit();
-        }
+        
+        setContentView(R.layout.enterstopcode_activity);
     }
     
     /**
