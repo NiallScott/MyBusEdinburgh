@@ -26,13 +26,16 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.SearchView;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -133,6 +136,7 @@ public class BusStopMapFragment extends SupportMapFragment
     private BusStopDatabase bsd;
     private GoogleMap map;
     private SharedPreferences sp;
+    private SearchManager searchMan;
     
     private final HashMap<String, Marker> busStopMarkers =
             new HashMap<String, Marker>();
@@ -142,6 +146,7 @@ public class BusStopMapFragment extends SupportMapFragment
     private String searchedBusStop = null;
     private String[] services;
     private String[] chosenServices;
+    private int actionBarHeight;
     
     /**
      * Create a new instance of the BusStopMapFragment, setting the initial
@@ -223,6 +228,8 @@ public class BusStopMapFragment extends SupportMapFragment
         final Context context = getActivity();
         bsd = BusStopDatabase.getInstance(context.getApplicationContext());
         sp = context.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        searchMan = (SearchManager) context
+                .getSystemService(Context.SEARCH_SERVICE);
 
         services = bsd.getBusServiceList();
         
@@ -230,6 +237,14 @@ public class BusStopMapFragment extends SupportMapFragment
             chosenServices = savedInstanceState
                     .getStringArray(ARG_CHOSEN_SERVICES);
         }
+        
+        // Get the height of the ActionBar from the assigned attribute in the
+        // appcompat project theme.
+        final TypedValue value = new TypedValue();
+        getActivity().getTheme().resolveAttribute(
+                android.support.v7.appcompat.R.attr.actionBarSize, value, true);
+        actionBarHeight = getResources()
+                .getDimensionPixelSize(value.resourceId);
         
         // This Fragment shows an options menu.
         setHasOptionsMenu(true);
@@ -251,7 +266,7 @@ public class BusStopMapFragment extends SupportMapFragment
                 final UiSettings uiSettings = map.getUiSettings();
                 uiSettings.setRotateGesturesEnabled(false);
                 uiSettings.setCompassEnabled(false);
-                uiSettings.setMyLocationButtonEnabled(false);
+                uiSettings.setMyLocationButtonEnabled(true);
                 
                 map.setInfoWindowAdapter(new MapInfoWindow(getActivity()));
                 map.setOnCameraChangeListener(this);
@@ -260,6 +275,7 @@ public class BusStopMapFragment extends SupportMapFragment
                 map.setMapType(sp.getInt(
                         PreferencesActivity.PREF_MAP_LAST_MAP_TYPE,
                         GoogleMap.MAP_TYPE_NORMAL));
+                map.setPadding(0, actionBarHeight, 0, 0);
                 moveCameraToInitialLocation();
                 
                 refreshBusStops(null);
@@ -334,6 +350,13 @@ public class BusStopMapFragment extends SupportMapFragment
     public void onCreateOptionsMenu(final Menu menu,
             final MenuInflater inflater) {
         inflater.inflate(R.menu.busstopmap_option_menu, menu);
+        
+        final MenuItem searchItem = menu
+                .findItem(R.id.busstopmap_option_menu_search);
+        final SearchView searchView = (SearchView) MenuItemCompat
+                .getActionView(searchItem);
+        searchView.setSearchableInfo(searchMan
+                .getSearchableInfo(getActivity().getComponentName()));
     }
     
     /**
@@ -363,14 +386,6 @@ public class BusStopMapFragment extends SupportMapFragment
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.busstopmap_option_menu_mylocation:
-                // Move the camera to the user's location and zoom in.
-                moveCameraToMyLocation(true);
-                return true;
-            case R.id.busstopmap_option_menu_search:
-                // Tell the underlying Activity to initiate a search.
-                getActivity().onSearchRequested();
-                return true;
             case R.id.busstopmap_option_menu_services:
                 callbacks.onShowServicesChooser(services, chosenServices,
                         getString(R.string
@@ -824,6 +839,10 @@ public class BusStopMapFragment extends SupportMapFragment
      * @param result The data to be populated on the map.
      */
     private void addGeoSearchResults(final HashSet<MarkerOptions> result) {
+        if (!isAdded()) {
+            return;
+        }
+        
         // If there is a progress Dialog, get rid of it.
         callbacks.onDismissSearchProgress();
         
@@ -902,29 +921,6 @@ public class BusStopMapFragment extends SupportMapFragment
                 newPolyLines.add(map.addPolyline(plo));
             }
         }
-    }
-    
-    /**
-     * Move the camera to the device's location, as provided by the Google Maps
-     * API.
-     * 
-     * @param verbose true if it should display a Toast notification if there is
-     * no location, false if not.
-     */
-    private void moveCameraToMyLocation(final boolean verbose) {
-        if (map != null && map.isMyLocationEnabled()) {
-            final Location myLocation = map.getMyLocation();
-            
-            if(myLocation != null) {
-                moveCameraToLocation(new LatLng(myLocation.getLatitude(),
-                        myLocation.getLongitude()), DEFAULT_SEARCH_ZOOM, true);
-                return;
-            }
-        }
-
-        Toast.makeText(getActivity(),
-                R.string.busstopmapfragment_location_unknown,
-                Toast.LENGTH_LONG).show();
     }
     
     /**

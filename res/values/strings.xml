@@ -37,7 +37,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_description">View live bus data in Edinburgh</string>
     <string name="app_author" tools:ignore="MissingTranslation">Niall Scott</string> <!-- Should not be included in localised versions -->
     <string name="search_hint">Search bus stops and places</string>
-    <string name="asset_db_version" tools:ignore="MissingTranslation">1372651209761</string> <!-- Should not be included in localised versions -->
+    <string name="asset_db_version" tools:ignore="MissingTranslation">1384787594878</string> <!-- Should not be included in localised versions -->
 
     <!--
     *******************
@@ -360,7 +360,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="busstopmapfragment_nosearchresults">No results found.</string>
     <string name="busstopmapfragment_progress_message">Searching for:\n%s</string> <!-- %s = search term. -->
-    <string name="busstopmapfragment_location_unknown">Location unknown</string>
     <string name="busstopmapfragment_service_chooser_title">Select route(s) to show</string>
     
     <!--
@@ -593,7 +592,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_menu_maptype">Map type</string>
     <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
     <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
-    <string name="map_menu_mylocation">My location</string>
     <string name="map_menu_services">Services</string>
     
     <!--

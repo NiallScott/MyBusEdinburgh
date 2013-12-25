@@ -34,6 +34,7 @@ import android.database.MergeCursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.BaseColumns;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,16 +58,32 @@ public class MapSearchSuggestionsProvider extends
     /** The database modes. */
     public static final int MODE = DATABASE_MODE_QUERIES | DATABASE_MODE_2LINES;
     
-    private static final String[] COLUMNS = new String[] {
-        SearchManager.SUGGEST_COLUMN_FORMAT,
-        SearchManager.SUGGEST_COLUMN_ICON_1,
-        SearchManager.SUGGEST_COLUMN_TEXT_1,
-        SearchManager.SUGGEST_COLUMN_TEXT_2,
-        SearchManager.SUGGEST_COLUMN_QUERY,
-        BaseColumns._ID
-    };
+    private static final String[] COLUMNS;
+    private static final boolean SUPPORTS_ICON =
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
     
     private LocationManager locMan;
+    
+    static {
+        if (SUPPORTS_ICON) {
+            COLUMNS = new String[] {
+                SearchManager.SUGGEST_COLUMN_FORMAT,
+                SearchManager.SUGGEST_COLUMN_ICON_1,
+                SearchManager.SUGGEST_COLUMN_TEXT_1,
+                SearchManager.SUGGEST_COLUMN_TEXT_2,
+                SearchManager.SUGGEST_COLUMN_QUERY,
+                BaseColumns._ID
+            };
+        } else {
+            COLUMNS = new String[] {
+                SearchManager.SUGGEST_COLUMN_FORMAT,
+                SearchManager.SUGGEST_COLUMN_TEXT_1,
+                SearchManager.SUGGEST_COLUMN_TEXT_2,
+                SearchManager.SUGGEST_COLUMN_QUERY,
+                BaseColumns._ID
+            };
+        }
+    }
     
     /**
      * Create a new MapSearchSuggestionsProvider. As per the API documentation,
@@ -162,6 +179,7 @@ public class MapSearchSuggestionsProvider extends
         Collections.sort(results);
         
         final int count = results.size();
+        Object[] row;
         int drawable;
         for(int i = 0; i < count; i++) {
             // Loop though all of the results and add them to the MatrixCursor.
@@ -170,44 +188,55 @@ public class MapSearchSuggestionsProvider extends
             sb.append(result.stopName).append(' ').append('(')
                     .append(result.stopCode).append(')');
             
-            switch(result.orientation) {
-                case 1:
-                    drawable = R.drawable.ic_map_busstopne;
-                    break;
-                case 2:
-                    drawable = R.drawable.ic_map_busstope;
-                    break;
-                case 3:
-                    drawable = R.drawable.ic_map_busstopse;
-                    break;
-                case 4:
-                    drawable = R.drawable.ic_map_busstops;
-                    break;
-                case 5:
-                    drawable = R.drawable.ic_map_busstopsw;
-                    break;
-                case 6:
-                    drawable = R.drawable.ic_map_busstopw;
-                    break;
-                case 7:
-                    drawable = R.drawable.ic_map_busstopnw;
-                    break;
-                case 0:
-                default:
-                    drawable = R.drawable.ic_map_busstopn;
-                    break;
+            if (SUPPORTS_ICON) {
+                switch(result.orientation) {
+                    case 1:
+                        drawable = R.drawable.ic_map_busstopne;
+                        break;
+                    case 2:
+                        drawable = R.drawable.ic_map_busstope;
+                        break;
+                    case 3:
+                        drawable = R.drawable.ic_map_busstopse;
+                        break;
+                    case 4:
+                        drawable = R.drawable.ic_map_busstops;
+                        break;
+                    case 5:
+                        drawable = R.drawable.ic_map_busstopsw;
+                        break;
+                    case 6:
+                        drawable = R.drawable.ic_map_busstopw;
+                        break;
+                    case 7:
+                        drawable = R.drawable.ic_map_busstopnw;
+                        break;
+                    case 0:
+                    default:
+                        drawable = R.drawable.ic_map_busstopn;
+                        break;
+                }
+
+                row = new Object[] {
+                    null,
+                    "android.resource://" + getContext().getPackageName() +
+                        '/' + drawable,
+                    sb.toString(),
+                    result.services,
+                    result.stopCode,
+                    (recentLastIndex + i)
+                };
+            } else {
+                row = new Object[] {
+                    null,
+                    sb.toString(),
+                    result.services,
+                    result.stopCode,
+                    (recentLastIndex + i)
+                };
             }
 
-            cursor.addRow(new Object[] {
-                null,
-                "android.resource://" + getContext().getPackageName() + '/' +
-                    drawable,
-                sb.toString(),
-                result.services,
-                result.stopCode,
-                (recentLastIndex + i)
-            });
-
+            cursor.addRow(row);
             sb.setLength(0);
         }
         

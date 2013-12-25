@@ -189,7 +189,7 @@ public class BusStopMapActivity extends ActionBarActivity
                         getSupportFragmentManager()
                                 .findFragmentByTag(DIALOG_PROGRESS);
         if (progressDialog != null) {
-            progressDialog.dismiss();
+            progressDialog.dismissAllowingStateLoss();
         }
     }
     

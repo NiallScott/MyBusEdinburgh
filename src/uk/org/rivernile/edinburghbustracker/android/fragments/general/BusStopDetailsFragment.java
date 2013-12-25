@@ -290,12 +290,7 @@ public class BusStopDetailsFragment extends Fragment
         map = mapView.getMap();
         // The Map can be null if Google Play Services is not available.
         if(map != null) {
-            final UiSettings mapUi = map.getUiSettings();
-            mapUi.setAllGesturesEnabled(false);
-            mapUi.setCompassEnabled(false);
-            mapUi.setMyLocationButtonEnabled(false);
-            mapUi.setZoomControlsEnabled(false);
-            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            map.getUiSettings().setMyLocationButtonEnabled(false);
             map.setOnMapClickListener(new OnMapClickListener() {
                 @Override
                 public void onMapClick(final LatLng point) {

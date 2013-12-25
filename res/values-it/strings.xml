@@ -212,7 +212,7 @@ This version of strings.xml is in Italian (it_IT) -->
     <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">"Deseleziona per mostrare un prompt quando il GPS è disabilitato"</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">"Seleziona la casella per non mostrare un messaggio quando il GPS è disattivato"</string>
 
-    <string name="preferences_backup_error_json_read">"Il backup non può essere ripristinato perchè il backup non può essere letto correttamente."</string>
+    <string name="preferences_backup_error_json_read" tools:ignore="Typos">"Il backup non può essere ripristinato perchè il backup non può essere letto correttamente."</string>
     <string name="preferences_backup_error_json_write">"Il backup non può essere eseguito."</string>
     <string name="preferences_backup_error_mediaerror">"C\'è un problema con la memoria esterna. Può essere che sia già in uso?"</string>
     <string name="preferences_backup_error_ioerror">"C\'è stato un errore durante il backup. Il file di backup non può essere letto o scritto."</string>
@@ -345,7 +345,6 @@ This version of strings.xml is in Italian (it_IT) -->
     -->
     <string name="busstopmapfragment_nosearchresults">"Nessun risultato trovato"</string>
     <string name="busstopmapfragment_progress_message">"Ricerca di:\n%s"</string> <!-- %s = search term. -->
-    <string name="busstopmapfragment_location_unknown">"Località sconosciuta"</string>
     <string name="busstopmapfragment_service_chooser_title">"Seleziona percorso(i) da mostrare"</string>
     
     <!--
@@ -383,6 +382,7 @@ This version of strings.xml is in Italian (it_IT) -->
     <string name="enterstopcode_edit_hint">"Inserisci il codice ad 8 cifre alla fermata del bus"</string>
     <string name="enterstopcode_button_scan">"La scansione del codice a barre"</string>
     <string name="enterstopcode_invalid_qrcode">"Il codice QR digitalizzata non contiene dati alla fermata del bus. O il codice non è stato scansionato correttamente, o il codice QR non è valido. Si prega di verificare nuovamente un codice valido QR."</string>
+    <string name="enterstopcode_scan_error">"C\'è stato un problema di lettura dei dati del codice QR."</string>
     <string name="enterstopcode_stopicon_description">"Esempio fermata codice QR"</string>
     
     <!--
@@ -566,7 +566,6 @@ This version of strings.xml is in Italian (it_IT) -->
     <string name="map_menu_maptype">"Tipo di mappa"</string>
     <string name="map_menu_mapoverlay_trafficviewon">"Vista Traffico"</string>
     <string name="map_menu_mapoverlay_trafficviewoff">"Vista Traffico Off"</string>
-    <string name="map_menu_mylocation">"La mia posizione"</string>
     <string name="map_menu_services">"Servizi"</string>
     
     <!--

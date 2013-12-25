@@ -29,14 +29,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:compat="http://schemas.android.com/apk/res-auto" >
     <item
-        android:id="@+id/busstopmap_option_menu_mylocation"
-        android:title="@string/map_menu_mylocation"
-        android:icon="@drawable/ic_menu_mylocation"
-        compat:showAsAction="ifRoom|withText" />
-    <item
         android:id="@+id/busstopmap_option_menu_search"
         android:title="@string/search"
         android:icon="@drawable/ic_menu_search"
+        compat:showAsAction="ifRoom|withText"
+        compat:actionViewClass="android.support.v7.widget.SearchView" />
+    <item
+        android:id="@+id/busstopmap_option_menu_services"
+        android:title="@string/map_menu_services"
+        android:icon="@drawable/ic_menu_filter"
         compat:showAsAction="ifRoom|withText" />
     <item
         android:id="@+id/busstopmap_option_menu_maptype"
@@ -47,9 +48,4 @@
         android:id="@+id/busstopmap_option_menu_trafficview"
         android:icon="@drawable/ic_menu_trafficview"
         tools:ignore="MenuTitle" />
-    <item
-        android:id="@+id/busstopmap_option_menu_services"
-        android:title="@string/map_menu_services"
-        android:icon="@drawable/ic_menu_filter"
-        compat:showAsAction="ifRoom|withText" />
 </menu>
