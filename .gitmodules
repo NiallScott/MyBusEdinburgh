@@ -1,0 +1,6 @@
+[submodule "lib-projects/AndroidAppCompat"]
+	path = lib-projects/AndroidAppCompat
+	url = git@github.com:NiallScott/AndroidAppCompat.git
+[submodule "lib-projects/GooglePlayServices"]
+	path = lib-projects/GooglePlayServices
+	url = git@github.com:NiallScott/GooglePlayServices.git
