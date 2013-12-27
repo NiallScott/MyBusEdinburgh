@@ -30,6 +30,7 @@ proguard/
 
 # NetBeans project files
 nbandroid/
+private/
 
 # .DS_Store
 .DS_Store
