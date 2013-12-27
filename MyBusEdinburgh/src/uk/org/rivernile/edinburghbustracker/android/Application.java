@@ -50,9 +50,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
+import uk.org.rivernile.edinburghbustracker.android.utils.UrlBuilder;
 
 /**
  * This code is the very first code that will be executed when the application
@@ -68,15 +68,6 @@ import org.json.JSONObject;
  * @author Niall Scott
  */
 public class Application extends android.app.Application {
-    
-    private static final String DB_API_CHECK_URL =
-            "http://www.mybustracker.co.uk/ws.php?module=json&function=" +
-            "getTopoId&key=";
-    private static final String DB_UPDATE_CHECK_URL =
-            "http://edinb.us/api/DatabaseVersion?schemaType=" +
-            BusStopDatabase.SCHEMA_NAME + "&random=";
-    
-    private static final Random random = new Random(System.currentTimeMillis());
     
     /**
      * {@inheritDoc}
@@ -155,18 +146,10 @@ public class Application extends android.app.Application {
                 if((System.currentTimeMillis() - lastCheck) < 86400000) return;
             }
             
-            // Construct the checking URL.
             final StringBuilder sb = new StringBuilder();
-            sb.append(DB_API_CHECK_URL);
-            sb.append(ApiKey.getHashedKey());
-            sb.append("&random=");
-            // A random number is used so networks don't cache the HTTP
-            // response.
-            sb.append(random.nextInt());
             try {
                 // Do connection stuff.
-                final URL url = new URL(sb.toString());
-                sb.setLength(0);
+                final URL url = new URL(UrlBuilder.getTopologyUrl().toString());
                 final HttpURLConnection conn = (HttpURLConnection)url
                         .openConnection();
                 try {
@@ -226,17 +209,11 @@ public class Application extends android.app.Application {
                 return;
             }
             
-            // There is an update available. Empty the StringBuilder then create
-            // the URL to get the new database information.
-            sb.setLength(0);
-            sb.append(DB_UPDATE_CHECK_URL);
-            sb.append(random.nextInt());
-            sb.append("&key=");
-            sb.append(ApiKey.getHashedKey());
-            
+            // There is an update available.
             try {
                 // Connection stuff.
-                final URL url = new URL(sb.toString());
+                final URL url = new URL(UrlBuilder.getDbVersionCheckUrl(
+                        BusStopDatabase.SCHEMA_NAME).toString());
                 sb.setLength(0);
                 final HttpURLConnection conn = (HttpURLConnection)url
                         .openConnection();

@@ -34,12 +34,11 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
-import uk.org.rivernile.edinburghbustracker.android.ApiKey;
+import uk.org.rivernile.edinburghbustracker.android.utils.UrlBuilder;
 
 /**
  * This Loader handles fetching data from Twitter to display as news items
@@ -65,11 +64,6 @@ public class TwitterUpdatesLoader
      */
     public static final byte ERROR_URLMISMATCH = 4;
     
-    private static final String REQUEST_URL = "http://edinb.us/api/" +
-            "TwitterStatuses?appName=MBE&key=";
-    
-    private static final Random random = new Random(System.currentTimeMillis());
-    
     /**
      * Create a new TwitterUpdatesLoader.
      * 
@@ -86,16 +80,11 @@ public class TwitterUpdatesLoader
     public TwitterLoaderResult loadInBackground() {
         final ArrayList<TwitterNewsItem> items =
                 new ArrayList<TwitterNewsItem>();
-        
-        final StringBuilder urlBuilder = new StringBuilder(REQUEST_URL);
-        urlBuilder.append(ApiKey.getHashedKey());
-        urlBuilder.append("&random=").append(random.nextInt());
-        
         byte error;
 
         try {
             // Create URL object.
-            final URL u = new URL(urlBuilder.toString());
+            final URL u = new URL(UrlBuilder.getTwitterUpdatesUrl().toString());
             // Open the connection to the HTTP server.
             final HttpURLConnection con = (HttpURLConnection)u.openConnection();
             // Buffer the input.

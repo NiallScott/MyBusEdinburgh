@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,14 +31,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Random;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
-import uk.org.rivernile.edinburghbustracker.android.ApiKey;
+import uk.org.rivernile.edinburghbustracker.android.utils.UrlBuilder;
 
 /**
  * This is the Edinburgh specific implementation of the bus times parser. To
@@ -59,10 +58,6 @@ public final class EdinburghParser implements BusParser {
     /** This error is called when the system is overloaded. */
     public static final byte ERROR_SYSTEM_OVERLOADED = 11;
     
-    private static final String URL =
-            "http://www.mybustracker.co.uk/ws.php?module=json&key=";
-    private static final Random rand = new Random(System.currentTimeMillis());
-    
     private boolean globalDisruption = false;
     
     /**
@@ -80,42 +75,14 @@ public final class EdinburghParser implements BusParser {
             final int numDepartures) throws BusParserException {
         if(stopCodes == null || stopCodes.length == 0) return null;
         
-        // Build the URL.
-        final StringBuilder sb = new StringBuilder();
-        sb.append(URL);
-        sb.append(ApiKey.getHashedKey());
-        sb.append("&function=getBusTimes&");
-        final int len = stopCodes.length;
-        
-        if(len == 1) {
-            sb.append("stopId=");
-            sb.append(stopCodes[0]);
-            sb.append('&');
-        } else {
-            for(int i = 0; i < len; i++) {
-                if(i >= 6) break;
-                
-                sb.append("stopId");
-                sb.append(i + 1);
-                sb.append('=');
-                sb.append(stopCodes[i]);
-                sb.append('&');
-            }
-        }
-        
-        sb.append("nb=");
-        sb.append(numDepartures);
-        // Add a random arg so the response isn't cached by the network proxies.
-        sb.append("&random=");
-        sb.append(rand.nextInt());
-        
         // TODO: review this code. I'm sure it could be done better.
         try {
-            final URL url = new URL(sb.toString());
-            // Reset the StringBuilder because we're going to reuse it.
-            sb.setLength(0);
+            final URL url = new URL(UrlBuilder
+                    .getBusTimesUrl(stopCodes, numDepartures).toString());
             final HttpURLConnection conn = (HttpURLConnection)url
                     .openConnection();
+            final StringBuilder sb = new StringBuilder();
+            
             try {
                 final BufferedInputStream is = new BufferedInputStream(
                         conn.getInputStream());
