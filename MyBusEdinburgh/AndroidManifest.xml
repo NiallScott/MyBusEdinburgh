@@ -27,8 +27,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.org.rivernile.edinburghbustracker.android"
-    android:versionCode="13"
-    android:versionName="2.2.3" >
+    android:versionCode="14"
+    android:versionName="2.3 development" >
     
     <!-- Request the required permissions. -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -57,7 +57,7 @@
     <!-- Tell the Google Play Store what versions of Android the app is
          compatible with. -->
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="10"
         android:targetSdkVersion="19" />
               
     <application
@@ -76,9 +76,15 @@
             android:name="com.google.android.backup.api_key"
             android:value="AEdPqrEAAAAIgfw_r8tIY0nyXAflwrdH6DJ1K38Gwog80pGrPw" />
         
+        <!-- The API key for Google Maps Android API v2. -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyAv1VYsySkSWNqZ9UQ5jA2TEitLk2lIKIM" />
+        
+        <!-- This is required by Google Play Services. -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
         
         <!-- The MainActivity, which is the entry point. -->
         <activity
