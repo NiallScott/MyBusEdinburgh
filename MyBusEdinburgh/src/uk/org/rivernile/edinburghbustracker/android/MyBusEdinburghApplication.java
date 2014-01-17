@@ -27,12 +27,12 @@ package uk.org.rivernile.edinburghbustracker.android;
 
 import java.io.File;
 import uk.org.rivernile.android.bustracker.BusApplication;
-import uk.org.rivernile.edinburghbustracker.android.endpoints
-        .BusTrackerEndpoint;
-import uk.org.rivernile.edinburghbustracker.android.endpoints
-        .HttpBusTrackerEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
         .EdinburghParser;
+import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
  * This class is the main entry point to the My Bus Edinburgh application. Some
@@ -42,6 +42,7 @@ import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
  */
 public class MyBusEdinburghApplication extends BusApplication {
     
+    private EdinburghUrlBuilder urlBuilder;
     private BusTrackerEndpoint busTrackerEndpoint;
     private BusStopDatabase busStopDatabase;
     private SettingsDatabase settingsDatabase;
@@ -63,7 +64,7 @@ public class MyBusEdinburghApplication extends BusApplication {
     public synchronized BusTrackerEndpoint getBusTrackerEndpoint() {
         if (busTrackerEndpoint == null) {
             busTrackerEndpoint = new HttpBusTrackerEndpoint(
-                    new EdinburghParser());
+                    new EdinburghParser(), getUrlBuilder());
         }
         
         return busTrackerEndpoint;
@@ -91,6 +92,19 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return settingsDatabase;
+    }
+    
+    /**
+     * Get an instance of the UrlBuilder.
+     * 
+     * @return An instance of the UrlBuilder.
+     */
+    private UrlBuilder getUrlBuilder() {
+        if (urlBuilder == null) {
+            urlBuilder = new EdinburghUrlBuilder();
+        }
+        
+        return urlBuilder;
     }
     
     private final Runnable cleanupTasks = new Runnable() {

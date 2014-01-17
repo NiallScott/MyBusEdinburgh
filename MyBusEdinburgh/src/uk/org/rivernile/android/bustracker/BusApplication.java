@@ -48,15 +48,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import org.json.JSONException;
 import org.json.JSONObject;
+import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.utils.FileUtils;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
-import uk.org.rivernile.edinburghbustracker.android.endpoints
-        .BusTrackerEndpoint;
-import uk.org.rivernile.edinburghbustracker.android.utils.UrlBuilder;
+import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
  * This code is the very first code that will be executed when the application
@@ -145,6 +144,7 @@ public abstract class BusApplication extends Application
         final boolean autoUpdate = sp.getBoolean(PREF_DATABASE_AUTO_UPDATE,
                 true);
         final SharedPreferences.Editor edit = sp.edit();
+        final EdinburghUrlBuilder urlBuilder = new EdinburghUrlBuilder();
         
         // Continue to check if the user has enabled it, or a check has been
         // forced (from the Preferences).
@@ -159,7 +159,7 @@ public abstract class BusApplication extends Application
             final StringBuilder sb = new StringBuilder();
             try {
                 // Do connection stuff.
-                final URL url = new URL(UrlBuilder.getTopologyUrl().toString());
+                final URL url = new URL(urlBuilder.getTopologyUrl().toString());
                 final HttpURLConnection conn = (HttpURLConnection)url
                         .openConnection();
                 try {
@@ -221,7 +221,7 @@ public abstract class BusApplication extends Application
             // There is an update available.
             try {
                 // Connection stuff.
-                final URL url = new URL(UrlBuilder.getDbVersionCheckUrl(
+                final URL url = new URL(urlBuilder.getDbVersionCheckUrl(
                         BusStopDatabase.SCHEMA_NAME).toString());
                 sb.setLength(0);
                 final HttpURLConnection conn = (HttpURLConnection)url

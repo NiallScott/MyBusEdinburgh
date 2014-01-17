@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.endpoints;
+package uk.org.rivernile.android.bustracker.endpoints;
 
 import java.util.HashMap;
 import junit.framework.TestCase;

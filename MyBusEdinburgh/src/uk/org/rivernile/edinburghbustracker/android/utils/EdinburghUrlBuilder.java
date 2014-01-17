@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,15 +28,16 @@ package uk.org.rivernile.edinburghbustracker.android.utils;
 import android.net.Uri;
 import android.text.TextUtils;
 import java.util.Random;
+import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 
 /**
- * This class contains a collection of static methods used to generate URLs for
+ * This class contains a collection of methods used to generate URLs for
  * contacting servers for resources.
  * 
  * @author Niall Scott
  */
-public class UrlBuilder {
+public class EdinburghUrlBuilder implements UrlBuilder {
     
     private static final Random RANDOM = new Random(System.currentTimeMillis());
     
@@ -45,35 +46,20 @@ public class UrlBuilder {
     protected static final String DB_SERVER_HOST = "edinb.us";
     
     /**
-     * This constructor is private to prevent creation of an instance of this
-     * class. This class simply contains static utility methods.
+     * {@inheritDoc}
      */
-    private UrlBuilder() {
-        // Constructor intentionally left empty.
-    }
-    
-    /**
-     * Get a Uri instance which represents a URL for getting the topology ID
-     * from the bus tracker API.
-     * 
-     * @return A Uri instance which represents a URL for getting the topology ID
-     * from the bus tracker API.
-     */
-    public static Uri getTopologyUrl() {
+    @Override
+    public Uri getTopologyUrl() {
         return getBustrackerBuilder()
                 .appendQueryParameter("function", "getTopoId")
                 .build();
     }
     
     /**
-     * Get a Uri instance which represents a URL for getting the latest database
-     * version for a given schemaType from the database server.
-     * 
-     * @param schemaType The schemaType to check for. Must not be null or empty.
-     * @return A Uri instance which represents a URL for getting the latest
-     * database version for a given schemaType from the database server.
+     * {@inheritDoc}
      */
-    public static Uri getDbVersionCheckUrl(final String schemaType) {
+    @Override
+    public Uri getDbVersionCheckUrl(final String schemaType) {
         if (TextUtils.isEmpty(schemaType)) {
             throw new IllegalArgumentException("schemaType must not be null or "
                     + "empty.");
@@ -86,18 +72,10 @@ public class UrlBuilder {
     }
     
     /**
-     * Get a Uri instance which represents a URL for getting bus stop times from
-     * the bus tracker API.
-     * 
-     * @param stopCodes The bus stop codes to request. Only the first 6 stop
-     * codes in the array will be dealt with as the API only accepts 6 stop
-     * codes in a single request. If this is null or empty, an
-     * IllegalArgumentException will be thrown.
-     * @param numDepartures The number of departures to return for each service.
-     * @return A Uri instance which represents a URL for getting bus stop times
-     * from the bus tracker API.
+     * {@inheritDoc}
      */
-    public static Uri getBusTimesUrl(final String[] stopCodes,
+    @Override
+    public Uri getBusTimesUrl(final String[] stopCodes,
             final int numDepartures) {
         if (stopCodes == null || stopCodes.length == 0) {
             throw new IllegalArgumentException("The stopCodes array must not "
@@ -125,12 +103,10 @@ public class UrlBuilder {
     }
     
     /**
-     * Get a Uri instance which represents a URL for getting Twitter updates.
-     * 
-     * @return A Uri instance which represents a URL for getting Twitter
-     * updates.
+     * {@inheritDoc}
      */
-    public static Uri getTwitterUpdatesUrl() {
+    @Override
+    public Uri getTwitterUpdatesUrl() {
         return getDbServerBuilder()
                 .appendPath("TwitterStatuses")
                 .appendQueryParameter("appName", "MBE")

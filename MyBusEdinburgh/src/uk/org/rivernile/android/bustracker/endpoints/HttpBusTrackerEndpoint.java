@@ -23,59 +23,51 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.endpoints;
+package uk.org.rivernile.android.bustracker.endpoints;
 
 import java.util.HashMap;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
+import uk.org.rivernile.android.fetchers.HttpFetcher;
 
 /**
- * A bus tracker endpoint is an abstraction layer to help with testing and the
- * ability to slot in new implementations quickly. Subclasses define the way
- * that data is fetched for the parser. For example, a subclass could define
- * that data comes from HTTP, while another one may wish to take it from the
- * application assets. To get an instance of this object, call
- * {@link uk.org.rivernile.edinburghbustracker.android.Application#getBusTrackerEndpoint()}.
+ * This class defines an endpoint for accessing the bus tracker API via HTTP.
  * 
  * @author Niall Scott
  */
-public abstract class BusTrackerEndpoint {
+public class HttpBusTrackerEndpoint extends BusTrackerEndpoint {
     
-    private final BusParser parser;
+    private final UrlBuilder urlBuilder;
     
     /**
      * Create a new endpoint.
      * 
      * @param parser The parser to use to parse the data that comes from the
      * source. Must not be null.
+     * @param urlBuilder A UrlBuilder instance, used to construct URLs for
+     * contacting remote resources.
      */
-    public BusTrackerEndpoint(final BusParser parser) {
-        if (parser == null) {
-            throw new IllegalArgumentException("The parser must not be null.");
+    public HttpBusTrackerEndpoint(final BusParser parser,
+            final UrlBuilder urlBuilder) {
+        super(parser);
+        
+        if (urlBuilder == null) {
+            throw new IllegalArgumentException("urlBuilder must not be null.");
         }
         
-        this.parser = parser;
+        this.urlBuilder = urlBuilder;
     }
-    
+
     /**
-     * Get the parser instance.
-     * 
-     * @return The parser instance.
+     * {@inheritDoc}
      */
-    protected final BusParser getParser() {
-        return parser;
+    @Override
+    public HashMap<String, BusStop> getBusTimes(final String[] stopCodes,
+            final int numDepartures) throws BusParserException {
+        final HttpFetcher fetcher = new HttpFetcher(urlBuilder
+                .getBusTimesUrl(stopCodes, numDepartures).toString(), false);
+        
+        return getParser().getBusTimes(fetcher);
     }
-    
-    /**
-     * Get the bus times for the bus stops specified in stopCodes.
-     * 
-     * @param stopCodes The bus stops to get times for.
-     * @param numDepartures The number of departures to get for each service at
-     * each stop.
-     * @return A HashMap of stopCode -> BusStop.
-     * @throws BusParserException If there was a problem while parsing data.
-     */
-    public abstract HashMap<String, BusStop> getBusTimes(String[] stopCodes,
-            int numDepartures) throws BusParserException;
 }

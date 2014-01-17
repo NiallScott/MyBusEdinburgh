@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,11 +30,33 @@ import junit.framework.TestCase;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 
 /**
- * Unit tests for UrlBuilder.
+ * Unit tests for EdinburghUrlBuilder.
  * 
  * @author Niall Scott
  */
-public class UrlBuilderTests extends TestCase {
+public class EdinburghUrlBuilderTests extends TestCase {
+    
+    private EdinburghUrlBuilder builder;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        
+        builder = new EdinburghUrlBuilder();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        
+        builder = null;
+    }
     
     /**
      * Common checks for tests on bus tracker URLs.
@@ -42,8 +64,8 @@ public class UrlBuilderTests extends TestCase {
      * @param uri The Uri to check.
      */
     private static void checkBusTrackerUri(final Uri uri) {
-        assertEquals(UrlBuilder.SCHEME_HTTP, uri.getScheme());
-        assertEquals(UrlBuilder.BUSTRACKER_HOST, uri.getHost());
+        assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
+        assertEquals(EdinburghUrlBuilder.BUSTRACKER_HOST, uri.getHost());
         assertEquals("/ws.php", uri.getPath());
         assertEquals("json", uri.getQueryParameter("module"));
         assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
@@ -56,8 +78,8 @@ public class UrlBuilderTests extends TestCase {
      * @param uri The Uri to check.
      */
     private static void checkDatabaseServerUri(final Uri uri) {
-        assertEquals(UrlBuilder.SCHEME_HTTP, uri.getScheme());
-        assertEquals(UrlBuilder.DB_SERVER_HOST, uri.getHost());
+        assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
+        assertEquals(EdinburghUrlBuilder.DB_SERVER_HOST, uri.getHost());
         assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
         assertNotNull(uri.getQueryParameter("random"));
     }
@@ -67,7 +89,7 @@ public class UrlBuilderTests extends TestCase {
      * is correctly constructed.
      */
     public void testGetTopologyUrl() {
-        final Uri uri = UrlBuilder.getTopologyUrl();
+        final Uri uri = builder.getTopologyUrl();
         
         checkBusTrackerUri(uri);
         assertEquals("getTopoId", uri.getQueryParameter("function"));
@@ -79,7 +101,7 @@ public class UrlBuilderTests extends TestCase {
      */
     public void testGetDbVersionCheckUrlWithNullSchemaType() {
         try {
-            UrlBuilder.getDbVersionCheckUrl(null);
+            builder.getDbVersionCheckUrl(null);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -94,7 +116,7 @@ public class UrlBuilderTests extends TestCase {
      */
     public void testGetDbVersionCheckUrlWithEmptySchemaType() {
         try {
-            UrlBuilder.getDbVersionCheckUrl("");
+            builder.getDbVersionCheckUrl("");
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -108,7 +130,7 @@ public class UrlBuilderTests extends TestCase {
      * server is correctly constructed.
      */
     public void testGetDbVersionCheckUrl() {
-        final Uri uri = UrlBuilder.getDbVersionCheckUrl("test");
+        final Uri uri = builder.getDbVersionCheckUrl("test");
 
         checkDatabaseServerUri(uri);
         assertEquals("/api/DatabaseVersion", uri.getPath());
@@ -121,7 +143,7 @@ public class UrlBuilderTests extends TestCase {
      */
     public void testGetBusTimesUrlNullStopCodes() {
         try {
-            UrlBuilder.getBusTimesUrl(null, 1);
+            builder.getBusTimesUrl(null, 1);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -136,7 +158,7 @@ public class UrlBuilderTests extends TestCase {
      */
     public void testGetBusTimesUrlEmptyStopCodes() {
         try {
-            UrlBuilder.getBusTimesUrl(new String[] { }, 1);
+            builder.getBusTimesUrl(new String[] { }, 1);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -150,7 +172,7 @@ public class UrlBuilderTests extends TestCase {
      * correctly constructed when passing in a single stop code.
      */
     public void testGetBusTimesUrlWithOneStopCode() {
-        final Uri uri = UrlBuilder.getBusTimesUrl(new String[] { "123" }, 4);
+        final Uri uri = builder.getBusTimesUrl(new String[] { "123" }, 4);
         
         checkBusTrackerUri(uri);
         assertEquals("getBusTimes", uri.getQueryParameter("function"));
@@ -164,7 +186,7 @@ public class UrlBuilderTests extends TestCase {
      * correctly constructed when passing in two stop codes.
      */
     public void testGetBusTimesUrlWithTwoStopCodes() {
-        final Uri uri = UrlBuilder.getBusTimesUrl(new String[] { "123", "456" },
+        final Uri uri = builder.getBusTimesUrl(new String[] { "123", "456" },
                 6);
         
         checkBusTrackerUri(uri);
@@ -182,7 +204,7 @@ public class UrlBuilderTests extends TestCase {
      * all stop codes after the sixth element.
      */
     public void testGetBusTimesUrlWithSevenStopCodes() {
-        final Uri uri = UrlBuilder.getBusTimesUrl(
+        final Uri uri = builder.getBusTimesUrl(
                 new String[] { "12", "23", "34", "45", "56", "67", "78" }, 2);
         
         checkBusTrackerUri(uri);
@@ -203,7 +225,7 @@ public class UrlBuilderTests extends TestCase {
      * correctly constructed.
      */
     public void testGetTwitterUpdatesUrl() {
-        final Uri uri = UrlBuilder.getTwitterUpdatesUrl();
+        final Uri uri = builder.getTwitterUpdatesUrl();
 
         checkDatabaseServerUri(uri);
         assertEquals("/api/TwitterStatuses", uri.getPath());

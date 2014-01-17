@@ -38,7 +38,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
-import uk.org.rivernile.edinburghbustracker.android.utils.UrlBuilder;
+import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
  * This Loader handles fetching data from Twitter to display as news items
@@ -84,7 +84,8 @@ public class TwitterUpdatesLoader
 
         try {
             // Create URL object.
-            final URL u = new URL(UrlBuilder.getTwitterUpdatesUrl().toString());
+            final URL u = new URL(new EdinburghUrlBuilder()
+                    .getTwitterUpdatesUrl().toString());
             // Open the connection to the HTTP server.
             final HttpURLConnection con = (HttpURLConnection)u.openConnection();
             // Buffer the input.
