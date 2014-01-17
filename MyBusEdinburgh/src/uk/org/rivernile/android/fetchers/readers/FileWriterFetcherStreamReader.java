@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 package uk.org.rivernile.android.fetchers.readers;
 
 import android.text.TextUtils;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -90,11 +92,13 @@ public class FileWriterFetcherStreamReader implements FetcherStreamReader {
             throw new IllegalArgumentException("The stream must not be null.");
         }
         
-        final FileOutputStream out = new FileOutputStream(file, append);
+        final BufferedInputStream in = new BufferedInputStream(stream);
+        final BufferedOutputStream out = new BufferedOutputStream(
+                new FileOutputStream(file, append));
         final byte[] buf = new byte[1024];
         int len;
 
-        while ((len = stream.read(buf)) > 0) {
+        while ((len = in.read(buf)) > 0) {
             out.write(buf, 0, len);
         }
 

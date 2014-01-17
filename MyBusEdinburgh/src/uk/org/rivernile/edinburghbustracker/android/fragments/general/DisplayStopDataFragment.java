@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -565,7 +565,7 @@ public class DisplayStopDataFragment extends Fragment
         showProgress();
         busTimesLoading = true;
         
-        return new BusTimesLoader(getActivity(), new EdinburghParser(),
+        return new BusTimesLoader(getActivity(),
                 args.getStringArray(LOADER_ARG_STOPCODES),
                 args.getInt(LOADER_ARG_NUMBER_OF_DEPARTURES, 4));
     }

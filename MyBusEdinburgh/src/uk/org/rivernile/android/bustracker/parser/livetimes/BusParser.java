@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 import java.util.HashMap;
+import uk.org.rivernile.android.fetchers.Fetcher;
 
 /**
  * The BusParser interface defines a single method that all parsers of the
@@ -58,16 +59,14 @@ public interface BusParser {
     public static final byte ERROR_URLMISMATCH = 6;
     
     /**
-     * Get data for a list of bus stops. This is usually bus times.
+     * Get bus times for the data returned by the given Fetcher.
      * 
-     * @param stopCodes The list of stop codes to return data for.
-     * @param numDepartures The max number of departures to show for each
-     * service.
+     * @param fetcher The fetcher to use to retrieve data.
      * @return A HashMap of String -> BusStop.
      * @throws BusParserException When an exception occurs during fetching or
      * parsing. Exceptions are wrapped in BusParserException to return a common
      * type.
      */
-    public HashMap<String, BusStop> getBusStopData(final String[] stopCodes,
-            final int numDepartures) throws BusParserException;
+    public HashMap<String, BusStop> getBusTimes(Fetcher fetcher)
+            throws BusParserException;
 }

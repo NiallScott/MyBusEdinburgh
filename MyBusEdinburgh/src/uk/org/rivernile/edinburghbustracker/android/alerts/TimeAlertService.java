@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,18 +34,17 @@ import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import java.util.HashMap;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
+import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser.EdinburghBus;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
-        .EdinburghParser;
+        .EdinburghBus;
 
 /**
  * The purpose of the TimeAlertService is run on a once-per-minute basis to load
@@ -72,6 +71,7 @@ public class TimeAlertService extends IntentService {
     
     private static final int ALERT_ID = 2;
     
+    private BusApplication app;
     private SettingsDatabase sd;
     private BusStopDatabase bsd;
     private NotificationManager notifMan;
@@ -94,6 +94,7 @@ public class TimeAlertService extends IntentService {
     public void onCreate() {
         super.onCreate();
         
+        app = (BusApplication) getApplication();
         sd = SettingsDatabase.getInstance(getApplicationContext());
         bsd = BusStopDatabase.getInstance(getApplicationContext());
         notifMan = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
@@ -110,12 +111,12 @@ public class TimeAlertService extends IntentService {
         final String stopCode = intent.getStringExtra(ARG_STOPCODE);
         final String[] services = intent.getStringArrayExtra(ARG_SERVICES);
         final int timeTrigger = intent.getIntExtra(ARG_TIME_TRIGGER, 5);
-        final BusParser parser = new EdinburghParser();
         
         HashMap<String, BusStop> result;
         try {
             // Get the bus times. Only get 1 bus per service.
-            result = parser.getBusStopData(new String[] { stopCode }, 1);
+            result = app.getBusTrackerEndpoint().getBusTimes(
+                    new String[] { stopCode }, 1);
         } catch(BusParserException e) {
             // There was an error. No point continuing. Reschedule.
             reschedule(intent);

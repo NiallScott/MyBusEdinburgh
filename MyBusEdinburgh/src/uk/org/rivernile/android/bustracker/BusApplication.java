@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,8 +23,9 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android;
+package uk.org.rivernile.android.bustracker;
 
+import android.app.Application;
 import android.app.backup.BackupManager;
 import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
         .PREF_DATABASE_AUTO_UPDATE;
@@ -34,31 +35,34 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.os.Build;
 import android.os.Looper;
 import android.widget.Toast;
 import com.bugsense.trace.BugSenseHandler;
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import uk.org.rivernile.android.utils.FileUtils;
+import uk.org.rivernile.edinburghbustracker.android.ApiKey;
+import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
+import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
+import uk.org.rivernile.edinburghbustracker.android.R;
+import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
+import uk.org.rivernile.edinburghbustracker.android.endpoints
+        .BusTrackerEndpoint;
 import uk.org.rivernile.edinburghbustracker.android.utils.UrlBuilder;
 
 /**
  * This code is the very first code that will be executed when the application
  * is started. It is used to register the BugSense handler, put a listener on
- * the SharedPreferences for Google Backup on Froyo upwards, and check for bus
- * stop database updates.
+ * the SharedPreferences for Google Backup, and check for bus stop database
+ * updates.
  * 
  * The Android developer documentation discourages the usage of this class, but
  * as it is unpredictable where the user will enter the application the code is
@@ -67,7 +71,8 @@ import uk.org.rivernile.edinburghbustracker.android.utils.UrlBuilder;
  * 
  * @author Niall Scott
  */
-public class Application extends android.app.Application {
+public abstract class BusApplication extends Application
+        implements OnSharedPreferenceChangeListener {
     
     /**
      * {@inheritDoc}
@@ -77,44 +82,50 @@ public class Application extends android.app.Application {
         super.onCreate();
         // Register the BugSense handler.
         BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY);
+        getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
+                .registerOnSharedPreferenceChangeListener(this);
+        
         // Cause the bus stop database to be extracted straight away.
         BusStopDatabase.getInstance(this);
-        
-        // If the API level is Froyo or greater, then register the
-        // SharedPreference listener.
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO)
-            getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
-                    .registerOnSharedPreferenceChangeListener(
-                    new SharedPreferencesListener(this));
-        
         // Start the thread to check for bus stop database updates.
         new Thread(stopDBTasks).start();
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onSharedPreferenceChanged(final SharedPreferences sp,
+            final String key) {
+        BackupManager.dataChanged(getPackageName());
+    }
+    
+    /**
+     * Get the bus tracker endpoint.
+     * 
+     * @return The BusTrackerEndpoint instance for this application.
+     */
+    public abstract BusTrackerEndpoint getBusTrackerEndpoint();
+    
+    /**
+     * Get an instance of the BusStopDatabase.
+     * 
+     * @return An instance of the BusStopDatabase.
+     */
+    public abstract BusStopDatabase getBusStopDatabase();
+    
+    /**
+     * Get an instance of the SettingsDatabase.
+     * 
+     * @return An instance of the SettingsDatabase.
+     */
+    public abstract SettingsDatabase getSettingsDatabase();
+    
     private Runnable stopDBTasks = new Runnable() {
         @Override
         public void run() {
-            // Delete old database files if they exist.
-            File toDelete = getDatabasePath("busstops.db");
-            if(toDelete.exists()) toDelete.delete();
-            
-            toDelete = getDatabasePath("busstops.db-journal");
-            if(toDelete.exists()) toDelete.delete();
-            
-            toDelete = getDatabasePath("busstops2.db");
-            if(toDelete.exists()) toDelete.delete();
-            
-            toDelete = getDatabasePath("busstops2.db-journal");
-            if(toDelete.exists()) toDelete.delete();
-            
-            toDelete = getDatabasePath("busstops8.db");
-            if(toDelete.exists()) toDelete.delete();
-            
-            toDelete = getDatabasePath("busstops8.db-journal");
-            if(toDelete.exists()) toDelete.delete();
-            
             // Start update task.
-            checkForDBUpdates(getApplicationContext(), false);
+            checkForDBUpdates(false);
         }
     };
     
@@ -127,10 +138,9 @@ public class Application extends android.app.Application {
      * @param context The context.
      * @param force True if the user forced the check, false if not.
      */
-    public static void checkForDBUpdates(final Context context,
-            final boolean force) {
+    public void checkForDBUpdates(final boolean force) {
         // Check to see if the user wants their database automatically updated.
-        final SharedPreferences sp = context.getSharedPreferences(
+        final SharedPreferences sp = getSharedPreferences(
                 PreferencesActivity.PREF_FILE, 0);
         final boolean autoUpdate = sp.getBoolean(PREF_DATABASE_AUTO_UPDATE,
                 true);
@@ -190,8 +200,7 @@ public class Application extends android.app.Application {
             if(topoId == null || topoId.length() == 0) return;
             
             // Get the current topoId from the database.
-            final BusStopDatabase bsd = BusStopDatabase
-                    .getInstance(context.getApplicationContext());
+            final BusStopDatabase bsd = BusStopDatabase.getInstance(this);
             final String dbTopoId = bsd.getTopoId();
             
             // If the topoIds match, write our check time to SharedPreferences.
@@ -202,7 +211,7 @@ public class Application extends android.app.Application {
                     // It was forced, alert the user there is no update
                     // available.
                     Looper.prepare();
-                    Toast.makeText(context, R.string.bus_stop_db_no_updates,
+                    Toast.makeText(this, R.string.bus_stop_db_no_updates,
                             Toast.LENGTH_LONG).show();
                     Looper.loop();
                 }
@@ -266,11 +275,11 @@ public class Application extends android.app.Application {
             // Make sure an update really is available.
             if(!topoId.equals(dbTopoId)) {
                 // Update the database.
-                updateStopsDB(context, dbUrl, checksum);
+                updateStopsDB(this, dbUrl, checksum);
             } else if(force) {
                 // Tell the user there is no update available.
                 Looper.prepare();
-                Toast.makeText(context, R.string.bus_stop_db_no_updates,
+                Toast.makeText(this, R.string.bus_stop_db_no_updates,
                         Toast.LENGTH_LONG).show();
                 Looper.loop();
             }
@@ -329,7 +338,7 @@ public class Application extends android.app.Application {
             
             // Do a MD5 checksum on the downloaded file. Make sure it matches
             // what the server reported.
-            if(!md5Checksum(temp).equalsIgnoreCase(checksum)) {
+            if(!FileUtils.md5Checksum(temp).equalsIgnoreCase(checksum)) {
                 // If it doesn't match, delete the downloaded file.
                 temp.delete();
                 return;
@@ -378,74 +387,5 @@ public class Application extends android.app.Application {
             Looper.loop();
         } catch(MalformedURLException e) {
         } catch(IOException e) { }
-    }
-    
-    /**
-     * Create a checksum for a File. This is used to ensure that a downloaded
-     * database has not been corrupted or incomplete.
-     * 
-     * See: http://vyshemirsky.blogspot.com/2007/08/computing-md5-digest-checksum-in-java.html
-     * This has been slightly modified.
-     * 
-     * @param file The file to run the MD5 checksum against.
-     * @return The MD5 checksum string.
-     */
-    public static String md5Checksum(final File file) {
-        try {
-            final InputStream fin = new FileInputStream(file);
-            final MessageDigest md5er = MessageDigest.getInstance("MD5");
-            final byte[] buffer = new byte[1024];
-            int read;
-            
-            while((read = fin.read(buffer)) != -1) {
-                if(read > 0) md5er.update(buffer, 0, read);
-            }
-            fin.close();
-            
-            final byte[] digest = md5er.digest();
-            if(digest == null) return null;
-            final StringBuilder builder = new StringBuilder();
-            for(byte a : digest) {
-                builder.append(Integer.toString((a & 0xff) 
-                + 0x100, 16).substring(1));
-            }
-            
-            return builder.toString();
-        } catch(FileNotFoundException e) {
-            return "";
-        } catch(NoSuchAlgorithmException e) {
-            return "";
-        } catch(IOException e) {
-            return "";
-        }
-    }
-    
-    /**
-     * The SharedPreferencesListener will look out for changes to the shared
-     * preferences and schedule updates with Google Backup if there is, if the
-     * device is running Android 2.2 (Froyo) or greater.
-     */
-    public static class SharedPreferencesListener
-            implements OnSharedPreferenceChangeListener {
-        
-        final Context context;
-        
-        /**
-         * Constructor, supplying a Context instance.
-         * 
-         * @param context The application Context.
-         */
-        public SharedPreferencesListener(final Context context) {
-            this.context = context;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void onSharedPreferenceChanged(final SharedPreferences sp,
-                final String key) {
-            BackupManager.dataChanged(context.getPackageName());
-        }
     }
 }

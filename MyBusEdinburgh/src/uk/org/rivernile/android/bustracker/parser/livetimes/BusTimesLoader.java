@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.parser.livetimes;
 import android.content.Context;
 import android.os.SystemClock;
 import java.util.HashMap;
+import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
 
 /**
@@ -41,7 +42,7 @@ import uk.org.rivernile.android.utils.SimpleResultLoader;
  */
 public class BusTimesLoader extends SimpleResultLoader<BusTimesResult> {
     
-    private final BusParser parser;
+    private final BusApplication app;
     private final String[] stopCodes;
     private final int numberOfDepartures;
     
@@ -50,27 +51,24 @@ public class BusTimesLoader extends SimpleResultLoader<BusTimesResult> {
      * be thrown if they are not supplied.
      * 
      * @param context A Context instance.
-     * @param parser A reference to the parser that is to be used.
      * @param stopCodes A String Array of bus stop codes to load.
      * @param numberOfDepartures The number of departures for each service to
      * load.
      */
-    public BusTimesLoader(final Context context, final BusParser parser,
-            final String[] stopCodes, final int numberOfDepartures) {
+    public BusTimesLoader(final Context context, final String[] stopCodes,
+            final int numberOfDepartures) {
         super(context);
         
-        // Ensure all arguments exist.
-        if(parser == null)
-            throw new IllegalArgumentException("The parser must not be null.");
-        
-        if(stopCodes == null || stopCodes.length == 0)
+        if(stopCodes == null || stopCodes.length == 0) {
             throw new IllegalArgumentException("Stop codes must be supplied.");
+        }
         
-        if(numberOfDepartures < 1)
+        if(numberOfDepartures < 1) {
             throw new IllegalArgumentException("The number of departures " +
                     "must be greater than 0.");
+        }
         
-        this.parser = parser;
+        app = (BusApplication) context.getApplicationContext();
         this.stopCodes = stopCodes;
         this.numberOfDepartures = numberOfDepartures;
     }
@@ -85,7 +83,8 @@ public class BusTimesLoader extends SimpleResultLoader<BusTimesResult> {
 
         try {
             // Get the bus times from the supplied parser.
-            res = parser.getBusStopData(stopCodes, numberOfDepartures);
+            res = app.getBusTrackerEndpoint()
+                    .getBusTimes(stopCodes, numberOfDepartures);
         } catch(BusParserException e) {
             // If an error occurrs, get it from the exception.
             error = e.getCode();

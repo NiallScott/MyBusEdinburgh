@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,11 +25,8 @@
 
 package uk.org.rivernile.edinburghbustracker.android.livetimes.parser;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,7 +34,9 @@ import org.json.JSONObject;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
-import uk.org.rivernile.edinburghbustracker.android.utils.UrlBuilder;
+import uk.org.rivernile.android.fetchers.Fetcher;
+import uk.org.rivernile.android.fetchers.UrlMismatchException;
+import uk.org.rivernile.android.fetchers.readers.JSONFetcherStreamReader;
 
 /**
  * This is the Edinburgh specific implementation of the bus times parser. To
@@ -61,50 +60,21 @@ public final class EdinburghParser implements BusParser {
     private boolean globalDisruption = false;
     
     /**
-     * Create a new EdinburghParser object.
-     */
-    public EdinburghParser() {
-        // Nothing to do here.
-    }
-    
-    /**
      * {@inheritDoc}
      */
     @Override
-    public HashMap<String, BusStop> getBusStopData(final String[] stopCodes,
-            final int numDepartures) throws BusParserException {
-        if(stopCodes == null || stopCodes.length == 0) return null;
+    public HashMap<String, BusStop> getBusTimes(final Fetcher fetcher)
+            throws BusParserException {
+        final JSONFetcherStreamReader reader = new JSONFetcherStreamReader();
         
-        // TODO: review this code. I'm sure it could be done better.
         try {
-            final URL url = new URL(UrlBuilder
-                    .getBusTimesUrl(stopCodes, numDepartures).toString());
-            final HttpURLConnection conn = (HttpURLConnection)url
-                    .openConnection();
-            final StringBuilder sb = new StringBuilder();
-            
-            try {
-                final BufferedInputStream is = new BufferedInputStream(
-                        conn.getInputStream());
-                // Check to see if the URL we connected to was what we expected.
-                if(!url.getHost().equals(conn.getURL().getHost())) {
-                    is.close();
-                    conn.disconnect();
-                    throw new BusParserException(ERROR_URLMISMATCH);
-                }
-                
-                int data;
-                
-                while((data = is.read()) != -1) {
-                    sb.append((char)data);
-                }
-            } finally {
-                conn.disconnect();
-            }
+            fetcher.executeFetcher(reader);
 
-            return parseJSON(sb.toString());
+            return parseJSON(reader.getJSONObject());
         } catch(MalformedURLException e) {
             throw new BusParserException(ERROR_CANNOTRESOLVE);
+        } catch (UrlMismatchException e) {
+            throw new BusParserException(ERROR_URLMISMATCH);
         } catch(IOException e) {
             throw new BusParserException(ERROR_NOCONNECTION);
         } catch(JSONException e) {
@@ -115,16 +85,15 @@ public final class EdinburghParser implements BusParser {
     /**
      * Parse the JSON string returned from the bus tracker web services.
      * 
-     * @param jsonString The JSON string to parse.
+     * @param jo The JSON object to parse.
      * @return A HashMap which has String -> BusStop mappings containing the
      * bus stop data.
      * @throws JSONException When a JSON exception occurs.
      * @throws BusParserException When a BusParserException occurs.
      */
-    private HashMap<String, BusStop> parseJSON(final String jsonString)
+    private HashMap<String, BusStop> parseJSON(JSONObject jo)
             throws JSONException, BusParserException {
         final HashMap<String, BusStop> data = new HashMap<String, BusStop>();
-        JSONObject jo = new JSONObject(jsonString);
         
         // Check to see if the API returns errors.
         if(jo.has("faultcode")) {

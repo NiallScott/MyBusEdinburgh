@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import uk.org.rivernile.android.bustracker.BusApplication;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -203,8 +204,9 @@ public class PreferencesActivity extends PreferenceActivity
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        Application.checkForDBUpdates(getApplicationContext(),
-                                true);
+                        final BusApplication app = (BusApplication)
+                                getApplicationContext();
+                        app.checkForDBUpdates(true);
                     }
                 }).start();
             }
