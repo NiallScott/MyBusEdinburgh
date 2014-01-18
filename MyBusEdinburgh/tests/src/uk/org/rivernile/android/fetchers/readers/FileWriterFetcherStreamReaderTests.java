@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 package uk.org.rivernile.android.fetchers.readers;
 
 import java.io.File;
+import java.io.IOException;
 import junit.framework.TestCase;
 
 /**
@@ -130,5 +131,26 @@ public class FileWriterFetcherStreamReaderTests extends TestCase {
         
         assertEquals(file, reader.getFile());
         assertFalse(reader.doesAppend());
+    }
+    
+    /**
+     * Test that the read method correctly throws an IllegalArgumentException if
+     * the stream is set to null.
+     * 
+     * @throws IOException This test is not expected to throw an IOException, so
+     * if it is thrown, let the TestCase cause a failure.
+     */
+    public void testReadInputStreamWithNullInputStream() throws IOException {
+        final FileWriterFetcherStreamReader reader =
+                new FileWriterFetcherStreamReader("test", false);
+        
+        try {
+            reader.readInputStream(null);
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+        
+        fail("The stream was set to null, so an IllegalArgumentException "
+                + "should be thrown.");
     }
 }

@@ -49,6 +49,7 @@ import java.net.URL;
 import org.json.JSONException;
 import org.json.JSONObject;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.utils.FileUtils;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
@@ -105,6 +106,14 @@ public abstract class BusApplication extends Application
      * @return The BusTrackerEndpoint instance for this application.
      */
     public abstract BusTrackerEndpoint getBusTrackerEndpoint();
+    
+    /**
+     * Get the database endpoint, used for checking for bus stop database
+     * updates.
+     * 
+     * @return The DatabaseEndpoint instance for this application.
+     */
+    public abstract DatabaseEndpoint getDatabaseEndpoint();
     
     /**
      * Get an instance of the BusStopDatabase.

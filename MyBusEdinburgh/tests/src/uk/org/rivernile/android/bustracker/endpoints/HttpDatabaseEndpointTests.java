@@ -26,19 +26,20 @@
 package uk.org.rivernile.android.bustracker.endpoints;
 
 import junit.framework.TestCase;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
-        .EdinburghParser;
+import uk.org.rivernile.android.bustracker.parser.database
+        .DatabaseVersionParser;
+import uk.org.rivernile.edinburghbustracker.android.parser.database
+        .EdinburghDatabaseVersionParser;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
- * Tests for HttpBusTrackerEndpoint.
+ * Tests for HttpDatabaseEndpoint.
  * 
  * @author Niall Scott
  */
-public class HttpBusTrackerEndpointTests extends TestCase {
+public class HttpDatabaseEndpointTests extends TestCase {
     
-    private BusParser parser;
+    private DatabaseVersionParser parser;
 
     /**
      * {@inheritDoc}
@@ -47,7 +48,7 @@ public class HttpBusTrackerEndpointTests extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        parser = new EdinburghParser();
+        parser = new EdinburghDatabaseVersionParser();
     }
 
     /**
@@ -66,7 +67,7 @@ public class HttpBusTrackerEndpointTests extends TestCase {
      */
     public void testConstructorWithNullUrlBuilder() {
         try {
-            new HttpBusTrackerEndpoint(parser, null);
+            new HttpDatabaseEndpoint(parser, null);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -82,6 +83,6 @@ public class HttpBusTrackerEndpointTests extends TestCase {
      * @throws Exception If an Exception occurs, the test should fail.
      */
     public void testConstructorWithNonNullUrlBuilder() throws Exception {
-        new HttpBusTrackerEndpoint(parser, new EdinburghUrlBuilder());
+        new HttpDatabaseEndpoint(parser, new EdinburghUrlBuilder());
     }
 }

@@ -28,10 +28,14 @@ package uk.org.rivernile.edinburghbustracker.android;
 import java.io.File;
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.HttpDatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
         .EdinburghParser;
+import uk.org.rivernile.edinburghbustracker.android.parser.database
+        .EdinburghDatabaseVersionParser;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
@@ -44,6 +48,7 @@ public class MyBusEdinburghApplication extends BusApplication {
     
     private EdinburghUrlBuilder urlBuilder;
     private BusTrackerEndpoint busTrackerEndpoint;
+    private DatabaseEndpoint databaseEndpoint;
     private BusStopDatabase busStopDatabase;
     private SettingsDatabase settingsDatabase;
 
@@ -68,6 +73,19 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return busTrackerEndpoint;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized DatabaseEndpoint getDatabaseEndpoint() {
+        if (databaseEndpoint == null) {
+            databaseEndpoint = new HttpDatabaseEndpoint(
+                    new EdinburghDatabaseVersionParser(), getUrlBuilder());
+        }
+        
+        return databaseEndpoint;
     }
 
     /**
