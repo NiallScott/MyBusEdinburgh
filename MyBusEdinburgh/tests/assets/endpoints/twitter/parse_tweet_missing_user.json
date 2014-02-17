@@ -1,0 +1,33 @@
+{
+    "created_at": "Wed Jan 22 20:25:18 +0000 2014",
+    "id": 1234567890,
+    "id_str": "1234567890",
+    "text": "This is an example tweet.",
+    "source": "\u003ca href=\"http:\/\/www.client.com\" rel=\"nofollow\"\u003eTwitter Client\u003c\/a\u003e",
+    "truncated": false,
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "entities": {
+        "hashtags": [
+        ],
+        "symbols": [
+        ],
+        "urls": [
+        ],
+        "user_mentions": [
+        ]
+    },
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "lang": "en"
+}

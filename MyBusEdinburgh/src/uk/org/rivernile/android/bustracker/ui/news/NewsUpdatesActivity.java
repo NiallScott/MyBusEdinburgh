@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,14 +23,13 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android;
+package uk.org.rivernile.android.bustracker.ui.news;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .TwitterUpdatesFragment;
+import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
  * This Activity hosts a TwitterUpdatesFragment which shows users the latest

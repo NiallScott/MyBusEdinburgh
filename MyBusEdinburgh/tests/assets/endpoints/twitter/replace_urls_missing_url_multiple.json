@@ -1,0 +1,19 @@
+[
+    {
+        "url": "http://t.co/example",
+        "expanded_url": "http://www.example.com",
+        "display_url": "example.com",
+        "indices": [
+            0,
+            22
+        ]
+    },
+    {
+        "expanded_url": "http://www.example2.com",
+        "display_url": "example2.com",
+        "indices": [
+            23,
+            45
+        ]
+    }
+]

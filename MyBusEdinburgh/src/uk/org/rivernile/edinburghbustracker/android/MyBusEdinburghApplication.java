@@ -31,7 +31,10 @@ import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpDatabaseEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.HttpTwitterEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
+import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
 import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
         .EdinburghParser;
 import uk.org.rivernile.edinburghbustracker.android.parser.database
@@ -49,6 +52,7 @@ public class MyBusEdinburghApplication extends BusApplication {
     private EdinburghUrlBuilder urlBuilder;
     private BusTrackerEndpoint busTrackerEndpoint;
     private DatabaseEndpoint databaseEndpoint;
+    private TwitterEndpoint twitterEndpoint;
     private BusStopDatabase busStopDatabase;
     private SettingsDatabase settingsDatabase;
 
@@ -86,6 +90,19 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return databaseEndpoint;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public synchronized TwitterEndpoint getTwitterEndpoint() {
+        if (twitterEndpoint == null) {
+            twitterEndpoint = new HttpTwitterEndpoint(
+                    new TwitterParserImpl(), getUrlBuilder());
+        }
+        
+        return twitterEndpoint;
     }
 
     /**

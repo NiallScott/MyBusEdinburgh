@@ -26,20 +26,18 @@
 package uk.org.rivernile.android.bustracker.endpoints;
 
 import junit.framework.TestCase;
-import uk.org.rivernile.android.bustracker.parser.database
-        .DatabaseVersionParser;
-import uk.org.rivernile.edinburghbustracker.android.parser.database
-        .EdinburghDatabaseVersionParser;
+import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParser;
+import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
- * Tests for HttpDatabaseEndpoint.
+ * Tests for HttpTwitterEndpoint.
  * 
  * @author Niall Scott
  */
-public class HttpDatabaseEndpointTests extends TestCase {
+public class HttpTwitterEndpointTests extends TestCase {
     
-    private DatabaseVersionParser parser;
+    private TwitterParser parser;
 
     /**
      * {@inheritDoc}
@@ -48,7 +46,7 @@ public class HttpDatabaseEndpointTests extends TestCase {
     public void setUp() throws Exception {
         super.setUp();
         
-        parser = new EdinburghDatabaseVersionParser();
+        parser = new TwitterParserImpl();
     }
 
     /**
@@ -67,7 +65,7 @@ public class HttpDatabaseEndpointTests extends TestCase {
      */
     public void testConstructorWithNullUrlBuilder() {
         try {
-            new HttpDatabaseEndpoint(parser, null);
+            new HttpTwitterEndpoint(parser, null);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -83,6 +81,6 @@ public class HttpDatabaseEndpointTests extends TestCase {
      * @throws Exception If an Exception occurs, the test should fail.
      */
     public void testConstructorWithNonNullUrlBuilder() throws Exception {
-        new HttpDatabaseEndpoint(parser, new EdinburghUrlBuilder());
+        new HttpTwitterEndpoint(parser, new EdinburghUrlBuilder());
     }
 }

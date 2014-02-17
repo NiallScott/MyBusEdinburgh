@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
 /*
- * Copyright (C) 2010 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,26 +21,28 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <TextView
-        android:id="@+id/twitText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autoLink="web|email|map"
-        android:textSize="16sp"
-        android:singleLine="false"
-        android:textIsSelectable="true" />
-    <TextView
-        android:id="@+id/twitInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:textSize="12sp"
-        android:textIsSelectable="true" />
-</LinearLayout>
+ */
+
+package uk.org.rivernile.android.bustracker.parser.twitter;
+
+import java.util.List;
+import uk.org.rivernile.android.fetchers.Fetcher;
+
+/**
+ * The TwitterParser is an interface that the concrete parser implements which
+ * deals with the fetching and parsing of Twitter data.
+ * 
+ * @author Niall Scott
+ */
+public interface TwitterParser {
+    
+    /**
+     * Get the list of ordered Tweets from the endpoint.
+     * 
+     * @param fetcher The Fetcher to use to get data.
+     * @return A List of Tweets. Will be empty if there are no Tweets.
+     * @throws TwitterException If there was a problem during the fetch or
+     * parsing process.
+     */
+    public List<Tweet> getTweets(Fetcher fetcher) throws TwitterException;
+}

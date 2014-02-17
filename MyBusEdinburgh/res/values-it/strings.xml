@@ -1,6 +1,6 @@
 <!--
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -421,15 +421,13 @@ This version of strings.xml is in Italian (it_IT) -->
     <string name="neareststops_service_chooser_title">"Selezionare il servizio (s) per filtrare"</string>
     
     <!--
-    ***********************************
-    * Strings for NewsUpdatesFragment *
-    ***********************************
+    **************************************
+    * Strings for TwitterUpdatesFragment *
+    **************************************
     -->
-    <string name="newsupdates_err_nodata">"Al momento non ci sono news o aggiornare gli elementi da mostrare."</string>
-    <string name="newsupdates_err_parseerr">"C\'è stato un errore durante il tentativo di elaborare i dati in arrivo."</string>
-    <string name="newsupdates_err_ioerr">"Si è verificato un errore durante la ricezione dei dati provenienti da Twitter. A volte questo errore si verifica quando Twitter sta gestendo carichi pesanti."</string>
-    <string name="newsupdates_err_urlerr">"C\'è stato un problema di formattazione per la URL di richiedesta dati dal server di Twitter."</string>
-    <string name="newsupdates_err_urlmismatch">"Accedi alla rete tramite il browser web e riprova."</string>
+    <string name="twitterupdates_err_nodata">"Al momento non ci sono news o aggiornare gli elementi da mostrare."</string>
+    <string name="twitterupdates_err_load">"C\'è stato un problema durante il caricamento dei dati. Riprovare più presto."</string>
+    <string name="twitterupdates_err_urlmismatch">"Accedi alla rete tramite il browser web e riprova."</string>
     
     <!--
     **********************

@@ -24,10 +24,12 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources>
-    <dimen name="text_size_small">14sp</dimen>
-    <dimen name="text_size_medium">16sp</dimen>
-    <dimen name="star_hitbox_size">48dp</dimen>
-    <dimen name="action_button_min_width">56dp</dimen>
-    <dimen name="indeterminate_progress_size">16dp</dimen>
-</resources>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:compat="http://schemas.android.com/apk/res-auto" >
+    <item
+        android:id="@+id/twitterupdates_option_menu_refresh"
+        android:title="@string/displaystopdata_menu_refresh"
+        android:icon="@drawable/ic_menu_refresh"
+        compat:showAsAction="ifRoom" />
+</menu>

@@ -214,7 +214,7 @@
         <!-- NewsUpdatesActivity, to show live system and network updates to the
              user. -->
         <activity
-            android:name=".NewsUpdatesActivity"
+            android:name="uk.org.rivernile.android.bustracker.ui.news.NewsUpdatesActivity"
             android:label="@string/newsupdates_title"
             android:parentActivityName=".MainActivity" >
             <!-- PARENT_ACTIVITY is used by the support library for supporting

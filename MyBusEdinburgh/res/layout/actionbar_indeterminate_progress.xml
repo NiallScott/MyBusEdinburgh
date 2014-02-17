@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2011 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,12 +24,15 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<menu
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:compat="http://schemas.android.com/apk/res-auto" >
-    <item
-        android:id="@+id/newsupdates_option_menu_refresh"
-        android:title="@string/displaystopdata_menu_refresh"
-        android:icon="@drawable/ic_menu_refresh"
-        compat:showAsAction="ifRoom|withText" />
-</menu>
+    android:layout_width="@dimen/action_button_min_width"
+    android:layout_height="wrap_content"
+    android:minWidth="@dimen/action_button_min_width" >
+
+    <ProgressBar
+        android:layout_width="@dimen/indeterminate_progress_size"
+        android:layout_height="@dimen/indeterminate_progress_size"
+        android:layout_gravity="center"
+        style="?indeterminateProgressStyle" />
+</FrameLayout>

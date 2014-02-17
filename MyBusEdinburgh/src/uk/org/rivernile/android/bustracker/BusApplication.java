@@ -50,6 +50,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
+import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.utils.FileUtils;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
@@ -114,6 +115,14 @@ public abstract class BusApplication extends Application
      * @return The DatabaseEndpoint instance for this application.
      */
     public abstract DatabaseEndpoint getDatabaseEndpoint();
+    
+    /**
+     * Get the Twitter endpoint, used for loading a list of Tweets to show the
+     * user updates.
+     * 
+     * @return The TwitterEndpoint instance for this application.
+     */
+    public abstract TwitterEndpoint getTwitterEndpoint();
     
     /**
      * Get an instance of the BusStopDatabase.
