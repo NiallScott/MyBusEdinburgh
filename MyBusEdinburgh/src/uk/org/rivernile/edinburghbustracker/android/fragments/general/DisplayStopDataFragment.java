@@ -327,11 +327,11 @@ public class DisplayStopDataFragment extends Fragment
         
         // Set the favourite ImageButton.
         if(sd.getFavouriteStopExists(stopCode)) {
-            imgbtnFavourite.setBackgroundResource(R.drawable.ic_list_favourite);
+            imgbtnFavourite.setImageResource(R.drawable.ic_list_favourite);
             imgbtnFavourite.setContentDescription(
                     getString(R.string.favourite_rem));
         } else {
-            imgbtnFavourite.setBackgroundResource(
+            imgbtnFavourite.setImageResource(
                     R.drawable.ic_list_unfavourite_light);
             imgbtnFavourite.setContentDescription(
                     getString(R.string.favourite_add));
@@ -540,7 +540,8 @@ public class DisplayStopDataFragment extends Fragment
                 // Get the position where this data lives.
                 final int position = ExpandableListView
                         .getPackedPositionGroup(info.packedPosition);
-                if(listAdapter != null) {
+                if(listAdapter != null &&
+                        position < listAdapter.getGroupCount()) {
                     final HashMap<String, String> groupData =
                             (HashMap<String, String>)listAdapter
                             .getGroup(position);
@@ -1046,7 +1047,7 @@ public class DisplayStopDataFragment extends Fragment
      */
     @Override
     public void onConfirmFavouriteDeletion() {
-        imgbtnFavourite.setBackgroundResource(
+        imgbtnFavourite.setImageResource(
                 R.drawable.ic_list_unfavourite_light);
         imgbtnFavourite.setContentDescription(
                 getString(R.string.favourite_add));

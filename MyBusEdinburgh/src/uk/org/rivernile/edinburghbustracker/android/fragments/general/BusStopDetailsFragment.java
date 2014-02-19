@@ -340,11 +340,11 @@ public class BusStopDetailsFragment extends Fragment
         }
         
         if(sd.getFavouriteStopExists(stopCode)) {
-            favouriteBtn.setBackgroundResource(R.drawable.ic_list_favourite);
+            favouriteBtn.setImageResource(R.drawable.ic_list_favourite);
             favouriteBtn.setContentDescription(
                     getString(R.string.favourite_rem));
         } else {
-            favouriteBtn.setBackgroundResource(R.drawable.ic_list_unfavourite);
+            favouriteBtn.setImageResource(R.drawable.ic_list_unfavourite);
             favouriteBtn.setContentDescription(
                     getString(R.string.favourite_add));
         }
@@ -551,7 +551,7 @@ public class BusStopDetailsFragment extends Fragment
      */
     @Override
     public void onConfirmFavouriteDeletion() {
-        favouriteBtn.setBackgroundResource(R.drawable.ic_list_unfavourite);
+        favouriteBtn.setImageResource(R.drawable.ic_list_unfavourite);
         favouriteBtn.setContentDescription(getString(R.string.favourite_add));
     }
 

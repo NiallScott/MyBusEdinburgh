@@ -509,7 +509,9 @@ public class NearestStopsFragment extends ListFragment
      * @param isFirst Is this the first load?
      */
     private void doUpdate(final boolean isFirst) {
-        if(lastLocation == null) return;
+        if (lastLocation == null || !isAdded()) {
+            return;
+        }
         
         // Stuff the arguments Bundle.
         final Bundle args = new Bundle();
