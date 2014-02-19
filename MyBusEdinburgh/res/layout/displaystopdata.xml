@@ -85,8 +85,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
-                android:background="@drawable/ic_list_favourite"
-                android:contentDescription="@string/favourite_add" />
+                android:background="@null"
+                android:contentDescription="@null" />
         </LinearLayout>
         <RelativeLayout
             android:layout_width="match_parent"
