@@ -41,6 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:background="@drawable/ic_list_favourite"
+        android:background="@null"
+        android:src="@drawable/ic_list_favourite"
         android:contentDescription="@string/favourite_rem" />
 </LinearLayout>
