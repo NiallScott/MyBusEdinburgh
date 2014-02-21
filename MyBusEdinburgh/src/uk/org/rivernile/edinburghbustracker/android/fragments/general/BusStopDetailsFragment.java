@@ -55,6 +55,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -689,9 +690,8 @@ public class BusStopDetailsFragment extends Fragment
             // is killed then later resumed with this Fragment being what is
             // returned to, the app crashes. This code forces initialisation to
             // happen.
-            try {
-                MapsInitializer.initialize(getActivity());
-            } catch(GooglePlayServicesNotAvailableException e) {
+            if (MapsInitializer.initialize(getActivity()) !=
+                    ConnectionResult.SUCCESS) {
                 return;
             }
             
