@@ -69,6 +69,19 @@ public interface UrlBuilder {
     public Uri getBusTimesUrl(String[] stopCodes, int numDepartures);
     
     /**
+     * Get a Uri instance which represents a URL for getting journey times for
+     * a specific journey ID departing from a specific stopCode from the bus
+     * tracker API.
+     * 
+     * @param stopCode The bus stop code to request.
+     * @param journeyId The unique ID of the journey leaving from the given
+     * stopCode.
+     * @return A Uri instance which represents a URL for getting journey times
+     * from the bus tracker API.
+     */
+    public Uri getJourneyTimesUrl(String stopCode, String journeyId);
+    
+    /**
      * Get a Uri instance which represents a URL for getting Twitter updates.
      * 
      * @return A Uri instance which represents a URL for getting Twitter

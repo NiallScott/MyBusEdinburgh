@@ -101,6 +101,29 @@ public class EdinburghUrlBuilder implements UrlBuilder {
         
         return builder.build();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Uri getJourneyTimesUrl(final String stopCode,
+            final String journeyId) {
+        if (TextUtils.isEmpty(stopCode)) {
+            throw new IllegalArgumentException("The stopcode must not be null "
+                    + "or empty.");
+        }
+        
+        if (TextUtils.isEmpty(journeyId)) {
+            throw new IllegalArgumentException("The journeyId must not be null "
+                    + "or empty.");
+        }
+        
+        return getBustrackerBuilder()
+                .appendQueryParameter("function", "getJourneyTimes")
+                .appendQueryParameter("stopId", stopCode)
+                .appendQueryParameter("journeyId", journeyId)
+                .build();
+    }
     
     /**
      * {@inheritDoc}

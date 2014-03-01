@@ -221,6 +221,79 @@ public class EdinburghUrlBuilderTests extends TestCase {
     }
     
     /**
+     * Test that getJourneyTimesUrl() correctly throws an
+     * IllegalArgumentException when the stopCode is set to null.
+     */
+    public void testGetJourneyTimesUrlWithNullStopCode() {
+        try {
+            builder.getJourneyTimesUrl(null, "journeyID");
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+        
+        fail("The stopCode is set as null, so an IllegalArgumentException "
+                + "should be thrown.");
+    }
+    
+    /**
+     * Test that getJourneyTimesUrl() correctly throws an
+     * IllegalArgumentException when the stopCode is set to empty.
+     */
+    public void testGetJourneyTimesUrlWithEmptyStopCode() {
+        try {
+            builder.getJourneyTimesUrl("", "journeyId");
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+        
+        fail("The stopCode is set to empty, so an IllegalArgumentException "
+                + "should be thrown.");
+    }
+    
+    /**
+     * Test that getJourneyTimesUrl() correctly throws an
+     * IllegalArgumentException when the journeyId is set to null.
+     */
+    public void testGetJourneyTimesUrlWithNullJourneyId() {
+        try {
+            builder.getJourneyTimesUrl("stopCode", null);
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+        
+        fail("The journeyId is set as null, so an IllegalArgumentException "
+                + "should be thrown.");
+    }
+    
+    /**
+     * Test that getJourneyTimesUrl() correctly throws an
+     * IllegalArgumentException when the journeyId is set to empty.
+     */
+    public void testGetJourneyTimesUrlWithEmptyJourneyId() {
+        try {
+            builder.getJourneyTimesUrl("stopCode", "");
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+        
+        fail("The journeyId is set to empty, so an IllegalArgumentException "
+                + "should be thrown.");
+    }
+    
+    /**
+     * Test that getJourneyTimesUrl() correctly constructs a URL from the given
+     * parameters.
+     */
+    public void testGetJourneyTimesUrl() {
+        final Uri uri = builder.getJourneyTimesUrl("123456", "7890");
+        
+        checkBusTrackerUri(uri);
+        assertEquals("getJourneyTimes", uri.getQueryParameter("function"));
+        assertEquals("123456", uri.getQueryParameter("stopId"));
+        assertEquals("7890", uri.getQueryParameter("journeyId"));
+    }
+    
+    /**
      * Test that the URL for getting Twitter updates from the database server is
      * correctly constructed.
      */
