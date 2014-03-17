@@ -72,11 +72,11 @@ import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteFavouriteDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
         .EdinburghBus;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
         .EdinburghBusStop;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
         .EdinburghParser;
 
 /**

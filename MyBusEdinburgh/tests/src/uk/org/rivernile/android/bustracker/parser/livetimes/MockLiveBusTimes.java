@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,39 +23,33 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.livetimes.parser;
+package uk.org.rivernile.android.bustracker.parser.livetimes;
 
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
+import java.util.Map;
 
 /**
- * This class contains an Edinburgh specific implementation of BusService.
+ * MockLiveBusTimes extends {@link LiveBusTimes} to provide mock implementations
+ * for abstract methods.
  * 
  * @author Niall Scott
  */
-public class EdinburghBusService extends BusService {
-    
-    private final boolean disruption;
+class MockLiveBusTimes extends LiveBusTimes<LiveBusStop> {
     
     /**
-     * Create a new instance of EdinburghBusService.
+     * Create a new MockLiveBusTimes instance.
      * 
-     * @param serviceName The name of the service.
-     * @param route The route of the service.
-     * @param disruption The disruption status of this service.
+     * @param busStops The mapping of bus stop codes to {@link LiveBusStop}
+     * instances. Must not be null.
      */
-    public EdinburghBusService(final String serviceName, final String route,
-            final boolean disruption) {
-        super(serviceName, route);
-        
-        this.disruption = disruption;
+    public MockLiveBusTimes(final Map<String, LiveBusStop> busStops) {
+        super(busStops);
     }
-    
+
     /**
-     * Get the disruption status for this bus service.
-     * 
-     * @return The disruption status for this bus service.
+     * {@inheritDoc}
      */
-    public boolean getDisruption() {
-        return disruption;
+    @Override
+    public boolean isGlobalDisruption() {
+        return false;
     }
 }

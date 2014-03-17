@@ -27,7 +27,7 @@ package uk.org.rivernile.android.bustracker.endpoints;
 
 import junit.framework.TestCase;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
         .EdinburghParser;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 

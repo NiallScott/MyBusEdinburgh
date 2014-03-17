@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
         .EdinburghParser;
 
 /**

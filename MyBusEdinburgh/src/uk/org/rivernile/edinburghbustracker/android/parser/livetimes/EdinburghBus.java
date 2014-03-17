@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.livetimes.parser;
+package uk.org.rivernile.edinburghbustracker.android.parser.livetimes;
 
 import uk.org.rivernile.android.bustracker.parser.livetimes.Bus;
 

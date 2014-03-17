@@ -43,7 +43,7 @@ import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
         .EdinburghBus;
 
 /**

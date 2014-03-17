@@ -35,7 +35,7 @@ import uk.org.rivernile.android.bustracker.endpoints.HttpTwitterEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
-import uk.org.rivernile.edinburghbustracker.android.livetimes.parser
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
         .EdinburghParser;
 import uk.org.rivernile.edinburghbustracker.android.parser.database
         .EdinburghDatabaseVersionParser;
