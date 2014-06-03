@@ -27,8 +27,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.org.rivernile.edinburghbustracker.android"
-    android:versionCode="13"
-    android:versionName="2.2.3" >
+    android:versionCode="14"
+    android:versionName="2.2.4" >
     
     <!-- Request the required permissions. -->
     <uses-permission android:name="android.permission.INTERNET" />

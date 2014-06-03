@@ -96,7 +96,7 @@
             <TextView
                 android:id="@+id/txtService"
                 android:layout_height="wrap_content"
-                android:layout_width="50dp"
+                android:layout_width="55dp"
                 android:layout_alignParentLeft="true"
                 android:gravity="center_horizontal"
                 android:singleLine="true"

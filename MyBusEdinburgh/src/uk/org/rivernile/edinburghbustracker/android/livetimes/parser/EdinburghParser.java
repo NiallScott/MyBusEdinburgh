@@ -245,9 +245,10 @@ public final class EdinburghParser implements BusParser {
     private static EdinburghBusService parseEdinburghBusService(
             final JSONObject joService) {
         try {
+            final String serviceName = serviceNameConversion(
+                    joService.getString("mnemoService"));
             final EdinburghBusService service = new EdinburghBusService(
-                    joService.getString("mnemoService"),
-                    joService.getString("nameService"),
+                    serviceName, joService.getString("nameService"),
                     joService.getBoolean("serviceDisruption"));
             final JSONArray jaBuses = joService.getJSONArray("timeDatas");
             final int len = jaBuses.length();
@@ -294,6 +295,19 @@ public final class EdinburghParser implements BusParser {
         }
         
         return null;
+    }
+    
+    /**
+     * Convert service names in to their public displays. For example, the tram
+     * isn't in the system as a tram.
+     * 
+     * @param serviceName The service name to possibly convert.
+     * @return The converted service name, or the same service name if no
+     * conversion was required.
+     */
+    private static String serviceNameConversion(final String serviceName) {
+        return "50".equals(serviceName) || "T50".equals(serviceName) ?
+                "TRAM" : serviceName;
     }
     
     /**
