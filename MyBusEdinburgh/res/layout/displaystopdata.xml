@@ -124,7 +124,7 @@
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:text="@string/displaystopdata_column_due" />
-    </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
     <ProgressBar
         android:id="@+id/progressBig"
