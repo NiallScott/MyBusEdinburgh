@@ -25,11 +25,11 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
-import java.util.HashMap;
 import junit.framework.TestCase;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
+import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
         .EdinburghParser;
 
@@ -86,8 +86,17 @@ public class BusTrackerEndpointTests extends TestCase {
          * {@inheritDoc}
          */
         @Override
-        public HashMap<String, BusStop> getBusTimes(final String[] stopCodes,
-                final int numDepartures) throws BusParserException {
+        public LiveBusTimes getBusTimes(final String[] stopCodes,
+                final int numDepartures) throws LiveTimesException {
+            return null;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Journey getJourneyTimes(final String stopCode,
+                final String journeyId) throws LiveTimesException {
             return null;
         }
     }

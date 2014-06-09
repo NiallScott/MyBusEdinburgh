@@ -43,7 +43,8 @@ public class JourneyTests extends TestCase {
      */
     public void testConstructorWithNullJourneyId() {
         try {
-            new MockJourney(null, "22", new ArrayList<JourneyDeparture>());
+            new MockJourney(null, "22", new ArrayList<JourneyDeparture>(),
+                    123456789L);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -58,7 +59,8 @@ public class JourneyTests extends TestCase {
      */
     public void testConstructorWithEmptyJourneyId() {
         try {
-            new MockJourney("", "22", new ArrayList<JourneyDeparture>());
+            new MockJourney("", "22", new ArrayList<JourneyDeparture>(),
+                    123456789L);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -73,7 +75,8 @@ public class JourneyTests extends TestCase {
      */
     public void testConstructorWithNullServiceName() {
         try {
-            new MockJourney("123456", null, new ArrayList<JourneyDeparture>());
+            new MockJourney("123456", null, new ArrayList<JourneyDeparture>(),
+                    123456789L);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -88,7 +91,8 @@ public class JourneyTests extends TestCase {
      */
     public void testConstructorWithEmptyServiceName() {
         try {
-            new MockJourney("123456", "", new ArrayList<JourneyDeparture>());
+            new MockJourney("123456", "", new ArrayList<JourneyDeparture>(),
+                    123456789L);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -103,7 +107,7 @@ public class JourneyTests extends TestCase {
      */
     public void testConstructorWithNullDepartures() {
         try {
-            new MockJourney("123456", "22", null);
+            new MockJourney("123456", "22", null, 123456789L);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -123,7 +127,9 @@ public class JourneyTests extends TestCase {
         departuresIn.add(new MockJourneyDeparture("456", "B", new Date(), 2));
         departuresIn.add(new MockJourneyDeparture("789", "C", new Date(), 3));
         
-        final Journey journey = new MockJourney("123", "12", departuresIn);
+        final Journey journey = new MockJourney("123", "12", departuresIn,
+                123456789L);
+        assertEquals(123456789L, journey.getReceiveTime());
         assertEquals("123", journey.getJourneyId());
         assertEquals("12", journey.getServiceName());
         

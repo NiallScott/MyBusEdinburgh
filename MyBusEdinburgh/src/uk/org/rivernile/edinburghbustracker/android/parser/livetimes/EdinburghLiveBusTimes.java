@@ -42,13 +42,16 @@ public class EdinburghLiveBusTimes extends LiveBusTimes<EdinburghLiveBusStop> {
      * 
      * @param busStops The mapping of bus stop codes to
      * {@link EdinburghLiveBusStop} instances. Must not be null.
+     * @param receiveTime The time, as per
+     * {@link android.os.SystemClock#elapsedRealtime()}, that the data was
+     * received at.
      * @param globalDisruption true if there is a global disruption in place,
      * false if not.
      */
     public EdinburghLiveBusTimes(
             final Map<String, EdinburghLiveBusStop> busStops,
-            final boolean globalDisruption) {
-        super(busStops);
+            final long receiveTime, final boolean globalDisruption) {
+        super(busStops, receiveTime);
         
         this.globalDisruption = globalDisruption;
     }

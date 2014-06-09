@@ -39,20 +39,25 @@ import java.util.Set;
 public abstract class LiveBusTimes<T extends LiveBusStop> {
     
     private final Map<String, T> busStops;
+    private final long receiveTime;
     
     /**
      * Create a new LiveBusTimes instance.
      * 
      * @param busStops The mapping of bus stop codes to {@link LiveBusStop}
      * instances. Must not be null.
+     * @param receiveTime The time, as per
+     * {@link android.os.SystemClock#elapsedRealtime()}, that the data was
+     * received at.
      */
-    public LiveBusTimes(final Map<String, T> busStops) {
+    public LiveBusTimes(final Map<String, T> busStops, final long receiveTime) {
         if (busStops == null) {
             throw new IllegalArgumentException("The busStops must not be "
                     + "null.");
         }
         
         this.busStops = busStops;
+        this.receiveTime = receiveTime;
     }
     
     /**
@@ -84,6 +89,20 @@ public abstract class LiveBusTimes<T extends LiveBusStop> {
      */
     public Set<String> getBusStops() {
         return busStops.keySet();
+    }
+    
+    /**
+     * Get the time, as per {@link android.os.SystemClock#elapsedRealtime()},
+     * that the data was received at. This may be used later to determine how
+     * old the data is. The reason that it is based on
+     * {@link android.os.SystemClock#elapsedRealtime()} is because that does not
+     * change if the user changes the system clock.
+     * 
+     * @return The number of milliseconds since system boot that the data was
+     * received and parsed at.
+     */
+    public long getReceiveTime() {
+        return receiveTime;
     }
     
     /**

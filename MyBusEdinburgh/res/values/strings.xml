@@ -369,9 +369,12 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="displaystopdata_lastupdated">Last updated %s</string> <!-- %s = last updated text, e.g. "5 minutes ago." -->
     <string name="displaystopdata_diverted">diverted</string>
+    <string name="displaystopdata_diverted_with_destination">%s (diverted)</string> <!-- %s = destination. -->
     <string name="displaystopdata_column_service">Service</string>
     <string name="displaystopdata_column_destination">Destination</string>
     <string name="displaystopdata_column_due">Due (mins)</string>
+    <string name="displaystopdata_due">DUE</string>
+    <string name="displaystopdata_estimated_time" tools:ignore="MissingTranslation">*%s</string> <!-- %s = time bus is due, e.g. "5" or "13:11" -->
 
     <string name="displaystopdata_err_unknown"><b>An unknown error has occurred.</b>\nPlease try again later.</string>
     <string name="displaystopdata_err_nocode"><b>No stop code was provided.</b>\nTo be able to show bus times, a stop code needs to be provided.</string>
@@ -382,7 +385,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_err_urlmismatch"><b>Network sign on required.</b>\nPlease sign on through your web browser and try again.</string>
     
     <string name="displaystopdata_err_api_invalid_key"><b>The service refused to serve this request.</b>\nThe service depends on your device\'s date and time being correct. Please check this in your system preferences. If they are, contact the application developer for further assistance.</string>
-    <string name="displaystopdata_err_api_invalid_parameter"><b>The service did not accept this request.</b>\nIf this happens again, please contact the application developer.</string>
     <string name="displaystopdata_err_api_processing_error"><b>The service encountered a processing error.</b>\nPlease try again later.</string>
     <string name="displaystopdata_err_api_system_maintenance"><b>The service is currently undergoing maintenance and is unavailable.</b>\nPlease try again later.</string>
     <string name="displaystopdata_err_api_system_overloaded"><b>The system is currently experiencing high load.</b>\nPlease try again later.</string>

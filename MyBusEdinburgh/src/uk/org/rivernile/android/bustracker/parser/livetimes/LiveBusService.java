@@ -40,9 +40,10 @@ import java.util.List;
 public abstract class LiveBusService<T extends LiveBus>
         implements Comparable<LiveBusService> {
     
+    private static final AlphanumComparator comparator =
+            new AlphanumComparator();
     private final String serviceName;
     private final List<T> buses;
-    private final AlphanumComparator comparator = new AlphanumComparator();
     
     /**
      * Create a new LiveBusService.

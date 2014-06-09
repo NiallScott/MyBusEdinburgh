@@ -25,14 +25,10 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -41,6 +37,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -55,29 +52,27 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import uk.org.rivernile.android.bustracker.parser.livetimes.Bus;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimesLoader;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusTimesResult;
+import org.json.JSONException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.AuthenticationException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimesLoader;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
+import uk.org.rivernile.android.bustracker.ui.bustimes.BusTimesExpandableListAdapter;
+import uk.org.rivernile.android.fetchers.UrlMismatchException;
+import uk.org.rivernile.android.utils.LoaderResult;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteFavouriteDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
-        .EdinburghBus;
-import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
-        .EdinburghBusStop;
-import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
-        .EdinburghParser;
 
 /**
  * This fragment shows live bus times. It is perhaps the most important part of
@@ -95,7 +90,8 @@ import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
  * @author Niall Scott
  */
 public class DisplayStopDataFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<BusTimesResult>,
+        implements LoaderManager.LoaderCallbacks<
+                LoaderResult<LiveBusTimes, LiveTimesException>>,
         DeleteFavouriteDialogFragment.Callbacks {
     
     private static final int EVENT_REFRESH = 1;
@@ -126,9 +122,9 @@ public class DisplayStopDataFragment extends Fragment
     private SettingsDatabase sd;
     private SharedPreferences sp;
     
+    private BusTimesExpandableListAdapter adapter;
     private ExpandableListView listView;
     private TextView txtLastRefreshed, txtStopName, txtServices, txtError;
-    private BusTimesExpandableListAdapter listAdapter;
     private View layoutTopBar;
     private ProgressBar progressSmall, progressBig;
     private ImageButton imgbtnFavourite;
@@ -210,6 +206,18 @@ public class DisplayStopDataFragment extends Fragment
         // Get the stop code from the arguments bundle.
         stopCode = getArguments().getString(ARG_STOPCODE);
         
+        adapter = createAdapter();
+        adapter.setShowNightServices(
+                sp.getBoolean(PreferencesActivity.PREF_SHOW_NIGHT_BUSES, true));
+        final boolean sortByTime = sp
+                .getBoolean(PreferencesActivity.PREF_SERVICE_SORTING, false);
+        
+        if (sortByTime) {
+            adapter.setOrder(BusTimesExpandableListAdapter.Order.ARRIVAL_TIME);
+        } else {
+            adapter.setOrder(BusTimesExpandableListAdapter.Order.SERVICE_NAME);
+        }
+        
         // Get preferences.
         try {
             numDepartures = Integer.parseInt(
@@ -272,6 +280,7 @@ public class DisplayStopDataFragment extends Fragment
         
         // The ListView has a context menu.
         registerForContextMenu(listView);
+        listView.setAdapter(adapter);
         
         return v;
     }
@@ -299,7 +308,7 @@ public class DisplayStopDataFragment extends Fragment
                 loadBusTimes(false);
             }
         } else {
-            handleError(BusParser.ERROR_NOCODE);
+            showError(getString(R.string.displaystopdata_err_nocode));
         }
         
         getArguments().remove(ARG_FORCELOAD);
@@ -459,14 +468,21 @@ public class DisplayStopDataFragment extends Fragment
         switch(item.getItemId()) {
             case R.id.displaystopdata_option_menu_sort:
                 // Change the sort preference and ask for a data redisplay.
-                boolean sortByTime = sp.getBoolean(
+                final boolean sortByTime = !sp.getBoolean(
                         PreferencesActivity.PREF_SERVICE_SORTING, false);
-                sortByTime = !sortByTime;
                 final SharedPreferences.Editor edit = sp.edit();
                 edit.putBoolean(PreferencesActivity.PREF_SERVICE_SORTING,
                         sortByTime);
                 edit.commit();
-                loadBusTimes(false);
+                
+                if (sortByTime) {
+                    adapter.setOrder(
+                            BusTimesExpandableListAdapter.Order.ARRIVAL_TIME);
+                } else {
+                    adapter.setOrder(
+                            BusTimesExpandableListAdapter.Order.SERVICE_NAME);
+                }
+                
                 getActivity().supportInvalidateOptionsMenu();
                 
                 return true;
@@ -533,22 +549,21 @@ public class DisplayStopDataFragment extends Fragment
     public boolean onContextItemSelected(final MenuItem item) {
         // Cast the information parameter.
         final ExpandableListContextMenuInfo info =
-                (ExpandableListContextMenuInfo)item.getMenuInfo();
+                (ExpandableListContextMenuInfo) item.getMenuInfo();
         
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.displaystopdata_context_menu_addarrivalalert:
                 // Get the position where this data lives.
                 final int position = ExpandableListView
                         .getPackedPositionGroup(info.packedPosition);
-                if(listAdapter != null &&
-                        position < listAdapter.getGroupCount()) {
-                    final HashMap<String, String> groupData =
-                            (HashMap<String, String>)listAdapter
+                if(position < adapter.getGroupCount()) {
+                    final LiveBusService busService = adapter
                             .getGroup(position);
                     // Fire off the Activity.
                     callbacks.onShowAddTimeAlert(stopCode,
-                            new String[] { groupData.get(SERVICE_NAME_KEY) });
+                            new String[] { busService.getServiceName() });
                 }
+                
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -559,14 +574,16 @@ public class DisplayStopDataFragment extends Fragment
      * {@inheritDoc}
      */
     @Override
-    public Loader<BusTimesResult> onCreateLoader(final int id,
-            final Bundle args) {
-        if(args == null) return null;
+    public Loader<LoaderResult<LiveBusTimes, LiveTimesException>>
+            onCreateLoader(final int id, final Bundle args) {
+        if(args == null) {
+            return null;
+        }
         
         showProgress();
         busTimesLoading = true;
-        
-        return new BusTimesLoader(getActivity(),
+
+        return new LiveBusTimesLoader(getActivity(),
                 args.getStringArray(LOADER_ARG_STOPCODES),
                 args.getInt(LOADER_ARG_NUMBER_OF_DEPARTURES, 4));
     }
@@ -575,14 +592,16 @@ public class DisplayStopDataFragment extends Fragment
      * {@inheritDoc}
      */
     @Override
-    public void onLoadFinished(final Loader<BusTimesResult> loader,
-            final BusTimesResult result) {
+    public void onLoadFinished(
+            final Loader<LoaderResult<LiveBusTimes, LiveTimesException>> loader,
+            final LoaderResult<LiveBusTimes, LiveTimesException> result) {
         busTimesLoading = false;
         
         if(result != null && isAdded()) {
-            lastRefresh = result.getLastRefresh();
-            if(result.hasError()) {
-                handleError(result.getError());
+            lastRefresh = result.getLoadTime();
+            
+            if(result.hasException()) {
+                handleError(result.getException());
             } else {
                 displayData(result.getResult());
             }
@@ -593,8 +612,19 @@ public class DisplayStopDataFragment extends Fragment
      * {@inheritDoc}
      */
     @Override
-    public void onLoaderReset(final Loader<BusTimesResult> loader) {
+    public void onLoaderReset(final Loader<LoaderResult<LiveBusTimes,
+            LiveTimesException>> loader) {
         // Nothing to do here.
+    }
+    
+    /**
+     * Create a new Adapter for the {@link ExpandableListView}. This method
+     * exists so that subclasses can return another Adapter.
+     * 
+     * @return A new {@link BusTimesExpandableListAdapter}.
+     */
+    protected BusTimesExpandableListAdapter createAdapter() {
+        return new BusTimesExpandableListAdapter(getActivity());
     }
     
     private Handler mHandler = new Handler() {
@@ -642,56 +672,34 @@ public class DisplayStopDataFragment extends Fragment
      * 
      * @param errorCode A number attributed to the error.
      */
-    private void handleError(final int errorCode) {
-        switch(errorCode) {
-            case BusParser.ERROR_NOCONNECTION:
-                txtError.setText(R.string.displaystopdata_err_noconn);
-                break;
-            case BusParser.ERROR_CANNOTRESOLVE:
-                txtError.setText(R.string.displaystopdata_err_noresolv);
-                break;
-            case BusParser.ERROR_NOCODE:
-                txtError.setText(R.string.displaystopdata_err_nocode);
-                break;
-            case BusParser.ERROR_PARSEERR:
-                txtError.setText(R.string.displaystopdata_err_parseerr);
-                break;
-            case BusParser.ERROR_NODATA:
-                txtError.setText(R.string.displaystopdata_err_nodata);
-                break;
-            case BusParser.ERROR_URLMISMATCH:
-                txtError.setText(R.string.displaystopdata_err_urlmismatch);
-                break;
-            case EdinburghParser.ERROR_INVALID_APP_KEY:
-                txtError.setText(R.string
-                        .displaystopdata_err_api_invalid_key);
-                break;
-            case EdinburghParser.ERROR_INVALID_PARAMETER:
-                txtError.setText(R.string
-                        .displaystopdata_err_api_invalid_parameter);
-                break;
-            case EdinburghParser.ERROR_PROCESSING_ERROR:
-                txtError.setText(R.string
-                        .displaystopdata_err_api_processing_error);
-                break;
-            case EdinburghParser.ERROR_SYSTEM_MAINTENANCE:
-                txtError.setText(R.string
+    private void handleError(final LiveTimesException exception) {
+        if (exception == null) {
+            showError(getString(R.string.displaystopdata_err_unknown));
+            return;
+        }
+        
+        final Throwable cause = exception.getCause();
+        final Throwable e = cause != null ? cause : exception;
+        final String errorMessage;
+        
+        if (e instanceof UrlMismatchException) {
+            errorMessage = getString(R.string.displaystopdata_err_urlmismatch);
+        } else if (e instanceof JSONException) {
+            errorMessage = getString(R.string.displaystopdata_err_parseerr);
+        } else if (e instanceof AuthenticationException) {
+            errorMessage = getString(R.string
+                    .displaystopdata_err_api_invalid_key);
+        } else if (e instanceof MaintenanceException) {
+            errorMessage = getString(R.string
                         .displaystopdata_err_api_system_maintenance);
-                break;
-            case EdinburghParser.ERROR_SYSTEM_OVERLOADED:
-                txtError.setText(R.string
+        } else if (e instanceof SystemOverloadedException) {
+            errorMessage = getString(R.string
                         .displaystopdata_err_api_system_overloaded);
-                break;
-            default:
-                txtError.setText(R.string.displaystopdata_err_unknown);
-                break;
+        } else {
+            errorMessage = getString(R.string.displaystopdata_err_unknown);
         }
         
-        showError();
-        
-        if(autoRefresh) {
-            setUpAutoRefresh();
-        }
+        showError(errorMessage);
     }
     
     /**
@@ -755,15 +763,20 @@ public class DisplayStopDataFragment extends Fragment
      * Show errors. Ensure progress and bus times layouts are removed and show
      * the error layout.
      */
-    private void showError() {
+    private void showError(final String errorMessage) {
         layoutTopBar.setVisibility(View.GONE);
         listView.setVisibility(View.GONE);
         progressBig.setVisibility(View.GONE);
         progressSmall.setVisibility(View.GONE);
         
+        txtError.setText(errorMessage);
         txtError.setVisibility(View.VISIBLE);
         
         getActivity().supportInvalidateOptionsMenu();
+        
+        if (autoRefresh) {
+            setUpAutoRefresh();
+        }
     }
     
     /**
@@ -799,164 +812,50 @@ public class DisplayStopDataFragment extends Fragment
     }
     
     /**
-     * Display the data once loaded in the ListView.
+     * Display the data that was loaded from the real time service.
+     * 
+     * @param busTimes The loaded LiveBusTimes object.
      */
-    private void displayData(final HashMap<String, BusStop> data) {
-        if(data == null) {
-            // There must be no data.
-            handleError(BusParser.ERROR_NODATA);
+    private void displayData(final LiveBusTimes busTimes) {
+        if (busTimes == null) {
+            showError(getString(R.string.displaystopdata_err_nodata));
+            adapter.setBusStop(null);
             return;
         }
         
-        // Get the data for this stop code.
-        final EdinburghBusStop busStop = (EdinburghBusStop)data.get(stopCode);
-        if(busStop == null) {
-            // There must be no data for this stop code.
-            handleError(BusParser.ERROR_NODATA);
+        final LiveBusStop busStop = busTimes.getBusStop(stopCode);
+        if (busStop == null) {
+            showError(getString(R.string.displaystopdata_err_nodata));
+            adapter.setBusStop(null);
             return;
         }
         
-        // If this is just a refresh, populate the expanded items list.
-        if(listAdapter != null) {
-            populateExpandedItemsList();
-        }
+        populateExpandedItemsList();
         
-        // If the stopName could not be set earlier, get it now from the web
-        // service.
-        if(stopName == null || stopName.length() == 0) {
+        if (TextUtils.isEmpty(stopName)) {
             stopName = busStop.getStopName();
-        
-            final String name = getString(R.string.busstop_coloured, stopName,
-                    stopCode);
-
-            // Show the user the stop name and stop code.
-            txtStopName.setText(Html.fromHtml(name));
+            txtStopName.setText(Html.fromHtml(
+                    getString(R.string.busstop_coloured, stopName, stopCode)));
         }
         
-        // Get the list of services in the user's preferred order.
-        final ArrayList<BusService> services;
-        if(sp.getBoolean(PreferencesActivity.PREF_SERVICE_SORTING, false)) {
-            services = busStop.getSortedByTimeBusServices();
-        } else {
-            services = busStop.getBusServices();
-        }
+        adapter.setBusStop(busStop);
         
-        // Does the user want to show night services?
-        final boolean showNightServices =
-                sp.getBoolean(PreferencesActivity.PREF_SHOW_NIGHT_BUSES, true);
-        
-        // Declare variables before going in to the loop.
-        final ArrayList<HashMap<String, String>> groupData =
-                new ArrayList<HashMap<String, String>>();
-        final ArrayList<ArrayList<HashMap<String, String>>> childData =
-                new ArrayList<ArrayList<HashMap<String, String>>>();
-        HashMap<String, String> curGroupMap;
-        ArrayList<HashMap<String, String>> children;
-        HashMap<String, String> curChildMap;
-        EdinburghBus bus;
-        String timeToDisplay, destination;
-        int mins;
-        boolean first;
-        
-        // Loop through the list of services.
-        for(BusService busService : services) {
-            if(!showNightServices &&
-                    busService.getServiceName().startsWith("N")) continue;
-            
-            curGroupMap = new HashMap<String, String>();
-            groupData.add(curGroupMap);
-            // Add the service name.
-            curGroupMap.put(SERVICE_NAME_KEY, busService.getServiceName());
-            
-            children = new ArrayList<HashMap<String, String>>();
-            first = true;
-            // Loop through the buses inside a service.
-            for(Bus lBus : busService.getBuses()) {
-                bus = (EdinburghBus)lBus;
-                destination = bus.getDestination();
-                
-                if(bus.isDiverted()) {
-                    // Special case if diverted.
-                    timeToDisplay = "";
-                    
-                    // Destination may be null when it comes back from the web
-                    // service. Display diverted notice accordingly.
-                    if(destination != null) {
-                        destination += " (" +
-                                getString(R.string.displaystopdata_diverted) +
-                                ')';
-                    } else {
-                        destination = getString(R.string
-                                .displaystopdata_diverted);
-                    }
-                } else {
-                    // Get the number of minutes until arrival.
-                    mins = bus.getArrivalMinutes();
-                    if(mins > 59) {
-                        // If more than 59 minutes, display the full time.
-                        timeToDisplay = bus.getArrivalTime();
-                    } else if(mins < 2) {
-                        // If the bus is due in less than 2 mins, show as due.
-                        timeToDisplay = "DUE";
-                    } else {
-                        // Otherwise, display the number of minutes until
-                        // arrival.
-                        timeToDisplay = String.valueOf(mins);
-                    }
-
-                    // If the time is estimated, prefix this to the time shown.
-                    if(bus.isEstimated()) {
-                        timeToDisplay = '*' + timeToDisplay;
-                    }
-                    
-                    // If the destination is null, make it the empty string to
-                    // prevent future problems.
-                    if(destination == null) {
-                        destination = "";
-                    }
-                }
-                
-                if(first) {
-                    // If this is the first bus for this service, put this entry
-                    // in the group map.
-                    curGroupMap.put(DESTINATION_KEY, destination);
-                    curGroupMap.put(ARRIVAL_TIME_KEY, timeToDisplay);
-                    first = false;
-                } else {
-                    // Otherwise, put it in the expanded child map.
-                    curChildMap = new HashMap<String, String>();
-                    children.add(curChildMap);
-                    curChildMap.put(DESTINATION_KEY, destination);
-                    curChildMap.put(ARRIVAL_TIME_KEY, timeToDisplay);
-                }
-            }
-            childData.add(children);
-        }
-        
-        // Create the adatper. This is ugly.
-        listAdapter = new BusTimesExpandableListAdapter(
-                getActivity(), groupData, R.layout.expandable_list_group,
-                new String[] { SERVICE_NAME_KEY, DESTINATION_KEY,
-                    ARRIVAL_TIME_KEY },
-                new int[] { R.id.buslist_service, R.id.buslist_destination,
-                    R.id.buslist_time },
-                childData, R.layout.expandable_list_child,
-                new String[] { DESTINATION_KEY, ARRIVAL_TIME_KEY },
-                new int[] { R.id.buschild_destination, R.id.buschild_time });
-        listView.setAdapter(listAdapter);
-        
-        final int count = groupData.size();
+        final int count = adapter.getGroupCount();
+        LiveBusService busService;
         for(int i = 0; i < count; i++) {
-            curGroupMap = groupData.get(i);
+            busService = adapter.getGroup(i);
             // Re-expand previously expanded items.
-            if(expandedServices.contains(curGroupMap.get(SERVICE_NAME_KEY))) {
+            if(expandedServices.contains(busService.getServiceName())) {
                 listView.expandGroup(i);
             }
         }
 
         showTimes();
-        if(autoRefresh) setUpAutoRefresh();
         updateLastRefreshed();
+        
+        if(autoRefresh) {
+            setUpAutoRefresh();
+        }
     }
     
     /**
@@ -1023,21 +922,16 @@ public class DisplayStopDataFragment extends Fragment
         // Firstly, flush the previous items from the list.
         expandedServices.clear();
         
-        // The ListAdapter could be null.
-        if(listAdapter != null) {
-            // Cache the count.
-            final int count = listAdapter.getGroupCount();
-            
-            HashMap<String, String> groupData;
-            // Loop through all group items.
-            for(int i = 0; i < count; i++) {
-                // If the group is expanded, get the service name and add it to
-                // the list.
-                if(listView.isGroupExpanded(i)) {
-                    groupData = (HashMap<String, String>)listAdapter
-                            .getGroup(i);
-                    expandedServices.add(groupData.get(SERVICE_NAME_KEY));
-                }
+        // Cache the count.
+        final int count = adapter.getGroupCount();
+
+        // Loop through all group items.
+        for(int i = 0; i < count; i++) {
+            // If the group is expanded, get the service name and add it to
+            // the list.
+            if(listView.isGroupExpanded(i)) {
+                expandedServices.add(adapter.getGroup(i)
+                        .getServiceName());
             }
         }
     }
@@ -1059,133 +953,6 @@ public class DisplayStopDataFragment extends Fragment
     @Override
     public void onCancelFavouriteDeletion() {
         // Nothing to do here.
-    }
-    
-    /**
-     * This custom ExpandableListAdapter attributes colours to service names
-     * in the ExpandableListView.
-     */
-    private static class BusTimesExpandableListAdapter
-            extends SimpleExpandableListAdapter {
-        
-        private final Context context;
-        private final int defaultColour;
-        private final HashMap<String, String> colours;
-        
-        /**
-         * Create a new BusTimesExpandableListAdapter.
-         * 
-         * @param context A Context instance.
-         * @param groupData The group data.
-         * @param groupLayout The layout to use for the group View.
-         * @param groupFrom An array of keys to use for the group items.
-         * @param groupTo The TextViews to load the keys in to.
-         * @param childData The child data.
-         * @param childLayout The layout to use for the child View.
-         * @param childFrom An array of keys to use for the child View.
-         * @param childTo The TextViews to load the keys in to.
-         */
-        public BusTimesExpandableListAdapter(final Context context,
-                final ArrayList<HashMap<String, String>> groupData,
-                final int groupLayout, final String[] groupFrom,
-                final int[] groupTo,
-                final ArrayList<ArrayList<HashMap<String, String>>> childData,
-                final int childLayout,
-                final String[] childFrom, final int[] childTo) {
-            super(context, groupData, groupLayout, groupFrom, groupTo,
-                    childData, childLayout, childFrom, childTo);
-            
-            // The superclass has no way to get the context again, so cache it
-            // here.
-            this.context = context;
-            
-            final BusStopDatabase bsd = BusStopDatabase.getInstance(
-                    context.getApplicationContext());
-            defaultColour = context.getResources().getColor(R.color
-                    .defaultBusColour);
-            final int size = groupData.size();
-            // Create an array of String to hold the loaded services.
-            final String[] services = new String[size];
-            int i = 0;
-            
-            // Get the service list from the group data and put it in the
-            // service array.
-            for(HashMap<String, String> map : groupData) {
-                services[i] = map.get(SERVICE_NAME_KEY);
-                i++;
-            }
-            
-            if(size > 0) {
-                colours = bsd.getServiceColours(services);
-            } else {
-                colours = null;
-            }
-        }
-        
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        @SuppressLint({"NewAPI"})
-        public View getGroupView(final int groupPosition,
-                final boolean isExpanded, final View convertView,
-                final ViewGroup parent) {
-            final View v = super.getGroupView(groupPosition, isExpanded,
-                    convertView, parent);
-            final TextView txtService = (TextView)v.findViewById(
-                    R.id.buslist_service);
-            // Get the HashMap for the groupPosition.
-            final HashMap<String, String> group =
-                    (HashMap<String, String>)getGroup(groupPosition);
-            // Get the name of the service.
-            final String service = group.get(SERVICE_NAME_KEY);
-            // Get the Drawable which makes up the retangle in the background
-            // with the rounded corners. Make it mutable so it doesn't affect
-            // other instances of the same Drawable.
-            final GradientDrawable background;
-            try {
-                background = (GradientDrawable)context.getResources()
-                        .getDrawable(R.drawable.bus_service_rounded_background)
-                        .mutate();
-            } catch(ClassCastException e) {
-                txtService.setTextColor(Color.BLACK);
-                return v;
-            }
-            
-            // Night services are treated differently to the rest.
-            if(service.startsWith("N")) {
-                // Give it a black background.
-                background.setColor(Color.BLACK);
-                // We need to replace the text in the TextView because HTML
-                // formatting has been applied to it, to make the 'N' red.
-                txtService.setText(
-                        BusStopDatabase.getColouredServiceListString(service));
-            } else if(colours != null && colours.containsKey(service)) {
-                try {
-                    // If the colour for the service can be parsed, set the
-                    // background here.
-                    background.setColor(Color.parseColor(
-                            colours.get(service)));
-                } catch(IllegalArgumentException e) {
-                    // If it cannot be parsed, use the default background
-                    // colour.
-                    background.setColor(defaultColour);
-                }
-            } else {
-                // If not a night service, and a colour doesn't exist for the
-                // service, use the default colour.
-                background.setColor(defaultColour);
-            }
-            
-            // Set the background and return the View for the group.
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                txtService.setBackground(background);
-            } else {
-                txtService.setBackgroundDrawable(background);
-            }
-            
-            return v;
-        }
     }
     
     /**

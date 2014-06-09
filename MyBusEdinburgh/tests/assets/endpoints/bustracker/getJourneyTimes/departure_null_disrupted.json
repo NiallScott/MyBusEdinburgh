@@ -1,0 +1,11 @@
+{
+    "order": 3,
+    "stopId": "36236754",
+    "stopName": "The Exchange",
+    "day": 0,
+    "time": "22:41",
+    "minutes": 4,
+    "reliability": "H",
+    "type": "N",
+    "busStopDisruption": null
+}

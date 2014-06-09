@@ -1,0 +1,13 @@
+{
+    "journeyId": "3084",
+    "operatorId": "LB",
+    "refService": "60",
+    "mnemoService": "22",
+    "nameService": "Gyle -- Ocean Terminal",
+    "refDest": "3964930",
+    "nameDest": "Gyle Centre",
+    "terminus": "36242462",
+    "globalDisruption": false,
+    "serviceDisruption": false,
+    "serviceDiversion": false
+}

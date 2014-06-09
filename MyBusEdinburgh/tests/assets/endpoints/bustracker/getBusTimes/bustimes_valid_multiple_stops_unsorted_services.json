@@ -1,0 +1,924 @@
+{
+    "busTimes": [
+        {
+            "operatorId": "LB",
+            "stopId": "36243526",
+            "stopName": "Fountainpark",
+            "refService": "90",
+            "mnemoService": "30",
+            "nameService": "Musselburgh -- Clovenstone",
+            "timeDatas": [
+                {
+                    "refDest": "5898241",
+                    "nameDest": "Musselburgh",
+                    "day": 0,
+                    "time": "22:09",
+                    "minutes": 7,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "58232685",
+                    "journeyId": "5227",
+                    "busId": "94"
+                },
+                {
+                    "refDest": "5898241",
+                    "nameDest": "Musselburgh",
+                    "day": 0,
+                    "time": "22:23",
+                    "minutes": 21,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "58232685",
+                    "journeyId": "5084",
+                    "busId": "122"
+                },
+                {
+                    "refDest": "5898241",
+                    "nameDest": "Musselburgh",
+                    "day": 0,
+                    "time": "22:46",
+                    "minutes": 44,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "58232685",
+                    "journeyId": "5110",
+                    "busId": "125"
+                },
+                {
+                    "refDest": "5898241",
+                    "nameDest": "Musselburgh",
+                    "day": 0,
+                    "time": "23:06",
+                    "minutes": 64,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "58232685",
+                    "journeyId": "5098",
+                    "busId": "103"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36236464",
+            "stopName": "Lauriston Terrac",
+            "refService": "108",
+            "mnemoService": "35",
+            "nameService": "Airport -- Ocean Terminal",
+            "timeDatas": [
+                {
+                    "refDest": "7110656",
+                    "nameDest": "Airport",
+                    "day": 0,
+                    "time": "22:13",
+                    "minutes": 11,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36253272",
+                    "journeyId": "4428",
+                    "busId": "904"
+                },
+                {
+                    "refDest": "7110659",
+                    "nameDest": "Sighthill",
+                    "day": 0,
+                    "time": "22:43",
+                    "minutes": 41,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36234863",
+                    "journeyId": "4416",
+                    "busId": "991"
+                },
+                {
+                    "refDest": "7110659",
+                    "nameDest": "Sighthill",
+                    "day": 0,
+                    "time": "23:13",
+                    "minutes": 71,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36234863",
+                    "journeyId": "4438",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "7110658",
+                    "nameDest": "Longstone",
+                    "day": 0,
+                    "time": "23:41",
+                    "minutes": 99,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36236752",
+                    "journeyId": "4182",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "1",
+            "mnemoService": "1",
+            "nameService": "Easter Road -- Clermiston",
+            "timeDatas": [
+                {
+                    "refDest": "98304",
+                    "nameDest": "Clermiston",
+                    "day": 0,
+                    "time": "22:19",
+                    "minutes": 17,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237636",
+                    "journeyId": "1394",
+                    "busId": "5"
+                },
+                {
+                    "refDest": "98304",
+                    "nameDest": "Clermiston",
+                    "day": 0,
+                    "time": "22:49",
+                    "minutes": 47,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237636",
+                    "journeyId": "1508",
+                    "busId": "4"
+                },
+                {
+                    "refDest": "98304",
+                    "nameDest": "Clermiston",
+                    "day": 0,
+                    "time": "23:19",
+                    "minutes": 77,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36237636",
+                    "journeyId": "1464",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36236464",
+            "stopName": "Lauriston Terrac",
+            "refService": "63",
+            "mnemoService": "23",
+            "nameService": "Greenbank - Trinity",
+            "timeDatas": [
+                {
+                    "refDest": "4161538",
+                    "nameDest": "Greenbank",
+                    "day": 0,
+                    "time": "22:03",
+                    "minutes": 1,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36235958",
+                    "journeyId": "3327",
+                    "busId": "375"
+                },
+                {
+                    "refDest": "4161538",
+                    "nameDest": "Greenbank",
+                    "day": 0,
+                    "time": "22:31",
+                    "minutes": 29,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36235958",
+                    "journeyId": "3409",
+                    "busId": "371"
+                },
+                {
+                    "refDest": "4161538",
+                    "nameDest": "Greenbank",
+                    "day": 0,
+                    "time": "23:01",
+                    "minutes": 59,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36235958",
+                    "journeyId": "3308",
+                    "busId": "372"
+                },
+                {
+                    "refDest": "4161538",
+                    "nameDest": "Greenbank",
+                    "day": 0,
+                    "time": "23:31",
+                    "minutes": 89,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36235958",
+                    "journeyId": "3329",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "90",
+            "mnemoService": "30",
+            "nameService": "Musselburgh -- Clovenstone",
+            "timeDatas": [
+                {
+                    "refDest": "5931008",
+                    "nameDest": "Clovenstone",
+                    "day": 0,
+                    "time": "22:14",
+                    "minutes": 12,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237483",
+                    "journeyId": "5097",
+                    "busId": "103"
+                },
+                {
+                    "refDest": "5931008",
+                    "nameDest": "Clovenstone",
+                    "day": 0,
+                    "time": "22:32",
+                    "minutes": 30,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237483",
+                    "journeyId": "5038",
+                    "busId": "110"
+                },
+                {
+                    "refDest": "5931008",
+                    "nameDest": "Clovenstone",
+                    "day": 0,
+                    "time": "22:51",
+                    "minutes": 49,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237483",
+                    "journeyId": "5215",
+                    "busId": "116"
+                },
+                {
+                    "refDest": "5931008",
+                    "nameDest": "Clovenstone",
+                    "day": 0,
+                    "time": "23:11",
+                    "minutes": 69,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237483",
+                    "journeyId": "5169",
+                    "busId": "113"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "60",
+            "mnemoService": "22",
+            "nameService": "Gyle -- Ocean Terminal",
+            "timeDatas": [
+                {
+                    "refDest": "3964930",
+                    "nameDest": "Gyle Centre",
+                    "day": 0,
+                    "time": "22:04",
+                    "minutes": 2,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36242462",
+                    "journeyId": "3197",
+                    "busId": "917"
+                },
+                {
+                    "refDest": "3964930",
+                    "nameDest": "Gyle Centre",
+                    "day": 0,
+                    "time": "22:15",
+                    "minutes": 13,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36242462",
+                    "journeyId": "3061",
+                    "busId": "348"
+                },
+                {
+                    "refDest": "3964930",
+                    "nameDest": "Gyle Centre",
+                    "day": 0,
+                    "time": "22:24",
+                    "minutes": 22,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36242462",
+                    "journeyId": "3042",
+                    "busId": "350"
+                },
+                {
+                    "refDest": "3964930",
+                    "nameDest": "Gyle Centre",
+                    "day": 0,
+                    "time": "22:34",
+                    "minutes": 32,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36242462",
+                    "journeyId": "3084",
+                    "busId": "343"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "12",
+            "mnemoService": "4",
+            "nameService": "The Jewel -- Hillend",
+            "timeDatas": [
+                {
+                    "refDest": "819200",
+                    "nameDest": "Hillend",
+                    "day": 0,
+                    "time": "22:30",
+                    "minutes": 28,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "64323845",
+                    "journeyId": "5507",
+                    "busId": "392"
+                },
+                {
+                    "refDest": "819200",
+                    "nameDest": "Hillend",
+                    "day": 0,
+                    "time": "23:00",
+                    "minutes": 58,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "64323845",
+                    "journeyId": "5523",
+                    "busId": "396"
+                },
+                {
+                    "refDest": "819200",
+                    "nameDest": "Hillend",
+                    "day": 0,
+                    "time": "23:30",
+                    "minutes": 88,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "64323845",
+                    "journeyId": "5550",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "105",
+            "mnemoService": "34",
+            "nameService": "Riccarton -- Ocean Terminal",
+            "timeDatas": [
+                {
+                    "refDest": "6914049",
+                    "nameDest": "Riccarton",
+                    "day": 0,
+                    "time": "22:29",
+                    "minutes": 27,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36234873",
+                    "journeyId": "3979",
+                    "busId": "646"
+                },
+                {
+                    "refDest": "6914049",
+                    "nameDest": "Riccarton",
+                    "day": 0,
+                    "time": "22:59",
+                    "minutes": 57,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36234873",
+                    "journeyId": "3999",
+                    "busId": "608"
+                },
+                {
+                    "refDest": "6914049",
+                    "nameDest": "Riccarton",
+                    "day": 0,
+                    "time": "23:28",
+                    "minutes": 86,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36234873",
+                    "journeyId": "4147",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "6914048",
+                    "nameDest": "Longstone",
+                    "day": 0,
+                    "time": "23:46",
+                    "minutes": 104,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36235367",
+                    "journeyId": "4156",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36236464",
+            "stopName": "Lauriston Terrac",
+            "refService": "117",
+            "mnemoService": "47",
+            "nameService": "Ladywood -- Granton H",
+            "timeDatas": [
+                {
+                    "refDest": "7667713",
+                    "nameDest": "Granton",
+                    "day": 0,
+                    "time": "22:30",
+                    "minutes": 28,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36253267",
+                    "journeyId": "1023",
+                    "busId": "936"
+                },
+                {
+                    "refDest": "7667713",
+                    "nameDest": "Granton",
+                    "day": 0,
+                    "time": "22:52",
+                    "minutes": 50,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36253267",
+                    "journeyId": "1064",
+                    "busId": "810"
+                },
+                {
+                    "refDest": "7667712",
+                    "nameDest": "Athol Crescent",
+                    "day": 0,
+                    "time": "23:20",
+                    "minutes": 78,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36232692",
+                    "journeyId": "1118",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "7667712",
+                    "nameDest": "Athol Crescent",
+                    "day": 0,
+                    "time": "23:41",
+                    "minutes": 99,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36232692",
+                    "journeyId": "1093",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": true,
+            "busStopDisruption": false,
+            "serviceDiversion": true
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36236464",
+            "stopName": "Lauriston Terrac",
+            "refService": "81",
+            "mnemoService": "27",
+            "nameService": "Hunter's Tryst -- Silverknowes",
+            "timeDatas": [
+                {
+                    "refDest": "5341185",
+                    "nameDest": "Hunters Tryst",
+                    "day": 0,
+                    "time": "22:17",
+                    "minutes": 15,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237837",
+                    "journeyId": "412",
+                    "busId": "355"
+                },
+                {
+                    "refDest": "5341185",
+                    "nameDest": "Hunters Tryst",
+                    "day": 0,
+                    "time": "22:46",
+                    "minutes": 44,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237837",
+                    "journeyId": "395",
+                    "busId": "351"
+                },
+                {
+                    "refDest": "5341185",
+                    "nameDest": "Hunters Tryst",
+                    "day": 0,
+                    "time": "23:16",
+                    "minutes": 74,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237837",
+                    "journeyId": "292",
+                    "busId": "352"
+                },
+                {
+                    "refDest": "5341185",
+                    "nameDest": "Hunters Tryst",
+                    "day": 0,
+                    "time": "23:46",
+                    "minutes": 104,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36237837",
+                    "journeyId": "377",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "199",
+            "mnemoService": "N22",
+            "nameService": "Ocean Terminal - Airport",
+            "timeDatas": [
+                {
+                    "refDest": "13074432",
+                    "nameDest": "Airport",
+                    "day": 0,
+                    "time": "00:15",
+                    "minutes": 133,
+                    "reliability": "T",
+                    "type": "R",
+                    "terminus": "36232426",
+                    "journeyId": "555",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "13074432",
+                    "nameDest": "Airport",
+                    "day": 0,
+                    "time": "00:45",
+                    "minutes": 163,
+                    "reliability": "F",
+                    "type": "R",
+                    "terminus": "36232426",
+                    "journeyId": "562",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "13074432",
+                    "nameDest": "Airport",
+                    "day": 0,
+                    "time": "01:15",
+                    "minutes": 193,
+                    "reliability": "T",
+                    "type": "R",
+                    "terminus": "36232426",
+                    "journeyId": "568",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "13074432",
+                    "nameDest": "Airport",
+                    "day": 0,
+                    "time": "01:45",
+                    "minutes": 223,
+                    "reliability": "T",
+                    "type": "R",
+                    "terminus": "36232426",
+                    "journeyId": "557",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "216",
+            "mnemoService": "N34",
+            "nameService": "Leith St - Riccarton",
+            "timeDatas": [
+                {
+                    "refDest": "14188544",
+                    "nameDest": "Riccarton",
+                    "day": 0,
+                    "time": "00:45",
+                    "minutes": 163,
+                    "reliability": "T",
+                    "type": "R",
+                    "terminus": "36235952",
+                    "journeyId": "678",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "14188544",
+                    "nameDest": "Riccarton",
+                    "day": 0,
+                    "time": "01:45",
+                    "minutes": 223,
+                    "reliability": "T",
+                    "type": "R",
+                    "terminus": "36235952",
+                    "journeyId": "680",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "14188544",
+                    "nameDest": "Riccarton",
+                    "day": 0,
+                    "time": "02:45",
+                    "minutes": 283,
+                    "reliability": "T",
+                    "type": "R",
+                    "terminus": "36235952",
+                    "journeyId": "682",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36243526",
+            "stopName": "Fountainpark",
+            "refService": "199",
+            "mnemoService": "N22",
+            "nameService": "Ocean Terminal - Airport",
+            "timeDatas": [
+                {
+                    "refDest": "13041665",
+                    "nameDest": "Ocean Terminal",
+                    "day": 0,
+                    "time": "01:05",
+                    "minutes": 183,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36242965",
+                    "journeyId": "556",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "13041665",
+                    "nameDest": "Ocean Terminal",
+                    "day": 0,
+                    "time": "01:35",
+                    "minutes": 213,
+                    "reliability": "F",
+                    "type": "N",
+                    "terminus": "36242965",
+                    "journeyId": "563",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "13041665",
+                    "nameDest": "Ocean Terminal",
+                    "day": 0,
+                    "time": "02:05",
+                    "minutes": 243,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36242965",
+                    "journeyId": "569",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "13041665",
+                    "nameDest": "Ocean Terminal",
+                    "day": 0,
+                    "time": "02:35",
+                    "minutes": 273,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36242965",
+                    "journeyId": "558",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "221",
+            "mnemoService": "N44",
+            "nameService": "Balerno - Tranent Windygoul",
+            "timeDatas": [
+                {
+                    "refDest": "14516224",
+                    "nameDest": "Balerno",
+                    "day": 0,
+                    "time": "00:30",
+                    "minutes": 148,
+                    "reliability": "T",
+                    "type": "R",
+                    "terminus": "36234964",
+                    "journeyId": "2590",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36243526",
+            "stopName": "Fountainpark",
+            "refService": "60",
+            "mnemoService": "22",
+            "nameService": "Gyle -- Ocean Terminal",
+            "timeDatas": [
+                {
+                    "refDest": "3932161",
+                    "nameDest": "Ocean Terminal",
+                    "day": 0,
+                    "time": "22:07",
+                    "minutes": 5,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36242965",
+                    "journeyId": "2821",
+                    "busId": "347"
+                },
+                {
+                    "refDest": "3932161",
+                    "nameDest": "Ocean Terminal",
+                    "day": 0,
+                    "time": "22:20",
+                    "minutes": 18,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36242965",
+                    "journeyId": "2842",
+                    "busId": "333"
+                },
+                {
+                    "refDest": "3932161",
+                    "nameDest": "Ocean Terminal",
+                    "day": 0,
+                    "time": "22:29",
+                    "minutes": 26,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36242965",
+                    "journeyId": "2914",
+                    "busId": "345"
+                },
+                {
+                    "refDest": "3932161",
+                    "nameDest": "Ocean Terminal",
+                    "day": 0,
+                    "time": "22:39",
+                    "minutes": 36,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36242965",
+                    "journeyId": "2864",
+                    "busId": "338"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        },
+        {
+            "operatorId": "LB",
+            "stopId": "36237983",
+            "stopName": "Royal Scot Acad",
+            "refService": "133",
+            "mnemoService": "44A",
+            "nameService": "Wallyford -- Balerno",
+            "timeDatas": [
+                {
+                    "refDest": "8749056",
+                    "nameDest": "Balerno",
+                    "day": 0,
+                    "time": "22:21",
+                    "minutes": 19,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36234964",
+                    "journeyId": "6804",
+                    "busId": "316"
+                },
+                {
+                    "refDest": "8749056",
+                    "nameDest": "Balerno",
+                    "day": 0,
+                    "time": "22:57",
+                    "minutes": 55,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36234964",
+                    "journeyId": "4567",
+                    "busId": "735"
+                },
+                {
+                    "refDest": "8749056",
+                    "nameDest": "Balerno",
+                    "day": 0,
+                    "time": "23:22",
+                    "minutes": 80,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36234964",
+                    "journeyId": "4717",
+                    "busId": "0"
+                },
+                {
+                    "refDest": "8749056",
+                    "nameDest": "Balerno",
+                    "day": 0,
+                    "time": "23:50",
+                    "minutes": 107,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36234964",
+                    "journeyId": "4614",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        }
+    ]
+}

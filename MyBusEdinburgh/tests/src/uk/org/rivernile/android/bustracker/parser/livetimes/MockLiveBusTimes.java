@@ -40,9 +40,13 @@ class MockLiveBusTimes extends LiveBusTimes<LiveBusStop> {
      * 
      * @param busStops The mapping of bus stop codes to {@link LiveBusStop}
      * instances. Must not be null.
+     * @param receiveTime The time, as per
+     * {@link android.os.SystemClock#elapsedRealtime()}, that the data was
+     * received at.
      */
-    public MockLiveBusTimes(final Map<String, LiveBusStop> busStops) {
-        super(busStops);
+    public MockLiveBusTimes(final Map<String, LiveBusStop> busStops,
+            final long receiveTime) {
+        super(busStops, receiveTime);
     }
 
     /**

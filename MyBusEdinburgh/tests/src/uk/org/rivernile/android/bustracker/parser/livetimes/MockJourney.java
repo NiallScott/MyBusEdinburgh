@@ -42,10 +42,13 @@ class MockJourney extends Journey {
      * @param serviceName Mock service name. Must not be null.
      * @param departures Most List of {@link JourneyDeparture}s. Must not be
      * null.
+     * @param receiveTime The time, as per
+     * {@link android.os.SystemClock#elapsedRealtime()}, that the data was
+     * received at.
      */
     public MockJourney(final String journeyId, final String serviceName,
-            final List<JourneyDeparture> departures) {
-        super(journeyId, serviceName, departures);
+            final List<JourneyDeparture> departures, final long receiveTime) {
+        super(journeyId, serviceName, departures, receiveTime);
     }
 
     /**

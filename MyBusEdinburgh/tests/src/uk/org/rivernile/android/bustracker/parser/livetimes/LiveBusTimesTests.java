@@ -44,7 +44,7 @@ public class LiveBusTimesTests extends TestCase {
      */
     public void testConstructorWithNullBusStops() {
         try {
-            new MockLiveBusTimes(null);
+            new MockLiveBusTimes(null, 123456789L);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -61,13 +61,14 @@ public class LiveBusTimesTests extends TestCase {
         final Map<String, LiveBusStop> map =
                 Collections.unmodifiableMap(
                         Collections.<String, LiveBusStop>emptyMap());
-        final LiveBusTimes busTimes = new MockLiveBusTimes(map);
+        final LiveBusTimes busTimes = new MockLiveBusTimes(map, 123456789L);
         final Set<String> stopCodes = busTimes.getBusStops();
         
         assertNotNull(stopCodes);
         assertTrue(stopCodes.isEmpty());
         assertTrue(busTimes.isEmpty());
         assertEquals(0, busTimes.size());
+        assertEquals(123456789L, busTimes.getReceiveTime());
     }
     
     /**
@@ -80,8 +81,10 @@ public class LiveBusTimesTests extends TestCase {
         map.put("123456", new MockLiveBusStop("123456", "stop name",
                 Collections.<LiveBusService>emptyList()));
         final LiveBusTimes busTimes =
-                new MockLiveBusTimes(Collections.unmodifiableMap(map));
+                new MockLiveBusTimes(Collections.unmodifiableMap(map),
+                123456789L);
         
+        assertEquals(123456789L, busTimes.getReceiveTime());
         assertFalse(busTimes.isEmpty());
         assertEquals(1, busTimes.size());
         
@@ -115,8 +118,10 @@ public class LiveBusTimesTests extends TestCase {
         map.put("214365", new MockLiveBusStop("214365", "stop name",
                 Collections.<LiveBusService>emptyList()));
         final LiveBusTimes busTimes =
-                new MockLiveBusTimes(Collections.unmodifiableMap(map));
+                new MockLiveBusTimes(Collections.unmodifiableMap(map),
+                123456789L);
         
+        assertEquals(123456789L, busTimes.getReceiveTime());
         assertFalse(busTimes.isEmpty());
         assertEquals(3, busTimes.size());
         

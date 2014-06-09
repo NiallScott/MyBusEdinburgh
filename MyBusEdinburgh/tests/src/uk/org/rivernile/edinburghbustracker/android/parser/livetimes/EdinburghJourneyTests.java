@@ -44,7 +44,7 @@ public class EdinburghJourneyTests extends TestCase {
         try {
             new EdinburghJourney("123", "22",
                     new ArrayList<EdinburghJourneyDeparture>(), null, null,
-                    null, null, false, false, false);
+                    null, null, false, false, false, 123456789L);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -61,7 +61,7 @@ public class EdinburghJourneyTests extends TestCase {
         try {
             new EdinburghJourney("123", "22",
                     new ArrayList<EdinburghJourneyDeparture>(), null, null,
-                    null, "", false, false, false);
+                    null, "", false, false, false, 123456789L);
         } catch (IllegalArgumentException e) {
             return;
         }
@@ -77,7 +77,7 @@ public class EdinburghJourneyTests extends TestCase {
         final Journey journey = new EdinburghJourney("123", "25",
                 new ArrayList<EdinburghJourneyDeparture>(), "LB",
                 "Riccarton -- Restalrig", "Riccarton", "123456", false, false,
-                false);
+                false, 123456789L);
         assertEquals("123", journey.getJourneyId());
         assertEquals("25", journey.getServiceName());
         assertTrue(journey.getDepartures().isEmpty());
@@ -98,7 +98,7 @@ public class EdinburghJourneyTests extends TestCase {
         final Journey journey = new EdinburghJourney("123", "25",
                 new ArrayList<EdinburghJourneyDeparture>(), "LB",
                 "Riccarton -- Restalrig", "Riccarton", "123456", true, false,
-                false);
+                false, 123456789L);
         assertTrue(journey.hasGlobalDisruption());
     }
     
@@ -110,7 +110,7 @@ public class EdinburghJourneyTests extends TestCase {
         final Journey journey = new EdinburghJourney("123", "25",
                 new ArrayList<EdinburghJourneyDeparture>(), "LB",
                 "Riccarton -- Restalrig", "Riccarton", "123456", false, true,
-                false);
+                false, 123456789L);
         assertTrue(journey.hasServiceDisruption());
     }
     
@@ -122,7 +122,7 @@ public class EdinburghJourneyTests extends TestCase {
         final Journey journey = new EdinburghJourney("123", "25",
                 new ArrayList<EdinburghJourneyDeparture>(), "LB",
                 "Riccarton -- Restalrig", "Riccarton", "123456", false, false,
-                true);
+                true, 123456789L);
         assertTrue(journey.hasServiceDiversion());
     }
 }

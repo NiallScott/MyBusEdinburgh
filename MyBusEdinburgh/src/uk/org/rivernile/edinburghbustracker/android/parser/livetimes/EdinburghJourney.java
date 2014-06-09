@@ -61,13 +61,17 @@ public class EdinburghJourney extends Journey<EdinburghJourneyDeparture> {
      * not.
      * @param serviceDisruption true if the service is disrupted, false if not.
      * @param serviceDiversion true if the service is diverted, false if not.
+     * @param receiveTime The time, as per
+     * {@link android.os.SystemClock#elapsedRealtime()}, that the data was
+     * received at.
      */
     public EdinburghJourney(final String journeyId, final String serviceName,
             final List<EdinburghJourneyDeparture> departures,
             final String operator, final String route, final String destination,
             final String terminus, final boolean globalDisruption,
-            final boolean serviceDisruption, final boolean serviceDiversion) {
-        super(journeyId, serviceName, departures);
+            final boolean serviceDisruption, final boolean serviceDiversion,
+            final long receiveTime) {
+        super(journeyId, serviceName, departures, receiveTime);
         
         if (TextUtils.isEmpty(terminus)) {
             throw new IllegalArgumentException("The terminus must not be null "

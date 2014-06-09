@@ -43,6 +43,7 @@ public abstract class Journey<T extends JourneyDeparture> {
     private final String journeyId;
     private final String serviceName;
     private final List<T> departures;
+    private final long receiveTime;
     
     /**
      * Create a new Journey.
@@ -52,9 +53,12 @@ public abstract class Journey<T extends JourneyDeparture> {
      * or empty.
      * @param departures A List of {@link JourneyDeparture}s for this journey.
      * This cannot be null.
+     * @param receiveTime The time, as per
+     * {@link android.os.SystemClock#elapsedRealtime()}, that the data was
+     * received at.
      */
     public Journey(final String journeyId, final String serviceName,
-            final List<T> departures) {
+            final List<T> departures, final long receiveTime) {
         if (TextUtils.isEmpty(journeyId)) {
             throw new IllegalArgumentException("The journeyId must not be null "
                     + "or empty.");
@@ -73,6 +77,7 @@ public abstract class Journey<T extends JourneyDeparture> {
         this.journeyId = journeyId;
         this.serviceName = serviceName;
         this.departures = departures;
+        this.receiveTime = receiveTime;
         
     }
     
@@ -101,6 +106,20 @@ public abstract class Journey<T extends JourneyDeparture> {
      */
     public List<T> getDepartures() {
         return departures;
+    }
+    
+    /**
+     * Get the time, as per {@link android.os.SystemClock#elapsedRealtime()},
+     * that the data was received at. This may be used later to determine how
+     * old the data is. The reason that it is based on
+     * {@link android.os.SystemClock#elapsedRealtime()} is because that does not
+     * change if the user changes the system clock.
+     * 
+     * @return The number of milliseconds since system boot that the data was
+     * received and parsed at.
+     */
+    public long getReceiveTime() {
+        return receiveTime;
     }
 
     /**

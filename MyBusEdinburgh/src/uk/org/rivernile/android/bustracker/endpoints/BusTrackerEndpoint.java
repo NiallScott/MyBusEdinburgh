@@ -25,10 +25,10 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
-import java.util.HashMap;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
+import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 
 /**
  * A bus tracker endpoint is an abstraction layer to help with testing and the
@@ -73,9 +73,23 @@ public abstract class BusTrackerEndpoint {
      * @param stopCodes The bus stops to get times for.
      * @param numDepartures The number of departures to get for each service at
      * each stop.
-     * @return A HashMap of stopCode -> BusStop.
-     * @throws BusParserException If there was a problem while parsing data.
+     * @return A LiveBusTimes object, containing the live bus stop data.
+     * @throws LiveTimesException If there was a problem while fetching or
+     * parsing the data.
      */
-    public abstract HashMap<String, BusStop> getBusTimes(String[] stopCodes,
-            int numDepartures) throws BusParserException;
+    public abstract LiveBusTimes getBusTimes(String[] stopCodes,
+            int numDepartures) throws LiveTimesException;
+    
+    /**
+     * Get the journey times for a specific journey departing from a specific
+     * stop.
+     * 
+     * @param stopCode The stopCode of the departure point.
+     * @param journeyId A unique ID for the journey.
+     * @return A Journey object, containing the journey data.
+     * @throws LiveTimesException If there was a problem while fetching or
+     * parsing the data.
+     */
+    public abstract Journey getJourneyTimes(String stopCode, String journeyId)
+            throws LiveTimesException;
 }

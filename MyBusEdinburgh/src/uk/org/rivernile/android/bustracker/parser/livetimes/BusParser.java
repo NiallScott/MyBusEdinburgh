@@ -25,48 +25,35 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
-import java.util.HashMap;
 import uk.org.rivernile.android.fetchers.Fetcher;
 
 /**
- * The BusParser interface defines a single method that all parsers of the
- * bus times should implement. Essentially this method will take a list of bus
- * stops to get bus times for, and it will return a HashMap of stop codes and
- * BusStop objects.
+ * The BusParser defines an interface of methods to communicate with the
+ * real-time server.
  * 
  * @author Niall Scott
  */
 public interface BusParser {
     
-    /** This error is called when the error has not been defined in code yet. */
-    public static final byte ERROR_UNKNOWN = 0;
-    /**
-     * This error is called when a connection could not be made to the server.
-     */
-    public static final byte ERROR_NOCONNECTION = 1;
-    /** This error is called when the server name could not be resolved. */
-    public static final byte ERROR_CANNOTRESOLVE = 2;
-    /** This error is called when no stop code has been provided. */
-    public static final byte ERROR_NOCODE = 3;
-    /** This error is called when there was an error parsing the data. */
-    public static final byte ERROR_PARSEERR = 4;
-    /** This error is called when there was no data for this stop. */
-    public static final byte ERROR_NODATA = 5;
-    /**
-     * This error is called when the URL the client thought it was requesting
-     * data from differs from the URL it is receiving data from.
-     */
-    public static final byte ERROR_URLMISMATCH = 6;
-    
     /**
      * Get bus times for the data returned by the given Fetcher.
      * 
      * @param fetcher The fetcher to use to retrieve data.
-     * @return A HashMap of String -> BusStop.
-     * @throws BusParserException When an exception occurs during fetching or
-     * parsing. Exceptions are wrapped in BusParserException to return a common
-     * type.
+     * @return A LiveBusTimes instance which contains the live bus data.
+     * @throws LiveTimesException When there was an error in fetching or parsing
+     * of the data. This may be an instance of LiveTimesException or one of its
+     * children. The instance may also have a cause Throwable included.
      */
-    public HashMap<String, BusStop> getBusTimes(Fetcher fetcher)
-            throws BusParserException;
+    public LiveBusTimes getBusTimes(Fetcher fetcher) throws LiveTimesException;
+    
+    /**
+     * Get journey times for a journey returned by the given Fetcher.
+     * 
+     * @param fetcher The fetcher to use to retrieve data.
+     * @return A Journey instance which contains the journey data.
+     * @throws LiveTimesException When there was an error in fetching or parsing
+     * of the data. This may be an instance of LiveTimesException or one of its
+     * children. The instance may also have a cause Throwable included.
+     */
+    public Journey getJourneyTimes(Fetcher fetcher) throws LiveTimesException;
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -88,43 +88,43 @@
                 android:background="@null"
                 android:contentDescription="@null" />
         </LinearLayout>
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_default"
             android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-            android:paddingTop="8dp">
+            android:orientation="horizontal" >
             <TextView
                 android:id="@+id/txtService"
                 android:layout_height="wrap_content"
-                android:layout_width="50dp"
-                android:layout_alignParentLeft="true"
-                android:gravity="center_horizontal"
+                android:layout_width="@dimen/service_name_width"
+                android:gravity="center"
                 android:singleLine="true"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:text="@string/displaystopdata_column_service"/>
+                android:text="@string/displaystopdata_column_service" />
             <TextView
                 android:id="@+id/txtDestination"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:layout_toRightOf="@id/txtService"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:singleLine="true"
-                android:paddingLeft="8dp"
+                android:paddingLeft="@dimen/padding_default"
+                android:paddingRight="@dimen/padding_default"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:text="@string/displaystopdata_column_destination"/>
+                android:text="@string/displaystopdata_column_destination" />
             <TextView
                 android:id="@+id/txtTime"
                 android:layout_height="wrap_content"
-                android:layout_width="80dp"
-                android:layout_alignParentRight="true"
-                android:paddingRight="10dp"
+                android:layout_width="@dimen/bustime_width"
+                android:paddingRight="@dimen/padding_default"
                 android:gravity="right"
                 android:singleLine="true"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                android:text="@string/displaystopdata_column_due"/>
-        </RelativeLayout>
+                android:text="@string/displaystopdata_column_due" />
+        </LinearLayout>
     </LinearLayout>
     <ProgressBar
         android:id="@+id/progressBig"

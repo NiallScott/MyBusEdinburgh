@@ -33,18 +33,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
-import java.util.HashMap;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusService;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
+import java.util.List;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
-import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
-        .EdinburghBus;
 
 /**
  * The purpose of the TimeAlertService is run on a once-per-minute basis to load
@@ -112,96 +112,59 @@ public class TimeAlertService extends IntentService {
         final String[] services = intent.getStringArrayExtra(ARG_SERVICES);
         final int timeTrigger = intent.getIntExtra(ARG_TIME_TRIGGER, 5);
         
-        HashMap<String, BusStop> result;
+        LiveBusTimes result;
         try {
             // Get the bus times. Only get 1 bus per service.
             result = app.getBusTrackerEndpoint().getBusTimes(
                     new String[] { stopCode }, 1);
-        } catch(BusParserException e) {
+        } catch(LiveTimesException e) {
             // There was an error. No point continuing. Reschedule.
             reschedule(intent);
             return;
         }
         
         // Get the bus stop we are interested in. It should be the only one in
-        // the HashMap anyway.
-        final BusStop busStop = result.get(stopCode);
+        // the result.
+        final LiveBusStop busStop = result.getBusStop(stopCode);
+        if (busStop == null) {
+            reschedule(intent);
+            return;
+        }
+        
+        final List<LiveBusService> busServices = busStop.getServices();
+        final int servicesLen = busServices.size();
         int time;
-        EdinburghBus edinBs;
+        LiveBusService busService;
+        LiveBus bus;
+        List<LiveBus> buses;
         
         // Loop through all the bus services at this stop.
-        for(BusService bs : busStop.getBusServices()) {
+        for(int i = 0; i < servicesLen; i++) {
+            busService = busServices.get(i);
+            buses = busService.getLiveBuses();
+            
             // We are only interested in the next departure. Also get the time.
-            edinBs = (EdinburghBus)bs.getFirstBus();
-            if (edinBs == null) {
+            bus = !buses.isEmpty() ? buses.get(0) : null;
+            if (bus == null) {
                 continue;
             }
             
-            time = edinBs.getArrivalMinutes();
+            time = bus.getDepartureMinutes();
             
             // Loop through all of the services we are interested in.
             for(String service : services) {
                 // The service matches and meets the time criteria.
-                if(service.equals(bs.getServiceName()) && time <= timeTrigger) {
+                if(service.equals(busService.getServiceName()) &&
+                        time <= timeTrigger) {
                     // The alert may have been cancelled by the user recently,
                     // check it's still active to stay relevant. Cancel the
                     // alert if we're continuing.
-                    if(!sd.isActiveTimeAlert(stopCode)) return;
-                    alertMan.removeTimeAlert();
-                    
-                    // Create the intent that's fired when the notification is
-                    // tapped. It shows the bus times view for that stop.
-                    final Intent launchIntent = new Intent(this,
-                            DisplayStopDataActivity.class);
-                    launchIntent.setAction(DisplayStopDataActivity
-                            .ACTION_VIEW_STOP_DATA);
-                    launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    launchIntent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
-                            stopCode);
-                    launchIntent.putExtra(DisplayStopDataActivity.ARG_FORCELOAD,
-                            true);
-                    
-                    final String stopName = bsd.getNameForBusStop(stopCode);
-                    
-                    final String title = getString(R.string
-                            .timeservice_notification_title);
-                    
-                    final String summary = getResources().getQuantityString(
-                            R.plurals.timeservice_notification_summary,
-                            time == 0 ? 1 : time, service, time, stopName);
-                    
-                    // Build the notification.
-                    final NotificationCompat.Builder notifBuilder =
-                            new NotificationCompat.Builder(this);
-                    notifBuilder.setAutoCancel(true);
-                    notifBuilder.setSmallIcon(R.drawable.ic_status_bus);
-                    notifBuilder.setTicker(summary);
-                    notifBuilder.setContentTitle(title);
-                    notifBuilder.setContentText(summary);
-                    // Support for Jelly Bean notifications.
-                    notifBuilder.setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText(summary));
-                    notifBuilder.setContentIntent(
-                            PendingIntent.getActivity(this, 0, launchIntent,
-                                PendingIntent.FLAG_ONE_SHOT));
-
-                    final Notification n = notifBuilder.build();
-                    if(sp.getBoolean(PreferencesActivity.PREF_ALERT_SOUND,
-                            true))
-                        n.defaults |= Notification.DEFAULT_SOUND;
-
-                    if(sp.getBoolean(PreferencesActivity.PREF_ALERT_VIBRATE,
-                            true))
-                        n.defaults |= Notification.DEFAULT_VIBRATE;
-
-                    if(sp.getBoolean(PreferencesActivity.PREF_ALERT_LED,
-                            true)) {
-                        n.defaults |= Notification.DEFAULT_LIGHTS;
-                        n.flags |= Notification.FLAG_SHOW_LIGHTS;
+                    if(!sd.isActiveTimeAlert(stopCode)) {
+                        return;
                     }
                     
-                    // Send the notification.
-                    notifMan.notify(ALERT_ID, n);
+                    alertMan.removeTimeAlert();
+                    displayNotification(stopCode, service, time);
                     return;
                 }
             }
@@ -210,6 +173,70 @@ public class TimeAlertService extends IntentService {
         // All the services have been looped through and the criteria didn't
         // match. This means a reschedule should be attempted.
         reschedule(intent);
+    }
+    
+    /**
+     * Display a notification to the user to alert them to the arrival.
+     * 
+     * @param stopCode The stopCode of the bus stop the arrival will take place
+     * at.
+     * @param serviceName The name of the service which is about to arrive.
+     * @param time The number of minutes until the service will arrive at the
+     * stop.
+     */
+    private void displayNotification(final String stopCode,
+            final String serviceName, final int time) {
+        // Create the intent that's fired when the notification is
+        // tapped. It shows the bus times view for that stop.
+        final Intent launchIntent = new Intent(this,
+                DisplayStopDataActivity.class);
+        launchIntent.setAction(DisplayStopDataActivity
+                .ACTION_VIEW_STOP_DATA);
+        launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        launchIntent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
+                stopCode);
+        launchIntent.putExtra(DisplayStopDataActivity.ARG_FORCELOAD,
+                true);
+
+        final String stopName = bsd.getNameForBusStop(stopCode);
+        final String title = getString(R.string
+                .timeservice_notification_title);
+        final String summary = getResources().getQuantityString(
+                R.plurals.timeservice_notification_summary,
+                time == 0 ? 1 : time, serviceName, time, stopName);
+
+        // Build the notification.
+        final NotificationCompat.Builder notifBuilder =
+                new NotificationCompat.Builder(this);
+        notifBuilder.setAutoCancel(true);
+        notifBuilder.setSmallIcon(R.drawable.ic_status_bus);
+        notifBuilder.setTicker(summary);
+        notifBuilder.setContentTitle(title);
+        notifBuilder.setContentText(summary);
+        // Support for Jelly Bean notifications.
+        notifBuilder.setStyle(new NotificationCompat.BigTextStyle()
+                .bigText(summary));
+        notifBuilder.setContentIntent(
+                PendingIntent.getActivity(this, 0, launchIntent,
+                    PendingIntent.FLAG_ONE_SHOT));
+
+        final Notification n = notifBuilder.build();
+        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_SOUND,
+                true))
+            n.defaults |= Notification.DEFAULT_SOUND;
+
+        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_VIBRATE,
+                true))
+            n.defaults |= Notification.DEFAULT_VIBRATE;
+
+        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_LED,
+                true)) {
+            n.defaults |= Notification.DEFAULT_LIGHTS;
+            n.flags |= Notification.FLAG_SHOW_LIGHTS;
+        }
+
+        // Send the notification.
+        notifMan.notify(ALERT_ID, n);
     }
     
     /**

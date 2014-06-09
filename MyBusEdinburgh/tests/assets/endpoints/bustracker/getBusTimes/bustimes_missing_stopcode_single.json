@@ -1,0 +1,65 @@
+{
+    "busTimes": [
+        {
+            "operatorId": "LB",
+            "stopName": "Royal Scot Acad",
+            "refService": "1",
+            "mnemoService": "1",
+            "nameService": "Easter Road -- Clermiston",
+            "timeDatas": [
+                {
+                    "refDest": "98304",
+                    "nameDest": "Clermiston",
+                    "day": 0,
+                    "time": "18:55",
+                    "minutes": 3,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237636",
+                    "journeyId": "1571",
+                    "busId": "9"
+                },
+                {
+                    "refDest": "98304",
+                    "nameDest": "Clermiston",
+                    "day": 0,
+                    "time": "19:15",
+                    "minutes": 23,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237636",
+                    "journeyId": "1458",
+                    "busId": "4"
+                },
+                {
+                    "refDest": "98304",
+                    "nameDest": "Clermiston",
+                    "day": 0,
+                    "time": "19:45",
+                    "minutes": 53,
+                    "reliability": "H",
+                    "type": "N",
+                    "terminus": "36237636",
+                    "journeyId": "1529",
+                    "busId": "6"
+                },
+                {
+                    "refDest": "98304",
+                    "nameDest": "Clermiston",
+                    "day": 0,
+                    "time": "20:20",
+                    "minutes": 88,
+                    "reliability": "T",
+                    "type": "N",
+                    "terminus": "36237636",
+                    "journeyId": "1391",
+                    "busId": "0"
+                }
+            ],
+            "globalDisruption": false,
+            "serviceDisruption": false,
+            "busStopDisruption": false,
+            "serviceDiversion": false
+        }
+    ]
+}

@@ -44,7 +44,7 @@ public class EdinburghLiveBusTimesTests extends TestCase {
         final LiveBusTimes busTimes = new EdinburghLiveBusTimes(
                 Collections.unmodifiableMap(
                         Collections.<String, EdinburghLiveBusStop>emptyMap()),
-                false);
+                123456789L, false);
         assertFalse(busTimes.isGlobalDisruption());
     }
     
@@ -56,7 +56,7 @@ public class EdinburghLiveBusTimesTests extends TestCase {
         final LiveBusTimes busTimes = new EdinburghLiveBusTimes(
                 Collections.unmodifiableMap(
                         Collections.<String, EdinburghLiveBusStop>emptyMap()),
-                true);
+                123456789L, true);
         assertTrue(busTimes.isGlobalDisruption());
     }
 }

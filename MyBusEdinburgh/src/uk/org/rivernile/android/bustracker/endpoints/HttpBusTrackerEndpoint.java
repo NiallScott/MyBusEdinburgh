@@ -25,10 +25,10 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
-import java.util.HashMap;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusParserException;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusStop;
+import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.android.fetchers.HttpFetcher;
 
 /**
@@ -63,11 +63,23 @@ public class HttpBusTrackerEndpoint extends BusTrackerEndpoint {
      * {@inheritDoc}
      */
     @Override
-    public HashMap<String, BusStop> getBusTimes(final String[] stopCodes,
-            final int numDepartures) throws BusParserException {
+    public LiveBusTimes getBusTimes(final String[] stopCodes,
+            final int numDepartures) throws LiveTimesException {
         final HttpFetcher fetcher = new HttpFetcher(urlBuilder
                 .getBusTimesUrl(stopCodes, numDepartures).toString(), false);
         
         return getParser().getBusTimes(fetcher);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Journey getJourneyTimes(final String stopCode,
+            final String journeyId) throws LiveTimesException {
+        final HttpFetcher fetcher = new HttpFetcher(urlBuilder
+                .getJourneyTimesUrl(stopCode, journeyId).toString(), false);
+        
+        return getParser().getJourneyTimes(fetcher);
     }
 }

@@ -112,7 +112,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
      * correctly throws a TwitterException containing a JSONException when the
-     * fetcher is set to fetch a resource that does not exist.
+     * fetcher is set to fetch a resource that contains invalid data.
      * 
      * @throws Exception There are no other exceptions expected from this test,
      * so if there are, let the TestCase fail the test when it intercepts them.
