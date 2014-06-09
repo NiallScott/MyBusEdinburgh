@@ -37,7 +37,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_description">View live bus data in Edinburgh</string>
     <string name="app_author" tools:ignore="MissingTranslation">Niall Scott</string> <!-- Should not be included in localised versions -->
     <string name="search_hint">Search bus stops and places</string>
-    <string name="asset_db_version" tools:ignore="MissingTranslation">1401815699757</string> <!-- Should not be included in localised versions -->
+    <string name="asset_db_version" tools:ignore="MissingTranslation">1402286404622</string> <!-- Should not be included in localised versions -->
 
     <!--
     *******************
