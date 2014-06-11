@@ -138,6 +138,13 @@ public abstract class BusApplication extends Application
      */
     public abstract SettingsDatabase getSettingsDatabase();
     
+    /**
+     * Get an instance of the FragmentFactory.
+     * 
+     * @return An instance of the FragmentFactory.
+     */
+    public abstract FragmentFactory getFragmentFactory();
+    
     private Runnable stopDBTasks = new Runnable() {
         @Override
         public void run() {

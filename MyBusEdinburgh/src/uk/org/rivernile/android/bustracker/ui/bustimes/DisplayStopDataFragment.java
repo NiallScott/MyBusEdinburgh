@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.fragments.general;
+package uk.org.rivernile.android.bustracker.ui.bustimes;
 
 import android.app.Activity;
 import android.content.Context;
@@ -65,8 +65,6 @@ import uk.org.rivernile.android.bustracker.parser.livetimes
         .MaintenanceException;
 import uk.org.rivernile.android.bustracker.parser.livetimes
         .SystemOverloadedException;
-import uk.org.rivernile.android.bustracker.ui.bustimes
-        .BusTimesExpandableListAdapter;
 import uk.org.rivernile.android.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.utils.LoaderResult;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
@@ -101,8 +99,6 @@ public class DisplayStopDataFragment extends Fragment
     
     /** This is the stop code argument. */
     public static final String ARG_STOPCODE = "stopCode";
-    /** This is the argument required to force a reload of data. */
-    public static final String ARG_FORCELOAD = "forceLoad";
     
     private static final String LOADER_ARG_STOPCODES = "stopCodes";
     private static final String LOADER_ARG_NUMBER_OF_DEPARTURES =
@@ -146,25 +142,6 @@ public class DisplayStopDataFragment extends Fragment
         final DisplayStopDataFragment f = new DisplayStopDataFragment();
         final Bundle b = new Bundle();
         b.putString(ARG_STOPCODE, stopCode);
-        f.setArguments(b);
-        
-        return f;
-    }
-    
-    /**
-     * Create a new instance of this Fragment, specifying the bus stop code and
-     * if a load of the data should be forced.
-     * 
-     * @param stopCode The stopCode to load times for.
-     * @param forceLoad true if data is to be refreshed, false if not.
-     * @return A new instance of this Fragment.
-     */
-    public static DisplayStopDataFragment newInstance(final String stopCode,
-            final boolean forceLoad) {
-        final DisplayStopDataFragment f = new DisplayStopDataFragment();
-        final Bundle b = new Bundle();
-        b.putString(ARG_STOPCODE, stopCode);
-        b.putBoolean(ARG_FORCELOAD, forceLoad);
         f.setArguments(b);
         
         return f;
@@ -297,16 +274,10 @@ public class DisplayStopDataFragment extends Fragment
             txtServices.setText(BusStopDatabase.getColouredServiceListString(
                     bsd.getBusServicesForStopAsString(stopCode)));
             
-            if(getArguments().getBoolean(ARG_FORCELOAD, false)) {
-                loadBusTimes(true);
-            } else {
-                loadBusTimes(false);
-            }
+            loadBusTimes(false);
         } else {
             showError(getString(R.string.displaystopdata_err_nocode));
         }
-        
-        getArguments().remove(ARG_FORCELOAD);
     }
     
     /**

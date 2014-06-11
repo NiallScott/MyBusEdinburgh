@@ -53,7 +53,7 @@ import java.util.HashMap;
 import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs

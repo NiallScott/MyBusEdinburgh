@@ -27,6 +27,7 @@ package uk.org.rivernile.edinburghbustracker.android;
 
 import java.io.File;
 import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.FragmentFactory;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint;
@@ -55,6 +56,7 @@ public class MyBusEdinburghApplication extends BusApplication {
     private TwitterEndpoint twitterEndpoint;
     private BusStopDatabase busStopDatabase;
     private SettingsDatabase settingsDatabase;
+    private FragmentFactory fragmentFactory;
 
     /**
      * {@inheritDoc}
@@ -127,6 +129,18 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return settingsDatabase;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FragmentFactory getFragmentFactory() {
+        if (fragmentFactory == null) {
+            fragmentFactory = new EdinburghFragmentFactory();
+        }
+        
+        return fragmentFactory;
     }
     
     /**

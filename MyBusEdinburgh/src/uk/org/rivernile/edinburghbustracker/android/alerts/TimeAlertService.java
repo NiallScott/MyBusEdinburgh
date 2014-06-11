@@ -40,8 +40,8 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
@@ -195,8 +195,6 @@ public class TimeAlertService extends IntentService {
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         launchIntent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
                 stopCode);
-        launchIntent.putExtra(DisplayStopDataActivity.ARG_FORCELOAD,
-                true);
 
         final String stopName = bsd.getNameForBusStop(stopCode);
         final String title = getString(R.string

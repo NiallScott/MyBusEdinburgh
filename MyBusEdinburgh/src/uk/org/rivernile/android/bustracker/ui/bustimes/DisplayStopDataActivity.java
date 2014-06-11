@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,21 +23,25 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android;
+package uk.org.rivernile.android.bustracker.ui.bustimes;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.MenuItem;
+import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.utils.NavigationUtils;
+import uk.org.rivernile.edinburghbustracker.android
+        .AddEditFavouriteStopActivity;
+import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
+import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
+import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteProximityAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteTimeAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .DisplayStopDataFragment;
 
 /**
  * This Activity hosts a DisplayStopDataFragment which shows the user live bus
@@ -68,9 +72,6 @@ public class DisplayStopDataActivity extends ActionBarActivity
     /** The Intent argument for the stop code. */
     public static final String ARG_STOPCODE =
             DisplayStopDataFragment.ARG_STOPCODE;
-    /** The Intent argument to force a load. */
-    public static final String ARG_FORCELOAD =
-            DisplayStopDataFragment.ARG_FORCELOAD;
     
     private static final String DIALOG_CONFIRM_DELETE_FAVOURITE =
             "deleteFavDialog";
@@ -84,33 +85,22 @@ public class DisplayStopDataActivity extends ActionBarActivity
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        setContentView(R.layout.single_fragment_container);
-        
-        if(savedInstanceState == null) {
-            DisplayStopDataFragment fragment;
+        if (savedInstanceState == null) {
             final Intent intent = getIntent();
+            final String stopCode;
             
-            if(Intent.ACTION_VIEW.equals(intent.getAction())) {
-                fragment = DisplayStopDataFragment.newInstance(
-                        intent.getData().getQueryParameter("busStopCode"));
+            if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+                stopCode = intent.getData().getQueryParameter("busStopCode");
             } else {
-                if(!intent.hasExtra(ARG_STOPCODE)) {
-                    throw new IllegalArgumentException(
-                            "A stopCode MUST be provided.");
-                }
-                
-                final String stopCode = intent.getStringExtra(ARG_STOPCODE);
-                
-                if(intent.hasExtra(ARG_FORCELOAD)) {
-                    fragment = DisplayStopDataFragment.newInstance(stopCode,
-                            intent.getBooleanExtra(ARG_FORCELOAD, false));
-                } else {
-                    fragment = DisplayStopDataFragment.newInstance(stopCode);
-                }
+                stopCode = intent.getStringExtra(ARG_STOPCODE);
             }
             
+            final BusApplication app = (BusApplication) getApplication();
+            final DisplayStopDataFragment f = app.getFragmentFactory()
+                    .getDisplayStopDataFragment(stopCode);
+            
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragmentContainer, fragment).commit();
+                    .add(android.R.id.content, f).commit();
         }
     }
     
