@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
@@ -48,7 +47,6 @@ import android.support.v4.content.Loader;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Surface;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -115,8 +113,7 @@ public class BusStopDetailsFragment extends Fragment
     private ImageButton favouriteBtn;
     private TextView txtName, txtServices, txtDistance, txtEmpty, txtProxAlert,
             txtTimeAlert;
-    private View layoutContent, layoutDetails, progress;
-    private int hitboxSize;
+    private View layoutContent, progress;
     
     private Location lastLocation;
     private String stopCode;
@@ -184,8 +181,6 @@ public class BusStopDetailsFragment extends Fragment
         accelerometer = sensMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         stopCode = getArguments().getString(ARG_STOPCODE);
-        hitboxSize = getResources()
-                .getDimensionPixelOffset(R.dimen.star_hitbox_size);
     }
     
     /**
@@ -203,7 +198,6 @@ public class BusStopDetailsFragment extends Fragment
         mapView.onCreate(savedInstanceState);
         
         layoutContent = v.findViewById(R.id.layoutContent);
-        layoutDetails = v.findViewById(R.id.layoutDetails);
         progress = v.findViewById(R.id.progress);
         txtEmpty = (TextView)v.findViewById(android.R.id.empty);
         txtName = (TextView)v.findViewById(R.id.txtName);
@@ -631,27 +625,6 @@ public class BusStopDetailsFragment extends Fragment
         layoutContent.setVisibility(View.VISIBLE);
         txtEmpty.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
-        
-        layoutDetails.post(new Runnable() {
-            @Override
-            public void run() {
-                final Rect rect = new Rect();
-                favouriteBtn.getHitRect(rect);
-                // Assume it's a square
-                final int adjustBy = (int)
-                        ((hitboxSize - (rect.bottom - rect.top)) / 2);
-
-                if(adjustBy > 0) {
-                    rect.top -= adjustBy;
-                    rect.bottom += adjustBy;
-                    rect.left -= adjustBy;
-                    rect.right += adjustBy;
-                }
-
-                layoutDetails.setTouchDelegate(new TouchDelegate(rect,
-                        favouriteBtn));
-            }
-        });
         
         setMapLocation();
         

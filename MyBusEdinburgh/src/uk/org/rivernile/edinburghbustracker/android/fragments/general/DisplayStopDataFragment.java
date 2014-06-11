@@ -28,7 +28,6 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -44,7 +43,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -56,15 +54,19 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.json.JSONException;
-import uk.org.rivernile.android.bustracker.parser.livetimes.AuthenticationException;
+import uk.org.rivernile.android.bustracker.parser.livetimes
+        .AuthenticationException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimesLoader;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
-import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException;
-import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
-import uk.org.rivernile.android.bustracker.ui.bustimes.BusTimesExpandableListAdapter;
+import uk.org.rivernile.android.bustracker.parser.livetimes
+        .MaintenanceException;
+import uk.org.rivernile.android.bustracker.parser.livetimes
+        .SystemOverloadedException;
+import uk.org.rivernile.android.bustracker.ui.bustimes
+        .BusTimesExpandableListAdapter;
 import uk.org.rivernile.android.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.utils.LoaderResult;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
@@ -96,10 +98,6 @@ public class DisplayStopDataFragment extends Fragment
     
     private static final int EVENT_REFRESH = 1;
     private static final int EVENT_UPDATE_TIME = 2;
-    
-    private static final String SERVICE_NAME_KEY = "SERVICE_NAME";
-    private static final String DESTINATION_KEY = "DESTINATION";
-    private static final String ARRIVAL_TIME_KEY = "ARRIVAL_TIME";
     
     /** This is the stop code argument. */
     public static final String ARG_STOPCODE = "stopCode";
@@ -137,7 +135,6 @@ public class DisplayStopDataFragment extends Fragment
     private long lastRefresh = 0;
     private final ArrayList<String> expandedServices = new ArrayList<String>();
     private boolean busTimesLoading = false;
-    private int hitboxSize;
     
     /**
      * Create a new instance of this Fragment, specifying the bus stop code.
@@ -200,8 +197,6 @@ public class DisplayStopDataFragment extends Fragment
         bsd = BusStopDatabase.getInstance(context);
         sd = SettingsDatabase.getInstance(context);
         sp = context.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
-        hitboxSize = getResources()
-                .getDimensionPixelOffset(R.dimen.star_hitbox_size);
         
         // Get the stop code from the arguments bundle.
         stopCode = getArguments().getString(ARG_STOPCODE);
@@ -736,27 +731,6 @@ public class DisplayStopDataFragment extends Fragment
         listView.setVisibility(View.VISIBLE);
         
         getActivity().supportInvalidateOptionsMenu();
-        
-        layoutTopBar.post(new Runnable() {
-            @Override
-            public void run() {
-                final Rect rect = new Rect();
-                imgbtnFavourite.getHitRect(rect);
-                // Assume it's a square
-                final int adjustBy = (int)
-                        ((hitboxSize - (rect.bottom - rect.top)) / 2);
-
-                if(adjustBy > 0) {
-                    rect.top -= adjustBy;
-                    rect.bottom += adjustBy;
-                    rect.left -= adjustBy;
-                    rect.right += adjustBy;
-                }
-
-                layoutTopBar.setTouchDelegate(new TouchDelegate(rect,
-                        imgbtnFavourite));
-            }
-        });
     }
     
     /**

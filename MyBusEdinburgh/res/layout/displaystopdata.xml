@@ -82,10 +82,12 @@
             </LinearLayout>
             <ImageButton
                 android:id="@+id/imgbtnFavourite"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginLeft="8dp"
                 android:background="@null"
+                android:adjustViewBounds="false"
+                android:scaleType="center"
                 android:contentDescription="@null" />
         </LinearLayout>
         <LinearLayout

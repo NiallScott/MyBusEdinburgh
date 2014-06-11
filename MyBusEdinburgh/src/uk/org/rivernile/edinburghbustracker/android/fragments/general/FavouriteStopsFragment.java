@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
@@ -42,7 +41,6 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -466,7 +464,6 @@ public class FavouriteStopsFragment extends ListFragment
         private final HashMap<String, Spanned> serviceListings =
                 new HashMap<String, Spanned>();
         private final OnClickListener starClickListener;
-        private int hitboxSize;
         
         /**
          * Create a new FavouritesCursorAdapter.
@@ -485,8 +482,6 @@ public class FavouriteStopsFragment extends ListFragment
             
             bsd = BusStopDatabase.getInstance(context.getApplicationContext());
             this.starClickListener = starClickListener;
-            hitboxSize = context.getResources()
-                    .getDimensionPixelOffset(R.dimen.star_hitbox_size);
         }
         
         /**
@@ -502,27 +497,6 @@ public class FavouriteStopsFragment extends ListFragment
                 imgbtnFavourite.setFocusable(false);
                 imgbtnFavourite.setFocusableInTouchMode(false);
                 imgbtnFavourite.setOnClickListener(starClickListener);
-                
-                v.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        final Rect rect = new Rect();
-                        imgbtnFavourite.getHitRect(rect);
-                        // Assume it's a square
-                        final int adjustBy = (int)
-                                ((hitboxSize - (rect.bottom - rect.top)) / 2);
-                        
-                        if(adjustBy > 0) {
-                            rect.top -= adjustBy;
-                            rect.bottom += adjustBy;
-                            rect.left -= adjustBy;
-                            rect.right += adjustBy;
-                        }
-                        
-                        v.setTouchDelegate(new TouchDelegate(rect,
-                                imgbtnFavourite));
-                    }
-                });
             }
             
             return v;

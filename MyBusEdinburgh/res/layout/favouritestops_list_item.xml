@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,11 +37,13 @@
         android:layout_weight="1" />
     <ImageButton
         android:id="@+id/imgbtnFavourite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="56dp"
+        android:layout_height="48dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:paddingRight="8dp"
         android:background="@null"
         android:src="@drawable/ic_list_favourite"
+        android:adjustViewBounds="false"
+        android:scaleType="center"
         android:contentDescription="@string/favourite_rem" />
 </LinearLayout>
