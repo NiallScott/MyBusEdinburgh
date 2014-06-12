@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowSystemLocationPreferencesListener;
 import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -120,7 +122,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(final DialogInterface dialog, final int id) {
-                callbacks.onShowGpsPreferences();
+                callbacks.onShowSystemLocationPreferences();
             }
         }).setNegativeButton(R.string.no, null);
         
@@ -131,11 +133,9 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks {
+    public static interface Callbacks
+            extends OnShowSystemLocationPreferencesListener {
         
-        /**
-         * This is called when the user wants to turn on GPS on their device.
-         */
-        public void onShowGpsPreferences();
+        // Nothing to put here - the interfaces are defined elsewhere.
     }
 }

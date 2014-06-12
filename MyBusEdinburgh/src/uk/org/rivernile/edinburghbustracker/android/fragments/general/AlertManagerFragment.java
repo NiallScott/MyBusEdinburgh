@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,6 +42,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmDeleteProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmDeleteTimeAlertListener;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -434,24 +438,14 @@ public class AlertManagerFragment extends ListFragment
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks {
+    public static interface Callbacks
+            extends OnShowConfirmDeleteProximityAlertListener,
+            OnShowConfirmDeleteTimeAlertListener {
         
         /**
          * This is called when it should be confirmed with the user that they
          * want to delete all alerts.
          */
         public void onShowConfirmDeleteAllAlerts();
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete the proximity alert.
-         */
-        public void onShowConfirmDeleteProximityAlert();
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete the time alert.
-         */
-        public void onShowConfirmDeleteTimeAlert();
     }
 }

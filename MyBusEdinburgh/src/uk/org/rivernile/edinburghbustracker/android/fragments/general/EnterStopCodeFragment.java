@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,6 +44,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import java.util.List;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -262,19 +263,12 @@ public class EnterStopCodeFragment extends Fragment
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks {
+    public static interface Callbacks extends OnShowBusTimesListener {
         
         /**
          * This is called when the user is asked if they want to install
          * a barcode scanner or not.
          */
         public void onAskInstallBarcodeScanner();
-        
-        /**
-         * This is called when the user wishes to view bus stop times.
-         * 
-         * @param stopCode The bus stop to view times for.
-         */
-        public void onShowBusTimes(String stopCode);
     }
 }

@@ -65,6 +65,18 @@ import uk.org.rivernile.android.bustracker.parser.livetimes
         .MaintenanceException;
 import uk.org.rivernile.android.bustracker.parser.livetimes
         .SystemOverloadedException;
+import uk.org.rivernile.android.bustracker.ui.callbacks.
+        OnShowAddFavouriteStopListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowAddProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowAddTimeAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmDeleteProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmDeleteTimeAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.android.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.utils.LoaderResult;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
@@ -904,53 +916,13 @@ public class DisplayStopDataFragment extends Fragment
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks {
+    public static interface Callbacks
+            extends OnShowConfirmFavouriteDeletionListener,
+            OnShowConfirmDeleteProximityAlertListener,
+            OnShowConfirmDeleteTimeAlertListener,
+            OnShowAddFavouriteStopListener, OnShowAddProximityAlertListener,
+            OnShowAddTimeAlertListener {
         
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete a favourite bus stop.
-         * 
-         * @param stopCode The bus stop that the user may want to delete.
-         */
-        public void onShowConfirmFavouriteDeletion(String stopCode);
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete the proximity alert.
-         */
-        public void onShowConfirmDeleteProximityAlert();
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete the time alert.
-         */
-        public void onShowConfirmDeleteTimeAlert();
-        
-        /**
-         * This is called when the user wants to add a new favourite bus stop.
-         * 
-         * @param stopCode The stop code of the bus stop to add.
-         * @param stopName The default name to use for the bus stop.
-         */
-        public void onShowAddFavouriteStop(String stopCode, String stopName);
-        
-        /**
-         * This is called when the user wants to view the interface to add a new
-         * proximity alert.
-         * 
-         * @param stopCode The stopCode the proximity alert should be added for.
-         */
-        public void onShowAddProximityAlert(String stopCode);
-        
-        /**
-         * This is called when the user wants to view the interface to add a new
-         * time alert.
-         * 
-         * @param stopCode The stopCode the time alert should be added for.
-         * @param defaultServices The services that should be selected by
-         * default. Set to null if no services should be selected.
-         */
-        public void onShowAddTimeAlert(String stopCode,
-                String[] defaultServices);
+        // Nothing to add in here - the interfaces are defined elsewhere.
     }
 }

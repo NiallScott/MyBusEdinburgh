@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,6 +46,8 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 import java.util.List;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowSystemLocationPreferencesListener;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
@@ -163,7 +165,7 @@ public class AddProximityAlertFragment extends Fragment {
                 // Start the GPS preference Activity if the user has checked
                 // the box.
                 if(checkProxGps.isChecked()) {
-                    callbacks.onShowGpsPreferences();
+                    callbacks.onShowSystemLocationPreferences();
                 }
                 // Tell the hosting Activity that a new alert has been added.
                 callbacks.onProximityAlertAdded();
@@ -279,7 +281,8 @@ public class AddProximityAlertFragment extends Fragment {
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks {
+    public static interface Callbacks
+            extends OnShowSystemLocationPreferencesListener {
         
         /**
          * This is called when the user wants to read the text about the
@@ -297,10 +300,5 @@ public class AddProximityAlertFragment extends Fragment {
          * alert.
          */
         public void onCancelAddProximityAlert();
-        
-        /**
-         * This is called when the user wants to turn on GPS on their device.
-         */
-        public void onShowGpsPreferences();
     }
 }

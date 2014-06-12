@@ -151,7 +151,8 @@ public class FavouriteStopsActivity extends ActionBarActivity
      * {@inheritDoc}
      */
     @Override
-    public void onShowAddTimeAlert(final String stopCode) {
+    public void onShowAddTimeAlert(final String stopCode,
+            final String[] defaultServices) {
         final Intent intent = new Intent(this, AddTimeAlertActivity.class);
         intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE, stopCode);
         startActivity(intent);

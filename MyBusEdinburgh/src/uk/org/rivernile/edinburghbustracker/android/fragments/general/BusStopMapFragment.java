@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -57,6 +57,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowServicesChooserListener;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android
         .MapSearchSuggestionsProvider;
@@ -973,25 +975,13 @@ public class BusStopMapFragment extends SupportMapFragment
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks {
+    public static interface Callbacks extends OnShowServicesChooserListener {
         
         /**
          * This is called when the user wishes to select their preferred map
          * type.
          */
         public void onShowMapTypeSelection();
-        
-        /**
-         * This is called when the user wishes to select services, for example,
-         * for filtering.
-         * 
-         * @param services The services to choose from.
-         * @param selectedServices Any services that should be selected by
-         * default.
-         * @param title A title to show on the chooser.
-         */
-        public void onShowServicesChooser(String[] services,
-                String[] selectedServices, String title);
         
         /**
          * This is called when the user has initiated a search and progress

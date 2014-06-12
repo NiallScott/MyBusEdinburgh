@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -101,7 +101,7 @@ public class AddProximityAlertActivity extends ActionBarActivity
      * {@inheritDoc}
      */
     @Override
-    public void onShowGpsPreferences() {
+    public void onShowSystemLocationPreferences() {
         try {
             startActivity(AddProximityAlertFragment.LOCATION_SETTINGS_INTENT);
         } catch (ActivityNotFoundException e) {

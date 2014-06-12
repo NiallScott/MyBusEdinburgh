@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,6 +54,24 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowAddFavouriteStopListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowAddProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowAddTimeAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowBusStopMapWithStopCodeListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowBusTimesListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmDeleteProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmDeleteTimeAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmFavouriteDeletionListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowServicesChooserListener;
 import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
@@ -370,7 +388,7 @@ public class NearestStopsFragment extends ListFragment
                 if(sd.isActiveTimeAlert(selectedStop.stopCode)) {
                     callbacks.onShowConfirmDeleteTimeAlert();
                 } else {
-                    callbacks.onShowAddTimeAlert(selectedStop.stopCode);
+                    callbacks.onShowAddTimeAlert(selectedStop.stopCode, null);
                 }
                 
                 return true;
@@ -824,83 +842,18 @@ public class NearestStopsFragment extends ListFragment
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks {
+    public static interface Callbacks
+            extends OnShowConfirmFavouriteDeletionListener,
+            OnShowConfirmDeleteProximityAlertListener,
+            OnShowConfirmDeleteTimeAlertListener,
+            OnShowAddFavouriteStopListener, OnShowAddProximityAlertListener,
+            OnShowAddTimeAlertListener, OnShowServicesChooserListener,
+            OnShowBusTimesListener, OnShowBusStopMapWithStopCodeListener {
         
         /**
          * This is called when the user should be asked if they want to turn on
          * GPS or not.
          */
         public void onAskTurnOnGps();
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete a favourite bus stop.
-         * 
-         * @param stopCode The bus stop that the user may want to delete.
-         */
-        public void onShowConfirmFavouriteDeletion(String stopCode);
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete the proximity alert.
-         */
-        public void onShowConfirmDeleteProximityAlert();
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete the time alert.
-         */
-        public void onShowConfirmDeleteTimeAlert();
-        
-        /**
-         * This is called when the user wishes to select services, for example,
-         * for filtering.
-         * 
-         * @param services The services to choose from.
-         * @param selectedServices Any services that should be selected by
-         * default.
-         * @param title A title to show on the chooser.
-         */
-        public void onShowServicesChooser(String[] services,
-                String[] selectedServices, String title);
-        
-        /**
-         * This is called when the user wants to add a new favourite bus stop.
-         * 
-         * @param stopCode The stop code of the bus stop to add.
-         * @param stopName The default name to use for the bus stop.
-         */
-        public void onShowAddFavouriteStop(String stopCode, String stopName);
-        
-        /**
-         * This is called when the user wants to view the interface to add a new
-         * proximity alert.
-         * 
-         * @param stopCode The stopCode the proximity alert should be added for.
-         */
-        public void onShowAddProximityAlert(String stopCode);
-        
-        /**
-         * This is called when the user wants to view the interface to add a new
-         * time alert.
-         * 
-         * @param stopCode The stopCode the time alert should be added for.
-         */
-        public void onShowAddTimeAlert(String stopCode);
-        
-        /**
-         * This is called when the user wants to view the bus stop map centered
-         * on a specific bus stop.
-         * 
-         * @param stopCode The stopCode that the map should center on.
-         */
-        public void onShowBusStopMapWithStopCode(String stopCode);
-        
-        /**
-         * This is called when the user wishes to view bus stop times.
-         * 
-         * @param stopCode The bus stop to view times for.
-         */
-        public void onShowBusTimes(String stopCode);
     }
 }

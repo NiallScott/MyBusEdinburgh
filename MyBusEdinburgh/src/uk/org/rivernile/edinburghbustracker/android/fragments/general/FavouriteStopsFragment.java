@@ -54,6 +54,19 @@ import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowAddProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowAddTimeAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowBusStopMapWithStopCodeListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmDeleteProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmDeleteTimeAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks
+        .OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -340,7 +353,7 @@ public class FavouriteStopsFragment extends ListFragment
                 if(sd.isActiveTimeAlert(selectedStopCode)) {
                     callbacks.onShowConfirmDeleteTimeAlert();
                 } else {
-                    callbacks.onShowAddTimeAlert(selectedStopCode);
+                    callbacks.onShowAddTimeAlert(selectedStopCode, null);
                 }
                 
                 return true;
@@ -545,27 +558,12 @@ public class FavouriteStopsFragment extends ListFragment
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks {
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete a favourite bus stop.
-         * 
-         * @param stopCode The bus stop that the user may want to delete.
-         */
-        public void onShowConfirmFavouriteDeletion(String stopCode);
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete the proximity alert.
-         */
-        public void onShowConfirmDeleteProximityAlert();
-        
-        /**
-         * This is called when it should be confirmed with the user that they
-         * want to delete the time alert.
-         */
-        public void onShowConfirmDeleteTimeAlert();
+    public static interface Callbacks
+            extends OnShowConfirmFavouriteDeletionListener,
+            OnShowConfirmDeleteProximityAlertListener,
+            OnShowConfirmDeleteTimeAlertListener,
+            OnShowAddProximityAlertListener, OnShowAddTimeAlertListener,
+            OnShowBusStopMapWithStopCodeListener, OnShowBusTimesListener {
         
         /**
          * This is called when the user wants to edit a favourite bus stop.
@@ -573,36 +571,5 @@ public class FavouriteStopsFragment extends ListFragment
          * @param stopCode The stop code of the bus stop to add.
          */
         public void onShowEditFavouriteStop(String stopCode);
-        
-        /**
-         * This is called when the user wants to view the interface to add a new
-         * proximity alert.
-         * 
-         * @param stopCode The stopCode the proximity alert should be added for.
-         */
-        public void onShowAddProximityAlert(String stopCode);
-        
-        /**
-         * This is called when the user wants to view the interface to add a new
-         * time alert.
-         * 
-         * @param stopCode The stopCode the time alert should be added for.
-         */
-        public void onShowAddTimeAlert(String stopCode);
-        
-        /**
-         * This is called when the user wants to view the bus stop map centered
-         * on a specific bus stop.
-         * 
-         * @param stopCode The stopCode that the map should center on.
-         */
-        public void onShowBusStopMapWithStopCode(String stopCode);
-        
-        /**
-         * This is called when the user wishes to view bus stop times.
-         * 
-         * @param stopCode The bus stop to view times for.
-         */
-        public void onShowBusTimes(String stopCode);
     }
 }
