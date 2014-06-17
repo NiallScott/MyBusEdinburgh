@@ -32,16 +32,16 @@
         android:id="@+id/displaystopdata_option_menu_refresh"
         android:title="@string/displaystopdata_menu_refresh"
         android:icon="@drawable/ic_menu_refresh"
-        compat:showAsAction="ifRoom|withText" />
+        compat:showAsAction="ifRoom" />
     <item
         android:id="@+id/displaystopdata_option_menu_sort"
         android:icon="@drawable/ic_menu_sort"
-        compat:showAsAction="ifRoom|withText"
+        compat:showAsAction="ifRoom"
         tools:ignore="MenuTitle" />
     <item
         android:id="@+id/displaystopdata_option_menu_autorefresh"
         android:icon="@drawable/ic_menu_autorefresh"
-        compat:showAsAction="ifRoom|withText"
+        compat:showAsAction="ifRoom"
         tools:ignore="MenuTitle" />
     <item
         android:id="@+id/displaystopdata_option_menu_prox"

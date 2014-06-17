@@ -85,6 +85,8 @@ public class DisplayStopDataActivity extends ActionBarActivity
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        setContentView(R.layout.single_fragment_container);
+        
         if (savedInstanceState == null) {
             final Intent intent = getIntent();
             final String stopCode;
@@ -100,7 +102,7 @@ public class DisplayStopDataActivity extends ActionBarActivity
                     .getDisplayStopDataFragment(stopCode);
             
             getSupportFragmentManager().beginTransaction()
-                    .add(android.R.id.content, f).commit();
+                    .add(R.id.fragmentContainer, f).commit();
         }
     }
     
