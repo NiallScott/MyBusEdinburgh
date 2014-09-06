@@ -31,13 +31,16 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
+import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import uk.org.rivernile.android.fetchers.AssetFileFetcher;
 import uk.org.rivernile.android.fetchers.readers.JSONFetcherStreamReader;
 
 /**
- * Tests for TwitterParserImpl.
+ * Tests for {@link TwitterParserImpl}.
  * 
  * @author Niall Scott
  */
@@ -45,9 +48,6 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     private TwitterParserImpl parser;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -55,9 +55,6 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
         parser = new TwitterParserImpl();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
@@ -67,11 +64,12 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws an IllegalArgumentExcaption when the fetcher is set as
-     * null.
+     * correctly throws an {@link IllegalArgumentException} when the fetcher is
+     * set as {@code null}.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsWithNullFetcher() throws Exception {
         try {
@@ -86,11 +84,13 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a TwitterException containing an IOException when the
-     * fetcher is set to fetch a resource that does not exist.
+     * correctly throws a {@link TwitterException} containing an
+     * {@link IOException} when the fetcher is set to fetch a resource that does
+     * not exist.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsWithInvalidSource() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -111,11 +111,13 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a TwitterException containing a JSONException when the
-     * fetcher is set to fetch a resource that contains invalid data.
+     * correctly throws a {@link TwitterException} containing a
+     * {@link JSONException} when the fetcher is set to fetch a resource that
+     * contains invalid data.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsWithInvalidJson() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -136,11 +138,13 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a TwitterException containing a JSONException when the
-     * fetcher returns a JSON object rather than a JSON array.
+     * correctly throws a {@link TwitterException} containing a
+     * {@link JSONException} when the fetcher returns a {@link JSONObject}
+     * rather than a {@link JSONArray}.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsWithJsonObject() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -162,10 +166,11 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly returns an empty list if an empty JSON array is fetched.
+     * correctly returns an empty list if an empty {@link JSONArray} is fetched.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsWithEmptyJsonArray() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -179,11 +184,12 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly returns an empty list when the JSON array only contains a
-     * single invalid tweet.
+     * correctly returns an empty list when the {@link JSONArray} only contains
+     * a single invalid tweet.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsWithSingleInvalidTweet() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -197,11 +203,12 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly returns an empty list when the JSON array only contains
+     * correctly returns an empty list when the {@link JSONArray} only contains
      * multiple invalid tweets.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsWithMultipleInvalidTweets() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -215,11 +222,12 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly returns a single tweet with a JSON array of 2 elements, one of
-     * which is invalid.
+     * correctly returns a single tweet with a {@link JSONArray} of 2 elements,
+     * one of which is invalid.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsMultipleWithInvalidTweet() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -231,12 +239,13 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
         assertNotNull(tweets);
         assertEquals(1, tweets.size());
         
-        final Date time = new GregorianCalendar(2014, Calendar.JANUARY, 22,
-                20, 25, 18).getTime();
+        final GregorianCalendar cal = new GregorianCalendar(
+                2014, Calendar.JANUARY, 22, 20, 25, 18);
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         final Tweet tweet = tweets.get(0);
         
         assertEquals("This is an example tweet.", tweet.getBody());
-        assertEquals(time, tweet.getTime());
+        assertEquals(cal.getTime(), tweet.getTime());
     }
     
     /**
@@ -246,7 +255,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
      * having been correctly ordered while being parsed in this test.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsMultiple() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -259,6 +269,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
         
         final GregorianCalendar cal1 =
                 new GregorianCalendar(2014, Calendar.JANUARY, 22, 20, 25, 18);
+        cal1.setTimeZone(TimeZone.getTimeZone("UTC"));
         final Tweet tweet1 = tweets.get(0);
         assertEquals("http://www.example.com This is an example tweet. "
                 + "http://www.example2.com", tweet1.getBody());
@@ -271,6 +282,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
         
         final GregorianCalendar cal2 =
                 new GregorianCalendar(2013, Calendar.DECEMBER, 10, 11, 1, 2);
+        cal2.setTimeZone(TimeZone.getTimeZone("UTC"));
         final Tweet tweet2 = tweets.get(1);
         assertEquals("Test tweet.", tweet2.getBody());
         assertEquals("Another Twitter User", tweet2.getDisplayName());
@@ -281,6 +293,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
         
         final GregorianCalendar cal3 =
                 new GregorianCalendar(2013, Calendar.NOVEMBER, 9, 3, 51, 42);
+        cal3.setTimeZone(TimeZone.getTimeZone("UTC"));
         final Tweet tweet3 = tweets.get(2);
         assertEquals("A tweet with a single URL. http://www.example3.com",
                 tweet3.getBody());
@@ -294,12 +307,13 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#getTweets(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly returns a List that is unmodifiable. If any methods are called
-     * on the List to change its state, an UnsupportedOperationException should
-     * be thrown.
+     * correctly returns a {@link List} that is unmodifiable. If any methods are
+     * called on the {@link List} to change its state, an
+     * {@link UnsupportedOperationException} should be thrown.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the {@link TestCase} fail the test when it
+     * intercepts them.
      */
     public void testGetTweetsListIsUnmodifiable() throws Exception {
         final AssetFileFetcher fetcher = new AssetFileFetcher(
@@ -323,7 +337,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#replaceUrls(java.lang.String, org.json.JSONArray)}
-     * correctly returns null when the body is set as null.
+     * correctly returns {@code null} when the body is set as {@code null}.
      */
     public void testReplaceUrlsWithNullBody() {
         assertNull(TwitterParserImpl.replaceUrls(null, new JSONArray()));
@@ -331,7 +345,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#replaceUrls(java.lang.String, org.json.JSONArray)}
-     * correctly returns empty String when the body is set as empty String.
+     * correctly returns empty {@link String} when the body is set as empty
+     * {@link String}.
      */
     public void testReplaceUrlsWithEmptyBody() {
         assertEquals("", TwitterParserImpl.replaceUrls("", new JSONArray()));
@@ -339,8 +354,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#replaceUrls(java.lang.String, org.json.JSONArray)}
-     * correctly returns the input body as is when the JSON array is set to
-     * null.
+     * correctly returns the input body as is when the {@link JSONArray} is set
+     * to {@code null}.
      */
     public void testReplaceUrlsWithNullJsonArray() {
         assertEquals("Example", TwitterParserImpl.replaceUrls("Example", null));
@@ -348,8 +363,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#replaceUrls(java.lang.String, org.json.JSONArray)}
-     * correctly returns the input body as is when the JSON array is set as
-     * empty.
+     * correctly returns the input body as is when the {@link JSONArray} is set
+     * as empty.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -365,7 +380,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     /**
      * Test that {@link TwitterParserImpl#replaceUrls(java.lang.String, org.json.JSONArray)}
      * correctly returns the input body as is when the URL field is missing from
-     * the JSON object in the array.
+     * the {@link JSONObject} in the array.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -400,7 +415,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     /**
      * Test that {@link TwitterParserImpl#replaceUrls(java.lang.String, org.json.JSONArray)}
      * correctly returns the input body as is when the expanded URL field is
-     * missing from the JSON object in the array.
+     * missing from the {@link JSONObject} in the array.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -436,7 +451,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the JSON object is set as null.
+     * correctly returns {@code null} when the {@link JSONObject} is set as
+     * {@code null}.
      * 
      * @throws Exception No exceptions are expected from this test, so fail the
      * test if there are any.
@@ -447,7 +463,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the JSON object is empty.
+     * correctly returns {@code null} when the {@link JSONObject} is empty.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -461,7 +477,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the date field is missing.
+     * correctly returns {@code null} when the date field is missing.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -475,7 +491,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the date field is null.
+     * correctly returns {@code null} when the date field is {@code null}.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -489,7 +505,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the date field is invalid.
+     * correctly returns {@code null} when the date field is invalid.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -503,7 +519,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the user object is missing.
+     * correctly returns {@code null} when the user object is missing.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -517,7 +533,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the user object is null.
+     * correctly returns {@code null} when the user object is {@code null}.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -531,7 +547,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the body is null.
+     * correctly returns {@code null} when the body is missing.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -545,7 +561,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the body is null.
+     * correctly returns {@code null} when the body is {@code null}.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -559,7 +575,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the display name is missing.
+     * correctly returns {@code null} when the display name is missing.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -573,7 +589,7 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns null when the display name is null.
+     * correctly returns {@code null} when the display name is {@code null}.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -587,8 +603,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object, even when the profile image URL
-     * is missing.
+     * correctly returns a valid {@link Tweet} object, even when the profile
+     * image URL is missing.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -605,8 +621,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object, even when the profile image URL
-     * is null.
+     * correctly returns a valid {@link Tweet} object, even when the profile
+     * image URL is {@code null}.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -623,8 +639,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object, even when the screen name is
-     * missing.
+     * correctly returns a valid {@link Tweet} object, even when the screen name
+     * is missing.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -641,8 +657,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object, even when the screen name is
-     * is null.
+     * correctly returns a valid {@link Tweet} object, even when the screen name
+     * is {@code null}.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -659,8 +675,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object, even when the entities object is
-     * missing.
+     * correctly returns a valid {@link Tweet} object, even when the entities
+     * object is missing.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -678,8 +694,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object, even when the entities object is
-     * null.
+     * correctly returns a valid {@link Tweet} object, even when the entities
+     * object is {@code null}.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -697,8 +713,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object, even when the urls object is
-     * missing.
+     * correctly returns a valid {@link Tweet} object, even when the urls object
+     * is missing.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -716,8 +732,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object, even when the urls object is
-     * null.
+     * correctly returns a valid {@link Tweet} object, even when the urls object
+     * is {@code null}.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -735,8 +751,8 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
     
     /**
      * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)}
-     * correctly returns a valid Tweet object and the data contained within is
-     * all as expected when the JSON is all as expected.
+     * correctly returns a valid {@link Tweet} object and the data contained
+     * within is all as expected when the JSON is all as expected.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
@@ -746,14 +762,15 @@ public class TwitterParserImplTests extends InstrumentationTestCase {
                 "endpoints/twitter/parse_tweet_compliant.json");
         final Tweet tweet = TwitterParserImpl
                 .parseTweet(reader.getJSONObject());
-        final Date time = new GregorianCalendar(2014, Calendar.JANUARY, 22,
-                20, 25, 18).getTime();
+        final GregorianCalendar cal = new GregorianCalendar(
+                2014, Calendar.JANUARY, 22, 20, 25, 18);
+        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         
         assertNotNull(tweet);
         assertEquals("http://www.example.com This is an example tweet. "
                 + "http://www.example2.com", tweet.getBody());
         assertEquals("Twitter User", tweet.getDisplayName());
-        assertEquals(time, tweet.getTime());
+        assertEquals(cal.getTime(), tweet.getTime());
         assertEquals("http://example.com/profile.jpeg",
                 tweet.getProfileImageUrl());
         assertEquals("https://twitter.com/twitter_user", tweet.getProfileUrl());
