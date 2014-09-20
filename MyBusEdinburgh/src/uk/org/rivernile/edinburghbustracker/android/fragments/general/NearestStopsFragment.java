@@ -54,6 +54,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowAddFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks
@@ -76,7 +77,6 @@ import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleResultLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -142,7 +142,7 @@ public class NearestStopsFragment extends ListFragment
         // Get references to required resources.
         locMan = (LocationManager)activity
                 .getSystemService(Context.LOCATION_SERVICE);
-        sp = activity.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        sp = activity.getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         bsd = BusStopDatabase.getInstance(activity.getApplicationContext());
         sd = SettingsDatabase.getInstance(activity.getApplicationContext());
         // Create the ArrayAdapter for the ListView.
@@ -158,7 +158,7 @@ public class NearestStopsFragment extends ListFragment
             // Check to see if GPS is enabled then check to see if the GPS
             // prompt dialog has been disabled.
             if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
-                    !sp.getBoolean(PreferencesActivity.PREF_DISABLE_GPS_PROMPT,
+                    !sp.getBoolean(PreferenceConstants.PREF_DISABLE_GPS_PROMPT,
                     false)) {
                 // Get the list of Activities which can handle the enabling of
                 // location services.

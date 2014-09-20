@@ -25,12 +25,10 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
-        .PREF_STARTUP_SHOW_FAVS;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.news.NewsUpdatesActivity;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .AboutDialogFragment;
@@ -61,8 +59,9 @@ public class MainActivity extends ActionBarActivity
         
         setContentView(R.layout.home_activity);
         
-        if(getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
-                .getBoolean(PREF_STARTUP_SHOW_FAVS, false)) {
+        if(getSharedPreferences(PreferenceConstants.PREF_FILE, 0)
+                .getBoolean(PreferenceConstants.PREF_STARTUP_SHOW_FAVS,
+                        false)) {
             onShowFavourites();
         }
     }

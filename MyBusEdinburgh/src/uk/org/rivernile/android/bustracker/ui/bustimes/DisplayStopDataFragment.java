@@ -65,6 +65,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes
         .MaintenanceException;
 import uk.org.rivernile.android.bustracker.parser.livetimes
         .SystemOverloadedException;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks.
         OnShowAddFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks
@@ -197,7 +198,7 @@ public class DisplayStopDataFragment extends Fragment
                 .getApplicationContext();
         bsd = app.getBusStopDatabase();
         sd = app.getSettingsDatabase();
-        sp = app.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        sp = app.getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         
         // Get the stop code from the arguments bundle.
         stopCode = getArguments().getString(ARG_STOPCODE);
@@ -206,9 +207,9 @@ public class DisplayStopDataFragment extends Fragment
         
         // Get preferences.
         adapter.setShowNightServices(
-                sp.getBoolean(PreferencesActivity.PREF_SHOW_NIGHT_BUSES, true));
+                sp.getBoolean(PreferenceConstants.PREF_SHOW_NIGHT_BUSES, true));
         
-        if (sp.getBoolean(PreferencesActivity.PREF_SERVICE_SORTING, false)) {
+        if (sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false)) {
             adapter.setOrder(BusTimesExpandableListAdapter.Order.ARRIVAL_TIME);
         } else {
             adapter.setOrder(BusTimesExpandableListAdapter.Order.SERVICE_NAME);
@@ -216,7 +217,7 @@ public class DisplayStopDataFragment extends Fragment
         
         try {
             numDepartures = Integer.parseInt(
-                    sp.getString(PreferencesActivity
+                    sp.getString(PreferenceConstants
                         .PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE, "4"));
         } catch (NumberFormatException e) {
             numDepartures = 4;
@@ -234,7 +235,7 @@ public class DisplayStopDataFragment extends Fragment
                                 STATE_KEY_EXPANDED_ITEMS));
             }
         } else {
-            autoRefresh = sp.getBoolean(PreferencesActivity.PREF_AUTO_REFRESH,
+            autoRefresh = sp.getBoolean(PreferenceConstants.PREF_AUTO_REFRESH,
                     false);
         }
     }
@@ -891,7 +892,7 @@ public class DisplayStopDataFragment extends Fragment
      */
     private void configureSortActionItem() {
         configureSortActionItem(
-                sp.getBoolean(PreferencesActivity.PREF_SERVICE_SORTING, false));
+                sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false));
     }
     
     /**
@@ -999,9 +1000,9 @@ public class DisplayStopDataFragment extends Fragment
     private void doSortSelected() {
         // Change the sort preference and ask for a data redisplay.
         final boolean sortByTime = !sp.getBoolean(
-                PreferencesActivity.PREF_SERVICE_SORTING, false);
+                PreferenceConstants.PREF_SERVICE_SORTING, false);
         final SharedPreferences.Editor edit = sp.edit();
-        edit.putBoolean(PreferencesActivity.PREF_SERVICE_SORTING, sortByTime);
+        edit.putBoolean(PreferenceConstants.PREF_SERVICE_SORTING, sortByTime);
         edit.commit();
 
         if (sortByTime) {

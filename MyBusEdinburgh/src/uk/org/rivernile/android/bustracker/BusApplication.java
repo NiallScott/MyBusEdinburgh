@@ -27,9 +27,6 @@ package uk.org.rivernile.android.bustracker;
 
 import android.app.Application;
 import android.app.backup.BackupManager;
-import static uk.org.rivernile.edinburghbustracker.android.PreferencesActivity
-        .PREF_DATABASE_AUTO_UPDATE;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -51,10 +48,10 @@ import org.json.JSONObject;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.utils.FileUtils;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
@@ -83,7 +80,7 @@ public abstract class BusApplication extends Application
         super.onCreate();
         // Register the BugSense handler.
         BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY);
-        getSharedPreferences(PreferencesActivity.PREF_FILE, 0)
+        getSharedPreferences(PreferenceConstants.PREF_FILE, 0)
                 .registerOnSharedPreferenceChangeListener(this);
         
         // Cause the bus stop database to be extracted straight away.
@@ -165,9 +162,9 @@ public abstract class BusApplication extends Application
     public void checkForDBUpdates(final boolean force) {
         // Check to see if the user wants their database automatically updated.
         final SharedPreferences sp = getSharedPreferences(
-                PreferencesActivity.PREF_FILE, 0);
-        final boolean autoUpdate = sp.getBoolean(PREF_DATABASE_AUTO_UPDATE,
-                true);
+                PreferenceConstants.PREF_FILE, 0);
+        final boolean autoUpdate = sp.getBoolean(
+                PreferenceConstants.PREF_DATABASE_AUTO_UPDATE, true);
         final SharedPreferences.Editor edit = sp.edit();
         final EdinburghUrlBuilder urlBuilder = new EdinburghUrlBuilder();
         

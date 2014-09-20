@@ -35,7 +35,7 @@ import android.net.Uri;
  * @author Niall Scott
  * @see #getFetcher(android.content.Context, android.net.Uri, boolean)
  */
-public class FetcherFactory {
+public final class FetcherFactory {
     
     private static final String SCHEME_HTTP = "http";
     private static final String SCHEME_HTTPS = "https";

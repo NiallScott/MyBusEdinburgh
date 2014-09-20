@@ -57,12 +57,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowServicesChooserListener;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android
         .MapSearchSuggestionsProvider;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .IndeterminateProgressDialogFragment;
@@ -229,7 +229,7 @@ public class BusStopMapFragment extends SupportMapFragment
         
         final Context context = getActivity();
         bsd = BusStopDatabase.getInstance(context.getApplicationContext());
-        sp = context.getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        sp = context.getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         searchMan = (SearchManager) context
                 .getSystemService(Context.SEARCH_SERVICE);
 
@@ -275,7 +275,7 @@ public class BusStopMapFragment extends SupportMapFragment
                 map.setOnMarkerClickListener(this);
                 map.setOnInfoWindowClickListener(this);
                 map.setMapType(sp.getInt(
-                        PreferencesActivity.PREF_MAP_LAST_MAP_TYPE,
+                        PreferenceConstants.PREF_MAP_LAST_MAP_TYPE,
                         GoogleMap.MAP_TYPE_NORMAL));
                 map.setPadding(0, actionBarHeight, 0, 0);
                 moveCameraToInitialLocation();
@@ -301,11 +301,11 @@ public class BusStopMapFragment extends SupportMapFragment
         
         if(map != null) {
             final SharedPreferences sharedPrefs = getActivity()
-                    .getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+                    .getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
             map.setMyLocationEnabled(sharedPrefs
-                    .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION, true));
+                    .getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true));
             map.getUiSettings().setZoomControlsEnabled(sharedPrefs
-                    .getBoolean(PreferencesActivity.PREF_ZOOM_BUTTONS, true));
+                    .getBoolean(PreferenceConstants.PREF_ZOOM_BUTTONS, true));
         }
     }
     
@@ -323,13 +323,13 @@ public class BusStopMapFragment extends SupportMapFragment
             final CameraPosition position = map.getCameraPosition();
             final LatLng latLng = position.target;
             
-            edit.putString(PreferencesActivity.PREF_MAP_LAST_LATITUDE,
+            edit.putString(PreferenceConstants.PREF_MAP_LAST_LATITUDE,
                     String.valueOf(latLng.latitude));
-            edit.putString(PreferencesActivity.PREF_MAP_LAST_LONGITUDE,
+            edit.putString(PreferenceConstants.PREF_MAP_LAST_LONGITUDE,
                     String.valueOf(latLng.longitude));
-            edit.putFloat(PreferencesActivity.PREF_MAP_LAST_ZOOM,
+            edit.putFloat(PreferenceConstants.PREF_MAP_LAST_ZOOM,
                     position.zoom);
-            edit.putInt(PreferencesActivity.PREF_MAP_LAST_MAP_TYPE,
+            edit.putInt(PreferenceConstants.PREF_MAP_LAST_MAP_TYPE,
                     map.getMapType());
             edit.commit();
         }
@@ -953,13 +953,13 @@ public class BusStopMapFragment extends SupportMapFragment
             // The Lat/Lons have to be treated as Strings because
             // SharedPreferences has no support for doubles.
             final String latitude = sp.getString(
-                    PreferencesActivity.PREF_MAP_LAST_LATITUDE,
+                    PreferenceConstants.PREF_MAP_LAST_LATITUDE,
                     String.valueOf(DEFAULT_LAT));
             final String longitude = sp.getString(
-                    PreferencesActivity.PREF_MAP_LAST_LONGITUDE,
+                    PreferenceConstants.PREF_MAP_LAST_LONGITUDE,
                     String.valueOf(DEFAULT_LONG));
             final float zoom = sp.getFloat(
-                    PreferencesActivity.PREF_MAP_LAST_ZOOM, DEFAULT_ZOOM);
+                    PreferenceConstants.PREF_MAP_LAST_ZOOM, DEFAULT_ZOOM);
             
             try {
                 moveCameraToLocation(new LatLng(Double.parseDouble(latitude),

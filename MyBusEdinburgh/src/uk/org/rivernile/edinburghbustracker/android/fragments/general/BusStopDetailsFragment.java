@@ -63,6 +63,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.NumberFormat;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowAddFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks
@@ -81,7 +82,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -343,8 +343,8 @@ public class BusStopDetailsFragment extends Fragment
         if(map != null) {
             map.setMyLocationEnabled(
                     getActivity().getSharedPreferences(
-                            PreferencesActivity.PREF_FILE, 0)
-                        .getBoolean(PreferencesActivity.PREF_AUTO_LOCATION,
+                            PreferenceConstants.PREF_FILE, 0)
+                        .getBoolean(PreferenceConstants.PREF_AUTO_LOCATION,
                                 true));
         }
         

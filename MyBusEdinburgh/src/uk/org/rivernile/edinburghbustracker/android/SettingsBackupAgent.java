@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,6 +39,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import org.json.JSONException;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 
 /**
  * This is the backup helper that will be called if the device implements the
@@ -62,7 +63,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         // us.
         SharedPreferencesBackupHelper prefsHelper =
                 new SharedPreferencesBackupHelper(this,
-                        PreferencesActivity.PREF_FILE);
+                        PreferenceConstants.PREF_FILE);
         addHelper(PREFS_BACKUP_KEY, prefsHelper);
         
         // Use the FileBackupHelper to deal with the favourite stops.

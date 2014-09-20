@@ -38,9 +38,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowSystemLocationPreferencesListener;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -87,7 +87,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        sp = getActivity().getSharedPreferences(PreferencesActivity.PREF_FILE,
+        sp = getActivity().getSharedPreferences(PreferenceConstants.PREF_FILE,
                 0);
     }
     
@@ -107,7 +107,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
             public void onCheckedChanged(final CompoundButton v,
                     boolean isChecked) {
                 SharedPreferences.Editor edit = sp.edit();
-                edit.putBoolean(PreferencesActivity.PREF_DISABLE_GPS_PROMPT,
+                edit.putBoolean(PreferenceConstants.PREF_DISABLE_GPS_PROMPT,
                         isChecked);
                 edit.commit();
             }

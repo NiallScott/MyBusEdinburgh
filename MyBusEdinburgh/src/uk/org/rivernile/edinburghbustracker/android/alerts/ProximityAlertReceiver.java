@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,34 +34,31 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.support.v4.app.NotificationCompat;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDetailsActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
- * The ProximityAlertReceiver is only called when a previously set proximity
- * alert meets its criteria. This is handled by the Android platform in
- * LocationManager. This BroadcastReceiver assumes all it has to do is manage
- * the alert and send the user notification.
+ * The {@code ProximityAlertReceiver} is only called when a previously set
+ * proximity alert meets its criteria. This is handled by the Android platform
+ * in {@link LocationManager}. This {@link BroadcastReceiver} assumes all it has
+ * to do is manage the alert and send the user a notification.
  * 
  * @author Niall Scott
  */
 public class ProximityAlertReceiver extends BroadcastReceiver {
     
-    /** Argument for the stopCode. */
+    /** Argument for the {@code stopCode}. */
     public static final String ARG_STOPCODE = "stopCode";
     /** Argument for the distance. */
     public static final String ARG_DISTANCE = "distance";
     
     private static final int ALERT_ID = 1;
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onReceive(final Context context, final Intent intent) {  
         final SettingsDatabase db = SettingsDatabase.getInstance(context);
@@ -94,7 +91,7 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
                 R.string.proxreceiver_notification_ticker, stopName);
         
         final SharedPreferences sp = context
-                .getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+                .getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         
         // Create the notification.
         final NotificationCompat.Builder notifBuilder =
@@ -124,13 +121,13 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
                         PendingIntent.FLAG_ONE_SHOT));
         
         final Notification n = notifBuilder.build();
-        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_SOUND, true))
+        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_SOUND, true))
             n.defaults |= Notification.DEFAULT_SOUND;
         
-        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_VIBRATE, true))
+        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_VIBRATE, true))
             n.defaults |= Notification.DEFAULT_VIBRATE;
         
-        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_LED, true)) {
+        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_LED, true)) {
             n.defaults |= Notification.DEFAULT_LIGHTS;
             n.flags |= Notification.FLAG_SHOW_LIGHTS;
         }

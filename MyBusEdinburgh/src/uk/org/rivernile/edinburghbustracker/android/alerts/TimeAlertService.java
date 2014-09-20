@@ -40,21 +40,24 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
- * The purpose of the TimeAlertService is run on a once-per-minute basis to load
- * bus times from the server to see if any of the services the user has filtered
- * on have arrived at the bus stop within the time trigger time, also set by the
- * user. If the criteria is not met then it schedules to run again in the next
- * minute. If the criteria is met, the user is greeted with a notification.
+ * The purpose of the {@code TimeAlertService} is to be run on a once-per-minute
+ * basis to load bus times from the server to see if any of the services the
+ * user has filtered on have arrived at the bus stop within the time trigger
+ * time, also set by the user. If the criteria is not met then it schedules to
+ * run again in the next minute. If the criteria is met, the user is greeted
+ * with a notification.
  * 
- * As this is an IntentService, it runs in a separate thread and does not block
- * the UI thread.
+ * <p>
+ * As this is an {@link IntentService}, it runs in a separate thread and does
+ * not block the UI thread.
+ * </p>
  * 
  * @author Niall Scott
  */
@@ -80,16 +83,13 @@ public class TimeAlertService extends IntentService {
     private SharedPreferences sp;
     
     /**
-     * Create a new instance of the TimeAlertService. This simply calls its
-     * super constructor.
+     * Create a new instance of the {@code TimeAlertService}. This simply calls
+     * its super constructor.
      */
     public TimeAlertService() {
         super(TimeAlertService.class.getSimpleName());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -100,12 +100,9 @@ public class TimeAlertService extends IntentService {
         notifMan = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         alertMan = AlertManager.getInstance(this);
         alarmMan = (AlarmManager)getSystemService(ALARM_SERVICE);
-        sp = getSharedPreferences(PreferencesActivity.PREF_FILE, 0);
+        sp = getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     protected void onHandleIntent(final Intent intent) {
         final String stopCode = intent.getStringExtra(ARG_STOPCODE);
@@ -178,8 +175,8 @@ public class TimeAlertService extends IntentService {
     /**
      * Display a notification to the user to alert them to the arrival.
      * 
-     * @param stopCode The stopCode of the bus stop the arrival will take place
-     * at.
+     * @param stopCode The {@code stopCode} of the bus stop the arrival will
+     * take place at.
      * @param serviceName The name of the service which is about to arrive.
      * @param time The number of minutes until the service will arrive at the
      * stop.
@@ -219,16 +216,13 @@ public class TimeAlertService extends IntentService {
                     PendingIntent.FLAG_ONE_SHOT));
 
         final Notification n = notifBuilder.build();
-        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_SOUND,
-                true))
+        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_SOUND, true))
             n.defaults |= Notification.DEFAULT_SOUND;
 
-        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_VIBRATE,
-                true))
+        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_VIBRATE, true))
             n.defaults |= Notification.DEFAULT_VIBRATE;
 
-        if(sp.getBoolean(PreferencesActivity.PREF_ALERT_LED,
-                true)) {
+        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_LED, true)) {
             n.defaults |= Notification.DEFAULT_LIGHTS;
             n.flags |= Notification.FLAG_SHOW_LIGHTS;
         }
@@ -245,8 +239,8 @@ public class TimeAlertService extends IntentService {
      * remove the alert otherwise the user's battery will be drained and data
      * used.
      * 
-     * @param intent The intent that started this service. This is to be reused
-     * to start the next service at the appropriate time.
+     * @param intent The {@link Intent} that started this service. This is to be
+     * reused to start the next service at the appropriate time.
      */
     private void reschedule(final Intent intent) {
         final long timeSet = intent.getLongExtra(ARG_TIME_SET, 0);
