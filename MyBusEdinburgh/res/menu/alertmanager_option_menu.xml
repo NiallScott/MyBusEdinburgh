@@ -30,6 +30,6 @@
     <item
         android:id="@+id/alertmanager_option_menu_delete_all"
         android:title="@string/alertmanager_menu_remove_multiple"
-        android:icon="@drawable/ic_menu_delete"
+        android:icon="@drawable/ic_action_delete"
         compat:showAsAction="ifRoom|withText" />
 </menu>

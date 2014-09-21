@@ -30,6 +30,6 @@
     <item
         android:id="@+id/twitterupdates_option_menu_refresh"
         android:title="@string/displaystopdata_menu_refresh"
-        android:icon="@drawable/ic_menu_refresh"
+        android:icon="@drawable/ic_action_refresh"
         compat:showAsAction="ifRoom" />
 </menu>

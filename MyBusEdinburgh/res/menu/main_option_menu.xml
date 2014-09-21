@@ -34,6 +34,6 @@
     <item
         android:id="@+id/main_option_menu_about"
         android:title="@string/main_menu_about"
-        android:icon="@drawable/ic_menu_info_details"
+        android:icon="@drawable/ic_action_about"
         compat:showAsAction="ifRoom|withText" />
 </menu>

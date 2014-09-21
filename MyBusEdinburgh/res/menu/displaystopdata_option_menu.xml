@@ -31,11 +31,11 @@
     <item
         android:id="@+id/displaystopdata_option_menu_refresh"
         android:title="@string/displaystopdata_menu_refresh"
-        android:icon="@drawable/ic_menu_refresh"
+        android:icon="@drawable/ic_action_refresh"
         compat:showAsAction="ifRoom" />
     <item
         android:id="@+id/displaystopdata_option_menu_sort"
-        android:icon="@drawable/ic_menu_sort"
+        android:icon="@drawable/ic_action_sort_by_size"
         compat:showAsAction="ifRoom"
         tools:ignore="MenuTitle" />
     <item

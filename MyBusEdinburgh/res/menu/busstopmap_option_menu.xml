@@ -31,7 +31,7 @@
     <item
         android:id="@+id/busstopmap_option_menu_search"
         android:title="@string/search"
-        android:icon="@drawable/ic_menu_search"
+        android:icon="@drawable/ic_action_search"
         compat:showAsAction="ifRoom|withText"
         compat:actionViewClass="android.support.v7.widget.SearchView" />
     <item
