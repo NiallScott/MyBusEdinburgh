@@ -36,15 +36,18 @@ public final class PreferenceConstants {
     /** The name of the preferences file. */
     public static final String PREF_FILE = "preferences";
     
+    /*
+     ********************
+     * User preferences *
+     ********************
+     */
+    
     /** The Preference for showing the favourites list on app startup. */
     public static final String PREF_STARTUP_SHOW_FAVS =
             "pref_startupshowfavs_state";
-    /** The Preference for automatically updating the bus stop database. */
-    public static final String PREF_DATABASE_AUTO_UPDATE =
-            "pref_database_autoupdate";
-    /** The Preference for forcing a bus stop database update. */
-    public static final String PREF_DATABASE_FORCE_UPDATE =
-            "pref_update_stop_db";
+    /** The Preference for updating the bus stop database over Wi-Fi only. */
+    public static final String PREF_BUS_STOP_DATABASE_WIFI_ONLY =
+            "pref_bus_stop_database_wifi_only";
     /** The Preference for backing up favourites. */
     public static final String PREF_BACKUP_FAVOURITES =
             "pref_backup_favourites";
@@ -79,6 +82,13 @@ public final class PreferenceConstants {
     /** The Preference for disabling the GPS prompt. */
     public static final String PREF_DISABLE_GPS_PROMPT =
             "neareststops_gps_prompt_disable";
+    
+    /*
+     *********************
+     * State preferences *
+     *********************
+     */
+    
     /** The Preference for the last known map latitude (not shown). */
     public static final String PREF_MAP_LAST_LATITUDE =
             "pref_map_last_latitude";
@@ -90,6 +100,8 @@ public final class PreferenceConstants {
     /** The Preference for the last known map type (not shown). */
     public static final String PREF_MAP_LAST_MAP_TYPE =
             "pref_map_last_map_type";
+    public static final String PREF_DATABASE_UPDATE_LAST_CHECK =
+            "pref_database_update_last_check";
     
     /**
      * This private constructor exists to prevent instantiation of this class.
