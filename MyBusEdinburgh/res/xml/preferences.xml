@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,17 +38,10 @@
             android:summaryOff="@string/preferences_checkbox_general_showfavourites_unticked"
             android:defaultValue="false" />
         <CheckBoxPreference
-            android:key="pref_database_autoupdate"
-            android:title="@string/preferences_checkbox_general_dbupdate"
-            android:defaultValue="true" />
-        <uk.org.rivernile.android.utils.GenericDialogPreference
-            android:key="pref_update_stop_db"
-            android:title="@string/preferences_dialog_general_update"
-            android:summary="@string/preferences_dialog_general_update_summary"
-            android:dialogTitle="@string/preferences_dialog_general_update"
-            android:dialogMessage="@string/preferences_dialog_general_update_message"
-            android:positiveButtonText="@string/yes"
-            android:negativeButtonText="@string/no" />
+            android:key="pref_bus_stop_database_wifi_only"
+            android:title="@string/preferences_checkbox_general_databaseupdatewifi"
+            android:summary="@string/preferences_checkbox_general_databaseupdatewifi_summary"
+            android:defaultValue="false" />
         <uk.org.rivernile.android.utils.GenericDialogPreference
             android:key="pref_backup_favourites"
             android:title="@string/preferences_dialog_general_backup"

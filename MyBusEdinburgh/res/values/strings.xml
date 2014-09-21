@@ -188,10 +188,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_general_showfavourites">Show favourites</string>
     <string name="preferences_checkbox_general_showfavourites_ticked">Untick to show the home menu when the application is launched</string>
     <string name="preferences_checkbox_general_showfavourites_unticked">Tick to show favourite stops when the application is launched</string>
-    <string name="preferences_checkbox_general_dbupdate">Auto update database</string>
-    <string name="preferences_dialog_general_update">Update stop database</string>
-    <string name="preferences_dialog_general_update_summary">Check for updates, and update if a new version is available</string>
-    <string name="preferences_dialog_general_update_message">Are you sure you want to update the bus stop database?</string>
+    <string name="preferences_checkbox_general_databaseupdatewifi">Updates via Wi-Fi only</string>
+    <string name="preferences_checkbox_general_databaseupdatewifi_summary">To reduce network provider data charges, don\'t update the bus stop database over mobile networks</string>
     <string name="preferences_dialog_general_backup">Backup favourites</string>
     <string name="preferences_dialog_general_backup_summary">To external storage</string>
     <string name="preferences_dialog_general_backup_message">Are you sure you want to backup your favourite stops list?</string>
@@ -682,6 +680,13 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **************
     **************
     -->
+    
+    <!--
+    *************************
+    * DatabaseUpdateService *
+    *************************
+    -->
+    <string name="databaseservice_title">Bus stop database updater</string>
     
     <!--
     ********************

@@ -308,6 +308,14 @@
              user is within the proximity of a selected bus stop.-->
         <receiver android:name=".alerts.ProximityAlertReceiver" />
         
+        <!-- DatabaseUpdateService, which checks to see if database updates are
+             available and if so, apply them. -->
+        <service
+            android:name="uk.org.rivernile.android.bustracker.database.DatabaseUpdateService"
+            android:label="@string/databaseservice_title"
+            android:icon="@drawable/appicon"
+            android:exported="false" />
+        
         <!-- TimeAlertService, which checks bus times periodically when the user
              has set an alert for bus times. -->
         <service

@@ -25,13 +25,14 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 import android.provider.SearchRecentSuggestions;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -74,9 +75,6 @@ public class PreferencesActivity extends PreferenceActivity
         final GenericDialogPreference clearSearchHistoryDialog =
                 (GenericDialogPreference)findPreference(
                 PreferenceConstants.PREF_CLEAR_MAP_SEARCH_HISTORY);
-        final GenericDialogPreference checkStopDBUpdates =
-                (GenericDialogPreference)findPreference(
-                PreferenceConstants.PREF_DATABASE_FORCE_UPDATE);
         numberOfDeparturesPref = (ListPreference)findPreference(
                 PreferenceConstants
                         .PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE);
@@ -134,26 +132,6 @@ public class PreferencesActivity extends PreferenceActivity
                         MapSearchSuggestionsProvider.AUTHORITY,
                         MapSearchSuggestionsProvider.MODE);
                 suggestions.clearHistory();
-            }
-        });
-
-        checkStopDBUpdates.setOnClickListener(
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int which) {
-                if (which != DialogInterface.BUTTON_POSITIVE) {
-                    dialog.dismiss();
-                    return;
-                }
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        final BusApplication app = (BusApplication)
-                                getApplicationContext();
-                        app.checkForDBUpdates(true);
-                    }
-                }).start();
             }
         });
     }
