@@ -88,28 +88,21 @@
         
         <!-- The MainActivity, which is the entry point. -->
         <activity
-            android:name=".MainActivity"
+            android:name="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/MyBusEdinburgh.MainActivity" >
+            android:theme="@style/MyBusEdinburgh.MainActivity" />
+        
+        <activity-alias
+            android:name=".MainActivity"
+            android:targetActivity="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
+            android:label="@string/app_name" >
             <!-- This intent filter tells the system to place an app icon in the
                  launcher and use this Activity when starting the app. -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        
-        <!-- EnterStopCodeActivity, to let users enter a bus stop code. -->
-        <activity
-            android:name=".EnterStopCodeActivity"
-            android:label="@string/enterstopcode_title"
-            android:parentActivityName=".MainActivity" >
-            <!-- PARENT_ACTIVITY is used by the support library for supporting
-                 up navigation. -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+        </activity-alias>
         
         <!-- FavouriteStopsActivity, to let the user see a list of their
              favourite bus stops. -->
@@ -210,44 +203,6 @@
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
-            <!-- PARENT_ACTIVITY is used by the support library for supporting
-                 up navigation. -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        
-        <!-- NewsUpdatesActivity, to show live system and network updates to the
-             user. -->
-        <activity
-            android:name="uk.org.rivernile.android.bustracker.ui.news.NewsUpdatesActivity"
-            android:label="@string/newsupdates_title"
-            android:parentActivityName=".MainActivity" >
-            <!-- PARENT_ACTIVITY is used by the support library for supporting
-                 up navigation. -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        
-        <!-- NearestStopsActivity, to show a listing of nearest bus stops to the
-             user. -->
-        <activity
-            android:name=".NearestStopsActivity"
-            android:label="@string/neareststops_title"
-            android:parentActivityName=".MainActivity" >
-            <!-- PARENT_ACTIVITY is used by the support library for supporting
-                 up navigation. -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        
-        <!-- AlertManagerActivity, to let the user view and remove alerts. -->
-        <activity
-            android:name=".AlertManagerActivity"
-            android:label="@string/alertmanager_title"
-            android:parentActivityName=".MainActivity" >
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data

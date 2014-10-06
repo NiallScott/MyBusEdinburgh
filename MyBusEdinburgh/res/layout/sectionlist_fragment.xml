@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,10 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources
-    xmlns:tools="http://schemas.android.com/tools" >
-    <style name="MyBusEdinburgh" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/AppActionBar</item>
-        <item name="actionBarStyle">@style/AppActionBar</item>
-    </style>
-    
-    <style name="MyBusEdinburgh.MainActivity">
-        <item name="android:homeAsUpIndicator">@drawable/ic_drawer</item>
-        <item name="homeAsUpIndicator">@drawable/ic_drawer</item>
-    </style>
-    
-    <style name="MyBusEdinburgh.MapActivity">
-        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/AppActionBar.Map</item>
-        <item name="actionBarStyle">@style/AppActionBar.Map</item>
-        <item name="android:windowActionBarOverlay" tools:ignore="NewApi">true</item>
-        <item name="windowActionBarOverlay">true</item>
-    </style>
-</resources>
+<ListView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:choiceMode="singleChoice" />

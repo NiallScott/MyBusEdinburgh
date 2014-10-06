@@ -139,6 +139,13 @@ public class EnterStopCodeFragment extends Fragment
         
         return v;
     }
+
+    @Override
+    public void onActivityCreated(final Bundle bundle) {
+        super.onActivityCreated(bundle);
+        
+        getActivity().setTitle(R.string.enterstopcode_title);
+    }
     
     /**
      * {@inheritDoc}

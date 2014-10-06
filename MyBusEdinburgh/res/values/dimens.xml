@@ -35,6 +35,8 @@
     <dimen name="action_button_min_width">56dp</dimen>
     <dimen name="indeterminate_progress_size">16dp</dimen>
     
+    <dimen name="navigation_drawer_width">280dp</dimen>
+    
     <!-- Dimensions for bus times view. -->
     <dimen name="service_name_width">55dp</dimen>
     <dimen name="bustime_width">80dp</dimen>

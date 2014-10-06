@@ -95,6 +95,8 @@ public class TwitterUpdatesFragment extends ListFragment
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
+        getActivity().setTitle(R.string.twitterupdates_title);
+        
         // Tell the underlying Activity that it should create an options menu
         // for this Fragment.
         setHasOptionsMenu(true);

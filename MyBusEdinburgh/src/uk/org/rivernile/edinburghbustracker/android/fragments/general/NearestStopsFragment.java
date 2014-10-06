@@ -194,6 +194,8 @@ public class NearestStopsFragment extends ListFragment
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
+        getActivity().setTitle(R.string.neareststops_title);
+        
         // The ListView items can show a context menu.
         registerForContextMenu(getListView());
         // Set the ListView adapter.

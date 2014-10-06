@@ -259,6 +259,8 @@ public class BusStopMapFragment extends SupportMapFragment
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
+        getActivity().setTitle(R.string.map_title);
+        
         if(map == null) {
             map = getMap();
             

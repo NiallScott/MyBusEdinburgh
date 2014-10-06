@@ -32,12 +32,6 @@
     <PreferenceCategory
         android:title="@string/preferences_category_general">
         <CheckBoxPreference
-            android:key="pref_startupshowfavs_state"
-            android:title="@string/preferences_checkbox_general_showfavourites"
-            android:summaryOn="@string/preferences_checkbox_general_showfavourites_ticked"
-            android:summaryOff="@string/preferences_checkbox_general_showfavourites_unticked"
-            android:defaultValue="false" />
-        <CheckBoxPreference
             android:key="pref_bus_stop_database_wifi_only"
             android:title="@string/preferences_checkbox_general_databaseupdatewifi"
             android:summary="@string/preferences_checkbox_general_databaseupdatewifi_summary"

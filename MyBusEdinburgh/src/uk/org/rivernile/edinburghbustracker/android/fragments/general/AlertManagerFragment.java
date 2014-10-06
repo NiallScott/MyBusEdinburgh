@@ -113,6 +113,13 @@ public class AlertManagerFragment extends ListFragment
             final ViewGroup container, final Bundle savedInstanceState) {
         return inflater.inflate(R.layout.alertmanager, container, false);
     }
+
+    @Override
+    public void onActivityCreated(final Bundle bundle) {
+        super.onActivityCreated(bundle);
+        
+        getActivity().setTitle(R.string.alertmanager_title);
+    }
     
     /**
      * {@inheritDoc}

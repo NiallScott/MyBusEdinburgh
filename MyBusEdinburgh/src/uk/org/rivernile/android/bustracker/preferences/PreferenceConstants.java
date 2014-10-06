@@ -42,9 +42,6 @@ public final class PreferenceConstants {
      ********************
      */
     
-    /** The Preference for showing the favourites list on app startup. */
-    public static final String PREF_STARTUP_SHOW_FAVS =
-            "pref_startupshowfavs_state";
     /** The Preference for updating the bus stop database over Wi-Fi only. */
     public static final String PREF_BUS_STOP_DATABASE_WIFI_ONLY =
             "pref_bus_stop_database_wifi_only";

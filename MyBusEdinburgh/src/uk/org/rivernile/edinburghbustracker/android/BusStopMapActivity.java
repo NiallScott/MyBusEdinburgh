@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,9 +29,7 @@ import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.MenuItem;
 import com.google.android.gms.maps.model.LatLng;
-import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .IndeterminateProgressDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -118,21 +116,6 @@ public class BusStopMapActivity extends ActionBarActivity
                     new LatLng(newIntent.getDoubleExtra(ARG_LATITUDE, 0),
                         newIntent.getDoubleExtra(ARG_LONGITUDE, 0)),
                     BusStopMapFragment.DEFAULT_SEARCH_ZOOM, false);
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        switch(item.getItemId()) {
-            case android.R.id.home:
-                NavigationUtils
-                        .navigateUpOnActivityWithMultipleEntryPoints(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
         }
     }
     
