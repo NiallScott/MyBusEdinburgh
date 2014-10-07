@@ -170,6 +170,12 @@
             android:name=".PreferencesActivity"
             android:label="@string/preferences_title"
             android:parentActivityName=".MainActivity" >
+            <!-- This lets the user manage network settings for the application
+                 from elsewhere in the system. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data
