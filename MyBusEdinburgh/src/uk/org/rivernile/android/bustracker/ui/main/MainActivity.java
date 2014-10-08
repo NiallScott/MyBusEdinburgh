@@ -182,6 +182,17 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
+    public void onBackPressed() {
+        // FIXME: this code exists because of a bug in the compatibility
+        // library. Remove it when the bug has been fixed in the library.
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public void setTitle(final CharSequence title) {
         drawerClosedTitle = title;
     }
