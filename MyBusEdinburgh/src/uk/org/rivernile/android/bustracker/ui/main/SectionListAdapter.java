@@ -34,6 +34,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
  * This {@link Adapter} is used to show a list of {@link Section}s to the user.
@@ -41,6 +43,9 @@ import java.util.Collection;
  * @author Niall Scott
  */
 public class SectionListAdapter extends BaseAdapter {
+    
+    private static final int TYPE_NORMAL = 0;
+    private static final int TYPE_DIVIDER = 1;
     
     private final Context context;
     private final LayoutInflater inflater;
@@ -80,6 +85,11 @@ public class SectionListAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, final View convertView,
             final ViewGroup parent) {
+        if (getItemViewType(position) == TYPE_DIVIDER) {
+            return convertView != null ? convertView :
+                    inflater.inflate(R.layout.list_divider, parent, false);
+        }
+        
         final View v;
         final ViewHolder holder;
         
@@ -106,6 +116,27 @@ public class SectionListAdapter extends BaseAdapter {
     public boolean hasStableIds() {
         return true;
     }
+
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
+    @Override
+    public int getItemViewType(final int position) {
+        final Section section = getItem(position);
+        return section != null ? TYPE_NORMAL : TYPE_DIVIDER;
+    }
+
+    @Override
+    public boolean areAllItemsEnabled() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled(final int position) {
+        return getItemViewType(position) == TYPE_NORMAL;
+    }
     
     /**
      * Get the {@link Context} used by this {@link Adapter}.
@@ -119,13 +150,10 @@ public class SectionListAdapter extends BaseAdapter {
     /**
      * Add a section to be shown.
      * 
-     * @param section The new {@link Section}. {@code null} will be ignored.
+     * @param section The new {@link Section}. A {@code null} item denotes a
+     * divider line.
      */
     public void addSection(final Section section) {
-        if (section == null) {
-            return;
-        }
-        
         sections.add(section);
         notifyDataSetChanged();
     }
@@ -158,10 +186,7 @@ public class SectionListAdapter extends BaseAdapter {
         }
         
         this.sections.ensureCapacity(this.sections.size() + sections.length);
-        
-        for (Section s : sections) {
-            this.sections.add(s);
-        }
+        Collections.addAll(this.sections, sections);
         
         notifyDataSetChanged();
     }

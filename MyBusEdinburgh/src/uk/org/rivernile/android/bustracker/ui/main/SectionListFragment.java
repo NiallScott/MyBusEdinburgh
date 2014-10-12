@@ -72,6 +72,7 @@ public class SectionListFragment extends ListFragment {
             NearestStopsSection.getInstance(),
             NewsSection.getInstance(),
             AlertManagerSection.getInstance(),
+            null, // Divider.
             SettingsSection.getInstance(),
             AboutSection.getInstance()
         };

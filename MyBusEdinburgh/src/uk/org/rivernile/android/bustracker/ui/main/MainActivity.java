@@ -135,7 +135,7 @@ public class MainActivity extends ActionBarActivity
                 super.onDrawerClosed(drawerView);
                 
                 actionBar.setTitle(drawerClosedTitle);
-                supportInvalidateOptionsMenu();
+                setFragmentOptionsMenuVisibility(false);
             }
 
             @Override
@@ -143,7 +143,7 @@ public class MainActivity extends ActionBarActivity
                 super.onDrawerOpened(drawerView);
                 
                 actionBar.setTitle(drawerOpenTitle);
-                supportInvalidateOptionsMenu();
+                setFragmentOptionsMenuVisibility(true);
             }
         };
         
@@ -160,9 +160,13 @@ public class MainActivity extends ActionBarActivity
         
         drawerToggle.syncState();
         
-        if (!drawer.isDrawerOpen(GravityCompat.START)) {
+        final boolean isDrawerOpen = drawer.isDrawerOpen(GravityCompat.START);
+        
+        if (!isDrawerOpen) {
             actionBar.setTitle(drawerClosedTitle);
         }
+        
+        setFragmentOptionsMenuVisibility(isDrawerOpen);
     }
 
     @Override
@@ -509,5 +513,21 @@ public class MainActivity extends ActionBarActivity
         
         fragTrans.commit();
         drawer.closeDrawer(GravityCompat.START);
+    }
+    
+    /**
+     * Set the correct visibility on the options menu of the current
+     * {@link Fragment} based on whether the {@link DrawerLayout} is open or
+     * closed.
+     * 
+     * @param isDrawerOpen {@code true} if the drawer is open, {@code false} if
+     * it is closed.
+     */
+    private void setFragmentOptionsMenuVisibility(final boolean isDrawerOpen) {
+        final Fragment f = getSupportFragmentManager()
+                .findFragmentById(R.id.layoutContainer);
+        if (f != null) {
+            f.setMenuVisibility(!isDrawerOpen);
+        }
     }
 }
