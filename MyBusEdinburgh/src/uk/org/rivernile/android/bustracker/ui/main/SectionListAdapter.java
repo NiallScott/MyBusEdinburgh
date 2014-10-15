@@ -94,8 +94,7 @@ public class SectionListAdapter extends BaseAdapter {
         final ViewHolder holder;
         
         if (convertView == null) {
-            v = inflater.inflate(android.R.layout.simple_list_item_1, parent,
-                    false);
+            v = inflater.inflate(R.layout.sectionlist_item, parent, false);
             holder = new ViewHolder();
             holder.text1 = (TextView) v.findViewById(android.R.id.text1);
             v.setTag(holder);

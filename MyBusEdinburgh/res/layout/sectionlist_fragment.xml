@@ -24,7 +24,7 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<ListView
+<uk.org.rivernile.android.bustracker.ui.main.ManualCheckingListView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/list"
     android:layout_width="match_parent"

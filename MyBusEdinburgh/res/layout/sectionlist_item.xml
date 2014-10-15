@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,9 +24,19 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources>
-    <color name="defaultBusColour">#4291BC</color>
-    <color name="actionBarColour">#990000</color>
-    <color name="mapActionBarColour">#90000000</color>
-    <color name="sectionlist_text_default">#212121</color>
-</resources>
+<CheckedTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="48dp"
+    android:paddingTop="@dimen/padding_default"
+    android:paddingBottom="@dimen/padding_default"
+    android:paddingLeft="@dimen/padding_default"
+    android:paddingStart="@dimen/padding_default"
+    android:paddingRight="64dp"
+    android:paddingEnd="64dp"
+    android:gravity="center_vertical"
+    android:drawablePadding="12dp"
+    android:textSize="16sp"
+    android:textColor="@color/sectionlist_item_text" />

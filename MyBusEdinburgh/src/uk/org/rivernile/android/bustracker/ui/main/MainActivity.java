@@ -512,6 +512,10 @@ public class MainActivity extends ActionBarActivity
         }
         
         fragTrans.commit();
+        
+        ((SectionListFragment) fragMan.findFragmentById(
+                R.id.fragmentSectionList)).setSectionAsSelected(section);
+        
         drawer.closeDrawer(GravityCompat.START);
     }
     

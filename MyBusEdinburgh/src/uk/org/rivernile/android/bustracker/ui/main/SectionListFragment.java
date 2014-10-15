@@ -98,7 +98,6 @@ public class SectionListFragment extends ListFragment {
             final long id) {
         final Section section = adapter.getItem(position);
         callbacks.onSectionChosen(section);
-        listView.setItemChecked(position, true);
     }
     
     /**
