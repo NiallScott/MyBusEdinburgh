@@ -24,8 +24,14 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<View
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="1dp"
-    android:background="?android:attr/listDivider" />
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/padding_default"
+    android:paddingBottom="@dimen/padding_default" >
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider" />
+</FrameLayout>
