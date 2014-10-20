@@ -29,11 +29,12 @@
     <style name="MyBusEdinburgh" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="android:actionBarStyle" tools:ignore="NewApi">@style/AppActionBar</item>
         <item name="actionBarStyle">@style/AppActionBar</item>
-    </style>
-    
-    <style name="MyBusEdinburgh.MainActivity">
-        <item name="android:homeAsUpIndicator">@drawable/ic_drawer</item>
-        <item name="homeAsUpIndicator">@drawable/ic_drawer</item>
+        <item name="android:colorPrimary" tools:ignore="NewApi">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorPrimaryDark" tools:ignore="NewApi">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:colorAccent" tools:ignore="NewApi">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorAccent</item>
     </style>
     
     <style name="MyBusEdinburgh.MapActivity">
@@ -42,4 +43,8 @@
         <item name="android:windowActionBarOverlay" tools:ignore="NewApi">true</item>
         <item name="windowActionBarOverlay">true</item>
     </style>
+    
+    <!-- This is required as the Material Design compatibiltiy themes leaves no
+         window decoration. -->
+    <style name="MyBusEdinburghCompat.Preferences" parent="@android:style/Theme.Light" />
 </resources>

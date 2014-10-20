@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,15 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources>
-    <style name="BusStopDetailsListItem" >
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">?selectableItemBackground</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceListItemSmall</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
-        <item name="android:paddingEnd">?android:attr/listPreferredItemPaddingEnd</item>
-        <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
-        <item name="android:focusable">true</item>
+<resources
+    xmlns:tools="http://schemas.android.com/tools" >
+    
+    <!-- This is required as the Material Design compatibiltiy themes leaves no
+         window decoration. -->
+    <style name="MyBusEdinburghCompat.Preferences" parent="@android:style/Theme.Material.Light.DarkActionBar" >
+        <item name="android:actionBarStyle">@style/PreferencesAppActionBar</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
     </style>
 </resources>

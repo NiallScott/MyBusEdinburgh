@@ -27,10 +27,8 @@
 <resources
     xmlns:tools="http://schemas.android.com/tools" >
     <style name="AppActionBar" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/actionBarColour</item>
-        <item name="background">@color/actionBarColour</item>
-        <item name="android:titleTextStyle" tools:ignore="NewApi">@style/ActionBarText</item>
-        <item name="titleTextStyle">@style/ActionBarText</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="background">@color/colorPrimary</item>
         <item name="android:displayOptions" tools:ignore="NewApi">showHome|homeAsUp|showTitle</item>
         <item name="displayOptions">showHome|homeAsUp|showTitle</item>
     </style>
@@ -40,43 +38,25 @@
         <item name="background">@color/mapActionBarColour</item>
     </style>
     
-    <style name="ActionBarText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title" >
-        <item name="android:textColor">#FFF</item>
-    </style>
-    
-    <style name="DashboardButton">
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center_horizontal</item>
-        <item name="android:drawablePadding">2dp</item>
-        <item name="android:textSize">@dimen/text_size_small</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">#990000</item>
-        <item name="android:background">@null</item>
-    </style>
-    
     <style name="DialogText">
         <item name="android:textColor">#FFF</item>
     </style>
     
-    <style name="SelectableItemBackground">
-        <item name="android:background">@android:drawable/list_selector_background</item>
-    </style>
-    
-    <style name="BusStopDetailsButtons" parent="@style/SelectableItemBackground" >
+    <style name="BusStopDetailsButtons" >
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
+        <item name="android:background">?selectableItemBackground</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
         <item name="android:textSize">@dimen/text_size_medium</item>
     </style>
     
-    <style name="BusStopDetailsListItem" parent="@style/SelectableItemBackground" >
+    <style name="BusStopDetailsListItem" >
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">?selectableItemBackground</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">6dp</item>

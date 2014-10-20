@@ -29,7 +29,7 @@
     
     <item
         android:state_checked="true"
-        android:color="@color/actionBarColour" />
+        android:color="@color/colorPrimary" />
     
     <item
         android:color="@color/sectionlist_text_default" />
