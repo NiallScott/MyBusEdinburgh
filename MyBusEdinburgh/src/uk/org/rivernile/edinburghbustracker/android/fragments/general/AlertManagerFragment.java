@@ -152,12 +152,11 @@ public class AlertManagerFragment extends ListFragment
         final MenuItem deleteAllItem = menu.findItem(
                 R.id.alertmanager_option_menu_delete_all);
         
-        // Only enable the 'Delete all alerts' item when there's alerts to
-        // delete.
+        // Only show the 'Delete all alerts' item when there's alerts to delete.
         if(ad.getCount() > 0) {
-            deleteAllItem.setEnabled(true);
+            deleteAllItem.setVisible(true);
         } else {
-            deleteAllItem.setEnabled(false);
+            deleteAllItem.setVisible(false);
         }
     }
     

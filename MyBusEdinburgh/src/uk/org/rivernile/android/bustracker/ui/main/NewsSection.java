@@ -68,7 +68,7 @@ public class NewsSection implements Section {
 
     @Override
     public int getIconResource() {
-        return 0;
+        return R.drawable.ic_drawer_travel_updates;
     }
 
     @Override

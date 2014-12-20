@@ -907,8 +907,10 @@ public class DisplayStopDataFragment extends Fragment
             if (sortByTime) {
                 sortMenuItem.setTitle(R.string
                         .displaystopdata_menu_sort_service);
+                sortMenuItem.setIcon(R.drawable.ic_action_sort_by_size);
             } else {
                 sortMenuItem.setTitle(R.string.displaystopdata_menu_sort_times);
+                sortMenuItem.setIcon(R.drawable.ic_action_time);
             }
             
             sortMenuItem.setEnabled(!busTimesLoading);

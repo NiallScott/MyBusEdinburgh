@@ -27,8 +27,8 @@
 <resources
     xmlns:tools="http://schemas.android.com/tools" >
     <style name="AppActionBar" parent="@style/Widget.AppCompat.ActionBar">
-        <item name="android:background">@color/colorPrimary</item>
-        <item name="background">@color/colorPrimary</item>
+        <item name="android:background">?colorPrimary</item>
+        <item name="background">?colorPrimary</item>
         <item name="android:displayOptions" tools:ignore="NewApi">showHome|homeAsUp|showTitle</item>
         <item name="displayOptions">showHome|homeAsUp|showTitle</item>
     </style>

@@ -69,7 +69,7 @@ public class NearestStopsSection implements Section {
 
     @Override
     public int getIconResource() {
-        return 0;
+        return R.drawable.ic_drawer_nearest;
     }
 
     @Override
