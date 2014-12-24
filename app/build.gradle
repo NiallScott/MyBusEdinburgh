@@ -1,0 +1,65 @@
+/*
+ * Copyright (C) 2014 Niall 'Rivernile' Scott
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+ */
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+    defaultConfig {
+        applicationId "uk.org.rivernile.edinburghbustracker.android"
+        minSdkVersion 10
+        targetSdkVersion 21
+        versionCode 15
+        versionName "2.3 development"
+
+        // Populate the build config with API keys which are stored in local.properties so that
+        // ApiKey.java can pick them up.
+        final Properties properties = new Properties()
+        properties.load(new FileInputStream("local.properties"))
+        buildConfigField("String", "API_KEY",
+                "\"" + properties.getProperty("apiKey", "invalid") + "\"")
+        buildConfigField("String", "BUGSENSE_KEY",
+                "\"" + properties.getProperty("bugsenseKey", "invalid") + "\"")
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            testCoverageEnabled true
+        }
+    }
+    jacoco {
+        version = "0.7.1.201405082137"
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.google.android.gms:play-services-maps:6.5.87'
+}
