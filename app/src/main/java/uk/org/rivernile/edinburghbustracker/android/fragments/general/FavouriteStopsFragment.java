@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -153,7 +153,7 @@ public class FavouriteStopsFragment extends ListFragment
         // Create the ListAdapter.
         if(isCreateShortcut) {
             ca = new FavouritesCursorAdapter(activity,
-                    android.R.layout.simple_list_item_2, null,
+                    R.layout.simple_list_item_2, null,
                     new String[] { SettingsDatabase.FAVOURITE_STOPS_STOPNAME },
                     new int[] { android.R.id.text1 }, null);
         } else {

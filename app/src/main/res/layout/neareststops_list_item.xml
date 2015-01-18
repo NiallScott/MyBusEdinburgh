@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,5 +40,5 @@
         android:layout_gravity="center_vertical"
         android:gravity="center" />
     <include
-        layout="@android:layout/simple_list_item_2" />
+        layout="@layout/simple_list_item_2" />
 </LinearLayout>
