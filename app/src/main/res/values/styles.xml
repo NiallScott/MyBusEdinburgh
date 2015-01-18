@@ -61,15 +61,18 @@
         <item name="android:paddingBottom">8dp</item>
         <item name="android:textSize">@dimen/text_size_medium</item>
     </style>
-    
+
     <style name="BusStopDetailsListItem" >
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">?selectableItemBackground</item>
-        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textAppearance">?attr/textAppearanceListItemSmall</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingLeft">6dp</item>
-        <item name="android:minHeight">?android:attr/listPreferredItemHeight</item>
+        <item name="android:paddingLeft">?attr/listPreferredItemPaddingLeft</item>
+        <item name="android:paddingRight">?attr/listPreferredItemPaddingRight</item>
+        <item name="android:paddingStart" tools:targetApi="17">?attr/listPreferredItemPaddingLeft</item>
+        <item name="android:paddingEnd" tools:targetApi="17">?attr/listPreferredItemPaddingRight</item>
+        <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
         <item name="android:focusable">true</item>
     </style>
     
