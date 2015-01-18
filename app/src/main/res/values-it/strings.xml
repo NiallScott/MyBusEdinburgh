@@ -1,6 +1,6 @@
 <!--
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -437,19 +437,6 @@ This version of strings.xml is in Italian (it_IT) -->
     **********************
     **********************
     -->
-    
-    <!--
-    ***********************************
-    * Strings for AboutDialogFragment *
-    ***********************************
-    -->
-    <string name="aboutdialog_version">"Versione %1$s (#%2$d)"</string> <!-- %1$s = external version number. %2$d = internal version number. -->
-    <string name="aboutdialog_dbversion">"Fermata dell\'autobus versione DB: %1$d (%2$s)"</string> <!-- %1$d = bus stop database timestamp. %2$s = human readable date. -->
-    <string name="aboutdialog_topology">"Versione Topologia: %s"</string> <!--  %s = topology string. -->
-    <string name="aboutdialog_contact">"Sito web: http://www.rivernile.org.uk/bustracker\nFollow @MyBusEdinburgh su Twitter per gli aggiornamenti più recenti: http://twitter.com/MyBusEdinburgh"</string>
-    <string name="aboutdialog_body">"<b>Grazie alle seguenti persone ed entità per rendere questo accada applicazione:</b>\nGordon Christie (EdinBus per iOS developer)\nIl Comune di Consiglio di Edimburgo\nAnthony Totton (App icona, sito web e la grafica)\nScott Straughan (versione 0.0.x app interfaccia designer)\nMatteo Doni (localizzazione italiana, testing)\nRoss McClymont (testing)\nConnexionz UK (donazione)\nINEO Systrans\nLothian autobus\n\n<b>Responsabilità</b>\nPermission ha stato concesso da La Città del Consiglio di Edimburgo per questa applicazione di legare alla loro feed di dati. Né l\'autore della richiesta, né il Consiglio della città di Edimburgo si assume alcuna responsabilità per la correttezza dei dati forniti da questa applicazione o le sue implicazioni, o qualsiasi perdita di dati o altri problemi derivanti attraverso l\'utilizzo di questa applicazione. L\'utilizzo di questa applicazione significa che l\'utente assume la completa responsabilità."</string>
-    <string name="aboutdialog_appicon_description">"Icona applicazione"</string>
-    <string name="aboutdialog_btn_licenses">"Licenze open source"</string>
     
     <!--
     *********************************************

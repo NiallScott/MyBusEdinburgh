@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2015 Niall 'Rivernile' Scott
  *
@@ -23,13 +21,35 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<fragment
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragmentAbout"
-    android:name="uk.org.rivernile.android.bustracker.ui.about.AboutFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:layout="@layout/about_fragment"
-    tools:context="uk.org.rivernile.android.bustracker.ui.about.AboutActivity" />
+ */
+
+package uk.org.rivernile.android.bustracker.ui.about;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
+import android.text.Html;
+import uk.org.rivernile.edinburghbustracker.android.R;
+
+
+/**
+ * This {@link DialogFragment} shows a dialog to the user showing credits for the application.
+ *
+ * @author Niall Scott
+ */
+public class CreditsDialogFragment extends DialogFragment {
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(final Bundle savedInstanceState) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true)
+                .setTitle(R.string.creditsdialog_title)
+                .setMessage(Html.fromHtml(getString(R.string.creditsdialog_body)))
+                .setPositiveButton(R.string.close, null);
+
+        return builder.create();
+    }
+}

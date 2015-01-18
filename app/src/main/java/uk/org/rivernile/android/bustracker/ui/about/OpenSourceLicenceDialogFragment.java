@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,42 +23,30 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
+package uk.org.rivernile.android.bustracker.ui.about;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This Fragment will show a Dialog which shows open source license information
- * for external code used inside this application.
+ * This {@link DialogFragment} will show a dialog which contains open source license information for
+ * external code used inside this application.
  * 
  * @author Niall Scott
  */
-public class OpenSourceLicenseDialogFragment extends DialogFragment {
-    
-    private static final boolean isHoneycombOrGreater =
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB;
-    
-    /**
-     * {@inheritDoc}
-     */
+public class OpenSourceLicenceDialogFragment extends DialogFragment {
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final Context context = getActivity();
-        
-        // Get the AlertDialog.Builder with the correct theme set.
-        final AlertDialog.Builder builder;
-        if(isHoneycombOrGreater) {
-            builder = AboutDialogFragment.getHoneycombDialog(context);
-        } else {
-            builder = new AlertDialog.Builder(context);
-        }
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         
         // License information may not be available for Google Play Services if
         // the device does not have Google Play Services installed.
@@ -67,7 +55,7 @@ public class OpenSourceLicenseDialogFragment extends DialogFragment {
         // This String contains non-Google Play Services license information.
         String appLicenses = getString(R.string.open_source_licenses);
         
-        if(playServicesLicenses != null) {
+        if (playServicesLicenses != null) {
             appLicenses = playServicesLicenses + appLicenses;
         }
         

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,6 +36,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_name" tools:ignore="MissingTranslation">My Bus Edinburgh</string> <!-- Should not be included in localised versions -->
     <string name="app_description">View live bus data in Edinburgh</string>
     <string name="app_author" tools:ignore="MissingTranslation">Niall Scott</string> <!-- Should not be included in localised versions -->
+    <string name="app_author_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/</string>
+    <string name="app_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/bustracker/</string>
+    <string name="app_twitter" tools:ignore="MissingTranslation">http://twitter.com/MyBusEdinburgh</string>
     <string name="search_hint">Search stops and places</string>
     <string name="asset_db_version" tools:ignore="MissingTranslation">1402286404622</string> <!-- Should not be included in localised versions -->
 
@@ -244,6 +247,24 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***************
     ***************
     -->
+
+    <!--
+    *****************************
+    * Strings for AboutFragment *
+    *****************************
+    -->
+    <string name="about_title">About</string>
+    <string name="about_version">Application version</string>
+    <string name="about_author">Author</string>
+    <string name="about_database_version">Database version</string>
+    <string name="about_topology_version">Topology version</string>
+    <string name="about_website">Website</string>
+    <string name="about_twitter">Twitter</string>
+    <string name="about_credits">Credits</string>
+    <string name="about_open_source">Open source licences</string>
+
+    <string name="about_version_format" tools:ignore="MissingTranslation">%1$s (#%2$d)</string> <!-- %1$s = external version number. %2$d = internal version number. -->
+    <string name="about_database_version_format" tools:ignore="MissingTranslation">%1$d (%2$s)</string> <!-- %1$d = UNIX timestamp. %2$s = human readable data. -->
     
     <!--
     ********************************************
@@ -416,29 +437,37 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     
     <!--
-    ***********************************
-    * Strings for AboutDialogFragment *
-    ***********************************
+    *************************************
+    * Strings for CreditsDialogFragment *
+    *************************************
     -->
-    <string name="aboutdialog_title">About</string>
-    <string name="aboutdialog_version">Version %1$s (#%2$d)</string> <!-- %1$s = external version number. %2$d = internal version number. -->
-    <string name="aboutdialog_dbversion">Stop DB version: %1$d (%2$s)</string> <!-- %1$d = bus stop database timestamp. %2$s = human readable date. -->
-    <string name="aboutdialog_topology">Topology version: %s</string> <!--  %s = topology string. -->
-    <string name="aboutdialog_contact">Website: http://www.rivernile.org.uk/bustracker\nFollow @MyBusEdinburgh on Twitter for the latest updates: http://twitter.com/MyBusEdinburgh</string>
-    <string name="aboutdialog_body"><b>Thanks to the following people and
-    entities for making this application happen:</b>\nGordon Christie (EdinBus for
-    iOS developer)\nThe City of Edinburgh Council\nAnthony Totton (App icon,
-    website and graphics)\nScott Straughan (Version 0.0.x app interface designer)\nMatteo Doni
-    (Italian localisation, testing)\nRoss McClymont (testing)\nConnexionz UK (donation)\nINEO Systrans\nLothian Buses\n
-    \n<b>Disclaimer</b>\nPermission has been granted from The City of Edinburgh Council
-    for this application to tie in to their data feed. Neither the author of the
-    application, nor The City of Edinburgh Council take any responsibility for
-    the accuracy of data supplied by this application or its implications, or
-    any data loss or any other issues arising through the usage of this
-    application. Usage of this application signifies the user takes complete
-    responsibility.</string>
-    <string name="aboutdialog_appicon_description">Application icon</string>
-    <string name="aboutdialog_btn_licenses">Open source licenses</string>
+    <string name="creditsdialog_title">Credits</string>
+    <string name="creditsdialog_body">
+        <![CDATA[
+            <h5>Thanks to the following people and entities for making this application happen:</h5>
+
+            <p>
+                &#8226; Gordon Christie (EdinBus for iOS developer)<br/>
+                &#8226; The City of Edinburgh Council<br/>
+                &#8226; Anthony Totton (App icon, website and graphics)<br/>
+                &#8226; Matteo Doni (Italian localisation, testing)<br/>
+                &#8226; Ross McClymont (testing)<br/>
+                &#8226; Connexionz UK (donation)<br/>
+                &#8226; INEO Systrans<br/>
+                &#8226; Lothian Buses
+            </p>
+
+            <h5>Disclaimer</h5>
+            <p>
+                Permission has been granted from The City of Edinburgh Council for this application
+                to tie in to their data feed. Neither the author of the application, nor The City of
+                Edinburgh Council take any responsibility for the accuracy of data supplied by this
+                application or its implications, or any data loss or any other issues arising
+                through the usage of this application. Usage of this application signifies the user
+                takes complete responsibility.
+            </p>
+        ]]>
+    </string>
     
     <!--
     *********************************************

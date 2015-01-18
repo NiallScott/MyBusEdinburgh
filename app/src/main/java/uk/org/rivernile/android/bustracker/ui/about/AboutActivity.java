@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2015 Niall 'Rivernile' Scott
  *
@@ -23,13 +21,39 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<fragment
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragmentAbout"
-    android:name="uk.org.rivernile.android.bustracker.ui.about.AboutFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:layout="@layout/about_fragment"
-    tools:context="uk.org.rivernile.android.bustracker.ui.about.AboutActivity" />
+ */
+
+package uk.org.rivernile.android.bustracker.ui.about;
+
+import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import uk.org.rivernile.edinburghbustracker.android.R;
+
+/**
+ * This {@link android.app.Activity} hosts {@link AboutFragment} to show application 'about'
+ * information.
+ *
+ * @author Niall Scott
+ */
+public class AboutActivity extends ActionBarActivity implements AboutFragment.Callbacks {
+
+    private static final String DIALOG_CREDITS = "creditsDialog";
+    private static final String DIALOG_LICENCES = "licencesDialog";
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.about);
+    }
+
+    @Override
+    public void onShowCredits() {
+        new CreditsDialogFragment().show(getSupportFragmentManager(), DIALOG_CREDITS);
+    }
+
+    @Override
+    public void onShowLicences() {
+        new OpenSourceLicenceDialogFragment().show(getSupportFragmentManager(), DIALOG_LICENCES);
+    }
+}

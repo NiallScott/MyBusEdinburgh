@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,13 @@
 package uk.org.rivernile.android.bustracker.ui.main;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import uk.org.rivernile.android.bustracker.ui.about.AboutActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .AboutDialogFragment;
 
 /**
  * This defines the about section.
@@ -39,16 +41,15 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  */
 public class AboutSection implements Section {
     
-    private static final String DIALOG_ABOUT = "aboutDialog";
-    
     private static AboutSection instance;
     
     /**
-     * Get an instance of this class. This class is safe to be a singleton as it
-     * contains no mutable state.
+     * Get an instance of this class. This class is safe to be a singleton as it contains no
+     * mutable state.
      * 
      * @return An instance of this class.
      */
+    @NonNull
     public static AboutSection getInstance() {
         if (instance == null) {
             instance = new AboutSection();
@@ -65,8 +66,8 @@ public class AboutSection implements Section {
     }
 
     @Override
-    public CharSequence getTitle(final Context context) {
-        return context.getString(R.string.aboutdialog_title);
+    public CharSequence getTitle(@NonNull final Context context) {
+        return context.getString(R.string.about_title);
     }
 
     @Override
@@ -75,18 +76,19 @@ public class AboutSection implements Section {
     }
 
     @Override
+    @Nullable
     public Fragment getFragment() {
         return null;
     }
 
     @Override
+    @Nullable
     public String getFragmentTag() {
         return null;
     }
 
     @Override
-    public void doAlternativeAction(final FragmentActivity activity) {
-        new AboutDialogFragment().show(activity.getSupportFragmentManager(),
-                DIALOG_ABOUT);
+    public void doAlternativeAction(@NonNull final FragmentActivity activity) {
+        activity.startActivity(new Intent(activity, AboutActivity.class));
     }
 }

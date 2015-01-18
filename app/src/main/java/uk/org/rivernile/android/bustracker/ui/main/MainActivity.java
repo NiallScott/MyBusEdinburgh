@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,8 +50,6 @@ import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .AboutDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteAllAlertsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteFavouriteDialogFragment;
@@ -61,8 +59,6 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .InstallBarcodeScannerDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .OpenSourceLicenseDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -77,39 +73,28 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .NearestStopsFragment;
 
 /**
- * This Activity loads the MainDashboardFragment.
+ * This {@link android.app.Activity} hosts the root UI elements.
  *
  * @author Niall Scott
  * @see SectionListFragment
  */
 public class MainActivity extends ActionBarActivity
-        implements SectionListFragment.Callbacks, AboutDialogFragment.Callbacks,
-        AlertManagerFragment.Callbacks, EnterStopCodeFragment.Callbacks,
-        FavouriteStopsFragment.Callbacks, NearestStopsFragment.Callbacks,
-        DeleteAllAlertsDialogFragment.Callbacks,
-        DeleteProximityAlertDialogFragment.Callbacks,
-        DeleteTimeAlertDialogFragment.Callbacks,
-        ServicesChooserDialogFragment.Callbacks,
-        InstallBarcodeScannerDialogFragment.Callbacks,
-        DeleteFavouriteDialogFragment.Callbacks,
-        TurnOnGpsDialogFragment.Callbacks {
+        implements SectionListFragment.Callbacks, AlertManagerFragment.Callbacks,
+        EnterStopCodeFragment.Callbacks, FavouriteStopsFragment.Callbacks,
+        NearestStopsFragment.Callbacks, DeleteAllAlertsDialogFragment.Callbacks,
+        DeleteProximityAlertDialogFragment.Callbacks, DeleteTimeAlertDialogFragment.Callbacks,
+        ServicesChooserDialogFragment.Callbacks, InstallBarcodeScannerDialogFragment.Callbacks,
+        DeleteFavouriteDialogFragment.Callbacks, TurnOnGpsDialogFragment.Callbacks {
     
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
-    
-    private static final String DIALOG_LICENCES = "licencesDialog";
-    private static final String DIALOG_DELETE_ALL_ALERTS =
-            "deleteAllAlertsDialog";
-    private static final String DIALOG_DELETE_PROX_ALERT =
-            "deleteProxAlertDialog";
-    private static final String DIALOG_DELETE_TIME_ALERT =
-            "deleteTimeAlertDialog";
-    private static final String DIALOG_SERVICES_CHOOSER =
-            "servicesChooserDialog";
-    private static final String DIALOG_INSTALL_BARCODE_SCANNER =
-            "installBarcodeScannerDialog";
-    private static final String DIALOG_CONFIRM_DELETE_FAVOURITE =
-            "deleteFavouriteDialog";
+
+    private static final String DIALOG_DELETE_ALL_ALERTS = "deleteAllAlertsDialog";
+    private static final String DIALOG_DELETE_PROX_ALERT = "deleteProxAlertDialog";
+    private static final String DIALOG_DELETE_TIME_ALERT = "deleteTimeAlertDialog";
+    private static final String DIALOG_SERVICES_CHOOSER = "servicesChooserDialog";
+    private static final String DIALOG_INSTALL_BARCODE_SCANNER = "installBarcodeScannerDialog";
+    private static final String DIALOG_CONFIRM_DELETE_FAVOURITE = "deleteFavouriteDialog";
     private static final String DIALOG_TURN_ON_GPS = "turnOnGpsDialog";
     
     private ActionBar actionBar;
@@ -127,8 +112,8 @@ public class MainActivity extends ActionBarActivity
         
         drawer = (DrawerLayout) findViewById(R.id.drawer);
         drawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        drawerToggle = new ActionBarDrawerToggle(this, drawer,
-                R.string.main_drawer_open, R.string.main_drawer_close) {
+        drawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.main_drawer_open,
+                R.string.main_drawer_close) {
             @Override
             public void onDrawerClosed(final View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -177,11 +162,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        if (drawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        
-        return super.onOptionsItemSelected(item);
+        return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -211,15 +192,9 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    public void onShowLicences() {
-        new OpenSourceLicenseDialogFragment().show(getSupportFragmentManager(),
-                DIALOG_LICENCES);
-    }
-
-    @Override
     public void onShowConfirmDeleteAllAlerts() {
-        new DeleteAllAlertsDialogFragment().show(getSupportFragmentManager(),
-                DIALOG_DELETE_ALL_ALERTS);
+        new DeleteAllAlertsDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_DELETE_ALL_ALERTS);
     }
 
     @Override
@@ -230,8 +205,8 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onShowConfirmDeleteTimeAlert() {
-        new DeleteTimeAlertDialogFragment().show(getSupportFragmentManager(),
-                DIALOG_DELETE_TIME_ALERT);
+        new DeleteTimeAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_DELETE_TIME_ALERT);
     }
 
     @Override
@@ -245,8 +220,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onAskInstallBarcodeScanner() {
         new InstallBarcodeScannerDialogFragment()
-                .show(getSupportFragmentManager(),
-                        DIALOG_INSTALL_BARCODE_SCANNER);
+                .show(getSupportFragmentManager(), DIALOG_INSTALL_BARCODE_SCANNER);
     }
 
     @Override
@@ -258,8 +232,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onShowEditFavouriteStop(final String stopCode) {
-        final Intent intent = new Intent(this,
-                AddEditFavouriteStopActivity.class);
+        final Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
         intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
         startActivity(intent);
     }
@@ -267,8 +240,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onShowConfirmFavouriteDeletion(final String stopCode) {
         DeleteFavouriteDialogFragment.newInstance(stopCode)
-                .show(getSupportFragmentManager(),
-                        DIALOG_CONFIRM_DELETE_FAVOURITE);
+                .show(getSupportFragmentManager(), DIALOG_CONFIRM_DELETE_FAVOURITE);
     }
 
     @Override
@@ -283,8 +255,7 @@ public class MainActivity extends ActionBarActivity
             final String[] defaultServices) {
         final Intent intent = new Intent(this, AddTimeAlertActivity.class);
         intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE, stopCode);
-        intent.putExtra(AddTimeAlertActivity.ARG_DEFAULT_SERVICES,
-                defaultServices);
+        intent.putExtra(AddTimeAlertActivity.ARG_DEFAULT_SERVICES, defaultServices);
         startActivity(intent);
     }
 
@@ -297,15 +268,13 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onAskTurnOnGps() {
-        new TurnOnGpsDialogFragment().show(getSupportFragmentManager(),
-                DIALOG_TURN_ON_GPS);
+        new TurnOnGpsDialogFragment().show(getSupportFragmentManager(), DIALOG_TURN_ON_GPS);
     }
 
     @Override
     public void onShowAddFavouriteStop(final String stopCode,
             final String stopName) {
-        final Intent intent = new Intent(this,
-                AddEditFavouriteStopActivity.class);
+        final Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
         intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
         intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME, stopName);
         startActivity(intent);
@@ -315,9 +284,8 @@ public class MainActivity extends ActionBarActivity
     public void onConfirmAllAlertsDeletion() {
         try {
             final DeleteAllAlertsDialogFragment.Callbacks child =
-                    (DeleteAllAlertsDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (DeleteAllAlertsDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onConfirmAllAlertsDeletion();
             }
@@ -330,9 +298,8 @@ public class MainActivity extends ActionBarActivity
     public void onCancelAllAlertsDeletion() {
         try {
             final DeleteAllAlertsDialogFragment.Callbacks child =
-                    (DeleteAllAlertsDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (DeleteAllAlertsDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onCancelAllAlertsDeletion();
             }
@@ -345,9 +312,8 @@ public class MainActivity extends ActionBarActivity
     public void onConfirmProximityAlertDeletion() {
         try {
             final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (DeleteProximityAlertDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onConfirmProximityAlertDeletion();
             }
@@ -360,9 +326,8 @@ public class MainActivity extends ActionBarActivity
     public void onCancelProximityAlertDeletion() {
         try {
             final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (DeleteProximityAlertDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onCancelProximityAlertDeletion();
             }
@@ -375,9 +340,8 @@ public class MainActivity extends ActionBarActivity
     public void onConfirmTimeAlertDeletion() {
         try {
             final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (DeleteTimeAlertDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onConfirmTimeAlertDeletion();
             }
@@ -390,9 +354,8 @@ public class MainActivity extends ActionBarActivity
     public void onCancelTimeAlertDeletion() {
         try {
             final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (DeleteTimeAlertDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onCancelTimeAlertDeletion();
             }
@@ -405,9 +368,8 @@ public class MainActivity extends ActionBarActivity
     public void onServicesChosen(final String[] chosenServices) {
         try {
             final ServicesChooserDialogFragment.Callbacks child =
-                    (ServicesChooserDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (ServicesChooserDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onServicesChosen(chosenServices);
             }
@@ -424,8 +386,8 @@ public class MainActivity extends ActionBarActivity
         try {
             startActivity(intent);
         } catch(ActivityNotFoundException e) {
-            Toast.makeText(this, R.string.barcodescannerdialog_noplaystore,
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.barcodescannerdialog_noplaystore, Toast.LENGTH_LONG)
+                    .show();
         }
     }
 
@@ -433,9 +395,8 @@ public class MainActivity extends ActionBarActivity
     public void onConfirmFavouriteDeletion() {
         try {
             final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (DeleteFavouriteDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onConfirmFavouriteDeletion();
             }
@@ -448,9 +409,8 @@ public class MainActivity extends ActionBarActivity
     public void onCancelFavouriteDeletion() {
         try {
             final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.layoutContainer);
+                    (DeleteFavouriteDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.layoutContainer);
             if (child != null) {
                 child.onCancelFavouriteDeletion();
             }
@@ -485,10 +445,8 @@ public class MainActivity extends ActionBarActivity
         }
         
         final FragmentManager fragMan = getSupportFragmentManager();
-        final Fragment currFragment = fragMan
-                .findFragmentById(R.id.layoutContainer);
-        final Fragment newFragment = fragMan.findFragmentByTag(section
-                .getFragmentTag());
+        final Fragment currFragment = fragMan.findFragmentById(R.id.layoutContainer);
+        final Fragment newFragment = fragMan.findFragmentByTag(section.getFragmentTag());
         
         if (currFragment != null && currFragment == newFragment) {
             drawer.closeDrawer(GravityCompat.START);
@@ -502,8 +460,7 @@ public class MainActivity extends ActionBarActivity
         }
         
         if (newFragment == null) {
-            fragTrans.add(R.id.layoutContainer, section.getFragment(),
-                    section.getFragmentTag());
+            fragTrans.add(R.id.layoutContainer, section.getFragment(), section.getFragmentTag());
         } else {
             // Fragments are attached/detached so that their state can be
             // persisted in memory for the lifetime of MainActivity.
@@ -512,8 +469,8 @@ public class MainActivity extends ActionBarActivity
         
         fragTrans.commit();
         
-        ((SectionListFragment) fragMan.findFragmentById(
-                R.id.fragmentSectionList)).setSectionAsSelected(section);
+        ((SectionListFragment) fragMan.findFragmentById(R.id.fragmentSectionList))
+                .setSectionAsSelected(section);
         
         drawer.closeDrawer(GravityCompat.START);
     }
@@ -527,8 +484,8 @@ public class MainActivity extends ActionBarActivity
      * it is closed.
      */
     private void setFragmentOptionsMenuVisibility(final boolean isDrawerOpen) {
-        final Fragment f = getSupportFragmentManager()
-                .findFragmentById(R.id.layoutContainer);
+        final Fragment f = getSupportFragmentManager().findFragmentById(R.id.layoutContainer);
+
         if (f != null) {
             f.setMenuVisibility(!isDrawerOpen);
         }
