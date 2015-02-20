@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -43,34 +44,26 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
-import uk.org.rivernile.edinburghbustracker.android
-        .AddEditFavouriteStopActivity;
+import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
+import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
+import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteAllAlertsDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteFavouriteDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteAllAlertsDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteTimeAlertDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .InstallBarcodeScannerDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .ServicesChooserDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .TurnOnGpsDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .AlertManagerFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .EnterStopCodeFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .FavouriteStopsFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .NearestStopsFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general.AlertManagerFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general.EnterStopCodeFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general.FavouriteStopsFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general.NearestStopsFragment;
 
 /**
  * This {@link android.app.Activity} hosts the root UI elements.
@@ -167,8 +160,8 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onBackPressed() {
-        // FIXME: this code exists because of a bug in the compatibility
-        // library. Remove it when the bug has been fixed in the library.
+        // FIXME: this code exists because of a bug in the compatibility library. Remove it when the
+        // bug has been fixed in the library.
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -187,7 +180,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    public void onSectionChosen(final Section section) {
+    public void onSectionChosen(@NonNull final Section section) {
         showSection(section);
     }
 
@@ -462,26 +455,20 @@ public class MainActivity extends ActionBarActivity
         if (newFragment == null) {
             fragTrans.add(R.id.layoutContainer, section.getFragment(), section.getFragmentTag());
         } else {
-            // Fragments are attached/detached so that their state can be
-            // persisted in memory for the lifetime of MainActivity.
+            // Fragments are attached/detached so that their state can be persisted in memory for
+            // the lifetime of MainActivity.
             fragTrans.attach(newFragment);
         }
         
         fragTrans.commit();
-        
-        ((SectionListFragment) fragMan.findFragmentById(R.id.fragmentSectionList))
-                .setSectionAsSelected(section);
-        
         drawer.closeDrawer(GravityCompat.START);
     }
     
     /**
-     * Set the correct visibility on the options menu of the current
-     * {@link Fragment} based on whether the {@link DrawerLayout} is open or
-     * closed.
+     * Set the correct visibility on the options menu of the current {@link Fragment} based on
+     * whether the {@link DrawerLayout} is open or closed.
      * 
-     * @param isDrawerOpen {@code true} if the drawer is open, {@code false} if
-     * it is closed.
+     * @param isDrawerOpen {@code true} if the drawer is open, {@code false} if it is closed.
      */
     private void setFragmentOptionsMenuVisibility(final boolean isDrawerOpen) {
         final Fragment f = getSupportFragmentManager().findFragmentById(R.id.layoutContainer);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,9 +23,12 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.main;
+package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
@@ -44,40 +47,42 @@ public interface Section {
      * @param context A {@link Context} instance.
      * @return The title for a {@code Section}.
      */
-    public CharSequence getTitle(Context context);
+    @NonNull
+    public CharSequence getTitle(@NonNull Context context);
     
     /**
      * Get the icon resource for a {@code Section}.
      * 
-     * @return The icon resource for a {@code Section}. When no icon is to be
-     * used, then {@code 0} is returned.
+     * @return The icon resource for a {@code Section}. When no icon is to be used, then {@code 0}
+     * is returned.
      */
+    @DrawableRes
     public int getIconResource();
     
     /**
-     * Get the {@link Fragment} to use for a {@code Section}. If a
-     * {@link Fragment} is not being used for the section, then {@code null}
-     * should be returned.
+     * Get the {@link Fragment} to use for a {@code Section}. If a {@link Fragment} is not being
+     * used for the section, then {@code null} should be returned.
      * 
-     * @return The {@link Fragment} to use for a {@code Section}, or
-     * {@code null} if an alternative action is to be performed.
+     * @return The {@link Fragment} to use for a {@code Section}, or {@code null} if an alternative
+     * action is to be performed.
      */
+    @Nullable
     public Fragment getFragment();
     
     /**
-     * Get the tag to use for the {@link Fragment} for this {@code Section}. If
-     * an alternative action is to be performed, return {@code null} here.
+     * Get the tag to use for the {@link Fragment} for this {@code Section}. If an alternative
+     * action is to be performed, return {@code null} here.
      * 
-     * @return The tag to use for the {@link Fragment} for this {@code Section},
-     * or {@code null} if an alternative action is to be performed.
+     * @return The tag to use for the {@link Fragment} for this {@code Section}, or {@code null} if
+     * an alternative action is to be performed.
      */
+    @Nullable
     public String getFragmentTag();
     
     /**
-     * The alternative action to perform, if {@link #getFragmentTag()} returns
-     * {@code null}.
+     * The alternative action to perform, if {@link #getFragmentTag()} returns {@code null}.
      * 
      * @param activity The current {@link FragmentActivity}.
      */
-    public void doAlternativeAction(FragmentActivity activity);
+    public void doAlternativeAction(@NonNull FragmentActivity activity);
 }

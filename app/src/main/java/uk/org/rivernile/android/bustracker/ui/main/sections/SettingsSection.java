@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,35 +23,37 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.main;
+package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
+import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This defines the bus stop map section.
+ * This defines the settings section.
  * 
  * @author Niall Scott
  */
-public class BusStopMapSection implements Section {
+public class SettingsSection implements Section {
     
-    private static BusStopMapSection instance;
+    private static SettingsSection instance;
     
     /**
-     * Get an instance of this class. This class is safe to be a singleton as it
-     * contains no mutable state.
+     * Get an instance of this class. This class is safe to be a singleton as it contains no mutable
+     * state.
      * 
      * @return An instance of this class.
      */
-    public static BusStopMapSection getInstance() {
+    @NonNull
+    public static SettingsSection getInstance() {
         if (instance == null) {
-            instance = new BusStopMapSection();
+            instance = new SettingsSection();
         }
         
         return instance;
@@ -60,41 +62,36 @@ public class BusStopMapSection implements Section {
     /**
      * This constructor is private to prevent outside instantiation.
      */
-    private BusStopMapSection() {
+    private SettingsSection() {
         // No implementation.
     }
 
     @Override
-    public CharSequence getTitle(final Context context) {
-        return context.getString(R.string.map_title);
+    @NonNull
+    public CharSequence getTitle(@NonNull final Context context) {
+        return context.getString(R.string.preferences_title);
     }
 
     @Override
+    @DrawableRes
     public int getIconResource() {
-        return R.drawable.ic_drawer_map;
+        return R.drawable.ic_drawer_settings;
     }
 
     @Override
+    @Nullable
     public Fragment getFragment() {
         return null;
     }
 
     @Override
+    @Nullable
     public String getFragmentTag() {
         return null;
     }
-    
+
     @Override
-    public void doAlternativeAction(final FragmentActivity activity) {
-        final int errorCode = GooglePlayServicesUtil
-                .isGooglePlayServicesAvailable(activity);
-        
-        if (errorCode == ConnectionResult.SUCCESS) {
-            activity.startActivity(new Intent(activity,
-                    BusStopMapActivity.class));
-        } else {
-            GooglePlayServicesUtil
-                    .showErrorDialogFragment(errorCode, activity, 1);
-        }
+    public void doAlternativeAction(@NonNull final FragmentActivity activity) {
+        activity.startActivity(new Intent(activity, PreferencesActivity.class));
     }
 }

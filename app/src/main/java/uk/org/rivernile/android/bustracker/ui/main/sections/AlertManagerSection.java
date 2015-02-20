@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,33 +23,36 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.main;
+package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .NearestStopsFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general.AlertManagerFragment;
 
 /**
- * This defines the nearest bus stops section.
+ * This defines the alert manager section.
  * 
  * @author Niall Scott
  */
-public class NearestStopsSection implements Section {
+public class AlertManagerSection implements Section {
     
-    private static NearestStopsSection instance;
+    private static AlertManagerSection instance;
     
     /**
-     * Get an instance of this class. This class is safe to be a singleton as it
-     * contains no mutable state.
+     * Get an instance of this class. This class is safe to be a singleton as it contains no mutable
+     * state.
      * 
      * @return An instance of this class.
      */
-    public static NearestStopsSection getInstance() {
+    @NonNull
+    public static AlertManagerSection getInstance() {
         if (instance == null) {
-            instance = new NearestStopsSection();
+            instance = new AlertManagerSection();
         }
         
         return instance;
@@ -58,32 +61,36 @@ public class NearestStopsSection implements Section {
     /**
      * This constructor is private to prevent outside instantiation.
      */
-    private NearestStopsSection() {
+    private AlertManagerSection() {
         // No implementation.
     }
 
     @Override
-    public CharSequence getTitle(final Context context) {
-        return context.getString(R.string.neareststops_title);
+    @NonNull
+    public CharSequence getTitle(@NonNull final Context context) {
+        return context.getString(R.string.alertmanager_title);
     }
 
     @Override
+    @DrawableRes
     public int getIconResource() {
-        return R.drawable.ic_drawer_nearest;
+        return R.drawable.ic_drawer_alerts;
     }
 
     @Override
+    @Nullable
     public Fragment getFragment() {
-        return new NearestStopsFragment();
+        return new AlertManagerFragment();
     }
 
     @Override
+    @Nullable
     public String getFragmentTag() {
-        return "TAG_NEAREST_STOPS";
+        return "TAG_ALERT_MANAGER";
     }
-    
+
     @Override
-    public void doAlternativeAction(final FragmentActivity activity) {
+    public void doAlternativeAction(@NonNull final FragmentActivity activity) {
         // Nothing to do here.
     }
 }

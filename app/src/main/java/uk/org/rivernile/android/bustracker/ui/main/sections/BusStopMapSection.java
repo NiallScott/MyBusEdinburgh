@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,33 +23,39 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.main;
+package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .AlertManagerFragment;
 
 /**
- * This defines the alert manager section.
+ * This defines the bus stop map section.
  * 
  * @author Niall Scott
  */
-public class AlertManagerSection implements Section {
+public class BusStopMapSection implements Section {
     
-    private static AlertManagerSection instance;
+    private static BusStopMapSection instance;
     
     /**
-     * Get an instance of this class. This class is safe to be a singleton as it
-     * contains no mutable state.
+     * Get an instance of this class. This class is safe to be a singleton as it contains no mutable
+     * state.
      * 
      * @return An instance of this class.
      */
-    public static AlertManagerSection getInstance() {
+    @NonNull
+    public static BusStopMapSection getInstance() {
         if (instance == null) {
-            instance = new AlertManagerSection();
+            instance = new BusStopMapSection();
         }
         
         return instance;
@@ -58,32 +64,42 @@ public class AlertManagerSection implements Section {
     /**
      * This constructor is private to prevent outside instantiation.
      */
-    private AlertManagerSection() {
+    private BusStopMapSection() {
         // No implementation.
     }
 
     @Override
-    public CharSequence getTitle(final Context context) {
-        return context.getString(R.string.alertmanager_title);
+    @NonNull
+    public CharSequence getTitle(@NonNull final Context context) {
+        return context.getString(R.string.map_title);
     }
 
     @Override
+    @DrawableRes
     public int getIconResource() {
-        return R.drawable.ic_drawer_alerts;
+        return R.drawable.ic_drawer_map;
     }
 
     @Override
+    @Nullable
     public Fragment getFragment() {
-        return new AlertManagerFragment();
+        return null;
     }
 
     @Override
+    @Nullable
     public String getFragmentTag() {
-        return "TAG_ALERT_MANAGER";
+        return null;
     }
-
+    
     @Override
-    public void doAlternativeAction(final FragmentActivity activity) {
-        // Nothing to do here.
+    public void doAlternativeAction(@NonNull final FragmentActivity activity) {
+        final int errorCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
+        
+        if (errorCode == ConnectionResult.SUCCESS) {
+            activity.startActivity(new Intent(activity, BusStopMapActivity.class));
+        } else {
+            GooglePlayServicesUtil.showErrorDialogFragment(errorCode, activity, 1);
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,33 +23,36 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.main;
+package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .FavouriteStopsFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general.NearestStopsFragment;
 
 /**
- * This defines the favourites section.
+ * This defines the nearest bus stops section.
  * 
  * @author Niall Scott
  */
-public class FavouritesSection implements Section {
+public class NearestStopsSection implements Section {
     
-    private static FavouritesSection instance;
+    private static NearestStopsSection instance;
     
     /**
-     * Get an instance of this class. This class is safe to be a singleton as it
-     * contains no mutable state.
+     * Get an instance of this class. This class is safe to be a singleton as it contains no mutable
+     * state.
      * 
      * @return An instance of this class.
      */
-    public static FavouritesSection getInstance() {
+    @NonNull
+    public static NearestStopsSection getInstance() {
         if (instance == null) {
-            instance = new FavouritesSection();
+            instance = new NearestStopsSection();
         }
         
         return instance;
@@ -58,32 +61,36 @@ public class FavouritesSection implements Section {
     /**
      * This constructor is private to prevent outside instantiation.
      */
-    private FavouritesSection() {
+    private NearestStopsSection() {
         // No implementation.
     }
 
     @Override
-    public CharSequence getTitle(final Context context) {
-        return context.getString(R.string.favouritestops_title);
+    @NonNull
+    public CharSequence getTitle(@NonNull final Context context) {
+        return context.getString(R.string.neareststops_title);
     }
 
     @Override
+    @DrawableRes
     public int getIconResource() {
-        return R.drawable.ic_drawer_favourites;
+        return R.drawable.ic_drawer_nearest;
     }
 
     @Override
+    @Nullable
     public Fragment getFragment() {
-        return FavouriteStopsFragment.newInstance(false);
+        return new NearestStopsFragment();
     }
 
     @Override
+    @Nullable
     public String getFragmentTag() {
-        return "TAG_FAVOURITES";
+        return "TAG_NEAREST_STOPS";
     }
     
     @Override
-    public void doAlternativeAction(final FragmentActivity activity) {
+    public void doAlternativeAction(@NonNull final FragmentActivity activity) {
         // Nothing to do here.
     }
 }

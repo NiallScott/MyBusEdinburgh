@@ -23,10 +23,11 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.main;
+package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -44,8 +45,8 @@ public class AboutSection implements Section {
     private static AboutSection instance;
     
     /**
-     * Get an instance of this class. This class is safe to be a singleton as it contains no
-     * mutable state.
+     * Get an instance of this class. This class is safe to be a singleton as it contains no mutable
+     * state.
      * 
      * @return An instance of this class.
      */
@@ -66,11 +67,13 @@ public class AboutSection implements Section {
     }
 
     @Override
+    @NonNull
     public CharSequence getTitle(@NonNull final Context context) {
         return context.getString(R.string.about_title);
     }
 
     @Override
+    @DrawableRes
     public int getIconResource() {
         return R.drawable.ic_drawer_about;
     }

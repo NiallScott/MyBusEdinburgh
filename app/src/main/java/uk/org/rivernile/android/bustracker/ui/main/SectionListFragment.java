@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,25 +29,38 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
+
+import uk.org.rivernile.android.bustracker.ui.main.sections.AboutSection;
+import uk.org.rivernile.android.bustracker.ui.main.sections.AlertManagerSection;
+import uk.org.rivernile.android.bustracker.ui.main.sections.BusStopMapSection;
+import uk.org.rivernile.android.bustracker.ui.main.sections.EnterStopCodeSection;
+import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
+import uk.org.rivernile.android.bustracker.ui.main.sections.NearestStopsSection;
+import uk.org.rivernile.android.bustracker.ui.main.sections.NewsSection;
+import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
+import uk.org.rivernile.android.bustracker.ui.main.sections.SettingsSection;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This {@link ListFragment} makes up the view in the application navigation
- * drawer. It shows a {@link ListView} of application {@link Section}s to the
- * user, which they can choose to navigate to.
+ * This {@link ListFragment} makes up the view in the application navigation drawer. It shows a
+ * {@link RecyclerView} of application {@link Section}s to the user, which they can choose to
+ * navigate to.
  * 
  * @author Niall Scott
  */
-public class SectionListFragment extends ListFragment {
+public class SectionListFragment extends Fragment {
+
+    private static final String KEY_SELECTED = "position";
     
     private Callbacks callbacks;
     private SectionListAdapter adapter;
-    
-    private ListView listView;
+
+    private RecyclerView recyclerView;
 
     @Override
     public void onAttach(final Activity activity) {
@@ -78,9 +91,12 @@ public class SectionListFragment extends ListFragment {
         };
         
         adapter = new SectionListAdapter(getActivity());
-        adapter.addSections(sections);
-        
-        setListAdapter(adapter);
+        adapter.setOnSectionChosenListener(callbacks);
+        adapter.setSections(sections);
+
+        if (savedInstanceState != null) {
+            adapter.setSelected(savedInstanceState.getInt(KEY_SELECTED));
+        }
     }
 
     @Override
@@ -88,41 +104,27 @@ public class SectionListFragment extends ListFragment {
             final ViewGroup container, final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.sectionlist_fragment,
                 container, false);
-        listView = (ListView) v.findViewById(android.R.id.list);
+        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(adapter);
         
         return v;
     }
 
     @Override
-    public void onListItemClick(final ListView l, View v, final int position,
-            final long id) {
-        final Section section = adapter.getItem(position);
-        callbacks.onSectionChosen(section);
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(KEY_SELECTED, adapter.getSelected());
     }
     
     /**
-     * Set a {@link Section} as the selected {@link Section}.
-     * 
-     * @param section The {@link Section} to select as the chosen one.
+     * {@link Activity Activities} which host this {@link Fragment} must implement this interface.
      */
-    public void setSectionAsSelected(final Section section) {
-        final int position = adapter.getPositionForSection(section);
-        if (position >= 0) {
-            listView.setItemChecked(position, true);
-        }
-    }
-    
-    /**
-     * {@link Activity Activities} which host this {@link Fragment} must
-     * implement this interface.
-     */
-    public static interface Callbacks {
-        
-        /**
-         * This is called when the user has chosen a section.
-         * 
-         * @param section The section that the user has chosen.
-         */
-        public void onSectionChosen(Section section);
+    public static interface Callbacks extends SectionListAdapter.OnSectionChosenListener {
+
+        // No methods to declare here.
     }
 }

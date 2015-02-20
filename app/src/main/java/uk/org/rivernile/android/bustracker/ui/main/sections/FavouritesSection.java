@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,32 +23,36 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.main;
+package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragment;
 import uk.org.rivernile.edinburghbustracker.android.R;
+import uk.org.rivernile.edinburghbustracker.android.fragments.general.FavouriteStopsFragment;
 
 /**
- * This defines the news section.
+ * This defines the favourites section.
  * 
  * @author Niall Scott
  */
-public class NewsSection implements Section {
+public class FavouritesSection implements Section {
     
-    private static NewsSection instance;
+    private static FavouritesSection instance;
     
     /**
-     * Get an instance of this class. This class is safe to be a singleton as it
-     * contains no mutable state.
+     * Get an instance of this class. This class is safe to be a singleton as it contains no mutable
+     * state.
      * 
      * @return An instance of this class.
      */
-    public static NewsSection getInstance() {
+    @NonNull
+    public static FavouritesSection getInstance() {
         if (instance == null) {
-            instance = new NewsSection();
+            instance = new FavouritesSection();
         }
         
         return instance;
@@ -57,32 +61,36 @@ public class NewsSection implements Section {
     /**
      * This constructor is private to prevent outside instantiation.
      */
-    private NewsSection() {
+    private FavouritesSection() {
         // No implementation.
     }
 
     @Override
-    public CharSequence getTitle(final Context context) {
-        return context.getString(R.string.twitterupdates_title);
+    @NonNull
+    public CharSequence getTitle(@NonNull final Context context) {
+        return context.getString(R.string.favouritestops_title);
     }
 
     @Override
+    @DrawableRes
     public int getIconResource() {
-        return R.drawable.ic_drawer_travel_updates;
+        return R.drawable.ic_drawer_favourites;
     }
 
     @Override
+    @Nullable
     public Fragment getFragment() {
-        return new TwitterUpdatesFragment();
+        return FavouriteStopsFragment.newInstance(false);
     }
 
     @Override
+    @Nullable
     public String getFragmentTag() {
-        return "TAG_NEWS";
+        return "TAG_FAVOURITES";
     }
     
     @Override
-    public void doAlternativeAction(final FragmentActivity activity) {
+    public void doAlternativeAction(@NonNull final FragmentActivity activity) {
         // Nothing to do here.
     }
 }

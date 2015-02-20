@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,54 +26,72 @@
 package uk.org.rivernile.android.bustracker.ui.main;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import android.widget.CheckedTextView;
+
+import java.lang.ref.WeakReference;
+
+import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This {@link Adapter} is used to show a list of {@link Section}s to the user.
- * 
+ * This {@link RecyclerView.Adapter} is used to populate the items to display in the section list.
+ * This shows the top level navigation of the application.
+ *
  * @author Niall Scott
  */
-public class SectionListAdapter extends BaseAdapter {
-    
+public class SectionListAdapter extends RecyclerView.Adapter {
+
     private static final int TYPE_NORMAL = 0;
     private static final int TYPE_DIVIDER = 1;
-    
+
     private final Context context;
     private final LayoutInflater inflater;
-    private final ArrayList<Section> sections = new ArrayList<Section>();
-    
+    private Section[] sections;
+    private WeakReference<OnSectionChosenListener> sectionChosenListener;
+    private int selected = 0;
+
     /**
      * Create a new {@code SectionListAdapter}.
-     * 
-     * @param context A {@link Context} instance. Must not be {@code null}.
+     *
+     * @param context The {@link Context} of the hosting {@link android.app.Activity}.
      */
-    public SectionListAdapter(final Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("The context must not be null.");
-        }
-        
+    public SectionListAdapter(@NonNull final Context context) {
         this.context = context;
         inflater = LayoutInflater.from(context);
+        setHasStableIds(true);
     }
 
     @Override
-    public int getCount() {
-        return sections.size();
+    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        return viewType == TYPE_NORMAL ?
+                new ViewHolder(inflater.inflate(R.layout.sectionlist_item, parent, false)) :
+                new DividerViewHolder(inflater.inflate(R.layout.list_divider, parent, false));
     }
 
     @Override
-    public Section getItem(final int position) {
-        return position >= 0 && position < sections.size() ?
-                sections.get(position) : null;
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+        final Section section = sections[position];
+
+        if (section == null) {
+            return;
+        }
+
+        final ViewHolder viewHolder = (ViewHolder) holder;
+        viewHolder.text1.setText(section.getTitle(context));
+        viewHolder.text1.setCompoundDrawablesWithIntrinsicBounds(
+                section.getIconResource(), 0, 0, 0);
+        viewHolder.text1.setChecked(position == selected);
+    }
+
+    @Override
+    public int getItemCount() {
+        return sections != null ? sections.length : 0;
     }
 
     @Override
@@ -83,140 +101,141 @@ public class SectionListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(final int position, final View convertView,
-            final ViewGroup parent) {
-        if (getItemViewType(position) == TYPE_DIVIDER) {
-            return convertView != null ? convertView :
-                    inflater.inflate(R.layout.list_divider, parent, false);
-        }
-        
-        final View v;
-        final ViewHolder holder;
-        
-        if (convertView == null) {
-            v = inflater.inflate(R.layout.sectionlist_item, parent, false);
-            holder = new ViewHolder();
-            holder.text1 = (TextView) v.findViewById(android.R.id.text1);
-            v.setTag(holder);
-        } else {
-            v = convertView;
-            holder = (ViewHolder) v.getTag();
-        }
-        
-        final Section section = getItem(position);
-        holder.text1.setText(section.getTitle(context));
-        holder.text1.setCompoundDrawablesWithIntrinsicBounds(
-                section.getIconResource(), 0, 0, 0);
-        
-        return v;
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return true;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 2;
-    }
-
-    @Override
     public int getItemViewType(final int position) {
         final Section section = getItem(position);
         return section != null ? TYPE_NORMAL : TYPE_DIVIDER;
     }
 
-    @Override
-    public boolean areAllItemsEnabled() {
-        return false;
-    }
-
-    @Override
-    public boolean isEnabled(final int position) {
-        return getItemViewType(position) == TYPE_NORMAL;
-    }
-    
     /**
-     * Get the {@link Context} used by this {@link Adapter}.
-     * 
-     * @return The {@link Context} used by this {@link Adpater}.
+     * Set the {@link Section}s to show.
+     *
+     * @param sections The {@link Section}s to show.
      */
-    public final Context getContext() {
-        return context;
-    }
-    
-    /**
-     * Add a section to be shown.
-     * 
-     * @param section The new {@link Section}. A {@code null} item denotes a
-     * divider line.
-     */
-    public void addSection(final Section section) {
-        sections.add(section);
-        notifyDataSetChanged();
-    }
-    
-    /**
-     * Add a {@link Collection} of {@link Section}s to be shown.
-     * 
-     * @param sections The {@link Collection} of {@link Section}s to be shown.
-     * {@code null} and empty will be ignored.
-     */
-    public void addSections(final Collection<Section> sections) {
-        if (sections == null || sections.isEmpty()) {
-            return;
-        }
-        
-        this.sections.ensureCapacity(this.sections.size() + sections.size());
-        this.sections.addAll(sections);
-        notifyDataSetChanged();
-    }
-    
-    /**
-     * Add an array of {@link Section} objects to be shown.
-     * 
-     * @param sections The {@link Section}s to add. {@code null} and empty will
-     * be ignored.
-     */
-    public void addSections(final Section[] sections) {
-        if (sections == null || sections.length == 0) {
-            return;
-        }
-        
-        this.sections.ensureCapacity(this.sections.size() + sections.length);
-        Collections.addAll(this.sections, sections);
-        
-        notifyDataSetChanged();
-    }
-    
-    /**
-     * Remove a section.
-     * 
-     * @param section The {@link Section} to be removed.
-     */
-    public void removeSection(final Section section) {
-        if (sections.remove(section)) {
+    public void setSections(@Nullable final Section[] sections) {
+        if (this.sections != sections) {
+            this.sections = sections;
             notifyDataSetChanged();
         }
     }
-    
+
     /**
-     * Get the position for the given {@link Section}.
-     * 
-     * @param section The {@link Section} to get the position for.
-     * @return The position of the {@link Section}, or {@code -1} if it does not
-     * exist in the adapter.
+     * Set the listener to be called when the user has selected a {@link Section}.
+     *
+     * @param listener The listener that is called when the user has selected a {@link Section}.
      */
-    public int getPositionForSection(final Section section) {
-        return sections.indexOf(section);
+    public void setOnSectionChosenListener(@Nullable final OnSectionChosenListener listener) {
+        if (listener != null) {
+            sectionChosenListener = new WeakReference<OnSectionChosenListener>(listener);
+        } else {
+            sectionChosenListener = null;
+        }
     }
-    
+
     /**
-     * This is used to hold references to {@link View}s while they are being
-     * recycled because calls to {@link View#findViewById(int)} are expensive.
+     * Set the currently selected item.
+     *
+     * @param selected The currently selected item.
      */
-    private static class ViewHolder {
-        TextView text1;
+    public void setSelected(final int selected) {
+        final Section section = getItem(selected);
+        final int oldSelected = this.selected;
+
+        if (section != null && section.getFragmentTag() != null) {
+            this.selected = selected;
+        }
+
+        if (this.selected != oldSelected) {
+            notifyItemChanged(oldSelected);
+            notifyItemChanged(selected);
+        }
+    }
+
+    /**
+     * Get the currently selected item.
+     *
+     * @return The currently selected item.
+     */
+    public int getSelected() {
+        return selected;
+    }
+
+    /**
+     * Get the {@link Section} at the given {@code position}.
+     *
+     * @param position The position of the {@link Section}.
+     * @return The {@link Section} at the given {@code position}, or {@code null} if the
+     *         {@link Section}s is currently set as {@code null}.
+     */
+    private Section getItem(final int position) {
+        return sections != null ? sections[position] : null;
+    }
+
+    /**
+     * This {@link RecyclerView.ViewHolder} is used to display the {@link Section} item.
+     */
+    private class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        CheckedTextView text1;
+
+        /**
+         * Create a new {@code ViewHolder}.
+         *
+         * @param itemView The {@link View} for this {@link RecyclerView.ViewHolder}.
+         */
+        ViewHolder(@NonNull final View itemView) {
+            super(itemView);
+
+            text1 = (CheckedTextView) itemView;
+            text1.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(final View v) {
+            final int position = getPosition();
+
+            if (position == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            final OnSectionChosenListener listener =
+                    sectionChosenListener != null ? sectionChosenListener.get() : null;
+
+            if (listener != null) {
+                setSelected(position);
+                listener.onSectionChosen(sections[position]);
+            }
+        }
+    }
+
+    /**
+     * This {@link RecyclerView.ViewHolder} is used to display a dividing line between two sections
+     * in the list.
+     */
+    private static class DividerViewHolder extends RecyclerView.ViewHolder {
+
+        /**
+         * Create a new {@code DividerViewHolder}.
+         *
+         * @param itemView The {@link View} for this {@link RecyclerView.ViewHolder}.
+         */
+        DividerViewHolder(@NonNull final View itemView) {
+            super(itemView);
+        }
+    }
+
+    /**
+     * This interface should be implemented by classes wishing to receive callbacks when a
+     * {@link Section} has been chosen.
+     *
+     * @see #setOnSectionChosenListener(uk.org.rivernile.android.bustracker.ui.main.SectionListAdapter.OnSectionChosenListener)
+     */
+    public static interface OnSectionChosenListener {
+
+        /**
+         * This is called when a {@link Section} has been chosen.
+         *
+         * @param section The chosen {@link Section}.
+         */
+        public void onSectionChosen(@NonNull Section section);
     }
 }

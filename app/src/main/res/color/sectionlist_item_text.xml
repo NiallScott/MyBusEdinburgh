@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,7 @@
     
     <item
         android:state_checked="true"
-        android:color="?colorPrimary" />
+        android:color="@color/colorPrimary" />
     
     <item
         android:color="@color/sectionlist_text_default" />

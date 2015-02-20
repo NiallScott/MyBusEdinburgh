@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,33 +23,36 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.main;
+package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
+import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragment;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .EnterStopCodeFragment;
 
 /**
- * This defines the enter stop code section.
+ * This defines the news section.
  * 
  * @author Niall Scott
  */
-public class EnterStopCodeSection implements Section {
+public class NewsSection implements Section {
     
-    private static EnterStopCodeSection instance;
+    private static NewsSection instance;
     
     /**
-     * Get an instance of this class. This class is safe to be a singleton as it
-     * contains no mutable state.
+     * Get an instance of this class. This class is safe to be a singleton as it contains no mutable
+     * state.
      * 
      * @return An instance of this class.
      */
-    public static EnterStopCodeSection getInstance() {
+    @NonNull
+    public static NewsSection getInstance() {
         if (instance == null) {
-            instance = new EnterStopCodeSection();
+            instance = new NewsSection();
         }
         
         return instance;
@@ -58,32 +61,36 @@ public class EnterStopCodeSection implements Section {
     /**
      * This constructor is private to prevent outside instantiation.
      */
-    private EnterStopCodeSection() {
+    private NewsSection() {
         // No implementation.
     }
 
     @Override
-    public CharSequence getTitle(final Context context) {
-        return context.getResources().getString(R.string.enterstopcode_title);
+    @NonNull
+    public CharSequence getTitle(@NonNull final Context context) {
+        return context.getString(R.string.twitterupdates_title);
     }
 
     @Override
+    @DrawableRes
     public int getIconResource() {
-        return R.drawable.ic_drawer_entercode;
+        return R.drawable.ic_drawer_travel_updates;
     }
 
     @Override
+    @Nullable
     public Fragment getFragment() {
-        return new EnterStopCodeFragment();
+        return new TwitterUpdatesFragment();
     }
 
     @Override
+    @Nullable
     public String getFragmentTag() {
-        return "TAG_ENTER_STOP_CODE";
+        return "TAG_NEWS";
     }
     
     @Override
-    public void doAlternativeAction(final FragmentActivity activity) {
+    public void doAlternativeAction(@NonNull final FragmentActivity activity) {
         // Nothing to do here.
     }
 }
