@@ -36,5 +36,7 @@
     android:paddingLeft="?attr/listPreferredItemPaddingLeft"
     android:paddingRight="?attr/listPreferredItemPaddingRight"
     android:gravity="center_vertical"
+    android:background="?selectableItemBackground"
     android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
+    android:clickable="true"
     tools:text="This is example text." />

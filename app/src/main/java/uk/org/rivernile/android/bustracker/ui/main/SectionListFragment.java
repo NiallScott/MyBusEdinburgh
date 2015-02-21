@@ -60,8 +60,6 @@ public class SectionListFragment extends Fragment {
     private Callbacks callbacks;
     private SectionListAdapter adapter;
 
-    private RecyclerView recyclerView;
-
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
@@ -69,8 +67,8 @@ public class SectionListFragment extends Fragment {
         try {
             callbacks = (Callbacks) activity;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName()
-                    + " does not implement " + Callbacks.class.getName());
+            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
+                    Callbacks.class.getName());
         }
     }
 
@@ -102,9 +100,8 @@ public class SectionListFragment extends Fragment {
     @Override
     public View onCreateView(final LayoutInflater inflater,
             final ViewGroup container, final Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.sectionlist_fragment,
-                container, false);
-        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
+        final View v = inflater.inflate(R.layout.sectionlist_fragment, container, false);
+        final RecyclerView recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));

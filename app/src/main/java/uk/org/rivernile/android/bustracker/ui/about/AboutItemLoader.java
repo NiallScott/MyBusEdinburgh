@@ -91,7 +91,7 @@ class AboutItemLoader extends SimpleResultLoader<List<AboutItem>> {
      */
     @NonNull
     private AboutItem getVersionItem(@NonNull final Context context) {
-        return new AboutItem(context.getString(R.string.about_version), getVersionString()) {
+        return new AboutItem(context.getString(R.string.about_version), getVersionString(), true) {
             @Override
             void doAction(@NonNull final Activity activity,
                           @NonNull final AboutFragment.Callbacks callbacks) {
@@ -116,7 +116,7 @@ class AboutItemLoader extends SimpleResultLoader<List<AboutItem>> {
     @NonNull
     private AboutItem getAuthorItem(@NonNull final Context context) {
         return new AboutItem(context.getString(R.string.about_author),
-                context.getString(R.string.app_author)) {
+                context.getString(R.string.app_author), true) {
             @Override
             void doAction(@NonNull final Activity activity,
                           @NonNull final AboutFragment.Callbacks callbacks) {
@@ -141,7 +141,7 @@ class AboutItemLoader extends SimpleResultLoader<List<AboutItem>> {
     @NonNull
     private AboutItem getWebsiteItem(@NonNull final Context context) {
         return new AboutItem(context.getString(R.string.about_website),
-                context.getString(R.string.app_website)) {
+                context.getString(R.string.app_website), true) {
             @Override
             void doAction(@NonNull final Activity activity,
                           @NonNull final AboutFragment.Callbacks callbacks) {
@@ -166,7 +166,7 @@ class AboutItemLoader extends SimpleResultLoader<List<AboutItem>> {
     @NonNull
     private AboutItem getTwitterItem(@NonNull final Context context) {
         return new AboutItem(context.getString(R.string.about_twitter),
-                context.getString(R.string.app_twitter)) {
+                context.getString(R.string.app_twitter), true) {
             @Override
             void doAction(@NonNull final Activity activity,
                           @NonNull final AboutFragment.Callbacks callbacks) {
@@ -193,7 +193,8 @@ class AboutItemLoader extends SimpleResultLoader<List<AboutItem>> {
         final Calendar dbVersion = getDatabaseVersion();
         return new AboutItem(context.getString(R.string.about_database_version),
                 context.getString(R.string.about_database_version_format,
-                        dbVersion.getTimeInMillis(), DATE_FORMAT.format(dbVersion.getTime())));
+                        dbVersion.getTimeInMillis(), DATE_FORMAT.format(dbVersion.getTime())),
+                false);
     }
 
     /**
@@ -204,7 +205,8 @@ class AboutItemLoader extends SimpleResultLoader<List<AboutItem>> {
      */
     @NonNull
     private AboutItem getTopologyVersionItem(@NonNull final Context context) {
-        return new AboutItem(context.getString(R.string.about_topology_version), bsd.getTopoId());
+        return new AboutItem(context.getString(R.string.about_topology_version), bsd.getTopoId(),
+                false);
     }
 
     /**
@@ -215,7 +217,7 @@ class AboutItemLoader extends SimpleResultLoader<List<AboutItem>> {
      */
     @NonNull
     private AboutItem getCreditsItem(@NonNull final Context context) {
-        return new AboutItem(context.getString(R.string.about_credits), null) {
+        return new AboutItem(context.getString(R.string.about_credits), null, true) {
             @Override
             void doAction(@NonNull final Activity activity,
                           @NonNull final AboutFragment.Callbacks callbacks) {
@@ -232,7 +234,7 @@ class AboutItemLoader extends SimpleResultLoader<List<AboutItem>> {
      */
     @NonNull
     private AboutItem getOpenSourceLicencesItem(@NonNull final Context context) {
-        return new AboutItem(context.getString(R.string.about_open_source), null) {
+        return new AboutItem(context.getString(R.string.about_open_source), null, true) {
             @Override
             void doAction(@NonNull final Activity activity,
                           @NonNull final AboutFragment.Callbacks callbacks) {

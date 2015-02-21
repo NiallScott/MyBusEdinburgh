@@ -28,46 +28,67 @@ package uk.org.rivernile.android.bustracker.ui.about;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This adapter provides the items to show in the list of application 'about' information.
+ * This adapter populates a list of 'about' items in a {@link RecyclerView}.
  *
  * @author Niall Scott
  */
-class AboutAdapter extends BaseAdapter {
+class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> {
 
     private static final int VIEW_TYPE_SINGLE = 0;
     private static final int VIEW_TYPE_DOUBLE = 1;
 
     private final LayoutInflater inflater;
     private List<AboutItem> items;
+    private WeakReference<OnItemClickedListener> itemClickedListener;
 
     /**
-     * Create a new {@code AboutAdapter}. This is used to populate the about items.
+     * Create a new {@code AboutAdapter}.
      *
-     * @param context A {@link Context} instance.
+     * @param context A {@link Context} instance from the hosting {@link android.app.Activity}.
      */
     AboutAdapter(@NonNull final Context context) {
         inflater = LayoutInflater.from(context);
+        setHasStableIds(true);
     }
 
     @Override
-    public int getCount() {
+    public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        final int layout = (viewType == VIEW_TYPE_SINGLE ?
+                R.layout.simple_list_item_1 : R.layout.simple_list_item_2);
+        return new ViewHolder(inflater.inflate(layout, parent, false));
+    }
+
+    @Override
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
+        final AboutItem item = getItem(position);
+
+        if (item == null) {
+            return;
+        }
+
+        holder.text1.setText(item.getTitle());
+        holder.setIsClickable(item.isClickable());
+
+        if (item.hasSubTitle() && holder.text2 != null) {
+            holder.text2.setText(item.getSubTitle());
+        }
+    }
+
+    @Override
+    public int getItemCount() {
         return items != null ? items.size() : 0;
-    }
-
-    @Nullable
-    @Override
-    public AboutItem getItem(final int position) {
-        return items != null ? items.get(position) : null;
     }
 
     @Override
@@ -76,54 +97,10 @@ class AboutAdapter extends BaseAdapter {
         return item != null ? item.hashCode() : 0;
     }
 
-    @Nullable
-    @Override
-    public View getView(final int position, @Nullable final View convertView,
-                        @NonNull final ViewGroup parent) {
-        final AboutItem item = getItem(position);
-
-        if (item == null) {
-            return null;
-        }
-
-        final boolean hasSubTitle = item.hasSubTitle();
-        final View v;
-        final ViewHolder holder;
-
-        if (convertView == null) {
-            v = inflater.inflate((hasSubTitle ?
-                    R.layout.simple_list_item_2 : R.layout.simple_list_item_1), parent, false);
-            holder = new ViewHolder();
-            holder.text1 = (TextView) v.findViewById(android.R.id.text1);
-
-            if (hasSubTitle) {
-                holder.text2 = (TextView) v.findViewById(android.R.id.text2);
-            }
-
-            v.setTag(holder);
-        } else {
-            v = convertView;
-            holder = (ViewHolder) v.getTag();
-        }
-
-        holder.text1.setText(item.getTitle());
-
-        if (hasSubTitle) {
-            holder.text2.setText(item.getSubTitle());
-        }
-
-        return v;
-    }
-
     @Override
     public int getItemViewType(final int position) {
         final AboutItem item = getItem(position);
         return item == null || !item.hasSubTitle() ? VIEW_TYPE_SINGLE : VIEW_TYPE_DOUBLE;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return 2;
     }
 
     /**
@@ -139,9 +116,94 @@ class AboutAdapter extends BaseAdapter {
     }
 
     /**
-     * This is used to hold references to {@link View}s during recycling.
+     * Get the {@link AboutItem} at the given {@code position}.
+     *
+     * @param position The position to get the {@link AboutItem} for.
+     * @return The {@link AboutItem} at the given {@code position}, or {@code null} if the items
+     *         were not set.
      */
-    private static class ViewHolder {
+    AboutItem getItem(final int position) {
+        return items != null ? items.get(position) : null;
+    }
+
+    /**
+     * Set the listener to be called when the user has clicked on an item.
+     *
+     * @param listener The listener that is called when the user has clicked on an item.
+     */
+    void setOnItemClickedListener(@Nullable final OnItemClickedListener listener) {
+        if (listener != null) {
+            itemClickedListener = new WeakReference<OnItemClickedListener>(listener);
+        } else {
+            itemClickedListener = null;
+        }
+    }
+
+    /**
+     * The {@link RecyclerView.ViewHolder} to populate rows with. Also deals with clicking events.
+     */
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        View itemView;
         TextView text1, text2;
+
+        /**
+         * Create a new {@code ViewHolder}.
+         *
+         * @param itemView The root {@link View} of the item.
+         */
+        ViewHolder(@NonNull final View itemView) {
+            super(itemView);
+
+            this.itemView = itemView;
+            text1 = (TextView) itemView.findViewById(android.R.id.text1);
+            text2 = (TextView) itemView.findViewById(android.R.id.text2);
+        }
+
+        @Override
+        public void onClick(final View v) {
+            final int position = getPosition();
+
+            if (position == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            final AboutItem item = getItem(position);
+
+            if (item == null) {
+                return;
+            }
+
+            final OnItemClickedListener listener =
+                    itemClickedListener != null ? itemClickedListener.get() : null;
+
+            if (listener != null) {
+                listener.onItemClicked(item);
+            }
+        }
+
+        /**
+         * Set the clickable state of the item.
+         *
+         * @param clickable {@code true} if the item is clickable, {@code false} if not.
+         */
+        void setIsClickable(final boolean clickable) {
+            itemView.setOnClickListener(clickable ? this : null);
+            itemView.setClickable(clickable);
+        }
+    }
+
+    /**
+     * This interface should be implemented by any classes wishing to be notified when a user has
+     * clicked an item.
+     */
+    static interface OnItemClickedListener {
+
+        /**
+         * This is called when an item has been clicked.
+         *
+         * @param item The clicked item.
+         */
+        void onItemClicked(@NonNull AboutItem item);
     }
 }

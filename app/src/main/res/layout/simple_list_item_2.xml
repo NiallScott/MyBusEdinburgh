@@ -35,7 +35,9 @@
     android:paddingLeft="?attr/listPreferredItemPaddingLeft"
     android:paddingRight="?attr/listPreferredItemPaddingRight"
     android:orientation="vertical"
-    android:gravity="center_vertical" >
+    android:gravity="center_vertical"
+    android:background="?selectableItemBackground"
+    android:clickable="true">
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"

@@ -39,17 +39,21 @@ class AboutItem {
 
     private final String title;
     private final String subTitle;
+    private final boolean isClickable;
 
     /**
      * Create a new 'about' item to display to a user.
      *
      * @param title The title of the item. Must not be {@code null}.
      * @param subTitle The subtitle of the item. If there is to be no subtitle, then set this as
-     * {@code null}.
+     *                 {@code null}.
+     * @param isClickable Is this item clickable?
      */
-    AboutItem(@NonNull final String title, @Nullable final String subTitle) {
+    AboutItem(@NonNull final String title, @Nullable final String subTitle,
+              final boolean isClickable) {
         this.title = title;
         this.subTitle = subTitle;
+        this.isClickable = isClickable;
     }
 
     /**
@@ -72,6 +76,15 @@ class AboutItem {
     @Nullable
     String getSubTitle() {
         return subTitle;
+    }
+
+    /**
+     * Is this item clickable?
+     *
+     * @return {@code true} if the item is clickable, {@code false} if not.
+     */
+    boolean isClickable() {
+        return isClickable;
     }
 
     /**

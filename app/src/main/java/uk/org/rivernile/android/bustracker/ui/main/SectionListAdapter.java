@@ -166,6 +166,7 @@ public class SectionListAdapter extends RecyclerView.Adapter {
      * @return The {@link Section} at the given {@code position}, or {@code null} if the
      *         {@link Section}s is currently set as {@code null}.
      */
+    @Nullable
     private Section getItem(final int position) {
         return sections != null ? sections[position] : null;
     }

@@ -27,18 +27,20 @@ package uk.org.rivernile.android.bustracker.ui.about;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import java.util.List;
+
+import uk.org.rivernile.android.utils.DividerItemDecoration;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -47,12 +49,13 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 public class AboutFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<List<AboutItem>>, AbsListView.OnItemClickListener {
+        implements LoaderManager.LoaderCallbacks<List<AboutItem>>,
+        AboutAdapter.OnItemClickedListener {
 
     private AboutAdapter adapter;
     private Callbacks callbacks;
 
-    private ListView listView;
+    private RecyclerView recyclerView;
     private ProgressBar progress;
 
     @Override
@@ -72,17 +75,22 @@ public class AboutFragment extends Fragment
         super.onCreate(savedInstanceState);
 
         adapter = new AboutAdapter(getActivity());
+        adapter.setOnItemClickedListener(this);
     }
 
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container,
                              @Nullable final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.about_fragment, container, false);
-        listView = (ListView) v.findViewById(android.R.id.list);
+        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
         progress = (ProgressBar) v.findViewById(R.id.progress);
 
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(this);
+        final Activity activity = getActivity();
+        recyclerView.setHasFixedSize(false);
+        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+        recyclerView.addItemDecoration(new DividerItemDecoration(activity,
+                DividerItemDecoration.VERTICAL_LIST));
+        recyclerView.setAdapter(adapter);
 
         return v;
     }
@@ -103,7 +111,7 @@ public class AboutFragment extends Fragment
     public void onLoadFinished(final Loader<List<AboutItem>> loader, final List<AboutItem> data) {
         adapter.setAboutItems(data);
         progress.setVisibility(View.GONE);
-        listView.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -112,13 +120,8 @@ public class AboutFragment extends Fragment
     }
 
     @Override
-    public void onItemClick(final AdapterView<?> parent, final View view, final int position,
-                            final long id) {
-        final AboutItem item = adapter.getItem(position);
-
-        if (item != null) {
-            item.doAction(getActivity(), callbacks);
-        }
+    public void onItemClicked(@NonNull final AboutItem item) {
+        item.doAction(getActivity(), callbacks);
     }
 
     /**
