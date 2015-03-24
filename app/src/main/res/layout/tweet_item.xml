@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2010 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,22 +26,30 @@
 */ -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="72dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="20dp"
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingStart="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight"
+    android:paddingEnd="?attr/listPreferredItemPaddingRight"
     android:orientation="vertical"
-    android:padding="8dp" >
+    android:gravity="center_vertical">
     <TextView
-        android:id="@+id/txtBody"
+        android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
         android:autoLink="web|email|map"
-        android:textSize="16sp"
-        android:singleLine="false"
-        android:textIsSelectable="true" />
+        android:textIsSelectable="true"
+        tools:text="Example text" />
     <TextView
-        android:id="@+id/txtInfo"
+        android:id="@android:id/text2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
-        android:textIsSelectable="true" />
+        android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
+        tools:text="Sample subtext" />
 </LinearLayout>

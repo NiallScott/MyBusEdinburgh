@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,186 +25,202 @@
 
 package uk.org.rivernile.android.bustracker.ui.news;
 
-import android.database.DataSetObserver;
-import android.test.AndroidTestCase;
-import android.view.View;
-import android.widget.TextView;
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.test.InstrumentationTestCase;
+import android.text.TextUtils;
+
+import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.GregorianCalendar;
+
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * Tests for TweetAdapter.
+ * Tests for {@link TweetAdapter}.
  * 
  * @author Niall Scott
  */
-public class TweetAdapterTests extends AndroidTestCase {
+public class TweetAdapterTests extends InstrumentationTestCase {
     
     private TweetAdapter adapter;
-    private boolean notifyCalled;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         super.setUp();
-        
-        adapter = new TweetAdapter(getContext());
-        notifyCalled = false;
+
+        final Context context = getInstrumentation().getTargetContext();
+        context.setTheme(R.style.MyBusEdinburgh);
+        adapter = new TweetAdapter(context);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         super.tearDown();
-        
+
         adapter = null;
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the context is set as null.
+     * Test the default state of the adapter.
      */
-    public void testConstructorWithNullContext() {
-        try {
-            new TweetAdapter(null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The context is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that the adapter methods return expected values in the default,
-     * freshly constructed state.
-     */
-    public void testDefaultState() {
-        assertEquals(0, adapter.getCount());
+    public void testDefault() {
+        assertTrue(adapter.hasStableIds());
+        assertTrue(adapter.isEmpty());
+        assertEquals(0, adapter.getItemCount());
+        assertEquals(0, adapter.getItemId(0));
         assertNull(adapter.getItem(0));
-        assertEquals(getContext(), adapter.getContext());
-        assertNull(adapter.getTweets());
     }
-    
+
     /**
-     * Test that the adapter methods return expected values when supplied with
-     * canned data.
+     * Test the adapter coping with an empty {@link ArrayList} of {@link Tweet}s.
      */
-    public void testWithCannedData() {
-        adapter.setTweets(getCannedData());
-        
-        assertEquals(3, adapter.getCount());
-        assertNotNull(adapter.getTweets());
-        
-        final Tweet tweet1 = adapter.getItem(0);
-        final Tweet tweet2 = adapter.getItem(1);
-        final Tweet tweet3 = adapter.getItem(2);
-        
-        assertNotNull(tweet1);
-        assertNotNull(tweet2);
-        assertNotNull(tweet3);
-        assertNull(adapter.getItem(3));
-        
-        assertEquals("a", tweet1.getBody());
-        assertEquals("f", tweet2.getBody());
-        assertEquals("k", tweet3.getBody());
-    }
-    
-    /**
-     * Test that {@link TweetAdapter#isEnabled(int)} always returns false.
-     */
-    public void testIsEnabledAlwaysReturnsFalse() {
-        adapter.setTweets(getCannedData());
-        
-        for (int i = 0; i < 10; i++) {
-            assertFalse("Item " + i + " is not false.", adapter.isEnabled(i));
-        }
-    }
-    
-    /**
-     * Test that the ID returned by {@link TweetAdapter#getItemId(int)} matches
-     * the position sent in.
-     */
-    public void testGetItemId() {
-        adapter.setTweets(getCannedData());
-        
-        for (int i = 0; i < 10; i++) {
-            assertEquals("Item " + i + " returned an incorrect ID.", i,
-                    adapter.getItemId(i));
-        }
-    }
-    
-    /**
-     * Test that the state correctly changes between calls to
-     * {@link TweetAdapter#setTweets(java.util.List)}. Also, test that
-     * {@link TweetAdapter#notifyDataSetChanged()} is being called each time.
-     */
-    public void testSetTweets() {
-        adapter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                notifyCalled = true;
-            }
-        });
-        
-        adapter.setTweets(getCannedData());
-        assertTrue(notifyCalled);
-        notifyCalled = false;
-        
-        adapter.setTweets(null);
-        assertTrue(notifyCalled);
-        notifyCalled = false;
-        assertEquals(0, adapter.getCount());
-        assertNull(adapter.getTweets());
+    public void testNoItems() {
+        final DataObserver observer = new DataObserver();
+        adapter.registerAdapterDataObserver(observer);
+        adapter.setTweets(new ArrayList<Tweet>(1));
+
+        assertTrue(observer.onChangeCalled);
+        assertTrue(adapter.isEmpty());
         assertNull(adapter.getItem(0));
-        
-        final List<Tweet> tweets = getCannedData();
-        tweets.add(new Tweet("p", "q", new Date(), "s", "t"));
+    }
+
+    /**
+     * Test the adapter coping with a single {@link Tweet}.
+     */
+    public void testOneItem() {
+        final DataObserver observer = new DataObserver();
+        adapter.registerAdapterDataObserver(observer);
+        assertFalse(observer.onChangeCalled);
+
+        final Tweet tweet = new Tweet("Body", "User",
+                new GregorianCalendar(2015, GregorianCalendar.JANUARY, 25, 13, 52, 11).getTime(),
+                "a", "b");
+        final ArrayList<Tweet> tweets = new ArrayList<>(1);
+        tweets.add(tweet);
         adapter.setTweets(tweets);
-        assertTrue(notifyCalled);
-        assertEquals(4, adapter.getCount());
-        assertNotNull(adapter.getTweets());
-        assertNotNull(adapter.getItem(3));
-        assertNull(adapter.getItem(4));
+
+        assertTrue(observer.onChangeCalled);
+        assertFalse(adapter.isEmpty());
+        assertEquals(1, adapter.getItemCount());
+        assertEquals(tweet, adapter.getItem(0));
+        assertNull(adapter.getItem(1));
+        assertEquals(tweet.hashCode(), adapter.getItemId(0));
+        assertEquals(0, adapter.getItemId(1));
+        assertNull(adapter.getItem(-1));
+
+        final TweetAdapter.ViewHolder vh = adapter.createViewHolder(null, 0);
+        assertTrue(TextUtils.isEmpty(vh.text1.getText().toString()));
+        assertTrue(TextUtils.isEmpty(vh.text2.getText().toString()));
+
+        final DateFormat dateFormat = DateFormat.getDateTimeInstance();
+        adapter.bindViewHolder(vh, 0);
+        assertEquals("Body", vh.text1.getText().toString());
+        assertEquals("User - " + dateFormat.format(tweet.getTime()), vh.text2.getText().toString());
+
+        adapter.bindViewHolder(vh, 1);
+        assertTrue(TextUtils.isEmpty(vh.text1.getText().toString()));
+        assertTrue(TextUtils.isEmpty(vh.text2.getText().toString()));
     }
-    
+
     /**
-     * Test that the View returned by
-     * {@link TweetAdapter#getView(int, android.view.View, android.view.ViewGroup)}
-     * has the expected Views. Also check that Views are being recycled
-     * properly.
+     * Test the adapter coping with multiple {@link Tweet}s.
      */
-    public void testGetView() {
-        adapter.setTweets(getCannedData());
-        
-        final View view1 = adapter.getView(0, null, null);
-        final TextView txtBody = (TextView) view1.findViewById(R.id.txtBody);
-        assertNotNull(txtBody);
-        assertNotNull(view1.findViewById(R.id.txtInfo));
-        assertEquals("a", txtBody.getText().toString());
-        
-        final View view2 = adapter.getView(1, view1, null);
-        assertTrue(view1 == view2);
-        assertEquals("f", txtBody.getText().toString());
+    public void testMultipleItems() {
+        final DataObserver observer = new DataObserver();
+        adapter.registerAdapterDataObserver(observer);
+        assertFalse(observer.onChangeCalled);
+
+        final Tweet tweet1 = new Tweet("Body", "User",
+                new GregorianCalendar(2015, GregorianCalendar.JANUARY, 25, 13, 52, 11).getTime(),
+                "a", "b");
+        final Tweet tweet2 = new Tweet("Body 2", "User 2",
+                new GregorianCalendar(2014, GregorianCalendar.DECEMBER, 2, 2, 13, 45).getTime(),
+                "c", "d");
+        final Tweet tweet3 = new Tweet("Body 3", "User 3",
+                new GregorianCalendar(2014, GregorianCalendar.OCTOBER, 10, 21, 22, 23).getTime(),
+                "e", "f");
+        final ArrayList<Tweet> tweets = new ArrayList<>(3);
+        tweets.add(tweet1);
+        tweets.add(tweet2);
+        tweets.add(tweet3);
+        adapter.setTweets(tweets);
+
+        assertTrue(observer.onChangeCalled);
+        assertFalse(adapter.isEmpty());
+        assertEquals(3, adapter.getItemCount());
+        assertEquals(tweet1, adapter.getItem(0));
+        assertEquals(tweet2, adapter.getItem(1));
+        assertEquals(tweet3, adapter.getItem(2));
+        assertNull(adapter.getItem(3));
+        assertEquals(tweet1.hashCode(), adapter.getItemId(0));
+        assertEquals(tweet2.hashCode(), adapter.getItemId(1));
+        assertEquals(tweet3.hashCode(), adapter.getItemId(2));
+        assertEquals(0, adapter.getItemId(3));
+
+        final DateFormat dateFormat = DateFormat.getDateTimeInstance();
+
+        final TweetAdapter.ViewHolder vh1 = adapter.createViewHolder(null, 0);
+        assertTrue(TextUtils.isEmpty(vh1.text1.getText().toString()));
+        assertTrue(TextUtils.isEmpty(vh1.text2.getText().toString()));
+
+        adapter.bindViewHolder(vh1, 0);
+        assertEquals("Body", vh1.text1.getText().toString());
+        assertEquals("User - " + dateFormat.format(tweet1.getTime()),
+                vh1.text2.getText().toString());
+
+        final TweetAdapter.ViewHolder vh2 = adapter.createViewHolder(null, 0);
+        assertTrue(TextUtils.isEmpty(vh2.text1.getText().toString()));
+        assertTrue(TextUtils.isEmpty(vh2.text2.getText().toString()));
+
+        adapter.bindViewHolder(vh2, 1);
+        assertEquals("Body 2", vh2.text1.getText().toString());
+        assertEquals("User 2 - " + dateFormat.format(tweet2.getTime()),
+                vh2.text2.getText().toString());
+
+        adapter.bindViewHolder(vh1, 2);
+        assertEquals("Body 3", vh1.text1.getText().toString());
+        assertEquals("User 3 - " + dateFormat.format(tweet3.getTime()),
+                vh1.text2.getText().toString());
     }
-    
+
     /**
-     * A utility method for getting pre-made canned data.
-     * 
-     * @return Get a List of canned Tweets.
+     * This is used to record when callback methods are called to ensure that the adapter calls its
+     * data change notifier.
      */
-    private List<Tweet> getCannedData() {
-        final List<Tweet> tweets = new ArrayList<Tweet>();
-        tweets.add(new Tweet("a", "b", new Date(), "d", "e"));
-        tweets.add(new Tweet("f", "g", new Date(), "i", "j"));
-        tweets.add(new Tweet("k", "l", new Date(), "n", "o"));
-        
-        return tweets;
+    private static class DataObserver extends RecyclerView.AdapterDataObserver {
+
+        boolean onChangeCalled;
+        boolean onItemRangeChangeCalled;
+        boolean onItemRangeInsertedCalled;
+        boolean onItemRangeRemovedCalled;
+        boolean onItemRangeMovedCalled;
+
+        @Override
+        public void onChanged() {
+            onChangeCalled = true;
+        }
+
+        @Override
+        public void onItemRangeChanged(final int positionStart, final int itemCount) {
+            onItemRangeChangeCalled = true;
+        }
+
+        @Override
+        public void onItemRangeInserted(final int positionStart, final int itemCount) {
+            onItemRangeInsertedCalled = true;
+        }
+
+        @Override
+        public void onItemRangeRemoved(final int positionStart, final int itemCount) {
+            onItemRangeRemovedCalled = true;
+        }
+
+        @Override
+        public void onItemRangeMoved(final int fromPosition, final int toPosition,
+                                     final int itemCount) {
+            onItemRangeMovedCalled = true;
+        }
     }
 }

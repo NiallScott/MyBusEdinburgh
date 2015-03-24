@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,11 +25,17 @@
 
 package uk.org.rivernile.android.bustracker.ui.news;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,87 +45,79 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import java.util.List;
+
+import uk.org.rivernile.android.utils.DividerItemDecoration;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterLoaderResult;
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterException;
-import uk.org.rivernile.android.bustracker.parser.twitter
-        .TwitterUpdatesLoader;
+import uk.org.rivernile.android.bustracker.parser.twitter.TwitterUpdatesLoader;
 import uk.org.rivernile.android.fetchers.UrlMismatchException;
 
 /**
- * This Fragments displays a ListView of Tweets which informs users of things
- * that may affect their journey. No action can be taken on the ListView items
- * but URLs can be tapped.
+ * This {@link Fragment} displays a list of {@link Tweet}s which informs the user of events that may
+ * affect their journey.
  * 
  * @author Niall Scott
  */
-public class TwitterUpdatesFragment extends ListFragment
+public class TwitterUpdatesFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<TwitterLoaderResult> {
     
     private TweetAdapter adapter;
+
+    private RecyclerView recyclerView;
     private ProgressBar progress;
     private TextView txtError;
+
     private MenuItem refreshItem;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         adapter = new TweetAdapter(getActivity());
-        setListAdapter(adapter);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public View onCreateView(final LayoutInflater inflater,
             final ViewGroup container, final Bundle savedInstanceState) {
-        final View v = inflater
-                .inflate(R.layout.twitterupdates, container, false);
-        
+        final View v = inflater.inflate(R.layout.twitterupdates, container, false);
+
+        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
         progress = (ProgressBar) v.findViewById(R.id.progress);
         txtError = (TextView) v.findViewById(R.id.txtError);
+
+        final Activity activity = getActivity();
+        recyclerView.setHasFixedSize(false);
+        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+        recyclerView.addItemDecoration(new DividerItemDecoration(activity,
+                DividerItemDecoration.VERTICAL_LIST));
+        recyclerView.setAdapter(adapter);
         
         return v;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
         getActivity().setTitle(R.string.twitterupdates_title);
         
-        // Tell the underlying Activity that it should create an options menu
-        // for this Fragment.
+        // Tell the underlying Activity that it should create an options menu for this Fragment.
         setHasOptionsMenu(true);
         
         // Initialise the Loader for loading tweets.
         loadTweets(false);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public void onCreateOptionsMenu(final Menu menu,
-            final MenuInflater inflater) {
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
         // Inflate the options menu.
         inflater.inflate(R.menu.twitterupdates_option_menu, menu);
         
         refreshItem = menu.findItem(R.id.twitterupdates_option_menu_refresh);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
@@ -127,9 +125,6 @@ public class TwitterUpdatesFragment extends ListFragment
         setRefreshActionItemAsLoading(progress.getVisibility() == View.VISIBLE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
@@ -141,22 +136,15 @@ public class TwitterUpdatesFragment extends ListFragment
                 return super.onOptionsItemSelected(item);
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public Loader<TwitterLoaderResult> onCreateLoader(final int id,
-            final Bundle args) {
+    public Loader<TwitterLoaderResult> onCreateLoader(final int id, final Bundle args) {
         return new TwitterUpdatesLoader(getActivity());
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onLoadFinished(final Loader<TwitterLoaderResult> loader,
-            final TwitterLoaderResult result) {
+                               final TwitterLoaderResult result) {
         if (isAdded()) {
             if(result.hasException()) {
                 handleError(result.getException());
@@ -165,21 +153,17 @@ public class TwitterUpdatesFragment extends ListFragment
             }
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onLoaderReset(final Loader<TwitterLoaderResult> loader) {
         // Nothing to do here.
     }
     
     /**
-     * Start off the process of loading Tweets.
+     * Start the process of loading Tweets.
      * 
-     * @param force true if a load should be forced, that is, scrap any previous
-     * data loaded and load new data. false if previous data is to be used, if
-     * available.
+     * @param force {@code true} if a load should be forced, that is, scrap any previous data loaded
+     *              and load new data. {@code false} if previous data is to be used, if available.
      */
     private void loadTweets(final boolean force) {
         if (adapter.isEmpty()) {
@@ -197,12 +181,11 @@ public class TwitterUpdatesFragment extends ListFragment
     }
     
     /**
-     * Set the status of the refresh ActionItem. Under normal circumstances,
-     * the ActionItem will only display a refresh icon and is enabled. While
-     * loading, this icon will be replaced with a progress indicator and will
-     * be disabled.
+     * Set the status of the refresh ActionItem. Under normal circumstances, the ActionItem will
+     * only display a refresh icon and is enabled. While loading, this icon will be replaced with a
+     * progress indicator and will be disabled.
      * 
-     * @param loading true if data is currently loading, false if not.
+     * @param loading {@code true} if data is currently loading, {@code false} if not.
      */
     private void setRefreshActionItemAsLoading(final boolean loading) {
         if (refreshItem != null) {
@@ -222,6 +205,7 @@ public class TwitterUpdatesFragment extends ListFragment
      */
     private void showProgress() {
         // Show the progress.
+        recyclerView.setVisibility(View.GONE);
         txtError.setVisibility(View.GONE);
         progress.setVisibility(View.VISIBLE);
         
@@ -230,21 +214,24 @@ public class TwitterUpdatesFragment extends ListFragment
     }
     
     /**
-     * Show an error with the String of the given resId.
+     * Show an error with the {@link String} of the given {@code resId}.
      * 
-     * @param resId The resource ID of the String to show as the error.
+     * @param resId The resource ID of the {@link String} to show as the error.
      */
-    private void showError(final int resId) {
+    private void showError(@StringRes final int resId) {
         showError(getString(resId));
     }
     
     /**
-     * Show an error with the given CharSequence.
+     * Show an error with the given {@link CharSequence}.
+     *
+     * @param errorString The error to show.
      */
-    private void showError(final CharSequence errorString) {
+    private void showError(@NonNull final CharSequence errorString) {
         txtError.setText(errorString);
         
         // Show the error layout.
+        recyclerView.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
         txtError.setVisibility(View.VISIBLE);
         
@@ -259,13 +246,10 @@ public class TwitterUpdatesFragment extends ListFragment
     /**
      * Handle errors.
      * 
-     * @param exception The TwitterException containing details about the
-     * exception.
+     * @param exception The {@link TwitterException} containing details about the exception.
      */
-    private void handleError(final TwitterException exception) {
-        final Throwable cause = exception != null ? exception.getCause() : null;
-        
-        if (cause instanceof UrlMismatchException) {
+    private void handleError(@Nullable final TwitterException exception) {
+        if (exception != null && exception.getCause() instanceof UrlMismatchException) {
             showError(R.string.twitterupdates_err_urlmismatch);
         } else {
             showError(R.string.twitterupdates_err_load);
@@ -273,9 +257,9 @@ public class TwitterUpdatesFragment extends ListFragment
     }
     
     /**
-     * Populate the ListView with the Twitter news items.
+     * Populate the {@link RecyclerView} with the Twitter news items.
      * 
-     * @param items An ArrayList of {@link Tweet}s.
+     * @param items A {@link List} of {@link Tweet}s.
      */
     private void populateList(final List<Tweet> items) {
         // If there's 0 items, display an error.
@@ -290,6 +274,7 @@ public class TwitterUpdatesFragment extends ListFragment
         
         // Give the Adapter the List of Tweets to show.
         adapter.setTweets(items);
+        recyclerView.setVisibility(View.VISIBLE);
         
         // Sort out the refresh menu item.
         setRefreshActionItemAsLoading(false);

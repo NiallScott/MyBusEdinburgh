@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,18 +44,16 @@ public final class Tweet implements Comparable<Tweet> {
     /**
      * Create a new Twitter news item.
      * 
-     * @param body The tweet text. Must not be null or empty.
-     * @param displayName The display name of the tweet author. Must not be null
-     * or empty.
-     * @param time A Date object representing the moment the tweet was posted.
-     * Must not be null.
-     * @param profileImageUrl The URL of the profile image of the tweet's
-     * author. Can be null.
-     * @param profileUrl The URL of the profile of the tweet's author. Can be
-     * null.
+     * @param body The tweet text. Must not be {@code null} or empty.
+     * @param displayName The display name of the tweet author. Must not be {@code null} or empty.
+     * @param time A {@link Date} object representing the moment the tweet was posted. Must not be
+     *             {@code null}.
+     * @param profileImageUrl The URL of the profile image of the tweet's author. Can be
+     *                        {@code null}.
+     * @param profileUrl The URL of the profile of the tweet's author. Can be {@code null}.
      */
     public Tweet(final String body, final String displayName, final Date time,
-            final String profileImageUrl, final String profileUrl) {
+                 final String profileImageUrl, final String profileUrl) {
         if (TextUtils.isEmpty(body)) {
             throw new IllegalArgumentException("The body must not be null or "
                     + "empty.");
@@ -107,7 +105,7 @@ public final class Tweet implements Comparable<Tweet> {
     /**
      * Get the URL of the profile image of the tweet's author.
      * 
-     * @return The URL of the profile image of the tweet's author. May be null.
+     * @return The URL of the profile image of the tweet's author. May be {@code null}.
      */
     public String getProfileImageUrl() {
         return profileImageUrl;
@@ -116,17 +114,49 @@ public final class Tweet implements Comparable<Tweet> {
     /**
      * Get the URL of the profile of the tweet's author.
      * 
-     * @return The URL of the profile of the tweet's author. May be null.
+     * @return The URL of the profile of the tweet's author. May be {@code null}.
      */
     public String getProfileUrl() {
         return profileUrl;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int compareTo(final Tweet another) {
         return another != null ? another.time.compareTo(time) : -1;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final Tweet tweet = (Tweet) o;
+
+        if (!body.equals(tweet.body)) {
+            return false;
+        }
+
+        if (!displayName.equals(tweet.displayName)) {
+            return false;
+        }
+
+        if (!time.equals(tweet.time)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = body.hashCode();
+        result = 31 * result + displayName.hashCode();
+        result = 31 * result + time.hashCode();
+        return result;
     }
 }

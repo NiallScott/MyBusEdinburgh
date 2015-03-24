@@ -122,6 +122,7 @@ class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> {
      * @return The {@link AboutItem} at the given {@code position}, or {@code null} if the items
      *         were not set.
      */
+    @Nullable
     AboutItem getItem(final int position) {
         return items != null ? items.get(position) : null;
     }
@@ -133,7 +134,7 @@ class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> {
      */
     void setOnItemClickedListener(@Nullable final OnItemClickedListener listener) {
         if (listener != null) {
-            itemClickedListener = new WeakReference<OnItemClickedListener>(listener);
+            itemClickedListener = new WeakReference<>(listener);
         } else {
             itemClickedListener = null;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ import java.util.GregorianCalendar;
 import junit.framework.TestCase;
 
 /**
- * Tests for Tweet.
+ * Tests for {@link Tweet}.
  * 
  * @author Niall Scott
  */
@@ -214,5 +214,30 @@ public class TweetTests extends TestCase {
         
         assertTrue(tweet1.compareTo(tweet2) < 0);
         assertTrue(tweet2.compareTo(tweet1) > 0);
+    }
+
+    /**
+     * Test that {@link Tweet#equals(Object)} and {@link Tweet#hashCode()} behave correctly.
+     */
+    public void testEqualsAndHashCode() {
+        final Date date1 = new GregorianCalendar(2014, 1, 26, 14, 30, 21).getTime();
+        final Date date2 = new GregorianCalendar(2014, 1, 26, 15, 30, 21).getTime();
+        final Tweet tweet1 = new Tweet("Body", "User", date1, "a", "b");
+        final Tweet tweet2 = new Tweet("Body", "User", date1, "a", "b");
+        final Tweet tweet3 = new Tweet("Body 2", "User", date1, "a", "b");
+        final Tweet tweet4 = new Tweet("Body", "User 2", date1, "a", "b");
+        final Tweet tweet5 = new Tweet("Body", "User", date2, "a", "b");
+
+        assertTrue(tweet1.equals(tweet1));
+        assertTrue(tweet1.equals(tweet2));
+        assertFalse(tweet1.equals(tweet3));
+        assertFalse(tweet1.equals(tweet4));
+        assertFalse(tweet1.equals(tweet5));
+        assertFalse(tweet1.equals(new Object()));
+
+        assertEquals(tweet1.hashCode(), tweet2.hashCode());
+        assertFalse(tweet1.hashCode() == tweet3.hashCode());
+        assertFalse(tweet1.hashCode() == tweet4.hashCode());
+        assertFalse(tweet1.hashCode() == tweet5.hashCode());
     }
 }
