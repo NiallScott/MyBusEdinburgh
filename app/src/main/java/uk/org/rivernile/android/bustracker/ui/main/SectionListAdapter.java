@@ -125,7 +125,7 @@ public class SectionListAdapter extends RecyclerView.Adapter {
      */
     public void setOnSectionChosenListener(@Nullable final OnSectionChosenListener listener) {
         if (listener != null) {
-            sectionChosenListener = new WeakReference<OnSectionChosenListener>(listener);
+            sectionChosenListener = new WeakReference<>(listener);
         } else {
             sectionChosenListener = null;
         }
@@ -192,7 +192,7 @@ public class SectionListAdapter extends RecyclerView.Adapter {
 
         @Override
         public void onClick(final View v) {
-            final int position = getPosition();
+            final int position = getAdapterPosition();
 
             if (position == RecyclerView.NO_POSITION) {
                 return;

@@ -163,7 +163,7 @@ class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> {
 
         @Override
         public void onClick(final View v) {
-            final int position = getPosition();
+            final int position = getAdapterPosition();
 
             if (position == RecyclerView.NO_POSITION) {
                 return;
