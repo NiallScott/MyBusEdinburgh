@@ -27,7 +27,7 @@ package uk.org.rivernile.edinburghbustracker.android;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -45,7 +45,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see AddTimeAlertFragment
  */
-public class AddTimeAlertActivity extends ActionBarActivity
+public class AddTimeAlertActivity extends AppCompatActivity
         implements AddTimeAlertFragment.Callbacks,
         ServicesChooserDialogFragment.Callbacks {
     

@@ -27,7 +27,7 @@ package uk.org.rivernile.edinburghbustracker.android;
 
 import android.content.ActivityNotFoundException;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -42,7 +42,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see AddProximityAlertFragment
  */
-public class AddProximityAlertActivity extends ActionBarActivity
+public class AddProximityAlertActivity extends AppCompatActivity
         implements AddProximityAlertFragment.Callbacks {
     
     /** The stopCode argument. */

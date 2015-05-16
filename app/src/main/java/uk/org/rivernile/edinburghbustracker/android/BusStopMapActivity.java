@@ -28,13 +28,14 @@ package uk.org.rivernile.edinburghbustracker.android;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+
 import com.google.android.gms.maps.model.LatLng;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.MapTypeChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.BusStopMapFragment;
 
-public class BusStopMapActivity extends ActionBarActivity implements BusStopMapFragment.Callbacks,
+public class BusStopMapActivity extends AppCompatActivity implements BusStopMapFragment.Callbacks,
         MapTypeChooserDialogFragment.Callbacks, ServicesChooserDialogFragment.Callbacks {
     
     /** The stopCode argument for the Intent. */

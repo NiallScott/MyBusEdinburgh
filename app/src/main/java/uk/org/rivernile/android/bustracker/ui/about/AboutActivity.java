@@ -26,7 +26,8 @@
 package uk.org.rivernile.android.bustracker.ui.about;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -35,7 +36,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * @author Niall Scott
  */
-public class AboutActivity extends ActionBarActivity implements AboutFragment.Callbacks {
+public class AboutActivity extends AppCompatActivity implements AboutFragment.Callbacks {
 
     private static final String DIALOG_CREDITS = "creditsDialog";
     private static final String DIALOG_LICENCES = "licencesDialog";

@@ -102,7 +102,7 @@
             android:name=".FavouriteStopsActivity"
             android:label="@string/favouriteshortcut_label"
             android:icon="@drawable/appicon_favourite"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
             <!-- This signifies that this Activity can add shortcuts to the
                  home screen, and launch this Activity when the user wants to
                  create a shortcut. -->
@@ -113,14 +113,14 @@
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
         
         <!-- DisplayStopDataActivity, to show bus times. -->
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity"
             android:label="@string/displaystopdata_title"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
             <!-- This Activity attempts to take over HTTP accessing of
                  mobile.mybustracker.co.uk. -->
             <intent-filter>
@@ -141,7 +141,7 @@
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
         
         <activity-alias
@@ -155,7 +155,7 @@
             android:name=".PreferencesActivity"
             android:label="@string/preferences_title"
             android:theme="@style/MyBusEdinburghCompat.Preferences"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
             <!-- This lets the user manage network settings for the application
                  from elsewhere in the system. -->
             <intent-filter>
@@ -166,7 +166,7 @@
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
         
         <!-- AddEditFavouriteStopActivity, to add or edit a favourite bus
@@ -174,12 +174,12 @@
         <activity
             android:name=".AddEditFavouriteStopActivity"
             android:label="@string/addeditstop_title"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
         
         <!-- BusStopMapActivity, to show bus stops on the map. -->
@@ -188,7 +188,7 @@
             android:label="@string/map_title"
             android:launchMode="singleTop"
             android:theme="@style/MyBusEdinburgh.MapActivity"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
             <!-- This Activity handles searching. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -206,7 +206,7 @@
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
         
         <!-- AddProximityAlertActivity, to let the user add a new proximity
@@ -214,36 +214,36 @@
         <activity
             android:name=".AddProximityAlertActivity"
             android:label="@string/addproxalert_title"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
         
         <!-- AddTimeAlertActivity, to let the user add a new time alert. -->
         <activity
             android:name=".AddTimeAlertActivity"
             android:label="@string/addtimealert_title"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
         
         <!-- AddTimeAlertActivity, to let the user add a new time alert. -->
         <activity
             android:name=".BusStopDetailsActivity"
             android:label="@string/busstopdetails_title"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
 
         <!-- AboutActivity, to show 'about' information for the application. -->

@@ -27,7 +27,7 @@ package uk.org.rivernile.edinburghbustracker.android;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.utils.NavigationUtils;
@@ -47,7 +47,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * @author Niall Scott
  * @see FavouriteStopsFragment
  */
-public class FavouriteStopsActivity extends ActionBarActivity
+public class FavouriteStopsActivity extends AppCompatActivity
         implements FavouriteStopsFragment.Callbacks,
         DeleteFavouriteDialogFragment.Callbacks,
         DeleteProximityAlertDialogFragment.Callbacks,

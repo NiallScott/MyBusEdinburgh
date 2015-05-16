@@ -29,7 +29,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.Toast;
 import uk.org.rivernile.android.utils.NavigationUtils;
@@ -51,7 +51,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general
  * 
  * @author Niall Scott
  */
-public class BusStopDetailsActivity extends ActionBarActivity
+public class BusStopDetailsActivity extends AppCompatActivity
         implements BusStopDetailsFragment.Callbacks,
         DeleteFavouriteDialogFragment.Callbacks,
         DeleteProximityAlertDialogFragment.Callbacks,

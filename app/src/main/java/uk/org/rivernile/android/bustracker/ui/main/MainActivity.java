@@ -37,8 +37,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -71,7 +71,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.general.NearestSto
  * @author Niall Scott
  * @see SectionListFragment
  */
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends AppCompatActivity
         implements SectionListFragment.Callbacks, AlertManagerFragment.Callbacks,
         EnterStopCodeFragment.Callbacks, FavouriteStopsFragment.Callbacks,
         NearestStopsFragment.Callbacks, DeleteAllAlertsDialogFragment.Callbacks,
