@@ -344,7 +344,6 @@ This version of strings.xml is in Italian (it_IT) -->
     **********************************
     -->
     <string name="busstopmapfragment_nosearchresults">"Nessun risultato trovato"</string>
-    <string name="busstopmapfragment_progress_message">"Ricerca di:\n%s"</string> <!-- %s = search term. -->
     <string name="busstopmapfragment_service_chooser_title">"Seleziona percorso(i) da mostrare"</string>
     
     <!--

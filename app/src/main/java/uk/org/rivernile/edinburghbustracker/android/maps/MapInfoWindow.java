@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,28 +37,28 @@ import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * The MapInfoWindow supplies a custom View for an InfoWindow if the bus stop
- * marker InfoWindow is being shown. This allows the text for services not to
- * ellipsise (i.e. be multi-line). Also, the service colouring can take place on
- * the text.
- * 
- * If the Marker is any other type, then the default Google Maps InfoWindow is
- * shown instead.
+ * The {@code MapInfoWindow} supplies a custom {@link View} for an {@code InfoWindow} if the bus
+ * stop marker {@code InfoWindow} is being shown. This allows the text for services not to ellipsise
+ * (i.e. be multi-line). Also, the service colouring can take place on the text.
+ *
+ * <p>
+ *     If the Marker is any other type, then the default Google Maps {@code InfoWindow} is shown
+ *     instead.
+ * </p>
  * 
  * @author Niall Scott
  */
 public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
     
-    private static final Pattern STOP_CODE_PATTERN =
-            Pattern.compile("(\\d{8})\\)$");
+    private static final Pattern STOP_CODE_PATTERN = Pattern.compile("(\\d{8})\\)$");
     
     private final LayoutInflater inflater;
     private View rootView;
     
     /**
-     * Create a new MapInfoWindow.
+     * Create a new {@code MapInfoWindow}.
      * 
-     * @param context A Context instance, must be non-null.
+     * @param context A {@link Context} instance, must be non-{@code null}.
      */
     public MapInfoWindow(final Context context) {
         if (context == null) {
@@ -69,44 +69,36 @@ public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
         inflater = LayoutInflater.from(context);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public View getInfoWindow(final Marker marker) {
-        // Since we don't want to modify the window decoration, return null here
-        // so that Google Maps uses its own implementation.
+        // Since we don't want to modify the window decoration, return null here so that Google Maps
+        // uses its own implementation.
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public View getInfoContents(final Marker marker) {
         final Matcher matcher = STOP_CODE_PATTERN.matcher(marker.getTitle());
+
         // If the Marker is a bus stop, we want to provide our own View.
         if (matcher.find()) {
             // Inflate the View from XML.
             if (rootView == null) {
-                rootView = inflater.inflate(R.layout.map_info_window, null,
-                        false);
+                rootView = inflater.inflate(R.layout.map_info_window, null, false);
             }
             
-            TextView txt = (TextView)rootView.findViewById(R.id.txtTitle);
+            TextView txt = (TextView) rootView.findViewById(R.id.txtTitle);
             // Set the title TextView.
             txt.setText(marker.getTitle());
             
-            txt = (TextView)rootView.findViewById(R.id.txtSnippet);
+            txt = (TextView) rootView.findViewById(R.id.txtSnippet);
             // Set the snippet TextView to that of a coloured list String.
-            txt.setText(BusStopDatabase.getColouredServiceListString(
-                    marker.getSnippet()));
+            txt.setText(BusStopDatabase.getColouredServiceListString(marker.getSnippet()));
             
             return rootView;
         }
         
-        // If not a bus stop, return null so that Google Maps uses the default
-        // InfoWindow View.
+        // If not a bus stop, return null so that Google Maps uses the default InfoWindow View.
         return null;
     }
 }

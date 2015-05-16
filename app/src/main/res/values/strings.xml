@@ -356,7 +356,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************************
     -->
     <string name="busstopmapfragment_nosearchresults">No results found.</string>
-    <string name="busstopmapfragment_progress_message">Searching for:\n%s</string> <!-- %s = search term. -->
     <string name="busstopmapfragment_service_chooser_title">Select route(s) to show</string>
     
     <!--
