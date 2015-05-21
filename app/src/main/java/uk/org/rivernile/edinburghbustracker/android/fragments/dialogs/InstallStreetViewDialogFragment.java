@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,27 +26,26 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
+
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This DialogFragment alerts the user that they do not have Google Street View
- * installed. Tapping on the positive button will let the underlying Activity
- * decided where to take the user.
+ * This {@link DialogFragment} alerts the user that they do not have Google Street View installed.
+ * Tapping on the positive button will let the underlying {@link Activity} decided where to take the
+ * user.
  * 
  * @author Niall Scott
  */
 public class InstallStreetViewDialogFragment extends DialogFragment {
     
     private Callbacks callbacks;
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
@@ -54,44 +53,38 @@ public class InstallStreetViewDialogFragment extends DialogFragment {
         try {
             callbacks = (Callbacks) activity;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() +
-                    " does not implement " + Callbacks.class.getName());
+            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
+                    Callbacks.class.getName());
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
+    @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder =
-                new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.streetviewdialog_title)
                 .setCancelable(true)
                 .setMessage(R.string.streetviewdialog_message)
-                .setPositiveButton(R.string.yes,
-                        new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(final DialogInterface dialog,
-                            final int which) {
+                    public void onClick(final DialogInterface dialog, final int which) {
                         callbacks.onShowInstallStreetView();
                     }
                 })
-                .setNegativeButton(R.string.no, null)
-                .setInverseBackgroundForced(true);
+                .setNegativeButton(R.string.no, null);
 
         return builder.create();
     }
     
     /**
-     * Any Activities which host this Fragment must implement this interface to
-     * handle navigation events.
+     * Any {@link Activity Activities} which host this {@link DialogFragment} must implement this
+     * interface to handle navigation events.
      */
-    public static interface Callbacks {
+    public interface Callbacks {
         
         /**
          * This is called when the user wants to install StreetView.
          */
-        public void onShowInstallStreetView();
+        void onShowInstallStreetView();
     }
 }

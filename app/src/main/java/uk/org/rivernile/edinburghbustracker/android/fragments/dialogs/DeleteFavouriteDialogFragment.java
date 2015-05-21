@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,19 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
+
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
- * This Fragment will show a Dialog which asks the user to confirm if they wish
- * to delete the favourite bus stop or not.
+ * This {@link DialogFragment} will show an {@link AlertDialog} which asks the user to confirm if
+ * they wish to delete the favourite bus stop or not.
  * 
  * @author Niall Scott
  */
@@ -50,26 +52,21 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
     private String stopCode;
     
     /**
-     * Create a new instance of the DeleteFavouriteDialogFragment, giving the
-     * stopCode as the argument.
+     * Create a new instance of the {@code DeleteFavouriteDialogFragment}, giving the
+     * {@code stopCode} as the argument.
      * 
      * @param stopCode The stopCode to potentially delete.
-     * @return A new instance of this DialogFragment.
+     * @return A new instance of this {@link DialogFragment}.
      */
-    public static DeleteFavouriteDialogFragment newInstance(
-            final String stopCode) {
-        final DeleteFavouriteDialogFragment f =
-                new DeleteFavouriteDialogFragment();
+    public static DeleteFavouriteDialogFragment newInstance(final String stopCode) {
+        final DeleteFavouriteDialogFragment f = new DeleteFavouriteDialogFragment();
         final Bundle b = new Bundle();
         b.putString(ARG_STOPCODE, stopCode);
         f.setArguments(b);
         
         return f;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
@@ -77,77 +74,71 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
         try {
             callbacks = (Callbacks) activity;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() +
-                    " does not implement " + Callbacks.class.getName());
+            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
+                    Callbacks.class.getName());
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        sd = SettingsDatabase.getInstance(
-                getActivity().getApplicationContext());
+        sd = SettingsDatabase.getInstance(getActivity().getApplicationContext());
         
         final Bundle args = getArguments();
-        if(args == null) throw new IllegalStateException("There were no " +
-                "arguments supplied to DeleteFavouriteDialogFragment.");
+
+        if (args == null) {
+            throw new IllegalStateException("There were no arguments supplied to " +
+                    "DeleteFavouriteDialogFragment.");
+        }
         
         stopCode = args.getString(ARG_STOPCODE);
-        if(stopCode == null || stopCode.length() == 0)
-            throw new IllegalArgumentException("The stopCode argument cannot " +
-                    "be null or empty.");
+
+        if (stopCode == null || stopCode.length() == 0) {
+            throw new IllegalArgumentException("The stopCode argument cannot be null or empty.");
+        }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder =
-                new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true)
                 .setTitle(R.string.deletefavouritedialog_title)
-                .setPositiveButton(R.string.okay,
-                new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface dialog,
                             final int id) {
                         sd.deleteFavouriteStop(stopCode);
-                        
                         callbacks.onConfirmFavouriteDeletion();
                     }
-                }).setNegativeButton(R.string.cancel,
-                        new DialogInterface.OnClickListener() {
-                     @Override
-                     public void onClick(final DialogInterface dialog,
-                             final int id) {
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog,
+                                        final int id) {
                         callbacks.onCancelFavouriteDeletion();
-                     }
-        });
+                    }
+                });
         
         return builder.create();
     }
     
     /**
-     * Any Activities which host this Fragment must implement this interface to
-     * handle navigation events.
+     * Any {@link Activity Activities} which host this {@link DialogFragment} must implement this
+     * interface to handle navigation events.
      */
     public interface Callbacks {
         
         /**
-         * This is called when the user has confirmed that they wish for the
-         * favourite bus stop to be deleted.
+         * This is called when the user has confirmed that they wish for the favourite bus stop to
+         * be deleted.
          */
-        public void onConfirmFavouriteDeletion();
+        void onConfirmFavouriteDeletion();
         
         /**
-         * This is called when the user has cancelled the deletion of the
-         * favourite bus stop.
+         * This is called when the user has cancelled the deletion of the favourite bus stop.
          */
-        public void onCancelFavouriteDeletion();
+        void onCancelFavouriteDeletion();
     }
 }

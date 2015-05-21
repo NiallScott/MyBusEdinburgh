@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,27 +26,26 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
+
 import com.google.android.gms.maps.GoogleMap;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This DialogFragment allows users to select what type of map to display. The
- * map may be a normal vector map, a satellite map or a terrain map.
+ * This {@link DialogFragment} allows users to select what type of map to display. The map may be a
+ * normal vector map, a satellite map or a terrain map.
  * 
  * @author Niall Scott
  */
 public class MapTypeChooserDialogFragment extends DialogFragment {
     
     private Callbacks callbacks;
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
@@ -58,49 +57,45 @@ public class MapTypeChooserDialogFragment extends DialogFragment {
                     " does not implement " + Callbacks.class.getName());
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder =
-                new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true)
                 .setTitle(R.string.maptypechooserdialog_title)
                 .setItems(R.array.maptypechooserdialog_items,
-                    new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int which) {
-                switch(which) {
-                    case 0:
-                        callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_NORMAL);
-                        break;
-                    case 1:
-                        callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_HYBRID);
-                        break;
-                    case 2:
-                        callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_TERRAIN);
-                        break;
-                }
-            }
-        });
+                        new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, final int which) {
+                        switch (which) {
+                            case 0:
+                                callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_NORMAL);
+                                break;
+                            case 1:
+                                callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_HYBRID);
+                                break;
+                            case 2:
+                                callbacks.onMapTypeChosen(GoogleMap.MAP_TYPE_TERRAIN);
+                                break;
+                        }
+                    }
+                });
         
         return builder.create();
     }
     
     /**
-     * Any Activities which host this Fragment must implement this interface to
-     * handle navigation events.
+     * Any {@link Activity Activities} which host this {@link DialogFragment} must implement this
+     * interface to handle navigation events.
      */
     public interface Callbacks {
         
         /**
-         * When the user makes a selection, this event is called on the event
-         * listener.
+         * When the user makes a selection, this event is called on the event listener.
          * 
          * @param mapType The type of map the user chose.
          */
-        public void onMapTypeChosen(int mapType);
+        void onMapTypeChosen(int mapType);
     }
 }

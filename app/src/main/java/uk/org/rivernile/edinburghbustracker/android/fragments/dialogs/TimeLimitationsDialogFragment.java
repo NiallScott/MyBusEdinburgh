@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,33 +26,30 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This DialogFragment shows the user some disclaimer text regarding the
- * time alert feature in the application.
+ * This {@link DialogFragment} shows the user some disclaimer text regarding the time alert feature
+ * in the application.
  * 
  * @author Niall Scott
  */
 public class TimeLimitationsDialogFragment extends DialogFragment {
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final Activity activity = getActivity();
-        
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.timelimitationsdialog_title)
                 .setCancelable(true)
-                .setView(LayoutInflater.from(activity)
-                        .inflate(R.layout.addtimealert_dialog, null))
+                .setView(LayoutInflater.from(activity).inflate(R.layout.addtimealert_dialog, null))
                 .setNegativeButton(R.string.close, null)
                 .setInverseBackgroundForced(true);
 

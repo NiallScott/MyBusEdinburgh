@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,28 +26,27 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
+
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 /**
- * This Fragment will show a Dialog which asks the user to confirm if they wish
- * to delete all alerts or not.
- * 
+ * This {@link DialogFragment} will show an {@link AlertDialog} which asks the user to confirm if
+ * they wish to delete all alerts or not.
+ *
  * @author Niall Scott
  */
 public class DeleteAllAlertsDialogFragment extends DialogFragment {
     
     private AlertManager alertMan;
     private Callbacks callbacks;
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
@@ -55,68 +54,57 @@ public class DeleteAllAlertsDialogFragment extends DialogFragment {
         try {
             callbacks = (Callbacks) activity;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() +
-                    " does not implement " + Callbacks.class.getName());
+            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
+                    Callbacks.class.getName());
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         // Make sure to get the AlertManager.
-        alertMan = AlertManager.getInstance(
-                getActivity().getApplicationContext());
+        alertMan = AlertManager.getInstance(getActivity().getApplicationContext());
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder =
-                new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setCancelable(true)
-            .setTitle(R.string.deleteallalertsdialog_title)
-            .setPositiveButton(R.string.okay,
-            new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int id) {
-                alertMan.removeTimeAlert();
-                alertMan.removeProximityAlert();
-                
-                callbacks.onConfirmAllAlertsDeletion();
-            }
-        }).setNegativeButton(R.string.cancel,
-                new DialogInterface.OnClickListener() {
-             @Override
-             public void onClick(final DialogInterface dialog, final int id) {
-                callbacks.onCancelAllAlertsDeletion();
-             }
-        });
+                .setTitle(R.string.deleteallalertsdialog_title)
+                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        alertMan.removeTimeAlert();
+                        alertMan.removeProximityAlert();
+                        callbacks.onConfirmAllAlertsDeletion();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                     @Override
+                     public void onClick(final DialogInterface dialog, final int id) {
+                        callbacks.onCancelAllAlertsDeletion();
+                     }
+                });
         
         return builder.create();
     }
     
     /**
-     * Any Activities which host this Fragment must implement this interface to
-     * handle navigation events.
+     * Any {@link Activity Activities} which host this {@link DialogFragment} must implement this
+     * interface to handle navigation events.
      */
     public interface Callbacks {
         
         /**
-         * This is called when the user has confirmed that they wish for all
-         * alerts to be deleted.
+         * This is called when the user has confirmed that they wish for all alerts to be deleted.
          */
-        public void onConfirmAllAlertsDeletion();
+        void onConfirmAllAlertsDeletion();
         
         /**
-         * This is called when the user has cancelled the deletion of all
-         * alerts.
+         * This is called when the user has cancelled the deletion of all alerts.
          */
-        public void onCancelAllAlertsDeletion();
+        void onCancelAllAlertsDeletion();
     }
 }

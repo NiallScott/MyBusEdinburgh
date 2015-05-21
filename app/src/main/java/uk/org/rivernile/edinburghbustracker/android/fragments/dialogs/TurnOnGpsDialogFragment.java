@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,6 +33,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -44,10 +44,9 @@ import uk.org.rivernile.android.bustracker.ui.callbacks
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This DialogFragment asks the user if they wish to turn on the GPS receiver on
- * their device. It additionally asks the user if they wish to not be asked
- * again. If the user confirms the Dialog, they are taken to the system settings
- * where they can turn GPS on.
+ * This {@link DialogFragment} asks the user if they wish to turn on the GPS receiver on their
+ * device. It additionally asks the user if they wish to not be asked again. If the user confirms
+ * the {@link Dialog}, they are taken to the system settings where they can turn GPS on.
  * 
  * @author Niall Scott
  */
@@ -60,14 +59,11 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
     private SharedPreferences sp;
     
     static {
-        TURN_ON_GPS_INTENT = new Intent(Settings
-                .ACTION_LOCATION_SOURCE_SETTINGS);
+        // TODO: sort deprecation.
+        TURN_ON_GPS_INTENT = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         TURN_ON_GPS_INTENT.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onAttach(final Activity activity) {
         super.onAttach(activity);
@@ -75,25 +71,18 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
         try {
             callbacks = (Callbacks) activity;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() +
-                    " does not implement " + Callbacks.class.getName());
+            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
+                    Callbacks.class.getName());
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        sp = getActivity().getSharedPreferences(PreferenceConstants.PREF_FILE,
-                0);
+        sp = getActivity().getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final Activity activity = getActivity();
@@ -101,15 +90,12 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
         
         final View v = inflater.inflate(R.layout.turn_on_gps, null);
         final CheckBox cb = (CheckBox)v.findViewById(R.id.chkTurnongps);
-        cb.setOnCheckedChangeListener(new CompoundButton
-                .OnCheckedChangeListener() {
+        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(final CompoundButton v,
-                    boolean isChecked) {
-                SharedPreferences.Editor edit = sp.edit();
-                edit.putBoolean(PreferenceConstants.PREF_DISABLE_GPS_PROMPT,
-                        isChecked);
-                edit.commit();
+            public void onCheckedChanged(final CompoundButton v, final boolean isChecked) {
+                final SharedPreferences.Editor edit = sp.edit();
+                edit.putBoolean(PreferenceConstants.PREF_DISABLE_GPS_PROMPT, isChecked);
+                edit.apply();
             }
         });
 
@@ -117,24 +103,22 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
         builder.setCancelable(true)
                 .setTitle(R.string.turnongpsdialog_title)
                 .setView(v)
-                .setInverseBackgroundForced(true)
-                .setPositiveButton(R.string.yes,
-                new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int id) {
-                callbacks.onShowSystemLocationPreferences();
-            }
-        }).setNegativeButton(R.string.no, null);
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        callbacks.onShowSystemLocationPreferences();
+                    }
+                })
+                .setNegativeButton(R.string.no, null);
         
         return builder.create();
     }
     
     /**
-     * Any Activities which host this Fragment must implement this interface to
-     * handle navigation events.
+     * Any {@link Activity Activities} which host this {@link DialogFragment} must implement this
+     * interface to handle navigation events.
      */
-    public static interface Callbacks
-            extends OnShowSystemLocationPreferencesListener {
+    public interface Callbacks extends OnShowSystemLocationPreferencesListener {
         
         // Nothing to put here - the interfaces are defined elsewhere.
     }
