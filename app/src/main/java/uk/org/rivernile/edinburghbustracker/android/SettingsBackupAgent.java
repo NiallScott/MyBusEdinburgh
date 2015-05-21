@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.annotation.TargetApi;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
@@ -48,7 +47,6 @@ import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
  * 
  * @author Niall Scott
  */
-@TargetApi(8)
 public class SettingsBackupAgent extends BackupAgentHelper {
     
     private static final String PREFS_BACKUP_KEY = "prefs";

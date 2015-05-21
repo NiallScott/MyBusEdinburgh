@@ -30,10 +30,10 @@ android {
     buildToolsVersion "22.0.1"
     defaultConfig {
         applicationId "uk.org.rivernile.edinburghbustracker.android"
-        minSdkVersion 10
+        minSdkVersion 15
         targetSdkVersion 22
         versionCode 15
-        versionName "2.3 development"
+        versionName "3.0 development"
 
         // Populate the build config with API keys which are stored in local.properties so that
         // ApiKey.java can pick them up.
