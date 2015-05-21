@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,23 +25,22 @@
  *     exempt from clause 2.
 */ -->
 <resources
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
     <style name="MyBusEdinburgh" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/AppActionBar</item>
-        <item name="actionBarStyle">@style/AppActionBar</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="actionBarStyle">@style/AppActionBar</item>
     </style>
     
     <style name="MyBusEdinburgh.MapActivity">
-        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/AppActionBar.Map</item>
         <item name="actionBarStyle">@style/AppActionBar.Map</item>
-        <item name="android:windowActionBarOverlay" tools:ignore="NewApi">true</item>
         <item name="windowActionBarOverlay">true</item>
     </style>
-    
+
     <!-- This is required as the Material Design compatibiltiy themes leaves no
          window decoration. -->
-    <style name="MyBusEdinburghCompat.Preferences" parent="@android:style/Theme.Light" />
+    <style name="MyBusEdinburghCompat.Preferences" parent="@android:style/Theme.Holo.Light.DarkActionBar" >
+        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/PreferencesAppActionBar</item>
+    </style>
 </resources>
