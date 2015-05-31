@@ -152,12 +152,11 @@
         
         <!-- PreferencesActivity, to let the user change app preferences. -->
         <activity
-            android:name=".PreferencesActivity"
+            android:name="uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity"
             android:label="@string/preferences_title"
-            android:theme="@style/MyBusEdinburghCompat.Preferences"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
-            <!-- This lets the user manage network settings for the application
-                 from elsewhere in the system. -->
+            <!-- This lets the user manage network settings for the application from elsewhere in
+                 the system. -->
             <intent-filter>
                 <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
                 <category android:name="android.intent.category.DEFAULT" />

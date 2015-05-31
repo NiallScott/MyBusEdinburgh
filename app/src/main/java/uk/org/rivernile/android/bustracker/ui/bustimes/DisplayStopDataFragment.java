@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -81,7 +81,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks
 import uk.org.rivernile.android.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.utils.LoaderResult;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.PreferencesActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs

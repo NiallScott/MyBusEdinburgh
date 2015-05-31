@@ -24,8 +24,7 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources
-    xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <style name="MyBusEdinburgh" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -36,11 +35,5 @@
     <style name="MyBusEdinburgh.MapActivity">
         <item name="actionBarStyle">@style/AppActionBar.Map</item>
         <item name="windowActionBarOverlay">true</item>
-    </style>
-
-    <!-- This is required as the Material Design compatibiltiy themes leaves no
-         window decoration. -->
-    <style name="MyBusEdinburghCompat.Preferences" parent="@android:style/Theme.Holo.Light.DarkActionBar" >
-        <item name="android:actionBarStyle" tools:ignore="NewApi">@style/PreferencesAppActionBar</item>
     </style>
 </resources>

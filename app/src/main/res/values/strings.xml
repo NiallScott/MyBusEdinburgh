@@ -161,9 +161,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="main_drawer_close">Close application navigation</string>
     
     <!--
-    ***********************************
-    * Strings for PreferencesActivity *
-    ***********************************
+    ********************************
+    * Strings for SettingsActivity *
+    ********************************
     -->
     <string name="preferences_title">Settings</string>
     

@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,10 +21,27 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<resources>
-    <style name="PreferencesAppActionBar" parent="@android:style/Widget.Material.ActionBar">
-        <item name="android:background">@color/colorPrimary</item>
-        <item name="android:displayOptions">homeAsUp|showTitle</item>
-    </style>
-</resources>
+ */
+
+package uk.org.rivernile.android.bustracker.ui.settings;
+
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+
+import uk.org.rivernile.edinburghbustracker.android.R;
+
+/**
+ * This {@link android.app.Activity} is used to host a {@link SettingsFragment} to allow the user to
+ * change application preferences.
+ *
+ * @author Niall Scott
+ */
+public class SettingsActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.settings);
+    }
+}
