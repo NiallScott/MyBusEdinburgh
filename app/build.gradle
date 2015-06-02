@@ -43,11 +43,13 @@ android {
                 "\"" + properties.getProperty("apiKey", "invalid") + "\"")
         buildConfigField("String", "BUGSENSE_KEY",
                 "\"" + properties.getProperty("bugsenseKey", "invalid") + "\"")
+        buildConfigField("boolean", "BUGSENSE_ENABLED", "false")
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField("boolean", "BUGSENSE_ENABLED", "true")
         }
         debug {
             testCoverageEnabled true

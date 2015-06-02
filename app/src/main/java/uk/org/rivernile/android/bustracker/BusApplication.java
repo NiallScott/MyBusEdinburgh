@@ -37,6 +37,7 @@ import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
+import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
@@ -59,8 +60,12 @@ public abstract class BusApplication extends Application
     @Override
     public void onCreate() {
         super.onCreate();
+
         // Register the BugSense handler.
-        BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY);
+        if (BuildConfig.BUGSENSE_ENABLED) {
+            BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY);
+        }
+
         getSharedPreferences(PreferenceConstants.PREF_FILE, 0)
                 .registerOnSharedPreferenceChangeListener(this);
         
