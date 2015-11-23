@@ -257,6 +257,12 @@
                 android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
 
+        <!-- SettingsProvider, to provide the user's saved favourite stops and active alerts. -->
+        <provider
+            android:name="uk.org.rivernile.android.bustracker.database.settings.SettingsProvider"
+            android:authorities="uk.org.rivernile.edinburghbustracker.android.provider.settings"
+            android:exported="false" />
+
         <!-- MapSearchHistoryProvider, to provide previous search history items
              when typing in a search term. -->
         <provider
