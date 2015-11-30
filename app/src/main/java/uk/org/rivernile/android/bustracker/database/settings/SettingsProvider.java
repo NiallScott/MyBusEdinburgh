@@ -142,9 +142,9 @@ public class SettingsProvider extends ContentProvider {
                 break;
             case FAVOURITES_ID:
             case ALERTS_ID:
-                throw new UnsupportedOperationException("Insert not supported on URI " + uri);
+                throw new IllegalArgumentException("Insert not supported on URI " + uri);
             default:
-                throw new UnsupportedOperationException("Unknown URI " + uri);
+                throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
         final long id = openHelper.getWritableDatabase().insertOrThrow(table, null, values);
@@ -179,7 +179,7 @@ public class SettingsProvider extends ContentProvider {
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
                 break;
             default:
-                throw new UnsupportedOperationException("Unknown URI " + uri);
+                throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
         final int count = openHelper.getWritableDatabase().delete(table, selection, selectionArgs);
@@ -213,7 +213,7 @@ public class SettingsProvider extends ContentProvider {
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
                 break;
             default:
-                throw new UnsupportedOperationException("Unknown URI " + uri);
+                throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
         final int count = openHelper.getWritableDatabase().update(table, values, selection,
