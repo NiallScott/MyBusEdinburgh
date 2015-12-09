@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,47 +25,52 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import junit.framework.TestCase;
-import uk.org.rivernile.edinburghbustracker.android.ui.bustimes
-        .EdinburghDisplayStopDataFragment;
+import static org.junit.Assert.assertTrue;
+
+import android.support.test.annotation.UiThreadTest;
+import android.support.test.rule.UiThreadTestRule;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import uk.org.rivernile.edinburghbustracker.android.ui.bustimes.EdinburghDisplayStopDataFragment;
 
 /**
  * Tests for {@link EdinburghFragmentFactory}.
  * 
  * @author Niall Scott
  */
-public class EdinburghFragmentFactoryTests extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class EdinburghFragmentFactoryTests {
+
+    @Rule
+    public UiThreadTestRule uiThreadTestRule = new UiThreadTestRule();
     
     private EdinburghFragmentFactory factory;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        
+    @Before
+    public void setUp() {
         factory = new EdinburghFragmentFactory();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        
+    @After
+    public void tearDown() {
         factory = null;
     }
     
     /**
      * Test that {@link EdinburghFragmentFactory#getDisplayStopDataFragment(java.lang.String)}
-     * returns a Fragment that is an instance of
-     * {@link EdinburghDisplayStopDataFragment}.
+     * returns a Fragment that is an instance of {@link EdinburghDisplayStopDataFragment}.
      */
+    @Test
+    @UiThreadTest
     public void testGetDisplayStopDataFragment() {
-        assertTrue("getDisplayStopDataFragment() must return a Fragment that "
-                + "is an instance of EdinburghDisplayStopDataFragment.",
+        assertTrue("getDisplayStopDataFragment() must return a Fragment that is an instance of " +
+                        "EdinburghDisplayStopDataFragment.",
                 factory.getDisplayStopDataFragment("123456") instanceof
                         EdinburghDisplayStopDataFragment);
     }
