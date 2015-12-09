@@ -90,11 +90,9 @@ public class SettingsProvider extends ContentProvider {
 
                 break;
             case ALERTS:
-                cleanUpAlerts();
                 table = SettingsContract.Alerts.TABLE_NAME;
                 break;
             case ALERTS_ID:
-                cleanUpAlerts();
                 table = SettingsContract.Alerts.TABLE_NAME;
                 selection = SettingsContract.Alerts._ID + " = ?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
@@ -137,7 +135,6 @@ public class SettingsProvider extends ContentProvider {
                 table = SettingsContract.Favourites.TABLE_NAME;
                 break;
             case ALERTS:
-                cleanUpAlerts();
                 table = SettingsContract.Alerts.TABLE_NAME;
                 break;
             case FAVOURITES_ID:
@@ -169,11 +166,9 @@ public class SettingsProvider extends ContentProvider {
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
                 break;
             case ALERTS:
-                cleanUpAlerts();
                 table = SettingsContract.Alerts.TABLE_NAME;
                 break;
             case ALERTS_ID:
-                cleanUpAlerts();
                 table = SettingsContract.Alerts.TABLE_NAME;
                 selection = SettingsContract.Alerts._ID + " = ?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
@@ -203,15 +198,8 @@ public class SettingsProvider extends ContentProvider {
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
                 break;
             case ALERTS:
-                cleanUpAlerts();
-                table = SettingsContract.Alerts.TABLE_NAME;
-                break;
             case ALERTS_ID:
-                cleanUpAlerts();
-                table = SettingsContract.Alerts.TABLE_NAME;
-                selection = SettingsContract.Alerts._ID + " = ?";
-                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
-                break;
+                throw new IllegalArgumentException("Update not supported on URI " + uri);
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -221,15 +209,5 @@ public class SettingsProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri, null, false);
 
         return count;
-    }
-
-    /**
-     * Clean up the alerts table.
-     */
-    private void cleanUpAlerts() {
-        openHelper.getWritableDatabase()
-                .delete(SettingsContract.Alerts.TABLE_NAME,
-                        SettingsContract.Alerts.TIME_ADDED + " < ?",
-                        new String[] { String.valueOf(System.currentTimeMillis() - 3600000) });
     }
 }

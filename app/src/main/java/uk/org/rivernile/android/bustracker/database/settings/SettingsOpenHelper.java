@@ -87,6 +87,18 @@ class SettingsOpenHelper extends SQLiteOpenHelper {
                 SettingsContract.Alerts.DISTANCE_FROM + " INTEGER," +
                 SettingsContract.Alerts.SERVICE_NAMES + " TEXT," +
                 SettingsContract.Alerts.TIME_TRIGGER + " INTEGER);");
+        createAlertsTriggers(db);
+    }
+
+    /**
+     * Create triggers required on the alerts table.
+     *
+     * @param db The {@link SQLiteDatabase}.
+     */
+    private static void createAlertsTriggers(@NonNull final SQLiteDatabase db) {
+        db.execSQL(getAlertsTriggerStatement("insert_alert", "BEFORE INSERT"));
+        db.execSQL(getAlertsTriggerStatement("delete_alert", "AFTER DELETE"));
+        db.execSQL(getAlertsTriggerStatement("update_alert", "AFTER UPDATE"));
     }
 
     /**
@@ -116,10 +128,27 @@ class SettingsOpenHelper extends SQLiteOpenHelper {
      * @param tableName The name of the table to create.
      * @return The schema to create a favourites table.
      */
-    private static String getFavouritesCreateTableStatement(final String tableName) {
+    private static String getFavouritesCreateTableStatement(@NonNull final String tableName) {
         return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                 SettingsContract.Favourites._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 SettingsContract.Favourites.STOP_CODE + " TEXT NOT NULL UNIQUE," +
                 SettingsContract.Favourites.STOP_NAME + " TEXT NOT NULL);";
+    }
+
+    /**
+     * Convenience method for getting a trigger statement for creating alert triggers.
+     *
+     * @param triggerName The name of the trigger to create.
+     * @param condition When the trigger should be fired.
+     * @return The schema to create an alerts trigger.
+     */
+    private static String getAlertsTriggerStatement(@NonNull final String triggerName,
+            @NonNull final String condition) {
+        final String toInsert = triggerName + ' ' + condition;
+        return "CREATE TRIGGER IF NOT EXISTS " + toInsert + " ON " +
+                SettingsContract.Alerts.TABLE_NAME + " FOR EACH ROW BEGIN " +
+                "DELETE FROM " + SettingsContract.Alerts.TABLE_NAME + " WHERE " +
+                SettingsContract.Alerts.TIME_ADDED +
+                " < ((SELECT strftime('%s','now') * 1000) - 3600000); END;";
     }
 }

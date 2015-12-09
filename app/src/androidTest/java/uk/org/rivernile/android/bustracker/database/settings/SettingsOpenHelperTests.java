@@ -67,6 +67,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
 
         assertDatabaseSchema(db);
         assertFavouritesTableEmpty(db);
+        assertAlertsTableEmpty(db);
         db.close();
     }
 
@@ -80,6 +81,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
 
         assertDatabaseSchema(db);
         assertFavouritesTableEmpty(db);
+        assertAlertsTableEmpty(db);
         db.close();
     }
 
@@ -93,6 +95,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
 
         assertDatabaseSchema(db);
         assertFavouritesTableEmpty(db);
+        assertAlertsTableEmpty(db);
         db.close();
     }
 
@@ -106,6 +109,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
 
         assertDatabaseSchema(db);
         assertFavouritesTableEmpty(db);
+        assertAlertsTableEmpty(db);
         db.close();
     }
 
@@ -249,6 +253,111 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
     }
 
     /**
+     * Test that inserting an alert when an expired alert exists in the database causes the trigger
+     * to fire that deletes the expired alert from the database.
+     */
+    public void testInsertAlertFiresTrigger() {
+        final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
+        final SQLiteDatabase db = openHelper.getReadableDatabase();
+        assertDatabaseSchema(db);
+
+        ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, 0L);
+        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv.put(SettingsContract.Alerts.DISTANCE_FROM, 1);
+        db.insert("active_alerts", null, cv);
+        assertExpiredAlertExists(db);
+
+        cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_TIME);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, System.currentTimeMillis());
+        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv.put(SettingsContract.Alerts.SERVICE_NAMES, "1,2,3");
+        cv.put(SettingsContract.Alerts.TIME_TRIGGER, 1);
+        db.insert("active_alerts", null, cv);
+
+        final Cursor c = db.query("active_alerts", new String[] { SettingsContract.Alerts.TYPE },
+                null, null, null, null, null);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals(SettingsContract.Alerts.ALERTS_TYPE_TIME, c.getInt(0));
+        c.close();
+        db.close();
+    }
+
+    /**
+     * Test that updating an alert when an expired alert exists in the database causes the trigger
+     * to fire that deletes the expired alert from the database.
+     */
+    public void testUpdateAlertFiresTrigger() {
+        final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
+        final SQLiteDatabase db = openHelper.getReadableDatabase();
+        assertDatabaseSchema(db);
+
+        ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_TIME);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, System.currentTimeMillis());
+        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv.put(SettingsContract.Alerts.SERVICE_NAMES, "1,2,3");
+        cv.put(SettingsContract.Alerts.TIME_TRIGGER, 1);
+        db.insert("active_alerts", null, cv);
+
+        cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, 0L);
+        cv.put(SettingsContract.Alerts.STOP_CODE, "24680");
+        cv.put(SettingsContract.Alerts.DISTANCE_FROM, 1);
+        db.insert("active_alerts", null, cv);
+        assertExpiredAlertExists(db);
+
+        cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.STOP_CODE, "987654");
+        db.update("active_alerts", cv, "stopCode = ?", new String[] { "123456" });
+
+        final Cursor c = db.query("active_alerts", new String[] { SettingsContract.Alerts.TYPE },
+                null, null, null, null, null);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals(SettingsContract.Alerts.ALERTS_TYPE_TIME, c.getInt(0));
+        c.close();
+        db.close();
+    }
+
+    /**
+     * Test that deleting an alert when an expired alert exists in the database causes the trigger
+     * to fire that deletes the expired alert from the database.
+     */
+    public void testDeleteAlertFiresTrigger() {
+        final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
+        final SQLiteDatabase db = openHelper.getReadableDatabase();
+        assertDatabaseSchema(db);
+
+        ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_TIME);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, System.currentTimeMillis());
+        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv.put(SettingsContract.Alerts.SERVICE_NAMES, "1,2,3");
+        cv.put(SettingsContract.Alerts.TIME_TRIGGER, 1);
+        db.insert("active_alerts", null, cv);
+
+        cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, 0L);
+        cv.put(SettingsContract.Alerts.STOP_CODE, "24680");
+        cv.put(SettingsContract.Alerts.DISTANCE_FROM, 1);
+        db.insert("active_alerts", null, cv);
+        assertExpiredAlertExists(db);
+
+        db.delete("active_alerts", "stopCode = ?", new String[] { "123456" });
+
+        final Cursor c = db.query("active_alerts", null, null, null, null, null, null);
+        assertEquals(0, c.getCount());
+        c.close();
+        db.close();
+    }
+
+    /**
      * Assert that the database schema is as expected.
      *
      * @param db The {@link SQLiteDatabase} to check the schema in.
@@ -258,36 +367,36 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
 
         final Cursor tablesCursor = db.rawQuery("SELECT name FROM sqlite_master WHERE " +
                 "type = 'table' AND " +
-                "name IN ('favourite_stops','active_alerts','temp_favourites');", null);
-
+                "name IN ('favourite_stops','active_alerts','temp_favourites') " +
+                "ORDER BY name ASC;", null);
         assertEquals(2, tablesCursor.getCount());
 
-        while (tablesCursor.moveToNext()) {
-            final String tableName = tablesCursor.getString(0);
-            assertTrue("favourite_stops".equals(tableName) ||
-                    "active_alerts".equals(tableName));
-        }
+        assertTrue(tablesCursor.moveToNext());
+        assertEquals("active_alerts", tablesCursor.getString(0));
+
+        assertTrue(tablesCursor.moveToNext());
+        assertEquals("favourite_stops", tablesCursor.getString(0));
 
         tablesCursor.close();
 
         final Cursor favouritesCursor = db.rawQuery("PRAGMA table_info(favourite_stops);", null);
         assertEquals(3, favouritesCursor.getCount());
 
-        favouritesCursor.moveToNext();
+        assertTrue(favouritesCursor.moveToNext());
         assertEquals("_id", favouritesCursor.getString(1));
         assertEquals("INTEGER", favouritesCursor.getString(2));
         assertEquals(0, favouritesCursor.getInt(3));
         assertNull(favouritesCursor.getString(4));
         assertEquals(1, favouritesCursor.getInt(5));
 
-        favouritesCursor.moveToNext();
+        assertTrue(favouritesCursor.moveToNext());
         assertEquals("stopCode", favouritesCursor.getString(1));
         assertEquals("TEXT", favouritesCursor.getString(2));
         assertEquals(1, favouritesCursor.getInt(3));
         assertNull(favouritesCursor.getString(4));
         assertEquals(0, favouritesCursor.getInt(5));
 
-        favouritesCursor.moveToNext();
+        assertTrue(favouritesCursor.moveToNext());
         assertEquals("stopName", favouritesCursor.getString(1));
         assertEquals("TEXT", favouritesCursor.getString(2));
         assertEquals(1, favouritesCursor.getInt(3));
@@ -299,49 +408,49 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
         final Cursor alertsCursor = db.rawQuery("PRAGMA table_info(active_alerts);", null);
         assertEquals(7, alertsCursor.getCount());
 
-        alertsCursor.moveToNext();
+        assertTrue(alertsCursor.moveToNext());
         assertEquals("_id", alertsCursor.getString(1));
         assertEquals("INTEGER", alertsCursor.getString(2));
         assertEquals(0, alertsCursor.getInt(3));
         assertNull(alertsCursor.getString(4));
         assertEquals(1, alertsCursor.getInt(5));
 
-        alertsCursor.moveToNext();
+        assertTrue(alertsCursor.moveToNext());
         assertEquals("type", alertsCursor.getString(1));
         assertEquals("NUMERIC", alertsCursor.getString(2));
         assertEquals(1, alertsCursor.getInt(3));
         assertNull(alertsCursor.getString(4));
         assertEquals(0, alertsCursor.getInt(5));
 
-        alertsCursor.moveToNext();
+        assertTrue(alertsCursor.moveToNext());
         assertEquals("timeAdded", alertsCursor.getString(1));
         assertEquals("INTEGER", alertsCursor.getString(2));
         assertEquals(1, alertsCursor.getInt(3));
         assertNull(alertsCursor.getString(4));
         assertEquals(0, alertsCursor.getInt(5));
 
-        alertsCursor.moveToNext();
+        assertTrue(alertsCursor.moveToNext());
         assertEquals("stopCode", alertsCursor.getString(1));
         assertEquals("TEXT", alertsCursor.getString(2));
         assertEquals(1, alertsCursor.getInt(3));
         assertNull(alertsCursor.getString(4));
         assertEquals(0, alertsCursor.getInt(5));
 
-        alertsCursor.moveToNext();
+        assertTrue(alertsCursor.moveToNext());
         assertEquals("distanceFrom", alertsCursor.getString(1));
         assertEquals("INTEGER", alertsCursor.getString(2));
         assertEquals(0, alertsCursor.getInt(3));
         assertNull(alertsCursor.getString(4));
         assertEquals(0, alertsCursor.getInt(5));
 
-        alertsCursor.moveToNext();
+        assertTrue(alertsCursor.moveToNext());
         assertEquals("serviceNames", alertsCursor.getString(1));
         assertEquals("TEXT", alertsCursor.getString(2));
         assertEquals(0, alertsCursor.getInt(3));
         assertNull(alertsCursor.getString(4));
         assertEquals(0, alertsCursor.getInt(5));
 
-        alertsCursor.moveToNext();
+        assertTrue(alertsCursor.moveToNext());
         assertEquals("timeTrigger", alertsCursor.getString(1));
         assertEquals("INTEGER", alertsCursor.getString(2));
         assertEquals(0, alertsCursor.getInt(3));
@@ -349,6 +458,24 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
         assertEquals(0, alertsCursor.getInt(5));
 
         alertsCursor.close();
+
+        final Cursor alertsTriggerCursor = db.rawQuery("SELECT name, tbl_name FROM sqlite_master " +
+                "WHERE type = 'trigger' ORDER BY name ASC;", null);
+        assertEquals(3, alertsTriggerCursor.getCount());
+
+        assertTrue(alertsTriggerCursor.moveToNext());
+        assertEquals("delete_alert", alertsTriggerCursor.getString(0));
+        assertEquals("active_alerts", alertsTriggerCursor.getString(1));
+
+        assertTrue(alertsTriggerCursor.moveToNext());
+        assertEquals("insert_alert", alertsTriggerCursor.getString(0));
+        assertEquals("active_alerts", alertsTriggerCursor.getString(1));
+
+        assertTrue(alertsTriggerCursor.moveToNext());
+        assertEquals("update_alert", alertsTriggerCursor.getString(0));
+        assertEquals("active_alerts", alertsTriggerCursor.getString(1));
+
+        alertsTriggerCursor.close();
     }
 
     /**
@@ -357,8 +484,42 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
      * @param db The {@link SQLiteDatabase} containing the favourite stops table.
      */
     private static void assertFavouritesTableEmpty(@NonNull final SQLiteDatabase db) {
-        final Cursor c = db.query("favourite_stops", null, null, null, null, null, null);
+        assertTableEmpty(db, "favourite_stops");
+    }
+
+    /**
+     * Assert that the alerts table has no entries.
+     *
+     * @param db The {@link SQLiteDatabase} containing the alerts table.
+     */
+    private static void assertAlertsTableEmpty(@NonNull final SQLiteDatabase db) {
+        assertTableEmpty(db, "active_alerts");
+    }
+
+    /**
+     * Assert that the table with the given {@code tableName} has no rows.
+     *
+     * @param db The {@link SQLiteDatabase} containing the table.
+     * @param tableName The name of the table to assert for emptiness.
+     */
+    private static void assertTableEmpty(@NonNull final SQLiteDatabase db,
+            @NonNull final String tableName) {
+        final Cursor c = db.query(tableName, null, null, null, null, null, null);
         assertEquals(0, c.getCount());
+        c.close();
+    }
+
+    /**
+     * Assert that the alerts table contains an expired alert.
+     *
+     * @param db The {@link SQLiteDatabase} containing the data.
+     */
+    private static void assertExpiredAlertExists(@NonNull final SQLiteDatabase db) {
+        final Cursor c = db.query("active_alerts", new String[] { "timeAdded" }, "timeAdded = ?",
+                new String[] { String.valueOf(0) }, null, null, null);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals(0L, c.getLong(0));
         c.close();
     }
 
@@ -432,5 +593,26 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
                 "distanceFrom INTEGER," +
                 "serviceNames TEXT," +
                 "timeTrigger INTEGER);");
+        createAlertsTriggers(db);
+    }
+
+    /**
+     * Create the expected triggers for alerts.
+     *
+     * @param db The {@link SQLiteDatabase} to create the alerts triggers in.
+     */
+    private static void createAlertsTriggers(@NonNull final SQLiteDatabase db) {
+        db.execSQL("CREATE TRIGGER IF NOT EXISTS insert_alert BEFORE INSERT ON active_alerts " +
+                "FOR EACH ROW BEGIN " +
+                "DELETE FROM active_alerts " +
+                "WHERE timeAdded < ((SELECT strftime('%s','now') * 1000) - 3600000); END;");
+        db.execSQL("CREATE TRIGGER IF NOT EXISTS delete_alert AFTER DELETE ON active_alerts " +
+                "FOR EACH ROW BEGIN " +
+                "DELETE FROM active_alerts " +
+                "WHERE timeAdded < ((SELECT strftime('%s','now') * 1000) - 3600000); END;");
+        db.execSQL("CREATE TRIGGER IF NOT EXISTS update_alert AFTER UPDATE ON active_alerts " +
+                "FOR EACH ROW BEGIN " +
+                "DELETE FROM active_alerts " +
+                "WHERE timeAdded < ((SELECT strftime('%s','now') * 1000) - 3600000); END;");
     }
 }
