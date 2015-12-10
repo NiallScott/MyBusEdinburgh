@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,45 +25,47 @@
 
 package uk.org.rivernile.edinburghbustracker.android.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import android.net.Uri;
-import junit.framework.TestCase;
+import android.support.annotation.NonNull;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 
 /**
- * Unit tests for EdinburghUrlBuilder.
+ * Unit tests for {@link EdinburghUrlBuilder}.
  * 
  * @author Niall Scott
  */
-public class EdinburghUrlBuilderTests extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class EdinburghUrlBuilderTests {
     
     private EdinburghUrlBuilder builder;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        
+    @Before
+    public void setUp() {
         builder = new EdinburghUrlBuilder();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        
+    @After
+    public void tearDown() {
         builder = null;
     }
     
     /**
      * Common checks for tests on bus tracker URLs.
      * 
-     * @param uri The Uri to check.
+     * @param uri The {@link Uri} to check.
      */
-    private static void checkBusTrackerUri(final Uri uri) {
+    private static void checkBusTrackerUri(@NonNull final Uri uri) {
         assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
         assertEquals(EdinburghUrlBuilder.BUSTRACKER_HOST, uri.getHost());
         assertEquals("/ws.php", uri.getPath());
@@ -75,9 +77,9 @@ public class EdinburghUrlBuilderTests extends TestCase {
     /**
      * Common checks for tests on database server URLs.
      * 
-     * @param uri The Uri to check.
+     * @param uri The {@link Uri} to check.
      */
-    private static void checkDatabaseServerUri(final Uri uri) {
+    private static void checkDatabaseServerUri(@NonNull final Uri uri) {
         assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
         assertEquals(EdinburghUrlBuilder.DB_SERVER_HOST, uri.getHost());
         assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
@@ -85,9 +87,10 @@ public class EdinburghUrlBuilderTests extends TestCase {
     }
     
     /**
-     * Test that the URL for getting the topology from the bus tracker server
-     * is correctly constructed.
+     * Test that the URL for getting the topology from the bus tracker server is correctly
+     * constructed.
      */
+    @Test
     public void testGetTopologyUrl() {
         final Uri uri = builder.getTopologyUrl();
         
@@ -96,39 +99,28 @@ public class EdinburghUrlBuilderTests extends TestCase {
     }
     
     /**
-     * Test that getDbVersionCheckUrl() correctly throw an
-     * IllegalArgumentException when schemaType is set to null.
+     * Test that {@link EdinburghUrlBuilder#getDbVersionCheckUrl(String)} correctly throws an
+     * {@link IllegalArgumentException} when {@code schemaType} is set to {@code null}.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testGetDbVersionCheckUrlWithNullSchemaType() {
-        try {
-            builder.getDbVersionCheckUrl(null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The schemaType was set as null, so IllegalArgumentException "
-                + "should be thrown.");
+        builder.getDbVersionCheckUrl(null);
     }
     
     /**
-     * Test that getDbVersionCheckUrl() correctly throws an
-     * IllegalArgumentException when schemaType is set to empty.
+     * Test that {@link EdinburghUrlBuilder#getDbVersionCheckUrl(String)} correctly throws an
+     * {@link IllegalArgumentException} when {@code schemaType} is set to empty.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testGetDbVersionCheckUrlWithEmptySchemaType() {
-        try {
-            builder.getDbVersionCheckUrl("");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The schemaType was set as empty, so IllegalArgumentException "
-                + "should be thrown.");
+        builder.getDbVersionCheckUrl("");
     }
     
     /**
-     * Test that the URL for checking the database version from the database
-     * server is correctly constructed.
+     * Test that the URL for checking the database version from the database server is correctly
+     * constructed.
      */
+    @Test
     public void testGetDbVersionCheckUrl() {
         final Uri uri = builder.getDbVersionCheckUrl("test");
 
@@ -138,39 +130,28 @@ public class EdinburghUrlBuilderTests extends TestCase {
     }
     
     /**
-     * Test that getBusTimesUrl() correctly throws an IllegalArgumentException
-     * when stopCodes is set to null.
+     * Test that {@link EdinburghUrlBuilder#getBusTimesUrl(String[], int)} correctly throws an
+     * {@link IllegalArgumentException} when {@code stopCodes} is set to {@code null}.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testGetBusTimesUrlNullStopCodes() {
-        try {
-            builder.getBusTimesUrl(null, 1);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The stopCodes array was set as null, so IllegalArgumentException "
-                + "should be thrown.");
+        builder.getBusTimesUrl(null, 1);
     }
     
     /**
-     * Test that getBusTimesUrl() correctly throws an IllegalArgumentException
-     * when stopCodes is set to empty.
+     * Test that {@link EdinburghUrlBuilder#getBusTimesUrl(String[], int)} correctly throws an
+     * {@link IllegalArgumentException} when {@code stopCodes} is set to empty.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testGetBusTimesUrlEmptyStopCodes() {
-        try {
-            builder.getBusTimesUrl(new String[] { }, 1);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The stopCodes array was set as null, so IllegalArgumentException "
-                + "should be thrown.");
+        builder.getBusTimesUrl(new String[] { }, 1);
     }
     
     /**
-     * Test that the URL for getting bus times from the bus tracker server is
-     * correctly constructed when passing in a single stop code.
+     * Test that the URL for getting bus times from the bus tracker server is correctly
+     * constructed when passing in a single stop code.
      */
+    @Test
     public void testGetBusTimesUrlWithOneStopCode() {
         final Uri uri = builder.getBusTimesUrl(new String[] { "123" }, 4);
         
@@ -182,12 +163,12 @@ public class EdinburghUrlBuilderTests extends TestCase {
     }
     
     /**
-     * Test that the URL for getting bus times from the bus tracker server is
-     * correctly constructed when passing in two stop codes.
+     * Test that the URL for getting bus times from the bus tracker server is correctly
+     * constructed when passing in two stop codes.
      */
+    @Test
     public void testGetBusTimesUrlWithTwoStopCodes() {
-        final Uri uri = builder.getBusTimesUrl(new String[] { "123", "456" },
-                6);
+        final Uri uri = builder.getBusTimesUrl(new String[] { "123", "456" }, 6);
         
         checkBusTrackerUri(uri);
         assertEquals("getBusTimes", uri.getQueryParameter("function"));
@@ -199,10 +180,11 @@ public class EdinburghUrlBuilderTests extends TestCase {
     }
     
     /**
-     * Test that the URL for getting bus times from the bus tracker server is
-     * correctly constructed when passing in seven stop codes. It should ignore
-     * all stop codes after the sixth element.
+     * Test that the URL for getting bus times from the bus tracker server is correctly
+     * constructed when passing in seven stop codes. It should ignore all stop codes after the
+     * sixth element.
      */
+    @Test
     public void testGetBusTimesUrlWithSevenStopCodes() {
         final Uri uri = builder.getBusTimesUrl(
                 new String[] { "12", "23", "34", "45", "56", "67", "78" }, 2);
@@ -221,69 +203,46 @@ public class EdinburghUrlBuilderTests extends TestCase {
     }
     
     /**
-     * Test that getJourneyTimesUrl() correctly throws an
-     * IllegalArgumentException when the stopCode is set to null.
+     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly throws an
+     * {@link IllegalArgumentException} when the {@code stopCode} is set to {@code null}.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testGetJourneyTimesUrlWithNullStopCode() {
-        try {
-            builder.getJourneyTimesUrl(null, "journeyID");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The stopCode is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
+        builder.getJourneyTimesUrl(null, "journeyID");
     }
     
     /**
-     * Test that getJourneyTimesUrl() correctly throws an
-     * IllegalArgumentException when the stopCode is set to empty.
+     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly throws an
+     * {@link IllegalArgumentException} when the {@code stopCode} is set to empty.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testGetJourneyTimesUrlWithEmptyStopCode() {
-        try {
-            builder.getJourneyTimesUrl("", "journeyId");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The stopCode is set to empty, so an IllegalArgumentException "
-                + "should be thrown.");
+        builder.getJourneyTimesUrl("", "journeyId");
     }
     
     /**
-     * Test that getJourneyTimesUrl() correctly throws an
-     * IllegalArgumentException when the journeyId is set to null.
+     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly throws an
+     * {@link IllegalArgumentException} when the {@code journeyId} is set to {@code null}.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testGetJourneyTimesUrlWithNullJourneyId() {
-        try {
-            builder.getJourneyTimesUrl("stopCode", null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The journeyId is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
+        builder.getJourneyTimesUrl("stopCode", null);
     }
     
     /**
-     * Test that getJourneyTimesUrl() correctly throws an
-     * IllegalArgumentException when the journeyId is set to empty.
+     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly throws an
+     * {@link IllegalArgumentException} when the {@code journeyId} is set to empty.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testGetJourneyTimesUrlWithEmptyJourneyId() {
-        try {
-            builder.getJourneyTimesUrl("stopCode", "");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The journeyId is set to empty, so an IllegalArgumentException "
-                + "should be thrown.");
+        builder.getJourneyTimesUrl("stopCode", "");
     }
     
     /**
-     * Test that getJourneyTimesUrl() correctly constructs a URL from the given
-     * parameters.
+     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly constructs
+     * a URL from the given parameters.
      */
+    @Test
     public void testGetJourneyTimesUrl() {
         final Uri uri = builder.getJourneyTimesUrl("123456", "7890");
         
@@ -294,9 +253,10 @@ public class EdinburghUrlBuilderTests extends TestCase {
     }
     
     /**
-     * Test that the URL for getting Twitter updates from the database server is
-     * correctly constructed.
+     * Test that the URL for getting Twitter updates from the database server is correctly
+     * constructed.
      */
+    @Test
     public void testGetTwitterUpdatesUrl() {
         final Uri uri = builder.getTwitterUpdatesUrl();
 

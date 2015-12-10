@@ -27,13 +27,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
     defaultConfig {
         applicationId "uk.org.rivernile.edinburghbustracker.android"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 15
         versionName "3.0 development"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         // Populate the build config with API keys which are stored in local.properties so that
         // ApiKey.java can pick them up.
@@ -62,8 +63,14 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-annotations:23.0.1'
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:recyclerview-v7:23.0.1'
-    compile 'com.google.android.gms:play-services-maps:8.1.0'
+    compile 'com.android.support:support-annotations:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:recyclerview-v7:23.1.1'
+    compile 'com.google.android.gms:play-services-maps:8.3.0'
+
+    androidTestCompile 'com.android.support:support-annotations:23.1.1'
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile 'com.android.support.test:rules:0.4.1'
+
+    testCompile 'junit:junit:4.12'
 }
