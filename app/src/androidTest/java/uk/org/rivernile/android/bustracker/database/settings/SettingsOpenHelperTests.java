@@ -25,42 +25,52 @@
 
 package uk.org.rivernile.android.bustracker.database.settings;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.RenamingDelegatingContext;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link SettingsOpenHelper}.
  *
  * @author Niall Scott
  */
-public class SettingsOpenHelperTests extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class SettingsOpenHelperTests {
 
     private static final String DB_NAME = "settings.db";
 
     private RenamingDelegatingContext context;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        context = new RenamingDelegatingContext(getContext(), "test_");
+    @Before
+    public void setUp() {
+        context = new RenamingDelegatingContext(InstrumentationRegistry.getTargetContext(),
+                "test_");
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() {
         context.deleteDatabase(DB_NAME);
         context = null;
-        super.tearDown();
     }
 
     /**
      * Test that a newly created database has the correct schema.
      */
+    @Test
     public void testDatabaseDefaultState() {
         final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
         final SQLiteDatabase db = openHelper.getReadableDatabase();
@@ -74,6 +84,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
     /**
      * Test that a database upgraded from version 1 has the correct schema.
      */
+    @Test
     public void testEmptyUpgradeFromV1() {
         createV1Database();
         final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
@@ -88,6 +99,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
     /**
      * Test that a database upgraded from version 2 has the correct schema.
      */
+    @Test
     public void testEmptyUpgradeFromV2() {
         createV2Database();
         final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
@@ -102,6 +114,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
     /**
      * Test that an existing version 3 database does not have its schema changed.
      */
+    @Test
     public void testEmptyStateV3Database() {
         createV3Database();
         final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
@@ -117,6 +130,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
      * Test that a favourite stop with a {@code null stopCode} does not get populated in the
      * upgraded table. This is a very unlikely scenario.
      */
+    @Test
     public void testOldFavouriteTableWithNullStopCode() {
         createV1Database();
         SQLiteDatabase db = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
@@ -140,6 +154,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
      * Test that migrating an old database to version 3 with a single favourite stop successfully
      * preserves the single favourite stop.
      */
+    @Test
     public void testOldFavouriteTableWithSingleEntry() {
         createV1Database();
         SQLiteDatabase db = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
@@ -166,6 +181,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
      * Test that migrating an old database to version 3 with multiple favourite stops successfully
      * preserves all favourite stops.
      */
+    @Test
     public void testOldFavouriteTableWithMultipleEntries() {
         createV1Database();
         SQLiteDatabase db = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
@@ -213,6 +229,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
      * Test that migrating an old database to version 3 with multiple favourite stops, but one of
      * them invalid, successfully preserves the valid stops.
      */
+    @Test
     public void testOldFavouriteTableWithMultipleEntriesWithInvalidRow() {
         createV1Database();
         SQLiteDatabase db = context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null);
@@ -256,6 +273,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
      * Test that inserting an alert when an expired alert exists in the database causes the trigger
      * to fire that deletes the expired alert from the database.
      */
+    @Test
     public void testInsertAlertFiresTrigger() {
         final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
         final SQLiteDatabase db = openHelper.getReadableDatabase();
@@ -290,6 +308,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
      * Test that updating an alert when an expired alert exists in the database causes the trigger
      * to fire that deletes the expired alert from the database.
      */
+    @Test
     public void testUpdateAlertFiresTrigger() {
         final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
         final SQLiteDatabase db = openHelper.getReadableDatabase();
@@ -328,6 +347,7 @@ public class SettingsOpenHelperTests extends AndroidTestCase {
      * Test that deleting an alert when an expired alert exists in the database causes the trigger
      * to fire that deletes the expired alert from the database.
      */
+    @Test
     public void testDeleteAlertFiresTrigger() {
         final SettingsOpenHelper openHelper = new SettingsOpenHelper(context);
         final SQLiteDatabase db = openHelper.getReadableDatabase();

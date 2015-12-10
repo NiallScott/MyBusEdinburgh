@@ -33,21 +33,38 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.ProviderTestCase2;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link SettingsProvider}.
  *
  * @author Niall Scott
  */
+@RunWith(AndroidJUnit4.class)
 public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
 
     public SettingsProviderTests() {
         super(SettingsProvider.class, SettingsContract.AUTHORITY);
     }
 
+    @Before
     @Override
-    protected void tearDown() throws Exception {
+    public void setUp() throws Exception {
+        setContext(InstrumentationRegistry.getTargetContext());
+
+        super.setUp();
+    }
+
+    @After
+    @Override
+    public void tearDown() throws Exception {
         super.tearDown();
 
         getMockContext().deleteDatabase(SettingsContract.DB_NAME);
@@ -57,6 +74,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * Test that {@link SettingsProvider#getType(Uri)} returns the correct MIME types for the
      * supplied content {@link Uri}s.
      */
+    @Test
     public void testGetTypeSuccess() {
         assertEquals(SettingsContract.Favourites.CONTENT_TYPE,
                 getMockContentResolver().getType(SettingsContract.Favourites.CONTENT_URI));
@@ -74,6 +92,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * Test that {@link SettingsProvider#getType(Uri)} returns {@code null} when invalid
      * {@link Uri}s are supplied.
      */
+    @Test
     public void testGetTypeWithInvalidUris() {
         assertNull(getMockContentResolver().getType(Uri.parse("content://invalid.uri/thing")));
         assertNull(getMockContentResolver()
@@ -86,34 +105,24 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * Test that {@link SettingsProvider#query(Uri, String[], String, String[], String)} throws an
      * {@link IllegalArgumentException} when an invalid {@link Uri} has been supplied.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testQueryWithInvalidUri() {
-        try {
-            getMockContentResolver()
-                    .query(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), null,
-                            null, null, null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-
-        fail("As an invalid Uri was used, an IllegalArgumentException was expected.");
+        getMockContentResolver()
+                .query(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), null,
+                        null, null, null);
     }
 
     /**
      * Test that {@link SettingsProvider#insert(Uri, ContentValues)} throws an
      * {@link IllegalArgumentException} when an invalid {@link Uri} has been supplied.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testInsertWithInvalidUri() {
-        try {
-            final ContentValues cv = new ContentValues();
-            cv.put("a", "1");
-            cv.put("b", "2");
-            getMockContentResolver()
-                    .insert(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), cv);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-
-        fail("As an invalid Uri was used, an IllegalArgumentException was expected.");
+        final ContentValues cv = new ContentValues();
+        cv.put("a", "1");
+        cv.put("b", "2");
+        getMockContentResolver()
+                .insert(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), cv);
     }
 
     /**
@@ -121,18 +130,13 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * {@link IllegalArgumentException} when a favourites {@link Uri} has been specified that
      * includes a specific item ID.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testInsertWithFavouritesId() {
-        try {
-            final ContentValues cv = new ContentValues();
-            cv.put(SettingsContract.Favourites.STOP_CODE, "123456");
-            cv.put(SettingsContract.Favourites.STOP_NAME, "Name");
-            getMockContentResolver().insert(
-                    ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1), cv);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-
-        fail("The favourites table does not support inserts when the ID is specified.");
+        final ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Favourites.STOP_CODE, "123456");
+        cv.put(SettingsContract.Favourites.STOP_NAME, "Name");
+        getMockContentResolver().insert(
+                ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1), cv);
     }
 
     /**
@@ -140,55 +144,40 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * {@link IllegalArgumentException} when an alerts {@link Uri} has been specified that
      * includes a specific item ID.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testInsertWithAlertsId() {
-        try {
-            final ContentValues cv = new ContentValues();
-            cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
-            cv.put(SettingsContract.Alerts.TIME_ADDED, 1234567890L);
-            cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
-            cv.put(SettingsContract.Alerts.DISTANCE_FROM, 1);
-            getMockContentResolver().insert(
-                    ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), cv);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-
-        fail("The alerts table does not support inserts when the ID is specified.");
+        final ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, 1234567890L);
+        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv.put(SettingsContract.Alerts.DISTANCE_FROM, 1);
+        getMockContentResolver().insert(
+                ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), cv);
     }
 
     /**
      * Test that {@link SettingsProvider#delete(Uri, String, String[])} throws an
      * {@link IllegalArgumentException} when an invalid {@link Uri} has been supplied.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testDeleteWithInvalidUri() {
-        try {
-            getMockContentResolver()
-                    .delete(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"),
-                            null, null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-
-        fail("As an invalid Uri was used, an IllegalArgumentException was expected.");
+        getMockContentResolver()
+                .delete(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), null,
+                        null);
     }
 
     /**
      * Test that {@link SettingsProvider#update(Uri, ContentValues, String, String[])} throws an
      * {@link IllegalArgumentException} when an invalid {@link Uri} has been supplied.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testUpdateWithInvalidUri() {
-        try {
-            final ContentValues cv = new ContentValues();
-            cv.put("a", "1");
-            cv.put("b", "2");
-            getMockContentResolver()
-                    .update(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), cv,
-                            null, null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-
-        fail("As an invalid Uri was used, an IllegalArgumentException was expected.");
+        final ContentValues cv = new ContentValues();
+        cv.put("a", "1");
+        cv.put("b", "2");
+        getMockContentResolver()
+                .update(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), cv,
+                        null, null);
     }
 
     /**
@@ -196,6 +185,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * {@link Cursor} with {@code 0} rows when no data has been inserted in to the database with
      * favourites.
      */
+    @Test
     public void testQueryFavouritesWithEmptyTable() {
         final Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
                 null, null, null, null);
@@ -208,6 +198,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * Test various permutations of
      * {@link SettingsProvider#query(Uri, String[], String, String[], String)} with favourites.
      */
+    @Test
     public void testQueryFavourites() {
         populateFavouritesWithTestData();
 
@@ -252,6 +243,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * Test {@link SettingsProvider#query(Uri, String[], String, String[], String)} with favourites
      * for a known item ID.
      */
+    @Test
     public void testQueryFavouritesById() {
         populateFavouritesWithTestData();
 
@@ -283,6 +275,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     /**
      * Test {@link SettingsProvider#insert(Uri, ContentValues)} with favourites.
      */
+    @Test
     public void testInsertFavourites() {
         Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
                 null, null, null, null);
@@ -309,6 +302,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     /**
      * Test {@link SettingsProvider#delete(Uri, String, String[])} with deleting all favourites.
      */
+    @Test
     public void testDeleteAllFavourites() {
         populateFavouritesWithTestData();
 
@@ -323,6 +317,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     /**
      * Test {@link SettingsProvider#delete(Uri, String, String[])} with favourites.
      */
+    @Test
     public void testDeleteFavourites() {
         populateFavouritesWithTestData();
 
@@ -358,6 +353,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     /**
      * Test {@link SettingsProvider#delete(Uri, String, String[])} with deleting a favourite by ID.
      */
+    @Test
     public void testDeleteFavouritesById() {
         populateFavouritesWithTestData();
 
@@ -395,6 +391,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * Test {@link SettingsProvider#update(Uri, ContentValues, String, String[])} with updating all
      * favourites.
      */
+    @Test
     public void testUpdateAllFavourites() {
         populateFavouritesWithTestData();
 
@@ -419,6 +416,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     /**
      * Test {@link SettingsProvider#update(Uri, ContentValues, String, String[])} with favourites.
      */
+    @Test
     public void testUpdateFavourites() {
         populateFavouritesWithTestData();
 
@@ -469,6 +467,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * Test {@link SettingsProvider#update(Uri, ContentValues, String, String[])} with updating a
      * favourite by ID.
      */
+    @Test
     public void testUpdateFavouritesById() {
         populateFavouritesWithTestData();
 
