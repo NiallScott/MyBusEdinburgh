@@ -35,6 +35,7 @@ import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersion;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersionParser;
 import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
 import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamReader;
+import uk.org.rivernile.android.utils.JSONUtils;
 
 /**
  * This parser gets version data from the bus stop database server.
@@ -53,15 +54,18 @@ public class EdinburghDatabaseVersionParser implements DatabaseVersionParser {
             fetcher.executeFetcher(reader);
             
             final JSONObject jo = reader.getJSONObject();
-            return new DatabaseVersion(
-                    jo.getString("db_schema_version"),
-                    jo.getString("topo_id"),
-                    jo.getString("db_url"),
-                    jo.getString("checksum"));
+            return new DatabaseVersion.Builder()
+                    .setSchemaName(JSONUtils.getString(jo, "db_schema_version"))
+                    .setTopologyId(JSONUtils.getString(jo, "topo_id"))
+                    .setUrl(JSONUtils.getString(jo, "db_url"))
+                    .setChecksum(JSONUtils.getString(jo, "checksum"))
+                    .build();
         } catch (IOException e) {
-            throw new DatabaseEndpointException(e.getMessage());
+            throw new DatabaseEndpointException(e);
         } catch (JSONException e) {
-            throw new DatabaseEndpointException(e.getMessage());
+            throw new DatabaseEndpointException(e);
+        } catch (IllegalArgumentException e) {
+            throw new DatabaseEndpointException("Unable to parse DatabaseVersion.");
         }
     }
 }

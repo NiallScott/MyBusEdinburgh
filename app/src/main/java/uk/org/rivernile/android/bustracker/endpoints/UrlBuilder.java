@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,66 +26,67 @@
 package uk.org.rivernile.android.bustracker.endpoints;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 /**
- * The UrlBuilder contains methods for constructing a URL for a particular
- * environment.
+ * The {@code UrlBuilder} contains methods for constructing a URL for a particular environment.
  * 
  * @author Niall Scott
  */
 public interface UrlBuilder {
     
     /**
-     * Get a Uri instance which represents a URL for getting the topology ID
-     * from the bus tracker API.
-     * 
-     * @return A Uri instance which represents a URL for getting the topology ID
-     * from the bus tracker API.
-     */
-    public Uri getTopologyUrl();
-    
-    /**
-     * Get a Uri instance which represents a URL for getting the latest database
-     * version for a given schemaType from the database server.
-     * 
-     * @param schemaType The schemaType to check for. Must not be null or empty.
-     * @return A Uri instance which represents a URL for getting the latest
-     * database version for a given schemaType from the database server.
-     */
-    public Uri getDbVersionCheckUrl(String schemaType);
-    
-    /**
-     * Get a Uri instance which represents a URL for getting bus stop times from
-     * the bus tracker API.
-     * 
-     * @param stopCodes The bus stop codes to request. Only the first 6 stop
-     * codes in the array will be dealt with as the API only accepts 6 stop
-     * codes in a single request. If this is null or empty, an
-     * IllegalArgumentException will be thrown.
-     * @param numDepartures The number of departures to return for each service.
-     * @return A Uri instance which represents a URL for getting bus stop times
-     * from the bus tracker API.
-     */
-    public Uri getBusTimesUrl(String[] stopCodes, int numDepartures);
-    
-    /**
-     * Get a Uri instance which represents a URL for getting journey times for
-     * a specific journey ID departing from a specific stopCode from the bus
+     * Get a {@link Uri} instance which represents a URL for getting the topology ID from the bus
      * tracker API.
      * 
-     * @param stopCode The bus stop code to request.
-     * @param journeyId The unique ID of the journey leaving from the given
-     * stopCode.
-     * @return A Uri instance which represents a URL for getting journey times
-     * from the bus tracker API.
+     * @return A {@link Uri} instance which represents a URL for getting the topology ID from the
+     * bus tracker API.
      */
-    public Uri getJourneyTimesUrl(String stopCode, String journeyId);
+    @NonNull
+    Uri getTopologyUrl();
     
     /**
-     * Get a Uri instance which represents a URL for getting Twitter updates.
+     * Get a {@link Uri} instance which represents a URL for getting the latest database version
+     * for a given {@code schemaType} from the database server.
      * 
-     * @return A Uri instance which represents a URL for getting Twitter
-     * updates.
+     * @param schemaType The {@code schemaType} to check for.
+     * @return A {@link Uri} instance which represents a URL for getting the latest database
+     * version for a given {@code schemaType} from the database server.
      */
-    public Uri getTwitterUpdatesUrl();
+    @NonNull
+    Uri getDbVersionCheckUrl(@NonNull String schemaType);
+    
+    /**
+     * Get a {@link Uri} instance which represents a URL for getting bus stop times from the bus
+     * tracker API.
+     * 
+     * @param stopCodes The bus stop codes to request. Only the first 6 stop codes in the array
+     * will be dealt with as the API only accepts 6 stop codes in a single request. If this is
+     * empty, an {@link IllegalArgumentException} will be thrown.
+     * @param numDepartures The number of departures to return for each service.
+     * @return A {@link Uri} instance which represents a URL for getting bus stop times from the
+     * bus tracker API.
+     */
+    @NonNull
+    Uri getBusTimesUrl(@NonNull String[] stopCodes, int numDepartures);
+    
+    /**
+     * Get a {@link Uri} instance which represents a URL for getting journey times for a specific
+     * journey ID departing from a specific {@code stopCode} from the bus tracker API.
+     * 
+     * @param stopCode The bus stop code to request.
+     * @param journeyId The unique ID of the journey leaving from the given {@code stopCode}.
+     * @return A {@link Uri} instance which represents a URL for getting journey times from the
+     * bus tracker API.
+     */
+    @NonNull
+    Uri getJourneyTimesUrl(@NonNull String stopCode, @NonNull String journeyId);
+    
+    /**
+     * Get a {@link Uri} instance which represents a URL for getting Twitter updates.
+     * 
+     * @return A {@link Uri} instance which represents a URL for getting Twitter updates.
+     */
+    @NonNull
+    Uri getTwitterUpdatesUrl();
 }

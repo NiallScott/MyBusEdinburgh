@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,11 +25,12 @@
 
 package uk.org.rivernile.android.bustracker.parser.database;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 /**
- * This model object describes the response from the DatabaseVersion from the
- * database server API.
+ * This model object describes a database version response from the endpoint.
  * 
  * @author Niall Scott
  */
@@ -39,40 +40,18 @@ public class DatabaseVersion {
     private final String topologyId;
     private final String url;
     private final String checksum;
-    
+
     /**
-     * Create a new DatabaseVersion. All parameters must not be null or empty.
-     * 
-     * @param schemaName The schema name.
-     * @param topologyId The topology ID.
-     * @param url The URL to download the database file.
-     * @param checksum The checksum of the database file.
+     * Create a new {@code DatabaseVersion}. This constructor is not publicly accessible. To
+     * construct an instance of this class, use the {@link Builder}.
+     *
+     * @param builder The {@link Builder} instance to construct from.
      */
-    public DatabaseVersion(final String schemaName, final String topologyId,
-            final String url, final String checksum) {
-        if (TextUtils.isEmpty(schemaName)) {
-            throw new IllegalArgumentException("The schemaName must not be "
-                    + "null.");
-        }
-        
-        if (TextUtils.isEmpty(topologyId)) {
-            throw new IllegalArgumentException("The topologyId must not be "
-                    + "null.");
-        }
-        
-        if (TextUtils.isEmpty(url)) {
-            throw new IllegalArgumentException("The url must not be null.");
-        }
-        
-        if (TextUtils.isEmpty(checksum)) {
-            throw new IllegalArgumentException("The checksum must not be "
-                    + "null.");
-        }
-        
-        this.schemaName = schemaName;
-        this.topologyId = topologyId;
-        this.url = url;
-        this.checksum = checksum;
+    private DatabaseVersion(@NonNull final Builder builder) {
+        schemaName = builder.schemaName;
+        topologyId = builder.topologyId;
+        url = builder.url;
+        checksum = builder.checksum;
     }
 
     /**
@@ -80,6 +59,7 @@ public class DatabaseVersion {
      * 
      * @return The schema name.
      */
+    @NonNull
     public String getSchemaName() {
         return schemaName;
     }
@@ -89,6 +69,7 @@ public class DatabaseVersion {
      * 
      * @return The topology ID.
      */
+    @NonNull
     public String getTopologyId() {
         return topologyId;
     }
@@ -98,6 +79,7 @@ public class DatabaseVersion {
      * 
      * @return The URL to download the database file.
      */
+    @NonNull
     public String getUrl() {
         return url;
     }
@@ -107,7 +89,126 @@ public class DatabaseVersion {
      * 
      * @return The checksum of the database file.
      */
+    @NonNull
     public String getChecksum() {
         return checksum;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final DatabaseVersion that = (DatabaseVersion) o;
+
+        return topologyId.equals(that.topologyId) && schemaName.equals(that.schemaName);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = schemaName.hashCode();
+        result = 31 * result + topologyId.hashCode();
+
+        return result;
+    }
+
+    /**
+     * This {@link Builder} must be used to construct a new {@link DatabaseVersion}. Create a new
+     * instance of this class, call the setters and when you are ready, call {@link #build()}.
+     */
+    public static class Builder {
+
+        private String schemaName;
+        private String topologyId;
+        private String url;
+        private String checksum;
+
+        /**
+         * Set the schema name.
+         *
+         * @param schemaName The schema name. Must not be {@code null} or empty when
+         * {@link #build()} is called.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setSchemaName(@Nullable final String schemaName) {
+            this.schemaName = schemaName;
+            return this;
+        }
+
+        /**
+         * Set the topology ID.
+         *
+         * @param topologyId The topology ID. Must not be {@code null} or empty when
+         * {@link #build()} is called.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setTopologyId(@Nullable final String topologyId) {
+            this.topologyId = topologyId;
+            return this;
+        }
+
+        /**
+         * Set the URL to download the database file.
+         *
+         * @param url The URL to download the database file. Must not be {@code null} or empty
+         * when {@link #build()} is called.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setUrl(@Nullable final String url) {
+            this.url = url;
+            return this;
+        }
+
+        /**
+         * Set the checksum of the datbase file.
+         *
+         * @param checksum The checksum of the database file. Must not be {@code null} or empty when
+         * {@link #build()} is called.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setChecksum(@Nullable final String checksum) {
+            this.checksum = checksum;
+            return this;
+        }
+
+        /**
+         * Build a new {@link DatabaseVersion} object.
+         *
+         * @return A new {@link DatabaseVersion} object.
+         * @throws IllegalArgumentException When any of the fields are {@code null} or empty.
+         */
+        @NonNull
+        public DatabaseVersion build() {
+            if (TextUtils.isEmpty(schemaName)) {
+                throw new IllegalArgumentException("The schemaName must not be null or empty.");
+            }
+
+            if (TextUtils.isEmpty(topologyId)) {
+                throw new IllegalArgumentException("The topologyId must not be null or empty.");
+            }
+
+            if (TextUtils.isEmpty(url)) {
+                throw new IllegalArgumentException("The url must not be null or empty..");
+            }
+
+            if (TextUtils.isEmpty(checksum)) {
+                throw new IllegalArgumentException("The checksum must not be null or empty.");
+            }
+
+            return new DatabaseVersion(this);
+        }
     }
 }

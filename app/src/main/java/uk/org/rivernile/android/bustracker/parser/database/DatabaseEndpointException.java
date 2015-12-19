@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,26 +26,45 @@
 package uk.org.rivernile.android.bustracker.parser.database;
 
 /**
- * This Exception is used where there was an error getting database information
- * from the endpoint.
+ * This {@link Exception} is used where there was an error getting database information from the
+ * endpoint.
  * 
  * @author Niall Scott
  */
 public class DatabaseEndpointException extends Exception {
     
     /**
-     * Create a new DatabaseEndpointException.
+     * Create a new {@code DatabaseEndpointException}.
      */
     public DatabaseEndpointException() {
         super();
     }
     
     /**
-     * Create a new DatabaseEndpointException, specifying a detailMessage.
+     * Create a new {@code DatabaseEndpointException}.
      * 
-     * @param detailMessage Human-readable description of the problem.
+     * @param detailMessage The message to include in the {@link Exception}.
      */
     public DatabaseEndpointException(final String detailMessage) {
         super(detailMessage);
+    }
+
+    /**
+     * Create a new {@code DatabaseEndpointException}.
+     *
+     * @param detailMessage The message to include in the {@link Exception}.
+     * @param throwable The {@link Throwable} that caused this {@link Exception}.
+     */
+    public DatabaseEndpointException(final String detailMessage, final Throwable throwable) {
+        super(detailMessage, throwable);
+    }
+
+    /**
+     * Create a new {@code DatabaseEndpointException}.
+     *
+     * @param throwable The {@link Throwable} that caused this {@link Exception}.
+     */
+    public DatabaseEndpointException(final Throwable throwable) {
+        super(throwable);
     }
 }
