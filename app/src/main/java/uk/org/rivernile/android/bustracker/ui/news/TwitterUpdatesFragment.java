@@ -46,13 +46,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import java.util.List;
 
+import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.utils.DividerItemDecoration;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterLoaderResult;
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterException;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterUpdatesLoader;
-import uk.org.rivernile.android.fetchers.UrlMismatchException;
 
 /**
  * This {@link Fragment} displays a list of {@link Tweet}s which informs the user of events that may

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,67 +25,60 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
+import static org.junit.Assert.assertSame;
+
+import android.support.annotation.NonNull;
+import android.support.test.runner.AndroidJUnit4;
+
 import java.util.List;
-import junit.framework.TestCase;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterException;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParser;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
 
 /**
- * Tests for TwitterEndpoint.
+ * Tests for {@link TwitterEndpoint}.
  * 
  * @author Niall Scott
  */
-public class TwitterEndpointTests extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class TwitterEndpointTests {
     
     /**
-     * Test that the constructor correctly throws an IllegalArgumentExxception
-     * when the parser is set to null.
+     * Test that {@link TwitterEndpoint#getParser()} returns the same {@link TwitterParser}
+     * object given to it in the constructor.
      */
-    public void testNullConstructor() {
-        try {
-            new MockTwitterEndpoint(null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The parser is set to null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that {@link TwitterEndpoint#getParser()} returns the same
-     * {@link TwitterParser} object given to it in the constructor.
-     */
+    @Test
     public void testNotNullConstructor() {
         final TwitterParserImpl parser = new TwitterParserImpl();
         final MockTwitterEndpoint endpoint = new MockTwitterEndpoint(parser);
         
-        assertEquals(parser, endpoint.getParser());
+        assertSame(parser, endpoint.getParser());
     }
     
     /**
-     * Because this is testing an abstract class, it's necessary to mock it out
-     * in to a concrete class.
+     * Because this is testing an abstract class, it's necessary to mock it out in to a concrete
+     * class.
      */
     private static class MockTwitterEndpoint extends TwitterEndpoint {
         
         /**
-         * Create a new MockTwitterEndpoint.
+         * Create a new {@code MockTwitterEndpoint}.
          * 
          * @param parser The parser to use.
          */
-        public MockTwitterEndpoint(final TwitterParser parser) {
+        public MockTwitterEndpoint(@NonNull final TwitterParser parser) {
             super(parser);
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        @NonNull
         @Override
         public List<Tweet> getTweets() throws TwitterException {
-            return null;
+            throw new UnsupportedOperationException();
         }
     }
 }

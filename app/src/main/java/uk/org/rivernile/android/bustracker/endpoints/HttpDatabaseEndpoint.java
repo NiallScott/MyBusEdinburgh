@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,12 +25,13 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
-import uk.org.rivernile.android.bustracker.parser.database
-        .DatabaseEndpointException;
+import android.content.Context;
+import android.support.annotation.NonNull;
+
+import uk.org.rivernile.android.bustracker.parser.database.DatabaseEndpointException;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersion;
-import uk.org.rivernile.android.bustracker.parser.database
-        .DatabaseVersionParser;
-import uk.org.rivernile.android.fetchers.HttpFetcher;
+import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersionParser;
+import uk.org.rivernile.android.fetchutils.fetchers.HttpFetcher;
 
 /**
  * This defines the HTTP endpoint for getting database version information.
@@ -38,36 +39,33 @@ import uk.org.rivernile.android.fetchers.HttpFetcher;
  * @author Niall Scott
  */
 public class HttpDatabaseEndpoint extends DatabaseEndpoint {
-    
+
+    private final Context context;
     private final UrlBuilder urlBuilder;
     
     /**
-     * Create a new HttpDatabaseEndpoint. The arguments must not be null.
+     * Create a new {@code HttpDatabaseEndpoint}.
      * 
      * @param parser The parser to use to parse the data.
-     * @param urlBuilder The UrlBuilder to use.
+     * @param urlBuilder The {@link UrlBuilder} to use.
      */
-    public HttpDatabaseEndpoint(final DatabaseVersionParser parser,
-            final UrlBuilder urlBuilder) {
+    public HttpDatabaseEndpoint(@NonNull final Context context,
+            @NonNull final DatabaseVersionParser parser, @NonNull final UrlBuilder urlBuilder) {
         super(parser);
-        
-        if (urlBuilder == null) {
-            throw new IllegalArgumentException("The urlBuilder must not be "
-                    + "null.");
-        }
-        
+
+        this.context = context;
         this.urlBuilder = urlBuilder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @NonNull
     @Override
-    public DatabaseVersion getDatabaseVersion(final String schemaType)
+    public DatabaseVersion getDatabaseVersion(@NonNull final String schemaType)
             throws DatabaseEndpointException {
-        final HttpFetcher fetcher = new HttpFetcher(urlBuilder
-                .getDbVersionCheckUrl(schemaType).toString(), false);
-        
+        final HttpFetcher fetcher = new HttpFetcher.Builder(context)
+                .setUrl(urlBuilder.getDbVersionCheckUrl(schemaType).toString())
+                .setAllowHostRedirects(false)
+                .build();
+
         return getParser().getDatabaseVersion(fetcher);
     }
 }

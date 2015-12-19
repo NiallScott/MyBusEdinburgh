@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,16 +25,16 @@
 
 package uk.org.rivernile.edinburghbustracker.android.parser.database;
 
+import android.support.annotation.NonNull;
+
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import uk.org.rivernile.android.bustracker.parser.database
-        .DatabaseEndpointException;
+import uk.org.rivernile.android.bustracker.parser.database.DatabaseEndpointException;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersion;
-import uk.org.rivernile.android.bustracker.parser.database
-        .DatabaseVersionParser;
-import uk.org.rivernile.android.fetchers.Fetcher;
-import uk.org.rivernile.android.fetchers.readers.JSONFetcherStreamReader;
+import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersionParser;
+import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
+import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamReader;
 
 /**
  * This parser gets version data from the bus stop database server.
@@ -43,16 +43,10 @@ import uk.org.rivernile.android.fetchers.readers.JSONFetcherStreamReader;
  */
 public class EdinburghDatabaseVersionParser implements DatabaseVersionParser {
 
-    /**
-     * {@inheritDoc}
-     */
+    @NonNull
     @Override
-    public DatabaseVersion getDatabaseVersion(final Fetcher fetcher)
+    public DatabaseVersion getDatabaseVersion(@NonNull final Fetcher fetcher)
             throws DatabaseEndpointException {
-        if (fetcher == null) {
-            throw new IllegalArgumentException("The fetcher must not be null.");
-        }
-        
         final JSONFetcherStreamReader reader = new JSONFetcherStreamReader();
         
         try {

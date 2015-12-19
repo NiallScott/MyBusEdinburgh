@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,83 +25,64 @@
 
 package uk.org.rivernile.edinburghbustracker.android.parser.livetimes;
 
-import android.test.InstrumentationTestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import android.support.annotation.NonNull;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .AuthenticationException;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .LiveTimesException;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .MaintenanceException;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .ServerErrorException;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .SystemOverloadedException;
-import uk.org.rivernile.android.fetchers.AssetFileFetcher;
-import uk.org.rivernile.android.fetchers.readers.JSONFetcherStreamReader;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import uk.org.rivernile.android.bustracker.parser.livetimes.AuthenticationException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.ServerErrorException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
+import uk.org.rivernile.android.fetchutils.fetchers.AssetFileFetcher;
+import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
+import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamReader;
 
 /**
  * Tests for {@link EdinburghParser}.
  * 
  * @author Niall Scott
  */
-public class EdinburghParserTests extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class EdinburghParserTests {
     
     private EdinburghParser parser;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        
+    @Before
+    public void setUp() {
         parser = new EdinburghParser();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        
+    @After
+    public void tearDown() {
         parser = null;
     }
     
     /**
-     * Test that{@link EdinburghParser#getBusTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws an IllegalArgumentException when the fetcher is set as
-     * null.
+     * Test that {@link EdinburghParser#getBusTimes(Fetcher)} correctly throws a
+     * {@link LiveTimesException} containing an {@link IOException} when the fetcher is set to
+     * fetch a resource that does not exist.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testGetBusTimesWithNullFetcher() throws Exception {
-        try {
-            parser.getBusTimes(null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The fetcher is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that {@link EdinburghParser#getBusTimes(uk.org.rivernile.android.fetchers.Fetcher))}
-     * correctly throws a {@link LiveTimesException} containing an
-     * {@link IOException} when the fetcher is set to fetch a resource that does
-     * not exist.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
-     */
+    @Test
     public void testGetBusTimesWithInvalidSource() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/generic/does_not_exist.json");
         
         try {
@@ -112,22 +93,21 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The fetcher is set to an incorrect resource, so an IOException "
-                + "should be set as the cause in the LiveTimesException.");
+        fail("The fetcher is set to an incorrect resource, so an IOException should be set as " +
+                "the cause in the LiveTimesException.");
     }
     
     /**
-     * Test that {@link EdinburghParser#getBusTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a {@link LiveTimesException} containing a
-     * {@link JSONException} when the fetcher is set to fetch a resource that
-     * contains invalid data.
+     * Test that {@link EdinburghParser#getBusTimes(Fetcher)} correctly throws a
+     * {@link LiveTimesException} containing a {@link JSONException} when the fetcher is set to
+     * fetch a resource that contains invalid data.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testGetBusTimesWithInvalidJson() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/generic/invalid.json");
         
         try {
@@ -138,22 +118,21 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The fetcher is set to return invalid JSON, so a JSONException "
-                + "should be set as the cause in the LiveTimesException.");
+        fail("The fetcher is set to return invalid JSON, so a JSONException should be set as the " +
+                "cause in the LiveTimesException.");
     }
     
     /**
-     * Test that {@link EdinburghParser#getBusTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a {@link LiveTimesException} containing a
-     * {@link JSONException} when the fetcher returns a JSON array rather than
-     * a JSON object.
+     * Test that {@link EdinburghParser#getBusTimes(Fetcher)} correctly throws a
+     * {@link LiveTimesException} containing a {@link JSONException} when the fetcher returns a
+     * JSON array rather than a JSON object.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testGetBusTimesWithJsonArray() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/generic/empty_array.json");
         
         try {
@@ -164,47 +143,36 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The fetcher is set to get a JSON array, but a JSON objecy is "
-                + "expected. A JSONException should be set as the cause in the "
-                + "LiveTimesException.");
+        fail("The fetcher is set to get a JSON array, but a JSON objecy is expected. A " +
+                "JSONException should be set as the cause in the LiveTimesException.");
     }
     
     /**
-     * Test that {@link EdinburghParser#getBusTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a {@link ServerErrorException} when the fetcher returns
-     * an error response.
+     * Test that {@link EdinburghParser#getBusTimes(Fetcher)} correctly throws a
+     * {@link ServerErrorException} when the fetcher returns an error response.
      * 
      * @throws Exception There are no other exceptions expected from this test,
      * so if there are, let the TestCase fail the test when it intercepts them.
      */
+    @Test(expected = ServerErrorException.class)
     public void testGetBusTimesWithError() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/bustracker/generic/error_processing_error.json");
-        
-        try {
-            parser.getBusTimes(fetcher);
-        } catch (ServerErrorException e) {
-            return;
-        }
-        
-        fail("The fetcher is set to retrieve an error response that contains a "
-                + "server error. A ServerErrorException should be thrown.");
+        parser.getBusTimes(fetcher);
     }
     
     /**
-     * Test that {@link EdinburghParser#getBusTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * returns a valid object when it is supplied valid data.
+     * Test that {@link EdinburghParser#getBusTimes(Fetcher)} returns a valid object when it is
+     * supplied valid data.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testGetBusTimesValid() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/bustracker/getBusTimes/bustimes_valid.json");
-        final EdinburghLiveBusTimes busTimes = (EdinburghLiveBusTimes)
-                parser.getBusTimes(fetcher);
+        final EdinburghLiveBusTimes busTimes = (EdinburghLiveBusTimes) parser.getBusTimes(fetcher);
         
         assertNotNull(busTimes);
         assertEquals(1, busTimes.size());
@@ -225,42 +193,21 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertEquals(expectedServices.length, size);
         
         for (int i = 0; i < size; i++) {
-            assertEquals(expectedServices[i],
-                    busServices.get(i).getServiceName());
+            assertEquals(expectedServices[i], busServices.get(i).getServiceName());
         }
     }
     
     /**
-     * Test that{@link EdinburghParser#getJourneyTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws an IllegalArgumentException when the fetcher is set as
-     * null.
+     * Test that {@link EdinburghParser#getJourneyTimes(Fetcher)} correctly throws a
+     * {@link LiveTimesException} containing an {@link IOException} when the fetcher is set to
+     * fetch a resource that does not exist.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testGetJourneyTimesWithNullFetcher() throws Exception {
-        try {
-            parser.getJourneyTimes(null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The fetcher is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that {@link EdinburghParser#getJourneyTimes(uk.org.rivernile.android.fetchers.Fetcher))}
-     * correctly throws a {@link LiveTimesException} containing an
-     * {@link IOException} when the fetcher is set to fetch a resource that does
-     * not exist.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
-     */
+    @Test
     public void testGetJourneyTimesWithInvalidSource() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/generic/does_not_exist.json");
         
         try {
@@ -271,22 +218,21 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The fetcher is set to an incorrect resource, so an IOException "
-                + "should be set as the cause in the LiveTimesException.");
+        fail("The fetcher is set to an incorrect resource, so an IOException should be set as " +
+                "the cause in the LiveTimesException.");
     }
     
     /**
-     * Test that {@link EdinburghParser#getJourneyTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a {@link LiveTimesException} containing a
-     * {@link JSONException} when the fetcher is set to fetch a resource that
-     * contains invalid data.
+     * Test that {@link EdinburghParser#getJourneyTimes(Fetcher)} correctly throws a
+     * {@link LiveTimesException} containing a {@link JSONException} when the fetcher is set to
+     * fetch a resource that contains invalid data.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testGetJourneyTimesWithInvalidJson() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/generic/invalid.json");
         
         try {
@@ -297,22 +243,21 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The fetcher is set to return invalid JSON, so a JSONException "
-                + "should be set as the cause in the LiveTimesException.");
+        fail("The fetcher is set to return invalid JSON, so a JSONException should be set as the " +
+                "cause in the LiveTimesException.");
     }
     
     /**
-     * Test that {@link EdinburghParser#getJourneyTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a {@link LiveTimesException} containing a
-     * {@link JSONException} when the fetcher returns a JSON array rather than
-     * a JSON object.
+     * Test that {@link EdinburghParser#getJourneyTimes(Fetcher)} correctly throws a
+     * {@link LiveTimesException} containing a {@link JSONException} when the fetcher returns a
+     * JSON array rather than a JSON object.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testGetJourneyTimesWithJsonArray() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/generic/empty_array.json");
         
         try {
@@ -323,47 +268,36 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The fetcher is set to get a JSON array, but a JSON objecy is "
-                + "expected. A JSONException should be set as the cause in the "
-                + "LiveTimesException.");
+        fail("The fetcher is set to get a JSON array, but a JSON objecy is expected. A " +
+                "JSONException should be set as the cause in the LiveTimesException.");
     }
     
     /**
-     * Test that {@link EdinburghParser#getJourneyTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws a {@link ServerErrorException} when the fetcher returns
-     * an error response.
+     * Test that {@link EdinburghParser#getJourneyTimes(Fetcher)} correctly throws a
+     * {@link ServerErrorException} when the fetcher returns an error response.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let test fail.
      */
+    @Test(expected = ServerErrorException.class)
     public void testGetJourneyTimesWithError() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/bustracker/generic/error_processing_error.json");
-        
-        try {
-            parser.getJourneyTimes(fetcher);
-        } catch (ServerErrorException e) {
-            return;
-        }
-        
-        fail("The fetcher is set to retrieve an error response that contains a "
-                + "server error. A ServerErrorException should be thrown.");
+        parser.getJourneyTimes(fetcher);
     }
     
     /**
-     * Test that {@link EdinburghParser#getJourneyTimes(uk.org.rivernile.android.fetchers.Fetcher)}
-     * returns a valid object when it is supplied valid data.
+     * Test that {@link EdinburghParser#getJourneyTimes(Fetcher)} returns a valid object when it
+     * is supplied valid data.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testGetJourneyTimesValid() throws Exception {
-        final AssetFileFetcher fetcher = new AssetFileFetcher(
-                getInstrumentation().getContext(),
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/bustracker/getJourneyTimes/journeytimes_valid.json");
-        final EdinburghJourney journey = (EdinburghJourney) parser
-                .getJourneyTimes(fetcher);
+        final EdinburghJourney journey = (EdinburghJourney) parser.getJourneyTimes(fetcher);
         
         assertEquals("3322", journey.getJourneyId());
         assertEquals("LB", journey.getOperator());
@@ -375,59 +309,46 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * correctly throws a {@link LiveTimesException} when the JSON object is set
-     * as null.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} correctly throws a
+     * {@link LiveTimesException} when the JSON object is set as {@code null}.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesWithNullJsonObject() {
-        try {
-            EdinburghParser.parseBusTimes(null);
-        } catch (LiveTimesException e) {
-            return;
-        }
-        
-        fail("The JSON object is set as null, so LiveTimesException should be "
-                + "thrown.");
+    @Test(expected = LiveTimesException.class)
+    public void testParseBusTimesWithNullJsonObject() throws Exception {
+        EdinburghParser.parseBusTimes(null);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * correctly throws a {@link LiveTimesException} containing an
-     * {@link AuthenticationException} when the JSON object is set as an API key
-     * error.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} correctly throws a
+     * {@link LiveTimesException} containing an {@link AuthenticationException} when the JSON
+     * object is set as an API key error.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test(expected = AuthenticationException.class)
     public void testParseBusTimesWithError() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/generic/error_invalid_app_key.json");
-        
-        try {
-            EdinburghParser.parseBusTimes(reader.getJSONObject());
-        } catch (AuthenticationException e) {
-            return;
-        }
-        
-        fail("An API key error was passed in, so a LiveTimesException "
-                + "containing an AuthenticationException should be thrown");
+        EdinburghParser.parseBusTimes(reader.getJSONObject());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a non-null {@link EdinburghLiveBusTimes} when there are no bus
-     * stops in the response.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a
+     * non-{@code null} {@link EdinburghLiveBusTimes} when there are no bus stops in the response.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesWithEmptyBusTimes() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bustimes_empty.json");
@@ -440,13 +361,14 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * throws a {@link LiveTimesException} containing a {@link JSONException}
-     * when the busTimes array in JSON is set as null.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} throws a
+     * {@link LiveTimesException} containing a {@link JSONException} when the {@code busTimes} array
+     * in JSON is set as {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithNullBusTimes() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bustimes_null.json");
@@ -459,80 +381,79 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The busTimes JSON array is set as null, so a LiveTimesException "
-                + "containing a JSONException should be thrown.");
+        fail("The busTimes JSON array is set as null, so a LiveTimesException containing a " +
+                "JSONException should be thrown.");
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that contains no bus stops when the data contains
-     * a single bus stop missing a stop code.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
-     */
-    public void testParseBusTimesWithMissingStopCodeSingle() throws Exception {
-        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_missing_stopcode_single.json");
-        final EdinburghLiveBusTimes busTimes = EdinburghParser
-                .parseBusTimes(reader.getJSONObject());
-        
-        assertNotNull(busTimes);
-        assertTrue(busTimes.isEmpty());
-    }
-    
-    /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that contains no bus stops when the data contains
-     * a single bus stop with a null stop code.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
-     */
-    public void testParseBusTimesWithNullStopCodeSingle() throws Exception {
-        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_null_stopcode_single.json");
-        final EdinburghLiveBusTimes busTimes = EdinburghParser
-                .parseBusTimes(reader.getJSONObject());
-        
-        assertNotNull(busTimes);
-        assertTrue(busTimes.isEmpty());
-    }
-    
-    /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that contains no bus stops when the data contains
-     * a single bus stop with an empty stop code.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
-     */
-    public void testParseBusTimesWithEmptyStopCodeSingle() throws Exception {
-        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_empty_stopcode_single.json");
-        final EdinburghLiveBusTimes busTimes = EdinburghParser
-                .parseBusTimes(reader.getJSONObject());
-        
-        assertNotNull(busTimes);
-        assertTrue(busTimes.isEmpty());
-    }
-    
-    /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that misses out bus stops which are missing a stop
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that contains no bus stops when the data contains a single bus stop missing a stop
      * code.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
+    public void testParseBusTimesWithMissingStopCodeSingle() throws Exception {
+        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
+                "endpoints/bustracker/getBusTimes/bustimes_missing_stopcode_single.json");
+        final EdinburghLiveBusTimes busTimes = EdinburghParser
+                .parseBusTimes(reader.getJSONObject());
+        
+        assertNotNull(busTimes);
+        assertTrue(busTimes.isEmpty());
+    }
+    
+    /**
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that contains no bus stops when the data contains a single bus stop with a
+     * {@code null} stop code.
+     * 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
+     */
+    @Test
+    public void testParseBusTimesWithNullStopCodeSingle() throws Exception {
+        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
+                "endpoints/bustracker/getBusTimes/bustimes_null_stopcode_single.json");
+        final EdinburghLiveBusTimes busTimes = EdinburghParser
+                .parseBusTimes(reader.getJSONObject());
+        
+        assertNotNull(busTimes);
+        assertTrue(busTimes.isEmpty());
+    }
+    
+    /**
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that contains no bus stops when the data contains a single bus stop with an empty
+     * stop code.
+     * 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
+     */
+    @Test
+    public void testParseBusTimesWithEmptyStopCodeSingle() throws Exception {
+        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
+                "endpoints/bustracker/getBusTimes/bustimes_empty_stopcode_single.json");
+        final EdinburghLiveBusTimes busTimes = EdinburghParser
+                .parseBusTimes(reader.getJSONObject());
+        
+        assertNotNull(busTimes);
+        assertTrue(busTimes.isEmpty());
+    }
+    
+    /**
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that misses out bus stops which are missing a stop code.
+     * 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
+     */
+    @Test
     public void testParseBusTimesWithMissingStopCodeMultiple()
             throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_missing_stopcode_multiple.json");
+                "endpoints/bustracker/getBusTimes/bustimes_missing_stopcode_multiple.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -553,17 +474,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that misses out bus stops which have a null stop
-     * code.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that misses out bus stops which have a {@code null} stop code.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithNullStopCodeMultiple() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_null_stopcode_multiple.json");
+                "endpoints/bustracker/getBusTimes/bustimes_null_stopcode_multiple.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -584,17 +504,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that misses out bus stops which have an empty stop
-     * code.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that misses out bus stops which have an empty stop code.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithEmptyStopCodeMultiple() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_empty_stopcode_multiple.json");
+                "endpoints/bustracker/getBusTimes/bustimes_empty_stopcode_multiple.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -615,17 +534,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object with no bus stops when the response only contains
-     * a single, invalid service.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object with no bus stops when the response only contains a single, invalid service.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithInvalidServiceSingle() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_invalid_service_single.json");
+                "endpoints/bustracker/getBusTimes/bustimes_invalid_service_single.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -634,16 +552,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that misses out bus services which are invalid.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that misses out bus services which are invalid.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithInvalidServiceMultiple() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_invalid_service_multiple.json");
+                "endpoints/bustracker/getBusTimes/bustimes_invalid_service_multiple.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -664,17 +582,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that has a null stop name when the response does
-     * not contain a stop name.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that has a {@code null} stop name when the response does not contain a stop name.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithMissingStopName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_missing_stop_name.json");
+                "endpoints/bustracker/getBusTimes/bustimes_missing_stop_name.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -687,17 +604,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that has a null stop name when the response
-     * contains a null stop name.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that has a {@code null} stop name when the response contains a {@code null} stop name.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithNullStopName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_null_stop_name.json");
+                "endpoints/bustracker/getBusTimes/bustimes_null_stop_name.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -710,17 +626,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object that has an empty stop name when the response
-     * contains an emtpy stop name.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object that has an empty stop name when the response contains an emtpy stop name.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithEmptyStopName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_empty_stop_name.json");
+                "endpoints/bustracker/getBusTimes/bustimes_empty_stop_name.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -733,17 +648,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object when the bus stop disrupted flag is missing and it
-     * sets this flag to false in this case.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object when the bus stop disrupted flag is missing and it sets this flag to false in this
+     * case.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithMissingStopDisrupted() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_empty_stop_name.json");
+                "endpoints/bustracker/getBusTimes/bustimes_empty_stop_name.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -756,17 +671,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object when the bus stop disrupted flag is null and it
-     * sets this flag to false in this case.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object when the bus stop disrupted flag is {@code null} and it sets this flag to false in
+     * this case.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithNullStopDisrupted() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_null_stop_name.json");
+                "endpoints/bustracker/getBusTimes/bustimes_null_stop_name.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -779,17 +694,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object when the global disrupted flag is missing and it
-     * sets this flag to false in this case.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object when the global disrupted flag is missing and it sets this flag to false in this case.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesWithMissingGlobalDisrupted() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_missing_global_disrupted.json");
+                "endpoints/bustracker/getBusTimes/bustimes_missing_global_disrupted.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -799,17 +713,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object when the global disrupted flag is null and it sets
-     * this flag to false in this case.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object when the global disrupted flag is {@code null} and it sets this flag to {@code false}
+     * in this case.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesWithNullGlobalDisrupted() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_null_global_disrupted.json");
+                "endpoints/bustracker/getBusTimes/bustimes_null_global_disrupted.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -819,13 +733,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object with the correct services in the correct order
-     * when the response is valid.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object with the correct services in the correct order when the response is valid.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesValidWithSingleStop() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bustimes_valid.json");
@@ -851,24 +765,22 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertEquals(expectedServices.length, size);
         
         for (int i = 0; i < size; i++) {
-            assertEquals(expectedServices[i],
-                    busServices.get(i).getServiceName());
+            assertEquals(expectedServices[i], busServices.get(i).getServiceName());
         }
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object with the correct services in the correct order
-     * when the response is valid but with the services in the wrong order.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object with the correct services in the correct order when the response is valid but with
+     * the services in the wrong order.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesValidWithSingleStopUnsortedServices()
-            throws Exception {
+    @Test
+    public void testParseBusTimesValidWithSingleStopUnsortedServices() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_valid_unsorted_services.json");
+                "endpoints/bustracker/getBusTimes/bustimes_valid_unsorted_services.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -891,23 +803,22 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertEquals(expectedServices.length, size);
         
         for (int i = 0; i < size; i++) {
-            assertEquals(expectedServices[i],
-                    busServices.get(i).getServiceName());
+            assertEquals(expectedServices[i], busServices.get(i).getServiceName());
         }
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object with the correct services in the correct order
-     * when the response is valid and contains services from multiple bus stops.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object with the correct services in the correct order when the response is valid and
+     * contains services from multiple bus stops.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesValidWithMultipleStops() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_valid_multiple_stops.json");
+                "endpoints/bustracker/getBusTimes/bustimes_valid_multiple_stops.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -926,14 +837,12 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             "1", "4", "22", "30", "34", "44A", "N22", "N34", "N44"
         };
         
-        final List<EdinburghLiveBusService> busServices1 =
-                busStop1.getServices();
+        final List<EdinburghLiveBusService> busServices1 = busStop1.getServices();
         final int size1 = busServices1.size();
         assertEquals(expectedServices1.length, size1);
         
         for (int i = 0; i < size1; i++) {
-            assertEquals(expectedServices1[i],
-                    busServices1.get(i).getServiceName());
+            assertEquals(expectedServices1[i], busServices1.get(i).getServiceName());
         }
         
         // Tests for 36236464
@@ -947,14 +856,12 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             "23", "27", "35", "47"
         };
         
-        final List<EdinburghLiveBusService> busServices2 =
-                busStop2.getServices();
+        final List<EdinburghLiveBusService> busServices2 = busStop2.getServices();
         final int size2 = busServices2.size();
         assertEquals(expectedServices2.length, size2);
         
         for (int i = 0; i < size2; i++) {
-            assertEquals(expectedServices2[i],
-                    busServices2.get(i).getServiceName());
+            assertEquals(expectedServices2[i], busServices2.get(i).getServiceName());
         }
         
         // Tests for 36243526
@@ -968,31 +875,28 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             "22", "30", "N22"
         };
         
-        final List<EdinburghLiveBusService> busServices3 =
-                busStop3.getServices();
+        final List<EdinburghLiveBusService> busServices3 = busStop3.getServices();
         final int size3 = busServices3.size();
         assertEquals(expectedServices3.length, size3);
         
         for (int i = 0; i < size3; i++) {
-            assertEquals(expectedServices3[i],
-                    busServices3.get(i).getServiceName());
+            assertEquals(expectedServices3[i], busServices3.get(i).getServiceName());
         }
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)}
-     * returns a valid object with the correct services in the correct order
-     * when the response is valid and contains services from multiple bus stops
-     * but with the order mixed up.
+     * Test that {@link EdinburghParser#parseBusTimes(org.json.JSONObject)} returns a valid
+     * object with the correct services in the correct order when the response is valid and
+     * contains services from multiple bus stops but with the order mixed up.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesValidWithMultipleStopsUnsortedServices()
-            throws Exception {
+    @Test
+    public void testParseBusTimesValidWithMultipleStopsUnsortedServices() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bustimes_valid_multiple_stops_unsorted_services.json");
+                "endpoints/bustracker/getBusTimes/" +
+                        "bustimes_valid_multiple_stops_unsorted_services.json");
         final EdinburghLiveBusTimes busTimes = EdinburghParser
                 .parseBusTimes(reader.getJSONObject());
         
@@ -1011,14 +915,12 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             "1", "4", "22", "30", "34", "44A", "N22", "N34", "N44"
         };
         
-        final List<EdinburghLiveBusService> busServices1 =
-                busStop1.getServices();
+        final List<EdinburghLiveBusService> busServices1 = busStop1.getServices();
         final int size1 = busServices1.size();
         assertEquals(expectedServices1.length, size1);
         
         for (int i = 0; i < size1; i++) {
-            assertEquals(expectedServices1[i],
-                    busServices1.get(i).getServiceName());
+            assertEquals(expectedServices1[i], busServices1.get(i).getServiceName());
         }
         
         // Tests for 36236464
@@ -1032,14 +934,12 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             "23", "27", "35", "47"
         };
         
-        final List<EdinburghLiveBusService> busServices2 =
-                busStop2.getServices();
+        final List<EdinburghLiveBusService> busServices2 = busStop2.getServices();
         final int size2 = busServices2.size();
         assertEquals(expectedServices2.length, size2);
         
         for (int i = 0; i < size2; i++) {
-            assertEquals(expectedServices2[i],
-                    busServices2.get(i).getServiceName());
+            assertEquals(expectedServices2[i], busServices2.get(i).getServiceName());
         }
         
         // Tests for 36243526
@@ -1053,112 +953,95 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             "22", "30", "N22"
         };
         
-        final List<EdinburghLiveBusService> busServices3 =
-                busStop3.getServices();
+        final List<EdinburghLiveBusService> busServices3 = busStop3.getServices();
         final int size3 = busServices3.size();
         assertEquals(expectedServices3.length, size3);
         
         for (int i = 0; i < size3; i++) {
-            assertEquals(expectedServices3[i],
-                    busServices3.get(i).getServiceName());
+            assertEquals(expectedServices3[i], busServices3.get(i).getServiceName());
         }
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the {@link org.json.JSONObject} sent in is null.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns
+     * {@code null} when the {@link org.json.JSONObject} sent in is {@code null}.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
-    public void testParseBusTimesBusServiceWithNullJsonObject()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithNullJsonObject() throws Exception {
         assertNull(EdinburghParser.parseBusTimesBusService(null));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the {@link org.json.JSONObject} sent in is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns
+     * {@code null} when the {@link org.json.JSONObject} sent in is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithEmptyJsonObject()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithEmptyJsonObject() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/generic/empty_object.json");
-        assertNull(EdinburghParser.parseBusTimesBusService(
-                reader.getJSONObject()));
+        assertNull(EdinburghParser.parseBusTimesBusService(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the service name is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns
+     * {@code null} when the service name is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithMissingServiceName()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithMissingServiceName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_missing_service_name.json");
-        assertNull(EdinburghParser.parseBusTimesBusService(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getBusTimes/service_missing_service_name.json");
+        assertNull(EdinburghParser.parseBusTimesBusService(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the service name is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns
+     * {@code null} when the service name is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithEmptyServiceName()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithEmptyServiceName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_empty_service_name.json");
-        assertNull(EdinburghParser.parseBusTimesBusService(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getBusTimes/service_empty_service_name.json");
+        assertNull(EdinburghParser.parseBusTimesBusService(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the service name is null.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns
+     * {@code null} when the service name is {@code null}.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
-    public void testParseBusTimesBusServiceWithNullServiceName()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithNullServiceName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_null_service_name.json");
-        assertNull(EdinburghParser.parseBusTimesBusService(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getBusTimes/service_null_service_name.json");
+        assertNull(EdinburghParser.parseBusTimesBusService(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object and the service name is "TRAM" when the service
-     * name is set to "50". This is because the tram is service 50 in the bus
-     * tracker system.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object and the service name is "TRAM" when the service name is set to "50". This is
+     * because the tram is service 50 in the bus tracker system.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithTramNameConversion50()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithTramNameConversion50() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_tram_50.json");
+                "endpoints/bustracker/getBusTimes/service_tram_50.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1167,20 +1050,18 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object and the service name is "TRAM" when the service
-     * name is set to "T50". This is because the tram is service 50 in the bus
-     * tracker system, although it has been seen set to T50 too.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object and the service name is "TRAM" when the service name is set to "T50". This is
+     * because the tram is service 50 in the bus tracker system, although it has been seen set to
+     * T50 too.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithTramNameConversionT50()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithTramNameConversionT50() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_tram_T50.json");
+                "endpoints/bustracker/getBusTimes/service_tram_T50.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1189,18 +1070,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the operator field is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the operator field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithMissingOperator()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithMissingOperator() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_missing_operator.json");
+                "endpoints/bustracker/getBusTimes/service_missing_operator.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1210,18 +1089,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the operator field is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the operator field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithEmptyOperator()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithEmptyOperator() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_empty_operator.json");
+                "endpoints/bustracker/getBusTimes/service_empty_operator.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1231,18 +1108,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the operator field is null.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the operator field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithNullOperator()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithNullOperator() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_null_operator.json");
+                "endpoints/bustracker/getBusTimes/service_null_operator.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1252,18 +1127,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the route field is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the route field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithMissingRoute()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithMissingRoute() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_missing_route.json");
+                "endpoints/bustracker/getBusTimes/service_missing_route.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1273,18 +1146,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the route field is empty.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the route field is empty.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithEmptyRoute()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithEmptyRoute() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_empty_route.json");
+                "endpoints/bustracker/getBusTimes/service_empty_route.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1294,18 +1165,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the route field is null.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the route field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithNullRoute()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithNullRoute() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_null_route.json");
+                "endpoints/bustracker/getBusTimes/service_null_route.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1315,18 +1184,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the disruption field is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the disruption field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithMissingDisruption()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithMissingDisruption() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_missing_disruption.json");
+                "endpoints/bustracker/getBusTimes/service_missing_disruption.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1335,18 +1202,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the disruption field is null.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the disruption field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithNullDisruption()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithNullDisruption() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_null_disruption.json");
+                "endpoints/bustracker/getBusTimes/service_null_disruption.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1355,18 +1220,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the diversion field is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the diversion field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithMissingDiversion()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithMissingDiversion() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_missing_diversion.json");
+                "endpoints/bustracker/getBusTimes/service_missing_diversion.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1375,18 +1238,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when the diversion field is null.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when the diversion field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithNullDiversion()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithNullDiversion() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_null_diversion.json");
+                "endpoints/bustracker/getBusTimes/service_null_diversion.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1395,87 +1256,73 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the bus array is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns
+     * {@code null} when the bus array is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithMissingBusArray()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithMissingBusArray() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_missing_bus_array.json");
-        assertNull(EdinburghParser.parseBusTimesBusService(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getBusTimes/service_missing_bus_array.json");
+        assertNull(EdinburghParser.parseBusTimesBusService(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the bus array is null.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
+     * returns {@code null} when the bus array is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithNullBusArray()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithNullBusArray() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_null_bus_array.json");
-        assertNull(EdinburghParser.parseBusTimesBusService(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getBusTimes/service_null_bus_array.json");
+        assertNull(EdinburghParser.parseBusTimesBusService(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the bus array is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns
+     * {@code null} when the bus array is empty.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
-    public void testParseBusTimesBusServiceWithEmptyBusArray()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithEmptyBusArray() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_empty_bus_array.json");
-        assertNull(EdinburghParser.parseBusTimesBusService(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getBusTimes/service_empty_bus_array.json");
+        assertNull(EdinburghParser.parseBusTimesBusService(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns null when the bus array contains a single invalid bus.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns
+     * {@code null} when the bus array contains a single invalid bus.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithInvalidBusSingle()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithInvalidBusSingle() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_invalid_bus_single.json");
-        assertNull(EdinburghParser.parseBusTimesBusService(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getBusTimes/service_invalid_bus_single.json");
+        assertNull(EdinburghParser.parseBusTimesBusService(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid object when a single bus could not be parsed in the bus
-     * array, but there were other buses that could be parsed in the array.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid object when a single bus could not be parsed in the bus array, but there were other
+     * buses that could be parsed in the array.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
-    public void testParseBusTimesBusServiceWithInvalidBusMultiple()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithInvalidBusMultiple() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_invalid_bus_multiple.json");
+                "endpoints/bustracker/getBusTimes/service_invalid_bus_multiple.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1491,14 +1338,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid service when there is a single bus and the fields are as
-     * expected.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid service when there is a single bus and the fields are as expected.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesBusServiceWithSingleBus() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/service_single_bus.json");
@@ -1518,19 +1364,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid service with the buses in the correct order when there
-     * are multiple buses in an incorrect order.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid service with the buses in the correct order when there are multiple buses in an
+     * incorrect order.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseBusTimesBusServiceWithMultipleBusUnsorted()
-            throws Exception {
+    @Test
+    public void testParseBusTimesBusServiceWithMultipleBusUnsorted() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "service_multiple_bus_unsorted.json");
+                "endpoints/bustracker/getBusTimes/service_multiple_bus_unsorted.json");
         final EdinburghLiveBusService service = EdinburghParser
                 .parseBusTimesBusService(reader.getJSONObject());
         
@@ -1555,13 +1399,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)}
-     * returns a valid service when the service object is fully compliant.
+     * Test that {@link EdinburghParser#parseBusTimesBusService(org.json.JSONObject)} returns a
+     * valid service when the service object is fully compliant.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusServiceValid() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/service_valid.json");
@@ -1586,23 +1430,25 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the {@link org.json.JSONObject} sent in is null.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the {@link org.json.JSONObject} sent in is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithNullJsonObject() throws Exception {
         assertNull(EdinburghParser.parseBusTimesBus(null));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the {@link org.json.JSONObject} sent in is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the {@link org.json.JSONObject} sent in is empty.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithEmptyJsonObject() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/generic/empty_object.json");
@@ -1610,26 +1456,27 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the destination is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the destination is missing.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithMissingDestination() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bus_missing_destination.json");
+                "endpoints/bustracker/getBusTimes/bus_missing_destination.json");
         assertNull(EdinburghParser.parseBusTimesBus(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the destination is null.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the destination is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithNullDestination() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_null_destination.json");
@@ -1637,12 +1484,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the destination is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the destination is empty.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithEmptyDestination() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_empty_destination.json");
@@ -1650,12 +1498,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the minutes field is missing.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the minutes field is missing.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithMissingMinutes() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_missing_minutes.json");
@@ -1663,12 +1512,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the minutes field is null.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the minutes field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithNullMinutes() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_null_minutes.json");
@@ -1676,26 +1526,27 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the reliability field is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the reliability field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithMissingReliability() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getBusTimes/"
-                + "bus_missing_reliability.json");
+                "endpoints/bustracker/getBusTimes/bus_missing_reliability.json");
         assertNull(EdinburghParser.parseBusTimesBus(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the reliability field is null.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the reliability field is {@code null}.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithNullReliability() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_null_reliability.json");
@@ -1703,12 +1554,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the reliability field is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the reliability field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithEmptyReliability() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_empty_reliability.json");
@@ -1716,12 +1568,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the type field is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the type field is missing.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithMissingType() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_missing_type.json");
@@ -1729,12 +1582,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the type field is null.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the type field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithNullType() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_null_type.json");
@@ -1742,12 +1596,13 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns null when the type field is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns
+     * {@code null} when the type field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithEmptyType() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_empty_type.json");
@@ -1755,17 +1610,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns a valid object when the terminus field is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns a valid
+     * object when the terminus field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithMissingTerminus() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_missing_terminus.json");
-        final EdinburghLiveBus bus = EdinburghParser
-                .parseBusTimesBus(reader.getJSONObject());
+        final EdinburghLiveBus bus = EdinburghParser.parseBusTimesBus(reader.getJSONObject());
         
         assertNotNull(bus);
         assertNull(bus.getTerminus());
@@ -1773,17 +1628,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns a valid object when the terminus field is null.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns a valid
+     * object when the terminus field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithNullTerminus() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_null_terminus.json");
-        final EdinburghLiveBus bus = EdinburghParser
-                .parseBusTimesBus(reader.getJSONObject());
+        final EdinburghLiveBus bus = EdinburghParser.parseBusTimesBus(reader.getJSONObject());
         
         assertNotNull(bus);
         assertNull(bus.getTerminus());
@@ -1791,17 +1646,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns a valid object when the terminus field is empty.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns a valid
+     * object when the terminus field is empty.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithEmptyTerminus() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_empty_terminus.json");
-        final EdinburghLiveBus bus = EdinburghParser
-                .parseBusTimesBus(reader.getJSONObject());
+        final EdinburghLiveBus bus = EdinburghParser.parseBusTimesBus(reader.getJSONObject());
         
         assertNotNull(bus);
         assertEquals("", bus.getTerminus());
@@ -1809,17 +1664,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns a valid object when the journeyId field is missing.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns a valid
+     * object when the journeyId field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithMissingJourneyId() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_missing_journey_id.json");
-        final EdinburghLiveBus bus = EdinburghParser
-                .parseBusTimesBus(reader.getJSONObject());
+        final EdinburghLiveBus bus = EdinburghParser.parseBusTimesBus(reader.getJSONObject());
         
         assertNotNull(bus);
         assertNull(bus.getJourneyId());
@@ -1827,17 +1682,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns a valid object when the journeyId field is null.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns a valid
+     * object when the journeyId field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithNullJourneyId() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_null_journey_id.json");
-        final EdinburghLiveBus bus = EdinburghParser
-                .parseBusTimesBus(reader.getJSONObject());
+        final EdinburghLiveBus bus = EdinburghParser.parseBusTimesBus(reader.getJSONObject());
         
         assertNotNull(bus);
         assertNull(bus.getJourneyId());
@@ -1845,17 +1700,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns a valid object when the journeyId field is empty.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns a valid
+     * object when the journeyId field is empty.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusWithEmptyJourneyId() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_empty_journey_id.json");
-        final EdinburghLiveBus bus = EdinburghParser
-                .parseBusTimesBus(reader.getJSONObject());
+        final EdinburghLiveBus bus = EdinburghParser.parseBusTimesBus(reader.getJSONObject());
         
         assertNotNull(bus);
         assertEquals("", bus.getJourneyId());
@@ -1863,18 +1718,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)}
-     * returns a valid object with its fields correctly populated when the bus
-     * object in JSON is valid.
+     * Test that {@link EdinburghParser#parseBusTimesBus(org.json.JSONObject)} returns a valid
+     * object with its fields correctly populated when the bus object in JSON is valid.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseBusTimesBusValid() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/getBusTimes/bus_valid.json");
-        final EdinburghLiveBus bus = EdinburghParser
-                .parseBusTimesBus(reader.getJSONObject());
+        final EdinburghLiveBus bus = EdinburghParser.parseBusTimesBus(reader.getJSONObject());
         
         assertEquals("Clermiston", bus.getDestination());
         assertEquals(47, bus.getDepartureMinutes());
@@ -1888,52 +1742,41 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)}
-     * correctly throws a {@link LiveTimesException} when the
-     * {@link org.json.JSONObject} is set as null.
+     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)} correctly throws
+     * a {@link LiveTimesException} when the {@link org.json.JSONObject} is set as {@code null}.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseJourneyTimesWithNullJsonObject() {
-        try {
-            EdinburghParser.parseJourneyTimes(null);
-        } catch (LiveTimesException e) {
-            return;
-        }
-        
-        fail("The JSONObject is set as null, so a LiveTimesException should be "
-                + "thrown.");
+    @Test(expected = LiveTimesException.class)
+    public void testParseJourneyTimesWithNullJsonObject() throws Exception {
+        EdinburghParser.parseJourneyTimes(null);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)}
-     * correctly throws an {@link AuthenticationException} when the data is set
-     * as an error for an invalid API key.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)} correctly throws
+     * an {@link AuthenticationException} when the data is set as an error for an invalid API key.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test(expected = AuthenticationException.class)
     public void testParseJourneyTimesWithError() throws Exception {
-        try {
-            final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/generic/error_invalid_app_key.json");
-            EdinburghParser.parseJourneyTimes(reader.getJSONObject());
-        } catch (AuthenticationException e) {
-            return;
-        }
-        
-        fail("The data is set as an error response for an invalid API key. An "
-                + "AuthenticationException should be thrown.");
+        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
+            "endpoints/bustracker/generic/error_invalid_app_key.json");
+        EdinburghParser.parseJourneyTimes(reader.getJSONObject());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)}
-     * correctly throws a {@link LiveTimesException} containing a
-     * {@link JSONException} when the journey times are missing.
+     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)} correctly throws
+     * a {@link LiveTimesException} containing a {@link JSONException} when the journey times are
+     * missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseJourneyTimesWithMissingJourneyTimes()
-            throws Exception {
+    @Test
+    public void testParseJourneyTimesWithMissingJourneyTimes() throws Exception {
         try {
             final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/generic/empty_object.json");
@@ -1944,23 +1787,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The data is set as an empty JSON object, so a LiveTimesException "
-                + "should be thrown with a JSONException set as its cause.");
+        fail("The data is set as an empty JSON object, so a LiveTimesException should be thrown " +
+                "with a JSONException set as its cause.");
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)}
-     * correctly throws a {@link LiveTimesException} containing a
-     * {@link JSONException} when the journey times is set to null.
+     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)} correctly throws
+     * a {@link LiveTimesException} containing a {@link JSONException} when the journey times is
+     * set to {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyTimesWithNullJourneyTimes() throws Exception {
         try {
             final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                    + "journeytimes_null_journey_times.json");
+                "endpoints/bustracker/getJourneyTimes/journeytimes_null_journey_times.json");
             EdinburghParser.parseJourneyTimes(reader.getJSONObject());
         } catch (LiveTimesException e) {
             if (e.getCause() instanceof JSONException) {
@@ -1968,67 +1811,52 @@ public class EdinburghParserTests extends InstrumentationTestCase {
             }
         }
         
-        fail("The journey times is set as null, so a LiveTimesException "
-                + "containing a JSONException as the cause should be thrown.");
+        fail("The journey times is set as null, so a LiveTimesException containing a " +
+                "JSONException as the cause should be thrown.");
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)}
-     * correctly throws a {@link LiveTimesException} when the journey times is
-     * set as an empty array.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)} correctly throws
+     * a {@link LiveTimesException} when the journey times is set as an empty array.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test(expected = LiveTimesException.class)
     public void testParseJourneyTimesWithEmptyJourneyTimes() throws Exception {
-        try {
-            final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                    + "journeytimes_empty_journey_times.json");
-            EdinburghParser.parseJourneyTimes(reader.getJSONObject());
-        } catch (LiveTimesException e) {
-            return;
-        }
-        
-        fail("The journey times is set as an empty array, so a "
-                + "LiveTimesException should be thrown.");
+        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
+            "endpoints/bustracker/getJourneyTimes/"
+                + "journeytimes_empty_journey_times.json");
+        EdinburghParser.parseJourneyTimes(reader.getJSONObject());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)}
-     * correctly throws a {@link LiveTimesException} when the journey could not
-     * be parsed.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)} correctly throws
+     * a {@link LiveTimesException} when the journey could not be parsed.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test(expected = LiveTimesException.class)
     public void testParseJourneyTimesWithInvalidJourney() throws Exception {
-        try {
-            final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                    + "journeytimes_invalid_journey.json");
-            EdinburghParser.parseJourneyTimes(reader.getJSONObject());
-        } catch (LiveTimesException e) {
-            return;
-        }
-        
-        fail("The journey times has an invalid journey, so LiveTimesException "
-                + "should be thrown.");
+        final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
+            "endpoints/bustracker/getJourneyTimes/"
+                + "journeytimes_invalid_journey.json");
+        EdinburghParser.parseJourneyTimes(reader.getJSONObject());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)}
-     * returns a valid object when the journey response is valid.
+     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)} returns a valid
+     * object when the journey response is valid.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyTimesWithValidJourney() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                    + "journeytimes_valid.json");
-        final EdinburghJourney journey = EdinburghParser
-                .parseJourneyTimes(reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journeytimes_valid.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourneyTimes(reader.getJSONObject());
         
         assertEquals("3322", journey.getJourneyId());
         assertEquals("LB", journey.getOperator());
@@ -2040,26 +1868,24 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)}
-     * only selects the first journey in the array, as the API should only
-     * return a single journey. There is currently no multi-journey support.
-     * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * Test that {@link EdinburghParser#parseJourneyTimes(org.json.JSONObject)} only selects the
+     * first journey in the array, as the API should only return a single journey. There is
+     * currently no multi-journey support.
+     *
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyTimesWithMultipleJournies() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                    + "journeytimes_valid_multiple.json");
-        final EdinburghJourney journey = EdinburghParser
-                .parseJourneyTimes(reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journeytimes_valid_multiple.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourneyTimes(reader.getJSONObject());
         
         assertEquals("3322", journey.getJourneyId());
         assertEquals("LB", journey.getOperator());
@@ -2071,27 +1897,28 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the {@link org.json.JSONObject} sent in is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the {@link org.json.JSONObject} sent in is {@code null}.
      */
+    @Test
     public void testParseJourneyWithNullJsonObject() {
         assertNull(EdinburghParser.parseJourney(null));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the {@link org.json.JSONObject} sent in is empty.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the {@link org.json.JSONObject} sent in is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithEmptyJsonObject() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/generic/empty_object.json");
@@ -2099,144 +1926,143 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the journeyId field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the journeyId field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingJourneyId() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_journey_id.json");
+                "endpoints/bustracker/getJourneyTimes/journey_missing_journey_id.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the journeyId field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the journeyId field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullJourneyId() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_journey_id.json");
+                "endpoints/bustracker/getJourneyTimes/journey_null_journey_id.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the journeyId field is empty.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the journeyId field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithEmptyJourneyId() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_empty_journey_id.json");
+                "endpoints/bustracker/getJourneyTimes/journey_empty_journey_id.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the service name field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the service name field is missing.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingServiceName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_service_name.json");
+                "endpoints/bustracker/getJourneyTimes/journey_missing_service_name.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the service name field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the service name field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullServiceName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_service_name.json");
+                "endpoints/bustracker/getJourneyTimes/journey_null_service_name.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the service name field is empty.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the service name field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithEmptyServiceName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_empty_service_name.json");
+                "endpoints/bustracker/getJourneyTimes/journey_empty_service_name.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the terminus field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the terminus field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingTerminus() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_terminus.json");
+                "endpoints/bustracker/getJourneyTimes/journey_missing_terminus.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the terminus field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the terminus field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullTerminus() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_terminus.json");
+                "endpoints/bustracker/getJourneyTimes/journey_null_terminus.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the terminus field is empty.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the terminus field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithEmptyTerminus() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_empty_terminus.json");
+                "endpoints/bustracker/getJourneyTimes/journey_empty_terminus.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the operator field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the operator field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingOperator() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_operator.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_missing_operator.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2249,25 +2075,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the operator field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the operator field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullOperator() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_operator.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_null_operator.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2280,25 +2104,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the operator field is empty.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the operator field is empty.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseJourneyWithEmptyOperator() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_empty_operator.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_empty_operator.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2311,25 +2133,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the route field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the route field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingRoute() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_route.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_missing_route.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2342,25 +2162,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the route field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the route field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullRoute() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_route.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_null_route.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2373,25 +2191,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the route field is empty.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the route field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithEmptyRoute() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_empty_route.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_empty_route.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2404,25 +2220,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the destination field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the destination field is missing.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingDestination() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_destination.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_missing_destination.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2435,25 +2249,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the destination field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the destination field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullDestination() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_destination.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_null_destination.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2466,26 +2278,24 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the destination field is empty.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the destination field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithEmptyDestination() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_empty_destination.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
-        
+                "endpoints/bustracker/getJourneyTimes/journey_empty_destination.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
+
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
         assertEquals("22", journey.getServiceName());
@@ -2497,25 +2307,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the global disruption field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the global disruption field is missing.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingGlobalDisruption() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_global_disruption.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_missing_global_disruption.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2528,25 +2336,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the global disruption field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the global disruption field is {@code null}.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullGlobalDisruption() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_global_disruption.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_null_global_disruption.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2559,26 +2365,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the service disruption field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the service disruption field is missing.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
-    public void testParseJourneyWithMissingServiceDisruption()
-            throws Exception {
+    @Test
+    public void testParseJourneyWithMissingServiceDisruption() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_service_disruption.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_missing_service_disruption.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2591,25 +2394,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the service disruption field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the service disruption field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullServiceDisruption() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_service_disruption.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_null_service_disruption.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2622,25 +2423,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the service diversion field is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the service diversion field is missing.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingServiceDiversion() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_service_diversion.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_missing_service_diversion.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2653,25 +2452,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object when the service diversion field is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * when the service diversion field is {@code null}.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullServiceDiversion() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_service_diversion.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_null_service_diversion.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2684,53 +2481,51 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the departures array is missing.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the departures array is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithMissingDepartures() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_missing_departures.json");
+                "endpoints/bustracker/getJourneyTimes/journey_missing_departures.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the departures array is null.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the departures array is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithNullDepartures() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_null_departures.json");
+                "endpoints/bustracker/getJourneyTimes/journey_null_departures.json");
         assertNull(EdinburghParser.parseJourney(reader.getJSONObject()));
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns null when the departures array is empty.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns {@code null}
+     * when the departures array is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithEmptyDepartures() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_empty_departures.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_empty_departures.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2743,26 +2538,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertTrue(departures.isEmpty());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object but with 0 departures when there are no valid
-     * departure objects in the list.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * but with 0 departures when there are no valid departure objects in the list.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithAllDeparturesInvalid() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_all_invalid_departures.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_all_invalid_departures.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2775,26 +2567,23 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertTrue(departures.isEmpty());
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object with a list of valid departures, with the invalid
-     * departures discarded.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * with a list of valid departures, with the invalid departures discarded.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithSomeDeparturesInvalid() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_some_invalid_departures.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_some_invalid_departures.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2807,15 +2596,14 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         
         final int size = departures.size();
         assertEquals(3, size);
         
         final String[] expected = new String[] {
-            "36237983", "36232545", "36236754"
+                "36237983", "36232545", "36236754"
         };
         
         for (int i = 0; i < size; i++) {
@@ -2824,19 +2612,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object and all the departures are in the correct order
-     * when the departures list is unsorted.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * and all the departures are in the correct order when the departures list is unsorted.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyWithUnsortedDepartures() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_unsorted_services.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_unsorted_services.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2849,16 +2635,15 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         
         final int size = departures.size();
         assertEquals(9, size);
         
         final String[] expected = new String[] {
-            "36237983", "36232545", "36232547", "36236754", "36253269",
-            "36243498", "36248598", "36245456", "36236542"
+                "36237983", "36232545", "36232547", "36236754", "36253269", "36243498", "36248598",
+                "36245456", "36236542"
         };
         
         for (int i = 0; i < size; i++) {
@@ -2867,18 +2652,17 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)}
-     * returns a valid object with the correct number of departures.
+     * Test that {@link EdinburghParser#parseJourney(org.json.JSONObject)} returns a valid object
+     * with the correct number of departures.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test(expected = UnsupportedOperationException.class)
     public void testParseJourneyValid() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "journey_valid.json");
-        final EdinburghJourney journey = EdinburghParser.parseJourney(
-                reader.getJSONObject());
+                "endpoints/bustracker/getJourneyTimes/journey_valid.json");
+        final EdinburghJourney journey = EdinburghParser.parseJourney(reader.getJSONObject());
         
         assertNotNull(journey);
         assertEquals("3084", journey.getJourneyId());
@@ -2891,107 +2675,90 @@ public class EdinburghParserTests extends InstrumentationTestCase {
         assertFalse(journey.hasServiceDisruption());
         assertFalse(journey.hasServiceDiversion());
         
-        final List<EdinburghJourneyDeparture> departures = journey
-                .getDepartures();
+        final List<EdinburghJourneyDeparture> departures = journey.getDepartures();
         assertNotNull(departures);
         assertEquals(34, departures.size());
-        
-        try {
-            departures.remove(0);
-        } catch (UnsupportedOperationException e) {
-            return;
-        }
-        
-        fail("The departures list should not be modifiable.");
+
+        departures.remove(0);
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the {@link org.json.JSONObject} sent in is null.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the {@link org.json.JSONObject} sent in is {@code null}.
      */
+    @Test
     public void testParseJourneyDepartureWithNullJsonObject() {
         assertNull(EdinburghParser.parseJourneyDeparture(null));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the {@link org.json.JSONObject} sent in is empty.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the {@link org.json.JSONObject} sent in is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithEmptyJsonObject()
             throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/generic/empty_object.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the stopCode field is missing.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the {@code stopCode} field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseJourneyDepartureWithMissingStopCode()
-            throws Exception {
+    @Test
+    public void testParseJourneyDepartureWithMissingStopCode() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_missing_stopcode.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_missing_stopcode.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the stopCode field is null.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the {@code stopCode} field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithNullStopCode() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_null_stopcode.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_null_stopcode.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the stopCode field is empty.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the {@code stopCode} field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them. 
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithEmptyStopCode() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_empty_stopcode.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_empty_stopcode.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns a valid object when the stop name field is missing.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns a
+     * valid object when the stop name field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseJourneyDepartureWithMissingStopName()
-            throws Exception {
+    @Test
+    public void testParseJourneyDepartureWithMissingStopName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_missing_stop_name.json");
+                "endpoints/bustracker/getJourneyTimes/departure_missing_stop_name.json");
         final EdinburghJourneyDeparture departure =
                 EdinburghParser.parseJourneyDeparture(reader.getJSONObject());
         
@@ -3008,17 +2775,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns a valid object when the stop name field is null.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns a
+     * valid object when the stop name field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithNullStopName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_null_stop_name.json");
+                "endpoints/bustracker/getJourneyTimes/departure_null_stop_name.json");
         final EdinburghJourneyDeparture departure =
                 EdinburghParser.parseJourneyDeparture(reader.getJSONObject());
         
@@ -3035,17 +2801,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns a valid object when the stop name field is empty.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns a
+     * valid object when the stop name field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithEmptyStopName() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_empty_stop_name.json");
+                "endpoints/bustracker/getJourneyTimes/departure_empty_stop_name.json");
         final EdinburghJourneyDeparture departure =
                 EdinburghParser.parseJourneyDeparture(reader.getJSONObject());
         
@@ -3062,50 +2827,44 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the minutes field is missing.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the minutes field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithMissingMinutes() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_missing_minutes.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_missing_minutes.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the minutes field is null.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the minutes field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithNullMinutes() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_null_minutes.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_null_minutes.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns a valid object when the disrupted field is missing.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns a
+     * valid object when the disrupted field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseJourneyDepartureWithMissingDisrupted()
-            throws Exception {
+    @Test
+    public void testParseJourneyDepartureWithMissingDisrupted() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_missing_disrupted.json");
+                "endpoints/bustracker/getJourneyTimes/departure_missing_disrupted.json");
         final EdinburghJourneyDeparture departure =
                 EdinburghParser.parseJourneyDeparture(reader.getJSONObject());
         
@@ -3122,17 +2881,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns a valid object when the disrupted field is null.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns a
+     * valid object when the disrupted field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithNullDisrupted() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_null_disrupted.json");
+                "endpoints/bustracker/getJourneyTimes/departure_null_disrupted.json");
         final EdinburghJourneyDeparture departure =
                 EdinburghParser.parseJourneyDeparture(reader.getJSONObject());
         
@@ -3149,117 +2907,100 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the reliability field is missing.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the reliability field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseJourneyDepartureWithMissingReliability()
-            throws Exception {
+    @Test
+    public void testParseJourneyDepartureWithMissingReliability() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_missing_reliability.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_missing_reliability.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the reliability field is null.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the reliability field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
-    public void testParseJourneyDepartureWithNullReliability()
-            throws Exception {
+    @Test
+    public void testParseJourneyDepartureWithNullReliability() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_null_reliability.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_null_reliability.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the reliability field is empty.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the reliability field is empty.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
-    public void testParseJourneyDepartureWithEmptyReliability()
-            throws Exception {
+    @Test
+    public void testParseJourneyDepartureWithEmptyReliability() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_empty_reliability.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_empty_reliability.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the type field is missing.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the type field is missing.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithMissingType() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_missing_type.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_missing_type.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the type field is null.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the type field is {@code null}.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithNullType() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_null_type.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_null_type.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns null when the type field is empty.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns
+     * {@code null} when the type field is empty.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureWithEmptyType() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_empty_type.json");
-        assertNull(EdinburghParser.parseJourneyDeparture(
-                reader.getJSONObject()));
+                "endpoints/bustracker/getJourneyTimes/departure_empty_type.json");
+        assertNull(EdinburghParser.parseJourneyDeparture(reader.getJSONObject()));
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns a valid object when the data is valid, for a departure in the
-     * future.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns a
+     * valid object when the data is valid, for a departure in the future.
      * 
      * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * so if there are, let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureForFutureDeparture() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_valid_future_departure.json");
+                "endpoints/bustracker/getJourneyTimes/departure_valid_future_departure.json");
         final EdinburghJourneyDeparture departure =
                 EdinburghParser.parseJourneyDeparture(reader.getJSONObject());
         
@@ -3276,18 +3017,16 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that
-     * {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)}
-     * returns a valid object when the data is valid, for a departure in the
-     * past.
+     * Test that {@link EdinburghParser#parseJourneyDeparture(org.json.JSONObject)} returns a
+     * valid object when the data is valid, for a departure in the past.
      * 
-     * @throws Exception There are no other exceptions expected from this test,
-     * so if there are, let the TestCase fail the test when it intercepts them.
+     * @throws Exception There are no other exceptions expected from this test, so if there are,
+     * let the test fail.
      */
+    @Test
     public void testParseJourneyDepartureForPastDeparture() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
-                "endpoints/bustracker/getJourneyTimes/"
-                + "departure_valid_past_departure.json");
+                "endpoints/bustracker/getJourneyTimes/departure_valid_past_departure.json");
         final EdinburghJourneyDeparture departure =
                 EdinburghParser.parseJourneyDeparture(reader.getJSONObject());
         
@@ -3304,126 +3043,121 @@ public class EdinburghParserTests extends InstrumentationTestCase {
     }
     
     /**
-     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns
-     * a {@link LiveTimesException} when the JSON object is set to null.
+     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns a
+     * {@link LiveTimesException} when the JSON object is set to {@code null}.
      */
+    @Test
     public void testParseErrorWithNullJsonObject() {
         final LiveTimesException exception = EdinburghParser.parseError(null);
         assertNotNull(exception);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns
-     * a {@link LiveTimesException} when the JSON object is set as an empty
-     * object.
+     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns a
+     * {@link LiveTimesException} when the JSON object is set as an empty object.
      * 
      * @throws Exception When there was a problem reading the JSON file from
      * assets. This is not expected.
      */
+    @Test
     public void testParseErrorWithEmptyJsonObject() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/generic/empty_object.json");
-        final LiveTimesException exception = EdinburghParser
-                .parseError(reader.getJSONObject());
+        final LiveTimesException exception = EdinburghParser.parseError(reader.getJSONObject());
         assertNotNull(exception);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns
-     * a {@link LiveTimesException} when the JSON object is set as an empty
-     * object.
+     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns a
+     * {@link LiveTimesException} when the JSON object is set as an empty object.
      * 
-     * @throws Exception When there was a problem reading the JSON file from
-     * assets. This is not expected.
+     * @throws Exception When there was a problem reading the JSON file from assets. This is not
+     * expected.
      */
+    @Test
     public void testParseErrorWithUnknownError() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/generic/error_not_known.json");
-        final LiveTimesException exception = EdinburghParser
-                .parseError(reader.getJSONObject());
+        final LiveTimesException exception = EdinburghParser.parseError(reader.getJSONObject());
         assertNotNull(exception);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns
-     * a {@link AuthenticationException} when the error denotes an invalid API
-     * key.
+     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns a
+     * {@link AuthenticationException} when the error denotes an invalid API key.
      * 
-     * @throws Exception When there was a problem reading the JSON file from
-     * assets. This is not expected.
+     * @throws Exception When there was a problem reading the JSON file from assets. This is not
+     * expected.
      */
+    @Test
     public void testParseErrorAppKey() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/generic/error_invalid_app_key.json");
-        final LiveTimesException exception = EdinburghParser
-                .parseError(reader.getJSONObject());
+        final LiveTimesException exception = EdinburghParser.parseError(reader.getJSONObject());
         assertNotNull(exception);
         assertTrue(exception instanceof AuthenticationException);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns
-     * a {@link ServerErrorException} when the error denotes an invalid
-     * parameter.
+     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns a
+     * {@link ServerErrorException} when the error denotes an invalid parameter.
      * 
-     * @throws Exception When there was a problem reading the JSON file from
-     * assets. This is not expected.
+     * @throws Exception When there was a problem reading the JSON file from assets. This is not
+     * expected.
      */
+    @Test
     public void testParseErrorInvalidParameter() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/generic/error_invalid_parameter.json");
-        final LiveTimesException exception = EdinburghParser
-                .parseError(reader.getJSONObject());
+        final LiveTimesException exception = EdinburghParser.parseError(reader.getJSONObject());
         assertNotNull(exception);
         assertTrue(exception instanceof ServerErrorException);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns
-     * a {@link ServerErrorException} when the error denotes a processing error.
+     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns a
+     * {@link ServerErrorException} when the error denotes a processing error.
      * 
-     * @throws Exception When there was a problem reading the JSON file from
-     * assets. This is not expected.
+     * @throws Exception When there was a problem reading the JSON file from assets. This is not
+     * expected.
      */
+    @Test
     public void testParseErrorProcessingError() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/generic/error_processing_error.json");
-        final LiveTimesException exception = EdinburghParser
-                .parseError(reader.getJSONObject());
+        final LiveTimesException exception = EdinburghParser.parseError(reader.getJSONObject());
         assertNotNull(exception);
         assertTrue(exception instanceof ServerErrorException);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns
-     * a {@link MaintenanceException} when the error denotes that the system is
-     * down for maintenance.
+     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns a
+     * {@link MaintenanceException} when the error denotes that the system is down for maintenance.
      * 
-     * @throws Exception When there was a problem reading the JSON file from
-     * assets. This is not expected.
+     * @throws Exception When there was a problem reading the JSON file from assets. This is not
+     * expected.
      */
+    @Test
     public void testParseErrorSystemMaintenance() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/generic/error_system_maintenance.json");
-        final LiveTimesException exception = EdinburghParser
-                .parseError(reader.getJSONObject());
+        final LiveTimesException exception = EdinburghParser.parseError(reader.getJSONObject());
         assertNotNull(exception);
         assertTrue(exception instanceof MaintenanceException);
     }
     
     /**
-     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns
-     * a {@link SystemOverloadedException} when the error denotes the system is
-     * overloaded.
+     * Test that {@link EdinburghParser#parseError(org.json.JSONObject)} returns a
+     * {@link SystemOverloadedException} when the error denotes the system is overloaded.
      * 
-     * @throws Exception When there was a problem reading the JSON file from
-     * assets. This is not expected.
+     * @throws Exception When there was a problem reading the JSON file from assets. This is not
+     * expected.
      */
+    @Test
     public void testParseErrorSystemOverloaded() throws Exception {
         final JSONFetcherStreamReader reader = getReaderAfterFetchingData(
                 "endpoints/bustracker/generic/error_system_overloaded.json");
-        final LiveTimesException exception = EdinburghParser
-                .parseError(reader.getJSONObject());
+        final LiveTimesException exception = EdinburghParser.parseError(reader.getJSONObject());
         assertNotNull(exception);
         assertTrue(exception instanceof SystemOverloadedException);
     }
@@ -3435,11 +3169,11 @@ public class EdinburghParserTests extends InstrumentationTestCase {
      * @return The data.
      * @throws IOException When there was a problem reading the data.
      */
-    private JSONFetcherStreamReader getReaderAfterFetchingData(
-            final String filePath) throws IOException{
+    @NonNull
+    private JSONFetcherStreamReader getReaderAfterFetchingData(@NonNull final String filePath)
+            throws IOException {
         final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        filePath);
+                new AssetFileFetcher(InstrumentationRegistry.getContext(), filePath);
         final JSONFetcherStreamReader reader = new JSONFetcherStreamReader();
         fetcher.executeFetcher(reader);
         

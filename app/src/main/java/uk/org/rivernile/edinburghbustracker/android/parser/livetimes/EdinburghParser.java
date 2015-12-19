@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 package uk.org.rivernile.edinburghbustracker.android.parser.livetimes;
 
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,20 +40,16 @@ import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .AuthenticationException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.AuthenticationException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .MaintenanceException;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .ServerErrorException;
-import uk.org.rivernile.android.bustracker.parser.livetimes
-        .SystemOverloadedException;
-import uk.org.rivernile.android.fetchers.Fetcher;
-import uk.org.rivernile.android.fetchers.readers.JSONFetcherStreamReader;
+import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.ServerErrorException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
+import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
+import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamReader;
 import uk.org.rivernile.android.utils.JSONUtils;
 
 /**
@@ -68,16 +65,10 @@ public final class EdinburghParser implements BusParser {
     private static final String ERROR_SYSTEM_MAINTENANCE = "SYSTEM_MAINTENANCE";
     private static final String ERROR_SYSTEM_OVERLOADED = "SYSTEM_OVERLOADED";
 
-    /**
-     * {@inheritDoc}
-     */
+    @NonNull
     @Override
-    public LiveBusTimes getBusTimes(final Fetcher fetcher)
+    public LiveBusTimes getBusTimes(@NonNull final Fetcher fetcher)
             throws LiveTimesException {
-        if (fetcher == null) {
-            throw new IllegalArgumentException("The fetcher must not be null.");
-        }
-        
         final JSONFetcherStreamReader reader = new JSONFetcherStreamReader();
         
         try {
@@ -91,15 +82,10 @@ public final class EdinburghParser implements BusParser {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Journey getJourneyTimes(final Fetcher fetcher)
+    @NonNull
+    @Override
+    public Journey getJourneyTimes(@NonNull final Fetcher fetcher)
             throws LiveTimesException {
-        if (fetcher == null) {
-            throw new IllegalArgumentException("The fetcher must not be null.");
-        }
-        
         final JSONFetcherStreamReader reader = new JSONFetcherStreamReader();
         
         try {

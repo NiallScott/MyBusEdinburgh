@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,64 +25,45 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
-import junit.framework.TestCase;
-import uk.org.rivernile.android.bustracker.parser.database
-        .DatabaseVersionParser;
-import uk.org.rivernile.edinburghbustracker.android.parser.database
-        .EdinburghDatabaseVersionParser;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersionParser;
+import uk.org.rivernile.edinburghbustracker.android.parser.database.EdinburghDatabaseVersionParser;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
- * Tests for HttpDatabaseEndpoint.
+ * Tests for {@link HttpDatabaseEndpoint}.
  * 
  * @author Niall Scott
  */
-public class HttpDatabaseEndpointTests extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class HttpDatabaseEndpointTests {
     
     private DatabaseVersionParser parser;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        
+    @Before
+    public void setUp() {
         parser = new EdinburghDatabaseVersionParser();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        
+    @After
+    public void tearDown() {
         parser = null;
     }
     
     /**
-     * Test that the constructor throws an IllegalArgumentException if the
-     * urlBuilder is null.
+     * Test that no exceptions are thrown if the constructor is passed a non-{@code null}
+     * {@code urlBuilder}.
      */
-    public void testConstructorWithNullUrlBuilder() {
-        try {
-            new HttpDatabaseEndpoint(parser, null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The urlBuilder is set to null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that no exceptions are thrown if the constructor is passed a
-     * non-null urlBuilder.
-     * 
-     * @throws Exception If an Exception occurs, the test should fail.
-     */
-    public void testConstructorWithNonNullUrlBuilder() throws Exception {
-        new HttpDatabaseEndpoint(parser, new EdinburghUrlBuilder());
+    @Test
+    public void testConstructorWithNonNullUrlBuilder() {
+        new HttpDatabaseEndpoint(InstrumentationRegistry.getContext(), parser,
+                new EdinburghUrlBuilder());
     }
 }

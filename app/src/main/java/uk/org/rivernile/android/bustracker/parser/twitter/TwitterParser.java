@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,24 +25,27 @@
 
 package uk.org.rivernile.android.bustracker.parser.twitter;
 
+import android.support.annotation.NonNull;
+
 import java.util.List;
-import uk.org.rivernile.android.fetchers.Fetcher;
+
+import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
 
 /**
- * The TwitterParser is an interface that the concrete parser implements which
- * deals with the fetching and parsing of Twitter data.
+ * The {@code TwitterParser} is an interface that the concrete parser implements which deals with
+ * the fetching and parsing of Twitter data.
  * 
  * @author Niall Scott
  */
 public interface TwitterParser {
     
     /**
-     * Get the list of ordered Tweets from the endpoint.
+     * Get the list of ordered {@link Tweet}s from the endpoint.
      * 
-     * @param fetcher The Fetcher to use to get data.
-     * @return A List of Tweets. Will be empty if there are no Tweets.
-     * @throws TwitterException If there was a problem during the fetch or
-     * parsing process.
+     * @param fetcher The {@link Fetcher} to use to get data.
+     * @return A {@link List} of {@link Tweet}s. Will be empty if there are no {@link Tweet}s.
+     * @throws TwitterException If there was a problem during the fetch or parsing process.
      */
-    public List<Tweet> getTweets(Fetcher fetcher) throws TwitterException;
+    @NonNull
+    List<Tweet> getTweets(@NonNull Fetcher fetcher) throws TwitterException;
 }

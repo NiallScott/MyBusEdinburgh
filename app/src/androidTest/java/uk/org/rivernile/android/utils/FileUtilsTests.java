@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,76 +24,71 @@
  */
 package uk.org.rivernile.android.utils;
 
-import android.test.InstrumentationTestCase;
+import static org.junit.Assert.assertEquals;
+
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import uk.org.rivernile.android.fetchers.AssetFileFetcher;
-import uk.org.rivernile.android.fetchers.readers.FileWriterFetcherStreamReader;
+
+import uk.org.rivernile.android.fetchutils.fetchers.AssetFileFetcher;
+import uk.org.rivernile.android.fetchutils.fetchers.readers.FileWriterFetcherStreamReader;
 
 /**
- * Tests for FileUtils.
+ * Tests for {@link FileUtils}.
  * 
  * @author Niall Scott
  */
-public class FileUtilsTests extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class FileUtilsTests {
     
-    private static final String EXPECTED_HASH =
-            "bae7aa5c017ead84fe44197bea819d63";
+    private static final String EXPECTED_HASH = "bae7aa5c017ead84fe44197bea819d63";
     
     /**
-     * Test that {@link FileUtils#md5Checksum(java.io.File)} correctly throws
-     * an IllegalArgumentException if the file is set to null.
+     * Test that {@link FileUtils#md5Checksum(java.io.File)} correctly throws an
+     * {@link IllegalArgumentException} if the file is set to {@code null}.
      * 
      * @throws IOException This test is not expected to throw an IOException, so
      * if it is thrown, let the TestCase cause a failure.
      */
+    @Test(expected = IllegalArgumentException.class)
     public void testMd5ChecksumWithNullFile() throws IOException {
-        try {
-            FileUtils.md5Checksum(null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The file is set to null, so IllegalArgumentException should be "
-                + "thrown.");
+        FileUtils.md5Checksum(null);
     }
     
     /**
      * Test that {@link FileUtils#md5Checksum(java.io.File)} correctly throws a
-     * FileNotFoundException if the File object points towards a file that does
+     * {@link FileNotFoundException} if the {@link File} object points towards a file that does
      * not exist.
-     * 
-     * @throws IOException This test is not expected to throw an IOException, so
-     * if it is thrown, let the TestCase cause a failure.
+     *
+     * @throws IOException This test is not expected to throw an {@link IOException}, so if it is
+     * thrown, let the test fail.
      */
+    @Test(expected = FileNotFoundException.class)
     public void testMd5ChecksumWithInvalidFilename() throws IOException {
-        try {
-            FileUtils.md5Checksum(new File("invalid"));
-        } catch (FileNotFoundException e) {
-            return;
-        }
-        
-        fail("The file is set to an invalid file, so FileNotFoundException "
-                + "should be thrown.");
+        FileUtils.md5Checksum(new File("invalid"));
     }
     
     /**
-     * Test that {@link FileUtils#md5Checksum(java.io.File)} correctly returns
-     * a hash if a valid file is given to it.
+     * Test that {@link FileUtils#md5Checksum(java.io.File)} correctly returns a hash if a valid
+     * file is given to it.
      * 
-     * @throws IOException This test is not expected to throw an IOException, so
-     * if it is thrown, let the TestCase cause a failure.
+     * @throws IOException This test is not expected to throw an {@link IOException}, so if it is
+     * thrown, let the test fail.
      */
+    @Test
     public void testMd5ChecksumWithValidFile() throws IOException {
-        final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        "fetchers/redsquare.png");
-        final File outFile =
-                new File(getInstrumentation().getTargetContext().getFilesDir(),
-                        "redsquare.png");
-        final FileWriterFetcherStreamReader reader =
-                new FileWriterFetcherStreamReader(outFile, false);
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "fetchers/redsquare.png");
+        final File outFile = new File(InstrumentationRegistry.getTargetContext().getFilesDir(),
+                "redsquare.png");
+        final FileWriterFetcherStreamReader reader = new FileWriterFetcherStreamReader(outFile,
+                false);
         
         fetcher.executeFetcher(reader);
         assertEquals(EXPECTED_HASH, FileUtils.md5Checksum(outFile));

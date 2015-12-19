@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 package uk.org.rivernile.android.bustracker.parser.twitter;
 
 import android.annotation.SuppressLint;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import java.io.IOException;
 import java.text.ParseException;
@@ -38,13 +39,13 @@ import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import uk.org.rivernile.android.fetchers.Fetcher;
-import uk.org.rivernile.android.fetchers.readers.JSONFetcherStreamReader;
+
+import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
+import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamReader;
 
 /**
- * This is the concrete implementation of {@link TwitterParser}. It fetches and
- * parses a JSON list of tweet objects and turns this in to a List of
- * {@link Tweet}s.
+ * This is the concrete implementation of {@link TwitterParser}. It fetches and parses a JSON
+ * list of tweet objects and turns this in to a {@link List} of {@link Tweet}s.
  * 
  * @author Niall Scott
  */
@@ -52,21 +53,13 @@ public class TwitterParserImpl implements TwitterParser {
     
     @SuppressLint({"SimpleDateFormat"})
     private static final SimpleDateFormat DATE_FORMAT =
-            new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZZ yyyy",
-                    Locale.ENGLISH);
+            new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZZ yyyy", Locale.ENGLISH);
     
     private static final String TWITTER_BASE_URL = "https://twitter.com/";
 
-    /**
-     * {@inheritDoc}
-     */
+    @NonNull
     @Override
-    public List<Tweet> getTweets(final Fetcher fetcher)
-            throws TwitterException {
-        if (fetcher == null) {
-            throw new IllegalArgumentException("The fetcher must not be null.");
-        }
-        
+    public List<Tweet> getTweets(@NonNull final Fetcher fetcher) throws TwitterException {
         final JSONFetcherStreamReader reader = new JSONFetcherStreamReader();
         
         try {
@@ -168,7 +161,6 @@ public class TwitterParserImpl implements TwitterParser {
             // Profile URL.
             final String profileUrl = screenName != null ?
                     TWITTER_BASE_URL + screenName : null;
-            
             
             // Profile image URL.
             String profileImageUrl = jUser.optString("profile_image_url", null);

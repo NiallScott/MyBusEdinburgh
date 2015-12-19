@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,209 +25,130 @@
 
 package uk.org.rivernile.edinburghbustracker.android.parser.database;
 
-import android.test.InstrumentationTestCase;
-import uk.org.rivernile.android.bustracker.parser.database
-        .DatabaseEndpointException;
+import static org.junit.Assert.assertEquals;
+
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import uk.org.rivernile.android.bustracker.parser.database.DatabaseEndpointException;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersion;
-import uk.org.rivernile.android.fetchers.AssetFileFetcher;
+import uk.org.rivernile.android.fetchutils.fetchers.AssetFileFetcher;
 
 /**
- * Tests for EdinburghDatabaseVersionParser.
+ * Tests for {@link EdinburghDatabaseVersionParser}.
  * 
  * @author Niall Scott
  */
-public class EdinburghDatabaseVersionParserTests
-        extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class EdinburghDatabaseVersionParserTests {
     
     private EdinburghDatabaseVersionParser parser;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        
+    @Before
+    public void setUp() {
         parser = new EdinburghDatabaseVersionParser();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        
+    @After
+    public void tearDown() {
         parser = null;
     }
     
     /**
-     * Test that {@link EdinburghDatabaseVersionParser#getDatabaseVersion(uk.org.rivernile.android.fetchers.Fetcher)}
-     * correctly throws IllegalArgumentException when the Fetcher is null.
-     * 
-     * @throws DatabaseEndpointException This shouldn't be thrown by this test,
-     * but if it is, let the TestCase handle the exception to fail the test.
+     * Test that {@link DatabaseEndpointException} is thrown if the resource does not exist.
      */
-    public void testGetDatabaseVersionWithNullFetcher()
-            throws DatabaseEndpointException {
-        try {
-            parser.getDatabaseVersion(null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The fetcher is set to null, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = DatabaseEndpointException.class)
+    public void testJsonFileDoesNotExist() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/generic/not_a_file.json");
+        parser.getDatabaseVersion(fetcher);
     }
     
     /**
-     * Test that {@link DatabaseEndpointException} is thrown if the resource
-     * does not exist.
+     * Test that {@link DatabaseEndpointException} is thrown if the JSON file contains
+     * ill-formatted JSON.
      */
-    public void testJsonFileDoesNotExist() {
-        final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        "endpoints/generic/not_a_file.json");
-        
-        try {
-            parser.getDatabaseVersion(fetcher);
-        } catch (DatabaseEndpointException e) {
-            return;
-        }
-        
-        fail("The JSON file does not exist, so a DatabaseEndpointException "
-                + "should be thrown.");
+    @Test(expected = DatabaseEndpointException.class)
+    public void testInvalidJson() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/generic/invalid.json");
+        parser.getDatabaseVersion(fetcher);
     }
     
     /**
-     * Test that {@link DatabaseEndpointException} is thrown if the JSON file
-     * contains ill-formatted JSON.
+     * Test that {@link DatabaseEndpointException} is thrown if the JSON object is empty.
      */
-    public void testInvalidJson() {
-        final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        "endpoints/generic/invalid.json");
-        
-        try {
-            parser.getDatabaseVersion(fetcher);
-        } catch (DatabaseEndpointException e) {
-            return;
-        }
-        
-        fail("The JSON response was invalid, so a DatabaseEndpointException "
-                + "should be thrown.");
+    @Test(expected = DatabaseEndpointException.class)
+    public void testEmptyJsonObject() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/generic/empty_object.json");
+        parser.getDatabaseVersion(fetcher);
     }
     
     /**
-     * Test that {@link DatabaseEndpointException} is thrown if the JSON
-     * object is empty.
+     * Test that {@link DatabaseEndpointException} is thrown if the JSON does not include the
+     * schema name.
      */
-    public void testEmptyJsonObject() {
-        final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        "endpoints/generic/empty_object.json");
-        
-        try {
-            parser.getDatabaseVersion(fetcher);
-        } catch (DatabaseEndpointException e) {
-            return;
-        }
-        
-        fail("The JSON response was empty, so a DatabaseEndpointException "
-                + "should be thrown.");
+    @Test(expected = DatabaseEndpointException.class)
+    public void testSchemaNameMissing() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/databaseVersion/missing_schema_name.json");
+        parser.getDatabaseVersion(fetcher);
     }
     
     /**
-     * Test that {@link DatabaseEndpointException} is thrown if the JSON does
-     * not include the schema name.
+     * Test that {@link DatabaseEndpointException} is thrown if the JSON does not include the
+     * topology ID.
      */
-    public void testSchemaNameMissing() {
-        final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        "endpoints/databaseVersion/missing_schema_name.json");
-        
-        try {
-            parser.getDatabaseVersion(fetcher);
-        } catch (DatabaseEndpointException e) {
-            return;
-        }
-        
-        fail("The JSON response was missing a schema name, so a "
-                + "DatabaseEndpointException should be thrown.");
+    @Test(expected = DatabaseEndpointException.class)
+    public void testTopologyIdMissing() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/databaseVersion/missing_topology_id.json");
+        parser.getDatabaseVersion(fetcher);
     }
     
     /**
-     * Test that {@link DatabaseEndpointException} is thrown if the JSON does
-     * not include the topology ID.
+     * Test that {@link DatabaseEndpointException} is thrown if the JSON does not include the
+     * database URL.
      */
-    public void testTopologyIdMissing() {
+    @Test(expected = DatabaseEndpointException.class)
+    public void testDbUrlMissing() throws DatabaseEndpointException {
         final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        "endpoints/databaseVersion/missing_topology_id.json");
-        
-        try {
-            parser.getDatabaseVersion(fetcher);
-        } catch (DatabaseEndpointException e) {
-            return;
-        }
-        
-        fail("The JSON response was missing a topology ID, so a "
-                + "DatabaseEndpointException should be thrown.");
-    }
-    
-    /**
-     * Test that {@link DatabaseEndpointException} is thrown if the JSON does
-     * not include the database URL.
-     */
-    public void testDbUrlMissing() {
-        final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
+                new AssetFileFetcher(InstrumentationRegistry.getContext(),
                         "endpoints/databaseVersion/missing_db_url.json");
-        
-        try {
-            parser.getDatabaseVersion(fetcher);
-        } catch (DatabaseEndpointException e) {
-            return;
-        }
-        
-        fail("The JSON response was missing a database URL, so a "
-                + "DatabaseEndpointException should be thrown.");
+        parser.getDatabaseVersion(fetcher);
     }
     
     /**
-     * Test that {@link DatabaseEndpointException} is thrown if the JSON does
-     * not include the checksum.
+     * Test that {@link DatabaseEndpointException} is thrown if the JSON does not include the
+     * checksum.
      */
-    public void testChecksumMissing() {
-        final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        "endpoints/databaseVersion/missing_checksum.json");
-        
-        try {
-            parser.getDatabaseVersion(fetcher);
-        } catch (DatabaseEndpointException e) {
-            return;
-        }
-        
-        fail("The JSON response was missing a checksum, so a "
-                + "DatabaseEndpointException should be thrown.");
+    @Test(expected = DatabaseEndpointException.class)
+    public void testChecksumMissing() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/databaseVersion/missing_checksum.json");
+        parser.getDatabaseVersion(fetcher);
     }
     
     /**
      * Test that a valid response is correctly parsed and yields correct data.
      * 
-     * @throws DatabaseEndpointException This is not expected to be thrown in
-     * this test, so if it is, let the TestCase cause a test failure.
+     * @throws DatabaseEndpointException This is not expected to be thrown in this test, so if it
+     * is, let the test fail.
      */
+    @Test
     public void testValidResponse() throws DatabaseEndpointException {
-        final AssetFileFetcher fetcher =
-                new AssetFileFetcher(getInstrumentation().getContext(),
-                        "endpoints/databaseVersion/valid.json");
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/databaseVersion/valid.json");
         final DatabaseVersion version = parser.getDatabaseVersion(fetcher);
         
         assertEquals("MBE_10", version.getSchemaName());
-        assertEquals("aeb023caaab29d2f73868bd34028e003",
-                version.getTopologyId());
+        assertEquals("aeb023caaab29d2f73868bd34028e003", version.getTopologyId());
         assertEquals("http://example.com/db/database.db", version.getUrl());
         assertEquals("6758df59b449d00731a329edd4020a61", version.getChecksum());
     }
