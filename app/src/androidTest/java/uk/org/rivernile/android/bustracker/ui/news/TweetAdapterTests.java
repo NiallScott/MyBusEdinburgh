@@ -25,10 +25,21 @@
 
 package uk.org.rivernile.android.bustracker.ui.news;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 import android.support.v7.widget.RecyclerView;
-import android.test.InstrumentationTestCase;
 import android.text.TextUtils;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -42,29 +53,27 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * 
  * @author Niall Scott
  */
-public class TweetAdapterTests extends InstrumentationTestCase {
+@RunWith(AndroidJUnit4.class)
+public class TweetAdapterTests {
     
     private TweetAdapter adapter;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        final Context context = getInstrumentation().getTargetContext();
+    @Before
+    public void setUp() {
+        final Context context = InstrumentationRegistry.getTargetContext();
         context.setTheme(R.style.MyBusEdinburgh);
         adapter = new TweetAdapter(context);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-
+    @After
+    public void tearDown() {
         adapter = null;
     }
 
     /**
      * Test the default state of the adapter.
      */
+    @Test
     public void testDefault() {
         assertTrue(adapter.hasStableIds());
         assertTrue(adapter.isEmpty());
@@ -76,6 +85,7 @@ public class TweetAdapterTests extends InstrumentationTestCase {
     /**
      * Test the adapter coping with an empty {@link ArrayList} of {@link Tweet}s.
      */
+    @Test
     public void testNoItems() {
         final DataObserver observer = new DataObserver();
         adapter.registerAdapterDataObserver(observer);
@@ -89,14 +99,20 @@ public class TweetAdapterTests extends InstrumentationTestCase {
     /**
      * Test the adapter coping with a single {@link Tweet}.
      */
+    @Test
     public void testOneItem() {
         final DataObserver observer = new DataObserver();
         adapter.registerAdapterDataObserver(observer);
         assertFalse(observer.onChangeCalled);
 
-        final Tweet tweet = new Tweet("Body", "User",
-                new GregorianCalendar(2015, GregorianCalendar.JANUARY, 25, 13, 52, 11).getTime(),
-                "a", "b");
+        final Tweet tweet = new Tweet.Builder()
+                .setBody("Body")
+                .setDisplayName("User")
+                .setTime(new GregorianCalendar(2015, GregorianCalendar.JANUARY, 25, 13, 52, 11)
+                        .getTime())
+                .setProfileImageUrl("a")
+                .setProfileUrl("b")
+                .build();
         final ArrayList<Tweet> tweets = new ArrayList<>(1);
         tweets.add(tweet);
         adapter.setTweets(tweets);
@@ -127,20 +143,36 @@ public class TweetAdapterTests extends InstrumentationTestCase {
     /**
      * Test the adapter coping with multiple {@link Tweet}s.
      */
+    @Test
     public void testMultipleItems() {
         final DataObserver observer = new DataObserver();
         adapter.registerAdapterDataObserver(observer);
         assertFalse(observer.onChangeCalled);
 
-        final Tweet tweet1 = new Tweet("Body", "User",
-                new GregorianCalendar(2015, GregorianCalendar.JANUARY, 25, 13, 52, 11).getTime(),
-                "a", "b");
-        final Tweet tweet2 = new Tweet("Body 2", "User 2",
-                new GregorianCalendar(2014, GregorianCalendar.DECEMBER, 2, 2, 13, 45).getTime(),
-                "c", "d");
-        final Tweet tweet3 = new Tweet("Body 3", "User 3",
-                new GregorianCalendar(2014, GregorianCalendar.OCTOBER, 10, 21, 22, 23).getTime(),
-                "e", "f");
+        final Tweet tweet1 = new Tweet.Builder()
+                .setBody("Body")
+                .setDisplayName("User")
+                .setTime(new GregorianCalendar(2015, GregorianCalendar.JANUARY, 25, 13, 52, 11)
+                        .getTime())
+                .setProfileImageUrl("a")
+                .setProfileUrl("b")
+                .build();
+        final Tweet tweet2 = new Tweet.Builder()
+                .setBody("Body 2")
+                .setDisplayName("User 2")
+                .setTime(new GregorianCalendar(2014, GregorianCalendar.DECEMBER, 2, 2, 13, 45)
+                        .getTime())
+                .setProfileImageUrl("c")
+                .setProfileUrl("d")
+                .build();
+        final Tweet tweet3 = new Tweet.Builder()
+                .setBody("Body 3")
+                .setDisplayName("User 3")
+                .setTime(new GregorianCalendar(2014, GregorianCalendar.OCTOBER, 10, 21, 22, 23)
+                        .getTime())
+                .setProfileImageUrl("e")
+                .setProfileUrl("f")
+                .build();
         final ArrayList<Tweet> tweets = new ArrayList<>(3);
         tweets.add(tweet1);
         tweets.add(tweet2);

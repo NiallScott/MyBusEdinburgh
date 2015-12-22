@@ -25,11 +25,13 @@
 
 package uk.org.rivernile.android.bustracker.parser.twitter;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import java.util.Date;
 
 /**
- * This class is a bean class to hold data for a Tweet.
+ * This is a model class to hold data for a tweet.
  * 
  * @author Niall Scott
  */
@@ -40,46 +42,27 @@ public final class Tweet implements Comparable<Tweet> {
     private final Date time;
     private final String profileImageUrl;
     private final String profileUrl;
-    
+
     /**
-     * Create a new Twitter news item.
-     * 
-     * @param body The tweet text. Must not be {@code null} or empty.
-     * @param displayName The display name of the tweet author. Must not be {@code null} or empty.
-     * @param time A {@link Date} object representing the moment the tweet was posted. Must not be
-     *             {@code null}.
-     * @param profileImageUrl The URL of the profile image of the tweet's author. Can be
-     *                        {@code null}.
-     * @param profileUrl The URL of the profile of the tweet's author. Can be {@code null}.
+     * Create a new {@code Tweet}. This constructor is not publicly accessible. To construct an
+     * instance of this class, use the {@link Builder}.
+     *
+     * @param builder The {@link Builder} instance to construct from.
      */
-    public Tweet(final String body, final String displayName, final Date time,
-                 final String profileImageUrl, final String profileUrl) {
-        if (TextUtils.isEmpty(body)) {
-            throw new IllegalArgumentException("The body must not be null or "
-                    + "empty.");
-        }
-        
-        if (TextUtils.isEmpty(displayName)) {
-            throw new IllegalArgumentException("The username must not be null "
-                    + "or empty.");
-        }
-        
-        if (time == null) {
-            throw new IllegalArgumentException("The time must not be null.");
-        }
-        
-        this.body = body;
-        this.displayName = displayName;
-        this.time = time;
-        this.profileImageUrl = profileImageUrl;
-        this.profileUrl = profileUrl;
+    private Tweet(@NonNull final Builder builder) {
+        body = builder.body;
+        displayName = builder.displayName;
+        time = builder.time;
+        profileImageUrl = builder.profileImageUrl;
+        profileUrl = builder.profileUrl;
     }
     
     /**
-     * Get the tweet text.
+     * Get the body of the tweet.
      * 
-     * @return The tweet text.
+     * @return The body of the tweet.
      */
+    @NonNull
     public String getBody() {
         return body;
     }
@@ -89,6 +72,7 @@ public final class Tweet implements Comparable<Tweet> {
      * 
      * @return The display name of the account which posted this tweet.
      */
+    @NonNull
     public String getDisplayName() {
         return displayName;
     }
@@ -98,31 +82,34 @@ public final class Tweet implements Comparable<Tweet> {
      * 
      * @return The date and time that this tweet was posted at.
      */
+    @NonNull
     public Date getTime() {
         return time;
     }
     
     /**
-     * Get the URL of the profile image of the tweet's author.
+     * Get the URL which points to the profile image of the account which posted the tweet.
      * 
-     * @return The URL of the profile image of the tweet's author. May be {@code null}.
+     * @return The URL which points to the profile image of the account which posted the tweet.
      */
+    @Nullable
     public String getProfileImageUrl() {
         return profileImageUrl;
     }
     
     /**
-     * Get the URL of the profile of the tweet's author.
+     * Get the URL which points to the profile of the account which posted the tweet.
      * 
-     * @return The URL of the profile of the tweet's author. May be {@code null}.
+     * @return The the URL which points to the profile of the account which posted the tweet.
      */
+    @Nullable
     public String getProfileUrl() {
         return profileUrl;
     }
 
     @Override
-    public int compareTo(final Tweet another) {
-        return another != null ? another.time.compareTo(time) : -1;
+    public int compareTo(@NonNull final Tweet another) {
+        return another.time.compareTo(time);
     }
 
     @Override
@@ -135,21 +122,10 @@ public final class Tweet implements Comparable<Tweet> {
             return false;
         }
 
-        final Tweet tweet = (Tweet) o;
+        final Tweet that = (Tweet) o;
 
-        if (!body.equals(tweet.body)) {
-            return false;
-        }
-
-        if (!displayName.equals(tweet.displayName)) {
-            return false;
-        }
-
-        if (!time.equals(tweet.time)) {
-            return false;
-        }
-
-        return true;
+        return body.equals(that.body) && displayName.equals(that.displayName) &&
+                time.equals(that.time);
     }
 
     @Override
@@ -157,6 +133,116 @@ public final class Tweet implements Comparable<Tweet> {
         int result = body.hashCode();
         result = 31 * result + displayName.hashCode();
         result = 31 * result + time.hashCode();
+
         return result;
+    }
+
+    /**
+     * This {@link Builder} must be used to construct a new {@link Tweet}. Create a new instance
+     * of this class, call the setters and when you are ready, call {@link #build()}.
+     */
+    public static class Builder {
+
+        private String body;
+        private String displayName;
+        private Date time;
+        private String profileImageUrl;
+        private String profileUrl;
+
+        /**
+         * Set the body of the tweet.
+         *
+         * @param body The body of the tweet. Must not be {@code null} or empty when
+         * {@link #build()} is called.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setBody(@Nullable final String body) {
+            this.body = body;
+            return this;
+        }
+
+        /**
+         * Set the display name of the account which posted this tweet.
+         *
+         * @param displayName The display name of the account which posted this tweet. Must not be
+         * {@code null} or empty when {@link #build()} is called.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setDisplayName(@Nullable final String displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        /**
+         * Set the date and time the tweet was posted at.
+         *
+         * @param time The date and time the tweet was posted at. Must not be {@code null} when
+         * {@link #build()} is called.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setTime(@Nullable final Date time) {
+            this.time = time;
+            return this;
+        }
+
+        /**
+         * Set the URL which points to the profile image of the account which posted the tweet.
+         *
+         * @param profileImageUrl The URL which points to the profile image of the account which
+         * posted the tweet.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setProfileImageUrl(@Nullable final String profileImageUrl) {
+            this.profileImageUrl = profileImageUrl;
+            return this;
+        }
+
+        /**
+         * Set the URL which points to the profile of the account which posted the tweet.
+         *
+         * @param profileUrl The URL which points to the profile of the account which posted the
+         * tweet.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setProfileUrl(@Nullable final String profileUrl) {
+            this.profileUrl = profileUrl;
+            return this;
+        }
+
+        /**
+         * Build a new {@link Tweet} object.
+         *
+         * @return A new {@link Tweet} object.
+         * @throws IllegalArgumentException When {@code time} is null, or {@code body} or
+         * {@code displayName} are {@code null} or empty.
+         */
+        @NonNull
+        public Tweet build() {
+            if (TextUtils.isEmpty(body)) {
+                throw new IllegalArgumentException("The body must not be null or "
+                        + "empty.");
+            }
+
+            if (TextUtils.isEmpty(displayName)) {
+                throw new IllegalArgumentException("The username must not be null "
+                        + "or empty.");
+            }
+
+            if (time == null) {
+                throw new IllegalArgumentException("The time must not be null.");
+            }
+
+            return new Tweet(this);
+        }
     }
 }

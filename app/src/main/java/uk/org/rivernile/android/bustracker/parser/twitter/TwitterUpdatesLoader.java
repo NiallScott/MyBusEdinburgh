@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,47 +26,44 @@
 package uk.org.rivernile.android.bustracker.parser.twitter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+
+import java.util.List;
+
 import uk.org.rivernile.android.bustracker.BusApplication;
-import uk.org.rivernile.android.utils.SimpleResultLoader;
+import uk.org.rivernile.android.fetchutils.loaders.Result;
+import uk.org.rivernile.android.fetchutils.loaders.support.SimpleAsyncTaskLoader;
 
 /**
- * This Loader attempts to fetch a List of Tweets from the Twitter endpoint. A
- * TwitterLoaderResult will be returned containing this list of Tweets, or a
- * TwitterException if loading failed.
+ * This {@link SimpleAsyncTaskLoader} attempts to fetch a {@link List} of {@link Tweet}s from the
+ * Twitter endpoint. A {@link Result} will be returned containing this {@link List} of
+ * {@link Tweet}s, or a {@link TwitterException} if loading failed.
  * 
  * @author Niall Scott
- * @see SimpleResultLoader
+ * @see SimpleAsyncTaskLoader
  */
 public class TwitterUpdatesLoader
-        extends SimpleResultLoader<TwitterLoaderResult> {
+        extends SimpleAsyncTaskLoader<Result<List<Tweet>, TwitterException>> {
     
     private final BusApplication app;
     
     /**
-     * Create a new TwitterUpdatesLoader.
+     * Create a new {@code TwitterUpdatesLoader}.
      * 
-     * @param context A Context object.
+     * @param context A {@link Context} object.
      */
-    public TwitterUpdatesLoader(final Context context) {
+    public TwitterUpdatesLoader(@NonNull final Context context) {
         super(context);
         
         app = (BusApplication) context.getApplicationContext();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public TwitterLoaderResult loadInBackground() {
-        TwitterLoaderResult result;
-        
+    public Result<List<Tweet>, TwitterException> loadInBackground() {
         try {
-            result = new TwitterLoaderResult(
-                    app.getTwitterEndpoint().getTweets());
+            return new Result<>(app.getTwitterEndpoint().getTweets());
         } catch (TwitterException e) {
-            result = new TwitterLoaderResult(e);
+            return new Result<>(e);
         }
-        
-        return result;
     }
 }

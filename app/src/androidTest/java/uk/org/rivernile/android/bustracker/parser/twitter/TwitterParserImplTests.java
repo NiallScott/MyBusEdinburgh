@@ -284,7 +284,13 @@ public class TwitterParserImplTests {
         final List<Tweet> tweets = parser.getTweets(fetcher);
         
         assertNotNull(tweets);
-        tweets.add(new Tweet("a", "b", new Date(), "d", "e"));
+        tweets.add(new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("b")
+                .setTime(new Date())
+                .setProfileImageUrl("d")
+                .setProfileUrl("e")
+                .build());
     }
     
     /**
@@ -398,18 +404,6 @@ public class TwitterParserImplTests {
         assertEquals("http://www.example.com http://t.co/example2 Example",
                 TwitterParserImpl.replaceUrls("http://t.co/example http://t.co/example2 Example",
                         reader.getJSONArray()));
-    }
-    
-    /**
-     * Test that {@link TwitterParserImpl#parseTweet(org.json.JSONObject)} correctly returns
-     * {@code null} when the {@link JSONObject} is set as {@code null}.
-     * 
-     * @throws Exception No exceptions are expected from this test, so fail the test if there are
-     * any.
-     */
-    @Test
-    public void testParseTweetWithNullJsonObject() throws Exception {
-        assertNull(TwitterParserImpl.parseTweet(null));
     }
     
     /**

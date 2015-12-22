@@ -25,150 +25,177 @@
 
 package uk.org.rivernile.android.bustracker.parser.twitter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import android.support.test.runner.AndroidJUnit4;
+
 import java.util.Date;
 import java.util.GregorianCalendar;
-import junit.framework.TestCase;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link Tweet}.
  * 
  * @author Niall Scott
  */
-public class TweetTests extends TestCase {
-    
+@RunWith(AndroidJUnit4.class)
+public class TweetTests {
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the body is set to null.
+     * Test that {@link Tweet.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * tweet body is set to {@code null}.
      */
-    public void testConstructorWithNullBody() {
-        try {
-            new Tweet(null, "b", new Date(), "d", "e");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The body is set to null, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuildWithNullBody() {
+        new Tweet.Builder()
+                .setBody(null)
+                .setDisplayName("b")
+                .setTime(new Date())
+                .setProfileImageUrl("c")
+                .setProfileUrl("d")
+                .build();
+    }
+
+    /**
+     * Test that {@link Tweet.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * tweet body is set to empty.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuildWithEmptyBody() {
+        new Tweet.Builder()
+                .setBody("")
+                .setDisplayName("b")
+                .setTime(new Date())
+                .setProfileImageUrl("c")
+                .setProfileUrl("d")
+                .build();
+    }
+
+    /**
+     * Test that {@link Tweet.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * display name is set to {@code null}.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuildWithNullDisplayName() {
+        new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName(null)
+                .setTime(new Date())
+                .setProfileImageUrl("c")
+                .setProfileUrl("d")
+                .build();
+    }
+
+    /**
+     * Test that {@link Tweet.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * display name is set to empty.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuildWithEmptyDisplayName() {
+        new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("")
+                .setTime(new Date())
+                .setProfileImageUrl("c")
+                .setProfileUrl("d")
+                .build();
+    }
+
+    /**
+     * Test that {@link Tweet.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * time is set to {@code null}.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuildWithNullTime() {
+        new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("b")
+                .setTime(null)
+                .setProfileImageUrl("c")
+                .setProfileUrl("d")
+                .build();
+    }
+
+    /**
+     * Test that no exception is thrown when {@link Tweet.Builder#build()} is called with the
+     * profile image URL set to {@code null}.
+     */
+    @Test
+    public void testBuildWithNullProfileImageUrl() {
+        new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("b")
+                .setTime(new Date())
+                .setProfileImageUrl(null)
+                .setProfileUrl("d")
+                .build();
+    }
+
+    /**
+     * Test that no exception is thrown when {@link Tweet.Builder#build()} is called with the
+     * profile image URL set to empty.
+     */
+    @Test
+    public void testBuildWithEmptyProfileImageUrl() {
+        new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("b")
+                .setTime(new Date())
+                .setProfileImageUrl("")
+                .setProfileUrl("d")
+                .build();
+    }
+
+    /**
+     * Test that no exception is thrown when {@link Tweet.Builder#build()} is called with the
+     * profile URL set to {@code null}.
+     */
+    @Test
+    public void testBuildWithNullProfileUrl() {
+        new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("b")
+                .setTime(new Date())
+                .setProfileImageUrl("c")
+                .setProfileUrl(null)
+                .build();
+    }
+
+    /**
+     * Test that no exception is thrown when {@link Tweet.Builder#build()} is called with the
+     * profile URL set to empty.
+     */
+    @Test
+    public void testBuildWithEmptyProfileUrl() {
+        new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("b")
+                .setTime(new Date())
+                .setProfileImageUrl("c")
+                .setProfileUrl("")
+                .build();
     }
     
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the body is set to empty.
+     * Test that after giving valid values to the {@link Tweet.Builder}, no exceptions are thrown
+     * and the getters return the expected data.
      */
-    public void testConstructorWithEmptyBody() {
-        try {
-            new Tweet("", "b", new Date(), "d", "e");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The body is set to empty, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the displayName is set to null.
-     */
-    public void testConstructorWithNullDisplayName() {
-        try {
-            new Tweet("a", null, new Date(), "d", "e");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The displayName is set to null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the displayName is set to empty.
-     */
-    public void testConstructorWithEmptyDisplayName() {
-        try {
-            new Tweet("a", "", new Date(), "d", "e");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The displayName is set to empty, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the time is set to null.
-     */
-    public void testConstructorWithNullTime() {
-        try {
-            new Tweet("a", "b", null, "d", "e");
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The time is set to null, so an IllegalArgumentException should "
-                + "be thrown.");
-    }
-    
-    /**
-     * Test that the constructor does not throw an exception when the
-     * profileImageUrl is set to null.
-     */
-    public void testConstructorWithNullProfileImageUrl() {
-        try {
-            new Tweet("a", "b", new Date(), null, "e");
-        } catch (IllegalArgumentException e) {
-            fail("The profileImageUrl is allowed to be null.");
-        }
-    }
-    
-    /**
-     * Test that the constructor does not throw an exception when the
-     * profileImageUrl is set to null.
-     */
-    public void testConstructorWithEmptyProfileImageUrl() {
-        try {
-            new Tweet("a", "b", new Date(), "", "e");
-        } catch (IllegalArgumentException e) {
-            fail("The profileImageUrl is allowed to be empty.");
-        }
-    }
-    
-    /**
-     * Test that the constructor does not throw an exception when the profileUrl
-     * is set to null.
-     */
-    public void testConstructorWithNullProfileUrl() {
-        try {
-            new Tweet("a", "b", new Date(), "d", null);
-        } catch (IllegalArgumentException e) {
-            fail("The profileUrl is allowed to be null.");
-        }
-    }
-    
-    /**
-     * Test that the constructor does not throw an exception when the profileUrl
-     * is set to null.
-     */
-    public void testConstructorWithEmptyProfileUrl() {
-        try {
-            new Tweet("a", "b", new Date(), "d", "");
-        } catch (IllegalArgumentException e) {
-            fail("The profileUrl is allowed to be empty.");
-        }
-    }
-    
-    /**
-     * Test that after giving valid values to the constructor, no exceptions are
-     * thrown and the data held in the object is as expected.
-     */
+    @Test
     public void testWithValidValues() {
         final Date time = new Date();
-        final Tweet tweet = new Tweet("This is an example tweet.", "A user",
-                time, "http://example.com/image.png",
-                "http://example.com/profile");
-        
+        final Tweet tweet = new Tweet.Builder()
+                .setBody("This is an example tweet.")
+                .setDisplayName("A user")
+                .setTime(time)
+                .setProfileImageUrl("http://example.com/image.png")
+                .setProfileUrl("http://example.com/profile")
+                .build();
+
         assertEquals("This is an example tweet.", tweet.getBody());
         assertEquals("A user", tweet.getDisplayName());
         assertEquals(time, tweet.getTime());
@@ -178,39 +205,56 @@ public class TweetTests extends TestCase {
     }
     
     /**
-     * Test that the Comparator in the Tweet correctly returns a negative value
-     * when the Tweet object sent in to compare with is null.
+     * Test that the {@link java.util.Comparator} in the {@link Tweet} correctly returns {@code 0}
+     * when the time that both {@link Tweet}s were tweeted at is identical.
      */
-    public void testComparatorWithNullCompareTo() {
-        final Tweet tweet = new Tweet("a", "b", new Date(), "d", "e");
-        assertTrue(tweet.compareTo(null) < 0);
-    }
-    
-    /**
-     * Test that the Comparator in the Tweet correctly returns 0 when the time
-     * that both Tweets were tweeted as is identical.
-     */
+    @Test
     public void testComparatorWithEqualTimes() {
         final Date time = new Date();
-        final Tweet tweet1 = new Tweet("a", "b", time, "d", "e");
-        final Tweet tweet2 = new Tweet("z", "y", time, "w", "v");
-        
-        assertTrue(tweet1.compareTo(tweet2) == 0);
+        final Tweet tweet1 = new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("b")
+                .setTime(time)
+                .setProfileImageUrl("d")
+                .setProfileUrl("e")
+                .build();
+        final Tweet tweet2 = new Tweet.Builder()
+                .setBody("z")
+                .setDisplayName("y")
+                .setTime(time)
+                .setProfileImageUrl("w")
+                .setProfileUrl("v")
+                .build();
+
+        assertEquals(0, tweet1.compareTo(tweet2));
     }
     
     /**
-     * Test that the Comparator in the Tweet correctly orders two Tweets when
-     * they have different timestamps.
+     * Test that the {@link java.util.Comparator} in the {@link Tweet} correctly orders two
+     * {@link Tweet}s when they have different timestamps.
      */
+    @Test
     public void testComparatorWithDifferentTimes() {
         GregorianCalendar cal = new GregorianCalendar(2014, 1, 26, 14, 30, 21);
         final Date time1 = cal.getTime();
         
         cal = new GregorianCalendar(2014, 1, 25, 9, 4, 53);
         final Date time2 = cal.getTime();
-        
-        final Tweet tweet1 = new Tweet("a", "b", time1, "d", "e");
-        final Tweet tweet2 = new Tweet("z", "y", time2, "w", "v");
+
+        final Tweet tweet1 = new Tweet.Builder()
+                .setBody("a")
+                .setDisplayName("b")
+                .setTime(time1)
+                .setProfileImageUrl("d")
+                .setProfileUrl("e")
+                .build();
+        final Tweet tweet2 = new Tweet.Builder()
+                .setBody("z")
+                .setDisplayName("y")
+                .setTime(time2)
+                .setProfileImageUrl("w")
+                .setProfileUrl("v")
+                .build();
         
         assertTrue(tweet1.compareTo(tweet2) < 0);
         assertTrue(tweet2.compareTo(tweet1) > 0);
@@ -219,14 +263,45 @@ public class TweetTests extends TestCase {
     /**
      * Test that {@link Tweet#equals(Object)} and {@link Tweet#hashCode()} behave correctly.
      */
+    @Test
     public void testEqualsAndHashCode() {
         final Date date1 = new GregorianCalendar(2014, 1, 26, 14, 30, 21).getTime();
         final Date date2 = new GregorianCalendar(2014, 1, 26, 15, 30, 21).getTime();
-        final Tweet tweet1 = new Tweet("Body", "User", date1, "a", "b");
-        final Tweet tweet2 = new Tweet("Body", "User", date1, "a", "b");
-        final Tweet tweet3 = new Tweet("Body 2", "User", date1, "a", "b");
-        final Tweet tweet4 = new Tweet("Body", "User 2", date1, "a", "b");
-        final Tweet tweet5 = new Tweet("Body", "User", date2, "a", "b");
+        final Tweet tweet1 = new Tweet.Builder()
+                .setBody("Body")
+                .setDisplayName("User")
+                .setTime(date1)
+                .setProfileImageUrl("a")
+                .setProfileUrl("b")
+                .build();
+        final Tweet tweet2 = new Tweet.Builder()
+                .setBody("Body")
+                .setDisplayName("User")
+                .setTime(date1)
+                .setProfileImageUrl("a")
+                .setProfileUrl("b")
+                .build();
+        final Tweet tweet3 = new Tweet.Builder()
+                .setBody("Body 2")
+                .setDisplayName("User")
+                .setTime(date1)
+                .setProfileImageUrl("a")
+                .setProfileUrl("b")
+                .build();
+        final Tweet tweet4 = new Tweet.Builder()
+                .setBody("Body")
+                .setDisplayName("User 2")
+                .setTime(date1)
+                .setProfileImageUrl("a")
+                .setProfileUrl("b")
+                .build();
+        final Tweet tweet5 = new Tweet.Builder()
+                .setBody("Body")
+                .setDisplayName("User")
+                .setTime(date2)
+                .setProfileImageUrl("a")
+                .setProfileUrl("b")
+                .build();
 
         assertTrue(tweet1.equals(tweet1));
         assertTrue(tweet1.equals(tweet2));
@@ -234,10 +309,12 @@ public class TweetTests extends TestCase {
         assertFalse(tweet1.equals(tweet4));
         assertFalse(tweet1.equals(tweet5));
         assertFalse(tweet1.equals(new Object()));
+        assertFalse(tweet1.equals(null));
 
+        assertEquals(tweet1.hashCode(), tweet1.hashCode());
         assertEquals(tweet1.hashCode(), tweet2.hashCode());
-        assertFalse(tweet1.hashCode() == tweet3.hashCode());
-        assertFalse(tweet1.hashCode() == tweet4.hashCode());
-        assertFalse(tweet1.hashCode() == tweet5.hashCode());
+        assertNotEquals(tweet1.hashCode(), tweet3.hashCode());
+        assertNotEquals(tweet1.hashCode(), tweet4.hashCode());
+        assertNotEquals(tweet1.hashCode(), tweet5.hashCode());
     }
 }

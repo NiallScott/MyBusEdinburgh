@@ -47,9 +47,9 @@ import android.widget.TextView;
 import java.util.List;
 
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
+import uk.org.rivernile.android.fetchutils.loaders.Result;
 import uk.org.rivernile.android.utils.DividerItemDecoration;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.android.bustracker.parser.twitter.TwitterLoaderResult;
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterException;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterUpdatesLoader;
@@ -61,7 +61,7 @@ import uk.org.rivernile.android.bustracker.parser.twitter.TwitterUpdatesLoader;
  * @author Niall Scott
  */
 public class TwitterUpdatesFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<TwitterLoaderResult> {
+        implements LoaderManager.LoaderCallbacks<Result<List<Tweet>, TwitterException>> {
     
     private TweetAdapter adapter;
 
@@ -138,24 +138,25 @@ public class TwitterUpdatesFragment extends Fragment
     }
 
     @Override
-    public Loader<TwitterLoaderResult> onCreateLoader(final int id, final Bundle args) {
+    public Loader<Result<List<Tweet>, TwitterException>> onCreateLoader(
+            final int id, final Bundle args) {
         return new TwitterUpdatesLoader(getActivity());
     }
 
     @Override
-    public void onLoadFinished(final Loader<TwitterLoaderResult> loader,
-                               final TwitterLoaderResult result) {
+    public void onLoadFinished(final Loader<Result<List<Tweet>, TwitterException>> loader,
+                               final Result<List<Tweet>, TwitterException> result) {
         if (isAdded()) {
-            if(result.hasException()) {
-                handleError(result.getException());
+            if(result.isError()) {
+                handleError(result.getError());
             } else {
-                populateList(result.getTweets());
+                populateList(result.getSuccess());
             }
         }
     }
 
     @Override
-    public void onLoaderReset(final Loader<TwitterLoaderResult> loader) {
+    public void onLoaderReset(final Loader<Result<List<Tweet>, TwitterException>> loader) {
         // Nothing to do here.
     }
     
