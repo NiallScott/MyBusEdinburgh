@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,6 +25,9 @@
 
 package uk.org.rivernile.android.utils;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,101 +40,90 @@ import org.json.JSONObject;
 public class JSONUtils {
     
     /**
-     * This constructor has been made private to prevent instantiation of this
-     * class.
+     * This constructor has been made private to prevent instantiation of this class.
      */
     private JSONUtils() {
         // No implementation.
     }
     
     /**
-     * Get a String from a JSON object. If the String given by name does not
+     * Get a {@link String} from a {@link JSONObject}. If the {@link String} given by name does not
      * exist, a {@link JSONException} will be thrown.
      * 
-     * @param obj The JSON object to get the String from. If this is null, a
-     * {@link JSONException} will be thrown.
-     * @param name The name of the JSON String to get.
-     * @return The value of the JSON String given by name. If the value is JSON
-     * null, then this will be converted in to Java's null.
-     * @throws JSONException When obj is null, or the conditions given at
-     * {@link JSONObject#getString(java.lang.String)}.
-     * @see JSONObject#getString(java.lang.String)
+     * @param obj The {@link JSONObject} to get the {@link String} from.
+     * @param name The name of the JSON {@link String} to get.
+     * @return The value of the JSON {@link String} given by name. If the value is JSON
+     * {@code null}, then this will be converted in to Java's {@code null}.
+     * @throws JSONException See {@link JSONObject#getString(String)}.
+     * @see JSONObject#getString(String)
      */
-    public static String getString(final JSONObject obj, final String name)
+    @Nullable
+    public static String getString(@NonNull final JSONObject obj, @Nullable final String name)
             throws JSONException {
-        if (obj == null) {
-            throw new JSONException("The JSON object is null.");
-        }
-        
-        // The value is fetched first to cause the default behaviour to be
-        // executed, then we take over with our extended behaviour.
+        // The value is fetched first to cause the default behaviour to be executed, then we take
+        // over with our extended behaviour.
         final String value = obj.getString(name);
         return !obj.isNull(name) ? value : null;
     }
     
     /**
-     * Get a String from a JSON array. If the index does not exist, a
+     * Get a {@link String} from a {@link JSONArray}. If the index does not exist, a
      * {@link JSONException} will be thrown.
      * 
-     * @param arr The JSON array to get the String from. If this is null, a
-     * {@link JSONException} will be thrown.
-     * @param index The index in the array to get the String from.
-     * @return The value of the JSON String at the given index. If the value is
-     * JSON null, then this will be converted in to Java's null.
-     * @throws JSONException When arr is null, or the conditions given at
-     * {@link JSONArray#getString(int)}.
+     * @param arr The {@link JSONArray} to get the {@link String} from.
+     * @param index The index in the array to get the {@link String} from.
+     * @return The value of the JSON {@link String} at the given index. If the value is JSON
+     * {@code null}, then this will be converted in to Java's {@code null}.
+     * @throws JSONException See {@link JSONArray#getString(int)}.
      * @see JSONArray#getString(int)
      */
-    public static String getString(final JSONArray arr, final int index)
+    @Nullable
+    public static String getString(@NonNull final JSONArray arr, final int index)
             throws JSONException {
-        if (arr == null) {
-            throw new JSONException("The JSON array is null.");
-        }
-        
-        // The value is fetched first to cause the default behaviour to be
-        // executed, then we take over with our extended behaviour.
+        // The value is fetched first to cause the default behaviour to be executed, then we take
+        // over with our extended behaviour.
         final String value = arr.getString(index);
         return !arr.isNull(index) ? value : null;
     }
     
     /**
-     * Get an optional String from a JSON object. This method exists because
-     * when the value of the mapping is JSON's null, then a String is returned
-     * rather than Java's null. This method checks for a null value with the
-     * JSON API and returns the correct value in this case.
-     * 
-     * @param obj The JSON object to retrieve the String value from.
-     * @param name The name of the key which maps to the String value.
-     * @param fallback What to return when obj is null, the mapping does not
-     * exist or the value is JSON null.
-     * @return The value of the mapping given by the name, or fallback if this
-     * does not exist.
-     * @see JSONObject#optString(java.lang.String, java.lang.String)
+     * Get an optional {@link String} from a {@link JSONObject}. This method exists because when
+     * the value of the mapping is JSON's {@code null}, then a {@link String} is returned rather
+     * than Java's {@code null}. This method checks for a {@code null} value with the JSON API
+     * and returns the correct value in this case.
+     *
+     * @param obj The {@link JSONObject} to retrieve the {@link String} value from.
+     * @param name The name of the key which maps to the {@link String} value.
+     * @param fallback What to return when the mapping does not exist or the value is JSON
+     * {@code null}.
+     * @return The value of the mapping given by the name, or {@code fallback} if this does not
+     * exist.
+     * @see JSONObject#optString(String, String)
      */
-    public static String optString(final JSONObject obj, final String name,
-            final String fallback) {
-        return obj != null ? (obj.has(name) && obj.isNull(name) ?
-                null : obj.optString(name, fallback)) : fallback;
+    @Nullable
+    public static String optString(@NonNull final JSONObject obj, @Nullable final String name,
+            @Nullable final String fallback) {
+        return obj.has(name) && obj.isNull(name) ? null : obj.optString(name, fallback);
     }
     
     /**
-     * Get an optional String from a JSON array. This method exists because
-     * when the value of the mapping is JSON's null, then a String is returned
-     * rather than Java's null. This method checks for a null value with the
-     * JSON API and returns the correct value in this case.
+     * Get an optional {@link String} from a {@link JSONArray}. This method exists because when
+     * the value of the mapping is JSON's {@code null}, then a {@link String} is returned rather
+     * than Java's {@code null}. This method checks for a {@code null} value with the JSON API
+     * and returns the correct value in this case.
      * 
-     * @param arr The JSON array to retrieve the String value from.
-     * @param index The index in the JSON array that the String exists.
-     * @param fallback What to return when arr is null, the element does not
-     * exist or the value is JSON null.
-     * @return The value of the mapping given by the index, or fallback if this
-     * does not exist.
-     * @see JSONArray#optString(int, java.lang.String)
+     * @param arr The {@link JSONArray} to retrieve the {@link String} value from.
+     * @param index The index in the {@link JSONArray} that the {@link String} exists.
+     * @param fallback What to return when the element does not exist or the value is JSON
+     * {@code null}.
+     * @return The value of the mapping given by the index, or {@code fallback} if this does not
+     * exist.
+     * @see JSONArray#optString(int, String)
      */
-    public static String optString(final JSONArray arr, final int index,
-            final String fallback) {
-        return arr != null ?
-                (index >= 0 && index < arr.length() && arr.isNull(index) ?
-                null : arr.optString(index, fallback)) : fallback;
+    @Nullable
+    public static String optString(@NonNull final JSONArray arr, final int index,
+            @Nullable final String fallback) {
+        return index >= 0 && index < arr.length() && arr.isNull(index) ?
+                null : arr.optString(index, fallback);
     }
 }

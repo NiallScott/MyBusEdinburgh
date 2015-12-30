@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,92 +25,60 @@
 
 package uk.org.rivernile.android.utils;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import android.support.test.runner.AndroidJUnit4;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link JSONUtils}.
  * 
  * @author Niall Scott
  */
-public class JSONUtilsTestCase extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class JSONUtilsTestCase {
     
     /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONObject, java.lang.String)}
-     * throws a {@link JSONException} when the {@link JSONObject} is set as
-     * <code>null</code>.
+     * Test that {@link JSONUtils#getString(JSONObject, String)} throws a {@link JSONException}
+     * when the name is set as {@code null}.
      */
-    public void testGetStringForObjectWithNullObject() {
-        try {
-            JSONUtils.getString(null, "test");
-        } catch (JSONException e) {
-            return;
-        }
-        
-        fail("The JSONObject is set as null, so a JSONException should be "
-                + "thrown.");
+    @Test(expected = JSONException.class)
+    public void testGetStringForObjectWithNullName() throws JSONException {
+        JSONUtils.getString(new JSONObject(), null);
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONObject, java.lang.String)}
-     * throws a {@link JSONException} when the name is set as <code>null</code>.
+     * Test that {@link JSONUtils#getString(JSONObject, String)} throws a {@link JSONException}
+     * when the name is set as empty {@link String}.
      */
-    public void testGetStringForObjectWithNullName() {
-        try {
-            JSONUtils.getString(new JSONObject(), null);
-        } catch (JSONException e) {
-            return;
-        }
-        
-        fail("The name is set as null, so a JSONException should be thrown.");
+    @Test(expected = JSONException.class)
+    public void testGetStringForObjectWithEmptyName() throws JSONException {
+        JSONUtils.getString(new JSONObject(), "");
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONObject, java.lang.String)}
-     * throws a {@link JSONException} when the name is set as empty String.
+     * Test that {@link JSONUtils#getString(JSONObject, String)} throws a {@link JSONException}
+     * when there is no mapping for the name.
      */
-    public void testGetStringForObjectWithEmptyName() {
-        try {
-            JSONUtils.getString(new JSONObject(), "");
-        } catch (JSONException e) {
-            return;
-        }
-        
-        fail("The name is set as empty String, so a JSONException should be "
-                + "thrown.");
+    @Test(expected = JSONException.class)
+    public void testGetStringForObjectWithNoMapping() throws JSONException {
+        JSONUtils.getString(new JSONObject(), "example");
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONObject, java.lang.String)}
-     * throws a {@link JSONException} when there is no mapping for the name.
-     */
-    public void testGetStringForObjectWithNoMapping() {
-        try {
-            JSONUtils.getString(new JSONObject(), "example");
-        } catch (JSONException e) {
-            return;
-        }
-        
-        fail("The name is set as an unmapped String, so a JSONException should "
-                + "be thrown.");
-    }
-    
-    /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONObject, java.lang.String)}
-     * returns <code>null</code> when the mapping is set as
-     * {@link JSONObject#NULL}.
+     * Test that {@link JSONUtils#getString(JSONObject, String)} returns {@code null} when the
+     * mapping is set as {@link JSONObject#NULL}.
      * 
-     * @throws JSONException There are no other exceptions expected from this
-     * test, so if there are, let the TestCase fail the test when it intercepts
-     * them.
+     * @throws JSONException There are no other exceptions expected from this test, so if there
+     * are, let the test fail.
      */
+    @Test
     public void testGetStringForObjectWithNullMapping() throws JSONException {
         final JSONObject jo = new JSONObject();
         jo.put("example", JSONObject.NULL);
@@ -118,65 +86,36 @@ public class JSONUtilsTestCase extends TestCase {
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONObject, java.lang.String)}
-     * returns non-<code>null</code> when the mapping is set as something other
-     * than {@link JSONObject#NULL}.
+     * Test that {@link JSONUtils#getString(JSONObject, String)} returns non-{@code null} when
+     * the mapping is set as something other than {@link JSONObject#NULL}.
      * 
-     * @throws JSONException There are no other exceptions expected from this
-     * test, so if there are, let the TestCase fail the test when it intercepts
-     * them.
+     * @throws JSONException There are no other exceptions expected from this test, so if there
+     * are, let the test fail.
      */
-    public void testGetStringForObjectWithNonNullMapping()
-            throws JSONException {
+    @Test
+    public void testGetStringForObjectWithNonNullMapping() throws JSONException {
         final JSONObject jo = new JSONObject();
         jo.put("example", "value");
         assertEquals("value", JSONUtils.getString(jo, "example"));
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONArray, int)}
-     * throws a {@link JSONException} when the {@link JSONArray} is set as
-     * <code>null</code>.
+     * Test that {@link JSONUtils#getString(JSONArray, int)} throws a {@link JSONException} when
+     * there is no mapping for the index.
      */
-    public void testGetStringForArrayWithNullObject() {
-        try {
-            JSONUtils.getString(null, 0);
-        } catch (JSONException e) {
-            return;
-        }
-        
-        fail("The JSONArray is set as null, so a JSONException should be "
-                + "thrown.");
+    @Test(expected = JSONException.class)
+    public void testGetStringForArrayWithNoMapping() throws JSONException {
+        JSONUtils.getString(new JSONArray(), 1);
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONArray, int)}
-     * throws a {@link JSONException} when there is no mapping for the index.
-     */
-    public void testGetStringForArrayWithNoMapping() {
-        try {
-            JSONUtils.getString(new JSONArray(), 1);
-        } catch (JSONException e) {
-            return;
-        }
-        
-        fail("The index is set as an unmapped value, so a JSONException should "
-                + "be thrown.");
-    }
-    
-    /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONArray, int)}
-     * returns <code>null</code> when the mapping is set as
-     * {@link JSONObject#NULL}.
+     * Test that {@link JSONUtils#getString(JSONArray, int)} returns {@code null} when the
+     * mapping is set as {@link JSONObject#NULL}.
      * 
-     * @throws JSONException There are no other exceptions expected from this
-     * test, so if there are, let the TestCase fail the test when it intercepts
-     * them.
+     * @throws JSONException There are no other exceptions expected from this test, so if there
+     * are, let the test fail.
      */
+    @Test
     public void testGetStringForArrayWithNullMapping() throws JSONException {
         final JSONArray ja = new JSONArray();
         ja.put(JSONObject.NULL);
@@ -184,75 +123,54 @@ public class JSONUtilsTestCase extends TestCase {
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#getString(org.json.JSONArray, int)}
-     * returns non-<code>null</code> when the mapping is set as something other
-     * than {@link JSONObject#NULL}.
+     * Test that {@link JSONUtils#getString(JSONArray, int)} returns non-{@code null} when the
+     * mapping is set as something other than {@link JSONObject#NULL}.
      * 
-     * @throws JSONException There are no other exceptions expected from this
-     * test, so if there are, let the TestCase fail the test when it intercepts
-     * them.
+     * @throws JSONException There are no other exceptions expected from this test, so if there
+     * are, let the test fail.
      */
-    public void testGetStringForArrayWithNonNullMapping()
-            throws JSONException {
+    @Test
+    public void testGetStringForArrayWithNonNullMapping() throws JSONException {
         final JSONArray ja = new JSONArray();
         ja.put("value");
         assertEquals("value", JSONUtils.getString(ja, 0));
     }
     
     /**
-     * Test that {@link JSONUtils#optString(org.json.JSONObject, java.lang.String, java.lang.String)}
-     * returns the default value when the {@link JSONObject} passed in is null.
+     * Test that {@link JSONUtils#optString(JSONObject, String, String)} returns the default
+     * value when the name is set as {@code null}.
      */
-    public void testOptStringForObjectWithNullObject() {
-        assertEquals("test", JSONUtils.optString(null, "key", "test"));
-    }
-    
-    /**
-     * Test that {@link JSONUtils#optString(org.json.JSONObject, java.lang.String, java.lang.String)}
-     * returns null when the {@link JSONObject} passed in is null and the
-     * default value is set as null.
-     */
-    public void testOptStringForObjectWithNullObjectAndNullDefault() {
-        assertNull(JSONUtils.optString(null, "key", null));
-    }
-    
-    /**
-     * Test that {@link JSONUtils#optString(org.json.JSONObject, java.lang.String, java.lang.String)}
-     * returns the default value when the name is set as null.
-     */
+    @Test
     public void testOptStringForObjectWithNullName() {
-       assertEquals("test",
-               JSONUtils.optString(new JSONObject(), null, "test"));
+       assertEquals("test", JSONUtils.optString(new JSONObject(), null, "test"));
     }
     
     /**
-     * Test that {@link JSONUtils#optString(org.json.JSONObject, java.lang.String, java.lang.String)}
-     * returns the default value when the name is set as empty String.
+     * Test that {@link JSONUtils#optString(JSONObject, String, String)} returns the default
+     * value when the name is set as empty {@link String}.
      */
+    @Test
     public void testOptStringForObjectWithEmptyName() {
-        assertEquals("test",
-               JSONUtils.optString(new JSONObject(), "", "test"));
+        assertEquals("test", JSONUtils.optString(new JSONObject(), "", "test"));
     }
     
     /**
-     * Test that {@link JSONUtils#optString(org.json.JSONObject, java.lang.String, java.lang.String)}
-     * returns the default value when the name is set as an unmapped key.
+     * Test that {@link JSONUtils#optString(JSONObject, String, String)} returns the default
+     * value when the name is set as an unmapped key.
      */
+    @Test
     public void testOptStringForObjectWithNoMapping() {
-        assertEquals("test",
-               JSONUtils.optString(new JSONObject(), "example", "test"));
+        assertEquals("test", JSONUtils.optString(new JSONObject(), "example", "test"));
     }
     
     /**
-     * Test that {@link JSONUtils#optString(org.json.JSONObject, java.lang.String, java.lang.String)}
-     * returns <code>null</code> when the mapping is set as
-     * {@link JSONObject#NULL}.
+     * Test that {@link JSONUtils#optString(JSONObject, String, String)} returns {@code null}
+     * when the mapping is set as {@link JSONObject#NULL}.
      * 
-     * @throws JSONException There are no other exceptions expected from this
-     * test, so if there are, let the TestCase fail the test when it intercepts
-     * them.
+     * @throws JSONException There are no other exceptions expected from this test, so if there
+     * are, let the test fail.
      */
+    @Test
     public void testOptStringForObjectWithNullMapping() throws JSONException {
         final JSONObject jo = new JSONObject();
         jo.put("example", JSONObject.NULL);
@@ -260,50 +178,36 @@ public class JSONUtilsTestCase extends TestCase {
     }
     
     /**
-     * Test that {@link JSONUtils#optString(org.json.JSONObject, java.lang.String, java.lang.String)}
-     * returns non-<code>null</code> when the mapping is set as something other
-     * than {@link JSONObject#NULL}.
+     * Test that {@link JSONUtils#optString(JSONObject, String, String)} returns non-{@code null}
+     * when the mapping is set as something other than {@link JSONObject#NULL}.
      * 
-     * @throws JSONException There are no other exceptions expected from this
-     * test, so if there are, let the TestCase fail the test when it intercepts
-     * them.
+     * @throws JSONException There are no other exceptions expected from this test, so if there
+     * are, let the test fail.
      */
-    public void testOptStringForObjectWithNonNullMapping()
-            throws JSONException {
+    @Test
+    public void testOptStringForObjectWithNonNullMapping() throws JSONException {
         final JSONObject jo = new JSONObject();
         jo.put("example", "value");
         assertEquals("value", JSONUtils.optString(jo, "example", "test"));
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#optString(org.json.JSONArray, int, java.lang.String)}
-     * returns the default value when the {@link JSONArray} is set as
-     * <code>null</code>.
+     * Test that {@link JSONUtils#optString(JSONArray, int, String)} returns the default value
+     * when there is no mapping for the index.
      */
-    public void testOptStringForArrayWithNullObject() {
-        assertEquals("test", JSONUtils.optString(null, 0, "test"));
-    }
-    
-    /**
-     * Test that
-     * {@link JSONUtils#optString(org.json.JSONArray, int, java.lang.String)}
-     * returns the default value when there is no mapping for the index.
-     */
+    @Test
     public void testOptStringForArrayWithNoMapping() {
         assertEquals("test", JSONUtils.optString(new JSONArray(), 1, "test"));
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#optString(org.json.JSONArray, int, java.lang.String)}
-     * returns <code>null</code> when the mapping is set as
-     * {@link JSONObject#NULL}.
+     * Test that {@link JSONUtils#optString(JSONArray, int, String)} returns {@code null} when
+     * the mapping is set as {@link JSONObject#NULL}.
      * 
-     * @throws JSONException There are no other exceptions expected from this
-     * test, so if there are, let the TestCase fail the test when it intercepts
-     * them.
+     * @throws JSONException There are no other exceptions expected from this test, so if there
+     * are, let the test fail.
      */
+    @Test
     public void testOptStringForArrayWithNullMapping() throws JSONException {
         final JSONArray ja = new JSONArray();
         ja.put(JSONObject.NULL);
@@ -311,17 +215,14 @@ public class JSONUtilsTestCase extends TestCase {
     }
     
     /**
-     * Test that
-     * {@link JSONUtils#optString(org.json.JSONArray, int, java.lang.String)}
-     * returns non-<code>null</code> when the mapping is set as something other
-     * than {@link JSONObject#NULL}.
+     * Test that {@link JSONUtils#optString(JSONArray, int, String)} returns non-{@code null}
+     * when the mapping is set as something other than {@link JSONObject#NULL}.
      * 
-     * @throws JSONException There are no other exceptions expected from this
-     * test, so if there are, let the TestCase fail the test when it intercepts
-     * them.
+     * @throws JSONException There are no other exceptions expected from this test, so if there
+     * are, let the test fail.
      */
-    public void testOptStringForArrayWithNonNullMapping()
-            throws JSONException {
+    @Test
+    public void testOptStringForArrayWithNonNullMapping() throws JSONException {
         final JSONArray ja = new JSONArray();
         ja.put("value");
         assertEquals("value", JSONUtils.optString(ja, 0, "test"));
