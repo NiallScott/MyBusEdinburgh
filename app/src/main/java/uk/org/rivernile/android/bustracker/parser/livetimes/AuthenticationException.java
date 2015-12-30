@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,24 +26,24 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 /**
- * This Exception should be thrown when there is a problem authenticating with
- * the remote server, for example, if an API key is required and it is rejected.
+ * This {@link Exception} should be thrown when there is a problem authenticating with the remote
+ * server, for example, if an API key is required and it is rejected.
  * 
  * @author Niall Scott
  */
 public class AuthenticationException extends LiveTimesException {
     
     /**
-     * Create a new AuthenticationException with a default message.
+     * Create a new {@code AuthenticationException} with a default message.
      */
     public AuthenticationException() {
         super("There was a problem authenticating with the remote server.");
     }
     
     /**
-     * Create a new AuthenticationException with the given detailMessage.
+     * Create a new {@code AuthenticationException} with the given {@code detailMessage}.
      * 
-     * @param detailMessage The message to set in the Exception.
+     * @param detailMessage The message to set in the {@link Exception}.
      */
     public AuthenticationException(final String detailMessage) {
         super(detailMessage);

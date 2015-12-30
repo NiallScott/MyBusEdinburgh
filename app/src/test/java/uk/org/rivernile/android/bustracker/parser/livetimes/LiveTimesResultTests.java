@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,28 +25,34 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
 /**
- * This {@link Exception} should be thrown when there is a problem with dealing with the request
- * on the remote server, for example, when the HTTP server returns a 5xx status code.
- * 
+ * Tests for {@link LiveTimesResult}.
+ *
  * @author Niall Scott
  */
-public class ServerErrorException extends LiveTimesException {
-    
+public class LiveTimesResultTests {
+
     /**
-     * Create a new {@code ServerErrorException} with a default message.
+     * Test that the load time passed in to the success constructor is returned by
+     * {@link LiveTimesResult#getLoadTime()}.
      */
-    public ServerErrorException() {
-        super("There was a problem dealing with the request on the remote "
-                + "server.");
+    @Test
+    public void testSuccessConstructor() {
+        final LiveTimesResult<String> result = new LiveTimesResult<>("test", 1L);
+        assertEquals(1L, result.getLoadTime());
     }
-    
+
     /**
-     * Create a new {@code ServerErrorException} with the given {@code detailMessage}.
-     * 
-     * @param detailMessage The message to set in the {@link Exception}.
+     * Test that the load time passed in to the error constructor is returned by
+     * {@link LiveTimesResult#getLoadTime()}.
      */
-    public ServerErrorException(final String detailMessage) {
-        super(detailMessage);
+    @Test
+    public void testErrorConstructor() {
+        final LiveTimesResult<String> result = new LiveTimesResult<>(new LiveTimesException(), 2L);
+        assertEquals(2L, result.getLoadTime());
     }
 }

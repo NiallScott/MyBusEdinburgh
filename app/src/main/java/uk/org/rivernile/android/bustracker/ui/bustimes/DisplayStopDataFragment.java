@@ -61,6 +61,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimesLoader;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesResult;
 import uk.org.rivernile.android.bustracker.parser.livetimes
         .MaintenanceException;
 import uk.org.rivernile.android.bustracker.parser.livetimes
@@ -79,7 +80,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
-import uk.org.rivernile.android.utils.LoaderResult;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
@@ -107,7 +107,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  */
 public class DisplayStopDataFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<
-                LoaderResult<LiveBusTimes, LiveTimesException>>,
+        LiveTimesResult<LiveBusTimes>>,
         View.OnClickListener,
         DeleteFavouriteDialogFragment.Callbacks,
         DeleteProximityAlertDialogFragment.Callbacks,
@@ -437,13 +437,9 @@ public class DisplayStopDataFragment extends Fragment
                 return super.onContextItemSelected(item);
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public Loader<LoaderResult<LiveBusTimes, LiveTimesException>>
-            onCreateLoader(final int id, final Bundle args) {
+    public Loader<LiveTimesResult<LiveBusTimes>> onCreateLoader(final int id, final Bundle args) {
         if (args == null) {
             return null;
         }
@@ -452,14 +448,10 @@ public class DisplayStopDataFragment extends Fragment
                 args.getStringArray(LOADER_ARG_STOPCODES),
                 args.getInt(LOADER_ARG_NUMBER_OF_DEPARTURES, 4));
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public void onLoadFinished(
-            final Loader<LoaderResult<LiveBusTimes, LiveTimesException>> loader,
-            final LoaderResult<LiveBusTimes, LiveTimesException> result) {
+    public void onLoadFinished(final Loader<LiveTimesResult<LiveBusTimes>> loader,
+            final LiveTimesResult<LiveBusTimes> result) {
         busTimesLoading = false;
         
         if (result != null) {
@@ -468,10 +460,10 @@ public class DisplayStopDataFragment extends Fragment
             rootView.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (result.hasException()) {
-                        handleError(result.getException());
+                    if (result.isError()) {
+                        handleError(result.getError());
                     } else {
-                        displayData(result.getResult());
+                        displayData(result.getSuccess());
                     }
                     
                     
@@ -480,13 +472,9 @@ public class DisplayStopDataFragment extends Fragment
             });
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public void onLoaderReset(final Loader<LoaderResult<LiveBusTimes,
-            LiveTimesException>> loader) {
+    public void onLoaderReset(final Loader<LiveTimesResult<LiveBusTimes>> loader) {
         // Nothing to do here.
     }
 
