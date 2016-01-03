@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -48,6 +48,22 @@ public class DatabaseVersion {
      * @param builder The {@link Builder} instance to construct from.
      */
     private DatabaseVersion(@NonNull final Builder builder) {
+        if (TextUtils.isEmpty(builder.schemaName)) {
+            throw new IllegalArgumentException("The schemaName must not be null or empty.");
+        }
+
+        if (TextUtils.isEmpty(builder.topologyId)) {
+            throw new IllegalArgumentException("The topologyId must not be null or empty.");
+        }
+
+        if (TextUtils.isEmpty(builder.url)) {
+            throw new IllegalArgumentException("The url must not be null or empty..");
+        }
+
+        if (TextUtils.isEmpty(builder.checksum)) {
+            throw new IllegalArgumentException("The checksum must not be null or empty.");
+        }
+
         schemaName = builder.schemaName;
         topologyId = builder.topologyId;
         url = builder.url;
@@ -192,22 +208,6 @@ public class DatabaseVersion {
          */
         @NonNull
         public DatabaseVersion build() {
-            if (TextUtils.isEmpty(schemaName)) {
-                throw new IllegalArgumentException("The schemaName must not be null or empty.");
-            }
-
-            if (TextUtils.isEmpty(topologyId)) {
-                throw new IllegalArgumentException("The topologyId must not be null or empty.");
-            }
-
-            if (TextUtils.isEmpty(url)) {
-                throw new IllegalArgumentException("The url must not be null or empty..");
-            }
-
-            if (TextUtils.isEmpty(checksum)) {
-                throw new IllegalArgumentException("The checksum must not be null or empty.");
-            }
-
             return new DatabaseVersion(this);
         }
     }

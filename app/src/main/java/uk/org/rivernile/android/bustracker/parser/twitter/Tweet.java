@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,6 +50,20 @@ public final class Tweet implements Comparable<Tweet> {
      * @param builder The {@link Builder} instance to construct from.
      */
     private Tweet(@NonNull final Builder builder) {
+        if (TextUtils.isEmpty(builder.body)) {
+            throw new IllegalArgumentException("The body must not be null or "
+                    + "empty.");
+        }
+
+        if (TextUtils.isEmpty(builder.displayName)) {
+            throw new IllegalArgumentException("The username must not be null "
+                    + "or empty.");
+        }
+
+        if (builder.time == null) {
+            throw new IllegalArgumentException("The time must not be null.");
+        }
+
         body = builder.body;
         displayName = builder.displayName;
         time = builder.time;
@@ -228,20 +242,6 @@ public final class Tweet implements Comparable<Tweet> {
          */
         @NonNull
         public Tweet build() {
-            if (TextUtils.isEmpty(body)) {
-                throw new IllegalArgumentException("The body must not be null or "
-                        + "empty.");
-            }
-
-            if (TextUtils.isEmpty(displayName)) {
-                throw new IllegalArgumentException("The username must not be null "
-                        + "or empty.");
-            }
-
-            if (time == null) {
-                throw new IllegalArgumentException("The time must not be null.");
-            }
-
             return new Tweet(this);
         }
     }
