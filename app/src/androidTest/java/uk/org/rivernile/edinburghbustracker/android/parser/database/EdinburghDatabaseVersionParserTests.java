@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -100,6 +100,16 @@ public class EdinburghDatabaseVersionParserTests {
                 "endpoints/databaseVersion/missing_schema_name.json");
         parser.getDatabaseVersion(fetcher);
     }
+
+    /**
+     * Test that {@link DatabaseEndpointException} is thrown if the schema name is empty.
+     */
+    @Test(expected = DatabaseEndpointException.class)
+    public void testSchemaNameEmpty() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/databaseVersion/empty_schema_name.json");
+        parser.getDatabaseVersion(fetcher);
+    }
     
     /**
      * Test that {@link DatabaseEndpointException} is thrown if the JSON does not include the
@@ -109,6 +119,16 @@ public class EdinburghDatabaseVersionParserTests {
     public void testTopologyIdMissing() throws DatabaseEndpointException {
         final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/databaseVersion/missing_topology_id.json");
+        parser.getDatabaseVersion(fetcher);
+    }
+
+    /**
+     * Test that {@link DatabaseEndpointException} is thrown if the topology ID is empty.
+     */
+    @Test(expected = DatabaseEndpointException.class)
+    public void testTopologyIdEmpty() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/databaseVersion/empty_topology_id.json");
         parser.getDatabaseVersion(fetcher);
     }
     
@@ -123,6 +143,17 @@ public class EdinburghDatabaseVersionParserTests {
                         "endpoints/databaseVersion/missing_db_url.json");
         parser.getDatabaseVersion(fetcher);
     }
+
+    /**
+     * Test that {@link DatabaseEndpointException} is thrown if the database URL is empty.
+     */
+    @Test(expected = DatabaseEndpointException.class)
+    public void testDbUrlEmpty() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher =
+                new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                        "endpoints/databaseVersion/empty_db_url.json");
+        parser.getDatabaseVersion(fetcher);
+    }
     
     /**
      * Test that {@link DatabaseEndpointException} is thrown if the JSON does not include the
@@ -132,6 +163,16 @@ public class EdinburghDatabaseVersionParserTests {
     public void testChecksumMissing() throws DatabaseEndpointException {
         final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
                 "endpoints/databaseVersion/missing_checksum.json");
+        parser.getDatabaseVersion(fetcher);
+    }
+
+    /**
+     * Test that {@link DatabaseEndpointException} is thrown if the checksum is empty.
+     */
+    @Test(expected = DatabaseEndpointException.class)
+    public void testChecksumEmpty() throws DatabaseEndpointException {
+        final AssetFileFetcher fetcher = new AssetFileFetcher(InstrumentationRegistry.getContext(),
+                "endpoints/databaseVersion/empty_checksum.json");
         parser.getDatabaseVersion(fetcher);
     }
     

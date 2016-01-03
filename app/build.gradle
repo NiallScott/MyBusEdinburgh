@@ -56,9 +56,6 @@ android {
             testCoverageEnabled true
         }
     }
-    jacoco {
-        version = "0.7.4.201502262128"
-    }
 }
 
 dependencies {
