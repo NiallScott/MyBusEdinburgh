@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,103 +25,47 @@
 
 package uk.org.rivernile.edinburghbustracker.android.parser.livetimes;
 
+import static org.junit.Assert.assertEquals;
+
+import android.support.test.runner.AndroidJUnit4;
+
 import java.util.Date;
-import junit.framework.TestCase;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link EdinburghLiveBus}.
  * 
  * @author Niall Scott
  */
-public class EdinburghLiveBusTests extends TestCase {
-    
+@RunWith(AndroidJUnit4.class)
+public class EdinburghLiveBusTests {
+
     /**
-     * Test that the getters return the correct values.
+     * Test the default state of the object when the bare minimum properties are supplied.
      */
-    public void testGenericValid() {
-        final Date time = new Date();
-        final EdinburghLiveBus liveBus = new EdinburghLiveBus("Destination",
-                time, 2, 'H', 'N', "123456", "9876");
-        
-        assertEquals("Destination", liveBus.getDestination());
-        assertEquals(time, liveBus.getDepartureTime());
-        assertEquals(2, liveBus.getDepartureMinutes());
-        assertEquals("123456", liveBus.getTerminus());
-        assertEquals("9876", liveBus.getJourneyId());
-        assertFalse(liveBus.isEstimatedTime());
-        assertFalse(liveBus.isDelayed());
-        assertFalse(liveBus.isDiverted());
-        assertFalse(liveBus.isTerminus());
-        assertFalse(liveBus.isPartRoute());
+    @Test
+    public void testDefault() {
+        final EdinburghLiveBus bus = (EdinburghLiveBus) new EdinburghLiveBus.Builder()
+                .setDestination("Destination")
+                .setDepartureTime(new Date())
+                .build();
+
+        assertEquals(0, bus.getDepartureMinutes());
     }
-    
+
     /**
-     * Test that {@link EdinburghLiveBus#isEstimatedTime()} returns true when
-     * reliability field indicates the time is estimated.
+     * Test the state of the object when a departure time is supplied.
      */
-    public void testIsEstimatedTime() {
-        final EdinburghLiveBus liveBus = new EdinburghLiveBus("Destination",
-                new Date(), 2, 'T', 'N', "123456", "9876");
-        assertTrue(liveBus.isEstimatedTime());
-        assertFalse(liveBus.isDelayed());
-        assertFalse(liveBus.isDiverted());
-        assertFalse(liveBus.isTerminus());
-        assertFalse(liveBus.isPartRoute());
-    }
-    
-    /**
-     * Test that {@link EdinburghLiveBus#isDelayed()} returns true when the
-     * reliability field indicates the bus is delayed.
-     */
-    public void testIsDelayed() {
-        final EdinburghLiveBus liveBus = new EdinburghLiveBus("Destination",
-                new Date(), 2, 'B', 'N', "123456", "9876");
-        assertFalse(liveBus.isEstimatedTime());
-        assertTrue(liveBus.isDelayed());
-        assertFalse(liveBus.isDiverted());
-        assertFalse(liveBus.isTerminus());
-        assertFalse(liveBus.isPartRoute());
-    }
-    
-    /**
-     * Test that {@link EdinburghLiveBus#isDiverted()} returns true when the
-     * reliability field indicates the bus is diverted.
-     */
-    public void testIsDiverted() {
-        final EdinburghLiveBus liveBus = new EdinburghLiveBus("Destination",
-                new Date(), 2, 'V', 'N', "123456", "9876");
-        assertFalse(liveBus.isEstimatedTime());
-        assertFalse(liveBus.isDelayed());
-        assertTrue(liveBus.isDiverted());
-        assertFalse(liveBus.isTerminus());
-        assertFalse(liveBus.isPartRoute());
-    }
-    
-    /**
-     * Test that {@link EdinburghLiveBus#isTerminus()} returns true when the
-     * type field indicates the departure point is a terminus.
-     */
-    public void testIsTerminus() {
-        final EdinburghLiveBus liveBus = new EdinburghLiveBus("Destination",
-                new Date(), 2, 'H', 'D', "123456", "9876");
-        assertFalse(liveBus.isEstimatedTime());
-        assertFalse(liveBus.isDelayed());
-        assertFalse(liveBus.isDiverted());
-        assertTrue(liveBus.isTerminus());
-        assertFalse(liveBus.isPartRoute());
-    }
-    
-    /**
-     * Test that {@link EdinburghLiveBus#isPartRoute()} returns true when the
-     * type field indicates that the bus is on part-route.
-     */
-    public void testIsPartRoute() {
-        final EdinburghLiveBus liveBus = new EdinburghLiveBus("Destination",
-                new Date(), 2, 'H', 'P', "123456", "9876");
-        assertFalse(liveBus.isEstimatedTime());
-        assertFalse(liveBus.isDelayed());
-        assertFalse(liveBus.isDiverted());
-        assertFalse(liveBus.isTerminus());
-        assertTrue(liveBus.isPartRoute());
+    @Test
+    public void testValid() {
+        final EdinburghLiveBus bus = (EdinburghLiveBus) new EdinburghLiveBus.Builder()
+                .setDepartureMinutes(7)
+                .setDestination("Destination")
+                .setDepartureTime(new Date())
+                .build();
+
+        assertEquals(7, bus.getDepartureMinutes());
     }
 }

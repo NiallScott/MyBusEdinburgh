@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,8 +28,6 @@ package uk.org.rivernile.android.bustracker.endpoints;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +43,7 @@ import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
  * @author Niall Scott
  */
 @RunWith(AndroidJUnit4.class)
-public class HttpTwitterEndpointTests extends TestCase {
+public class HttpTwitterEndpointTests {
     
     private TwitterParser parser;
 

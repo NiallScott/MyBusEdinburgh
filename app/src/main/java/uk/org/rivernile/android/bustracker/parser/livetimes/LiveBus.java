@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,41 +25,53 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import java.util.Date;
 
 /**
- * A LiveBus is a bus that is part of a service which has real-time tracking
- * information associated in it, described by this class.
+ * A {@code LiveBus} is a bus that is part of a service which has real-time tracking information
+ * associated in it, described by this class.
  * 
  * @author Niall Scott
  */
-public abstract class LiveBus implements Comparable<LiveBus> {
+public class LiveBus implements Comparable<LiveBus> {
     
     private final String destination;
     private final Date departureTime;
-    
+    private final String terminus;
+    private final String journeyId;
+    private final boolean isEstimatedTime;
+    private final boolean isDelayed;
+    private final boolean isDiverted;
+    private final boolean isTerminus;
+    private final boolean isPartRoute;
+
     /**
-     * Create a new LiveBus.
-     * 
-     * @param destination The destination of the bus. Must not be null or empty
-     * String.
-     * @param departureTime A Date object representing the departure time. Must
-     * not be null.
+     * Create a new {@code LiveBus}. This constructor is not publicly accessible. To construct an
+     * instance of this class, use the {@link Builder}.
+     *
+     * @param builder The {@link Builder} instance to construct from.
      */
-    public LiveBus(final String destination, final Date departureTime) {
-        if (TextUtils.isEmpty(destination)) {
-            throw new IllegalArgumentException("The destination must not be "
-                    + "null or empty.");
+    protected LiveBus(@NonNull final Builder builder) {
+        if (TextUtils.isEmpty(builder.destination)) {
+            throw new IllegalArgumentException("The destination must not be null or empty.");
         }
-        
-        if (departureTime == null) {
-            throw new IllegalArgumentException("The departureTime must not be "
-                    + "null or empty.");
+
+        if (builder.departureTime == null) {
+            throw new IllegalArgumentException("The departureTime must not be null or empty.");
         }
-        
-        this.destination = destination;
-        this.departureTime = departureTime;
+
+        destination = builder.destination;
+        departureTime = builder.departureTime;
+        terminus = builder.terminus;
+        journeyId = builder.journeyId;
+        isEstimatedTime = builder.isEstimatedTime;
+        isDelayed = builder.isDelayed;
+        isDiverted = builder.isDiverted;
+        isTerminus = builder.isTerminus;
+        isPartRoute = builder.isPartRoute;
     }
 
     /**
@@ -67,98 +79,259 @@ public abstract class LiveBus implements Comparable<LiveBus> {
      * 
      * @return The name of the destination of this bus.
      */
+    @NonNull
     public String getDestination() {
         return destination;
     }
 
     /**
-     * Get a Date object representing the departure time.
+     * Get a {@link Date} object representing the departure time.
      * 
-     * @return A Date object representing the departure time.
+     * @return A {@link Date} object representing the departure time.
      */
+    @NonNull
     public Date getDepartureTime() {
         return departureTime;
     }
     
     /**
-     * Get the number of minutes to departure relative to the time that this
-     * method is called. A negative number will be returned if the departure
-     * time has been passed.
+     * Get the number of minutes to departure relative to the time that this method is called. A
+     * negative number will be returned if the departure time has been passed.
      * 
-     * @return The number of minutes to departure. A negative number will be
-     * returned if the departure time has been passed.
+     * @return The number of minutes to departure. A negative number will be returned if the
+     * departure time has been passed.
      */
     public int getDepartureMinutes() {
-        final long differenceMillis = departureTime.getTime() -
-                new Date().getTime();
-        return (int) (differenceMillis / 60000);
+        return (int) ((departureTime.getTime() - new Date().getTime()) / 60000);
     }
     
     /**
      * Get the stop code of the terminating bus stop.
+     *
+     * <p>
+     *     Not all real-time systems will support this field. In this case, {@code null} or an
+     *     empty {@link String} should be returned.
+     * </p>
      * 
-     * Not all real-time systems will support this field. In this case, null or
-     * an empty String should be returned.
-     * 
-     * @return The stop code of the terminating bus stop. Can be null or an
-     * empty String.
+     * @return The stop code of the terminating bus stop. May be {@code null} or an empty
+     * {@link String}.
      */
-    public abstract String getTerminus();
+    @Nullable
+    public String getTerminus() {
+        return terminus;
+    }
     
     /**
      * Get the unique ID of the journey of this bus.
      * 
-     * Not all real-time systems will support this field. In this case, null or
-     * an empty String should be returned.
+     * <p>
+     *     Not all real-time systems will support this field. In this case, {@code null} or an
+     *     empty {@link String} should be returned.
+     * </p>
      * 
-     * @return The unique ID of the journey of this bus. Can be null or an
-     * empty String.
+     * @return The unique ID of the journey of this bus. May be {@code null} or an empty
+     * {@link String}.
      */
-    public abstract String getJourneyId();
+    @Nullable
+    public String getJourneyId() {
+        return journeyId;
+    }
     
     /**
      * Get whether the time is estimated or not.
      * 
-     * @return true if the time is estimated, false if it is real-time.
+     * @return {@code true} if the time is estimated, {@code false} if it is real-time.
      */
-    public abstract boolean isEstimatedTime();
+    public boolean isEstimatedTime() {
+        return isEstimatedTime;
+    }
     
     /**
      * Get whether the service is delayed or not.
      * 
-     * @return true if the service is delayed, false if not.
+     * @return {@code true} if the service is delayed, {@code false} if not.
      */
-    public abstract boolean isDelayed();
+    public boolean isDelayed() {
+        return isDelayed;
+    }
     
     /**
      * Get whether the service is diverted or not.
      * 
-     * @return true if the service is diverted, false if not.
+     * @return {@code true} if the service is diverted, {@code false} if not.
      */
-    public abstract boolean isDiverted();
+    public boolean isDiverted() {
+        return isDiverted;
+    }
     
     /**
      * Get whether this point is a terminus stop on the journey's route.
      * 
-     * @return true if this point is a terminus for this journey, false if not.
+     * @return {@code true} if this point is a terminus for this journey, {@code false} if not.
      */
-    public abstract boolean isTerminus();
+    public boolean isTerminus() {
+        return isTerminus;
+    }
     
     /**
-     * Get whether this journey is only going to complete part of its route or
-     * not.
+     * Get whether this journey is only going to complete part of its route or not.
      * 
-     * @return true if this journey will only complete part of its route, false
+     * @return {@code true} if this journey will only complete part of its route, {@code false}
      * if not.
      */
-    public abstract boolean isPartRoute();
+    public boolean isPartRoute() {
+        return isPartRoute;
+    }
+
+    @Override
+    public int compareTo(@NonNull final LiveBus another) {
+        return departureTime.compareTo(another.departureTime);
+    }
 
     /**
-     * {@inheritDoc}
+     * This {@link Builder} must be used to construct a new {@link LiveBus}. Create a new instance
+     * of this class, call the setters and when you are ready, call {@link #build()}.
      */
-    @Override
-    public int compareTo(final LiveBus another) {
-        return another != null ?
-                departureTime.compareTo(another.departureTime) : -1;
+    public static class Builder {
+
+        private String destination;
+        private Date departureTime;
+        private String terminus;
+        private String journeyId;
+        private boolean isEstimatedTime;
+        private boolean isDelayed;
+        private boolean isDiverted;
+        private boolean isTerminus;
+        private boolean isPartRoute;
+
+        /**
+         * Set the name of the destination of this bus.
+         *
+         * @param destination The name of the destination of this bus.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setDestination(@Nullable final String destination) {
+            this.destination = destination;
+            return this;
+        }
+
+        /**
+         * Set the {@link Date} object representing the departure time.
+         *
+         * @param departureTime The {@link Date} object representing the departure time.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setDepartureTime(@Nullable final Date departureTime) {
+            this.departureTime = departureTime;
+            return this;
+        }
+
+        /**
+         * Set the stop code of the terminating bus stop.
+         *
+         * @param terminus Set the stop code of the terminating bus stop.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setTerminus(@Nullable final String terminus) {
+            this.terminus = terminus;
+            return this;
+        }
+
+        /**
+         * Set the unique ID of the journey of this bus.
+         *
+         * @param journeyId Set the unique ID of the journey of this bus.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setJourneyId(@Nullable final String journeyId) {
+            this.journeyId = journeyId;
+            return this;
+        }
+
+        /**
+         * Set whether the time is estimated or not.
+         *
+         * @param isEstimatedTime {@code true} if the time is estimated, {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsEstimatedTime(final boolean isEstimatedTime) {
+            this.isEstimatedTime = isEstimatedTime;
+            return this;
+        }
+
+        /**
+         * Set whether the service is delayed or not.
+         *
+         * @param isDelayed {@code true} if the service is delayed, {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsDelayed(final boolean isDelayed) {
+            this.isDelayed = isDelayed;
+            return this;
+        }
+
+        /**
+         * Set whether the service is diverted or not.
+         *
+         * @param isDiverted {@code true} if the service is diverted, {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsDiverted(final boolean isDiverted) {
+            this.isDiverted = isDiverted;
+            return this;
+        }
+
+        /**
+         * Set whether this point is a terminus stop on the journey's route.
+         *
+         * @param isTerminus {@code true} if this point is a terminus stop, {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsTerminus(final boolean isTerminus) {
+            this.isTerminus = isTerminus;
+            return this;
+        }
+
+        /**
+         * Set whether this journey is only going to complete part of its route or not.
+         *
+         * @param isPartRoute {@code true} if this journey will only complete part of its route,
+         * {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsPartRoute(final boolean isPartRoute) {
+            this.isPartRoute = isPartRoute;
+            return this;
+        }
+
+        /**
+         * Build a new {@link LiveBus} object.
+         *
+         * @return A new {@link LiveBus} object.
+         * @throws IllegalArgumentException When the departure time is {@code null}, or the
+         * destination is {@code null} or empty.
+         */
+        @NonNull
+        public LiveBus build() {
+            return new LiveBus(this);
+        }
     }
 }

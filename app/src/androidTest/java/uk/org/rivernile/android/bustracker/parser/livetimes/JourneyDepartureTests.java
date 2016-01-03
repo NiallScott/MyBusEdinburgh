@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,124 +25,144 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import android.support.test.runner.AndroidJUnit4;
+
 import java.util.Date;
-import junit.framework.TestCase;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link JourneyDeparture}.
  * 
  * @author Niall Scott
  */
-public class JourneyDepartureTests extends TestCase {
-    
+@RunWith(AndroidJUnit4.class)
+public class JourneyDepartureTests {
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the stopCode is set as null.
+     * Test that {@link JourneyDeparture.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the stop code is set to {@code null}.
      */
-    public void testConstructorWithNullStopCode() {
-        try {
-            new MockJourneyDeparture(null, "stop name", new Date(), 1);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The stopCode is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullStopCode() {
+        new JourneyDeparture.Builder()
+                .setStopCode(null)
+                .setDepartureTime(new Date())
+                .build();
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the stopCode is set as empty.
+     * Test that {@link JourneyDeparture.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the stop code is set to empty.
      */
-    public void testConstructorWithEmptyStopCode() {
-        try {
-            new MockJourneyDeparture("", "stop name", new Date(), 1);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The stopCode is set as empty, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithEmptyStopCode() {
+        new JourneyDeparture.Builder()
+                .setStopCode("")
+                .setDepartureTime(new Date())
+                .build();
     }
-    
+
     /**
-     * Test that the constructor can accept a null stop name.
+     * Test that {@link JourneyDeparture.Builder#build()} does not throw any exceptions when the
+     * stop name is set as empty.
      */
-    public void testConstructorWithNullStopName() {
-        final JourneyDeparture departure =
-                new MockJourneyDeparture("123456", null, new Date(), 1);
-        assertNull(departure.getStopName());
+    @Test
+    public void testBuilderWithEmptyStopName() {
+        new JourneyDeparture.Builder()
+                .setStopCode("123456")
+                .setStopName("")
+                .setDepartureTime(new Date())
+                .build();
     }
-    
+
     /**
-     * Test that the constructor can accept an empty stop name.
+     * Test that {@link JourneyDeparture.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the departure time is set to {@code null}.
      */
-    public void testConstructorWithEmptyStopName() {
-        final JourneyDeparture departure =
-                new MockJourneyDeparture("123456", "", new Date(), 1);
-        assertEquals("", departure.getStopName());
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullDepartureTime() {
+        new JourneyDeparture.Builder()
+                .setStopCode("123456")
+                .setDepartureTime(null)
+                .build();
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the departureTime is set as null.
+     * Test the default values of a {@link JourneyDeparture} object.
      */
-    public void testConstructorWithNullDepartureTime() {
-        try {
-            new MockJourneyDeparture("123456", "stop name", null, 1);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The departureTime is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that the getters correctly return the data passed in to the
-     * constructor.
-     */
-    public void testValidDeparture() {
+    @Test
+    public void testDefault() {
         final Date date = new Date();
-        final JourneyDeparture departure =
-                new MockJourneyDeparture("123456", "stop name", date, 1);
-        
+        final JourneyDeparture departure = new JourneyDeparture.Builder()
+                .setStopCode("123456")
+                .setDepartureTime(date)
+                .build();
+
         assertEquals("123456", departure.getStopCode());
-        assertEquals("stop name", departure.getStopName());
+        assertNull(departure.getStopName());
         assertEquals(date, departure.getDepartureTime());
+        assertFalse(departure.isBusStopDisrupted());
+        assertFalse(departure.isEstimatedTime());
+        assertFalse(departure.isDelayed());
+        assertFalse(departure.isDiverted());
+        assertFalse(departure.isTerminus());
+        assertFalse(departure.isPartRoute());
+    }
+
+    /**
+     * Test building a {@link JourneyDeparture} with valid values produces an object that returns
+     * expected values.
+     */
+    @Test
+    public void testWithValidValues() {
+        final Date date = new Date();
+        final JourneyDeparture departure = new JourneyDeparture.Builder()
+                .setStopCode("123456")
+                .setStopName("Stop name")
+                .setDepartureTime(date)
+                .setIsBusStopDisrupted(true)
+                .setIsEstimatedTime(true)
+                .setIsDelayed(true)
+                .setIsDiverted(true)
+                .setIsTerminus(true)
+                .setIsPartRoute(true)
+                .build();
+
+        assertEquals("123456", departure.getStopCode());
+        assertEquals("Stop name", departure.getStopName());
+        assertEquals(date, departure.getDepartureTime());
+        assertTrue(departure.isBusStopDisrupted());
+        assertTrue(departure.isEstimatedTime());
+        assertTrue(departure.isDelayed());
+        assertTrue(departure.isDiverted());
+        assertTrue(departure.isTerminus());
+        assertTrue(departure.isPartRoute());
     }
     
     /**
-     * Test that the compareTo() method correctly returns -1 when the object to
-     * compare with is set to null.
+     * Test that ordering works correctly based on the value of the 'order' parameter.
      */
-    public void testOrderingWithNullObjectToCompare() {
-        final JourneyDeparture departure =
-                new MockJourneyDeparture("123456", "stop name", new Date(), 1);
-        assertEquals(-1, departure.compareTo(null));
-    }
-    
-    /**
-     * Test that ordering works correctly based on the value of the 'order'
-     * parameter.
-     */
-    public void testOrdering() {
-        JourneyDeparture departure1 =
-                new MockJourneyDeparture("123456", "stop name", new Date(), 1);
-        JourneyDeparture departure2 =
-                new MockJourneyDeparture("654321", "another", new Date(), 2);
+    @Test
+    public void testComparator() {
+        final JourneyDeparture departure1 = new JourneyDeparture.Builder()
+                .setStopCode("123456")
+                .setDepartureTime(new Date())
+                .setOrder(1)
+                .build();
+        final JourneyDeparture departure2 = new JourneyDeparture.Builder()
+                .setStopCode("654321")
+                .setDepartureTime(new Date())
+                .setOrder(2)
+                .build();
         assertTrue(departure1.compareTo(departure2) < 0);
-        
-        departure1 =
-                new MockJourneyDeparture("123456", "stop name", new Date(), 1);
-        departure2 =
-                new MockJourneyDeparture("654321", "another", new Date(), 1);
-        assertEquals(0, departure1.compareTo(departure2));
-        
-        departure1 =
-                new MockJourneyDeparture("123456", "stop name", new Date(), 2);
-        departure2 =
-                new MockJourneyDeparture("654321", "another", new Date(), 1);
-        assertTrue(departure1.compareTo(departure2) > 0);
+        assertTrue(departure2.compareTo(departure1) > 0);
+        assertEquals(0, departure1.compareTo(departure1));
     }
 }
