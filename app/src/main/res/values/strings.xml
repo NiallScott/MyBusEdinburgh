@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -211,8 +211,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_backup_error_ioerror">There was an error during backup. The backup file could not be read or written.</string>
     <string name="preferences_backup_error_nofile">No backup file exists to restore from.</string>
 
-    <string name="preference_backup_success">The database was successfully backed up to external storage.</string>
-    <string name="preference_restore_success">The database was successfully restored from external storage.</string>
+    <string name="preference_backup_success">The database was successfully backed up to external storage</string>
+    <string name="preference_backup_permission_denied">Unable to backup as the permission was denied</string>
+    <string name="preference_restore_success">The database was successfully restored from external storage</string>
+    <string name="preference_restore_permission_denied">Unable to restore as the permission was denied</string>
     
     <string-array name="preferences_num_departures_entries">
         <item>1 departure</item>
@@ -415,7 +417,24 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="neareststops_title">Nearest stops</string>
     <string name="neareststops_empty"><b>There is no data to display.</b>\nThis means that either your location could not be determined, or you are not in range of any stops, or no nearby stops match your filter.</string>
+    <string name="neareststops_error_permission_required"><b>Permission required.</b>\nTo show the nearest stops, you need to grant access to your location.</string>
+    <string name="neareststops_error_permission_required_button">Grant permission</string>
+    <string name="neareststops_error_location_sources"><b>Location services disabled.</b>\nPlease enable location services from the system settings.</string>
+    <string name="neareststops_error_location_sources_button">Open settings</string>
     <string name="neareststops_service_chooser_title">Select service(s) to filter</string>
+    <string name="neareststops_distance_format">%d m</string>
+    <string name="neareststops_orientation_unknown">Faces unknown direction</string>
+
+    <string-array name="neareststops_orientations">
+        <item>Faces north</item>
+        <item>Faces north east</item>
+        <item>Faces east</item>
+        <item>Faces south east</item>
+        <item>Faces south</item>
+        <item>Faces south west</item>
+        <item>Faces west</item>
+        <item>Faces north west</item>
+    </string-array>
     
     <!--
     **************************************
@@ -532,7 +551,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***********************************************
     -->
     <string name="opensourcelicensedialog_title">Open source licenses</string>
-    
+
     <!--
     **************************************************
     * Strings for ProximityLimitationsDialogFragment *

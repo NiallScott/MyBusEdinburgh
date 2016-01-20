@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2011 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,18 +27,56 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="SelectableText"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:paddingLeft="8dp" >
-    <TextView
-        android:id="@+id/txtNearestDistance"
-        android:layout_width="66dp"
+    android:gravity="center_vertical"
+    android:paddingLeft="?listPreferredItemPaddingLeft"
+    android:paddingStart="?listPreferredItemPaddingLeft"
+    android:paddingRight="?listPreferredItemPaddingRight"
+    android:paddingEnd="?listPreferredItemPaddingRight"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:longClickable="true">
+    <ImageView
+        android:id="@+id/imgDirection"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="center"
+        android:contentDescription="@null"
+        tools:src="@drawable/mapmarker_n" />
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingRight="5dp"
-        android:layout_gravity="center_vertical"
-        android:gravity="center" />
-    <include
-        layout="@layout/simple_list_item_2" />
+        android:layout_weight="1"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
+        android:minHeight="72dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@android:id/text1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
+            tools:text="Example text" />
+        <TextView
+            android:id="@android:id/text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
+            tools:text="Sample subtext" />
+    </LinearLayout>
+    <TextView
+        android:id="@+id/txtDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/padding_default"
+        android:paddingBottom="@dimen/padding_default"
+        android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
+        tools:text="300 m"/>
 </LinearLayout>

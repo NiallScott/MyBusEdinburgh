@@ -3,5 +3,6 @@
 .idea/tasks.xml
 .idea/workspace.xml
 build/
+captures/
 .DS_Store
 local.properties

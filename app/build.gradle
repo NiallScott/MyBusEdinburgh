@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ android {
     defaultConfig {
         applicationId "uk.org.rivernile.edinburghbustracker.android"
         minSdkVersion 15
-        targetSdkVersion 22
+        targetSdkVersion 23
         versionCode 15
         versionName "3.0 development"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,14 +24,19 @@
  */
 package uk.org.rivernile.android.utils;
 
+import android.Manifest;
 import android.location.Location;
 import android.location.LocationManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.RequiresPermission;
+
 import java.util.List;
 
 /**
- * This class contains various methods which help with Location services. Some
- * of the code is taken from the Android Developer website. Any bits of code
- * which have been taken from elsewhere will be marked in their method Javadoc.
+ * This class contains various methods which help with location services. Some of the code is
+ * taken from the Android Developer website. Any bits of code which have been taken from
+ * elsewhere will be marked in their method Javadoc.
  *
  * @author Niall Scott
  */
@@ -47,21 +52,21 @@ public class LocationUtils {
     }
 
     /**
-     * Get the best initial fix on a Location. It will loop through all known
-     * system location providers and get the location from each provider. They
-     * will all be compared to return the best Location.
+     * Get the best initial fix on a {@link Location}. It will loop through all known system
+     * location providers and get the location from each provider. They will all be compared to
+     * return the best Location.
      *
-     * @param locMan An instance of the LocationManager, so that this method can
-     * obtain the last location for each provider.
-     * @return An instance of Location which contains the best Location, or null
+     * @param locMan An instance of the {@link LocationManager}, so that this method can obtain
+     * the last {@link Location} for each provider.
+     * @return An instance of {@link Location} which contains the best location, or {@code null}
      * if a location could not be determined.
+     * @throws SecurityException If no suitable permission is present.
      */
-    public static Location getBestInitialLocation(
-            final LocationManager locMan) {
-        if (locMan == null) {
-            return null;
-        }
-
+    @RequiresPermission(anyOf = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION})
+    @Nullable
+    public static Location getBestInitialLocation(@NonNull final LocationManager locMan) {
         final List<String> matchingProviders = locMan.getAllProviders();
         Location location, bestLocation = null;
 
@@ -77,31 +82,30 @@ public class LocationUtils {
     }
 
     /**
-     * Determines whether one Location reading is better than the current
-     * Location fix.
+     * Determines whether one {@link Location} reading is better than the current
+     * {@link Location} fix.
      *
      * This was taken from
-     * http://d.android.com/training/basics/location/currentlocation.html
+     * <a href="http://d.android.com/training/basics/location/currentlocation.html">here</a>.
      *
-     * @param location The new Location fix.
-     * @param currentBestLocation The currently held Location fix.
-     * @return true if the new Location is better than the old one, false if
+     * @param location The new {@link Location} fix.
+     * @param currentBestLocation The currently held {@link Location} fix.
+     * @return {@code true} if the new {@link Location} is better than the old one, {@code false} if
      * not.
      */
-    public static boolean isBetterLocation(final Location location,
-            final Location currentBestLocation) {
+    public static boolean isBetterLocation(@NonNull final Location location,
+            @Nullable final Location currentBestLocation) {
         if (currentBestLocation == null) {
             // A new location is always better than no location.
             return true;
         }
 
         // Check whether the new location fix is newer or older.
-        final long timeDelta = location.getTime()
-                - currentBestLocation.getTime();
+        final long timeDelta = location.getTime() - currentBestLocation.getTime();
         final boolean isNewer = timeDelta > 0;
 
-        // If it's been more than two minutes since the current location, use
-        // the new location because the user has likely moved.
+        // If it's been more than two minutes since the current location, use the new location
+        // because the user has likely moved.
         if (timeDelta > TWO_MINUTES) {
             return true;
         } else if (timeDelta < -TWO_MINUTES) {
@@ -117,17 +121,15 @@ public class LocationUtils {
         final boolean isSignificantlyLessAccurate = accuracyDelta > 200;
 
         // Check if the old and new location are from the same provider.
-        final boolean isFromSameProvider = isSameProvider(
-                location.getProvider(), currentBestLocation.getProvider());
+        final boolean isFromSameProvider = isSameProvider(location.getProvider(),
+                currentBestLocation.getProvider());
 
-        // Determine location quality using a combination of timeliness and
-        // accuracy.
+        // Determine location quality using a combination of timeliness and accuracy.
         if (accuracyDelta < 0) {
             return true;
         } else if (isNewer && !isLessAccurate) {
             return true;
-        } else if (isNewer && !isSignificantlyLessAccurate
-                && isFromSameProvider) {
+        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
             return true;
         }
 
@@ -137,12 +139,12 @@ public class LocationUtils {
     /**
      * Checks to see if two providers are the same.
      *
-     * @param provider1 The first provider String to compare.
-     * @param provider2 The second provider String to compare.
-     * @return true if they are the same, false if not.
+     * @param provider1 The first provider {@link String} to compare.
+     * @param provider2 The second provider {@link String} to compare.
+     * @return {@code true} if they are the same, {@code false} if not.
      */
-    public static boolean isSameProvider(final String provider1,
-            final String provider2) {
+    public static boolean isSameProvider(@Nullable final String provider1,
+            @Nullable final String provider2) {
         if (provider1 == null) {
             return provider2 == null;
         }

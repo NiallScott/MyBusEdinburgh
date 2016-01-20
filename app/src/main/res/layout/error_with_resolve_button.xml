@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,15 +24,28 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources>
-    <!-- App theme colours. -->
-    <color name="colorPrimary">#C41411</color>
-    <color name="colorPrimaryDark">#B0120A</color>
-    <color name="colorAccent">#607D8B</color>
-    <color name="colorContextualStatusBarBackground">#616161</color>
-    <color name="colorContextualActionBarBackground">#757575</color>
-    
-    <color name="defaultBusColour">#4291BC</color>
-    <color name="mapActionBarColour">#90000000</color>
-    <color name="sectionlist_text_default">#212121</color>
-</resources>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutError"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+    <include
+        layout="@layout/error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="0dp" />
+    <Button
+        style="@style/Widget.AppCompat.Button.Borderless.Colored"
+        android:id="@+id/btnErrorResolve"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_default"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        tools:text="Resolve"
+        tools:visibility="visible" />
+</LinearLayout>
