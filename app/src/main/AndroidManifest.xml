@@ -26,6 +26,7 @@
 */ -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="uk.org.rivernile.edinburghbustracker.android" >
     
     <!-- Request the required permissions. -->
@@ -59,7 +60,10 @@
         android:hardwareAccelerated="true"
         android:theme="@style/MyBusEdinburgh"
         android:backupAgent="SettingsBackupAgent"
-        android:allowBackup="true" >
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/autobackup"
+        android:fullBackupOnly="true"
+        tools:ignore="UnusedAttribute">
         
         <!-- This is the API key used by the backup service. This is linked
              to the package name. -->
