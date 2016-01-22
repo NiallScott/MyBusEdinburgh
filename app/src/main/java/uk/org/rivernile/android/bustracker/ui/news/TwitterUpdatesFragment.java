@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -88,8 +87,7 @@ public class TwitterUpdatesFragment extends Fragment
         txtError = (TextView) v.findViewById(R.id.txtError);
 
         final Activity activity = getActivity();
-        recyclerView.setHasFixedSize(false);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+        recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new DividerItemDecoration(activity,
                 DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setAdapter(adapter);

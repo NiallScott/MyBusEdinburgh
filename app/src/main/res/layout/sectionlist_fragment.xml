@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 */ -->
 <android.support.v7.widget.RecyclerView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
     android:id="@android:id/list"
@@ -35,4 +36,6 @@
     android:paddingBottom="@dimen/padding_default"
     android:background="@android:color/white"
     android:scrollbars="vertical"
-    android:clipToPadding="false" />
+    android:clipToPadding="false"
+    android:orientation="vertical"
+    app:layoutManager="android.support.v7.widget.LinearLayoutManager" />

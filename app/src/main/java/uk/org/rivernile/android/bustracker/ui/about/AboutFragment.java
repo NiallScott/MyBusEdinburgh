@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,13 @@
 package uk.org.rivernile.android.bustracker.ui.about;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,13 +59,13 @@ public class AboutFragment extends Fragment
     private ProgressBar progress;
 
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(final Context context) {
+        super.onAttach(context);
 
         try {
-            callbacks = (Callbacks) activity;
+            callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() + " does not implement "
+            throw new IllegalStateException(context.getClass().getName() + " does not implement "
                     + Callbacks.class.getName());
         }
     }
@@ -86,8 +86,7 @@ public class AboutFragment extends Fragment
         progress = (ProgressBar) v.findViewById(R.id.progress);
 
         final Activity activity = getActivity();
-        recyclerView.setHasFixedSize(false);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+        recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new DividerItemDecoration(activity,
                 DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setAdapter(adapter);
@@ -128,16 +127,16 @@ public class AboutFragment extends Fragment
      * Any {@link Activity Activities} which host this {@link Fragment} must implement this
      * interface to handle navigation events.
      */
-    public static interface Callbacks {
+    public interface Callbacks {
 
         /**
          * This is called when the user wants to see credits.
          */
-        public void onShowCredits();
+        void onShowCredits();
 
         /**
          * This is called when the user wants to see the open source licences.
          */
-        public void onShowLicences();
+        void onShowLicences();
     }
 }

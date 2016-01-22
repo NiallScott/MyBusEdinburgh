@@ -31,7 +31,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +48,6 @@ import uk.org.rivernile.android.bustracker.ui.main.sections.NewsSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.main.sections.SettingsSection;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 /**
  * This {@link ListFragment} makes up the view in the application navigation drawer. It shows a
@@ -118,7 +116,6 @@ public class SectionListFragment extends Fragment {
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
 
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
         
         return v;
