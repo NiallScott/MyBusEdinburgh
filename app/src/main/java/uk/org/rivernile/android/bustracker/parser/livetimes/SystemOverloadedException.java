@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,24 +26,24 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 /**
- * This Exception should be thrown when the server reports that it is
- * overloaded (or some other rate limiting is implemented).
+ * This {@link Exception} should be thrown when the server reports that it is overloaded (or some
+ * other rate limiting is implemented).
  * 
  * @author Niall Scott
  */
 public class SystemOverloadedException extends LiveTimesException {
     
     /**
-     * Create a new SystemOverloadedException with a default message.
+     * Create a new {@code SystemOverloadedException} with a default message.
      */
     public SystemOverloadedException() {
         super("The remote server is overloaded.");
     }
     
     /**
-     * Create a new SystemOverloadedException with the given detailMessage.
+     * Create a new {@code SystemOverloadedException} with the given {@code detailMessage}.
      * 
-     * @param detailMessage The message to set in the Exception.
+     * @param detailMessage The message to set in the {@link Exception}.
      */
     public SystemOverloadedException(final String detailMessage) {
         super(detailMessage);

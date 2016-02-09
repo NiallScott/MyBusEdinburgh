@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,11 +25,13 @@
 
 package uk.org.rivernile.android.bustracker.parser.database;
 
-import uk.org.rivernile.android.fetchers.Fetcher;
+import android.support.annotation.NonNull;
+
+import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
 
 /**
- * This interface defines the entry methods to get the database version
- * information from the endpoint and parse the data it gets back.
+ * This interface defines the entry methods to get the database version information from the
+ * endpoint and parse the data it gets back.
  * 
  * @author Niall Scott
  */
@@ -38,12 +40,12 @@ public interface DatabaseVersionParser {
     /**
      * Get database version information.
      * 
-     * @param fetcher The Fetcher to use to grab the data.
-     * @return A DatabaseVersion object describing the version details if no
-     * exceptions have occurred.
-     * @throws DatabaseEndpointException If an exception occurs while grabbing
-     * the data or parsing it.
+     * @param fetcher The {@link Fetcher} to use to grab the data.
+     * @return A {@link DatabaseVersion} object describing the version details if no exceptions
+     * have occurred.
+     * @throws DatabaseEndpointException If an exception occurs while grabbing the data or
+     * parsing it.
      */
-    public DatabaseVersion getDatabaseVersion(Fetcher fetcher)
-            throws DatabaseEndpointException;
+    @NonNull
+    DatabaseVersion getDatabaseVersion(@NonNull Fetcher fetcher) throws DatabaseEndpointException;
 }

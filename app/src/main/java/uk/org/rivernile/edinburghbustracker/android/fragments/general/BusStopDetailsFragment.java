@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,8 +25,10 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -41,8 +43,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -64,52 +69,40 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.NumberFormat;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowAddFavouriteStopListener;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowAddProximityAlertListener;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowAddTimeAlertListener;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowBusStopMapWithStopCodeListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddFavouriteStopListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddTimeAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopCodeListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowConfirmDeleteProximityAlertListener;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowConfirmDeleteTimeAlertListener;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowConfirmFavouriteDeletionListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteFavouriteDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteTimeAlertDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTimeAlertDialogFragment;
 
 /**
- * This Fragment shows details for a bus stop. The bus stop code is passed in
- * as an argument to this Fragment. A Map is shown at the top of the Fragment
+ * This {@link Fragment} shows details for a bus stop. The bus stop code is passed in as an
+ * argument to this {@link Fragment}. A Map is shown at the top of the {@link Fragment}
  * if the Google Play Services are available, otherwise it is removed.
  * 
  * @author Niall Scott
  */
-public class BusStopDetailsFragment extends Fragment
-        implements LocationListener, SensorEventListener,
-        LoaderManager.LoaderCallbacks<Cursor>,
-        DeleteProximityAlertDialogFragment.Callbacks,
-        DeleteTimeAlertDialogFragment.Callbacks,
+public class BusStopDetailsFragment extends Fragment implements LocationListener,
+        SensorEventListener, LoaderManager.LoaderCallbacks<Cursor>,
+        DeleteProximityAlertDialogFragment.Callbacks, DeleteTimeAlertDialogFragment.Callbacks,
         DeleteFavouriteDialogFragment.Callbacks {
-    
-    private static final NumberFormat distanceFormat =
-            NumberFormat.getInstance();
     
     /** This is the stopCode argument. */
     public static final String ARG_STOPCODE = "stopCode";
+
+    private static final NumberFormat DISTANCE_FORMAT = NumberFormat.getInstance();
     
     private static final int REQUEST_PERIOD = 10000;
     private static final float MIN_DISTANCE = 3.0f;
@@ -126,8 +119,7 @@ public class BusStopDetailsFragment extends Fragment
     private MapView mapView;
     private GoogleMap map;
     private ImageButton favouriteBtn;
-    private TextView txtName, txtServices, txtDistance, txtEmpty, txtProxAlert,
-            txtTimeAlert;
+    private TextView txtName, txtServices, txtDistance, txtEmpty, txtProxAlert, txtTimeAlert;
     private View layoutContent, progress;
     
     private Location lastLocation;
@@ -148,12 +140,13 @@ public class BusStopDetailsFragment extends Fragment
     private Bitmap needleBitmap;
     
     /**
-     * Get a new instance of this Fragment. A bus stop code must be supplied.
+     * Get a new instance of this {@link Fragment}. A bus stop code must be supplied.
      * 
      * @param stopCode The bus stop code to show details for.
-     * @return A new instance of this Fragment.
+     * @return A new instance of this {@link Fragment}.
      */
-    public static BusStopDetailsFragment newInstance(final String stopCode) {
+    @NonNull
+    public static BusStopDetailsFragment newInstance(@NonNull final String stopCode) {
         final BusStopDetailsFragment f = new BusStopDetailsFragment();
         final Bundle b = new Bundle();
         b.putString(ARG_STOPCODE, stopCode);
@@ -161,25 +154,19 @@ public class BusStopDetailsFragment extends Fragment
         
         return f;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(final Context context) {
+        super.onAttach(context);
         
         try {
-            callbacks = (Callbacks) activity;
+            callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() +
-                    " does not implement " + Callbacks.class.getName());
+            throw new IllegalStateException(context.getClass().getName() + " does not implement " +
+                    Callbacks.class.getName());
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -189,24 +176,18 @@ public class BusStopDetailsFragment extends Fragment
         // Get the various resources and services.
         bsd = BusStopDatabase.getInstance(context);
         sd = SettingsDatabase.getInstance(context);
-        locMan = (LocationManager)context
-                .getSystemService(Context.LOCATION_SERVICE);
-        sensMan = (SensorManager)context
-                .getSystemService(Context.SENSOR_SERVICE);
+        locMan = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        sensMan = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         stopCode = getArguments().getString(ARG_STOPCODE);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public View onCreateView(final LayoutInflater inflater,
-            final ViewGroup container, final Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+            final Bundle savedInstanceState) {
         // This is the View that contains the root view.
-        final View v = inflater.inflate(R.layout.busstopdetails, container,
-                false);
+        final View v = inflater.inflate(R.layout.busstopdetails, container, false);
         
         // Get the MapView and send it the onCreate event.
         mapView = (MapView)v.findViewById(R.id.mapView);
@@ -214,14 +195,14 @@ public class BusStopDetailsFragment extends Fragment
         
         layoutContent = v.findViewById(R.id.layoutContent);
         progress = v.findViewById(R.id.progress);
-        txtEmpty = (TextView)v.findViewById(android.R.id.empty);
-        txtName = (TextView)v.findViewById(R.id.txtName);
-        txtServices = (TextView)v.findViewById(R.id.txtServices);
-        txtDistance = (TextView)v.findViewById(R.id.txtDistance);
-        txtProxAlert = (TextView)v.findViewById(R.id.txtProxAlert);
-        txtTimeAlert = (TextView)v.findViewById(R.id.txtTimeAlert);
+        txtEmpty = (TextView) v.findViewById(android.R.id.empty);
+        txtName = (TextView) v.findViewById(R.id.txtName);
+        txtServices = (TextView) v.findViewById(R.id.txtServices);
+        txtDistance = (TextView) v.findViewById(R.id.txtDistance);
+        txtProxAlert = (TextView) v.findViewById(R.id.txtProxAlert);
+        txtTimeAlert = (TextView) v.findViewById(R.id.txtTimeAlert);
         
-        Button b = (Button)v.findViewById(R.id.btnBusTimes);
+        Button b = (Button) v.findViewById(R.id.btnBusTimes);
         b.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -230,7 +211,7 @@ public class BusStopDetailsFragment extends Fragment
             }
         });
         
-        b = (Button)v.findViewById(R.id.btnStreetView);
+        b = (Button) v.findViewById(R.id.btnStreetView);
         b.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
@@ -239,17 +220,16 @@ public class BusStopDetailsFragment extends Fragment
             }
         });
         
-        favouriteBtn = (ImageButton)v.findViewById(R.id.imgbtnFavourite);
+        favouriteBtn = (ImageButton) v.findViewById(R.id.imgbtnFavourite);
         favouriteBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
                 // Add/remove as favourite.
-                if(sd.getFavouriteStopExists(stopCode)) {
+                if (sd.getFavouriteStopExists(stopCode)) {
                     callbacks.onShowConfirmFavouriteDeletion(stopCode);
                 } else {
                     callbacks.onShowAddFavouriteStop(stopCode,
-                            locality != null ?
-                            stopName + ", " + locality : stopName);
+                            locality != null ? stopName + ", " + locality : stopName);
                 }
             }
         });
@@ -257,7 +237,7 @@ public class BusStopDetailsFragment extends Fragment
         txtProxAlert.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                if(sd.isActiveProximityAlert(stopCode)) {
+                if (sd.isActiveProximityAlert(stopCode)) {
                     callbacks.onShowConfirmDeleteProximityAlert();
                 } else {
                     callbacks.onShowAddProximityAlert(stopCode);
@@ -268,7 +248,7 @@ public class BusStopDetailsFragment extends Fragment
         txtTimeAlert.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                if(sd.isActiveTimeAlert(stopCode)) {
+                if (sd.isActiveTimeAlert(stopCode)) {
                     callbacks.onShowConfirmDeleteTimeAlert();
                 } else {
                     callbacks.onShowAddTimeAlert(stopCode, null);
@@ -278,26 +258,24 @@ public class BusStopDetailsFragment extends Fragment
         
         return v;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
-        // Get the screen rotation. This will be needed later to remap the
-        // coordinate system.
-        screenRotation = getActivity().getWindowManager().getDefaultDisplay()
-                .getRotation();
+        // Get the screen rotation. This will be needed later to remap the coordinate system.
+        screenRotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
         
         // Initialise the lastLocation to the best known location.
-        lastLocation = LocationUtils.getBestInitialLocation(locMan);
+        if (hasLocationPermission()) {
+            lastLocation = LocationUtils.getBestInitialLocation(locMan);
+        }
+
         updateLocation();
         
         map = mapView.getMap();
         // The Map can be null if Google Play Services is not available.
-        if(map != null) {
+        if (map != null) {
             map.getUiSettings().setMyLocationButtonEnabled(false);
             map.setOnMapClickListener(new OnMapClickListener() {
                 @Override
@@ -310,70 +288,61 @@ public class BusStopDetailsFragment extends Fragment
             mapView.setVisibility(View.GONE);
         }
         
-        // The loader is restarted each time incase a new bus stop database has
-        // become available.
+        // The loader is restarted each time incase a new bus stop database has become available.
         getLoaderManager().restartLoader(0, null, this);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onResume() {
         super.onResume();
         
         // Feed back life cycle events back to the MapView.
         mapView.onResume();
-        
-        // Start the location providers if they are enabled.
-        if(locMan.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            locMan.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-                    REQUEST_PERIOD, MIN_DISTANCE, this);
+
+        if (hasLocationPermission()) {
+            // Start the location providers if they are enabled.
+            if (locMan.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                locMan.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, REQUEST_PERIOD,
+                        MIN_DISTANCE, this);
+            }
+
+            if (locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                locMan.requestLocationUpdates(LocationManager.GPS_PROVIDER, REQUEST_PERIOD,
+                        MIN_DISTANCE, this);
+            }
+
+            // Show the user's location on the map if we can.
+            if (map != null) {
+                map.setMyLocationEnabled(getActivity().getSharedPreferences(
+                        PreferenceConstants.PREF_FILE, 0)
+                        .getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true));
+            }
+
+            // Start the accelerometer and magnetometer.
+            startOrientationSensors();
         }
         
-        if(locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            locMan.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    REQUEST_PERIOD, MIN_DISTANCE, this);
-        }
-        
-        // Start the accelerometer and magnetometer.
-        startOrientationSensors();
-        
-        // Show the user's location on the map if we can.
-        if(map != null) {
-            map.setMyLocationEnabled(
-                    getActivity().getSharedPreferences(
-                            PreferenceConstants.PREF_FILE, 0)
-                        .getBoolean(PreferenceConstants.PREF_AUTO_LOCATION,
-                                true));
-        }
-        
-        if(sd.getFavouriteStopExists(stopCode)) {
+        if (sd.getFavouriteStopExists(stopCode)) {
             favouriteBtn.setImageResource(R.drawable.ic_list_favourite);
-            favouriteBtn.setContentDescription(
-                    getString(R.string.favourite_rem));
+            favouriteBtn.setContentDescription(getString(R.string.favourite_rem));
         } else {
             favouriteBtn.setImageResource(R.drawable.ic_list_unfavourite);
-            favouriteBtn.setContentDescription(
-                    getString(R.string.favourite_add));
+            favouriteBtn.setContentDescription(getString(R.string.favourite_add));
         }
         
-        if(sd.isActiveProximityAlert(stopCode)) {
+        if (sd.isActiveProximityAlert(stopCode)) {
             txtProxAlert.setText(R.string.busstopdetails_prox_rem);
         } else {
             txtProxAlert.setText(R.string.busstopdetails_prox_add);
         }
         
-        if(sd.isActiveTimeAlert(stopCode)) {
+        if (sd.isActiveTimeAlert(stopCode)) {
             txtTimeAlert.setText(R.string.busstopdetails_time_rem);
         } else {
             txtTimeAlert.setText(R.string.busstopdetails_time_add);
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onPause() {
         super.onPause();
@@ -386,10 +355,7 @@ public class BusStopDetailsFragment extends Fragment
         // ...and Sensor updates.
         sensMan.unregisterListener(this);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onSaveInstanceState(final Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -397,10 +363,7 @@ public class BusStopDetailsFragment extends Fragment
         // Feed back life cycle events back to the MapView.
         mapView.onSaveInstanceState(outState);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -408,10 +371,7 @@ public class BusStopDetailsFragment extends Fragment
         // Feed back life cycle events back to the MapView.
         mapView.onDestroy();
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onLowMemory() {
         super.onLowMemory();
@@ -419,10 +379,7 @@ public class BusStopDetailsFragment extends Fragment
         // Feed back life cycle events back to the MapView.
         mapView.onLowMemory();
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public Loader<Cursor> onCreateLoader(final int i, final Bundle bundle) {
         // Show the progress indicator.
@@ -432,9 +389,6 @@ public class BusStopDetailsFragment extends Fragment
         return new BusStopDetailsLoader(getActivity(), stopCode);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
         if (isAdded()) {
@@ -446,25 +400,19 @@ public class BusStopDetailsFragment extends Fragment
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onLoaderReset(final Loader<Cursor> loader) {
         // Nothing to do here.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onLocationChanged(final Location location) {
-        if(LocationUtils.isBetterLocation(location, lastLocation)) {
+        if (LocationUtils.isBetterLocation(location, lastLocation)) {
             lastLocation = location;
 
             // Calculate the GeomagneticField of the current location. This is
             // used by the direction indicator.
-            if(location != null) {
+            if (location != null) {
                 geoField = new GeomagneticField(
                         Double.valueOf(location.getLatitude()).floatValue(),
                         Double.valueOf(location.getLongitude()).floatValue(),
@@ -476,47 +424,34 @@ public class BusStopDetailsFragment extends Fragment
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onStatusChanged(final String provider, final int status,
             final Bundle extras) {
         // Nothing to do here.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onProviderEnabled(final String provider) {
-        if (LocationManager.GPS_PROVIDER.equals(provider) ||
-                LocationManager.NETWORK_PROVIDER.equals(provider)) {
-            locMan.requestLocationUpdates(provider, REQUEST_PERIOD,
-                    MIN_DISTANCE, this);
+        if (hasLocationPermission() && (LocationManager.GPS_PROVIDER.equals(provider) ||
+                LocationManager.NETWORK_PROVIDER.equals(provider))) {
+            locMan.requestLocationUpdates(provider, REQUEST_PERIOD, MIN_DISTANCE, this);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onProviderDisabled(final String provider) {
         // Nothing to do here.
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onSensorChanged(final SensorEvent event) {
         final float[] values = event.values;
         
-        switch(event.sensor.getType()) {
+        switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
                 // If there's no accelerometer values yet, create the values
                 // array.
-                if(accelerometerValues == null) {
+                if (accelerometerValues == null) {
                     accelerometerValues = new float[3];
                     accelerometerValues[0] = values[0];
                     accelerometerValues[1] = values[1];
@@ -529,7 +464,7 @@ public class BusStopDetailsFragment extends Fragment
             case Sensor.TYPE_MAGNETIC_FIELD:
                 // If there's no magnetometer values yet, create the values
                 // array.
-                if(magnetometerValues == null) {
+                if (magnetometerValues == null) {
                     magnetometerValues = new float[3];
                     magnetometerValues[0] = values[0];
                     magnetometerValues[1] = values[1];
@@ -547,77 +482,56 @@ public class BusStopDetailsFragment extends Fragment
         updateDirectionNeedle();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
         // Nothing to do here.
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onConfirmFavouriteDeletion() {
         favouriteBtn.setImageResource(R.drawable.ic_list_unfavourite);
         favouriteBtn.setContentDescription(getString(R.string.favourite_add));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCancelFavouriteDeletion() {
         // Nothing to do.
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onConfirmProximityAlertDeletion() {
         txtProxAlert.setText(R.string.busstopdetails_prox_add);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCancelProximityAlertDeletion() {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onConfirmTimeAlertDeletion() {
         txtTimeAlert.setText(R.string.busstopdetails_time_add);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCancelTimeAlertDeletion() {
         // Nothing to do.
     }
     
     /**
-     * This is called when the Loader has finished. It moves the data out of the
-     * Cursor and in to local fields.
+     * This is called when the {@link Loader} has finished. It moves the data out of the
+     * {@link Cursor} and in to local fields.
      * 
      * @param c The returned Cursor.
      */
     private void populateData(final Cursor c) {
-        if(c == null) {
+        if (c == null) {
             showLoadFailedError();
             
             return;
         }
 
-        if(c.moveToNext()) {
+        if (c.moveToNext()) {
             stopName = c.getString(2);
             latitude = c.getDouble(3);
             longitude = c.getDouble(4);
@@ -633,8 +547,7 @@ public class BusStopDetailsFragment extends Fragment
     }
     
     /**
-     * Using the data in the local fields of this object, populate the various
-     * views with data.
+     * Using the data in the local fields of this object, populate the various views with data.
      */
     private void populateView() {
         layoutContent.setVisibility(View.VISIBLE);
@@ -645,9 +558,8 @@ public class BusStopDetailsFragment extends Fragment
         
         final String name;
         
-        if(locality != null) {
-            name = getString(R.string.busstop_locality_coloured, stopName,
-                    locality, stopCode);
+        if (locality != null) {
+            name = getString(R.string.busstop_locality_coloured, stopName, locality, stopCode);
         } else {
             name = getString(R.string.busstop_coloured, stopName, stopCode);
         }
@@ -656,11 +568,11 @@ public class BusStopDetailsFragment extends Fragment
         
         // Set the services list text.
         final String services = bsd.getBusServicesForStopAsString(stopCode);
-        if(services == null || services.length() == 0) {
+
+        if (services == null || services.length() == 0) {
             txtServices.setText(R.string.busstopdetails_noservices);
         } else {
-            txtServices.setText(BusStopDatabase.getColouredServiceListString(
-                    services));
+            txtServices.setText(BusStopDatabase.getColouredServiceListString(services));
         }
         
         updateLocation();
@@ -670,64 +582,51 @@ public class BusStopDetailsFragment extends Fragment
      * Set the location of the map.
      */
     private void setMapLocation() {
-        if(map != null) {
-            // This is a bit of a hack to stop the map crashing the app. The
-            // CameraUpdateFactory depends on being initialised before use. It
-            // seems to work well when the Fragment is first run, but if the app
-            // is killed then later resumed with this Fragment being what is
-            // returned to, the app crashes. This code forces initialisation to
-            // happen.
-            if (MapsInitializer.initialize(getActivity()) !=
-                    ConnectionResult.SUCCESS) {
+        if (map != null) {
+            // This is a bit of a hack to stop the map crashing the app. The CameraUpdateFactory
+            // depends on being initialised before use. It seems to work well when the Fragment
+            // is first run, but if the app is killed then later resumed with this Fragment being
+            // what is returned to, the app crashes. This code forces initialisation to happen.
+            if (MapsInitializer.initialize(getActivity()) != ConnectionResult.SUCCESS) {
                 return;
             }
             
             // Move the camera to the position of the bus stop marker.
             final LatLng position = new LatLng(latitude, longitude);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position,
-                    MAP_ZOOM));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, MAP_ZOOM));
             // Create new MarkerOptions. Not draggable.
             final MarkerOptions mo = new MarkerOptions();
             mo.draggable(false);
             mo.position(position);
             
             // Select the marker icon to use on the map.
-            switch(orientation) {
+            switch (orientation) {
                 case 0:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker_n));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_n));
                     break;
                 case 1:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker_ne));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_ne));
                     break;
                 case 2:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker_e));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_e));
                     break;
                 case 3:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker_se));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_se));
                     break;
                 case 4:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker_s));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_s));
                     break;
                 case 5:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker_sw));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_sw));
                     break;
                 case 6:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker_w));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_w));
                     break;
                 case 7:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker_nw));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_nw));
                     break;
                 default:
-                    mo.icon(BitmapDescriptorFactory.fromResource(
-                            R.drawable.mapmarker));
+                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker));
                     break;
             }
             
@@ -737,8 +636,8 @@ public class BusStopDetailsFragment extends Fragment
     }
     
     /**
-     * This method is called when there is a problem loading the bus stop or the
-     * bus stop does not exist in the database.
+     * This method is called when there is a problem loading the bus stop or the bus stop does
+     * not exist in the database.
      */
     private void showLoadFailedError() {
         layoutContent.setVisibility(View.GONE);
@@ -750,29 +649,27 @@ public class BusStopDetailsFragment extends Fragment
      * This method is called when the device detects a new location.
      */
     private void updateLocation() {
-        if(lastLocation == null || stopCode == null) {
+        if (lastLocation == null || stopCode == null) {
             // Make sure there's no distance text or direction needle.
             txtDistance.setText("");
-            txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                    null, null);
+            txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             recycleNeedleBitmapIfNotNull(null);
             
             return;
         }
         
         // Get the distance between the device's location and the bus stop.
-        Location.distanceBetween(lastLocation.getLatitude(),
-                lastLocation.getLongitude(), latitude, longitude, distance);
+        Location.distanceBetween(lastLocation.getLatitude(), lastLocation.getLongitude(),
+                latitude, longitude, distance);
         // Units depends on distance.
-        if(distance[0] > 1000f) {
-            distanceFormat.setMaximumFractionDigits(1);
-            distanceFormat.setParseIntegerOnly(false);
-            txtDistance.setText(distanceFormat.format(distance[0] / 1000) +
-                    " km");
+        if (distance[0] > 1000f) {
+            DISTANCE_FORMAT.setMaximumFractionDigits(1);
+            DISTANCE_FORMAT.setParseIntegerOnly(false);
+            txtDistance.setText(DISTANCE_FORMAT.format(distance[0] / 1000) + " km");
         } else {
-            distanceFormat.setMaximumFractionDigits(0);
-            distanceFormat.setParseIntegerOnly(true);
-            txtDistance.setText(distanceFormat.format(distance[0]) + " m");
+            DISTANCE_FORMAT.setMaximumFractionDigits(0);
+            DISTANCE_FORMAT.setParseIntegerOnly(true);
+            txtDistance.setText(DISTANCE_FORMAT.format(distance[0]) + " m");
         }
         
         // There's a new location, the direction needle needs to be updated.
@@ -780,115 +677,99 @@ public class BusStopDetailsFragment extends Fragment
     }
     
     /**
-     * Update the direction needle so that it is pointing towards the bus stop,
-     * based on the device location and the direction it is facing.
+     * Update the direction needle so that it is pointing towards the bus stop, based on the
+     * device location and the direction it is facing.
      */
     private void updateDirectionNeedle() {
-        // We need values for location, the accelerometer and magnetometer to
-        // continue.
-        if(lastLocation == null || accelerometerValues == null ||
-                magnetometerValues == null) {
+        // We need values for location, the accelerometer and magnetometer to continue.
+        if (lastLocation == null || accelerometerValues == null || magnetometerValues == null) {
             // Make sure the needle isn't showing.
-            txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                    null, null);
+            txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             recycleNeedleBitmapIfNotNull(null);
             
             return;
         }
         
-        // Calculating the rotation matrix may fail, for example, if the device
-        // is in freefall. In that case we cannot continue as the values will
-        // be unreliable.
-        if(!SensorManager.getRotationMatrix(rotationMatrix, null,
-                accelerometerValues, magnetometerValues)) {
+        // Calculating the rotation matrix may fail, for example, if the device is in freefall.
+        // In that case we cannot continue as the values will be unreliable.
+        if (!SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerValues,
+                magnetometerValues)) {
             return;
         }
         
         // The screen rotation was obtained earlier.
-        switch(screenRotation) {
+        switch (screenRotation) {
             // There's lots of information about this elsewhere, but briefly;
-            // The values from the sensors are in the device's coordinate system
-            // which may be correct if the device is in its natural orientation,
-            // but it needs to be remapped if the device is rotated.
+            // The values from the sensors are in the device's coordinate system which may be
+            // correct if the device is in its natural orientation, but it needs to be remapped
+            // if the device is rotated.
             case Surface.ROTATION_0:
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_X, SensorManager.AXIS_Z,
-                        rotationMatrix);
+                SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X,
+                        SensorManager.AXIS_Z, rotationMatrix);
                 break;
             case Surface.ROTATION_90:
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_Z, SensorManager.AXIS_MINUS_X,
-                        rotationMatrix);
+                SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_Z,
+                        SensorManager.AXIS_MINUS_X, rotationMatrix);
                 break;
             case Surface.ROTATION_180:
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_MINUS_X, SensorManager.AXIS_MINUS_Z,
-                        rotationMatrix);
+                SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_MINUS_X,
+                        SensorManager.AXIS_MINUS_Z, rotationMatrix);
                 break;
             case Surface.ROTATION_270:
-                SensorManager.remapCoordinateSystem(rotationMatrix,
-                        SensorManager.AXIS_MINUS_Z, SensorManager.AXIS_X,
-                        rotationMatrix);
+                SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_MINUS_Z,
+                        SensorManager.AXIS_X, rotationMatrix);
                 break;
         }
         
-        // Get the X, Y and Z orientations, which are in radians. Covert this
-        // in to degrees East of North.
+        // Get the X, Y and Z orientations, which are in radians. Covert this in to degrees East
+        // of North.
         SensorManager.getOrientation(rotationMatrix, headings);
         double heading = Math.toDegrees(headings[0]);
         
-        // If there's a GeomagneticField value, then adjust the heading to take
-        // this in to account.
-        if(geoField != null) {
+        // If there's a GeomagneticField value, then adjust the heading to take this in to account.
+        if (geoField != null) {
             heading -= geoField.getDeclination();
         }
         
-        // The orientation is in the range of -180 to +180. Convert this in to
-        // a range of 0 to 360.
-        final float bearingTo = distance[1] < 0 ?
-                distance[1] + 360 : distance[1];
+        // The orientation is in the range of -180 to +180. Convert this in to a range of 0 to 360.
+        final float bearingTo = distance[1] < 0 ? distance[1] + 360 : distance[1];
         
         // This is the heading to the bus stop.
         heading = bearingTo - heading;
         
-        // The above calculation may come out as a negative number again. Put
-        // this back in to the range of 0 to 360.
-        if(heading < 0) {
+        // The above calculation may come out as a negative number again. Put this back in to the
+        // range of 0 to 360.
+        if (heading < 0) {
             heading += 360;
         }
         
-        // This 'if' statement is required to prevent a crash during device
-        // rotation. It ensured that the Fragment is still part of the Activity.
-        if(isAdded()) {
+        // This 'if' statement is required to prevent a crash during device rotation. It ensured
+        // that the Fragment is still part of the Activity.
+        if (isAdded()) {
             // Get the arrow bitmap from the resources.
             final Bitmap needleIn = BitmapFactory.decodeResource(getResources(),
                     R.drawable.heading_arrow);
             // Get an identity matrix and rotate it by the required amount.
             final Matrix m = new Matrix();
-            m.setRotate((float)heading % 360, (float)needleIn.getWidth() / 2,
-                    (float)needleIn.getHeight() / 2);
+            m.setRotate((float) heading % 360, (float) needleIn.getWidth() / 2,
+                    (float) needleIn.getHeight() / 2);
             // Apply the rotation matrix to the Bitmap, to create a new Bitmap.
-            final Bitmap needleOut = Bitmap.createBitmap(needleIn, 0, 0,
-                    needleIn.getWidth(), needleIn.getHeight(), m, true);
+            final Bitmap needleOut = Bitmap.createBitmap(needleIn, 0, 0, needleIn.getWidth(),
+                    needleIn.getHeight(), m, true);
             
-            // Recycle the needle read in if it's not the same as the rotated
-            // needle.
+            // Recycle the needle read in if it's not the same as the rotated needle.
             if (needleIn != needleOut) {
                 needleIn.recycle();
             }
             
             // This Bitmap needs to be converted to a Drawable type.
-            final BitmapDrawable drawable = new BitmapDrawable(getResources(),
-                    needleOut);
+            final BitmapDrawable drawable = new BitmapDrawable(getResources(), needleOut);
             // Set the new needle to be on the right hand side of the TextView.
-            txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                    drawable, null);
+            txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
             recycleNeedleBitmapIfNotNull(needleOut);
         } else {
-            // If the Fragment is not added to the Activity, then make sure
-            // there's no needle.
-            txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                    null, null);
+            // If the Fragment is not added to the Activity, then make sure there's no needle.
+            txtDistance.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             recycleNeedleBitmapIfNotNull(null);
         }
     }
@@ -897,48 +778,58 @@ public class BusStopDetailsFragment extends Fragment
      * Start the sensors used to measure device magnetic orientation.
      */
     private void startOrientationSensors() {
-        // Only use the sensors when both the magnetometer and the accelerometer
-        // are available.
-        if(magnetometer != null && accelerometer != null) {
-            sensMan.registerListener(this, magnetometer,
-                    SensorManager.SENSOR_DELAY_NORMAL);
-            sensMan.registerListener(this, accelerometer,
-                    SensorManager.SENSOR_DELAY_NORMAL);
+        // Only use the sensors when both the magnetometer and the accelerometer are available.
+        if (magnetometer != null && accelerometer != null) {
+            sensMan.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+            sensMan.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
     
     /**
-     * This method is used to smooth the values coming from the accelerometer
-     * and the magnetometer. This stops the needle from jumping around.
+     * This method is used to smooth the values coming from the accelerometer and the
+     * magnetometer. This stops the needle from jumping around.
      * 
      * @param oldValues The existing values.
      * @param newValues The new values from the sensor.
      */
-    private static void smoothValues(final float[] oldValues,
-            final float[] newValues) {
+    private static void smoothValues(final float[] oldValues, final float[] newValues) {
         // If there's no old or new values, then return.
-        if(oldValues == null || newValues == null) {
+        if (oldValues == null || newValues == null) {
             return;
         }
         
         // Loop through the arrays, smoothing the values.
         final int len = oldValues.length;
-        for(int i = 0; i < len; i++) {
+        for (int i = 0; i < len; i++) {
             oldValues[i] += 0.2f * (newValues[i] - oldValues[i]);
         }
     }
     
     /**
-     * Recycle the needle Bitmap if it's no longer in use.
+     * Recycle the needle {@link Bitmap} if it's no longer in use.
      * 
-     * @param newNeedle The new needle Bitmap. Can be null.
+     * @param newNeedle The new needle {@link Bitmap}.
      */
-    private void recycleNeedleBitmapIfNotNull(final Bitmap newNeedle) {
+    private void recycleNeedleBitmapIfNotNull(@Nullable final Bitmap newNeedle) {
         if (needleBitmap != null) {
             needleBitmap.recycle();
         }
         
         needleBitmap = newNeedle;
+    }
+
+    /**
+     * Does the application have access to the necessary location permissions?
+     *
+     * @return {@code true} if the application has access to the necessary location permissions,
+     * {@code false} if not.
+     */
+    private boolean hasLocationPermission() {
+        final boolean hasFineLocation = ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        final boolean hasCoarseLocation = ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return hasFineLocation && hasCoarseLocation;
     }
     
     /**
@@ -950,22 +841,19 @@ public class BusStopDetailsFragment extends Fragment
         private final String stopCode;
         
         /**
-         * Create a new BusStopDetailsLoader, specifying the stopCode.
+         * Create a new {@link BusStopDetailsLoader}, specifying the {@code stopCode}.
          * 
-         * @param context A Context instance.
-         * @param stopCode The stopCode to load.
+         * @param context A {@link Context} instance.
+         * @param stopCode The {@code stopCode} to load.
          */
-        public BusStopDetailsLoader(final Context context,
-                final String stopCode) {
+        public BusStopDetailsLoader(@NonNull final Context context,
+                @NonNull final String stopCode) {
             super(context);
             
             bsd = BusStopDatabase.getInstance(context.getApplicationContext());
             this.stopCode = stopCode;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public Cursor loadInBackground() {
             final Cursor c = bsd.getBusStopByCode(stopCode);
@@ -980,16 +868,13 @@ public class BusStopDetailsFragment extends Fragment
     }
     
     /**
-     * Any Activities which host this Fragment must implement this interface to
-     * handle navigation events.
+     * Any {@link Activity Activities} which host this {@link Fragment} must implement this
+     * interface to handle navigation events.
      */
-    public static interface Callbacks
-            extends OnShowConfirmFavouriteDeletionListener,
-            OnShowConfirmDeleteProximityAlertListener,
-            OnShowConfirmDeleteTimeAlertListener, OnShowBusTimesListener,
-            OnShowAddProximityAlertListener, OnShowAddTimeAlertListener,
-            OnShowBusStopMapWithStopCodeListener,
-            OnShowAddFavouriteStopListener {
+    public interface Callbacks extends OnShowConfirmFavouriteDeletionListener,
+            OnShowConfirmDeleteProximityAlertListener, OnShowConfirmDeleteTimeAlertListener,
+            OnShowBusTimesListener, OnShowAddProximityAlertListener, OnShowAddTimeAlertListener,
+            OnShowBusStopMapWithStopCodeListener, OnShowAddFavouriteStopListener {
         
         /**
          * This is called when the user wishes to see a location on Street View.
@@ -997,6 +882,6 @@ public class BusStopDetailsFragment extends Fragment
          * @param latitude The latitude of the location to show.
          * @param longitude The longitude of the location to show.
          */
-        public void onShowStreetView(double latitude, double longitude);
+        void onShowStreetView(double latitude, double longitude);
     }
 }

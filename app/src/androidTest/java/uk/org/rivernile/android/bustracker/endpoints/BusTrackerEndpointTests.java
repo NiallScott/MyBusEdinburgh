@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,79 +25,67 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertSame;
+
+import android.support.annotation.NonNull;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
-import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
-        .EdinburghParser;
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghParser;
 
 /**
- * Tests for BusTrackerEndpoint.
+ * Tests for {@link BusTrackerEndpoint}.
  * 
  * @author Niall Scott
  */
-public class BusTrackerEndpointTests extends TestCase {
-    
+@RunWith(AndroidJUnit4.class)
+public class BusTrackerEndpointTests {
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentExxception
-     * when the parser is set to null.
+     * Test that {@link BusTrackerEndpoint#getParser()} returns the same {@link BusParser} object
+     * given to it in the constructor.
      */
-    public void testNullConstructor() {
-        try {
-            new MockBusTrackerEndpoint(null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The parser is set to null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that {@link BusTrackerEndpoint#getParser()} returns the same
-     * {@link BusParser} object given to it in the constructor.
-     */
+    @Test
     public void testNotNullConstructor() {
         final EdinburghParser parser = new EdinburghParser();
-        final MockBusTrackerEndpoint endpoint =
-                new MockBusTrackerEndpoint(parser);
+        final MockBusTrackerEndpoint endpoint = new MockBusTrackerEndpoint(parser);
         
-        assertEquals(parser, endpoint.getParser());
+        assertSame(parser, endpoint.getParser());
     }
     
     /**
-     * Because this is testing an abstract class, it's necessary to mock it out
-     * in to a concrete class.
+     * Because this is testing an abstract class, it's necessary to mock it out in to a concrete
+     * class.
      */
     private static class MockBusTrackerEndpoint extends BusTrackerEndpoint {
         
         /**
-         * Create a new MockBusTrackerEndpoint.
+         * Create a new {@code MockBusTrackerEndpoint}.
          * 
          * @param parser The parser to use.
          */
-        public MockBusTrackerEndpoint(final BusParser parser) {
+        public MockBusTrackerEndpoint(@NonNull final BusParser parser) {
             super(parser);
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        @NonNull
         @Override
-        public LiveBusTimes getBusTimes(final String[] stopCodes,
+        public LiveBusTimes getBusTimes(@NonNull final String[] stopCodes,
                 final int numDepartures) throws LiveTimesException {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        @NonNull
         @Override
-        public Journey getJourneyTimes(final String stopCode,
-                final String journeyId) throws LiveTimesException {
-            return null;
+        public Journey getJourneyTimes(@NonNull final String stopCode,
+                @NonNull final String journeyId) throws LiveTimesException {
+            throw new UnsupportedOperationException();
         }
     }
 }

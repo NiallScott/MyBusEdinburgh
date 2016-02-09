@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,63 +25,45 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
-import junit.framework.TestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
-import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
-        .EdinburghParser;
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghParser;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
- * Tests for HttpBusTrackerEndpoint.
+ * Tests for {@link HttpBusTrackerEndpoint}.
  * 
  * @author Niall Scott
  */
-public class HttpBusTrackerEndpointTests extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class HttpBusTrackerEndpointTests {
     
     private BusParser parser;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        
+    @Before
+    public void setUp() {
         parser = new EdinburghParser();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        
+    @After
+    public void tearDown() {
         parser = null;
     }
     
     /**
-     * Test that the constructor throws an IllegalArgumentException if the
-     * urlBuilder is null.
+     * Test that no exceptions are thrown if the constructor is passed a non-{@code null}
+     * {@code urlBuilder}.
      */
-    public void testConstructorWithNullUrlBuilder() {
-        try {
-            new HttpBusTrackerEndpoint(parser, null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The urlBuilder is set to null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that no exceptions are thrown if the constructor is passed a
-     * non-null urlBuilder.
-     * 
-     * @throws Exception If an Exception occurs, the test should fail.
-     */
-    public void testConstructorWithNonNullUrlBuilder() throws Exception {
-        new HttpBusTrackerEndpoint(parser, new EdinburghUrlBuilder());
+    @Test
+    public void testConstructorWithNonNullUrlBuilder() {
+        new HttpBusTrackerEndpoint(InstrumentationRegistry.getContext(), parser,
+                new EdinburghUrlBuilder());
     }
 }

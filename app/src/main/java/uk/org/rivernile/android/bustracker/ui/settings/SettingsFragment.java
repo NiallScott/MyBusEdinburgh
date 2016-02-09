@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,20 +25,18 @@
 
 package uk.org.rivernile.android.bustracker.ui.settings;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.provider.SearchRecentSuggestions;
-import android.widget.Toast;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.utils.GenericDialogPreference;
 import uk.org.rivernile.edinburghbustracker.android.MapSearchSuggestionsProvider;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
  * This {@link PreferenceFragment} allows the user to change app-wide preferences. As the minimum
@@ -51,17 +49,26 @@ import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 public class SettingsFragment extends PreferenceFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private SettingsDatabase sd;
+    private Callbacks callbacks;
     private SharedPreferences sp;
     private ListPreference numberOfDeparturesPref;
     private String[] numberOfDeparturesStrings;
 
     @Override
+    public void onAttach(final Context context) {
+        super.onAttach(context);
+
+        try {
+            callbacks = (Callbacks) context;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(context.getClass().getName() + " does not implement " +
+                    Callbacks.class.getName());
+        }
+    }
+
+    @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        final BusApplication app = (BusApplication) getActivity().getApplication();
-        sd = SettingsDatabase.getInstance(app);
 
         getPreferenceManager().setSharedPreferencesName(PreferenceConstants.PREF_FILE);
         addPreferencesFromResource(R.xml.preferences);
@@ -82,14 +89,7 @@ public class SettingsFragment extends PreferenceFragment
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
-                    final String message = sd.backupDatabase();
-
-                    if (message.equals("success")) {
-                        Toast.makeText(getActivity(), R.string.preference_backup_success,
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
-                    }
+                    callbacks.onBackupFavourites();
                 }
             }
         });
@@ -98,14 +98,7 @@ public class SettingsFragment extends PreferenceFragment
             @Override
             public void onClick(final DialogInterface dialog, final int which) {
                 if (which == DialogInterface.BUTTON_POSITIVE) {
-                    final String message = sd.restoreDatabase();
-
-                    if (message.equals("success")) {
-                        Toast.makeText(app, R.string.preference_restore_success, Toast.LENGTH_SHORT)
-                                .show();
-                    } else {
-                        Toast.makeText(app, message, Toast.LENGTH_SHORT).show();
-                    }
+                    callbacks.onRestoreFavourites();
                 }
             }
         });
@@ -144,6 +137,10 @@ public class SettingsFragment extends PreferenceFragment
     public void onSharedPreferenceChanged(final SharedPreferences sp, final String key) {
         if (PreferenceConstants.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE.equals(key)) {
             populateNumberOfDeparturesSummary();
+        } else if (PreferenceConstants.PREF_AUTO_LOCATION.equals(key)) {
+            if (sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true)) {
+                callbacks.requestLocationPermission();
+            }
         }
     }
 
@@ -162,5 +159,27 @@ public class SettingsFragment extends PreferenceFragment
         }
 
         numberOfDeparturesPref.setSummary(numberOfDeparturesStrings[val - 1]);
+    }
+
+    /**
+     * Any {@link android.app.Activity} which hosts this {@link PreferenceFragment} must implement
+     * this interface.
+     */
+    interface Callbacks {
+
+        /**
+         * This is called when the user wishes to backup their favourites.
+         */
+        void onBackupFavourites();
+
+        /**
+         * This is called when the user wishes to restore their favourites.
+         */
+        void onRestoreFavourites();
+
+        /**
+         * This is called when the location permission should be requested.
+         */
+        void requestLocationPermission();
     }
 }

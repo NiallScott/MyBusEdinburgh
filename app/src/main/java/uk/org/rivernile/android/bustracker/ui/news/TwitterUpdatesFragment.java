@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,13 +45,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import java.util.List;
 
+import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
+import uk.org.rivernile.android.fetchutils.loaders.Result;
 import uk.org.rivernile.android.utils.DividerItemDecoration;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.android.bustracker.parser.twitter.TwitterLoaderResult;
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterException;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterUpdatesLoader;
-import uk.org.rivernile.android.fetchers.UrlMismatchException;
 
 /**
  * This {@link Fragment} displays a list of {@link Tweet}s which informs the user of events that may
@@ -61,7 +60,7 @@ import uk.org.rivernile.android.fetchers.UrlMismatchException;
  * @author Niall Scott
  */
 public class TwitterUpdatesFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<TwitterLoaderResult> {
+        implements LoaderManager.LoaderCallbacks<Result<List<Tweet>, TwitterException>> {
     
     private TweetAdapter adapter;
 
@@ -88,8 +87,7 @@ public class TwitterUpdatesFragment extends Fragment
         txtError = (TextView) v.findViewById(R.id.txtError);
 
         final Activity activity = getActivity();
-        recyclerView.setHasFixedSize(false);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activity));
+        recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new DividerItemDecoration(activity,
                 DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setAdapter(adapter);
@@ -138,24 +136,25 @@ public class TwitterUpdatesFragment extends Fragment
     }
 
     @Override
-    public Loader<TwitterLoaderResult> onCreateLoader(final int id, final Bundle args) {
+    public Loader<Result<List<Tweet>, TwitterException>> onCreateLoader(
+            final int id, final Bundle args) {
         return new TwitterUpdatesLoader(getActivity());
     }
 
     @Override
-    public void onLoadFinished(final Loader<TwitterLoaderResult> loader,
-                               final TwitterLoaderResult result) {
+    public void onLoadFinished(final Loader<Result<List<Tweet>, TwitterException>> loader,
+                               final Result<List<Tweet>, TwitterException> result) {
         if (isAdded()) {
-            if(result.hasException()) {
-                handleError(result.getException());
+            if(result.isError()) {
+                handleError(result.getError());
             } else {
-                populateList(result.getTweets());
+                populateList(result.getSuccess());
             }
         }
     }
 
     @Override
-    public void onLoaderReset(final Loader<TwitterLoaderResult> loader) {
+    public void onLoaderReset(final Loader<Result<List<Tweet>, TwitterException>> loader) {
         // Nothing to do here.
     }
     

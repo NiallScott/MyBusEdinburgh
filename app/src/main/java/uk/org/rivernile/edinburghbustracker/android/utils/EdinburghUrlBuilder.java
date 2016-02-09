@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,14 @@
 package uk.org.rivernile.edinburghbustracker.android.utils;
 
 import android.net.Uri;
-import android.text.TextUtils;
+import android.support.annotation.NonNull;
 import java.util.Random;
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 
 /**
- * This class contains a collection of methods used to generate URLs for
- * contacting servers for resources.
+ * This class contains a collection of methods used to generate URLs for contacting servers for
+ * resources.
  * 
  * @author Niall Scott
  */
@@ -44,42 +44,29 @@ public class EdinburghUrlBuilder implements UrlBuilder {
     protected static final String SCHEME_HTTP = "http";
     protected static final String BUSTRACKER_HOST = "www.mybustracker.co.uk";
     protected static final String DB_SERVER_HOST = "edinb.us";
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @NonNull
     @Override
     public Uri getTopologyUrl() {
         return getBustrackerBuilder()
                 .appendQueryParameter("function", "getTopoId")
                 .build();
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @NonNull
     @Override
-    public Uri getDbVersionCheckUrl(final String schemaType) {
-        if (TextUtils.isEmpty(schemaType)) {
-            throw new IllegalArgumentException("schemaType must not be null or "
-                    + "empty.");
-        }
-        
+    public Uri getDbVersionCheckUrl(@NonNull final String schemaType) {
         return getDbServerBuilder()
                 .appendPath("DatabaseVersion")
                 .appendQueryParameter("schemaType", schemaType)
                 .build();
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @NonNull
     @Override
-    public Uri getBusTimesUrl(final String[] stopCodes,
-            final int numDepartures) {
-        if (stopCodes == null || stopCodes.length == 0) {
-            throw new IllegalArgumentException("The stopCodes array must not "
-                    + "be null or empty.");
+    public Uri getBusTimesUrl(@NonNull final String[] stopCodes, final int numDepartures) {
+        if (stopCodes.length == 0) {
+            throw new IllegalArgumentException("The stopCodes array must not be empty.");
         }
         
         final Uri.Builder builder = getBustrackerBuilder();
@@ -102,32 +89,17 @@ public class EdinburghUrlBuilder implements UrlBuilder {
         return builder.build();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @NonNull
     @Override
-    public Uri getJourneyTimesUrl(final String stopCode,
-            final String journeyId) {
-        if (TextUtils.isEmpty(stopCode)) {
-            throw new IllegalArgumentException("The stopcode must not be null "
-                    + "or empty.");
-        }
-        
-        if (TextUtils.isEmpty(journeyId)) {
-            throw new IllegalArgumentException("The journeyId must not be null "
-                    + "or empty.");
-        }
-        
+    public Uri getJourneyTimesUrl(@NonNull final String stopCode, @NonNull final String journeyId) {
         return getBustrackerBuilder()
                 .appendQueryParameter("function", "getJourneyTimes")
                 .appendQueryParameter("stopId", stopCode)
                 .appendQueryParameter("journeyId", journeyId)
                 .build();
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
+    @NonNull
     @Override
     public Uri getTwitterUpdatesUrl() {
         return getDbServerBuilder()
@@ -137,32 +109,32 @@ public class EdinburghUrlBuilder implements UrlBuilder {
     }
     
     /**
-     * Get a Uri.Builder which represents a URL on the bus tracker API server.
-     * The specific request builds upon this builder.
+     * Get a {@link Uri.Builder} which represents a URL on the bus tracker API server. The
+     * specific request builds upon this builder.
      * 
-     * @return A Uri.Builder configured for a URL on the bus tracker API server.
+     * @return A {@link Uri.Builder} configured for a URL on the bus tracker API server.
      */
+    @NonNull
     private static Uri.Builder getBustrackerBuilder() {
         return new Uri.Builder().scheme(SCHEME_HTTP)
                 .authority(BUSTRACKER_HOST).path("ws.php")
                 .appendQueryParameter("module", "json")
                 .appendQueryParameter("key", ApiKey.getHashedKey())
-                .appendQueryParameter("random",
-                        String.valueOf(RANDOM.nextInt()));
+                .appendQueryParameter("random", String.valueOf(RANDOM.nextInt()));
     }
     
     /**
-     * Get a Uri.Builder which represents a URL on the database server. The
-     * specific request builds upon this builder.
+     * Get a {@link Uri.Builder} which represents a URL on the database server. The specific
+     * request builds upon this builder.
      * 
-     * @return A Uri.Builder configured for a URL on the database server.
+     * @return A {@link Uri.Builder} configured for a URL on the database server.
      */
+    @NonNull
     private static Uri.Builder getDbServerBuilder() {
         return new Uri.Builder().scheme(SCHEME_HTTP)
                 .authority(DB_SERVER_HOST)
                 .appendPath("api")
                 .appendQueryParameter("key", ApiKey.getHashedKey())
-                .appendQueryParameter("random",
-                        String.valueOf(RANDOM.nextInt()));
+                .appendQueryParameter("random", String.valueOf(RANDOM.nextInt()));
     }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2013 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@
     <color name="colorPrimary">#C41411</color>
     <color name="colorPrimaryDark">#B0120A</color>
     <color name="colorAccent">#607D8B</color>
+    <color name="colorContextualStatusBarBackground">#616161</color>
+    <color name="colorContextualActionBarBackground">#757575</color>
     
     <color name="defaultBusColour">#4291BC</color>
     <color name="mapActionBarColour">#90000000</color>

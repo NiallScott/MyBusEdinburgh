@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,11 +25,14 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
-import uk.org.rivernile.android.fetchers.HttpFetcher;
+import uk.org.rivernile.android.fetchutils.fetchers.HttpFetcher;
 
 /**
  * This class defines an endpoint for accessing the bus tracker API via HTTP.
@@ -37,49 +40,57 @@ import uk.org.rivernile.android.fetchers.HttpFetcher;
  * @author Niall Scott
  */
 public class HttpBusTrackerEndpoint extends BusTrackerEndpoint {
-    
+
+    private final Context context;
     private final UrlBuilder urlBuilder;
     
     /**
-     * Create a new endpoint.
-     * 
-     * @param parser The parser to use to parse the data that comes from the
-     * source. Must not be null.
-     * @param urlBuilder A UrlBuilder instance, used to construct URLs for
-     * contacting remote resources.
+     * Create a new {@code HttpBusTrackerEndpoint}.
+     *
+     * @param context A {@link Context} instance.
+     * @param parser The parser to use to parse the data that comes from the source.
+     * @param urlBuilder A {@link UrlBuilder} instance, used to construct URLs for contacting
+     * remote resources.
      */
-    public HttpBusTrackerEndpoint(final BusParser parser,
-            final UrlBuilder urlBuilder) {
+    public HttpBusTrackerEndpoint(@NonNull final Context context, @NonNull final BusParser parser,
+            @NonNull final UrlBuilder urlBuilder) {
         super(parser);
-        
-        if (urlBuilder == null) {
-            throw new IllegalArgumentException("urlBuilder must not be null.");
-        }
-        
+
+        this.context = context;
         this.urlBuilder = urlBuilder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @NonNull
     @Override
-    public LiveBusTimes getBusTimes(final String[] stopCodes,
+    public LiveBusTimes getBusTimes(@NonNull final String[] stopCodes,
             final int numDepartures) throws LiveTimesException {
-        final HttpFetcher fetcher = new HttpFetcher(urlBuilder
-                .getBusTimesUrl(stopCodes, numDepartures).toString(), false);
-        
+        final HttpFetcher fetcher = createHttpBuilder()
+                .setUrl(urlBuilder.getBusTimesUrl(stopCodes, numDepartures).toString())
+                .build();
+
         return getParser().getBusTimes(fetcher);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @NonNull
     @Override
-    public Journey getJourneyTimes(final String stopCode,
-            final String journeyId) throws LiveTimesException {
-        final HttpFetcher fetcher = new HttpFetcher(urlBuilder
-                .getJourneyTimesUrl(stopCode, journeyId).toString(), false);
-        
+    public Journey getJourneyTimes(@NonNull final String stopCode,
+            @NonNull final String journeyId) throws LiveTimesException {
+        final HttpFetcher fetcher = createHttpBuilder()
+                .setUrl(urlBuilder.getJourneyTimesUrl(stopCode, journeyId).toString())
+                .build();
+
         return getParser().getJourneyTimes(fetcher);
+    }
+
+    /**
+     * Create a partially configured instance of {@link HttpFetcher.Builder}.
+     *
+     * @return A partially configured instance of {@link HttpFetcher.Builder}.
+     */
+    @NonNull
+    private HttpFetcher.Builder createHttpBuilder() {
+        return new HttpFetcher.Builder(context)
+                .setAllowHostRedirects(false)
+                .setUseCaches(false);
     }
 }

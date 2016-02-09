@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,71 +27,58 @@ package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 import android.content.Context;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import uk.org.rivernile.android.bustracker.BusApplication;
-import uk.org.rivernile.android.utils.LoaderResult;
-import uk.org.rivernile.android.utils.SimpleResultLoader;
+import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
+import uk.org.rivernile.android.fetchutils.loaders.support.SimpleAsyncTaskLoader;
 
 /**
- * This Loader deals with fetching journey times data from any source. The
- * implementation for fetching is not defined here, it's defined by the class
- * represented by the BusParser object. This Loader simply puts it in another
- * Thread and the LoaderManager deals with its life cycle.
+ * This {@link SimpleAsyncTaskLoader} deals with fetching journey times data from any source. The
+ * implementation for fetching is not defined here. It's defined by the class represented by the
+ * {@link BusParser} object.
  * 
  * @author Niall Scott
- * @see SimpleResultLoader
+ * @see SimpleAsyncTaskLoader
  */
-public class JourneyTimesLoader extends
-        SimpleResultLoader<LoaderResult<Journey, LiveTimesException>>{
+public class JourneyTimesLoader extends SimpleAsyncTaskLoader<LiveTimesResult<Journey>> {
     
-    private final BusApplication app;
+    private final BusTrackerEndpoint endpoint;
     private final String stopCode;
     private final String journeyId;
     
     /**
-     * Create a new JourneyTimesLoader. All arguments are mandatory,
-     * exceptions will be thrown if they are not supplied.
+     * Create a new {@code JourneyTimesLoader}. All arguments are mandatory, exceptions will be
+     * thrown if they are not supplied.
      * 
-     * @param context A Context instance.
-     * @param stopCode The stopCode that the service is departing from.
+     * @param context A {@link Context} instance.
+     * @param stopCode The {@code stopCode} that the service is departing from.
      * @param journeyId A unique ID for the journey to return.
      */
-    public JourneyTimesLoader(final Context context, final String stopCode,
-            final String journeyId) {
+    public JourneyTimesLoader(@NonNull final Context context, @NonNull final String stopCode,
+            @NonNull final String journeyId) {
         super(context);
         
         if (TextUtils.isEmpty(stopCode)) {
-            throw new IllegalArgumentException("The stopCode should not be "
-                    + "null or empty.");
+            throw new IllegalArgumentException("The stopCode should not be null or empty.");
         }
         
         if (TextUtils.isEmpty(journeyId)) {
-            throw new IllegalArgumentException("The journeyId should not be "
-                    + "null or empty.");
+            throw new IllegalArgumentException("The journeyId should not be null or empty.");
         }
         
-        app = (BusApplication) context.getApplicationContext();
+        endpoint = ((BusApplication) context.getApplicationContext()).getBusTrackerEndpoint();
         this.stopCode = stopCode;
         this.journeyId = journeyId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public LoaderResult<Journey, LiveTimesException> loadInBackground() {
-        LoaderResult<Journey, LiveTimesException> result;
-        
+    public LiveTimesResult<Journey> loadInBackground() {
         try {
-            final Journey journey = app.getBusTrackerEndpoint()
-                    .getJourneyTimes(stopCode, journeyId);
-            result = new LoaderResult<Journey, LiveTimesException>(journey,
-                    journey.getReceiveTime());
+            final Journey journey = endpoint.getJourneyTimes(stopCode, journeyId);
+            return new LiveTimesResult<>(journey, journey.getReceiveTime());
         } catch (LiveTimesException e) {
-            result = new LoaderResult<Journey, LiveTimesException>(e,
-                    SystemClock.elapsedRealtime());
+            return new LiveTimesResult<>(e, SystemClock.elapsedRealtime());
         }
-        
-        return result;
     }
 }

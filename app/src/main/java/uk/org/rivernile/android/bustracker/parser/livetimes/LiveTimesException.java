@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,34 +26,33 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 /**
- * This Exception is thrown when there are problems fetching or parsing
- * real-time data.
+ * This {@link Exception} is thrown when there are problems fetching or parsing real-time data.
  * 
  * @author Niall Scott
  */
 public class LiveTimesException extends Exception {
     
     /**
-     * Create a new LiveTimesException.
+     * Create a new {@code LiveTimesException}.
      */
     public LiveTimesException() {
         super();
     }
     
     /**
-     * Create a new LiveTimesException.
+     * Create a new {@code LiveTimesException}.
      * 
-     * @param detailMessage The message to include in the Exception.
+     * @param detailMessage The message to include in the {@link Exception}.
      */
     public LiveTimesException(final String detailMessage) {
         super(detailMessage);
     }
     
     /**
-     * Create a new LiveTimesException.
+     * Create a new {@code LiveTimesException}.
      * 
-     * @param detailMessage The message to include in the Exception.
-     * @param throwable The Throwable that caused this Exception.
+     * @param detailMessage The message to include in the {@link Exception}.
+     * @param throwable The {@link Throwable} that caused this {@link Exception}.
      */
     public LiveTimesException(final String detailMessage,
             final Throwable throwable) {
@@ -61,9 +60,9 @@ public class LiveTimesException extends Exception {
     }
     
     /**
-     * Create a new LiveTimesException.
+     * Create a new {@code LiveTimesException}.
      * 
-     * @param throwable The Throwable that caused this Exception.
+     * @param throwable The {@link Throwable} that caused this {@link Exception}.
      */
     public LiveTimesException(final Throwable throwable) {
         super(throwable);

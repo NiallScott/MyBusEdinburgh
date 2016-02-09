@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,70 +27,58 @@ package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 import android.content.Context;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
+
 import uk.org.rivernile.android.bustracker.BusApplication;
-import uk.org.rivernile.android.utils.LoaderResult;
-import uk.org.rivernile.android.utils.SimpleResultLoader;
+import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
+import uk.org.rivernile.android.fetchutils.loaders.support.SimpleAsyncTaskLoader;
 
 /**
- * This Loader deals with fetching bus times data from any source. The
- * implementation for fetching is not defined here, it's defined by the class
- * represented by the BusParser object. This Loader simply puts it in another
- * Thread and the LoaderManager deals with its life cycle.
+ * This {@link SimpleAsyncTaskLoader} deals with fetching bus times data from any source. The
+ * implementation for fetching is not defined here. It's defined by the class represented by the
+ * {@link BusParser} object.
  * 
  * @author Niall Scott
- * @see SimpleResultLoader
+ * @see SimpleAsyncTaskLoader
  */
-public class LiveBusTimesLoader extends
-        SimpleResultLoader<LoaderResult<LiveBusTimes, LiveTimesException>> {
+public class LiveBusTimesLoader extends SimpleAsyncTaskLoader<LiveTimesResult<LiveBusTimes>> {
     
-    private final BusApplication app;
+    private final BusTrackerEndpoint endpoint;
     private final String[] stopCodes;
     private final int numberOfDepartures;
     
     /**
-     * Create a new LiveBusTimesLoader. All arguments are mandatory,
-     * exceptions will be thrown if they are not supplied.
+     * Create a new {@code LiveBusTimesLoader}. All arguments are mandatory, exceptions will be
+     * thrown if they are not supplied.
      * 
-     * @param context A Context instance.
-     * @param stopCodes A String array of bus stop codes to load.
-     * @param numberOfDepartures The number of departures for each service to
-     * load.
+     * @param context A {@link Context} instance.
+     * @param stopCodes A {@link String} array of bus stop codes to load.
+     * @param numberOfDepartures The number of departures for each service to load.
      */
-    public LiveBusTimesLoader(final Context context, final String[] stopCodes,
+    public LiveBusTimesLoader(@NonNull final Context context, @NonNull final String[] stopCodes,
             final int numberOfDepartures) {
         super(context);
         
-        if(stopCodes == null || stopCodes.length == 0) {
+        if (stopCodes.length == 0) {
             throw new IllegalArgumentException("Stop codes must be supplied.");
         }
         
-        if(numberOfDepartures < 1) {
-            throw new IllegalArgumentException("The number of departures " +
-                    "must be greater than 0.");
+        if (numberOfDepartures < 1) {
+            throw new IllegalArgumentException("The number of departures must be greater than 0.");
         }
         
-        app = (BusApplication) context.getApplicationContext();
+        endpoint = ((BusApplication) context.getApplicationContext()).getBusTrackerEndpoint();
         this.stopCodes = stopCodes;
         this.numberOfDepartures = numberOfDepartures;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public LoaderResult<LiveBusTimes, LiveTimesException> loadInBackground() {
-        LoaderResult<LiveBusTimes, LiveTimesException> result;
-        
+    public LiveTimesResult<LiveBusTimes> loadInBackground() {
         try {
-            final LiveBusTimes busTimes = app.getBusTrackerEndpoint()
-                    .getBusTimes(stopCodes, numberOfDepartures);
-            result = new LoaderResult<LiveBusTimes, LiveTimesException>(
-                    busTimes, busTimes.getReceiveTime());
+            final LiveBusTimes busTimes = endpoint.getBusTimes(stopCodes, numberOfDepartures);
+            return new LiveTimesResult<>(busTimes, busTimes.getReceiveTime());
         } catch (LiveTimesException e) {
-            result = new LoaderResult<LiveBusTimes, LiveTimesException>(e,
-                    SystemClock.elapsedRealtime());
+            return new LiveTimesResult<>(e, SystemClock.elapsedRealtime());
         }
-        
-        return result;
     }
 }

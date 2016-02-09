@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,24 +26,23 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 /**
- * This Exception should be thrown when the remote server is down for
- * maintenance.
+ * This {@link Exception} should be thrown when the remote server is down for maintenance.
  * 
  * @author Niall Scott
  */
 public class MaintenanceException extends LiveTimesException {
     
     /**
-     * Create a new MaintenanceException with a default message.
+     * Create a new {@code MaintenanceException} with a default message.
      */
     public MaintenanceException() {
         super("The remote server is down for maintenance.");
     }
     
     /**
-     * Create a new MaintenanceException with the given detailMessage.
+     * Create a new {@code MaintenanceException} with the given {@code detailMessage}.
      * 
-     * @param detailMessage The message to set in the Exception.
+     * @param detailMessage The message to set in the {@link Exception}.
      */
     public MaintenanceException(final String detailMessage) {
         super(detailMessage);

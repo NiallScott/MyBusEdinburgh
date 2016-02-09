@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,16 +36,14 @@ import uk.org.rivernile.android.bustracker.endpoints.HttpTwitterEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
-import uk.org.rivernile.edinburghbustracker.android.parser.livetimes
-        .EdinburghParser;
-import uk.org.rivernile.edinburghbustracker.android.parser.database
-        .EdinburghDatabaseVersionParser;
+import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghParser;
+import uk.org.rivernile.edinburghbustracker.android.parser.database.EdinburghDatabaseVersionParser;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
- * This class is the main entry point to the My Bus Edinburgh application. Some
- * app resources, such as the BusStopDatabase, can be retrieved from here.
- * 
+ * This class is the main entry point to the My Bus Edinburgh application. Some app resources,
+ * such as the {@link BusStopDatabase}, can be retrieved from here.
+ *
  * @author Niall Scott
  */
 public class MyBusEdinburghApplication extends BusApplication {
@@ -58,9 +56,6 @@ public class MyBusEdinburghApplication extends BusApplication {
     private SettingsDatabase settingsDatabase;
     private FragmentFactory fragmentFactory;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -68,48 +63,36 @@ public class MyBusEdinburghApplication extends BusApplication {
         new Thread(cleanupTasks).start();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized BusTrackerEndpoint getBusTrackerEndpoint() {
         if (busTrackerEndpoint == null) {
-            busTrackerEndpoint = new HttpBusTrackerEndpoint(
-                    new EdinburghParser(), getUrlBuilder());
+            busTrackerEndpoint = new HttpBusTrackerEndpoint(this, new EdinburghParser(),
+                    getUrlBuilder());
         }
         
         return busTrackerEndpoint;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized DatabaseEndpoint getDatabaseEndpoint() {
         if (databaseEndpoint == null) {
-            databaseEndpoint = new HttpDatabaseEndpoint(
-                    new EdinburghDatabaseVersionParser(), getUrlBuilder());
+            databaseEndpoint = new HttpDatabaseEndpoint(this, new EdinburghDatabaseVersionParser(),
+                    getUrlBuilder());
         }
         
         return databaseEndpoint;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized TwitterEndpoint getTwitterEndpoint() {
         if (twitterEndpoint == null) {
-            twitterEndpoint = new HttpTwitterEndpoint(
-                    new TwitterParserImpl(), getUrlBuilder());
+            twitterEndpoint = new HttpTwitterEndpoint(this, new TwitterParserImpl(),
+                    getUrlBuilder());
         }
         
         return twitterEndpoint;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized BusStopDatabase getBusStopDatabase() {
         if (busStopDatabase == null) {
@@ -119,9 +102,6 @@ public class MyBusEdinburghApplication extends BusApplication {
         return busStopDatabase;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized SettingsDatabase getSettingsDatabase() {
         if (settingsDatabase == null) {
@@ -131,9 +111,6 @@ public class MyBusEdinburghApplication extends BusApplication {
         return settingsDatabase;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public FragmentFactory getFragmentFactory() {
         if (fragmentFactory == null) {
@@ -144,9 +121,9 @@ public class MyBusEdinburghApplication extends BusApplication {
     }
     
     /**
-     * Get an instance of the UrlBuilder.
+     * Get an instance of the {@link UrlBuilder}.
      * 
-     * @return An instance of the UrlBuilder.
+     * @return An instance of the {@link UrlBuilder}.
      */
     private UrlBuilder getUrlBuilder() {
         if (urlBuilder == null) {

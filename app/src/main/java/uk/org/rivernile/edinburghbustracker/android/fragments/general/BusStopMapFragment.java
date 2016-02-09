@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,14 +25,17 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
@@ -129,6 +132,8 @@ public class BusStopMapFragment extends SupportMapFragment
     private static final int LOADER_ID_BUS_STOPS = 0;
     private static final int LOADER_ID_GEO_SEARCH = 1;
     private static final int LOADER_ID_ROUTE_LINES = 2;
+
+    private static final int PERMISSION_REQUEST_LOCATION = 1;
     
     private Callbacks callbacks;
     private BusStopDatabase bsd;
@@ -239,6 +244,17 @@ public class BusStopMapFragment extends SupportMapFragment
         
         getActivity().setTitle(R.string.map_title);
         getMapAsync(this);
+
+        if (savedInstanceState == null) {
+            if (sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true) &&
+                    !hasLocationPermission()) {
+                requestPermissions(
+                        new String[] {
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                        }, PERMISSION_REQUEST_LOCATION);
+            }
+        }
     }
 
     @Override
@@ -246,7 +262,7 @@ public class BusStopMapFragment extends SupportMapFragment
         super.onResume();
         
         if (map != null) {
-            map.setMyLocationEnabled(sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true));
+            updateMyLocationFeature();
             map.getUiSettings().setZoomControlsEnabled(
                     sp.getBoolean(PreferenceConstants.PREF_ZOOM_BUTTONS, true));
         }
@@ -312,7 +328,7 @@ public class BusStopMapFragment extends SupportMapFragment
         map.setMapType(sp.getInt(PreferenceConstants.PREF_MAP_LAST_MAP_TYPE,
                 GoogleMap.MAP_TYPE_NORMAL));
         map.setPadding(0, actionBarHeight, 0, 0);
-        map.setMyLocationEnabled(sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true));
+        updateMyLocationFeature();
 
         // This causes an initial load of bus stops to happen too.
         moveCameraToInitialLocation();
@@ -372,6 +388,14 @@ public class BusStopMapFragment extends SupportMapFragment
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(final int requestCode,
+            @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        if (requestCode == PERMISSION_REQUEST_LOCATION) {
+            updateMyLocationFeature();
         }
     }
 
@@ -643,6 +667,17 @@ public class BusStopMapFragment extends SupportMapFragment
             map.moveCamera(update);
         }
     }
+
+    /**
+     * Enable the 'My Location' layer if the user has enabled it and if the permission has been
+     * granted.
+     */
+    private void updateMyLocationFeature() {
+        if (map != null) {
+            map.setMyLocationEnabled(sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true) &&
+                    hasLocationPermission());
+        }
+    }
     
     /**
      * Refresh the bus stop marker icons on the map. This may be because the camera has moved, a
@@ -896,23 +931,37 @@ public class BusStopMapFragment extends SupportMapFragment
             }
         }
     }
+
+    /**
+     * Does the application have access to the necessary location permissions?
+     *
+     * @return {@code true} if the application has access to the necessary location permissions,
+     * {@code false} if not.
+     */
+    private boolean hasLocationPermission() {
+        final boolean hasFineLocation = ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        final boolean hasCoarseLocation = ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return hasFineLocation && hasCoarseLocation;
+    }
     
     /**
      * Any {@link Activity Activities} which host this {@link android.support.v4.app.Fragment} must
      * implement this interface to handle navigation events.
      */
-    public static interface Callbacks extends OnShowServicesChooserListener {
+    public interface Callbacks extends OnShowServicesChooserListener {
         
         /**
          * This is called when the user wishes to select their preferred map type.
          */
-        public void onShowMapTypeSelection();
+        void onShowMapTypeSelection();
         
         /**
          * This is called when the user wants to see details about a bus stop.
          * 
          * @param stopCode The bus stop code the user wants to see details for.
          */
-        public void onShowBusStopDetails(String stopCode);
+        void onShowBusStopDetails(String stopCode);
     }
 }

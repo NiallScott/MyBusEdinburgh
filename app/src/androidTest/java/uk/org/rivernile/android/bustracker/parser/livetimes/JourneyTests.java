@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,125 +25,224 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import android.support.test.runner.AndroidJUnit4;
+
+import java.util.Collections;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link Journey}.
  * 
  * @author Niall Scott
  */
-public class JourneyTests extends TestCase {
-    
+@RunWith(AndroidJUnit4.class)
+public class JourneyTests {
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the journeyId is set as null.
+     * Test that {@link Journey.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * journey ID is set to {@code null}.
      */
-    public void testConstructorWithNullJourneyId() {
-        try {
-            new MockJourney(null, "22", new ArrayList<JourneyDeparture>(),
-                    123456789L);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The journeyId is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullJourneyId() {
+        new Journey.Builder()
+                .setJourneyId(null)
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setTerminus("123456")
+                .build();
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the journeyId is set as empty.
+     * Test that {@link Journey.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * journey ID is set to empty.
      */
-    public void testConstructorWithEmptyJourneyId() {
-        try {
-            new MockJourney("", "22", new ArrayList<JourneyDeparture>(),
-                    123456789L);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The journeyId is set as empty, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithEmptyJourneyId() {
+        new Journey.Builder()
+                .setJourneyId("")
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setTerminus("123456")
+                .build();
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the service name is set as null.
+     * Test that {@link Journey.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * service name is set to {@code null}.
      */
-    public void testConstructorWithNullServiceName() {
-        try {
-            new MockJourney("123456", null, new ArrayList<JourneyDeparture>(),
-                    123456789L);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The serviceName is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullServiceName() {
+        new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName(null)
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setTerminus("123456")
+                .build();
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the service name is set as empty.
+     * Test that {@link Journey.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * service name is set to empty.
      */
-    public void testConstructorWithEmptyServiceName() {
-        try {
-            new MockJourney("123456", "", new ArrayList<JourneyDeparture>(),
-                    123456789L);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The serviceName is set as empty, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithEmptyServiceName() {
+        new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setTerminus("123456")
+                .build();
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the departures is set as null.
+     * Test that {@link Journey.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * departures is set to {@code null}.
      */
-    public void testConstructorWithNullDepartures() {
-        try {
-            new MockJourney("123456", "22", null, 123456789L);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The departures is set as empty, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullDepartures() {
+        new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("1")
+                .setDepartures(null)
+                .setTerminus("123456")
+                .build();
     }
-    
+
     /**
-     * Test that the getters return correct data with the data that was supplied
-     * in the constructor.
+     * Test that {@link Journey.Builder#build()} does not throw any exceptions when the operator is
+     * set as empty.
      */
+    @Test
+    public void testBuilderWithEmptyOperator() {
+        new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setOperator("")
+                .setTerminus("123456")
+                .build();
+    }
+
+    /**
+     * Test that {@link Journey.Builder#build()} does not throw any exceptions when the route is
+     * set as empty.
+     */
+    @Test
+    public void testBuilderWithEmptyRoute() {
+        new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setRoute("")
+                .setTerminus("123456")
+                .build();
+    }
+
+    /**
+     * Test that {@link Journey.Builder#build()} does not throw any exceptions when the
+     * destination is set as empty.
+     */
+    @Test
+    public void testBuilderWithEmptyDestination() {
+        new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDestination("")
+                .setTerminus("123456")
+                .build();
+    }
+
+    /**
+     * Test that {@link Journey.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * terminus is set to {@code null}.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullTerminus() {
+        new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setTerminus(null)
+                .build();
+    }
+
+    /**
+     * Test that {@link Journey.Builder#build()} throws an {@link IllegalArgumentException} when the
+     * terminus is set to empty.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithEmptyTerminus() {
+        new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setTerminus("")
+                .build();
+    }
+
+    /**
+     * Test the default values of a {@link Journey} object.
+     */
+    @Test
+    public void testDefault() {
+        final Journey journey = new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setTerminus("123456")
+                .build();
+
+        assertEquals("abc123", journey.getJourneyId());
+        assertEquals("1", journey.getServiceName());
+        assertTrue(journey.getDepartures().isEmpty());
+        assertNull(journey.getOperator());
+        assertNull(journey.getRoute());
+        assertNull(journey.getDestination());
+        assertEquals("123456", journey.getTerminus());
+        assertFalse(journey.hasGlobalDisruption());
+        assertFalse(journey.hasServiceDisruption());
+        assertFalse(journey.hasServiceDiversion());
+        assertEquals(0L, journey.getReceiveTime());
+    }
+
+    /**
+     * Test building a {@link Journey} with valid values produces an object that returns expected
+     * values.
+     */
+    @Test
     public void testValid() {
-        final ArrayList<JourneyDeparture> departuresIn =
-                new ArrayList<JourneyDeparture>();
-        departuresIn.add(new MockJourneyDeparture("123", "A", new Date(), 1));
-        departuresIn.add(new MockJourneyDeparture("456", "B", new Date(), 2));
-        departuresIn.add(new MockJourneyDeparture("789", "C", new Date(), 3));
-        
-        final Journey journey = new MockJourney("123", "12", departuresIn,
-                123456789L);
+        final Journey journey = new Journey.Builder()
+                .setJourneyId("abc123")
+                .setServiceName("1")
+                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setOperator("LB")
+                .setRoute("A -- B")
+                .setDestination("End")
+                .setTerminus("123456")
+                .setHasGlobalDisruption(true)
+                .setHasServiceDisruption(true)
+                .setHasServiceDiversion(true)
+                .setReceiveTime(123456789L)
+                .build();
+
+        assertEquals("abc123", journey.getJourneyId());
+        assertEquals("1", journey.getServiceName());
+        assertTrue(journey.getDepartures().isEmpty());
+        assertEquals("LB", journey.getOperator());
+        assertEquals("A -- B", journey.getRoute());
+        assertEquals("End", journey.getDestination());
+        assertEquals("123456", journey.getTerminus());
+        assertTrue(journey.hasGlobalDisruption());
+        assertTrue(journey.hasServiceDisruption());
+        assertTrue(journey.hasServiceDiversion());
         assertEquals(123456789L, journey.getReceiveTime());
-        assertEquals("123", journey.getJourneyId());
-        assertEquals("12", journey.getServiceName());
-        
-        final List<JourneyDeparture> departuresOut = journey.getDepartures();
-        assertNotNull(departuresOut);
-        assertEquals(3, departuresOut.size());
-        
-        JourneyDeparture departure = departuresOut.get(0);
-        assertEquals("123", departure.getStopCode());
-        
-        departure = departuresOut.get(1);
-        assertEquals("456", departure.getStopCode());
-        
-        departure = departuresOut.get(2);
-        assertEquals("789", departure.getStopCode());
     }
 }

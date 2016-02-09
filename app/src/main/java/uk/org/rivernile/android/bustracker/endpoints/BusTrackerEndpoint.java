@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,18 +25,18 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
+import android.support.annotation.NonNull;
+
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 
 /**
- * A bus tracker endpoint is an abstraction layer to help with testing and the
- * ability to slot in new implementations quickly. Subclasses define the way
- * that data is fetched for the parser. For example, a subclass could define
- * that data comes from HTTP, while another one may wish to take it from the
- * application assets. To get an instance of this object, call
- * {@link uk.org.rivernile.edinburghbustracker.android.Application#getBusTrackerEndpoint()}.
+ * A bus tracker endpoint is an abstraction layer to help with testing and the ability to slot in
+ * new implementations quickly. Subclasses define the way that data is fetched for the parser.
+ * For example, a subclass could define that data comes from HTTP, while another one may wish to
+ * take it from the application assets.
  * 
  * @author Niall Scott
  */
@@ -45,16 +45,11 @@ public abstract class BusTrackerEndpoint {
     private final BusParser parser;
     
     /**
-     * Create a new endpoint.
+     * Create a new {@code BusTrackerEndpoint}.
      * 
-     * @param parser The parser to use to parse the data that comes from the
-     * source. Must not be null.
+     * @param parser The parser to use to parse the data that comes from the source.
      */
-    public BusTrackerEndpoint(final BusParser parser) {
-        if (parser == null) {
-            throw new IllegalArgumentException("The parser must not be null.");
-        }
-        
+    public BusTrackerEndpoint(@NonNull final BusParser parser) {
         this.parser = parser;
     }
     
@@ -63,33 +58,32 @@ public abstract class BusTrackerEndpoint {
      * 
      * @return The parser instance.
      */
+    @NonNull
     protected final BusParser getParser() {
         return parser;
     }
     
     /**
-     * Get the bus times for the bus stops specified in stopCodes.
+     * Get the bus times for the bus stops specified in {@code stopCodes}.
      * 
      * @param stopCodes The bus stops to get times for.
-     * @param numDepartures The number of departures to get for each service at
-     * each stop.
-     * @return A LiveBusTimes object, containing the live bus stop data.
-     * @throws LiveTimesException If there was a problem while fetching or
-     * parsing the data.
+     * @param numDepartures The number of departures to get for each service at each stop.
+     * @return A {@link LiveBusTimes} object, containing the live bus stop data.
+     * @throws LiveTimesException If there was a problem while fetching or parsing the data.
      */
-    public abstract LiveBusTimes getBusTimes(String[] stopCodes,
-            int numDepartures) throws LiveTimesException;
+    @NonNull
+    public abstract LiveBusTimes getBusTimes(@NonNull String[] stopCodes, int numDepartures)
+            throws LiveTimesException;
     
     /**
-     * Get the journey times for a specific journey departing from a specific
-     * stop.
+     * Get the journey times for a specific journey departing from a specific stop.
      * 
-     * @param stopCode The stopCode of the departure point.
+     * @param stopCode The {@code stopCode} of the departure point.
      * @param journeyId A unique ID for the journey.
-     * @return A Journey object, containing the journey data.
-     * @throws LiveTimesException If there was a problem while fetching or
-     * parsing the data.
+     * @return A {@link Journey} object, containing the journey data.
+     * @throws LiveTimesException If there was a problem while fetching or parsing the data.
      */
-    public abstract Journey getJourneyTimes(String stopCode, String journeyId)
+    @NonNull
+    public abstract Journey getJourneyTimes(@NonNull String stopCode, @NonNull String journeyId)
             throws LiveTimesException;
 }

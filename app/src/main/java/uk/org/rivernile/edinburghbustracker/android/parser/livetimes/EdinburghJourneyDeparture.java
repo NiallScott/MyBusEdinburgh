@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,55 +25,39 @@
 
 package uk.org.rivernile.edinburghbustracker.android.parser.livetimes;
 
-import java.util.Date;
+import android.support.annotation.NonNull;
+
 import uk.org.rivernile.android.bustracker.parser.livetimes.JourneyDeparture;
 
 /**
- * This class defines an Edinburgh specific JourneyDeparture.
+ * This class defines an Edinburgh specific {@link JourneyDeparture}.
  * 
  * @author Niall Scott
  */
 public class EdinburghJourneyDeparture extends JourneyDeparture {
     
     private final int departureMinutes;
-    private final char reliability;
-    private final char type;
-    private final boolean isDisrupted;
-    
-    /**
-     * Create a new EdinburghJourneyDeparture.
-     * 
-     * @param stopCode The stop code where the departure takes place from.
-     * @param stopName The stop name where the departure takes place from. Can
-     * be null.
-     * @param departureTime A Date object representing the time of departure.
-     * @param departureMinutes The number of minutes until the departure takes
-     * place, as calculated by the server.
-     * @param reliability The 'reliability' field in the response.
-     * @param type The 'type' field in the response.
-     * @param isDisrupted true if the bus stop is disrupted, false if not.
-     * @param order The value of the 'order' field in the response.
-     */
-    public EdinburghJourneyDeparture(final String stopCode,
-            final String stopName, final Date departureTime,
-            final int departureMinutes, final char reliability, final char type,
-            final boolean isDisrupted, final int order) {
-        super(stopCode, stopName, departureTime, order);
-        
-        this.departureMinutes = departureMinutes;
-        this.reliability = reliability;
-        this.type = type;
-        this.isDisrupted = isDisrupted;
-    }
 
     /**
-     * Get the number of minutes from the time that the request was made with
-     * the API server until the bus is due to arrive the bus stop. This differs
-     * from {@link JourneyDeparture#getDepartureMinutes()} as in this case the
-     * time is calculated by the server rather than on device.
+     * Create a new {@code EdinburghJourneyDeparture}. This constructor is not publicly accessible.
+     * To construct an instance of this class, use the {@link Builder}.
+     *
+     * @param builder The {@link Builder} instance to construct from.
+     */
+    private EdinburghJourneyDeparture(@NonNull final Builder builder) {
+        super(builder);
+
+        departureMinutes = builder.departureMinutes;
+    }
+    
+    /**
+     * Get the number of minutes from the time that the request was made with the API server
+     * until the bus is due to arrive the bus stop. This differs from
+     * {@link JourneyDeparture#getDepartureMinutes()} as in this case the time is calculated by
+     * the server rather than on device.
      * 
-     * @return The number of minutes until the bus is due to arrive at the stop.
-     * This time is relative to when the request was made with the server.
+     * @return The number of minutes until the bus is due to arrive at the stop. This time is
+     * relative to when the request was made with the server.
      */
     @Override
     public int getDepartureMinutes() {
@@ -81,50 +65,37 @@ public class EdinburghJourneyDeparture extends JourneyDeparture {
     }
 
     /**
-     * {@inheritDoc}
+     * This {@link Builder} must be used to construct a new {@link EdinburghJourneyDeparture}.
+     * Create a new instance of this class, call the setters and when you are ready, call
+     * {@link #build()}.
      */
-    @Override
-    public boolean isBusStopDisrupted() {
-        return isDisrupted;
-    }
+    public static class Builder extends JourneyDeparture.Builder {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isEstimatedTime() {
-        return reliability == EdinburghConstants.RELIABILITY_ESTIMATED;
-    }
+        private int departureMinutes;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isDelayed() {
-        return reliability == EdinburghConstants.RELIABILITY_DELAYED;
-    }
+        /**
+         * Set the number of minutes until departure.
+         *
+         * @param departureMinutes The number of minutes until departure.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setDepartureMinutes(final int departureMinutes) {
+            this.departureMinutes = departureMinutes;
+            return this;
+        }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isDiverted() {
-        return reliability == EdinburghConstants.RELIABILITY_DIVERTED;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isTerminus() {
-        return type == EdinburghConstants.TYPE_TERMINUS;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isPartRoute() {
-        return type == EdinburghConstants.TYPE_PART_ROUTE;
+        /**
+         * Build a new {@link EdinburghJourneyDeparture} object.
+         *
+         * @return A new {@link EdinburghJourneyDeparture} object.
+         * @throws IllegalArgumentException See {@link JourneyDeparture.Builder#build()}.
+         */
+        @NonNull
+        @Override
+        public EdinburghJourneyDeparture build() {
+            return new EdinburghJourneyDeparture(this);
+        }
     }
 }

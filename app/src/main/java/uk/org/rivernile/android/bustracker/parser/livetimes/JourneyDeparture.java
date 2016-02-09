@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,140 +25,318 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import java.util.Date;
 
 /**
- * A JourneyDeparture represents a departure point on a journey. A journey is a
- * list of points that a service calls at. This class should be subclassed to
- * customise it for a specific real-time system.
+ * A {@code JourneyDeparture} represents a departure point on a {@link Journey}. A {@link Journey}
+ * is a list of points that a service calls at.
  * 
  * @author Niall Scott
  */
-public abstract class JourneyDeparture implements Comparable<JourneyDeparture> {
-    
-    private final int order;
+public class JourneyDeparture implements Comparable<JourneyDeparture> {
+
     private final String stopCode;
     private final String stopName;
     private final Date departureTime;
-    
+    private final boolean isBusStopDisrupted;
+    private final boolean isEstimatedTime;
+    private final boolean isDelayed;
+    private final boolean isDiverted;
+    private final boolean isTerminus;
+    private final boolean isPartRoute;
+    private final int order;
+
     /**
-     * Create a new JourneyDeparture.
-     * 
-     * @param stopCode The stop code where the departure takes place from.
-     * @param stopName The stop name where the departure takes place from. Can
-     * be null.
-     * @param departureTime A Date object representing the time of departure.
-     * @param order What order this departure is in a list of departures.
+     * Create a new {@code JourneyDeparture}. This constructor is not publicly accessible. To
+     * construct an instance of this class, use the {@link Builder}.
+     *
+     * @param builder The {@link Builder} instance to construct from.
      */
-    public JourneyDeparture(final String stopCode, final String stopName,
-            final Date departureTime, final int order) {
-        if (TextUtils.isEmpty(stopCode)) {
-            throw new IllegalArgumentException("The stopCode must not be null "
-                    + "or empty.");
+    protected JourneyDeparture(@NonNull final Builder builder) {
+        if (TextUtils.isEmpty(builder.stopCode)) {
+            throw new IllegalArgumentException("The stopCode must not be null or empty.");
         }
-        
-        if (departureTime == null) {
-            throw new IllegalArgumentException("The departureTime must not be "
-                    + "null.");
+
+        if (builder.departureTime == null) {
+            throw new IllegalArgumentException("The departureTime must not be null.");
         }
-        
-        this.stopCode = stopCode;
-        this.stopName = stopName;
-        this.departureTime = departureTime;
-        this.order = order;
+
+        stopCode = builder.stopCode;
+        stopName = builder.stopName;
+        departureTime = builder.departureTime;
+        isBusStopDisrupted = builder.isBusStopDisrupted;
+        isEstimatedTime = builder.isEstimatedTime;
+        isDelayed = builder.isDelayed;
+        isDiverted = builder.isDiverted;
+        isTerminus = builder.isTerminus;
+        isPartRoute = builder.isPartRoute;
+        order = builder.order;
     }
 
     /**
-     * Get the stopCode of the departure bus stop.
+     * Get the {@code stopCode} of the departure bus stop.
      * 
-     * @return The stopCode of the departure bus stop.
+     * @return The {@code stopCode} of the departure bus stop.
      */
+    @NonNull
     public String getStopCode() {
         return stopCode;
     }
     
     /**
-     * Get the stopName of the departure bus stop.
+     * Get the name of the departure bus stop.
      * 
-     * @return The stopName of the departure bus stop. May be null.
+     * @return The name of the departure bus stop.
      */
+    @Nullable
     public String getStopName() {
         return stopName;
     }
 
     /**
-     * Get a Date object representing the departure time.
+     * Get a {@link Date} object representing the departure time.
      * 
-     * @return A Date object representing the departure time.
+     * @return A {@link Date} object representing the departure time.
      */
+    @NonNull
     public Date getDepartureTime() {
         return departureTime;
     }
     
     /**
-     * Get the number of minutes to departure relative to the time that this
-     * method is called. A negative number will be returned if the departure
-     * time has been passed.
+     * Get the number of minutes to departure relative to the time that this method is called. A
+     * negative number will be returned if the departure time has been passed.
      * 
-     * @return The number of minutes to departure. A negative number will be
-     * returned if the departure time has been passed.
+     * @return The number of minutes to departure. A negative number will be returned if the
+     * departure time has been passed.
      */
     public int getDepartureMinutes() {
-        final long differenceMillis = departureTime.getTime() -
-                new Date().getTime();
-        return (int) (differenceMillis / 60000);
+        return (int) ((departureTime.getTime() - new Date().getTime()) / 60000);
     }
     
     /**
      * Get whether the bus stop has a current disruption set or not.
      * 
-     * @return true if the bus stop is disrupted, false if not.
+     * @return {@code true} if the bus stop is disrupted, {@code false} if not.
      */
-    public abstract boolean isBusStopDisrupted();
+    public boolean isBusStopDisrupted() {
+        return isBusStopDisrupted;
+    }
     
     /**
      * Get whether the time is estimated or not.
      * 
-     * @return true if the time is estimated, false if it is real-time.
+     * @return {@code true} if the time is estimated, {@code false} if it is real-time.
      */
-    public abstract boolean isEstimatedTime();
+    public boolean isEstimatedTime() {
+        return isEstimatedTime;
+    }
     
     /**
      * Get whether the service is delayed or not.
      * 
-     * @return true if the service is delayed, false if not.
+     * @return {@code true} if the service is delayed, {@code false} if not.
      */
-    public abstract boolean isDelayed();
+    public boolean isDelayed() {
+        return isDelayed;
+    }
     
     /**
      * Get whether the service is diverted or not.
      * 
-     * @return true if the service is diverted, false if not.
+     * @return {@code true} if the service is diverted, {@code false} if not.
      */
-    public abstract boolean isDiverted();
+    public boolean isDiverted() {
+        return isDiverted;
+    }
     
     /**
      * Get whether this point is a terminus stop on the journey's route.
      * 
-     * @return true if this point is a terminus for this journey, false if not.
+     * @return {@code true} if this point is a terminus for this journey, {@code false} if not.
      */
-    public abstract boolean isTerminus();
+    public boolean isTerminus() {
+        return isTerminus;
+    }
     
     /**
-     * Get whether this journey is only going to complete part of its route or
-     * not.
+     * Get whether this journey is only going to complete part of its route or not.
      * 
-     * @return true if this journey will only complete part of its route, false
+     * @return {@code true} if this journey will only complete part of its route, {@code false}
      * if not.
      */
-    public abstract boolean isPartRoute();
+    public boolean isPartRoute() {
+        return isPartRoute;
+    }
+
+    @Override
+    public int compareTo(@NonNull final JourneyDeparture another) {
+        return order - another.order;
+    }
 
     /**
-     * {@inheritDoc}
+     * This {@link Builder} must be used to construct a new {@link JourneyDeparture}. Create a new
+     * instance of this class, call the setters and when you are ready, call {@link #build()}.
      */
-    @Override
-    public int compareTo(final JourneyDeparture another) {
-        return another != null ? order - another.order : -1;
+    public static class Builder {
+
+        private String stopCode;
+        private String stopName;
+        private Date departureTime;
+        private boolean isBusStopDisrupted;
+        private boolean isEstimatedTime;
+        private boolean isDelayed;
+        private boolean isDiverted;
+        private boolean isTerminus;
+        private boolean isPartRoute;
+        private int order;
+
+        /**
+         * Set the {@code stopCode} of the departure bus stop.
+         *
+         * @param stopCode The {@code stopCode} of the departure bus stop.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setStopCode(@Nullable final String stopCode) {
+            this.stopCode = stopCode;
+            return this;
+        }
+
+        /**
+         * Set the name of the departure bus stop.
+         *
+         * @param stopName The name of the departure bus stop.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setStopName(@Nullable final String stopName) {
+            this.stopName = stopName;
+            return this;
+        }
+
+        /**
+         * Set the {@link Date} object representing the departure time.
+         *
+         * @param departureTime The {@link Date} object representing the departure time.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setDepartureTime(@Nullable final Date departureTime) {
+            this.departureTime = departureTime;
+            return this;
+        }
+
+        /**
+         * Set whether this bus stop has a current disruption or not.
+         *
+         * @param isBusStopDisrupted {@code true} if this bus stop has a current disruption,
+         * {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsBusStopDisrupted(final boolean isBusStopDisrupted) {
+            this.isBusStopDisrupted = isBusStopDisrupted;
+            return this;
+        }
+
+        /**
+         * Set whether the time is estimated or not.
+         *
+         * @param isEstimatedTime {@code true} if the time is estimated, {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsEstimatedTime(final boolean isEstimatedTime) {
+            this.isEstimatedTime = isEstimatedTime;
+            return this;
+        }
+
+        /**
+         * Set whether the service is delayed or not.
+         *
+         * @param isDelayed {@code true} if the service is delayed, {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsDelayed(final boolean isDelayed) {
+            this.isDelayed = isDelayed;
+            return this;
+        }
+
+        /**
+         * Set whether the service is diverted or not.
+         *
+         * @param isDiverted {@code true} if the service is diverted, {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsDiverted(final boolean isDiverted) {
+            this.isDiverted = isDiverted;
+            return this;
+        }
+
+        /**
+         * Set whether this departure point is the terminating point or not.
+         *
+         * @param isTerminus {@code true} if this departure point is the terminating point,
+         * {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsTerminus(final boolean isTerminus) {
+            this.isTerminus = isTerminus;
+            return this;
+        }
+
+        /**
+         * Set whether this journey is only going to complete part of its route or not.
+         *
+         * @param isPartRoute {@code true} if this journey is only going to complete part of its
+         * route, {@code false} if not.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setIsPartRoute(final boolean isPartRoute) {
+            this.isPartRoute = isPartRoute;
+            return this;
+        }
+
+        /**
+         * Set the ordering of this journey departure.
+         *
+         * @param order The order of this journey departure.
+         * @return A reference to this {@code Builder} so that method calls can be chained.
+         * @see #build()
+         */
+        @NonNull
+        public Builder setOrder(final int order) {
+            this.order = order;
+            return this;
+        }
+
+        /**
+         * Build a new {@link JourneyDeparture} object.
+         *
+         * @return A new {@link JourneyDeparture} object.
+         * @throws IllegalArgumentException When the departure time is {@code null}, or the
+         * stop code is {@code null} or empty.
+         */
+        @NonNull
+        public JourneyDeparture build() {
+            return new JourneyDeparture(this);
+        }
     }
 }

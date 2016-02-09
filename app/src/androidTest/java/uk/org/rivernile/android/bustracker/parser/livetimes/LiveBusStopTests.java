@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,73 +25,115 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import android.support.test.runner.AndroidJUnit4;
+
 import java.util.ArrayList;
-import java.util.List;
-import junit.framework.TestCase;
+import java.util.Collections;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link LiveBusStop}.
  * 
  * @author Niall Scott
  */
-public class LiveBusStopTests extends TestCase {
-    
+@RunWith(AndroidJUnit4.class)
+public class LiveBusStopTests {
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the stopCode is set as null.
+     * Test that {@link LiveBusStop.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the stop code is set to {@code null}.
      */
-    public void testConstructorWithNullStopCode() {
-        try {
-            new MockLiveBusStop(null, "name", new ArrayList<LiveBusService>());
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The stopCode is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullStopCode() {
+        new LiveBusStop.Builder()
+                .setStopCode(null)
+                .setServices(Collections.<LiveBusService>emptyList())
+                .build();
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the stopCode is set as empty.
+     * Test that {@link LiveBusStop.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the stop code is set to empty.
      */
-    public void testConstructorWithEmptyStopCode() {
-        try {
-            new MockLiveBusStop("", "name", new ArrayList<LiveBusService>());
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The stopCode is set as empty, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithEmptyStopCode() {
+        new LiveBusStop.Builder()
+                .setStopCode("")
+                .setServices(Collections.<LiveBusService>emptyList())
+                .build();
     }
-    
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the List of {@link LiveBusService}s is set as null.
+     * Test that {@link LiveBusStop.Builder#build()} does not throw an exception when the stop
+     * name is set to empty.
      */
-    public void testConstructorWithNullServicesList() {
-        try {
-            new MockLiveBusStop("123456", "name", null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The List of services is set as null, so an "
-                + "IllegalArgumentException should be thrown.");
+    @Test
+    public void testBuilderWithEmptyStopName() {
+        new LiveBusStop.Builder()
+                .setStopCode("123456")
+                .setStopName("")
+                .setServices(Collections.<LiveBusService>emptyList())
+                .build();
     }
-    
+
     /**
-     * Test that the getters return the same data as given to them in the
-     * constructor.
+     * Test that {@link LiveBusStop.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the services is set to {@code null}.
      */
-    public void testValidLiveBusStop() {
-        final List<LiveBusService> services = new ArrayList<LiveBusService>();
-        final LiveBusStop busStop =
-                new MockLiveBusStop("123456", "a name", services);
-        
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullServices() {
+        new LiveBusStop.Builder()
+                .setStopCode("123456")
+                .setServices(null)
+                .build();
+    }
+
+    /**
+     * Test the default values of a {@link LiveBusStop} object.
+     */
+    @Test
+    public void testDefault() {
+        final LiveBusStop busStop = new LiveBusStop.Builder()
+                .setStopCode("123456")
+                .setServices(Collections.<LiveBusService>emptyList())
+                .build();
+
         assertEquals("123456", busStop.getStopCode());
-        assertEquals("a name", busStop.getStopName());
-        assertEquals(services, busStop.getServices());
+        assertNull(busStop.getStopName());
+        assertTrue(busStop.getServices().isEmpty());
+        assertFalse(busStop.isDisrupted());
+    }
+
+    /**
+     * Test building a {@link LiveBusStop} with valid values produces an object that returns
+     * expected values.
+     */
+    @Test
+    public void testValid() {
+        final LiveBusService service = new LiveBusService.Builder()
+                .setServiceName("1")
+                .setBuses(Collections.<LiveBus>emptyList())
+                .build();
+        final ArrayList<LiveBusService> services = new ArrayList<>();
+        services.add(service);
+        final LiveBusStop busStop = new LiveBusStop.Builder()
+                .setStopCode("123456")
+                .setStopName("Stop name")
+                .setServices(services)
+                .setIsDisrupted(true)
+                .build();
+
+        assertEquals("123456", busStop.getStopCode());
+        assertEquals("Stop name", busStop.getStopName());
+        assertEquals(1, busStop.getServices().size());
+        assertEquals("1", busStop.getServices().get(0).getServiceName());
+        assertTrue(busStop.isDisrupted());
     }
 }

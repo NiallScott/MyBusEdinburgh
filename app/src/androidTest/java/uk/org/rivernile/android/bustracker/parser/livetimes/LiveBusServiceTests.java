@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,82 +25,154 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
-import junit.framework.TestCase;
 
 /**
  * Tests for {@link LiveBusService}.
  * 
  * @author Niall Scott
  */
-public class LiveBusServiceTests extends TestCase {
-    
+@RunWith(AndroidJUnit4.class)
+public class LiveBusServiceTests {
+
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the serviceName is set to null.
+     * Test that {@link LiveBusService.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the service name is set to {@code null}.
      */
-    public void testConstructorWithNullServiceName() {
-        try {
-            new MockLiveBusService(null, new ArrayList<LiveBus>());
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The serviceName is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullServiceName() {
+        new LiveBusService.Builder()
+                .setServiceName(null)
+                .setBuses(Collections.<LiveBus>emptyList())
+                .build();
+    }
+
+    /**
+     * Test that {@link LiveBusService.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the service name is set to empty.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithEmptyServiceName() {
+        new LiveBusService.Builder()
+                .setServiceName("")
+                .setBuses(Collections.<LiveBus>emptyList())
+                .build();
+    }
+
+    /**
+     * Test that {@link LiveBusService.Builder#build()} throws an {@link IllegalArgumentException}
+     * when the {@link List} of {@link LiveBus}es is set to {@code null}.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBuilderWithNullBuses() {
+        new LiveBusService.Builder()
+                .setServiceName("1")
+                .setBuses(null)
+                .build();
+    }
+
+    /**
+     * Test that {@link LiveBusService.Builder#build()} does not throw an exception when the
+     * operator is set to empty.
+     */
+    @Test
+    public void testBuilderWithEmptyOperator() {
+        new LiveBusService.Builder()
+                .setServiceName("1")
+                .setBuses(Collections.<LiveBus>emptyList())
+                .setOperator("")
+                .build();
+    }
+
+    /**
+     * Test that {@link LiveBusService.Builder#build()} does not throw an exception when the
+     * route is set to empty.
+     */
+    @Test
+    public void testBuilderWithEmptyRoute() {
+        new LiveBusService.Builder()
+                .setServiceName("1")
+                .setBuses(Collections.<LiveBus>emptyList())
+                .setRoute("")
+                .build();
+    }
+
+    /**
+     * Test the default values of a {@link LiveBusService} object.
+     */
+    @Test
+    public void testDefault() {
+        final LiveBusService service = new LiveBusService.Builder()
+                .setServiceName("1")
+                .setBuses(Collections.<LiveBus>emptyList())
+                .build();
+
+        assertEquals("1", service.getServiceName());
+        assertTrue(service.getLiveBuses().isEmpty());
+        assertNull(service.getOperator());
+        assertNull(service.getRoute());
+        assertFalse(service.isDisrupted());
+        assertFalse(service.isDiverted());
+    }
+
+    /**
+     * Test building a {@link LiveBusService} with valid values produces an object that returns
+     * expected values.
+     */
+    @Test
+    public void testValid() {
+        final LiveBus bus = new LiveBus.Builder()
+                .setDestination("A")
+                .setDepartureTime(new Date())
+                .build();
+        final ArrayList<LiveBus> buses = new ArrayList<>();
+        buses.add(bus);
+        final LiveBusService service = new LiveBusService.Builder()
+                .setServiceName("2")
+                .setBuses(buses)
+                .setOperator("LB")
+                .setRoute("A -- B")
+                .setIsDisrupted(true)
+                .setIsDiverted(true)
+                .build();
+
+        assertEquals("2", service.getServiceName());
+        assertEquals(1, service.getLiveBuses().size());
+        assertEquals("A", service.getLiveBuses().get(0).getDestination());
+        assertEquals("LB", service.getOperator());
+        assertEquals("A -- B", service.getRoute());
+        assertTrue(service.isDisrupted());
+        assertTrue(service.isDiverted());
     }
     
     /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the serviceName is set to empty.
+     * Test that instances of {@link LiveBusService} order correctly when held inside a
+     * {@link List}.
      */
-    public void testConstructorWithEmptyServiceName() {
-        try {
-            new MockLiveBusService("", new ArrayList<LiveBus>());
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The serviceName is set as empty, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that the constructor correctly throws an IllegalArgumentException
-     * when the List of buses is set to null.
-     */
-    public void testConstructorWithNullBusList() {
-        try {
-            new MockLiveBusService("22", null);
-        } catch (IllegalArgumentException e) {
-            return;
-        }
-        
-        fail("The buses List is set as null, so an IllegalArgumentException "
-                + "should be thrown.");
-    }
-    
-    /**
-     * Test that the getters return the correct data.
-     */
-    public void testValidLiveBusService() {
-        final List<LiveBus> buses = new ArrayList<LiveBus>();
-        final LiveBusService service = new MockLiveBusService("41", buses);
-        assertEquals("41", service.getServiceName());
-        assertEquals(buses, service.getLiveBuses());
-    }
-    
-    /**
-     * Test that instances of LiveBusService order correctly when held inside a
-     * List.
-     */
+    @Test
     public void testOrdering() {
-        final List<LiveBus> buses = new ArrayList<LiveBus>();
-        final LiveBusService serviceA = new MockLiveBusService("25", buses);
-        final LiveBusService serviceB = new MockLiveBusService("X25", buses);
-        
-        assertTrue(serviceA.compareTo(null) < 0);
+        final LiveBusService serviceA = new LiveBusService.Builder()
+                .setServiceName("25")
+                .setBuses(Collections.<LiveBus>emptyList())
+                .build();
+        final LiveBusService serviceB = new LiveBusService.Builder()
+                .setServiceName("X25")
+                .setBuses(Collections.<LiveBus>emptyList())
+                .build();
+
         assertEquals(0, serviceA.compareTo(serviceA));
         assertTrue(serviceA.compareTo(serviceB) < 0);
         assertTrue(serviceB.compareTo(serviceA) > 0);

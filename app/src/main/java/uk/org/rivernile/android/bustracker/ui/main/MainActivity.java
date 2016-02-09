@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,19 +29,23 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
@@ -63,7 +67,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsD
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.AlertManagerFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.EnterStopCodeFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.FavouriteStopsFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general.NearestStopsFragment;
+import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;
 
 /**
  * This {@link android.app.Activity} hosts the root UI elements.
@@ -94,6 +98,7 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout drawer;
     private ActionBarDrawerToggle drawerToggle;
     private CharSequence drawerOpenTitle, drawerClosedTitle;
+    private int statusBarColour;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -177,6 +182,31 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void setTitle(final int titleId) {
         setTitle(getString(titleId));
+    }
+
+    @Override
+    public void onSupportActionModeStarted(final ActionMode mode) {
+        super.onSupportActionModeStarted(mode);
+
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            final Window window = getWindow();
+            statusBarColour = window.getStatusBarColor();
+            window.setStatusBarColor(ContextCompat.getColor(this,
+                    R.color.colorContextualStatusBarBackground));
+        }
+    }
+
+    @Override
+    public void onSupportActionModeFinished(final ActionMode mode) {
+        super.onSupportActionModeFinished(mode);
+
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(statusBarColour);
+        }
     }
 
     @Override

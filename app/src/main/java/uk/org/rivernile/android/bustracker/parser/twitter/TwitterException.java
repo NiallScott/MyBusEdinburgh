@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,44 +26,43 @@
 package uk.org.rivernile.android.bustracker.parser.twitter;
 
 /**
- * TwitterException is used when there are problems during the fetching or
- * parsing of Twitter data.
- * 
+ * {@code TwitterException} is used when there are problems during the fetching or parsing of
+ * Twitter data.
+ *
  * @author Niall Scott
  */
 public class TwitterException extends Exception {
     
     /**
-     * Create a new TwitterException.
+     * Create a new {@code TwitterException}.
      */
     public TwitterException() {
         super();
     }
     
     /**
-     * Create a new TwitterException.
+     * Create a new {@code TwitterException}.
      * 
-     * @param detailMessage The message to include in the Exception.
+     * @param detailMessage The message to include in the {@link Exception}.
      */
     public TwitterException(final String detailMessage) {
         super(detailMessage);
     }
     
     /**
-     * Create a new TwitterException.
+     * Create a new {@code TwitterException}.
      * 
-     * @param detailMessage The message to include in the Exception.
-     * @param throwable The Throwable that caused this Exception.
+     * @param detailMessage The message to include in the {@link Exception}.
+     * @param throwable The Throwable that caused this {@link Exception}.
      */
-    public TwitterException(final String detailMessage,
-            final Throwable throwable) {
+    public TwitterException(final String detailMessage, final Throwable throwable) {
         super(detailMessage, throwable);
     }
     
     /**
-     * Create a new TwitterException.
+     * Create a new {@code TwitterException}.
      * 
-     * @param throwable The Throwable that caused this Exception.
+     * @param throwable The Throwable that caused this {@link Exception}.
      */
     public TwitterException(final Throwable throwable) {
         super(throwable);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,35 +25,38 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
-import uk.org.rivernile.android.fetchers.Fetcher;
+import android.support.annotation.NonNull;
+
+import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
 
 /**
- * The BusParser defines an interface of methods to communicate with the
- * real-time server.
+ * The {@code BusParser} defines an interface of methods to communicate with the real-time server.
  * 
  * @author Niall Scott
  */
 public interface BusParser {
     
     /**
-     * Get bus times for the data returned by the given Fetcher.
+     * Get bus times for the data returned by the given {@link Fetcher}.
      * 
      * @param fetcher The fetcher to use to retrieve data.
-     * @return A LiveBusTimes instance which contains the live bus data.
-     * @throws LiveTimesException When there was an error in fetching or parsing
-     * of the data. This may be an instance of LiveTimesException or one of its
-     * children. The instance may also have a cause Throwable included.
+     * @return A {@link LiveBusTimes} instance which contains the live bus data.
+     * @throws LiveTimesException When there was an error in fetching or parsing of the data.
+     * This may be an instance of {@link LiveTimesException} or one of its children. The instance
+     * may also have a cause {@link Throwable} included.
      */
-    public LiveBusTimes getBusTimes(Fetcher fetcher) throws LiveTimesException;
+    @NonNull
+    LiveBusTimes getBusTimes(@NonNull Fetcher fetcher) throws LiveTimesException;
     
     /**
-     * Get journey times for a journey returned by the given Fetcher.
+     * Get journey times for a journey returned by the given {@link Fetcher}.
      * 
      * @param fetcher The fetcher to use to retrieve data.
-     * @return A Journey instance which contains the journey data.
-     * @throws LiveTimesException When there was an error in fetching or parsing
-     * of the data. This may be an instance of LiveTimesException or one of its
-     * children. The instance may also have a cause Throwable included.
+     * @return A {@link Journey} instance which contains the journey data.
+     * @throws LiveTimesException When there was an error in fetching or parsing of the data.
+     * This may be an instance of {@link LiveTimesException} or one of its children. The instance
+     * may also have a cause {@link Throwable} included.
      */
-    public Journey getJourneyTimes(Fetcher fetcher) throws LiveTimesException;
+    @NonNull
+    Journey getJourneyTimes(@NonNull Fetcher fetcher) throws LiveTimesException;
 }

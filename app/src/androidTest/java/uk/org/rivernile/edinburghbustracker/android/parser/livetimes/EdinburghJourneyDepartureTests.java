@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,121 +25,49 @@
 
 package uk.org.rivernile.edinburghbustracker.android.parser.livetimes;
 
+import static org.junit.Assert.assertEquals;
+
+import android.support.test.runner.AndroidJUnit4;
+
 import java.util.Date;
-import junit.framework.TestCase;
-import uk.org.rivernile.android.bustracker.parser.livetimes.JourneyDeparture;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link EdinburghJourneyDeparture}.
  * 
  * @author Niall Scott
  */
-public class EdinburghJourneyDepartureTests extends TestCase {
-    
+@RunWith(AndroidJUnit4.class)
+public class EdinburghJourneyDepartureTests {
+
     /**
-     * Test that the getters return the correct values.
+     * Test the default state of the object when the bare minimum properties are supplied.
      */
-    public void testGeneralValid() {
-        final Date time = new Date();
-        final JourneyDeparture departure =
-                new EdinburghJourneyDeparture("123456", "stop name", time, 2,
-                        'H', 'N', false, 1);
-        
-        assertEquals("123456", departure.getStopCode());
-        assertEquals("stop name", departure.getStopName());
-        assertEquals(time, departure.getDepartureTime());
-        assertEquals(2, departure.getDepartureMinutes());
-        assertFalse(departure.isBusStopDisrupted());
-        assertFalse(departure.isEstimatedTime());
-        assertFalse(departure.isDelayed());
-        assertFalse(departure.isDiverted());
-        assertFalse(departure.isTerminus());
-        assertFalse(departure.isPartRoute());
+    @Test
+    public void testDefault() {
+        final EdinburghJourneyDeparture departure =
+                (EdinburghJourneyDeparture) new EdinburghJourneyDeparture.Builder()
+                        .setStopCode("123456")
+                        .setDepartureTime(new Date())
+                        .build();
+
+        assertEquals(0, departure.getDepartureMinutes());
     }
-    
+
     /**
-     * Test that {@link EdinburghJourneyDeparture#isBusStopDisrupted()} returns
-     * true when the isDisrupted flag is set to true.
+     * Test the state of the object when a departure time is supplied.
      */
-    public void testBusStopDisrupted() {
-        final JourneyDeparture departure =
-                new EdinburghJourneyDeparture("123456", "stop name", new Date(),
-                        2, 'H', 'N', true, 1);
-        assertTrue(departure.isBusStopDisrupted());
-    }
-    
-    /**
-     * Test that {@link EdinburghJourneyDeparture#isEstimatedTime()} returns
-     * true when reliability field indicates the time is estimated.
-     */
-    public void testIsEstimatedTime() {
-        final JourneyDeparture departure =
-                new EdinburghJourneyDeparture("123456", "stop name", new Date(),
-                        2, 'T', 'N', false, 1);
-        assertTrue(departure.isEstimatedTime());
-        assertFalse(departure.isDelayed());
-        assertFalse(departure.isDiverted());
-        assertFalse(departure.isTerminus());
-        assertFalse(departure.isPartRoute());
-    }
-    
-    /**
-     * Test that {@link EdinburghJourneyDeparture#isDelayed()} returns true when
-     * the reliability field indicates the bus is delayed.
-     */
-    public void testIsDelayed() {
-        final JourneyDeparture departure =
-                new EdinburghJourneyDeparture("123456", "stop name", new Date(),
-                        2, 'B', 'N', false, 1);
-        assertFalse(departure.isEstimatedTime());
-        assertTrue(departure.isDelayed());
-        assertFalse(departure.isDiverted());
-        assertFalse(departure.isTerminus());
-        assertFalse(departure.isPartRoute());
-    }
-    
-    /**
-     * Test that {@link EdinburghJourneyDeparture#isDiverted()} returns true
-     * when the reliability field indicates the bus is diverted.
-     */
-    public void testIsDiverted() {
-        final JourneyDeparture departure =
-                new EdinburghJourneyDeparture("123456", "stop name", new Date(),
-                        2, 'V', 'N', false, 1);
-        assertFalse(departure.isEstimatedTime());
-        assertFalse(departure.isDelayed());
-        assertTrue(departure.isDiverted());
-        assertFalse(departure.isTerminus());
-        assertFalse(departure.isPartRoute());
-    }
-    
-    /**
-     * Test that {@link EdinburghJourneyDeparture#isTerminus()} returns true
-     * when the type field indicates the departure point is a terminus.
-     */
-    public void testIsTerminus() {
-        final JourneyDeparture departure =
-                new EdinburghJourneyDeparture("123456", "stop name", new Date(),
-                        2, 'H', 'D', false, 1);
-        assertFalse(departure.isEstimatedTime());
-        assertFalse(departure.isDelayed());
-        assertFalse(departure.isDiverted());
-        assertTrue(departure.isTerminus());
-        assertFalse(departure.isPartRoute());
-    }
-    
-    /**
-     * Test that {@link EdinburghJourneyDeparture#isPartRoute()} returns true
-     * when the type field indicates that the bus is on part-route.
-     */
-    public void testIsPartRoute() {
-        final JourneyDeparture departure =
-                new EdinburghJourneyDeparture("123456", "stop name", new Date(),
-                        2, 'H', 'P', false, 1);
-        assertFalse(departure.isEstimatedTime());
-        assertFalse(departure.isDelayed());
-        assertFalse(departure.isDiverted());
-        assertFalse(departure.isTerminus());
-        assertTrue(departure.isPartRoute());
+    @Test
+    public void testValid() {
+        final EdinburghJourneyDeparture departure =
+                (EdinburghJourneyDeparture) new EdinburghJourneyDeparture.Builder()
+                        .setDepartureMinutes(5)
+                        .setStopCode("123456")
+                        .setDepartureTime(new Date())
+                        .build();
+
+        assertEquals(5, departure.getDepartureMinutes());
     }
 }

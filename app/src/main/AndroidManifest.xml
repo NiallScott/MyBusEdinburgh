@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 */ -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="uk.org.rivernile.edinburghbustracker.android" >
     
     <!-- Request the required permissions. -->
@@ -35,7 +36,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
     <!-- Tell the Google Play Store that this app uses location features, but
          app does not require that devices have them. -->
@@ -60,7 +60,10 @@
         android:hardwareAccelerated="true"
         android:theme="@style/MyBusEdinburgh"
         android:backupAgent="SettingsBackupAgent"
-        android:allowBackup="true" >
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/autobackup"
+        android:fullBackupOnly="true"
+        tools:ignore="UnusedAttribute">
         
         <!-- This is the API key used by the backup service. This is linked
              to the package name. -->

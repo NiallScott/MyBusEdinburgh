@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,15 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 /**
- * This Exception should be thrown when there is a problem with dealing with the
- * request on the remote server, for example, when the HTTP server returns a 5xx
- * status code.
+ * This {@link Exception} should be thrown when there is a problem with dealing with the request
+ * on the remote server, for example, when the HTTP server returns a 5xx status code.
  * 
  * @author Niall Scott
  */
 public class ServerErrorException extends LiveTimesException {
     
     /**
-     * Create a new ServerErrorException with a default message.
+     * Create a new {@code ServerErrorException} with a default message.
      */
     public ServerErrorException() {
         super("There was a problem dealing with the request on the remote "
@@ -43,9 +42,9 @@ public class ServerErrorException extends LiveTimesException {
     }
     
     /**
-     * Create a new ServerErrorException with the given detailMessage.
+     * Create a new {@code ServerErrorException} with the given {@code detailMessage}.
      * 
-     * @param detailMessage The message to set in the Exception.
+     * @param detailMessage The message to set in the {@link Exception}.
      */
     public ServerErrorException(final String detailMessage) {
         super(detailMessage);

@@ -61,32 +61,6 @@ public class EdinburghUrlBuilderTests {
     }
     
     /**
-     * Common checks for tests on bus tracker URLs.
-     * 
-     * @param uri The {@link Uri} to check.
-     */
-    private static void checkBusTrackerUri(@NonNull final Uri uri) {
-        assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
-        assertEquals(EdinburghUrlBuilder.BUSTRACKER_HOST, uri.getHost());
-        assertEquals("/ws.php", uri.getPath());
-        assertEquals("json", uri.getQueryParameter("module"));
-        assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
-        assertNotNull(uri.getQueryParameter("random"));
-    }
-    
-    /**
-     * Common checks for tests on database server URLs.
-     * 
-     * @param uri The {@link Uri} to check.
-     */
-    private static void checkDatabaseServerUri(@NonNull final Uri uri) {
-        assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
-        assertEquals(EdinburghUrlBuilder.DB_SERVER_HOST, uri.getHost());
-        assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
-        assertNotNull(uri.getQueryParameter("random"));
-    }
-    
-    /**
      * Test that the URL for getting the topology from the bus tracker server is correctly
      * constructed.
      */
@@ -96,24 +70,6 @@ public class EdinburghUrlBuilderTests {
         
         checkBusTrackerUri(uri);
         assertEquals("getTopoId", uri.getQueryParameter("function"));
-    }
-    
-    /**
-     * Test that {@link EdinburghUrlBuilder#getDbVersionCheckUrl(String)} correctly throws an
-     * {@link IllegalArgumentException} when {@code schemaType} is set to {@code null}.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetDbVersionCheckUrlWithNullSchemaType() {
-        builder.getDbVersionCheckUrl(null);
-    }
-    
-    /**
-     * Test that {@link EdinburghUrlBuilder#getDbVersionCheckUrl(String)} correctly throws an
-     * {@link IllegalArgumentException} when {@code schemaType} is set to empty.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetDbVersionCheckUrlWithEmptySchemaType() {
-        builder.getDbVersionCheckUrl("");
     }
     
     /**
@@ -127,15 +83,6 @@ public class EdinburghUrlBuilderTests {
         checkDatabaseServerUri(uri);
         assertEquals("/api/DatabaseVersion", uri.getPath());
         assertEquals("test", uri.getQueryParameter("schemaType"));
-    }
-    
-    /**
-     * Test that {@link EdinburghUrlBuilder#getBusTimesUrl(String[], int)} correctly throws an
-     * {@link IllegalArgumentException} when {@code stopCodes} is set to {@code null}.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetBusTimesUrlNullStopCodes() {
-        builder.getBusTimesUrl(null, 1);
     }
     
     /**
@@ -203,42 +150,6 @@ public class EdinburghUrlBuilderTests {
     }
     
     /**
-     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly throws an
-     * {@link IllegalArgumentException} when the {@code stopCode} is set to {@code null}.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetJourneyTimesUrlWithNullStopCode() {
-        builder.getJourneyTimesUrl(null, "journeyID");
-    }
-    
-    /**
-     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly throws an
-     * {@link IllegalArgumentException} when the {@code stopCode} is set to empty.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetJourneyTimesUrlWithEmptyStopCode() {
-        builder.getJourneyTimesUrl("", "journeyId");
-    }
-    
-    /**
-     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly throws an
-     * {@link IllegalArgumentException} when the {@code journeyId} is set to {@code null}.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetJourneyTimesUrlWithNullJourneyId() {
-        builder.getJourneyTimesUrl("stopCode", null);
-    }
-    
-    /**
-     * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly throws an
-     * {@link IllegalArgumentException} when the {@code journeyId} is set to empty.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetJourneyTimesUrlWithEmptyJourneyId() {
-        builder.getJourneyTimesUrl("stopCode", "");
-    }
-    
-    /**
      * Test that {@link EdinburghUrlBuilder#getJourneyTimesUrl(String, String)} correctly constructs
      * a URL from the given parameters.
      */
@@ -263,5 +174,31 @@ public class EdinburghUrlBuilderTests {
         checkDatabaseServerUri(uri);
         assertEquals("/api/TwitterStatuses", uri.getPath());
         assertEquals("MBE", uri.getQueryParameter("appName"));
+    }
+
+    /**
+     * Common checks for tests on bus tracker URLs.
+     *
+     * @param uri The {@link Uri} to check.
+     */
+    private static void checkBusTrackerUri(@NonNull final Uri uri) {
+        assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
+        assertEquals(EdinburghUrlBuilder.BUSTRACKER_HOST, uri.getHost());
+        assertEquals("/ws.php", uri.getPath());
+        assertEquals("json", uri.getQueryParameter("module"));
+        assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
+        assertNotNull(uri.getQueryParameter("random"));
+    }
+
+    /**
+     * Common checks for tests on database server URLs.
+     *
+     * @param uri The {@link Uri} to check.
+     */
+    private static void checkDatabaseServerUri(@NonNull final Uri uri) {
+        assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
+        assertEquals(EdinburghUrlBuilder.DB_SERVER_HOST, uri.getHost());
+        assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
+        assertNotNull(uri.getQueryParameter("random"));
     }
 }

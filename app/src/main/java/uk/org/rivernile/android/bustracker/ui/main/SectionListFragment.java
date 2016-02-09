@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,17 @@
 package uk.org.rivernile.android.bustracker.ui.main;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
 
 import uk.org.rivernile.android.bustracker.ui.main.sections.AboutSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.AlertManagerSection;
@@ -61,13 +64,13 @@ public class SectionListFragment extends Fragment {
     private SectionListAdapter adapter;
 
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(final Context context) {
+        super.onAttach(context);
         
         try {
-            callbacks = (Callbacks) activity;
+            callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
+            throw new IllegalStateException(context.getClass().getName() + " does not implement " +
                     Callbacks.class.getName());
         }
     }
@@ -75,20 +78,29 @@ public class SectionListFragment extends Fragment {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        final Activity activity = getActivity();
+        final ArrayList<Section> sectionsList = new ArrayList<>(9);
+        sectionsList.add(FavouritesSection.getInstance());
+        sectionsList.add(EnterStopCodeSection.getInstance());
+        sectionsList.add(BusStopMapSection.getInstance());
+
+        if (activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION)) {
+            // The Nearest Stops feature is useless without the device having location services. If
+            // there's no location services, don't show it as an option to the user.
+            sectionsList.add(NearestStopsSection.getInstance());
+        }
+
+        sectionsList.add(NewsSection.getInstance());
+        sectionsList.add(AlertManagerSection.getInstance());
+        sectionsList.add(null);
+        sectionsList.add(SettingsSection.getInstance());
+        sectionsList.add(AboutSection.getInstance());
         
-        final Section[] sections = new Section[] {
-            FavouritesSection.getInstance(),
-            EnterStopCodeSection.getInstance(),
-            BusStopMapSection.getInstance(),
-            NearestStopsSection.getInstance(),
-            NewsSection.getInstance(),
-            AlertManagerSection.getInstance(),
-            null, // Divider.
-            SettingsSection.getInstance(),
-            AboutSection.getInstance()
-        };
+        final Section[] sections = new Section[sectionsList.size()];
+        sectionsList.toArray(sections);
         
-        adapter = new SectionListAdapter(getActivity());
+        adapter = new SectionListAdapter(activity);
         adapter.setOnSectionChosenListener(callbacks);
         adapter.setSections(sections);
 
@@ -104,7 +116,6 @@ public class SectionListFragment extends Fragment {
         final RecyclerView recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
 
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
         
         return v;
@@ -120,7 +131,7 @@ public class SectionListFragment extends Fragment {
     /**
      * {@link Activity Activities} which host this {@link Fragment} must implement this interface.
      */
-    public static interface Callbacks extends SectionListAdapter.OnSectionChosenListener {
+    public interface Callbacks extends SectionListAdapter.OnSectionChosenListener {
 
         // No methods to declare here.
     }
