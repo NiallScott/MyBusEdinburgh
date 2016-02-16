@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,6 +50,8 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
 
+    private long currentTime;
+
     public SettingsProviderTests() {
         super(SettingsProvider.class, SettingsContract.AUTHORITY);
     }
@@ -58,6 +60,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Override
     public void setUp() throws Exception {
         setContext(InstrumentationRegistry.getTargetContext());
+        currentTime = System.currentTimeMillis();
 
         super.setUp();
     }
@@ -68,6 +71,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         super.tearDown();
 
         getMockContext().deleteDatabase(SettingsContract.DB_NAME);
+        currentTime = 0;
     }
 
     /**
@@ -181,6 +185,32 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     }
 
     /**
+     * Test that {@link SettingsProvider#update(Uri, ContentValues, String, String[])} throws an
+     * {@link IllegalArgumentException} when an alerts {@link Uri} has been specified.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testUpdateWithAlerts() {
+        final ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.STOP_CODE, "24680");
+        getMockContentResolver()
+                .update(SettingsContract.Alerts.CONTENT_URI, cv, null, null);
+    }
+
+    /**
+     * Test that {@link SettingsProvider#update(Uri, ContentValues, String, String[])} throws an
+     * {@link IllegalArgumentException} when an alerts {@link Uri} has been specified that includes
+     * a specific item ID.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testUpdateWithAlertsUri() {
+        final ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.STOP_CODE, "24680");
+        getMockContentResolver()
+                .update(ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), cv,
+                        null, null);
+    }
+
+    /**
      * Test that {@link SettingsProvider#query(Uri, String[], String, String[], String)} returns a
      * {@link Cursor} with {@code 0} rows when no data has been inserted in to the database with
      * favourites.
@@ -189,8 +219,24 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     public void testQueryFavouritesWithEmptyTable() {
         final Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
                 null, null, null, null);
+        assertNotNull(c);
         assertEquals(0, c.getCount());
         assertNotificationUri(SettingsContract.Favourites.CONTENT_URI, c);
+        c.close();
+    }
+
+    /**
+     * Test that {@link SettingsProvider#query(Uri, String[], String, String[], String)} returns
+     * a {@link Cursor} with {@code 0} rows when no data has been inserted in to the database with
+     * alerts.
+     */
+    @Test
+    public void testQueryAlertsWithEmptyTable() {
+        final Cursor c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI, null,
+                null, null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
+        assertNotificationUri(SettingsContract.Alerts.CONTENT_URI, c);
         c.close();
     }
 
@@ -204,6 +250,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
 
         Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
                 null, null, null, null);
+        assertNotNull(c);
         assertEquals(3, c.getCount());
 
         c.moveToNext();
@@ -217,6 +264,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
 
         c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
                 null, null, null, SettingsContract.Favourites.STOP_NAME + " DESC");
+        assertNotNull(c);
         assertEquals(3, c.getCount());
 
         c.moveToNext();
@@ -232,10 +280,44 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
                 new String[] { SettingsContract.Favourites.STOP_NAME },
                 SettingsContract.Favourites.STOP_CODE + " = ?",
                 new String[] { "323456" }, null);
+        assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("C", c.getString(0));
         assertNotificationUri(SettingsContract.Favourites.CONTENT_URI, c);
+        c.close();
+    }
+
+    /**
+     * Test various permutations of
+     * {@link SettingsProvider#query(Uri, String[], String, String[], String)} with alerts.
+     */
+    @Test
+    public void testQueryAlerts() {
+        populateAlertsWithTestData();
+
+        Cursor c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI, null, null,
+                null, null);
+        assertNotNull(c);
+        assertEquals(2, c.getCount());
+
+        c.moveToNext();
+        assertEquals("123456", c.getString(3));
+        c.moveToNext();
+        assertEquals("223456", c.getString(3));
+        assertNotificationUri(SettingsContract.Alerts.CONTENT_URI, c);
+        c.close();
+
+        c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI,
+                new String[] { SettingsContract.Alerts.STOP_CODE },
+                SettingsContract.Alerts.TYPE + " = ?",
+                new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY) },
+                null);
+        assertNotNull(c);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals("123456", c.getString(0));
+        assertNotificationUri(SettingsContract.Alerts.CONTENT_URI, c);
         c.close();
     }
 
@@ -250,6 +332,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         Cursor c = getMockContentResolver().query(
                 ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1), null,
                 null, null, null);
+        assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("B", c.getString(2));
@@ -258,6 +341,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         c = getMockContentResolver().query(
                 ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 42), null,
                 null, null, null);
+        assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
 
@@ -266,9 +350,46 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
                 new String[] { SettingsContract.Favourites.STOP_NAME },
                 SettingsContract.Favourites.STOP_CODE + " = ?",
                 new String[] { "323456" }, null);
+        assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("B", c.getString(0));
+        c.close();
+    }
+
+    /**
+     * Test {@link SettingsProvider#query(Uri, String[], String, String[], String)} with alerts for
+     * a known item ID.
+     */
+    @Test
+    public void testQueryAlertsById() {
+        populateAlertsWithTestData();
+
+        Cursor c = getMockContentResolver().query(
+                ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), null, null,
+                null, null);
+        assertNotNull(c);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals("123456", c.getString(3));
+        c.close();
+
+        c = getMockContentResolver().query(
+                ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 42), null, null,
+                null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
+        c.close();
+
+        c = getMockContentResolver().query(
+                ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1),
+                new String[] { SettingsContract.Alerts.STOP_CODE },
+                SettingsContract.Alerts.TYPE + " = ?",
+                new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_TIME) }, null);
+        assertNotNull(c);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals("123456", c.getString(0));
         c.close();
     }
 
@@ -279,6 +400,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     public void testInsertFavourites() {
         Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
                 null, null, null, null);
+        assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
 
@@ -287,15 +409,53 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         cv.put(SettingsContract.Favourites.STOP_NAME, "Test stop");
         final Uri returnedUri = getMockContentResolver()
                 .insert(SettingsContract.Favourites.CONTENT_URI, cv);
+        assertNotNull(returnedUri);
         assertEquals(ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1),
                 returnedUri);
 
         c = getMockContentResolver().query(returnedUri, null, null, null, null);
+        assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals(1, c.getInt(0));
         assertEquals("24680", c.getString(1));
         assertEquals("Test stop", c.getString(2));
+        c.close();
+    }
+
+    /**
+     * Test {@link SettingsProvider#insert(Uri, ContentValues)} with alerts.
+     */
+    @Test
+    public void testInsertAlerts() {
+        Cursor c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI, null,
+                null, null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
+        c.close();
+
+        final ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, currentTime);
+        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv.put(SettingsContract.Alerts.DISTANCE_FROM, 10);
+        final Uri returnedUri = getMockContentResolver()
+                .insert(SettingsContract.Alerts.CONTENT_URI, cv);
+        assertNotNull(returnedUri);
+        assertEquals(ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1),
+                returnedUri);
+
+        c = getMockContentResolver().query(returnedUri, null, null, null, null);
+        assertNotNull(c);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals(1, c.getInt(0));
+        assertEquals(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY, c.getInt(1));
+        assertEquals(currentTime, c.getLong(2));
+        assertEquals("123456", c.getString(3));
+        assertEquals(10, c.getInt(4));
+        assertTrue(c.isNull(5));
+        assertTrue(c.isNull(6));
         c.close();
     }
 
@@ -310,6 +470,23 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
                 .delete(SettingsContract.Favourites.CONTENT_URI, null, null));
         final Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
                 null, null, null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
+        c.close();
+    }
+
+    /**
+     * Test {@link SettingsProvider#delete(Uri, String, String[])} with deleting all alerts.
+     */
+    @Test
+    public void testDeleteAllAlerts() {
+        populateAlertsWithTestData();
+
+        assertEquals(2, getMockContentResolver()
+                .delete(SettingsContract.Alerts.CONTENT_URI, null, null));
+        final Cursor c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI,
+                null, null, null, null);
+        assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
     }
@@ -329,6 +506,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
+        assertNotNull(c);
         assertEquals(2, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(0));
@@ -344,9 +522,46 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
+        assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(0));
+        c.close();
+    }
+
+    /**
+     * Test {@link SettingsProvider#delete(Uri, String, String[])} with alerts.
+     */
+    @Test
+    public void testDeleteAlerts() {
+        populateAlertsWithTestData();
+
+        int count = getMockContentResolver().delete(SettingsContract.Alerts.CONTENT_URI,
+                SettingsContract.Alerts.TYPE + " = ?",
+                new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY) });
+        assertEquals(1, count);
+
+        Cursor c = getMockContentResolver().query(
+                SettingsContract.Alerts.CONTENT_URI,
+                new String[] { SettingsContract.Alerts.STOP_CODE },
+                null, null, null);
+        assertNotNull(c);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals("223456", c.getString(0));
+        c.close();
+
+        count = getMockContentResolver().delete(SettingsContract.Alerts.CONTENT_URI,
+                SettingsContract.Alerts.TYPE + " = ?",
+                new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_TIME) });
+        assertEquals(1, count);
+
+        c = getMockContentResolver().query(
+                SettingsContract.Alerts.CONTENT_URI,
+                new String[] { SettingsContract.Alerts.STOP_CODE },
+                null, null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
         c.close();
     }
 
@@ -366,6 +581,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
+        assertNotNull(c);
         assertEquals(2, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(0));
@@ -381,9 +597,46 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
+        assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(0));
+        c.close();
+    }
+
+    /**
+     * Test {@link SettingsProvider#delete(Uri, String, String[])} with deleting an alert by ID.
+     */
+    @Test
+    public void testDeleteAlertsById() {
+        populateAlertsWithTestData();
+
+        Uri deleteUri = ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 2);
+        int count = getMockContentResolver().delete(deleteUri,
+                SettingsContract.Alerts.TYPE + " = ?",
+                new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY) });
+        assertEquals(1, count);
+
+        Cursor c = getMockContentResolver().query(
+                SettingsContract.Alerts.CONTENT_URI,
+                new String[] { SettingsContract.Favourites.STOP_CODE },
+                null, null, null);
+        assertNotNull(c);
+        assertEquals(1, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals("123456", c.getString(0));
+        c.close();
+
+        deleteUri = ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1);
+        count = getMockContentResolver().delete(deleteUri, null, null);
+        assertEquals(1, count);
+
+        c = getMockContentResolver().query(
+                SettingsContract.Alerts.CONTENT_URI,
+                new String[] { SettingsContract.Alerts.STOP_CODE },
+                null, null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
         c.close();
     }
 
@@ -404,6 +657,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_NAME },
                 null, null, null);
+        assertNotNull(c);
         assertEquals(3, c.getCount());
 
         while (c.moveToNext()) {
@@ -429,6 +683,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         Cursor c = getMockContentResolver().query(
                 SettingsContract.Favourites.CONTENT_URI, null, null, null,
                 SettingsContract.Favourites._ID + " ASC");
+        assertNotNull(c);
         assertEquals(3, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(1));
@@ -450,6 +705,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         c = getMockContentResolver().query(
                 SettingsContract.Favourites.CONTENT_URI, null, null, null,
                 SettingsContract.Favourites._ID + " ASC");
+        assertNotNull(c);
         assertEquals(3, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(1));
@@ -480,6 +736,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
 
         Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI, null,
                 null, null, SettingsContract.Favourites._ID + " ASC");
+        assertNotNull(c);
         assertEquals(3, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(1));
@@ -500,6 +757,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
 
         c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI, null,
                 null, null, SettingsContract.Favourites._ID + " ASC");
+        assertNotNull(c);
         assertEquals(3, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(1));
@@ -549,6 +807,30 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         cv.put(SettingsContract.Favourites.STOP_CODE, "323456");
         cv.put(SettingsContract.Favourites.STOP_NAME, "C");
         db.insertOrThrow(SettingsContract.Favourites.TABLE_NAME, null, cv);
+
+        db.close();
+    }
+
+    /**
+     * Populate the alerts table with some test data.
+     */
+    private void populateAlertsWithTestData() {
+        final SQLiteDatabase db = new SettingsOpenHelper(getMockContext()).getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, currentTime);
+        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv.put(SettingsContract.Alerts.DISTANCE_FROM, 10);
+        db.insertOrThrow(SettingsContract.Alerts.TABLE_NAME, null, cv);
+
+        cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_TIME);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, currentTime);
+        cv.put(SettingsContract.Alerts.STOP_CODE, "223456");
+        cv.put(SettingsContract.Alerts.SERVICE_NAMES, "1,2,3");
+        cv.put(SettingsContract.Alerts.TIME_TRIGGER, 5);
+        db.insertOrThrow(SettingsContract.Alerts.TABLE_NAME, null, cv);
 
         db.close();
     }

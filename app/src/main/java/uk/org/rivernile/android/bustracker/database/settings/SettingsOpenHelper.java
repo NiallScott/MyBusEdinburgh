@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -128,6 +128,7 @@ class SettingsOpenHelper extends SQLiteOpenHelper {
      * @param tableName The name of the table to create.
      * @return The schema to create a favourites table.
      */
+    @NonNull
     private static String getFavouritesCreateTableStatement(@NonNull final String tableName) {
         return "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
                 SettingsContract.Favourites._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -142,6 +143,7 @@ class SettingsOpenHelper extends SQLiteOpenHelper {
      * @param condition When the trigger should be fired.
      * @return The schema to create an alerts trigger.
      */
+    @NonNull
     private static String getAlertsTriggerStatement(@NonNull final String triggerName,
             @NonNull final String condition) {
         final String toInsert = triggerName + ' ' + condition;

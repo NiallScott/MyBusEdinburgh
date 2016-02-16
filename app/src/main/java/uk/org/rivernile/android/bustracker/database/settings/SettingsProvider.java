@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -87,7 +87,6 @@ public class SettingsProvider extends ContentProvider {
                 table = SettingsContract.Favourites.TABLE_NAME;
                 selection = SettingsContract.Favourites._ID + " = ?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
-
                 break;
             case ALERTS:
                 table = SettingsContract.Alerts.TABLE_NAME;
