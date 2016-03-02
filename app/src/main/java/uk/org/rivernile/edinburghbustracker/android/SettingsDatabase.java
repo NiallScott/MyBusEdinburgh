@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,23 +25,10 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import android.app.backup.BackupManager;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * This class deals with the database interaction with the settings database.
@@ -69,23 +56,12 @@ public class SettingsDatabase extends SQLiteOpenHelper {
     private static final String ALERTS_SERVICE_NAMES = "serviceNames";
     private static final String ALERTS_TIME_TRIGGER = "timeTrigger";
     
-    private static final String BACKUP_DB_VERSION = "dbVersion";
-    private static final String BACKUP_SCHEMA_VERSION = "jsonSchemaVersion";
-    private static final String BACKUP_CREATE_TIME = "createTime";
-    private static final String BACKUP_FAVOURITE_STOPS = "favouriteStops";
-    private static final String BACKUP_STOPCODE = "stopCode";
-    private static final String BACKUP_STOPNAME = "stopName";
-    private static final String BACKUP_DIRECTORY = "/mybusedinburgh/";
-    private static final String BACKUP_FILE_NAME = "settings.backup";
-    
     /** A proximity alert type. */
     public static final byte ALERTS_TYPE_PROXIMITY = 1;
     /** A time alert type. */
     public static final byte ALERTS_TYPE_TIME = 2;
 
     private static SettingsDatabase instance;
-
-    private Context context;
 
     /**
      * Creates a new SettingsDatabase object. If the DB does not already exist,
@@ -95,7 +71,6 @@ public class SettingsDatabase extends SQLiteOpenHelper {
      */
     private SettingsDatabase(final Context context) {
         super(context, SETTINGS_DB_NAME, null, SETTINGS_DB_VERSION);
-        this.context = context;
     }
 
     /**
@@ -198,65 +173,6 @@ public class SettingsDatabase extends SQLiteOpenHelper {
     }
 
     /**
-     * Insert a new favourite stop in to the database.
-     *
-     * @param stopCode The stop code to insert.
-     * @param stopName The stop name to insert.
-     * @throws SQLException If an error occurs whilst writing to the database.
-     */
-    public void insertFavouriteStop(final String stopCode,
-            final String stopName) throws SQLException {
-        if(stopCode == null || stopName == null || stopCode.length() == 0
-                || stopName.length() == 0) return;
-        if(getFavouriteStopExists(stopCode)) return;
-        final ContentValues cv = new ContentValues();
-        cv.put(FAVOURITE_STOPS_STOPCODE, stopCode);
-        cv.put(FAVOURITE_STOPS_STOPNAME, stopName);
-
-        final SQLiteDatabase db = getWritableDatabase();
-        db.insertOrThrow(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPNAME, cv);
-        
-        BackupManager.dataChanged(context.getPackageName());
-    }
-
-    /**
-     * Delete a favourite stop from the database.
-     *
-     * @param stopCode The stop code to delete from the database.
-     */
-    public void deleteFavouriteStop(final String stopCode) {
-        if(stopCode == null || stopCode.length() == 0) return;
-        if(!getFavouriteStopExists(stopCode)) return;
-
-        final SQLiteDatabase db = getWritableDatabase();
-        db.delete(FAVOURITE_STOPS_TABLE, FAVOURITE_STOPS_STOPCODE + " = ?",
-                new String[] { stopCode });
-        
-        BackupManager.dataChanged(context.getPackageName());
-    }
-
-    /**
-     * Modify the stopName string of an item in the database.
-     *
-     * @param stopCode The stop code of the item to modify.
-     * @param stopName The new stop name.
-     */
-    public void modifyFavouriteStop(final String stopCode,
-            final String stopName) {
-        if(stopCode == null || stopName == null || stopCode.length() == 0
-                || stopName.length() == 0) return;
-        if(!getFavouriteStopExists(stopCode)) return;
-        final ContentValues cv = new ContentValues();
-        cv.put(FAVOURITE_STOPS_STOPNAME, stopName);
-
-        final SQLiteDatabase db = getWritableDatabase();
-        db.update(FAVOURITE_STOPS_TABLE, cv, FAVOURITE_STOPS_STOPCODE + " = ?",
-                new String[] { stopCode });
-        
-        BackupManager.dataChanged(context.getPackageName());
-    }
-
-    /**
      * Get the name for a bus stop.
      *
      * @param stopCode The bus stop code.
@@ -278,78 +194,6 @@ public class SettingsDatabase extends SQLiteOpenHelper {
         
         c.close();
         return result;
-    }
-    
-    /**
-     * Insert a new proximity alert in to the database. We have to store this
-     * because it's not possible to get information on proximity alerts we have
-     * set back from the platform.
-     * 
-     * @param stopCode The stopCode for which the proximity alert is set.
-     * @param distance The distance at which to trigger the proximity alert.
-     */
-    public void insertNewProximityAlert(final String stopCode,
-            final int distance) {
-        final SQLiteDatabase db = getWritableDatabase();
-        cleanupAlerts(db);
-        
-        final ContentValues cv = new ContentValues();
-        cv.put(ALERTS_TYPE, ALERTS_TYPE_PROXIMITY);
-        cv.put(ALERTS_TIME_ADDED, System.currentTimeMillis());
-        cv.put(ALERTS_STOPCODE, stopCode);
-        cv.put(ALERTS_DISTANCE_FROM, distance);
-        
-        db.insertOrThrow(ALERTS_TABLE, ALERTS_DISTANCE_FROM, cv);
-    }
-    
-    /**
-     * Insert a new time alert in to the database. We have to store this because
-     * it's not possible to get alarm information from the platform after we
-     * have set up an alarm.
-     * 
-     * @param stopCode The stopCode for which the time alert is set.
-     * @param serviceNames The names of the services which should trigger this
-     * alert.
-     * @param timeTrigger The time at which to trigger the time alert.
-     */
-    public void insertNewTimeAlert(final String stopCode,
-            final String[] serviceNames, final int timeTrigger) {
-        final SQLiteDatabase db = getWritableDatabase();
-        cleanupAlerts(db);
-        
-        int len = serviceNames.length;
-        final StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < len; i++) {
-            sb.append(serviceNames[i]);
-            if(i != len-1) {
-                sb.append(',');
-            }
-        }
-        
-        final ContentValues cv = new ContentValues();
-        cv.put(ALERTS_TYPE, ALERTS_TYPE_TIME);
-        cv.put(ALERTS_TIME_ADDED, System.currentTimeMillis());
-        cv.put(ALERTS_STOPCODE, stopCode);
-        cv.put(ALERTS_SERVICE_NAMES, sb.toString());
-        cv.put(ALERTS_TIME_TRIGGER, timeTrigger);
-        
-        db.insertOrThrow(ALERTS_TABLE, ALERTS_TIME_TRIGGER, cv);
-    }
-    
-    /**
-     * Delete an alert of a particular type. This can be either
-     * {@link SettingsDatabase#ALERTS_TYPE_PROXIMITY} or
-     * {@link SettingsDatabase#ALERTS_TYPE_TIME}.
-     * 
-     * @param type The type of alert to delete.
-     * @see SettingsDatabase#ALERTS_TYPE_PROXIMITY
-     * @see SettingsDatabase#ALERTS_TYPE_TIME
-     */
-    public void deleteAllAlertsOfType(final byte type) {
-        final SQLiteDatabase db = getWritableDatabase();
-        cleanupAlerts(db);
-        db.delete(ALERTS_TABLE, ALERTS_TYPE + " = ?",
-                new String[] { String.valueOf(type) });
     }
     
     /**
@@ -403,20 +247,6 @@ public class SettingsDatabase extends SQLiteOpenHelper {
     }
     
     /**
-     * Return a Cursor object which contains all fields of an alert, for all
-     * alerts in the database. It is perfectly possible that no alerts exist,
-     * therefore an empty Cursor is returned.
-     * 
-     * @return A Cursor containing all alerts known in the database.
-     */
-    public Cursor getAllAlerts() {
-        final SQLiteDatabase db = getWritableDatabase();
-        
-        cleanupAlerts(db);
-        return db.query(ALERTS_TABLE, null, null, null, null, null, null);
-    }
-    
-    /**
      * Clean up alerts. This removes any alerts which are older than 1 hour.
      * 
      * @param db The SQLiteDatabase on which we are operating.
@@ -428,130 +258,5 @@ public class SettingsDatabase extends SQLiteOpenHelper {
                         String.valueOf(System.currentTimeMillis() - 3600000)
                     });
         }
-    }
-    
-    /**
-     * Return a dump of the list of favourite bus stops as a JSONObject, to be
-     * later output to file.
-     * 
-     * @return A JSON object describing the favourite bus stops.
-     * @throws JSONException When an error occurs whilst dealing with JSON.
-     */
-    public JSONObject backupDatabaseAsJSON() throws JSONException {
-        final JSONObject root = new JSONObject();
-        final JSONArray favStops = new JSONArray();
-        JSONObject stop;
-        
-        root.put(BACKUP_DB_VERSION, SETTINGS_DB_VERSION);
-        root.put(BACKUP_SCHEMA_VERSION, 1);
-        root.put(BACKUP_CREATE_TIME, System.currentTimeMillis());
-        root.put(BACKUP_FAVOURITE_STOPS, favStops);
-
-        final Cursor c = getAllFavouriteStops();
-        while(c.moveToNext()) {
-            stop = new JSONObject();
-            stop.put(BACKUP_STOPCODE, c.getString(0));
-            stop.put(BACKUP_STOPNAME, c.getString(1));
-            favStops.put(stop);
-        }
-        
-        return root;
-    }
-    
-    /**
-     * Restore a previous backup from JSON input and insert it in to the
-     * database.
-     * 
-     * @param jsonString The JSON to be restored.
-     * @throws JSONException When an error occurs whilst parsing the JSON text.
-     */
-    public void restoreDatabaseFromJSON(final String jsonString)
-            throws JSONException {
-        final SQLiteDatabase db = getWritableDatabase();
-        db.delete(FAVOURITE_STOPS_TABLE, null, null);
-        
-        final JSONObject root = new JSONObject(jsonString);
-        final JSONArray favStops = root.getJSONArray(BACKUP_FAVOURITE_STOPS);
-        JSONObject stop;
-        
-        final int len = favStops.length();
-        for(int i = 0; i < len; i++) {
-            stop = favStops.getJSONObject(i);
-            insertFavouriteStop(stop.getString(BACKUP_STOPCODE),
-                    stop.getString(BACKUP_STOPNAME));
-        }
-    }
-
-    /**
-     * Backup the JSON dump of the database to a file on external storage.
-     * 
-     * @return A success or failure string.
-     */
-    public String backupDatabase() {
-        if(!Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            return context.getString(
-                    R.string.preferences_backup_error_mediaerror);
-        }
-        
-        File out = new File(Environment.getExternalStorageDirectory(),
-                BACKUP_DIRECTORY);
-        out.mkdirs();
-        out = new File(out, BACKUP_FILE_NAME);
-        
-        try {
-            final JSONObject root = backupDatabaseAsJSON();
-            final PrintWriter pw = new PrintWriter(new FileWriter(out));
-            pw.println(root.toString());
-            pw.flush();
-            pw.close();
-        } catch(JSONException e) {
-            return context.getString(
-                    R.string.preferences_backup_error_json_write);
-        } catch(IOException e) {
-            return context.getString(R.string.preferences_backup_error_ioerror);
-        }
-        
-        return "success";
-    }
-    
-    /**
-     * Restore a previous JSON dump of the database from a file on external
-     * storage.
-     * 
-     * @return A success or failure string.
-     */
-    public String restoreDatabase() {
-        if(!Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            return context.getString(
-                    R.string.preferences_backup_error_mediaerror);
-        }
-        
-        final File in = new File(Environment.getExternalStorageDirectory(),
-                BACKUP_DIRECTORY + BACKUP_FILE_NAME);
-        if(!in.exists() || !in.canRead()) {
-            return context.getString(R.string.preferences_backup_error_nofile);
-        }
-        
-        final StringBuilder jsonString = new StringBuilder();
-        try {
-            String str;
-            final BufferedReader reader = new BufferedReader(
-                    new FileReader(in));
-            while((str = reader.readLine()) != null) {
-                jsonString.append(str);
-            }
-            reader.close();
-            
-            restoreDatabaseFromJSON(jsonString.toString());
-        } catch(IOException e) {
-            return context.getString(R.string.preferences_backup_error_ioerror);
-        } catch(JSONException e) {
-            return context.getString(
-                    R.string.preferences_backup_error_json_read);
-        }
-        
-        return "success";
     }
 }

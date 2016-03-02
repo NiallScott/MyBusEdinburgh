@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,15 +32,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.LocationManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+
+import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteAllProximityAlertsTask;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDetailsActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
  * The {@code ProximityAlertReceiver} is only called when a previously set
@@ -60,12 +64,14 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
     private static final int ALERT_ID = 1;
     
     @Override
-    public void onReceive(final Context context, final Intent intent) {  
-        final SettingsDatabase db = SettingsDatabase.getInstance(context);
+    public void onReceive(final Context context, final Intent intent) {
         final String stopCode = intent.getStringExtra(ARG_STOPCODE);
         // Make sure the alert is still active to remain relevant.
-        if(!db.isActiveProximityAlert(stopCode)) return;
-        
+        // FIXME: short term fix. DB access on main thread. Fix ASAP.
+        if (!isActiveProximityAlert(context, stopCode)) {
+            return;
+        }
+
         final String stopName = BusStopDatabase.getInstance(context)
                 .getNameForBusStop(stopCode);
         
@@ -75,7 +81,7 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
                 .getSystemService(Context.LOCATION_SERVICE);
         
         // Delete the alert from the database.
-        db.deleteAllAlertsOfType(SettingsDatabase.ALERTS_TYPE_PROXIMITY);
+        DeleteAllProximityAlertsTask.start(context);
         
         // Make sure the LocationManager no longer checks for this proximity.
         final PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
@@ -134,5 +140,38 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
         
         // Send the notification to the UI.
         notMan.notify(ALERT_ID, n);
+    }
+
+    /**
+     * Is there an active proximity alert for the stop code?
+     *
+     * @param context A {@link Context} instance.
+     * @param stopCode The stop code to check for.
+     * @return {@code true} if there is an active proximity alert for the stop code, {@code false}
+     * if not.
+     */
+    // FIXME: short term fix. DB access on main thread. Fix ASAP.
+    private static boolean isActiveProximityAlert(@NonNull final Context context,
+            @NonNull final String stopCode) {
+        final Cursor cursor = context.getContentResolver().query(
+                SettingsContract.Alerts.CONTENT_URI,
+                new String[] { SettingsContract.Alerts.STOP_CODE },
+                SettingsContract.Alerts.TYPE + " = ? AND " + SettingsContract.Alerts.STOP_CODE +
+                        " = ?",
+                new String[] {
+                        String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY),
+                        stopCode
+                }, null);
+
+        final boolean result;
+
+        if (cursor != null) {
+            result = cursor.getCount() > 0;
+            cursor.close();
+        } else {
+            result = false;
+        }
+
+        return result;
     }
 }

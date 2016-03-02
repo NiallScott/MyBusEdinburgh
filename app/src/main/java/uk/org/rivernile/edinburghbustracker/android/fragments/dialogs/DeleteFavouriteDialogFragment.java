@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,9 +32,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 
+import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteFavouriteStopTask;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
  * This {@link DialogFragment} will show an {@link AlertDialog} which asks the user to confirm if
@@ -46,8 +47,7 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
     
     /** The argument that is sent to this Fragment to denote the stop code. */
     private static final String ARG_STOPCODE = "stopCode";
-    
-    private SettingsDatabase sd;
+
     private Callbacks callbacks;
     private String stopCode;
     
@@ -83,8 +83,6 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        sd = SettingsDatabase.getInstance(getActivity().getApplicationContext());
-        
         final Bundle args = getArguments();
 
         if (args == null) {
@@ -94,7 +92,7 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
         
         stopCode = args.getString(ARG_STOPCODE);
 
-        if (stopCode == null || stopCode.length() == 0) {
+        if (TextUtils.isEmpty(stopCode)) {
             throw new IllegalArgumentException("The stopCode argument cannot be null or empty.");
         }
     }
@@ -107,16 +105,14 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
                 .setTitle(R.string.deletefavouritedialog_title)
                 .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(final DialogInterface dialog,
-                            final int id) {
-                        sd.deleteFavouriteStop(stopCode);
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        DeleteFavouriteStopTask.start(getActivity(), stopCode);
                         callbacks.onConfirmFavouriteDeletion();
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(final DialogInterface dialog,
-                                        final int id) {
+                    public void onClick(final DialogInterface dialog, final int id) {
                         callbacks.onCancelFavouriteDeletion();
                     }
                 });

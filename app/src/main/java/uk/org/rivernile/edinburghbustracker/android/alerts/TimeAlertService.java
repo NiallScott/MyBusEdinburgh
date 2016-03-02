@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,11 +29,16 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import java.util.List;
+
+import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
@@ -44,7 +49,6 @@ import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
  * The purpose of the {@code TimeAlertService} is to be run on a once-per-minute
@@ -75,7 +79,6 @@ public class TimeAlertService extends IntentService {
     private static final int ALERT_ID = 2;
     
     private BusApplication app;
-    private SettingsDatabase sd;
     private BusStopDatabase bsd;
     private NotificationManager notifMan;
     private AlertManager alertMan;
@@ -95,7 +98,6 @@ public class TimeAlertService extends IntentService {
         super.onCreate();
         
         app = (BusApplication) getApplication();
-        sd = SettingsDatabase.getInstance(getApplicationContext());
         bsd = BusStopDatabase.getInstance(getApplicationContext());
         notifMan = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         alertMan = AlertManager.getInstance(this);
@@ -156,7 +158,7 @@ public class TimeAlertService extends IntentService {
                     // The alert may have been cancelled by the user recently,
                     // check it's still active to stay relevant. Cancel the
                     // alert if we're continuing.
-                    if(!sd.isActiveTimeAlert(stopCode)) {
+                    if (!isActiveTimeAlert(this, stopCode)) {
                         return;
                     }
                     
@@ -257,5 +259,38 @@ public class TimeAlertService extends IntentService {
         // Reschedule ourself to run again in 60 seconds.
         alarmMan.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + 60000, pi);
+    }
+
+    /**
+     * Is there an active time alert for the stop code?
+     *
+     * @param context A {@link Context} instance.
+     * @param stopCode The stop code to check for.
+     * @return {@code true} if there is an active time alert for the stop code, {@code false} if
+     * not.
+     */
+    // FIXME: short term fix. See if this can be done better.
+    private static boolean isActiveTimeAlert(@NonNull final Context context,
+            @NonNull final String stopCode) {
+        final Cursor cursor = context.getContentResolver().query(
+                SettingsContract.Alerts.CONTENT_URI,
+                new String[] { SettingsContract.Alerts.STOP_CODE },
+                SettingsContract.Alerts.TYPE + " = ? AND " + SettingsContract.Alerts.STOP_CODE +
+                        " = ?",
+                new String[] {
+                        String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_TIME),
+                        stopCode
+                }, null);
+
+        final boolean result;
+
+        if (cursor != null) {
+            result = cursor.getCount() > 0;
+            cursor.close();
+        } else {
+            result = false;
+        }
+
+        return result;
     }
 }

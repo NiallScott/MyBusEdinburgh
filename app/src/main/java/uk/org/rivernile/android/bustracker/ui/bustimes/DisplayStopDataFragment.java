@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,10 +27,12 @@ package uk.org.rivernile.android.bustracker.ui.bustimes;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -54,6 +56,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import org.json.JSONException;
 import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
 import uk.org.rivernile.android.bustracker.parser.livetimes
         .AuthenticationException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
@@ -82,7 +88,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -105,23 +110,20 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  * 
  * @author Niall Scott
  */
-public class DisplayStopDataFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<
-        LiveTimesResult<LiveBusTimes>>,
-        View.OnClickListener,
-        DeleteFavouriteDialogFragment.Callbacks,
-        DeleteProximityAlertDialogFragment.Callbacks,
-        DeleteTimeAlertDialogFragment.Callbacks {
+public class DisplayStopDataFragment extends Fragment implements LoaderManager.LoaderCallbacks,
+        View.OnClickListener, DeleteFavouriteDialogFragment.Callbacks,
+        DeleteProximityAlertDialogFragment.Callbacks, DeleteTimeAlertDialogFragment.Callbacks {
     
     private static final int EVENT_REFRESH = 1;
     private static final int EVENT_UPDATE_TIME = 2;
     
     /** This is the stop code argument. */
     public static final String ARG_STOPCODE = "stopCode";
-    
-    private static final String LOADER_ARG_STOPCODES = "stopCodes";
-    private static final String LOADER_ARG_NUMBER_OF_DEPARTURES =
-            "numberOfDepartures";
+
+    private static final int LOADER_BUS_TIMES = 1;
+    private static final int LOADER_FAVOURITE_STOP = 2;
+    private static final int LOADER_HAS_PROX_ALERT = 3;
+    private static final int LOADER_HAS_TIME_ALERT = 4;
     
     private static final String STATE_KEY_AUTOREFRESH = "autoRefresh";
     private static final String STATE_KEY_LAST_REFRESH = "lastRefresh";
@@ -132,14 +134,12 @@ public class DisplayStopDataFragment extends Fragment
     
     private Callbacks callbacks;
     private BusStopDatabase bsd;
-    private SettingsDatabase sd;
     private SharedPreferences sp;
     
     private MenuItem sortMenuItem, autoRefreshMenuItem, proxMenuItem,
             timeMenuItem, refreshMenuItem;
     
     private BusTimesExpandableListAdapter adapter;
-    private View rootView;
     private ExpandableListView listView;
     private TextView txtLastRefreshed, txtStopName, txtServices, txtError;
     private View layoutTopBar;
@@ -154,6 +154,10 @@ public class DisplayStopDataFragment extends Fragment
     private long lastRefresh = 0;
     private final ArrayList<String> expandedServices = new ArrayList<String>();
     private boolean busTimesLoading = false;
+    private Cursor cursorFavourite;
+    private Cursor cursorProxAlert;
+    private Cursor cursorTimeAlert;
+    private int columnStopName;
     
     /**
      * Create a new instance of this Fragment, specifying the bus stop code.
@@ -196,7 +200,6 @@ public class DisplayStopDataFragment extends Fragment
         final BusApplication app = (BusApplication) getActivity()
                 .getApplicationContext();
         bsd = app.getBusStopDatabase();
-        sd = app.getSettingsDatabase();
         sp = app.getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         
         // Get the stop code from the arguments bundle.
@@ -243,22 +246,19 @@ public class DisplayStopDataFragment extends Fragment
      * {@inheritDoc}
      */
     @Override
-    public View onCreateView(final LayoutInflater inflater,
-            final ViewGroup container, final Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.displaystopdata, container, false);
+    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+            final Bundle savedInstanceState) {
+        final View v = inflater.inflate(R.layout.displaystopdata, container, false);
         
         // Get the UI components we need.
-        listView = (ExpandableListView) rootView
-                .findViewById(android.R.id.list);
-        txtLastRefreshed = (TextView) rootView
-                .findViewById(R.id.txtLastUpdated);
-        layoutTopBar = rootView.findViewById(R.id.layoutTopBar);
-        txtStopName = (TextView) rootView.findViewById(R.id.txtStopName);
-        txtServices = (TextView) rootView.findViewById(R.id.txtServices);
-        txtError = (TextView) rootView.findViewById(R.id.txtError);
-        progress = (ProgressBar) rootView.findViewById(R.id.progress);
-        imgbtnFavourite = (ImageButton) rootView
-                .findViewById(R.id.imgbtnFavourite);
+        listView = (ExpandableListView) v.findViewById(android.R.id.list);
+        txtLastRefreshed = (TextView) v.findViewById(R.id.txtLastUpdated);
+        layoutTopBar = v.findViewById(R.id.layoutTopBar);
+        txtStopName = (TextView) v.findViewById(R.id.txtStopName);
+        txtServices = (TextView) v.findViewById(R.id.txtServices);
+        txtError = (TextView) v.findViewById(R.id.txtError);
+        progress = (ProgressBar) v.findViewById(R.id.progress);
+        imgbtnFavourite = (ImageButton) v.findViewById(R.id.imgbtnFavourite);
         
         imgbtnFavourite.setOnClickListener(this);
         
@@ -266,7 +266,7 @@ public class DisplayStopDataFragment extends Fragment
         registerForContextMenu(listView);
         listView.setAdapter(adapter);
         
-        return rootView;
+        return v;
     }
     
     /**
@@ -287,6 +287,11 @@ public class DisplayStopDataFragment extends Fragment
             
             // Tell the fragment that there is an options menu.
             setHasOptionsMenu(true);
+
+            final LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(LOADER_FAVOURITE_STOP, null, this);
+            loaderManager.initLoader(LOADER_HAS_PROX_ALERT, null, this);
+            loaderManager.initLoader(LOADER_HAS_TIME_ALERT, null, this);
         } else {
             showError(getString(R.string.displaystopdata_err_nocode));
         }
@@ -302,10 +307,6 @@ public class DisplayStopDataFragment extends Fragment
         // Set up timer events.
         setUpLastRefreshed();
         setUpAutoRefresh();
-        
-        configureProximityActionItem();
-        configureTimeActionItem();
-        configureFavouriteButton();
     }
     
     /**
@@ -315,7 +316,7 @@ public class DisplayStopDataFragment extends Fragment
     public void onPause() {
         super.onPause();
 
-        // Stop the background tasks when we're pasued.
+        // Stop the background tasks when we're paused.
         mHandler.removeMessages(EVENT_REFRESH);
         mHandler.removeMessages(EVENT_UPDATE_TIME);
     }
@@ -347,7 +348,7 @@ public class DisplayStopDataFragment extends Fragment
         // Inflate the menu.
         inflater.inflate(R.menu.displaystopdata_option_menu, menu);
         
-        sortMenuItem = menu.findItem( R.id.displaystopdata_option_menu_sort);
+        sortMenuItem = menu.findItem(R.id.displaystopdata_option_menu_sort);
         autoRefreshMenuItem = menu.findItem(R.id
                 .displaystopdata_option_menu_autorefresh);
         proxMenuItem = menu.findItem(R.id.displaystopdata_option_menu_prox);
@@ -366,8 +367,8 @@ public class DisplayStopDataFragment extends Fragment
         configureRefreshActionItem();
         configureSortActionItem();
         configureAutoRefreshActionItem();
-        configureProximityActionItem();
-        configureTimeActionItem();
+        configureProximityActionItem(cursorProxAlert);
+        configureTimeActionItem(cursorTimeAlert);
     }
     
     /**
@@ -439,43 +440,54 @@ public class DisplayStopDataFragment extends Fragment
     }
 
     @Override
-    public Loader<LiveTimesResult<LiveBusTimes>> onCreateLoader(final int id, final Bundle args) {
-        if (args == null) {
-            return null;
-        }
-
-        return new LiveBusTimesLoader(getActivity(),
-                args.getStringArray(LOADER_ARG_STOPCODES),
-                args.getInt(LOADER_ARG_NUMBER_OF_DEPARTURES, 4));
-    }
-
-    @Override
-    public void onLoadFinished(final Loader<LiveTimesResult<LiveBusTimes>> loader,
-            final LiveTimesResult<LiveBusTimes> result) {
-        busTimesLoading = false;
-        
-        if (result != null) {
-            lastRefresh = result.getLoadTime();
-            
-            rootView.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (result.isError()) {
-                        handleError(result.getError());
-                    } else {
-                        displayData(result.getSuccess());
-                    }
-                    
-                    
-                    setUpAutoRefresh();
-                }
-            });
+    public Loader onCreateLoader(final int id, final Bundle args) {
+        switch (id) {
+            case LOADER_BUS_TIMES:
+                return new LiveBusTimesLoader(getActivity(), new String[] { stopCode },
+                        numDepartures);
+            case LOADER_FAVOURITE_STOP:
+                return new FavouriteStopsLoader(getActivity(), stopCode);
+            case LOADER_HAS_PROX_ALERT:
+                return new HasProximityAlertLoader(getActivity(), stopCode);
+            case LOADER_HAS_TIME_ALERT:
+                return new HasTimeAlertLoader(getActivity(), stopCode);
+            default:
+                return null;
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void onLoaderReset(final Loader<LiveTimesResult<LiveBusTimes>> loader) {
-        // Nothing to do here.
+    public void onLoadFinished(final Loader loader, final Object result) {
+        switch (loader.getId()) {
+            case LOADER_BUS_TIMES:
+                handleBusTimesResult((LiveTimesResult<LiveBusTimes>) result);
+                break;
+            case LOADER_FAVOURITE_STOP:
+                configureFavouriteButton((Cursor) result);
+                break;
+            case LOADER_HAS_PROX_ALERT:
+                configureProximityActionItem((Cursor) result);
+                break;
+            case LOADER_HAS_TIME_ALERT:
+                configureTimeActionItem((Cursor) result);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(final Loader loader) {
+        switch (loader.getId()) {
+            case LOADER_FAVOURITE_STOP:
+                configureFavouriteButton(null);
+                break;
+            case LOADER_HAS_PROX_ALERT:
+                configureProximityActionItem(null);
+                break;
+            case LOADER_HAS_TIME_ALERT:
+                configureTimeActionItem(null);
+                break;
+        }
     }
 
     /**
@@ -484,12 +496,14 @@ public class DisplayStopDataFragment extends Fragment
     @Override
     public void onClick(final View v) {
         if (v == imgbtnFavourite) {
-            if (sd.getFavouriteStopExists(stopCode)) {
-                callbacks.onShowConfirmFavouriteDeletion(stopCode);
-            } else {
-                callbacks.onShowAddFavouriteStop(stopCode,
-                        !TextUtils.isEmpty(stopLocality) ?
-                                stopName + ", " + stopLocality : stopName);
+            if (cursorFavourite != null) {
+                if (cursorFavourite.getCount() > 0) {
+                    callbacks.onShowConfirmFavouriteDeletion(stopCode);
+                } else {
+                    callbacks.onShowAddFavouriteStop(stopCode,
+                            !TextUtils.isEmpty(stopLocality) ?
+                                    stopName + ", " + stopLocality : stopName);
+                }
             }
         }
     }
@@ -499,7 +513,7 @@ public class DisplayStopDataFragment extends Fragment
      */
     @Override
     public void onConfirmFavouriteDeletion() {
-        configureFavouriteButton(false);
+        // Nothing to do here.
     }
 
     /**
@@ -515,7 +529,7 @@ public class DisplayStopDataFragment extends Fragment
      */
     @Override
     public void onConfirmProximityAlertDeletion() {
-        configureProximityActionItem(false);
+        // Nothing to do here.
     }
 
     /**
@@ -531,7 +545,7 @@ public class DisplayStopDataFragment extends Fragment
      */
     @Override
     public void onConfirmTimeAlertDeletion() {
-        configureTimeActionItem(false);
+        // Nothing to do here.
     }
 
     /**
@@ -582,18 +596,32 @@ public class DisplayStopDataFragment extends Fragment
     private void loadBusTimes(final boolean reload) {
         mHandler.removeMessages(EVENT_REFRESH);
         
-        final Bundle args = new Bundle();
-        args.putStringArray(LOADER_ARG_STOPCODES, new String[] { stopCode });
-        args.putInt(LOADER_ARG_NUMBER_OF_DEPARTURES, numDepartures);
-        
         busTimesLoading = true;
         showProgress();
         
         if (reload) {
-            getLoaderManager().restartLoader(0, args, this);
+            getLoaderManager().restartLoader(LOADER_BUS_TIMES, null, this);
         } else {
-            getLoaderManager().initLoader(0, args, this);
+            getLoaderManager().initLoader(LOADER_BUS_TIMES, null, this);
         }
+    }
+
+    /**
+     * Handle the result of loading live bus times.
+     *
+     * @param result The result of loading live bus times.
+     */
+    private void handleBusTimesResult(@NonNull final LiveTimesResult<LiveBusTimes> result) {
+        busTimesLoading = false;
+        lastRefresh = result.getLoadTime();
+
+        if (result.isError()) {
+            handleError(result.getError());
+        } else {
+            displayData(result.getSuccess());
+        }
+
+        setUpAutoRefresh();
     }
     
     /**
@@ -691,8 +719,8 @@ public class DisplayStopDataFragment extends Fragment
      * the bus tracker web service.
      */
     private void populateStopName() {
-        if (sd.getFavouriteStopExists(stopCode)) {
-            stopName = sd.getNameForStop(stopCode);
+        if (cursorFavourite != null && cursorFavourite.moveToFirst()) {
+            stopName = cursorFavourite.getString(columnStopName);
         } else {
             stopName = bsd.getNameForBusStop(stopCode);
             stopLocality = bsd.getLocalityForStopCode(stopCode);
@@ -851,27 +879,28 @@ public class DisplayStopDataFragment extends Fragment
     
     /**
      * Configure the favourite button with the correct state.
-     */
-    private void configureFavouriteButton() {
-        configureFavouriteButton(sd.getFavouriteStopExists(stopCode));
-    }
-    
-    /**
-     * Configure the favourite button with the correct state.
      * 
-     * @param isFavourite true if the bus stop is a favourite, false if not.
+     * @param cursorFavourite The {@link Cursor} of the favourite stop.
      */
-    private void configureFavouriteButton(final boolean isFavourite) {
-        if (isFavourite) {
-            imgbtnFavourite.setImageResource(R.drawable.ic_list_favourite);
-            imgbtnFavourite.setContentDescription(
-                    getString(R.string.favourite_rem));
+    private void configureFavouriteButton(final Cursor cursorFavourite) {
+        this.cursorFavourite = cursorFavourite;
+
+        if (cursorFavourite != null) {
+            columnStopName = cursorFavourite.getColumnIndex(SettingsContract.Favourites.STOP_NAME);
+            imgbtnFavourite.setEnabled(true);
+
+            if (cursorFavourite.getCount() > 0) {
+                imgbtnFavourite.setImageResource(R.drawable.ic_list_favourite);
+                imgbtnFavourite.setContentDescription(getString(R.string.favourite_rem));
+            } else {
+                imgbtnFavourite.setImageResource(R.drawable.ic_list_unfavourite_light);
+                imgbtnFavourite.setContentDescription(getString(R.string.favourite_add));
+            }
         } else {
-            imgbtnFavourite.setImageResource(
-                    R.drawable.ic_list_unfavourite_light);
-            imgbtnFavourite.setContentDescription(
-                    getString(R.string.favourite_add));
+            imgbtnFavourite.setEnabled(false);
         }
+
+        populateStopName();
     }
     
     /**
@@ -921,48 +950,54 @@ public class DisplayStopDataFragment extends Fragment
     
     /**
      * Configure the proximity menu item with the correct state.
-     */
-    private void configureProximityActionItem() {
-        configureProximityActionItem(sd.isActiveProximityAlert(stopCode));
-    }
-    
-    /**
-     * Configure the proximity menu item with the correct state.
      * 
-     * @param isActive true if the proximity alert is active, false if not.
+     * @param cursorProxAlert The {@link Cursor} of the proximity alert.
      */
-    private void configureProximityActionItem(final boolean isActive) {
-        if (proxMenuItem != null) {
-            if (isActive) {
-                proxMenuItem.setTitle(R.string.displaystopdata_menu_prox_rem)
-                        .setIcon(R.drawable.ic_menu_proximityremove);
-            } else {
-                proxMenuItem.setTitle(R.string.displaystopdata_menu_prox_add)
-                        .setIcon(R.drawable.ic_menu_proximityadd);
+    private void configureProximityActionItem(final Cursor cursorProxAlert) {
+        this.cursorProxAlert = cursorProxAlert;
+
+        if (cursorProxAlert != null) {
+            if (proxMenuItem != null) {
+                proxMenuItem.setEnabled(true);
+
+                if (cursorProxAlert.getCount() > 0) {
+                    proxMenuItem.setTitle(R.string.displaystopdata_menu_prox_rem)
+                            .setIcon(R.drawable.ic_menu_proximityremove);
+                } else {
+                    proxMenuItem.setTitle(R.string.displaystopdata_menu_prox_add)
+                            .setIcon(R.drawable.ic_menu_proximityadd);
+                }
+            }
+        } else {
+            if (proxMenuItem != null) {
+                proxMenuItem.setEnabled(false);
             }
         }
     }
     
     /**
      * Configure the proximity menu item with the correct state.
-     */
-    private void configureTimeActionItem() {
-        configureTimeActionItem(sd.isActiveTimeAlert(stopCode));
-    }
-    
-    /**
-     * Configure the proximity menu item with the correct state.
      * 
-     * @param isActive true if the time alert is active, false if not.
+     * @param cursorTimeAlert The {@link Cursor} of the time alert.
      */
-    private void configureTimeActionItem(final boolean isActive) {
-        if (timeMenuItem != null) {
-            if (isActive) {
-                timeMenuItem.setTitle(R.string.displaystopdata_menu_time_rem)
-                        .setIcon(R.drawable.ic_menu_arrivalremove);
-            } else {
-                timeMenuItem.setTitle(R.string.displaystopdata_menu_time_add)
-                        .setIcon(R.drawable.ic_menu_arrivaladd);
+    private void configureTimeActionItem(final Cursor cursorTimeAlert) {
+        this.cursorTimeAlert = cursorTimeAlert;
+
+        if (cursorTimeAlert != null) {
+            if (timeMenuItem != null) {
+                timeMenuItem.setEnabled(true);
+
+                if (cursorTimeAlert.getCount() > 0) {
+                    timeMenuItem.setTitle(R.string.displaystopdata_menu_time_rem)
+                            .setIcon(R.drawable.ic_menu_arrivalremove);
+                } else {
+                    timeMenuItem.setTitle(R.string.displaystopdata_menu_time_add)
+                            .setIcon(R.drawable.ic_menu_arrivaladd);
+                }
+            }
+        } else {
+            if (timeMenuItem != null) {
+                timeMenuItem.setEnabled(false);
             }
         }
     }
@@ -1031,11 +1066,13 @@ public class DisplayStopDataFragment extends Fragment
      * This is called when the proximity alert ActionItem is selected.
      */
     private void doProximityAlertSelected() {
-        if (sd.isActiveProximityAlert(stopCode)) {
-            callbacks.onShowConfirmDeleteProximityAlert();
-        } else {
-            // Show the Activity for adding a new proximity alert.
-            callbacks.onShowAddProximityAlert(stopCode);
+        if (cursorProxAlert != null) {
+            if (cursorProxAlert.getCount() > 0) {
+                callbacks.onShowConfirmDeleteProximityAlert();
+            } else {
+                // Show the Activity for adding a new proximity alert.
+                callbacks.onShowAddProximityAlert(stopCode);
+            }
         }
     }
     
@@ -1043,11 +1080,13 @@ public class DisplayStopDataFragment extends Fragment
      * This is called when the time alert ActionItem is selected.
      */
     private void doTimeAlertSelected() {
-        if (sd.isActiveTimeAlert(stopCode)) {
-            callbacks.onShowConfirmDeleteTimeAlert();
-        } else {
-            // Show the Activity for adding a new time alert.
-            callbacks.onShowAddTimeAlert(stopCode, null);
+        if (cursorTimeAlert != null) {
+            if (cursorTimeAlert.getCount() > 0) {
+                callbacks.onShowConfirmDeleteTimeAlert();
+            } else {
+                // Show the Activity for adding a new time alert.
+                callbacks.onShowAddTimeAlert(stopCode, null);
+            }
         }
     }
     
@@ -1055,7 +1094,7 @@ public class DisplayStopDataFragment extends Fragment
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks
+    public interface Callbacks
             extends OnShowConfirmFavouriteDeletionListener,
             OnShowConfirmDeleteProximityAlertListener,
             OnShowConfirmDeleteTimeAlertListener,

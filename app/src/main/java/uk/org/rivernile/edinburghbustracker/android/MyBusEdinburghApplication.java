@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -53,7 +53,6 @@ public class MyBusEdinburghApplication extends BusApplication {
     private DatabaseEndpoint databaseEndpoint;
     private TwitterEndpoint twitterEndpoint;
     private BusStopDatabase busStopDatabase;
-    private SettingsDatabase settingsDatabase;
     private FragmentFactory fragmentFactory;
 
     @Override
@@ -100,15 +99,6 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return busStopDatabase;
-    }
-
-    @Override
-    public synchronized SettingsDatabase getSettingsDatabase() {
-        if (settingsDatabase == null) {
-            settingsDatabase = SettingsDatabase.getInstance(this);
-        }
-        
-        return settingsDatabase;
     }
 
     @Override

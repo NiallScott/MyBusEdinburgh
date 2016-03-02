@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,8 +32,12 @@ import android.content.Intent;
 import android.location.LocationManager;
 import android.os.SystemClock;
 import com.google.android.gms.maps.model.LatLng;
+
+import uk.org.rivernile.android.bustracker.database.settings.loaders.AddProximityAlertTask;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.AddTimeAlertTask;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteAllProximityAlertsTask;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteAllTimeAlertsTask;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
  * The AlertManager takes care of handling the addition and removal of proximity
@@ -49,7 +53,6 @@ public class AlertManager {
     private LocationManager locMan;
     private AlarmManager alMan;
     private BusStopDatabase bsd;
-    private SettingsDatabase sd;
     
     /**
      * Create a new AlertManager instance.
@@ -61,7 +64,6 @@ public class AlertManager {
                 Context.LOCATION_SERVICE);
         alMan = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         bsd = BusStopDatabase.getInstance(context.getApplicationContext());
-        sd = SettingsDatabase.getInstance(context.getApplicationContext());
     }
     
     /**
@@ -115,7 +117,7 @@ public class AlertManager {
         // locations for the alerts.
         locMan.removeProximityAlert(pi);
         // Add the new alert to the database.
-        sd.insertNewProximityAlert(stopCode, distance);
+        AddProximityAlertTask.start(context, stopCode, distance);
         // Ask LocationManager to look out for the given location.
         locMan.addProximityAlert(latitude, longitude, (float)distance,
                 System.currentTimeMillis() + 3600000, pi);
@@ -129,7 +131,7 @@ public class AlertManager {
      */
     public void removeProximityAlert() {
         // Remove the alert from the database.
-        sd.deleteAllAlertsOfType(SettingsDatabase.ALERTS_TYPE_PROXIMITY);
+        DeleteAllProximityAlertsTask.start(context);
         final Intent intent = new Intent(context, ProximityAlertReceiver.class);
         final PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
@@ -179,7 +181,7 @@ public class AlertManager {
         // Make sure existing alarms are cancelled.
         alMan.cancel(pi);
         // Add a new time alert to the database.
-        sd.insertNewTimeAlert(stopCode, services, timeTrigger);
+        AddTimeAlertTask.start(context, stopCode, services, timeTrigger);
         // Set the alarm.
         alMan.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + 60000, pi);
@@ -193,7 +195,7 @@ public class AlertManager {
      */
     public void removeTimeAlert() {
         // Remove all time alerts from the database.
-        sd.deleteAllAlertsOfType(SettingsDatabase.ALERTS_TYPE_TIME);
+        DeleteAllTimeAlertsTask.start(context);
         final Intent intent = new Intent(context, TimeAlertService.class);
         final PendingIntent pi = PendingIntent.getService(context, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);

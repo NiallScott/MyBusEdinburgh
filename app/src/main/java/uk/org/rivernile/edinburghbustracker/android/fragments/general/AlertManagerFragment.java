@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Html;
@@ -42,14 +43,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowConfirmDeleteProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowConfirmDeleteTimeAlertListener;
-import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteAllAlertsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -119,17 +120,7 @@ public class AlertManagerFragment extends ListFragment
         super.onActivityCreated(bundle);
         
         getActivity().setTitle(R.string.alertmanager_title);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        
-        // Reload the data every time onResume is called.
-        getLoaderManager().restartLoader(0, null, this);
+        getLoaderManager().initLoader(0, null, this);
     }
     
     /**
@@ -189,17 +180,11 @@ public class AlertManagerFragment extends ListFragment
      */
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
-        if (isAdded()) {
-            // Swap in the new Cursor. The superclass deals with closing the old
-            // Cursor object.
-            ad.swapCursor(c);
-            // There may be change in status so refresh the options menu.
-            getActivity().supportInvalidateOptionsMenu();
-        } else {
-            if (c != null) {
-                c.close();
-            }
-        }
+        // Swap in the new Cursor. The superclass deals with closing the old
+        // Cursor object.
+        ad.swapCursor(c);
+        // There may be change in status so refresh the options menu.
+        getActivity().supportInvalidateOptionsMenu();
     }
 
     /**
@@ -216,8 +201,7 @@ public class AlertManagerFragment extends ListFragment
      */
     @Override
     public void onConfirmAllAlertsDeletion() {
-        // All alerts have been removed, refresh the data.
-        getLoaderManager().restartLoader(0, null, this);
+        // Nothing to do here.
     }
 
     /**
@@ -233,8 +217,7 @@ public class AlertManagerFragment extends ListFragment
      */
     @Override
     public void onConfirmProximityAlertDeletion() {
-        // The proximity alert has been removed, refresh the data.
-        getLoaderManager().restartLoader(0, null, this);
+        // Nothing to do here.
     }
 
     /**
@@ -250,8 +233,7 @@ public class AlertManagerFragment extends ListFragment
      */
     @Override
     public void onConfirmTimeAlertDeletion() {
-        // The time alert has been removed, refresh the data.
-        getLoaderManager().restartLoader(0, null, this);
+        // Nothing to do here.
     }
 
     /**
@@ -265,9 +247,7 @@ public class AlertManagerFragment extends ListFragment
     /**
      * This class allows the alert list to be loaded in the background.
      */
-    private static class AlertCursorLoader extends SimpleCursorLoader {
-        
-        private final SettingsDatabase sd;
+    private static class AlertCursorLoader extends CursorLoader {
         
         /**
          * Create a new AlertCursorLoader.
@@ -275,22 +255,7 @@ public class AlertManagerFragment extends ListFragment
          * @param context A Context object.
          */
         public AlertCursorLoader(final Context context) {
-            super(context);
-            
-            sd = SettingsDatabase.getInstance(context.getApplicationContext());
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public Cursor loadInBackground() {
-            final Cursor c = sd.getAllAlerts();
-            
-            // This ensures the Cursor window is set properly.
-            if(c != null) c.getCount();
-            
-            return c;
+            super(context, SettingsContract.Alerts.CONTENT_URI, null, null, null, null);
         }
     }
 
@@ -300,6 +265,11 @@ public class AlertManagerFragment extends ListFragment
     private class AlertCursorAdapter extends CursorAdapter {
         
         private BusStopDatabase bsd;
+        private int typeColumnIndex;
+        private int busStopCodeIndex;
+        private int distanceFromColumn;
+        private int servicesColumn;
+        private int timeTriggerColumn;
         
         /**
          * Create a new AlertCursorAdapter.
@@ -328,13 +298,11 @@ public class AlertManagerFragment extends ListFragment
          * @param parent The parent View.
          */
         @Override
-        public View getView(final int position, final View convertView,
-                final ViewGroup parent) {
+        public View getView(final int position, final View convertView, final ViewGroup parent) {
             // Move the Cursor in to position. Throw an Exception if this is
             // not possible.
             if(!mCursor.moveToPosition(position)) {
-                throw new IllegalStateException("Couldn't move cursor to " +
-                        "position " + position);
+                throw new IllegalStateException("Couldn't move cursor to position " + position);
             }
             
             // Create a new View.
@@ -349,19 +317,15 @@ public class AlertManagerFragment extends ListFragment
          * {@inheritDoc}
          */
         @Override
-        public View newView(final Context context, final Cursor c,
-                final ViewGroup container) {
+        public View newView(final Context context, final Cursor c, final ViewGroup container) {
             final LayoutInflater inflater = LayoutInflater.from(context);
             
             // The inflated layout depends on what time of alert it is showing.
-            switch(c.getInt(1)) {
-                case SettingsDatabase.ALERTS_TYPE_PROXIMITY:
-                    return inflater.inflate(
-                            R.layout.alertmanager_list_proximity, container,
-                            false);
-                case SettingsDatabase.ALERTS_TYPE_TIME:
-                    return inflater.inflate(R.layout.alertmanager_list_time,
-                            container, false);
+            switch(c.getInt(typeColumnIndex)) {
+                case SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY:
+                    return inflater.inflate(R.layout.alertmanager_list_proximity, container, false);
+                case SettingsContract.Alerts.ALERTS_TYPE_TIME:
+                    return inflater.inflate(R.layout.alertmanager_list_time, container, false);
                 default:
                     return null;
             }
@@ -371,10 +335,9 @@ public class AlertManagerFragment extends ListFragment
          * {@inheritDoc}
          */
         @Override
-        public void bindView(final View view, final Context context,
-                final Cursor c) {
+        public void bindView(final View view, final Context context, final Cursor c) {
             // Get the stopCode and locality information.
-            final String stopCode = c.getString(3);
+            final String stopCode = c.getString(busStopCodeIndex);
             final String locality = bsd.getLocalityForStopCode(stopCode);
             final String busStop;
             
@@ -391,8 +354,8 @@ public class AlertManagerFragment extends ListFragment
             TextView txt;
             
             // How the View is populated depends on the alert type.
-            switch(c.getInt(1)) {
-                case SettingsDatabase.ALERTS_TYPE_PROXIMITY:
+            switch(c.getInt(typeColumnIndex)) {
+                case SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY:
                     btn = (Button)view.findViewById(R.id.btnRemoveProxAlert);
                     btn.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -405,9 +368,9 @@ public class AlertManagerFragment extends ListFragment
                     txt = (TextView)view.findViewById(R.id.txtAlertManProx);
                     txt.setText(Html.fromHtml(context
                             .getString(R.string.alertmanager_prox_text,
-                                c.getInt(4), busStop)));
+                                c.getInt(distanceFromColumn), busStop)));
                     break;
-                case SettingsDatabase.ALERTS_TYPE_TIME:
+                case SettingsContract.Alerts.ALERTS_TYPE_TIME:
                     btn = (Button)view.findViewById(R.id.btnRemoveTimeAlert);
                     btn.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -417,8 +380,8 @@ public class AlertManagerFragment extends ListFragment
                     });
                     
                     txt = (TextView)view.findViewById(R.id.txtAlertManTime);
-                    final int timeTrigger = c.getInt(6);
-                    final String[] services = c.getString(5).split(",");
+                    final int timeTrigger = c.getInt(timeTriggerColumn);
+                    final String[] services = c.getString(servicesColumn).split(",");
                     final StringBuilder sb = new StringBuilder();
                     
                     for(String service : services) {
@@ -438,13 +401,27 @@ public class AlertManagerFragment extends ListFragment
                     break;
             }
         }
+
+        @Override
+        public Cursor swapCursor(final Cursor newCursor) {
+            if (newCursor != null) {
+                typeColumnIndex = newCursor.getColumnIndex(SettingsContract.Alerts.TYPE);
+                busStopCodeIndex = newCursor.getColumnIndex(SettingsContract.Alerts.STOP_CODE);
+                distanceFromColumn = newCursor.getColumnIndex(SettingsContract.Alerts
+                        .DISTANCE_FROM);
+                servicesColumn = newCursor.getColumnIndex(SettingsContract.Alerts.SERVICE_NAMES);
+                timeTriggerColumn = newCursor.getColumnIndex(SettingsContract.Alerts.TIME_TRIGGER);
+            }
+
+            return super.swapCursor(newCursor);
+        }
     }
     
     /**
      * Any Activities which host this Fragment must implement this interface to
      * handle navigation events.
      */
-    public static interface Callbacks
+    public interface Callbacks
             extends OnShowConfirmDeleteProximityAlertListener,
             OnShowConfirmDeleteTimeAlertListener {
         
@@ -452,6 +429,6 @@ public class AlertManagerFragment extends ListFragment
          * This is called when it should be confirmed with the user that they
          * want to delete all alerts.
          */
-        public void onShowConfirmDeleteAllAlerts();
+        void onShowConfirmDeleteAllAlerts();
     }
 }

@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -56,6 +57,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.List;
+
+import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavouriteStopLoader;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
@@ -70,7 +75,6 @@ import uk.org.rivernile.android.utils.GenericUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
 
@@ -84,7 +88,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsD
  * @author Niall Scott
  */
 public class NearestStopsFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<List<SearchResult>>, LocationListener,
+        implements LoaderManager.LoaderCallbacks, LocationListener,
         ServicesChooserDialogFragment.Callbacks, NearestStopsAdapter.OnItemClickedListener {
 
     private static final String STATE_CHOSEN_SERVICES = "chosenServices";
@@ -94,10 +98,14 @@ public class NearestStopsFragment extends Fragment
     
     private static final int REQUEST_PERIOD = 10000;
     private static final float MIN_DISTANCE = 3.0f;
+
+    private static final int LOADER_NEAREST_STOPS = 1;
+    private static final int LOADER_HAS_FAVOURITE_STOP = 2;
+    private static final int LOADER_HAS_PROXIMITY_ALERT = 3;
+    private static final int LOADER_HAS_TIME_ALERT = 4;
     
     private Callbacks callbacks;
     private LocationManager locMan;
-    private SettingsDatabase sd;
     
     private NearestStopsAdapter adapter;
     private ActionMode actionMode;
@@ -105,6 +113,10 @@ public class NearestStopsFragment extends Fragment
     private String[] chosenServices;
     private Location lastLocation;
     private SearchResult selectedStop;
+
+    private Cursor cursorFavourite;
+    private Cursor cursorProxAlert;
+    private Cursor cursorTimeAlert;
 
     private RecyclerView recyclerView;
     private ProgressBar progress;
@@ -143,7 +155,6 @@ public class NearestStopsFragment extends Fragment
         // Get references to required resources.
         locMan = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         final BusStopDatabase bsd = BusStopDatabase.getInstance(activity.getApplicationContext());
-        sd = SettingsDatabase.getInstance(activity.getApplicationContext());
         services = bsd.getBusServiceList();
         adapter = new NearestStopsAdapter(activity);
         adapter.setOnItemClickedListener(this);
@@ -260,21 +271,63 @@ public class NearestStopsFragment extends Fragment
     }
 
     @Override
-    public Loader<List<SearchResult>> onCreateLoader(final int id, final Bundle args) {
-        // Create a new Loader.
-        return new NearestStopsLoader(getActivity(), lastLocation.getLatitude(),
-                lastLocation.getLongitude(), chosenServices);
+    public Loader onCreateLoader(final int id, final Bundle args) {
+        switch (id) {
+            case LOADER_NEAREST_STOPS:
+                return new NearestStopsLoader(getActivity(), lastLocation.getLatitude(),
+                        lastLocation.getLongitude(), chosenServices);
+            case LOADER_HAS_FAVOURITE_STOP:
+                return selectedStop != null
+                        ? new HasFavouriteStopLoader(getActivity(), selectedStop.getStopCode())
+                        : null;
+            case LOADER_HAS_PROXIMITY_ALERT:
+                return selectedStop != null
+                        ? new HasProximityAlertLoader(getActivity(), selectedStop.getStopCode())
+                        : null;
+            case LOADER_HAS_TIME_ALERT:
+                return selectedStop != null
+                        ? new HasTimeAlertLoader(getActivity(), selectedStop.getStopCode())
+                        : null;
+            default:
+                return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onLoadFinished(final Loader loader, final Object result) {
+        switch (loader.getId()) {
+            case LOADER_NEAREST_STOPS:
+                populateResults((List<SearchResult>) result);
+                break;
+            case LOADER_HAS_FAVOURITE_STOP:
+                cursorFavourite = (Cursor) result;
+                updateActionModeItemFavourite();
+                break;
+            case LOADER_HAS_PROXIMITY_ALERT:
+                cursorProxAlert = (Cursor) result;
+                updateActionModeItemProximity();
+                break;
+            case LOADER_HAS_TIME_ALERT:
+                cursorTimeAlert = (Cursor) result;
+                updateActionModeItemTime();
+                break;
+        }
     }
 
     @Override
-    public void onLoadFinished(final Loader<List<SearchResult>> loader,
-            final List<SearchResult> results) {
-        populateResults(results);
-    }
-
-    @Override
-    public void onLoaderReset(final Loader<List<SearchResult>> loader) {
-        // Nothing to do here.
+    public void onLoaderReset(final Loader loader) {
+        switch (loader.getId()) {
+            case LOADER_HAS_FAVOURITE_STOP:
+                cursorFavourite = null;
+                break;
+            case LOADER_HAS_PROXIMITY_ALERT:
+                cursorProxAlert = null;
+                break;
+            case LOADER_HAS_TIME_ALERT:
+                cursorTimeAlert = null;
+                break;
+        }
     }
 
     @Override
@@ -359,9 +412,9 @@ public class NearestStopsFragment extends Fragment
         }
 
         if (isFirst) {
-            getLoaderManager().initLoader(0, null, this);
+            getLoaderManager().initLoader(LOADER_NEAREST_STOPS, null, this);
         } else {
-            getLoaderManager().restartLoader(0, null, this);
+            getLoaderManager().restartLoader(LOADER_NEAREST_STOPS, null, this);
         }
     }
 
@@ -473,6 +526,69 @@ public class NearestStopsFragment extends Fragment
     }
 
     /**
+     * Update the favourite action mode item depending on the current state.
+     */
+    private void updateActionModeItemFavourite() {
+        if (amMenuItemFavourite != null) {
+            if (cursorFavourite != null) {
+                amMenuItemFavourite.setEnabled(true);
+
+                if (cursorFavourite.getCount() > 0) {
+                    amMenuItemFavourite.setTitle(R.string.neareststops_context_remasfav);
+                    amMenuItemFavourite.setIcon(R.drawable.ic_action_star);
+                } else {
+                    amMenuItemFavourite.setTitle(R.string.neareststops_context_addasfav);
+                    amMenuItemFavourite.setIcon(R.drawable.ic_action_star_border);
+                }
+            } else {
+                amMenuItemFavourite.setEnabled(false);
+            }
+        }
+    }
+
+    /**
+     * Update the proximity action mode item depending on the current state.
+     */
+    private void updateActionModeItemProximity() {
+        if (amMenuItemProxAlert != null) {
+            if (cursorProxAlert != null) {
+                amMenuItemProxAlert.setEnabled(true);
+
+                if (cursorProxAlert.getCount() > 0) {
+                    amMenuItemProxAlert.setTitle(R.string.neareststops_menu_prox_rem);
+                    amMenuItemProxAlert.setIcon(R.drawable.ic_action_location_off);
+                } else {
+                    amMenuItemProxAlert.setTitle(R.string.neareststops_menu_prox_add);
+                    amMenuItemProxAlert.setIcon(R.drawable.ic_action_location_on);
+                }
+            } else {
+                amMenuItemProxAlert.setEnabled(false);
+            }
+        }
+    }
+
+    /**
+     * Update the time action mode item depending on the current state.
+     */
+    private void updateActionModeItemTime() {
+        if (amMenuItemTimeAlert != null) {
+            if (cursorTimeAlert != null) {
+                amMenuItemTimeAlert.setEnabled(true);
+
+                if (cursorTimeAlert.getCount() > 0) {
+                    amMenuItemTimeAlert.setTitle(R.string.neareststops_menu_time_rem);
+                    amMenuItemTimeAlert.setIcon(R.drawable.ic_action_alarm_off);
+                } else {
+                    amMenuItemTimeAlert.setTitle(R.string.neareststops_menu_time_add);
+                    amMenuItemTimeAlert.setIcon(R.drawable.ic_action_alarm_add);
+                }
+            } else {
+                amMenuItemTimeAlert.setEnabled(false);
+            }
+        }
+    }
+
+    /**
      * Starts a location provider in the {@link LocationManager}.
      *
      * @param provider The provider to start.
@@ -563,6 +679,12 @@ public class NearestStopsFragment extends Fragment
             amMenuItemTimeAlert = menu.findItem(R.id.neareststops_context_menu_time_alert);
             amMenuItemShowOnMap = menu.findItem(R.id.neareststops_context_menu_showonmap);
 
+            final LoaderManager loaderManager = getLoaderManager();
+            loaderManager.restartLoader(LOADER_HAS_FAVOURITE_STOP, null, NearestStopsFragment.this);
+            loaderManager.restartLoader(LOADER_HAS_PROXIMITY_ALERT, null,
+                    NearestStopsFragment.this);
+            loaderManager.restartLoader(LOADER_HAS_TIME_ALERT, null, NearestStopsFragment.this);
+
             final String stopCode = selectedStop.getStopCode();
             final String locality = selectedStop.getLocality();
             final String name;
@@ -582,34 +704,9 @@ public class NearestStopsFragment extends Fragment
 
         @Override
         public boolean onPrepareActionMode(final ActionMode mode, final Menu menu) {
-            final String stopCode = selectedStop.getStopCode();
-
-            // Title depends on whether it's already a favourite or not.
-            if (sd.getFavouriteStopExists(stopCode)) {
-                amMenuItemFavourite.setTitle(R.string.neareststops_context_remasfav);
-                amMenuItemFavourite.setIcon(R.drawable.ic_action_star);
-            } else {
-                amMenuItemFavourite.setTitle(R.string.neareststops_context_addasfav);
-                amMenuItemFavourite.setIcon(R.drawable.ic_action_star_border);
-            }
-
-            // Title depends on whether a proximity alert has already been added or not.
-            if (sd.isActiveProximityAlert(stopCode)) {
-                amMenuItemProxAlert.setTitle(R.string.neareststops_menu_prox_rem);
-                amMenuItemProxAlert.setIcon(R.drawable.ic_action_location_off);
-            } else {
-                amMenuItemProxAlert.setTitle(R.string.neareststops_menu_prox_add);
-                amMenuItemProxAlert.setIcon(R.drawable.ic_action_location_on);
-            }
-
-            // Title depends on whether a time alert has already been added or not.
-            if (sd.isActiveTimeAlert(stopCode)) {
-                amMenuItemTimeAlert.setTitle(R.string.neareststops_menu_time_rem);
-                amMenuItemTimeAlert.setIcon(R.drawable.ic_action_alarm_off);
-            } else {
-                amMenuItemTimeAlert.setTitle(R.string.neareststops_menu_time_add);
-                amMenuItemTimeAlert.setIcon(R.drawable.ic_action_alarm_add);
-            }
+            updateActionModeItemFavourite();
+            updateActionModeItemProximity();
+            updateActionModeItemTime();
 
             // If the Google Play Services is not available, then don't show the option to show the
             // stop on the map.
@@ -634,34 +731,41 @@ public class NearestStopsFragment extends Fragment
             switch (item.getItemId()) {
                 case R.id.neareststops_context_menu_favourite:
                     // See if this stop exists as a favourite already.
-                    if (sd.getFavouriteStopExists(stopCode)) {
-                        callbacks.onShowConfirmFavouriteDeletion(stopCode);
-                    } else {
-                        // If it doesn't exist, show the Add Favourite Stop interface.
-                        final String locality = selectedStop.getLocality();
-                        callbacks.onShowAddFavouriteStop(stopCode,
-                                locality != null ? selectedStop.getStopName() + ", " + locality :
-                                        selectedStop.getStopName());
+                    if (cursorFavourite != null) {
+                        if (cursorFavourite.getCount() > 0) {
+                            callbacks.onShowConfirmFavouriteDeletion(stopCode);
+                        } else {
+                            // If it doesn't exist, show the Add Favourite Stop interface.
+                            final String locality = selectedStop.getLocality();
+                            callbacks.onShowAddFavouriteStop(stopCode,
+                                    locality != null
+                                            ? selectedStop.getStopName() + ", " + locality
+                                            : selectedStop.getStopName());
+                        }
                     }
 
                     result = true;
                     break;
                 case R.id.neareststops_context_menu_prox_alert:
                     // See if this stop exists as a proximity alert.
-                    if (sd.isActiveProximityAlert(stopCode)) {
-                        callbacks.onShowConfirmDeleteProximityAlert();
-                    } else {
-                        callbacks.onShowAddProximityAlert(stopCode);
+                    if (cursorProxAlert != null) {
+                        if (cursorProxAlert.getCount() > 0) {
+                            callbacks.onShowConfirmDeleteProximityAlert();
+                        } else {
+                            callbacks.onShowAddProximityAlert(stopCode);
+                        }
                     }
 
                     result = true;
                     break;
                 case R.id.neareststops_context_menu_time_alert:
                     // See if this stop exists as a time alert.
-                    if (sd.isActiveTimeAlert(stopCode)) {
-                        callbacks.onShowConfirmDeleteTimeAlert();
-                    } else {
-                        callbacks.onShowAddTimeAlert(stopCode, null);
+                    if (cursorTimeAlert != null) {
+                        if (cursorTimeAlert.getCount() > 0) {
+                            callbacks.onShowConfirmDeleteTimeAlert();
+                        } else {
+                            callbacks.onShowAddTimeAlert(stopCode, null);
+                        }
                     }
 
                     result = true;
@@ -683,6 +787,11 @@ public class NearestStopsFragment extends Fragment
 
         @Override
         public void onDestroyActionMode(final ActionMode mode) {
+            final LoaderManager loaderManager = getLoaderManager();
+            loaderManager.destroyLoader(LOADER_HAS_FAVOURITE_STOP);
+            loaderManager.destroyLoader(LOADER_HAS_PROXIMITY_ALERT);
+            loaderManager.destroyLoader(LOADER_HAS_TIME_ALERT);
+
             actionMode = null;
             amMenuItemFavourite = amMenuItemProxAlert = amMenuItemTimeAlert = amMenuItemShowOnMap
                     = null;

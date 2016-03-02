@@ -31,12 +31,16 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import uk.org.rivernile.android.bustracker.database.settings.SettingsDatabase;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.BackupFavouritesLoader;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.RestoreFavouritesLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
  * This {@link android.app.Activity} is used to host a {@link SettingsFragment} to allow the user to
@@ -44,20 +48,61 @@ import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
  *
  * @author Niall Scott
  */
-public class SettingsActivity extends AppCompatActivity implements SettingsFragment.Callbacks {
+public class SettingsActivity extends AppCompatActivity implements SettingsFragment.Callbacks,
+        LoaderManager.LoaderCallbacks<Integer> {
 
     private static final int PERMISSION_REQUEST_BACKUP = 1;
     private static final int PERMISSION_REQUEST_RESTORE = 2;
     private static final int PERMISSION_REQUEST_LOCATION = 3;
 
-    private SettingsDatabase sd;
+    private static final int LOADER_BACKUP_FAVOURITES = 1;
+    private static final int LOADER_RESTORE_FAVOURITES = 2;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        sd = SettingsDatabase.getInstance(getApplication());
         setContentView(R.layout.settings);
+        final LoaderManager loaderManager = getSupportLoaderManager();
+
+        if (loaderManager.getLoader(LOADER_BACKUP_FAVOURITES) != null) {
+            // Reconnect to the Loader to get its result.
+            loaderManager.initLoader(LOADER_BACKUP_FAVOURITES, null, this);
+        }
+
+        if (loaderManager.getLoader(LOADER_RESTORE_FAVOURITES) != null) {
+            // Reconnect to the Loader to get its result.
+            loaderManager.initLoader(LOADER_RESTORE_FAVOURITES, null, this);
+        }
+    }
+
+    @Override
+    public Loader<Integer> onCreateLoader(final int id, final Bundle args) {
+        switch (id) {
+            case LOADER_BACKUP_FAVOURITES:
+                return new BackupFavouritesLoader(this);
+            case LOADER_RESTORE_FAVOURITES:
+                return new RestoreFavouritesLoader(this);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(final Loader<Integer> loader, final Integer data) {
+        switch (loader.getId()) {
+            case LOADER_BACKUP_FAVOURITES:
+                handleBackupResult(data);
+                break;
+            case LOADER_RESTORE_FAVOURITES:
+                handleRestoreResult(data);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(final Loader<Integer> loader) {
+        // Nothing to do here.
     }
 
     @Override
@@ -136,25 +181,77 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
      * Perform the backup of the user's favourite stops.
      */
     private void performBackup() {
-        final String message = sd.backupDatabase();
-
-        if (message.equals("success")) {
-            Toast.makeText(this, R.string.preference_backup_success, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-        }
+        getSupportLoaderManager().restartLoader(LOADER_BACKUP_FAVOURITES, null, this);
     }
 
     /**
      * Perform the restore of the user's favourite stops.
      */
     private void performRestore() {
-        final String message = sd.restoreDatabase();
+        getSupportLoaderManager().restartLoader(LOADER_RESTORE_FAVOURITES, null, this);
+    }
 
-        if (message.equals("success")) {
-            Toast.makeText(this, R.string.preference_restore_success, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    /**
+     * Handle the result of an operation to backup the user's saved favourite stops.
+     *
+     * @param result A number representing the result of the backup operation.
+     */
+    private void handleBackupResult(@SettingsDatabase.BackupRestoreResult final int result) {
+        getSupportLoaderManager().destroyLoader(LOADER_BACKUP_FAVOURITES);
+
+        final int text;
+
+        switch (result) {
+            case SettingsDatabase.BACKUP_RESTORE_SUCCESS:
+                text = R.string.preference_backup_success;
+                break;
+            case SettingsDatabase.ERROR_BACKUP_RESTORE_EXTERNAL_STORAGE:
+                text = R.string.preferences_backup_restore_error_media;
+                break;
+            case SettingsDatabase.ERROR_BACKUP_UNABLE_TO_WRITE:
+                text = R.string.preferences_backup_error_write;
+                break;
+            default:
+                text = 0;
+        }
+
+        if (text != 0) {
+            Toast.makeText(this, text, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Handle the result of an operation to restore the user's backup of saved favourite stops.
+     *
+     * @param result A number representing the result of the restore operation.
+     */
+    private void handleRestoreResult(@SettingsDatabase.BackupRestoreResult final int result) {
+        getSupportLoaderManager().destroyLoader(LOADER_RESTORE_FAVOURITES);
+
+        final int text;
+
+        switch (result) {
+            case SettingsDatabase.BACKUP_RESTORE_SUCCESS:
+                text = R.string.preference_restore_success;
+                break;
+            case SettingsDatabase.ERROR_BACKUP_RESTORE_EXTERNAL_STORAGE:
+                text = R.string.preferences_backup_restore_error_media;
+                break;
+            case SettingsDatabase.ERROR_RESTORE_FILE_DOES_NOT_EXIST:
+                text = R.string.preferences_restore_error_no_file;
+                break;
+            case SettingsDatabase.ERROR_RESTORE_UNABLE_TO_READ:
+                text = R.string.preferences_restore_error_unable_read;
+                break;
+            case SettingsDatabase.ERROR_RESTORE_DATA_MALFORMED:
+                text = R.string.preferences_restore_error_data_malformed;
+                break;
+            default:
+                text = 0;
+        }
+
+        if (text != 0) {
+            Toast.makeText(this, text, Toast.LENGTH_LONG).show();
         }
     }
 }

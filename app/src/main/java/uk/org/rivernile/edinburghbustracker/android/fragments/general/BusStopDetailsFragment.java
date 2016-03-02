@@ -68,6 +68,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.NumberFormat;
+
+import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavouriteStopLoader;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
+import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
@@ -81,7 +85,6 @@ import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteProximityAlertDialogFragment;
@@ -102,6 +105,11 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     /** This is the stopCode argument. */
     public static final String ARG_STOPCODE = "stopCode";
 
+    private static final int LOADER_BUS_STOP_DATA = 1;
+    private static final int LOADER_HAS_FAVOURITE_STOP = 2;
+    private static final int LOADER_HAS_PROX_ALERT = 3;
+    private static final int LOADER_HAS_TIME_ALERT = 4;
+
     private static final NumberFormat DISTANCE_FORMAT = NumberFormat.getInstance();
     
     private static final int REQUEST_PERIOD = 10000;
@@ -110,7 +118,6 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     
     private Callbacks callbacks;
     private BusStopDatabase bsd;
-    private SettingsDatabase sd;
     private LocationManager locMan;
     private SensorManager sensMan;
     private Sensor accelerometer;
@@ -129,6 +136,10 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     private double longitude;
     private int orientation;
     private String locality;
+
+    private Cursor cursorFavourite;
+    private Cursor cursorProxAlert;
+    private Cursor cursorTimeAlert;
     
     private final float[] distance = new float[2];
     private final float[] rotationMatrix = new float[9];
@@ -175,7 +186,6 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         
         // Get the various resources and services.
         bsd = BusStopDatabase.getInstance(context);
-        sd = SettingsDatabase.getInstance(context);
         locMan = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
         sensMan = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -225,11 +235,13 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
             @Override
             public void onClick(final View v) {
                 // Add/remove as favourite.
-                if (sd.getFavouriteStopExists(stopCode)) {
-                    callbacks.onShowConfirmFavouriteDeletion(stopCode);
-                } else {
-                    callbacks.onShowAddFavouriteStop(stopCode,
-                            locality != null ? stopName + ", " + locality : stopName);
+                if (cursorFavourite != null) {
+                    if (cursorFavourite.getCount() > 0) {
+                        callbacks.onShowConfirmFavouriteDeletion(stopCode);
+                    } else {
+                        callbacks.onShowAddFavouriteStop(stopCode,
+                                locality != null ? stopName + ", " + locality : stopName);
+                    }
                 }
             }
         });
@@ -237,10 +249,12 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         txtProxAlert.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                if (sd.isActiveProximityAlert(stopCode)) {
-                    callbacks.onShowConfirmDeleteProximityAlert();
-                } else {
-                    callbacks.onShowAddProximityAlert(stopCode);
+                if (cursorProxAlert != null) {
+                    if (cursorProxAlert.getCount() > 0) {
+                        callbacks.onShowConfirmDeleteProximityAlert();
+                    } else {
+                        callbacks.onShowAddProximityAlert(stopCode);
+                    }
                 }
             }
         });
@@ -248,10 +262,12 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         txtTimeAlert.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
-                if (sd.isActiveTimeAlert(stopCode)) {
-                    callbacks.onShowConfirmDeleteTimeAlert();
-                } else {
-                    callbacks.onShowAddTimeAlert(stopCode, null);
+                if (cursorTimeAlert != null) {
+                    if (cursorTimeAlert.getCount() > 0) {
+                        callbacks.onShowConfirmDeleteTimeAlert();
+                    } else {
+                        callbacks.onShowAddTimeAlert(stopCode, null);
+                    }
                 }
             }
         });
@@ -262,6 +278,11 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        final LoaderManager loaderManager = getLoaderManager();
+        loaderManager.initLoader(LOADER_HAS_FAVOURITE_STOP, null, this);
+        loaderManager.initLoader(LOADER_HAS_PROX_ALERT, null, this);
+        loaderManager.initLoader(LOADER_HAS_TIME_ALERT, null, this);
         
         // Get the screen rotation. This will be needed later to remap the coordinate system.
         screenRotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
@@ -289,7 +310,7 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         }
         
         // The loader is restarted each time incase a new bus stop database has become available.
-        getLoaderManager().restartLoader(0, null, this);
+        loadData();
     }
 
     @Override
@@ -320,26 +341,6 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
 
             // Start the accelerometer and magnetometer.
             startOrientationSensors();
-        }
-        
-        if (sd.getFavouriteStopExists(stopCode)) {
-            favouriteBtn.setImageResource(R.drawable.ic_list_favourite);
-            favouriteBtn.setContentDescription(getString(R.string.favourite_rem));
-        } else {
-            favouriteBtn.setImageResource(R.drawable.ic_list_unfavourite);
-            favouriteBtn.setContentDescription(getString(R.string.favourite_add));
-        }
-        
-        if (sd.isActiveProximityAlert(stopCode)) {
-            txtProxAlert.setText(R.string.busstopdetails_prox_rem);
-        } else {
-            txtProxAlert.setText(R.string.busstopdetails_prox_add);
-        }
-        
-        if (sd.isActiveTimeAlert(stopCode)) {
-            txtTimeAlert.setText(R.string.busstopdetails_time_rem);
-        } else {
-            txtTimeAlert.setText(R.string.busstopdetails_time_add);
         }
     }
 
@@ -381,28 +382,52 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(final int i, final Bundle bundle) {
-        // Show the progress indicator.
-        progress.setVisibility(View.VISIBLE);
-        txtEmpty.setVisibility(View.GONE);
-        layoutContent.setVisibility(View.GONE);
-        return new BusStopDetailsLoader(getActivity(), stopCode);
+    public Loader<Cursor> onCreateLoader(final int id, final Bundle bundle) {
+        switch (id) {
+            case LOADER_BUS_STOP_DATA:
+                return new BusStopDetailsLoader(getActivity(), stopCode);
+            case LOADER_HAS_FAVOURITE_STOP:
+                return new HasFavouriteStopLoader(getActivity(), stopCode);
+            case LOADER_HAS_PROX_ALERT:
+                return new HasProximityAlertLoader(getActivity(), stopCode);
+            case LOADER_HAS_TIME_ALERT:
+                return new HasTimeAlertLoader(getActivity(), stopCode);
+            default:
+                return null;
+        }
     }
 
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
-        if (isAdded()) {
-            populateData(c);
-        } else {
-            if (c != null) {
-                c.close();
-            }
+        switch (loader.getId()) {
+            case LOADER_BUS_STOP_DATA:
+                populateData(c);
+                break;
+            case LOADER_HAS_FAVOURITE_STOP:
+                updateFavouritesItem(c);
+                break;
+            case LOADER_HAS_PROX_ALERT:
+                updateProximityItem(c);
+                break;
+            case LOADER_HAS_TIME_ALERT:
+                updateTimeAlert(c);
+                break;
         }
     }
 
     @Override
     public void onLoaderReset(final Loader<Cursor> loader) {
-        // Nothing to do here.
+        switch (loader.getId()) {
+            case LOADER_HAS_FAVOURITE_STOP:
+                updateFavouritesItem(null);
+                break;
+            case LOADER_HAS_PROX_ALERT:
+                updateProximityItem(null);
+                break;
+            case LOADER_HAS_TIME_ALERT:
+                updateTimeAlert(null);
+                break;
+        }
     }
 
     @Override
@@ -517,6 +542,16 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     public void onCancelTimeAlertDeletion() {
         // Nothing to do.
     }
+
+    /**
+     * Load the bus stop data.
+     */
+    private void loadData() {
+        progress.setVisibility(View.VISIBLE);
+        txtEmpty.setVisibility(View.GONE);
+        layoutContent.setVisibility(View.GONE);
+        getLoaderManager().restartLoader(LOADER_BUS_STOP_DATA, null, this);
+    }
     
     /**
      * This is called when the {@link Loader} has finished. It moves the data out of the
@@ -576,6 +611,71 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         }
         
         updateLocation();
+    }
+
+    /**
+     * Update the favourites item.
+     *
+     * @param c The favourites {@link Cursor}.
+     */
+    private void updateFavouritesItem(@Nullable final Cursor c) {
+        cursorFavourite = c;
+
+        if (cursorFavourite != null) {
+            favouriteBtn.setEnabled(true);
+
+            if (cursorFavourite.getCount() > 0) {
+                favouriteBtn.setImageResource(R.drawable.ic_list_favourite);
+                favouriteBtn.setContentDescription(getString(R.string.favourite_rem));
+            } else {
+                favouriteBtn.setImageResource(R.drawable.ic_list_unfavourite);
+                favouriteBtn.setContentDescription(getString(R.string.favourite_add));
+            }
+        } else {
+            favouriteBtn.setEnabled(false);
+        }
+    }
+
+    /**
+     * Update the proximity item.
+     *
+     * @param c The proximity {@link Cursor}.
+     */
+    private void updateProximityItem(@Nullable final Cursor c) {
+        cursorProxAlert = c;
+
+        if (cursorProxAlert != null) {
+            txtProxAlert.setEnabled(true);
+
+            if (cursorProxAlert.getCount() > 0) {
+                txtProxAlert.setText(R.string.busstopdetails_prox_rem);
+            } else {
+                txtProxAlert.setText(R.string.busstopdetails_prox_add);
+            }
+        } else {
+            txtProxAlert.setEnabled(false);
+        }
+    }
+
+    /**
+     * Update the time item.
+     *
+     * @param c The time {@link Cursor}.
+     */
+    private void updateTimeAlert(@Nullable final Cursor c) {
+        cursorTimeAlert = c;
+
+        if (cursorTimeAlert != null) {
+            txtTimeAlert.setEnabled(true);
+
+            if (cursorTimeAlert.getCount() > 0) {
+                txtTimeAlert.setText(R.string.busstopdetails_time_rem);
+            } else {
+                txtTimeAlert.setText(R.string.busstopdetails_time_add);
+            }
+        } else {
+            txtTimeAlert.setEnabled(false);
+        }
     }
     
     /**

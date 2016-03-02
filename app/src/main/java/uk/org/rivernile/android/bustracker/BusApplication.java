@@ -39,7 +39,6 @@ import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
-import uk.org.rivernile.edinburghbustracker.android.SettingsDatabase;
 
 /**
  * This code is the very first code that will be executed when the application
@@ -110,13 +109,6 @@ public abstract class BusApplication extends Application
      * @return An instance of the BusStopDatabase.
      */
     public abstract BusStopDatabase getBusStopDatabase();
-    
-    /**
-     * Get an instance of the SettingsDatabase.
-     * 
-     * @return An instance of the SettingsDatabase.
-     */
-    public abstract SettingsDatabase getSettingsDatabase();
     
     /**
      * Get an instance of the FragmentFactory.
