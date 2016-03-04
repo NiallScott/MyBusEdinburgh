@@ -666,7 +666,7 @@ public class NearestStopsFragment extends Fragment
         return packages != null && !packages.isEmpty();
     }
 
-    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+    private final ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
         @Override
         public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
             if (selectedStop == null) {

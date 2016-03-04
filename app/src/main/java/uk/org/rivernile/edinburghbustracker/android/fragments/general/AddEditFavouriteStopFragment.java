@@ -176,7 +176,7 @@ public class AddEditFavouriteStopFragment extends Fragment implements View.OnCli
 
             if (cursor != null) {
                 // Whether we add or edit depends on whether the favourite stop already exists.
-                if (cursor.getCount() > 1) {
+                if (cursor.getCount() > 0) {
                     EditFavouriteStopTask.start(getActivity(),
                             cursor.getLong(cursor.getColumnIndex(SettingsContract.Favourites._ID)),
                             s);
@@ -210,8 +210,9 @@ public class AddEditFavouriteStopFragment extends Fragment implements View.OnCli
 
                 if (nameRequiresPopulation) {
                     nameRequiresPopulation = false;
-                    edit.setText(cursor.getString(
-                            cursor.getColumnIndex(SettingsContract.Favourites.STOP_NAME)));
+                    stopName = cursor.getString(
+                            cursor.getColumnIndex(SettingsContract.Favourites.STOP_NAME));
+                    edit.setText(stopName);
                     edit.setSelection(stopName.length());
                 }
             } else {

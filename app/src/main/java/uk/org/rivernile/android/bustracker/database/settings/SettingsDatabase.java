@@ -286,7 +286,7 @@ public final class SettingsDatabase {
 
         final File out = new File(Environment.getExternalStorageDirectory(), BACKUP_DIRECTORY);
 
-        if (!out.mkdirs()) {
+        if (!out.exists() && !out.mkdirs()) {
             return ERROR_BACKUP_UNABLE_TO_WRITE;
         }
 

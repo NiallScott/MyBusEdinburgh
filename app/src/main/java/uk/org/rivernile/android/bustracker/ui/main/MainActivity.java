@@ -66,7 +66,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesCh
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.AlertManagerFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.EnterStopCodeFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general.FavouriteStopsFragment;
+import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment;
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;
 
 /**

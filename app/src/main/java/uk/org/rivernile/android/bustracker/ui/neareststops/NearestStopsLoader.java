@@ -49,7 +49,7 @@ import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
  *
  * @author Niall Scott
  */
-public class NearestStopsLoader extends SimpleAsyncTaskLoader<List<SearchResult>> {
+class NearestStopsLoader extends SimpleAsyncTaskLoader<List<SearchResult>> {
 
     /** If modifying for another city, check that this value is correct. */
     private static final double LATITUDE_SPAN = 0.004499;
@@ -72,7 +72,7 @@ public class NearestStopsLoader extends SimpleAsyncTaskLoader<List<SearchResult>
      * served by these services will be returned. If no filtering is to take place, set to
      * {@code null}.
      */
-    public NearestStopsLoader(@NonNull final Context context, final double latitude,
+    NearestStopsLoader(@NonNull final Context context, final double latitude,
             final double longitude, @Nullable final String[] filteredServices) {
         super(context);
 

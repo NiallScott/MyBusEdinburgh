@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,50 +31,41 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.utils.NavigationUtils;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteFavouriteDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteTimeAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general
-        .FavouriteStopsFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTimeAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment;
 
 /**
- * The FavouriteStopsActivity displays the user a list of their saved favourite
- * bus stops and allows them to perform actions on them.
+ * The {@code FavouriteStopsActivity} displays the user a list of their saved favourite bus stops
+ * and allows them to perform actions on them.
  *
  * @author Niall Scott
  * @see FavouriteStopsFragment
  */
 public class FavouriteStopsActivity extends AppCompatActivity
-        implements FavouriteStopsFragment.Callbacks,
-        DeleteFavouriteDialogFragment.Callbacks,
-        DeleteProximityAlertDialogFragment.Callbacks,
-        DeleteTimeAlertDialogFragment.Callbacks {
+        implements FavouriteStopsFragment.Callbacks, DeleteFavouriteDialogFragment.Callbacks,
+        DeleteProximityAlertDialogFragment.Callbacks, DeleteTimeAlertDialogFragment.Callbacks {
     
-    private static final String DIALOG_CONFIRM_DELETE_FAVOURITE =
-            "deleteFavDialog";
+    private static final String DIALOG_CONFIRM_DELETE_FAVOURITE = "deleteFavDialog";
     private static final String DIALOG_DELETE_PROX_ALERT = "delProxAlertDialog";
     private static final String DIALOG_DELETE_TIME_ALERT = "delTimeAlertDialog";
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.single_fragment_container);
         
-        final boolean isCreateShortcut = Intent.ACTION_CREATE_SHORTCUT.equals(
-                getIntent().getAction());
+        final boolean isCreateShortcut = Intent.ACTION_CREATE_SHORTCUT
+                .equals(getIntent().getAction());
         
         setTitle(isCreateShortcut ? R.string.favouriteshortcut_title
                 : R.string.favouritestops_title);
         
-        // Only add the fragment if there was no previous instance of this
-        // Activity, otherwise this fragment will appear multiple times.
-        if(savedInstanceState == null) {
+        // Only add the fragment if there was no previous instance of this Activity, otherwise
+        // this fragment will appear multiple times.
+        if (savedInstanceState == null) {
             final FavouriteStopsFragment fragment = FavouriteStopsFragment
                     .newInstance(isCreateShortcut);
 
@@ -82,64 +73,43 @@ public class FavouriteStopsActivity extends AppCompatActivity
                     .add(R.id.fragmentContainer, fragment).commit();
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case android.R.id.home:
-                NavigationUtils
-                        .navigateUpOnActivityWithMultipleEntryPoints(this);
+                NavigationUtils.navigateUpOnActivityWithMultipleEntryPoints(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onShowConfirmFavouriteDeletion(final String stopCode) {
         DeleteFavouriteDialogFragment.newInstance(stopCode)
-                .show(getSupportFragmentManager(),
-                        DIALOG_CONFIRM_DELETE_FAVOURITE);
+                .show(getSupportFragmentManager(), DIALOG_CONFIRM_DELETE_FAVOURITE);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onShowConfirmDeleteProximityAlert() {
         new DeleteProximityAlertDialogFragment()
                 .show(getSupportFragmentManager(), DIALOG_DELETE_PROX_ALERT);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onShowConfirmDeleteTimeAlert() {
         new DeleteTimeAlertDialogFragment()
                 .show(getSupportFragmentManager(), DIALOG_DELETE_TIME_ALERT);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onShowEditFavouriteStop(final String stopCode) {
-        final Intent intent = new Intent(this,
-                AddEditFavouriteStopActivity.class);
+        final Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
         intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
         startActivity(intent);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onShowAddProximityAlert(final String stopCode) {
         final Intent intent = new Intent(this, AddProximityAlertActivity.class);
@@ -147,47 +117,33 @@ public class FavouriteStopsActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onShowAddTimeAlert(final String stopCode,
-            final String[] defaultServices) {
+    public void onShowAddTimeAlert(final String stopCode, final String[] defaultServices) {
         final Intent intent = new Intent(this, AddTimeAlertActivity.class);
         intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE, stopCode);
         startActivity(intent);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onShowBusStopMapWithStopCode(final String stopCode) {
         final Intent intent = new Intent(this, BusStopMapActivity.class);
         intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
         startActivity(intent);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onShowBusTimes(final String stopCode) {
         final Intent intent = new Intent(this, DisplayStopDataActivity.class);
         intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
         startActivity(intent);
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onConfirmFavouriteDeletion() {
         try {
             final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                    (DeleteFavouriteDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.fragmentContainer);
             if (child != null) {
                 child.onConfirmFavouriteDeletion();
             }
@@ -196,16 +152,12 @@ public class FavouriteStopsActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCancelFavouriteDeletion() {
         try {
             final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                    (DeleteFavouriteDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.fragmentContainer);
             if (child != null) {
                 child.onCancelFavouriteDeletion();
             }
@@ -213,17 +165,13 @@ public class FavouriteStopsActivity extends AppCompatActivity
             // Unable to pass the callback on. Silently fail.
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onConfirmProximityAlertDeletion() {
         try {
             final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                    (DeleteProximityAlertDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.fragmentContainer);
             if (child != null) {
                 child.onConfirmProximityAlertDeletion();
             }
@@ -232,16 +180,12 @@ public class FavouriteStopsActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCancelProximityAlertDeletion() {
         try {
             final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                    (DeleteProximityAlertDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.fragmentContainer);
             if (child != null) {
                 child.onCancelProximityAlertDeletion();
             }
@@ -249,17 +193,13 @@ public class FavouriteStopsActivity extends AppCompatActivity
             // Unable to pass the callback on. Silently fail.
         }
     }
-    
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public void onConfirmTimeAlertDeletion() {
         try {
             final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                    (DeleteTimeAlertDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.fragmentContainer);
             if (child != null) {
                 child.onConfirmTimeAlertDeletion();
             }
@@ -268,16 +208,12 @@ public class FavouriteStopsActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onCancelTimeAlertDeletion() {
         try {
             final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
+                    (DeleteTimeAlertDialogFragment.Callbacks) getSupportFragmentManager()
+                            .findFragmentById(R.id.fragmentContainer);
             if (child != null) {
                 child.onCancelTimeAlertDeletion();
             }

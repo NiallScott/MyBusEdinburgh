@@ -26,20 +26,30 @@
 */ -->
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
     <item
         android:id="@+id/favouritestops_context_menu_modify"
-        android:title="@string/favouritestops_menu_edit" />
+        android:title="@string/favouritestops_menu_edit"
+        android:icon="@drawable/ic_action_edit"
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/favouritestops_context_menu_delete"
-        android:title="@string/favouritestops_menu_delete" />
+        android:title="@string/favouritestops_menu_delete"
+        android:icon="@drawable/ic_action_delete"
+        app:showAsAction="ifRoom" />
     <item
         android:id="@+id/favouritestops_context_menu_prox_alert"
+        app:showAsAction="never"
         tools:ignore="MenuTitle" />
     <item
         android:id="@+id/favouritestops_context_menu_time_alert"
+        app:showAsAction="never"
         tools:ignore="MenuTitle" />
     <item
         android:id="@+id/favouritestops_context_menu_showonmap"
-        android:title="@string/favouritestops_menu_showonmap" />
+        android:title="@string/favouritestops_menu_showonmap"
+        android:icon="@drawable/ic_action_map"
+        app:showAsAction="never" />
 </menu>
