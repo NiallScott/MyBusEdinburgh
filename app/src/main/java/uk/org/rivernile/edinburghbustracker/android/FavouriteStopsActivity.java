@@ -45,8 +45,7 @@ import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment;
  * @see FavouriteStopsFragment
  */
 public class FavouriteStopsActivity extends AppCompatActivity
-        implements FavouriteStopsFragment.Callbacks, DeleteFavouriteDialogFragment.Callbacks,
-        DeleteProximityAlertDialogFragment.Callbacks, DeleteTimeAlertDialogFragment.Callbacks {
+        implements FavouriteStopsFragment.Callbacks {
     
     private static final String DIALOG_CONFIRM_DELETE_FAVOURITE = "deleteFavDialog";
     private static final String DIALOG_DELETE_PROX_ALERT = "delProxAlertDialog";
@@ -136,89 +135,5 @@ public class FavouriteStopsActivity extends AppCompatActivity
         final Intent intent = new Intent(this, DisplayStopDataActivity.class);
         intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
         startActivity(intent);
-    }
-
-    @Override
-    public void onConfirmFavouriteDeletion() {
-        try {
-            final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onConfirmFavouriteDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onCancelFavouriteDeletion() {
-        try {
-            final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onCancelFavouriteDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onConfirmProximityAlertDeletion() {
-        try {
-            final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onConfirmProximityAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onCancelProximityAlertDeletion() {
-        try {
-            final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onCancelProximityAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onConfirmTimeAlertDeletion() {
-        try {
-            final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onConfirmTimeAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onCancelTimeAlertDeletion() {
-        try {
-            final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onCancelTimeAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
     }
 }

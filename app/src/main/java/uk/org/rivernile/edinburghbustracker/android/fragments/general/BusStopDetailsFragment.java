@@ -85,10 +85,6 @@ import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTimeAlertDialogFragment;
 
 /**
  * This {@link Fragment} shows details for a bus stop. The bus stop code is passed in as an
@@ -98,9 +94,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTime
  * @author Niall Scott
  */
 public class BusStopDetailsFragment extends Fragment implements LocationListener,
-        SensorEventListener, LoaderManager.LoaderCallbacks<Cursor>,
-        DeleteProximityAlertDialogFragment.Callbacks, DeleteTimeAlertDialogFragment.Callbacks,
-        DeleteFavouriteDialogFragment.Callbacks {
+        SensorEventListener, LoaderManager.LoaderCallbacks<Cursor> {
     
     /** This is the stopCode argument. */
     public static final String ARG_STOPCODE = "stopCode";
@@ -510,37 +504,6 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     @Override
     public void onAccuracyChanged(final Sensor sensor, final int accuracy) {
         // Nothing to do here.
-    }
-
-    @Override
-    public void onConfirmFavouriteDeletion() {
-        favouriteBtn.setImageResource(R.drawable.ic_list_unfavourite);
-        favouriteBtn.setContentDescription(getString(R.string.favourite_add));
-    }
-
-    @Override
-    public void onCancelFavouriteDeletion() {
-        // Nothing to do.
-    }
-
-    @Override
-    public void onConfirmProximityAlertDeletion() {
-        txtProxAlert.setText(R.string.busstopdetails_prox_add);
-    }
-
-    @Override
-    public void onCancelProximityAlertDeletion() {
-        // Nothing to do.
-    }
-
-    @Override
-    public void onConfirmTimeAlertDeletion() {
-        txtTimeAlert.setText(R.string.busstopdetails_time_add);
-    }
-
-    @Override
-    public void onCancelTimeAlertDeletion() {
-        // Nothing to do.
     }
 
     /**

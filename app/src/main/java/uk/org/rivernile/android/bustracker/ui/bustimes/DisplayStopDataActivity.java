@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -59,10 +59,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  * @see DisplayStopDataFragment
  */
 public class DisplayStopDataActivity extends AppCompatActivity
-        implements DisplayStopDataFragment.Callbacks,
-        DeleteFavouriteDialogFragment.Callbacks,
-        DeleteProximityAlertDialogFragment.Callbacks,
-        DeleteTimeAlertDialogFragment.Callbacks {
+        implements DisplayStopDataFragment.Callbacks {
     
     /** The ACTION_VIEW_STOP_DATA intent action name. */
     public static final String ACTION_VIEW_STOP_DATA =
@@ -188,113 +185,5 @@ public class DisplayStopDataActivity extends AppCompatActivity
         }
         
         startActivity(intent);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onConfirmFavouriteDeletion() {
-        try {
-            final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onConfirmFavouriteDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCancelFavouriteDeletion() {
-        try {
-            final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onCancelFavouriteDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onConfirmProximityAlertDeletion() {
-        try {
-            final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onConfirmProximityAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCancelProximityAlertDeletion() {
-        try {
-            final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onCancelProximityAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onConfirmTimeAlertDeletion() {
-        try {
-            final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onConfirmTimeAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCancelTimeAlertDeletion() {
-        try {
-            final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks)
-                            getSupportFragmentManager()
-                                    .findFragmentById(R.id.fragmentContainer);
-            if (child != null) {
-                child.onCancelTimeAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
     }
 }

@@ -62,7 +62,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProxi
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 
 /**
  * This {@link Fragment} shows the user a list of their favourite bus stops. What this
@@ -90,7 +89,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavo
  * @author Niall Scott
  */
 public class FavouriteStopsFragment extends Fragment implements LoaderManager.LoaderCallbacks,
-        DeleteFavouriteDialogFragment.Callbacks, FavouriteStopsAdapter.OnItemClickedListener {
+        FavouriteStopsAdapter.OnItemClickedListener {
 
     /** The argument to signify create shortcut mode. */
     public static final String ARG_CREATE_SHORTCUT = "createShortcut";
@@ -317,16 +316,6 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
                 cursorTimeAlert = null;
                 break;
         }
-    }
-
-    @Override
-    public void onConfirmFavouriteDeletion() {
-        // Do nothing.
-    }
-
-    @Override
-    public void onCancelFavouriteDeletion() {
-        // Do nothing.
     }
 
     /**

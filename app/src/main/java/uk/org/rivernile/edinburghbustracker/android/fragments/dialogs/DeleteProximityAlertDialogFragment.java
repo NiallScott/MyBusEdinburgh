@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -45,19 +44,6 @@ import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 public class DeleteProximityAlertDialogFragment extends DialogFragment {
     
     private AlertManager alertMan;
-    private Callbacks callbacks;
-
-    @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
-        
-        try {
-            callbacks = (Callbacks) activity;
-        } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
-                    Callbacks.class.getName());
-        }
-    }
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -77,34 +63,10 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(final DialogInterface dialog, final int id) {
                         alertMan.removeProximityAlert();
-                        callbacks.onConfirmProximityAlertDeletion();
                     }
                 })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        callbacks.onCancelProximityAlertDeletion();
-                    }
-                });
+                .setNegativeButton(R.string.cancel, null);
         
         return builder.create();
-    }
-    
-    /**
-     * Any {@link Activity Activities} which host this {@link DialogFragment} must implement this
-     * interface to handle navigation events.
-     */
-    public interface Callbacks {
-        
-        /**
-         * This is called when the user has confirmed that they wish for the proximity alert to be
-         * deleted.
-         */
-        void onConfirmProximityAlertDeletion();
-        
-        /**
-         * This is called when the user has cancelled the deletion of the proximity alert.
-         */
-        void onCancelProximityAlertDeletion();
     }
 }

@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -48,7 +47,6 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
     /** The argument that is sent to this Fragment to denote the stop code. */
     private static final String ARG_STOPCODE = "stopCode";
 
-    private Callbacks callbacks;
     private String stopCode;
     
     /**
@@ -65,18 +63,6 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
         f.setArguments(b);
         
         return f;
-    }
-
-    @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
-        
-        try {
-            callbacks = (Callbacks) activity;
-        } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
-                    Callbacks.class.getName());
-        }
     }
 
     @Override
@@ -107,34 +93,10 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(final DialogInterface dialog, final int id) {
                         DeleteFavouriteStopTask.start(getActivity(), stopCode);
-                        callbacks.onConfirmFavouriteDeletion();
                     }
                 })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        callbacks.onCancelFavouriteDeletion();
-                    }
-                });
+                .setNegativeButton(R.string.cancel, null);
         
         return builder.create();
-    }
-    
-    /**
-     * Any {@link Activity Activities} which host this {@link DialogFragment} must implement this
-     * interface to handle navigation events.
-     */
-    public interface Callbacks {
-        
-        /**
-         * This is called when the user has confirmed that they wish for the favourite bus stop to
-         * be deleted.
-         */
-        void onConfirmFavouriteDeletion();
-        
-        /**
-         * This is called when the user has cancelled the deletion of the favourite bus stop.
-         */
-        void onCancelFavouriteDeletion();
     }
 }

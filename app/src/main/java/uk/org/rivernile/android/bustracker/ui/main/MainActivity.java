@@ -78,10 +78,8 @@ import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;
 public class MainActivity extends AppCompatActivity
         implements SectionListFragment.Callbacks, AlertManagerFragment.Callbacks,
         EnterStopCodeFragment.Callbacks, FavouriteStopsFragment.Callbacks,
-        NearestStopsFragment.Callbacks, DeleteAllAlertsDialogFragment.Callbacks,
-        DeleteProximityAlertDialogFragment.Callbacks, DeleteTimeAlertDialogFragment.Callbacks,
-        ServicesChooserDialogFragment.Callbacks, InstallBarcodeScannerDialogFragment.Callbacks,
-        DeleteFavouriteDialogFragment.Callbacks, TurnOnGpsDialogFragment.Callbacks {
+        NearestStopsFragment.Callbacks, ServicesChooserDialogFragment.Callbacks,
+        InstallBarcodeScannerDialogFragment.Callbacks, TurnOnGpsDialogFragment.Callbacks {
     
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
@@ -304,90 +302,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onConfirmAllAlertsDeletion() {
-        try {
-            final DeleteAllAlertsDialogFragment.Callbacks child =
-                    (DeleteAllAlertsDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.layoutContainer);
-            if (child != null) {
-                child.onConfirmAllAlertsDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onCancelAllAlertsDeletion() {
-        try {
-            final DeleteAllAlertsDialogFragment.Callbacks child =
-                    (DeleteAllAlertsDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.layoutContainer);
-            if (child != null) {
-                child.onCancelAllAlertsDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onConfirmProximityAlertDeletion() {
-        try {
-            final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.layoutContainer);
-            if (child != null) {
-                child.onConfirmProximityAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onCancelProximityAlertDeletion() {
-        try {
-            final DeleteProximityAlertDialogFragment.Callbacks child =
-                    (DeleteProximityAlertDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.layoutContainer);
-            if (child != null) {
-                child.onCancelProximityAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onConfirmTimeAlertDeletion() {
-        try {
-            final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.layoutContainer);
-            if (child != null) {
-                child.onConfirmTimeAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onCancelTimeAlertDeletion() {
-        try {
-            final DeleteTimeAlertDialogFragment.Callbacks child =
-                    (DeleteTimeAlertDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.layoutContainer);
-            if (child != null) {
-                child.onCancelTimeAlertDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
     public void onServicesChosen(final String[] chosenServices) {
         try {
             final ServicesChooserDialogFragment.Callbacks child =
@@ -411,34 +325,6 @@ public class MainActivity extends AppCompatActivity
         } catch(ActivityNotFoundException e) {
             Toast.makeText(this, R.string.barcodescannerdialog_noplaystore, Toast.LENGTH_LONG)
                     .show();
-        }
-    }
-
-    @Override
-    public void onConfirmFavouriteDeletion() {
-        try {
-            final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.layoutContainer);
-            if (child != null) {
-                child.onConfirmFavouriteDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
-        }
-    }
-
-    @Override
-    public void onCancelFavouriteDeletion() {
-        try {
-            final DeleteFavouriteDialogFragment.Callbacks child =
-                    (DeleteFavouriteDialogFragment.Callbacks) getSupportFragmentManager()
-                            .findFragmentById(R.id.layoutContainer);
-            if (child != null) {
-                child.onCancelFavouriteDeletion();
-            }
-        } catch (ClassCastException e) {
-            // Unable to pass the callback on. Silently fail.
         }
     }
 

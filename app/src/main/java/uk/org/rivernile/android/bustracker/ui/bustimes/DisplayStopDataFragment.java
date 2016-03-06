@@ -88,12 +88,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteFavouriteDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteTimeAlertDialogFragment;
 
 /**
  * This fragment shows live bus times. It is perhaps the most important part of
@@ -111,8 +105,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
  * @author Niall Scott
  */
 public class DisplayStopDataFragment extends Fragment implements LoaderManager.LoaderCallbacks,
-        View.OnClickListener, DeleteFavouriteDialogFragment.Callbacks,
-        DeleteProximityAlertDialogFragment.Callbacks, DeleteTimeAlertDialogFragment.Callbacks {
+        View.OnClickListener {
     
     private static final int EVENT_REFRESH = 1;
     private static final int EVENT_UPDATE_TIME = 2;
@@ -506,54 +499,6 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
                 }
             }
         }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onConfirmFavouriteDeletion() {
-        // Nothing to do here.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCancelFavouriteDeletion() {
-        // Nothing to do here.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onConfirmProximityAlertDeletion() {
-        // Nothing to do here.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCancelProximityAlertDeletion() {
-        // Nothing to do here.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onConfirmTimeAlertDeletion() {
-        // Nothing to do here.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void onCancelTimeAlertDeletion() {
-        // Nothing to do here.
     }
     
     /**
