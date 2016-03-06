@@ -99,11 +99,11 @@
             </intent-filter>
         </activity-alias>
         
-        <!-- FavouriteStopsActivity, to let the user see a list of their
-             favourite bus stops. -->
+        <!-- SelectFavouriteStopActivity, to let the user choose a favourite stop to show as a home
+             screen shortcut. -->
         <activity
-            android:name=".FavouriteStopsActivity"
-            android:label="@string/favouriteshortcut_label"
+            android:name="uk.org.rivernile.android.bustracker.ui.favourites.SelectFavouriteStopActivity"
+            android:label="@string/favouriteshortcut_title"
             android:icon="@drawable/appicon_favourite"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
             <!-- This signifies that this Activity can add shortcuts to the

@@ -23,51 +23,40 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android;
+package uk.org.rivernile.android.bustracker.ui.favourites;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.utils.NavigationUtils;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTimeAlertDialogFragment;
-import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment;
+import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * The {@code FavouriteStopsActivity} displays the user a list of their saved favourite bus stops
- * and allows them to perform actions on them.
+ * The {@code SelectFavouriteStopActivity} displays the user's saved favourite stops and allows them
+ * to select a stop which will go on to be displayed on the device home screen.
  *
  * @author Niall Scott
  * @see FavouriteStopsFragment
  */
-public class FavouriteStopsActivity extends AppCompatActivity
+public class SelectFavouriteStopActivity extends AppCompatActivity
         implements FavouriteStopsFragment.Callbacks {
     
-    private static final String DIALOG_CONFIRM_DELETE_FAVOURITE = "deleteFavDialog";
-    private static final String DIALOG_DELETE_PROX_ALERT = "delProxAlertDialog";
-    private static final String DIALOG_DELETE_TIME_ALERT = "delTimeAlertDialog";
-
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (!Intent.ACTION_CREATE_SHORTCUT.equals(getIntent().getAction())) {
+            finish();
+            return;
+        }
+
         setContentView(R.layout.single_fragment_container);
-        
-        final boolean isCreateShortcut = Intent.ACTION_CREATE_SHORTCUT
-                .equals(getIntent().getAction());
-        
-        setTitle(isCreateShortcut ? R.string.favouriteshortcut_title
-                : R.string.favouritestops_title);
         
         // Only add the fragment if there was no previous instance of this Activity, otherwise
         // this fragment will appear multiple times.
         if (savedInstanceState == null) {
-            final FavouriteStopsFragment fragment = FavouriteStopsFragment
-                    .newInstance(isCreateShortcut);
-
+            final FavouriteStopsFragment fragment = FavouriteStopsFragment.newInstance(true);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragmentContainer, fragment).commit();
         }
@@ -86,54 +75,41 @@ public class FavouriteStopsActivity extends AppCompatActivity
 
     @Override
     public void onShowConfirmFavouriteDeletion(final String stopCode) {
-        DeleteFavouriteDialogFragment.newInstance(stopCode)
-                .show(getSupportFragmentManager(), DIALOG_CONFIRM_DELETE_FAVOURITE);
+        // Not required here.
     }
 
     @Override
     public void onShowConfirmDeleteProximityAlert() {
-        new DeleteProximityAlertDialogFragment()
-                .show(getSupportFragmentManager(), DIALOG_DELETE_PROX_ALERT);
+        // Not required here.
     }
 
     @Override
     public void onShowConfirmDeleteTimeAlert() {
-        new DeleteTimeAlertDialogFragment()
-                .show(getSupportFragmentManager(), DIALOG_DELETE_TIME_ALERT);
+        // Not required here.
     }
 
     @Override
     public void onShowEditFavouriteStop(final String stopCode) {
-        final Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
-        startActivity(intent);
+        // Not required here.
     }
 
     @Override
     public void onShowAddProximityAlert(final String stopCode) {
-        final Intent intent = new Intent(this, AddProximityAlertActivity.class);
-        intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE, stopCode);
-        startActivity(intent);
+        // Not required here.
     }
 
     @Override
     public void onShowAddTimeAlert(final String stopCode, final String[] defaultServices) {
-        final Intent intent = new Intent(this, AddTimeAlertActivity.class);
-        intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE, stopCode);
-        startActivity(intent);
+        // Not required here.
     }
 
     @Override
     public void onShowBusStopMapWithStopCode(final String stopCode) {
-        final Intent intent = new Intent(this, BusStopMapActivity.class);
-        intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
-        startActivity(intent);
+        // Not required here.
     }
 
     @Override
     public void onShowBusTimes(final String stopCode) {
-        final Intent intent = new Intent(this, DisplayStopDataActivity.class);
-        intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
-        startActivity(intent);
+        // Not required here.
     }
 }
