@@ -246,13 +246,12 @@ public final class SettingsDatabase {
     @WorkerThread
     @BackupRestoreResult
     public static int backupFavourites(@NonNull final Context context, @NonNull final File file) {
-        final byte[] output = serialiseFavourites(context).toString().getBytes();
         BufferedOutputStream out = null;
         int result;
 
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
-            out.write(output);
+            out.write(serialiseFavourites(context).toString().getBytes());
             out.flush();
             result = BACKUP_RESTORE_SUCCESS;
         } catch (IOException e) {
