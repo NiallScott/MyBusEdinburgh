@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2010 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,20 +36,35 @@
     android:paddingStart="?attr/listPreferredItemPaddingLeft"
     android:paddingRight="?attr/listPreferredItemPaddingRight"
     android:paddingEnd="?attr/listPreferredItemPaddingRight"
-    android:orientation="vertical"
-    android:gravity="center_vertical">
-    <TextView
-        android:id="@android:id/text1"
-        android:layout_width="match_parent"
+    android:orientation="horizontal">
+    <ImageView
+        android:id="@+id/imgAvatar"
+        android:layout_width="@dimen/news_avatar_size"
+        android:layout_height="@dimen/news_avatar_size"
+        android:layout_marginTop="4dp"
+        android:src="@drawable/avatar_placeholder"
+        android:contentDescription="@null"
+        android:clickable="true" />
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
-        android:autoLink="web|email|map"
-        android:textIsSelectable="true"
-        tools:text="Example text" />
-    <TextView
-        android:id="@android:id/text2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
-        tools:text="Sample subtext" />
+        android:layout_weight="1"
+        android:layout_marginLeft="20dp"
+        android:layout_gravity="top"
+        android:orientation="vertical">
+        <TextView
+            android:id="@android:id/text1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
+            android:autoLink="web|email|map"
+            android:textIsSelectable="true"
+            tools:text="Example text" />
+        <TextView
+            android:id="@android:id/text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
+            tools:text="Sample subtext" />
+    </LinearLayout>
 </LinearLayout>

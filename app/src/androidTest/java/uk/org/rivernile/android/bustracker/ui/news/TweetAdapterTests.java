@@ -32,12 +32,15 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.annotation.UiThreadTest;
+import android.support.test.rule.UiThreadTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -55,6 +58,9 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 @RunWith(AndroidJUnit4.class)
 public class TweetAdapterTests {
+
+    @Rule
+    public UiThreadTestRule uiThreadTestRule = new UiThreadTestRule();
     
     private TweetAdapter adapter;
 
@@ -100,6 +106,7 @@ public class TweetAdapterTests {
      * Test the adapter coping with a single {@link Tweet}.
      */
     @Test
+    @UiThreadTest
     public void testOneItem() {
         final DataObserver observer = new DataObserver();
         adapter.registerAdapterDataObserver(observer);
@@ -110,7 +117,7 @@ public class TweetAdapterTests {
                 .setDisplayName("User")
                 .setTime(new GregorianCalendar(2015, GregorianCalendar.JANUARY, 25, 13, 52, 11)
                         .getTime())
-                .setProfileImageUrl("a")
+                .setProfileImageUrl(null)
                 .setProfileUrl("b")
                 .build();
         final ArrayList<Tweet> tweets = new ArrayList<>(1);
@@ -129,21 +136,27 @@ public class TweetAdapterTests {
         final TweetAdapter.ViewHolder vh = adapter.createViewHolder(null, 0);
         assertTrue(TextUtils.isEmpty(vh.text1.getText().toString()));
         assertTrue(TextUtils.isEmpty(vh.text2.getText().toString()));
+        assertTrue(TextUtils.isEmpty(vh.imgAvatar.getContentDescription()));
 
         final DateFormat dateFormat = DateFormat.getDateTimeInstance();
         adapter.bindViewHolder(vh, 0);
         assertEquals("Body", vh.text1.getText().toString());
         assertEquals("User - " + dateFormat.format(tweet.getTime()), vh.text2.getText().toString());
+        assertEquals(tweet.getDisplayName(), vh.imgAvatar.getContentDescription());
+        assertTrue(vh.imgAvatar.isClickable());
 
         adapter.bindViewHolder(vh, 1);
         assertTrue(TextUtils.isEmpty(vh.text1.getText().toString()));
         assertTrue(TextUtils.isEmpty(vh.text2.getText().toString()));
+        assertTrue(TextUtils.isEmpty(vh.imgAvatar.getContentDescription()));
+        assertFalse(vh.imgAvatar.isClickable());
     }
 
     /**
      * Test the adapter coping with multiple {@link Tweet}s.
      */
     @Test
+    @UiThreadTest
     public void testMultipleItems() {
         final DataObserver observer = new DataObserver();
         adapter.registerAdapterDataObserver(observer);
@@ -154,7 +167,7 @@ public class TweetAdapterTests {
                 .setDisplayName("User")
                 .setTime(new GregorianCalendar(2015, GregorianCalendar.JANUARY, 25, 13, 52, 11)
                         .getTime())
-                .setProfileImageUrl("a")
+                .setProfileImageUrl(null)
                 .setProfileUrl("b")
                 .build();
         final Tweet tweet2 = new Tweet.Builder()
@@ -162,7 +175,7 @@ public class TweetAdapterTests {
                 .setDisplayName("User 2")
                 .setTime(new GregorianCalendar(2014, GregorianCalendar.DECEMBER, 2, 2, 13, 45)
                         .getTime())
-                .setProfileImageUrl("c")
+                .setProfileImageUrl(null)
                 .setProfileUrl("d")
                 .build();
         final Tweet tweet3 = new Tweet.Builder()
@@ -170,7 +183,7 @@ public class TweetAdapterTests {
                 .setDisplayName("User 3")
                 .setTime(new GregorianCalendar(2014, GregorianCalendar.OCTOBER, 10, 21, 22, 23)
                         .getTime())
-                .setProfileImageUrl("e")
+                .setProfileImageUrl(null)
                 .setProfileUrl("f")
                 .build();
         final ArrayList<Tweet> tweets = new ArrayList<>(3);
@@ -196,25 +209,33 @@ public class TweetAdapterTests {
         final TweetAdapter.ViewHolder vh1 = adapter.createViewHolder(null, 0);
         assertTrue(TextUtils.isEmpty(vh1.text1.getText().toString()));
         assertTrue(TextUtils.isEmpty(vh1.text2.getText().toString()));
+        assertTrue(TextUtils.isEmpty(vh1.imgAvatar.getContentDescription()));
 
         adapter.bindViewHolder(vh1, 0);
         assertEquals("Body", vh1.text1.getText().toString());
         assertEquals("User - " + dateFormat.format(tweet1.getTime()),
                 vh1.text2.getText().toString());
+        assertEquals(tweet1.getDisplayName(), vh1.imgAvatar.getContentDescription());
+        assertTrue(vh1.imgAvatar.isClickable());
 
         final TweetAdapter.ViewHolder vh2 = adapter.createViewHolder(null, 0);
         assertTrue(TextUtils.isEmpty(vh2.text1.getText().toString()));
         assertTrue(TextUtils.isEmpty(vh2.text2.getText().toString()));
+        assertTrue(TextUtils.isEmpty(vh2.imgAvatar.getContentDescription()));
 
         adapter.bindViewHolder(vh2, 1);
         assertEquals("Body 2", vh2.text1.getText().toString());
         assertEquals("User 2 - " + dateFormat.format(tweet2.getTime()),
                 vh2.text2.getText().toString());
+        assertEquals(tweet2.getDisplayName(), vh2.imgAvatar.getContentDescription());
+        assertTrue(vh2.imgAvatar.isClickable());
 
         adapter.bindViewHolder(vh1, 2);
         assertEquals("Body 3", vh1.text1.getText().toString());
         assertEquals("User 3 - " + dateFormat.format(tweet3.getTime()),
                 vh1.text2.getText().toString());
+        assertEquals(tweet3.getDisplayName(), vh1.imgAvatar.getContentDescription());
+        assertTrue(vh1.imgAvatar.isClickable());
     }
 
     /**

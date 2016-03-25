@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import com.bugsense.trace.BugSenseHandler;
+import com.squareup.picasso.Picasso;
+
 import uk.org.rivernile.android.bustracker.database.DatabaseUpdateService;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
@@ -116,4 +118,11 @@ public abstract class BusApplication extends Application
      * @return An instance of the FragmentFactory.
      */
     public abstract FragmentFactory getFragmentFactory();
+
+    /**
+     * Get an instance of {@link Picasso} for image loading.
+     *
+     * @return An instance of {@link Picasso}.
+     */
+    public abstract Picasso getPicasso();
 }

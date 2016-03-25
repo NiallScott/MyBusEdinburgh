@@ -137,7 +137,8 @@ public class TwitterParserImpl implements TwitterParser {
 
             final JSONObject jUser = jTweet.getJSONObject("user");
             builder.setDisplayName(JSONUtils.getString(jUser, "name"))
-                    .setProfileImageUrl(JSONUtils.optString(jUser, "profile_image_url", null));
+                    .setProfileImageUrl(JSONUtils.optString(jUser, "profile_image_url_https",
+                            null));
 
             final String screenName = JSONUtils.optString(jUser, "screen_name", null);
 

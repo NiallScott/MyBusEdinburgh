@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,15 +30,22 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.List;
 
+import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
+import uk.org.rivernile.android.utils.CircleTransform;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -52,7 +59,11 @@ class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
 
     private final Context context;
     private final LayoutInflater inflater;
+    private final Picasso picasso;
+    private final int avatarSize;
+    private final CircleTransform circleTransform;
     private List<Tweet> tweets;
+    private WeakReference<OnItemClickListener> clickListenerRef;
 
     /**
      * Create a new {@code TweetAdaper}.
@@ -62,6 +73,9 @@ class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
     TweetAdapter(@NonNull final Context context) {
         this.context = context;
         inflater = LayoutInflater.from(context);
+        picasso = ((BusApplication) context.getApplicationContext()).getPicasso();
+        avatarSize = context.getResources().getDimensionPixelSize(R.dimen.news_avatar_size);
+        circleTransform = new CircleTransform();
         setHasStableIds(true);
     }
 
@@ -72,16 +86,7 @@ class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        final Tweet tweet = getItem(position);
-
-        if (tweet != null) {
-            holder.text1.setText(Html.fromHtml(tweet.getBody()));
-            holder.text2.setText(context.getString(R.string.tweetadapter_info_format,
-                    tweet.getDisplayName(), OUT_DATE_FORMAT.format(tweet.getTime())));
-        } else {
-            holder.text1.setText(null);
-            holder.text2.setText(null);
-        }
+        holder.populate(getItem(position));
     }
 
     @Override
@@ -129,10 +134,21 @@ class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
     }
 
     /**
+     * Set a listener to be invoked when an item has been clicked in the {@link Tweet} item.
+     *
+     * @param listener A listener to be invoked when an item has been clicked in the
+     * {@link Tweet} item.
+     */
+    void setOnItemClickListener(@Nullable final OnItemClickListener listener) {
+        clickListenerRef = listener != null ? new WeakReference<>(listener) : null;
+    }
+
+    /**
      * This is the {@link RecyclerView.ViewHolder} for this adapter.
      */
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        ImageView imgAvatar;
         TextView text1, text2;
 
         /**
@@ -143,8 +159,74 @@ class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
         ViewHolder(@NonNull final View itemView) {
             super(itemView);
 
+            imgAvatar = (ImageView) itemView.findViewById(R.id.imgAvatar);
             text1 = (TextView) itemView.findViewById(android.R.id.text1);
             text2 = (TextView) itemView.findViewById(android.R.id.text2);
+
+            imgAvatar.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(final View v) {
+            final int position = getAdapterPosition();
+
+            if (position == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            final Tweet tweet = getItem(position);
+
+            if (tweet == null) {
+                return;
+            }
+
+            final OnItemClickListener listener =
+                    clickListenerRef != null ? clickListenerRef.get() : null;
+
+            if (listener != null) {
+                listener.onAvatarClicked(tweet);
+            }
+        }
+
+        /**
+         * Populate the contents of the this {@code ViewHolder}.
+         */
+        void populate(@Nullable final Tweet tweet) {
+            if (tweet != null) {
+                final String displayName = tweet.getDisplayName();
+                imgAvatar.setContentDescription(displayName);
+                imgAvatar.setClickable(!TextUtils.isEmpty(tweet.getProfileUrl()));
+                text1.setText(Html.fromHtml(tweet.getBody()));
+                text2.setText(context.getString(R.string.tweetadapter_info_format, displayName,
+                        OUT_DATE_FORMAT.format(tweet.getTime())));
+                picasso.load(tweet.getProfileImageUrl())
+                        .resize(avatarSize, avatarSize)
+                        .centerCrop()
+                        .transform(circleTransform)
+                        .placeholder(R.drawable.avatar_placeholder)
+                        .error(R.drawable.avatar_placeholder)
+                        .into(imgAvatar);
+            } else {
+                imgAvatar.setImageResource(R.drawable.avatar_placeholder);
+                imgAvatar.setContentDescription(null);
+                imgAvatar.setClickable(false);
+                text1.setText(null);
+                text2.setText(null);
+            }
+        }
+    }
+
+    /**
+     * This interface should be implemented by classes wanting to know when elements inside a
+     * {@link Tweet} item has been clicked.
+     */
+    interface OnItemClickListener {
+
+        /**
+         * This is called when an avatar has been clicked.
+         *
+         * @param tweet The {@link Tweet} containing the clicked avatar.
+         */
+        void onAvatarClicked(@NonNull Tweet tweet);
     }
 }

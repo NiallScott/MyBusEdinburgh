@@ -247,7 +247,7 @@ public class TwitterParserImplTests {
                 tweet1.getBody());
         assertEquals("Twitter User", tweet1.getDisplayName());
         assertEquals(cal1.getTime(), tweet1.getTime());
-        assertEquals("http://example.com/profile1.jpeg", tweet1.getProfileImageUrl());
+        assertEquals("https://example.com/profile1.jpeg", tweet1.getProfileImageUrl());
         assertEquals("https://twitter.com/twitter_user", tweet1.getProfileUrl());
         
         final GregorianCalendar cal2 = new GregorianCalendar(2013, Calendar.DECEMBER, 10, 11, 1, 2);
@@ -256,7 +256,7 @@ public class TwitterParserImplTests {
         assertEquals("Test tweet.", tweet2.getBody());
         assertEquals("Another Twitter User", tweet2.getDisplayName());
         assertEquals(cal2.getTime(), tweet2.getTime());
-        assertEquals("http://example.com/profile2.jpeg", tweet2.getProfileImageUrl());
+        assertEquals("https://example.com/profile2.jpeg", tweet2.getProfileImageUrl());
         assertEquals("https://twitter.com/tweeter", tweet2.getProfileUrl());
         
         final GregorianCalendar cal3 = new GregorianCalendar(2013, Calendar.NOVEMBER, 9, 3, 51, 42);
@@ -265,7 +265,7 @@ public class TwitterParserImplTests {
         assertEquals("A tweet with a single URL. http://www.example3.com", tweet3.getBody());
         assertEquals("A tweeting person", tweet3.getDisplayName());
         assertEquals(cal3.getTime(), tweet3.getTime());
-        assertEquals("http://example.com/profile3.jpeg", tweet3.getProfileImageUrl());
+        assertEquals("https://example.com/profile3.jpeg", tweet3.getProfileImageUrl());
         assertEquals("https://twitter.com/my_twitter_handle", tweet3.getProfileUrl());
     }
     
@@ -713,7 +713,7 @@ public class TwitterParserImplTests {
                 tweet.getBody());
         assertEquals("Twitter User", tweet.getDisplayName());
         assertEquals(cal.getTime(), tweet.getTime());
-        assertEquals("http://example.com/profile.jpeg", tweet.getProfileImageUrl());
+        assertEquals("https://example.com/profile.jpeg", tweet.getProfileImageUrl());
         assertEquals("https://twitter.com/twitter_user", tweet.getProfileUrl());
     }
     

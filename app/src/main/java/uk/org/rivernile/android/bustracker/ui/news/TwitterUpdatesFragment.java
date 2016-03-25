@@ -25,7 +25,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.news;
 
-import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -47,7 +48,6 @@ import java.util.List;
 
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.fetchutils.loaders.Result;
-import uk.org.rivernile.android.utils.DividerItemDecoration;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterException;
@@ -60,7 +60,8 @@ import uk.org.rivernile.android.bustracker.parser.twitter.TwitterUpdatesLoader;
  * @author Niall Scott
  */
 public class TwitterUpdatesFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Result<List<Tweet>, TwitterException>> {
+        implements LoaderManager.LoaderCallbacks<Result<List<Tweet>, TwitterException>>,
+        TweetAdapter.OnItemClickListener {
     
     private TweetAdapter adapter;
 
@@ -75,6 +76,7 @@ public class TwitterUpdatesFragment extends Fragment
         super.onCreate(savedInstanceState);
         
         adapter = new TweetAdapter(getActivity());
+        adapter.setOnItemClickListener(this);
     }
 
     @Override
@@ -86,10 +88,9 @@ public class TwitterUpdatesFragment extends Fragment
         progress = (ProgressBar) v.findViewById(R.id.progress);
         txtError = (TextView) v.findViewById(R.id.txtError);
 
-        final Activity activity = getActivity();
         recyclerView.setHasFixedSize(true);
-        recyclerView.addItemDecoration(new DividerItemDecoration(activity,
-                DividerItemDecoration.VERTICAL_LIST));
+        recyclerView.addItemDecoration(new NewsItemDecoration(getActivity(),
+                getResources().getDimensionPixelSize(R.dimen.news_divider_inset_start)));
         recyclerView.setAdapter(adapter);
         
         return v;
@@ -157,7 +158,14 @@ public class TwitterUpdatesFragment extends Fragment
     public void onLoaderReset(final Loader<Result<List<Tweet>, TwitterException>> loader) {
         // Nothing to do here.
     }
-    
+
+    @Override
+    public void onAvatarClicked(@NonNull final Tweet tweet) {
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(tweet.getProfileUrl()));
+        startActivity(intent);
+    }
+
     /**
      * Start the process of loading Tweets.
      * 

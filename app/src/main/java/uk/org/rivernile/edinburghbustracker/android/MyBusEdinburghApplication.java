@@ -25,6 +25,9 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
+import com.jakewharton.picasso.OkHttp3Downloader;
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.FragmentFactory;
@@ -54,6 +57,7 @@ public class MyBusEdinburghApplication extends BusApplication {
     private TwitterEndpoint twitterEndpoint;
     private BusStopDatabase busStopDatabase;
     private FragmentFactory fragmentFactory;
+    private Picasso picasso;
 
     @Override
     public void onCreate() {
@@ -109,7 +113,18 @@ public class MyBusEdinburghApplication extends BusApplication {
         
         return fragmentFactory;
     }
-    
+
+    @Override
+    public Picasso getPicasso() {
+        if (picasso == null) {
+            picasso = new Picasso.Builder(this)
+                    .downloader(new OkHttp3Downloader(this))
+                    .build();
+        }
+
+        return picasso;
+    }
+
     /**
      * Get an instance of the {@link UrlBuilder}.
      * 
