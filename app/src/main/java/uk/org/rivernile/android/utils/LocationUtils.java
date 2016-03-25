@@ -54,7 +54,7 @@ public class LocationUtils {
     /**
      * Get the best initial fix on a {@link Location}. It will loop through all known system
      * location providers and get the location from each provider. They will all be compared to
-     * return the best Location.
+     * return the best {@link Location}.
      *
      * @param locMan An instance of the {@link LocationManager}, so that this method can obtain
      * the last {@link Location} for each provider.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,30 +25,31 @@
 package uk.org.rivernile.android.utils;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 /**
  * This class contains generic utility methods.
  * 
  * @author Niall Scott
  */
-public class GenericUtils {
+public final class GenericUtils {
+
+    /**
+     * This constructor is private to prevent instantiation.
+     */
+    private GenericUtils() { }
     
     /**
-     * A utility method to determine if the Google Maps component will show
-     * on the device.
+     * A utility method to determine if the Google Maps component will show on the device.
      * 
-     * @param context A Context instance.
-     * @return true if the Google Maps should show, false if not.
+     * @param context A {@link Context} instance.
+     * @return {@code true} if the Google Maps should show, {@code false} if not.
      */
-    public static boolean isGoogleMapsAvailable(final Context context) {
-        if (context == null) {
-            return false;
-        }
-        
-        return GooglePlayServicesUtil.isGooglePlayServicesAvailable(context) ==
-                ConnectionResult.SUCCESS &&
-                GraphicsUtils.getOpenGLESVersion(context) >= 2;
+    public static boolean isGoogleMapsAvailable(@NonNull final Context context) {
+        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable (context) ==
+                ConnectionResult.SUCCESS && GraphicsUtils.getOpenGLESVersion(context) >= 2;
     }
 }

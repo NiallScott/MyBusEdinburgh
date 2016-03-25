@@ -50,18 +50,6 @@ public class FileUtilsTests {
     private static final String EXPECTED_HASH = "bae7aa5c017ead84fe44197bea819d63";
     
     /**
-     * Test that {@link FileUtils#md5Checksum(java.io.File)} correctly throws an
-     * {@link IllegalArgumentException} if the file is set to {@code null}.
-     * 
-     * @throws IOException This test is not expected to throw an IOException, so
-     * if it is thrown, let the TestCase cause a failure.
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testMd5ChecksumWithNullFile() throws IOException {
-        FileUtils.md5Checksum(null);
-    }
-    
-    /**
      * Test that {@link FileUtils#md5Checksum(java.io.File)} correctly throws a
      * {@link FileNotFoundException} if the {@link File} object points towards a file that does
      * not exist.

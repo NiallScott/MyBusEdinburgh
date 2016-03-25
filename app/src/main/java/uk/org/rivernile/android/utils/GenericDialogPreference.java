@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,12 +28,12 @@ package uk.org.rivernile.android.utils;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.DialogPreference;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
 /**
- * This class extends the DialogPreference class in the Android SDK to allow a
- * dialog to be created and for the buttons to be able carry out actions as the
- * API does not allow this.
+ * This class extends the {@link DialogPreference} class in the Android SDK to allow a dialog to
+ * be created and for the buttons to be able carry out actions as the API does not allow this.
  *
  * @author Niall Scott
  */
@@ -43,38 +43,35 @@ public class GenericDialogPreference extends DialogPreference {
     private DialogInterface.OnDismissListener onDismiss;
 
     /**
-     * Create a new GenericDialogPreference instance. This simply calls the
-     * constructor in the super class.
+     * Create a new {@code GenericDialogPreference} instance. This simply calls the constructor
+     * in the super class.
      *
-     * @param context The context to use.
-     * @param attrs An AttributeSet instance.
+     * @param context The {@link Context} to use.
+     * @param attrs An {@link AttributeSet} instance.
      * @param defStyle DefStyle.
      */
-    public GenericDialogPreference(final Context context,
-            final AttributeSet attrs, final int defStyle) {
+    public GenericDialogPreference(final Context context, final AttributeSet attrs,
+            final int defStyle) {
         super(context, attrs, defStyle);
     }
 
     /**
-     * Create a new GenericDialogPreference instance. This simply calls the
-     * constructor in the super class.
+     * Create a new {@code GenericDialogPreference} instance. This simply calls the constructor
+     * in the super class.
      *
-     * @param context The context to use.
-     * @param attrs An AttributeSet instance.
+     * @param context The {@link Context} to use.
+     * @param attrs An {@link AttributeSet} instance.
      */
-    public GenericDialogPreference(final Context context,
-            final AttributeSet attrs) {
+    public GenericDialogPreference(final Context context, final AttributeSet attrs) {
         super(context, attrs);
     }
 
     /**
      * Set the callback to use when a button on the dialog is clicked.
      *
-     * @param onClick The callback to use when a button on the dialog is
-     * clicked.
+     * @param onClick The callback to use when a button on the dialog is clicked.
      */
-    public void setOnClickListener(
-            final DialogInterface.OnClickListener onClick) {
+    public void setOnClickListener(@Nullable final DialogInterface.OnClickListener onClick) {
         this.onClick = onClick;
     }
 
@@ -83,29 +80,22 @@ public class GenericDialogPreference extends DialogPreference {
      *
      * @param onDismiss The callback to use when the dialog is dismissed.
      */
-    public void setOnDismissListener(
-            final DialogInterface.OnDismissListener onDismiss) {
+    public void setOnDismissListener(@Nullable final DialogInterface.OnDismissListener onDismiss) {
         this.onDismiss = onDismiss;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onClick(final DialogInterface dialog, final int which) {
-        if(onClick != null) {
+        if (onClick != null) {
             onClick.onClick(dialog, which);
         } else {
             super.onClick(dialog, which);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onDismiss(final DialogInterface dialog) {
-        if(onDismiss != null) {
+        if (onDismiss != null) {
             onDismiss.onDismiss(dialog);
         } else {
             super.onDismiss(dialog);

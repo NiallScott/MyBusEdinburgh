@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,6 +24,8 @@
  */
 package uk.org.rivernile.android.utils;
 
+import android.support.annotation.NonNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,53 +38,55 @@ import java.security.NoSuchAlgorithmException;
  * 
  * @author Niall Scott
  */
-public class FileUtils {
+public final class FileUtils {
     
     /**
      * Intentionally left blank to prevent instance creation.
      */
-    private FileUtils() {
-        
-    }
+    private FileUtils() { }
     
     /**
-     * Create a checksum for a File. This could be used to check that a file is
-     * of correct consistency.
-     * 
-     * See: http://vyshemirsky.blogspot.com/2007/08/computing-md5-digest-checksum-in-java.html
-     * This has been slightly modified.
+     * Create a checksum for a {@link File}. This could be used to check that a file is of
+     * correct consistency.
+     *
+     * <p>
+     *     See:
+     *     <a href="http://vyshemirsky.blogspot.com/2007/08/computing-md5-digest-checksum-in-java.html">
+     *         http://vyshemirsky.blogspot.com/2007/08/computing-md5-digest-checksum-in-java.html</a>
+     * </p>
+     *
+     * <p>
+     *     This has been slightly modified.
+     * </p>
      * 
      * @param file The file to run the MD5 checksum against.
      * @return The MD5 checksum string.
      */
-    public static String md5Checksum(final File file) throws IOException {
-        if (file == null) {
-            throw new IllegalArgumentException("file must not be null.");
-        }
-        
+    @NonNull
+    public static String md5Checksum(@NonNull final File file) throws IOException {
         try {
             final InputStream fin = new FileInputStream(file);
             final MessageDigest md5er = MessageDigest.getInstance("MD5");
             final byte[] buffer = new byte[1024];
             int read;
             
-            while((read = fin.read(buffer)) != -1) {
-                if(read > 0) {
+            while ((read = fin.read(buffer)) != -1) {
+                if (read > 0) {
                     md5er.update(buffer, 0, read);
                 }
             }
             
             fin.close();
-            
             final byte[] digest = md5er.digest();
-            if(digest == null) {
+
+            if (digest == null) {
                 return "";
             }
             
             final StringBuilder builder = new StringBuilder();
-            for(byte a : digest) {
-                builder.append(Integer.toString((a & 0xff) + 0x100, 16)
-                        .substring(1));
+
+            for (byte a : digest) {
+                builder.append(Integer.toString((a & 0xff) + 0x100, 16).substring(1));
             }
             
             return builder.toString();
