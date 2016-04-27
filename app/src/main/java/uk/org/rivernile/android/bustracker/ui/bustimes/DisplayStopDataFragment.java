@@ -907,10 +907,10 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
 
                 if (cursorProxAlert.getCount() > 0) {
                     proxMenuItem.setTitle(R.string.displaystopdata_menu_prox_rem)
-                            .setIcon(R.drawable.ic_menu_proximityremove);
+                            .setIcon(R.drawable.ic_action_location_off);
                 } else {
                     proxMenuItem.setTitle(R.string.displaystopdata_menu_prox_add)
-                            .setIcon(R.drawable.ic_menu_proximityadd);
+                            .setIcon(R.drawable.ic_action_location_on);
                 }
             }
         } else {
@@ -934,10 +934,10 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
 
                 if (cursorTimeAlert.getCount() > 0) {
                     timeMenuItem.setTitle(R.string.displaystopdata_menu_time_rem)
-                            .setIcon(R.drawable.ic_menu_arrivalremove);
+                            .setIcon(R.drawable.ic_action_alarm_off);
                 } else {
                     timeMenuItem.setTitle(R.string.displaystopdata_menu_time_add)
-                            .setIcon(R.drawable.ic_menu_arrivaladd);
+                            .setIcon(R.drawable.ic_action_alarm_add);
                 }
             }
         } else {

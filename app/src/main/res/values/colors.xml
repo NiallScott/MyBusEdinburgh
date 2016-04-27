@@ -35,4 +35,6 @@
     <color name="defaultBusColour">#4291BC</color>
     <color name="mapActionBarColour">#90000000</color>
     <color name="sectionlist_text_default">#212121</color>
+    <color name="map_range_ring_stroke">@color/colorPrimary</color>
+    <color name="map_range_ring_fill">#1AC41411</color>
 </resources>

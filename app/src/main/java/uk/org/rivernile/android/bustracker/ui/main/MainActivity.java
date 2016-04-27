@@ -55,7 +55,6 @@ import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteAllAlertsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteProximityAlertDialogFragment;
@@ -64,7 +63,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .InstallBarcodeScannerDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general.AlertManagerFragment;
+import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.EnterStopCodeFragment;
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment;
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;
@@ -84,7 +83,6 @@ public class MainActivity extends AppCompatActivity
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
 
-    private static final String DIALOG_DELETE_ALL_ALERTS = "deleteAllAlertsDialog";
     private static final String DIALOG_DELETE_PROX_ALERT = "deleteProxAlertDialog";
     private static final String DIALOG_DELETE_TIME_ALERT = "deleteTimeAlertDialog";
     private static final String DIALOG_SERVICES_CHOOSER = "servicesChooserDialog";
@@ -210,12 +208,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSectionChosen(@NonNull final Section section) {
         showSection(section);
-    }
-
-    @Override
-    public void onShowConfirmDeleteAllAlerts() {
-        new DeleteAllAlertsDialogFragment()
-                .show(getSupportFragmentManager(), DIALOG_DELETE_ALL_ALERTS);
     }
 
     @Override

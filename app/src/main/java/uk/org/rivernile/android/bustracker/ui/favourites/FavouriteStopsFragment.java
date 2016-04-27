@@ -52,7 +52,7 @@ import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
-import uk.org.rivernile.android.utils.GenericUtils;
+import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddTimeAlertListener;
@@ -509,7 +509,7 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
 
             // If the Google Play Services is not available, then don't show the option to show the
             // stop on the map.
-            if (!GenericUtils.isGoogleMapsAvailable(getActivity())) {
+            if (!MapsUtils.isGoogleMapsAvailable(getActivity())) {
                 amMenuItemShowOnMap.setVisible(false);
             }
 

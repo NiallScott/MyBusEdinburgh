@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,13 +21,29 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:compat="http://schemas.android.com/apk/res-auto" >
-    <item
-        android:id="@+id/alertmanager_option_menu_delete_all"
-        android:title="@string/alertmanager_menu_remove_multiple"
-        android:icon="@drawable/ic_action_delete"
-        compat:showAsAction="ifRoom" />
-</menu>
+ */
+
+package uk.org.rivernile.android.bustracker.database.settings.loaders;
+
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v4.content.CursorLoader;
+
+import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
+
+/**
+ * This {@link CursorLoader} loads details for all currently set alerts.
+ *
+ * @author Niall Scott
+ */
+public class AlertsLoader extends CursorLoader {
+
+    /**
+     * Create a new {@code AlertsLoader}.
+     *
+     * @param context A {@link Context} instance.
+     */
+    public AlertsLoader(@NonNull final Context context) {
+        super(context, SettingsContract.Alerts.CONTENT_URI, null, null, null, null);
+    }
+}

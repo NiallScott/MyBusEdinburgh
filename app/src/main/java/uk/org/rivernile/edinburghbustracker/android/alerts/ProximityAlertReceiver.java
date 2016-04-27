@@ -40,7 +40,7 @@ import android.support.v4.app.NotificationCompat;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteAllProximityAlertsTask;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
-import uk.org.rivernile.android.utils.GenericUtils;
+import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDetailsActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
@@ -112,7 +112,7 @@ public class ProximityAlertReceiver extends BroadcastReceiver {
                 .bigText(summary));
         
         final Intent launchIntent;
-        if (GenericUtils.isGoogleMapsAvailable(context)) {
+        if (MapsUtils.isGoogleMapsAvailable(context)) {
             // The Intent which launches the bus stop map at the selected stop.
             launchIntent = new Intent(context, BusStopMapActivity.class);
             launchIntent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);

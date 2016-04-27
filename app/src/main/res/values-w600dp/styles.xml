@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,26 +25,7 @@
  *     exempt from clause 2.
 */ -->
 <resources>
-    <!-- General dimensions. -->
-    <dimen name="padding_half">4dp</dimen>
-    <dimen name="padding_default">8dp</dimen>
-    <dimen name="padding_double">16dp</dimen>
-    
-    <dimen name="text_size_small">14sp</dimen>
-    <dimen name="text_size_medium">16sp</dimen>
-    <dimen name="action_button_min_size">48dp</dimen>
-    <dimen name="indeterminate_progress_size">24dp</dimen>
-    
-    <dimen name="navigation_drawer_width">280dp</dimen>
-    
-    <!-- Dimensions for bus times view. -->
-    <dimen name="service_name_width">55dp</dimen>
-    <dimen name="bustime_width">80dp</dimen>
-
-    <!-- Dimensions for news. -->
-    <dimen name="news_avatar_size">36dp</dimen>
-    <dimen name="news_divider_inset_start">72dp</dimen>
-
-    <!-- Dimens for alert manager. -->
-    <dimen name="map_range_ring_stroke">1dp</dimen>
+    <style name="Card.Default">
+        <item name="android:layout_width">568dp</item>
+    </style>
 </resources>
