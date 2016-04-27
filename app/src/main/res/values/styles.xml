@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -98,5 +98,19 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingRight">@dimen/padding_default</item>
         <item name="android:gravity">right</item>
+    </style>
+
+    <style name="Card">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/padding_double</item>
+        <item name="android:layout_marginRight">@dimen/padding_double</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@android:color/white</item>
+        <item name="cardCornerRadius">2dp</item>
+    </style>
+
+    <style name="Card.Default">
+        <item name="android:layout_width">match_parent</item>
     </style>
 </resources>

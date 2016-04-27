@@ -64,7 +64,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.NumberFormat;
@@ -82,6 +81,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProxi
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.android.utils.LocationUtils;
+import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.android.utils.SimpleCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -661,38 +661,8 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
             final MarkerOptions mo = new MarkerOptions();
             mo.draggable(false);
             mo.position(position);
-            
             // Select the marker icon to use on the map.
-            switch (orientation) {
-                case 0:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_n));
-                    break;
-                case 1:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_ne));
-                    break;
-                case 2:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_e));
-                    break;
-                case 3:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_se));
-                    break;
-                case 4:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_s));
-                    break;
-                case 5:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_sw));
-                    break;
-                case 6:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_w));
-                    break;
-                case 7:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_nw));
-                    break;
-                default:
-                    mo.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker));
-                    break;
-            }
-            
+            MapsUtils.applyStopDirectionToMarker(mo, orientation);
             // Add the marker to the map.
             map.addMarker(mo);
         }

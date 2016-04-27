@@ -55,6 +55,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="select">Select</string>
     <string name="submit">Submit</string>
     <string name="yes">Yes</string>
+    <string name="remove">Remove</string>
     
     <string name="prox_alert_add">Add proximity alert</string>
     <string name="prox_alert_rem">Remove proximity alert</string>
@@ -327,16 +328,22 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="alertmanager_title">Alerts</string>
     <string name="alertmanager_empty"><b>You currently have no alerts set.</b>\nYou can add time and proximity alerts from your favourite stops listing, the stop map, the nearby stops list and when viewing arrival times for a stop.</string>
-    <string name="alertmanager_prox_title"><b>Proximity Alert</b></string>
-    <string name="alertmanager_prox_text">You will be alerted when you are within %1$d metres of stop %2$s.\n\nFor the most accurate results, ensure GPS is turned on. This alert will be automatically removed 1 hour after being set, or if you restart your device.</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
-    <string name="alertmanager_time_title"><b>Bus Arrival Alert</b></string>
-    <plurals name="alertmanager_time_text">
-        <item quantity="one">You will be alerted when any of the following services are due now at the stop %1$s:\n\n%2$s\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</item> <!-- %1$s = bus stop name and code. %2$s = list of service names. -->
-        <item quantity="other">You will be alerted when any of the following services are due in %3$d minutes or less at the stop %1$s:\n\n%2$s\n\nThis alert will be automatically removed 1 hour after being set, or if you restart your device.</item> <!-- %3$d = number of minutes. %1$s = bus stop name and code. %3$s = list of service names. -->
+    <string name="alertmanager_prox_title">Proximity alert</string>
+    <string name="alertmanager_prox_subtitle">When within %1$dm of %2$s</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
+    <string name="alertmanager_prox_blurb">For the most accurate results, turn on GPS. This alert is removed after 1 hour or if the device is restarted.</string>
+    <string name="alertmanager_prox_button_location_settings">Location settings</string>
+    <string name="alertmanager_time_title">Arrival alert</string>
+    <plurals name="alertmanager_time_subtitle_single_service">
+        <item quantity="one">When service %1$s is due at %2$s</item>
+        <item quantity="other">When service %1$s is within %3$d minutes of %2$s</item>
     </plurals>
-    <string name="alertmanager_button_remove_single">Remove alert</string>
-    <string name="alertmanager_prox_image_description">Proximity icon</string>
-    <string name="alertmanager_time_image_description">Arrival alert icon</string>
+    <plurals name="alertmanager_time_subtitle_multiple_services">
+        <item quantity="one">When any of services %1$s are due at %2$s</item>
+        <item quantity="other">When any of services %1$s are within %3$d minutes of %2$s</item>
+    </plurals>
+    <string name="alertmanager_time_blurb">This alert is removed after 1 hour or if the device is restarted</string>
+    <string name="alertmanager_snackbar_remove_proximity">Proximity alert removed</string>
+    <string name="alertmanager_snackbar_remove_time">Time alert removed</string>
     
     <!--
     **************************************
@@ -489,13 +496,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     
     <!--
     *********************************************
-    * Strings for DeleteAllAlertsDialogFragment *
-    *********************************************
-    -->
-    <string name="deleteallalertsdialog_title">Remove all alerts?</string>
-    
-    <!--
-    *********************************************
     * Strings for DeleteFavouriteDialogFragment *
     *********************************************
     -->
@@ -584,14 +584,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***********
     ***********
     -->
-    
-    <!--
-    *****************************************
-    * Strings for AlertManagerFragment menu *
-    *****************************************
-    -->
-    <string name="alertmanager_menu_remove_multiple">Remove all alerts</string>
-    
     
     <!--
     ***************************************

@@ -71,7 +71,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProxi
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
-import uk.org.rivernile.android.utils.GenericUtils;
+import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -710,7 +710,7 @@ public class NearestStopsFragment extends Fragment
 
             // If the Google Play Services is not available, then don't show the option to show the
             // stop on the map.
-            if (!GenericUtils.isGoogleMapsAvailable(getActivity())) {
+            if (!MapsUtils.isGoogleMapsAvailable(getActivity())) {
                 amMenuItemShowOnMap.setVisible(false);
             }
 
