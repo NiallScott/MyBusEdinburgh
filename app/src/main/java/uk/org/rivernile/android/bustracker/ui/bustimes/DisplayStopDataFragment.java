@@ -25,7 +25,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -171,13 +171,13 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
      * {@inheritDoc}
      */
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(final Context context) {
+        super.onAttach(context);
         
         try {
-            callbacks = (Callbacks) activity;
+            callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() +
+            throw new IllegalStateException(context.getClass().getName() +
                     " does not implement " + Callbacks.class.getName());
         }
     }

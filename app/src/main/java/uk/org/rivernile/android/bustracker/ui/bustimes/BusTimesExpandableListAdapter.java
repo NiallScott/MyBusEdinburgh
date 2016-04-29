@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,7 +63,7 @@ public class BusTimesExpandableListAdapter extends BaseExpandableListAdapter {
      * This enum describes the ways in which the user may order the bus
      * services.
      */
-    public static enum Order {
+    public enum Order {
         /** Order services by name. This is the default ordering. */
         SERVICE_NAME,
         /** Order services by arrival time. */
@@ -93,8 +94,7 @@ public class BusTimesExpandableListAdapter extends BaseExpandableListAdapter {
         
         this.context = context;
         inflater = LayoutInflater.from(context);
-        defaultColour = context.getResources().getColor(R.color
-                    .defaultBusColour);
+        defaultColour = ContextCompat.getColor(context, R.color.defaultBusColour);
         
         final BusApplication app = (BusApplication) context
                 .getApplicationContext();

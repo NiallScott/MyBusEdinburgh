@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity
             }
         };
         
-        drawer.setDrawerListener(drawerToggle);
+        drawer.addDrawerListener(drawerToggle);
         
         if (savedInstanceState == null) {
             showSection(FavouritesSection.getInstance());
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSupportActionModeStarted(final ActionMode mode) {
+    public void onSupportActionModeStarted(@NonNull final ActionMode mode) {
         super.onSupportActionModeStarted(mode);
 
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSupportActionModeFinished(final ActionMode mode) {
+    public void onSupportActionModeFinished(@NonNull final ActionMode mode) {
         super.onSupportActionModeFinished(mode);
 
         drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);

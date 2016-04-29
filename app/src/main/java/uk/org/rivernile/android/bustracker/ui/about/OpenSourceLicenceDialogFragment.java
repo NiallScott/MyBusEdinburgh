@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -51,7 +51,7 @@ public class OpenSourceLicenceDialogFragment extends DialogFragment {
         
         // License information may not be available for Google Play Services if
         // the device does not have Google Play Services installed.
-        final String playServicesLicenses = GooglePlayServicesUtil
+        final String playServicesLicenses = GoogleApiAvailability.getInstance()
                 .getOpenSourceSoftwareLicenseInfo(context);
         // This String contains non-Google Play Services license information.
         String appLicenses = getString(R.string.open_source_licenses);
