@@ -263,6 +263,12 @@
             android:authorities="${applicationId}.provider.settings"
             android:exported="false" />
 
+        <!-- BusStopProvider, to provide bus stop data. -->
+        <provider
+            android:name="uk.org.rivernile.android.bustracker.database.busstop.BusStopProvider"
+            android:authorities="${applicationId}.provider.busstop"
+            android:exported="false" />
+
         <!-- MapSearchHistoryProvider, to provide previous search history items
              when typing in a search term. -->
         <provider
