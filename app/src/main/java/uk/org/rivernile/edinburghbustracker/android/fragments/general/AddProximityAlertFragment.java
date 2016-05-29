@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -46,11 +45,12 @@ import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
 import java.util.List;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowSystemLocationPreferencesListener;
+
+import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.alerts.AlertManager;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 /**
  * This fragment allows the user to add a new proximity alert. This alerts the
@@ -133,14 +133,13 @@ public class AddProximityAlertFragment extends Fragment {
         if(stopCode == null || stopCode.length() == 0)
             throw new IllegalArgumentException("The stopCode argument must " +
                     "not be null or empty.");
-        
-        final Activity activity = getActivity();
+
+        final BusApplication app = (BusApplication) getActivity().getApplication();
         
         // Get the various resources.
-        alertMan = AlertManager.getInstance(activity.getApplicationContext());
-        locMan = (LocationManager)activity
-                .getSystemService(Context.LOCATION_SERVICE);
-        bsd = BusStopDatabase.getInstance(activity.getApplicationContext());
+        alertMan = app.getAlertManager();
+        locMan = (LocationManager) app.getSystemService(Context.LOCATION_SERVICE);
+        bsd = app.getBusStopDatabase();
     }
     
     /**

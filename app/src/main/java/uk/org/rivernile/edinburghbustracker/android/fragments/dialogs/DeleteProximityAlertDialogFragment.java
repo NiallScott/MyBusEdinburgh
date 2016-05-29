@@ -32,8 +32,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
 
 /**
  * This {@link DialogFragment} will show an {@link AlertDialog} which asks the user to confirm if
@@ -48,9 +49,8 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        // Make sure to get the AlertManager.
-        alertMan = AlertManager.getInstance(getActivity().getApplicationContext());
+
+        alertMan = ((BusApplication) getActivity().getApplication()).getAlertManager();
     }
 
     @NonNull

@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.edinburghbustracker.android.fragments.general;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -40,13 +39,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowServicesChooserListener;
+
+import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.alerts.AlertManager;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.alerts.AlertManager;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .ServicesChooserDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 
 /**
  * This fragment allows the user to add a new time alert. This alerts the user
@@ -132,9 +131,9 @@ public class AddTimeAlertFragment extends Fragment
         super.onCreate(savedInstanceState);
         
         // Get the various resources.
-        final Context context = getActivity().getApplicationContext();
-        bsd = BusStopDatabase.getInstance(context);
-        alertMan = AlertManager.getInstance(context);
+        final BusApplication app = (BusApplication) getActivity().getApplicationContext();
+        bsd = app.getBusStopDatabase();
+        alertMan = app.getAlertManager();
         
         final Bundle args = getArguments();
         // Get the stop code from the arguments.

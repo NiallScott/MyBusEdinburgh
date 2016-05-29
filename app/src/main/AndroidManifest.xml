@@ -280,7 +280,7 @@
         
         <!-- ProximityAlertReceiver, where the broadcast is received when the
              user is within the proximity of a selected bus stop.-->
-        <receiver android:name=".alerts.ProximityAlertReceiver" />
+        <receiver android:name="uk.org.rivernile.android.bustracker.alerts.ProximityAlertReceiver" />
         
         <!-- DatabaseUpdateService, which checks to see if database updates are
              available and if so, apply them. -->
@@ -293,7 +293,7 @@
         <!-- TimeAlertService, which checks bus times periodically when the user
              has set an alert for bus times. -->
         <service
-            android:name=".alerts.TimeAlertService"
+            android:name="uk.org.rivernile.android.bustracker.alerts.TimeAlertService"
             android:icon="@drawable/appicon"
             android:exported="false" />
     </application>

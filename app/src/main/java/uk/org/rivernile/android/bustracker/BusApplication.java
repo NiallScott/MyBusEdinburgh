@@ -33,6 +33,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import com.bugsense.trace.BugSenseHandler;
 import com.squareup.picasso.Picasso;
 
+import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.android.bustracker.database.DatabaseUpdateService;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
@@ -111,6 +112,13 @@ public abstract class BusApplication extends Application
      * @return An instance of the BusStopDatabase.
      */
     public abstract BusStopDatabase getBusStopDatabase();
+
+    /**
+     * Get an instance of the {@link AlertManager}.
+     *
+     * @return An instance of the {@link AlertManager}.
+     */
+    public abstract AlertManager getAlertManager();
     
     /**
      * Get an instance of the FragmentFactory.

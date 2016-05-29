@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.alerts;
+package uk.org.rivernile.android.bustracker.alerts;
 
 import android.app.Notification;
 import android.app.NotificationManager;

@@ -31,6 +31,8 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.FragmentFactory;
+import uk.org.rivernile.android.bustracker.alerts.AlertManager;
+import uk.org.rivernile.android.bustracker.alerts.AlertManagerImpl;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint;
@@ -56,6 +58,7 @@ public class MyBusEdinburghApplication extends BusApplication {
     private DatabaseEndpoint databaseEndpoint;
     private TwitterEndpoint twitterEndpoint;
     private BusStopDatabase busStopDatabase;
+    private AlertManager alertManager;
     private FragmentFactory fragmentFactory;
     private Picasso picasso;
 
@@ -103,6 +106,15 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return busStopDatabase;
+    }
+
+    @Override
+    public synchronized AlertManager getAlertManager() {
+        if (alertManager == null) {
+            alertManager = new AlertManagerImpl(this);
+        }
+
+        return alertManager;
     }
 
     @Override
