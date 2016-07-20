@@ -68,6 +68,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.NumberFormat;
 
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavouriteStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
@@ -82,15 +86,13 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeA
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.MapsUtils;
-import uk.org.rivernile.android.utils.SimpleCursorLoader;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
  * This {@link Fragment} shows details for a bus stop. The bus stop code is passed in as an
- * argument to this {@link Fragment}. A Map is shown at the top of the {@link Fragment}
- * if the Google Play Services are available, otherwise it is removed.
- * 
+ * argument to this {@link Fragment}. A {@link GoogleMap} is shown at the top of the
+ * {@link Fragment} if the Google Play Services are available, otherwise it is removed.
+ *
  * @author Niall Scott
  */
 public class BusStopDetailsFragment extends Fragment implements LocationListener,
@@ -100,9 +102,10 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     public static final String ARG_STOPCODE = "stopCode";
 
     private static final int LOADER_BUS_STOP_DATA = 1;
-    private static final int LOADER_HAS_FAVOURITE_STOP = 2;
-    private static final int LOADER_HAS_PROX_ALERT = 3;
-    private static final int LOADER_HAS_TIME_ALERT = 4;
+    private static final int LOADER_BUS_STOP_SERVICES = 2;
+    private static final int LOADER_HAS_FAVOURITE_STOP = 3;
+    private static final int LOADER_HAS_PROX_ALERT = 4;
+    private static final int LOADER_HAS_TIME_ALERT = 5;
 
     private static final NumberFormat DISTANCE_FORMAT = NumberFormat.getInstance();
     
@@ -111,7 +114,6 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     private static final float MAP_ZOOM = 15f;
     
     private Callbacks callbacks;
-    private BusStopDatabase bsd;
     private LocationManager locMan;
     private SensorManager sensMan;
     private Sensor accelerometer;
@@ -179,9 +181,8 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         final Context context = getActivity().getApplicationContext();
         
         // Get the various resources and services.
-        bsd = BusStopDatabase.getInstance(context);
-        locMan = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
-        sensMan = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
+        locMan = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        sensMan = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensMan.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensMan.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         stopCode = getArguments().getString(ARG_STOPCODE);
@@ -274,6 +275,7 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         super.onActivityCreated(savedInstanceState);
 
         final LoaderManager loaderManager = getLoaderManager();
+        loaderManager.initLoader(LOADER_BUS_STOP_SERVICES, null, this);
         loaderManager.initLoader(LOADER_HAS_FAVOURITE_STOP, null, this);
         loaderManager.initLoader(LOADER_HAS_PROX_ALERT, null, this);
         loaderManager.initLoader(LOADER_HAS_TIME_ALERT, null, this);
@@ -379,7 +381,16 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     public Loader<Cursor> onCreateLoader(final int id, final Bundle bundle) {
         switch (id) {
             case LOADER_BUS_STOP_DATA:
-                return new BusStopDetailsLoader(getActivity(), stopCode);
+                return new BusStopLoader(getContext(), stopCode,
+                        new String[] {
+                                BusStopContract.BusStops.STOP_NAME,
+                                BusStopContract.BusStops.LATITUDE,
+                                BusStopContract.BusStops.LONGITUDE,
+                                BusStopContract.BusStops.ORIENTATION,
+                                BusStopContract.BusStops.LOCALITY
+                        });
+            case LOADER_BUS_STOP_SERVICES:
+                return new BusStopServiceNamesLoader(getContext(), stopCode);
             case LOADER_HAS_FAVOURITE_STOP:
                 return new HasFavouriteStopLoader(getActivity(), stopCode);
             case LOADER_HAS_PROX_ALERT:
@@ -397,6 +408,8 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
             case LOADER_BUS_STOP_DATA:
                 populateData(c);
                 break;
+            case LOADER_BUS_STOP_SERVICES:
+                handleBusStopServices(((BusStopServiceNamesLoader) loader).getServices());
             case LOADER_HAS_FAVOURITE_STOP:
                 updateFavouritesItem(c);
                 break;
@@ -530,11 +543,11 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         }
 
         if (c.moveToNext()) {
-            stopName = c.getString(2);
-            latitude = c.getDouble(3);
-            longitude = c.getDouble(4);
-            orientation = c.getInt(5);
-            locality = c.getString(6);
+            stopName = c.getString(c.getColumnIndex(BusStopContract.BusStops.STOP_NAME));
+            latitude = c.getDouble(c.getColumnIndex(BusStopContract.BusStops.LATITUDE));
+            longitude = c.getDouble(c.getColumnIndex(BusStopContract.BusStops.LOCALITY));
+            orientation = c.getInt(c.getColumnIndex(BusStopContract.BusStops.ORIENTATION));
+            locality = c.getString(c.getColumnIndex(BusStopContract.BusStops.LOCALITY));
             
             c.close();
             populateView();
@@ -563,17 +576,20 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         }
         
         txtName.setText(Html.fromHtml(name));
-        
-        // Set the services list text.
-        final String services = bsd.getBusServicesForStopAsString(stopCode);
+        updateLocation();
+    }
 
-        if (services == null || services.length() == 0) {
+    /**
+     * Handle the load of serives for a bus stop.
+     *
+     * @param services The services that stop at this bus stop.
+     */
+    private void handleBusStopServices(@Nullable final String[] services) {
+        if (services == null || services.length == 0) {
             txtServices.setText(R.string.busstopdetails_noservices);
         } else {
-            txtServices.setText(BusStopDatabase.getColouredServiceListString(services));
+            txtServices.setText(BusStopDatabase.convertArrayToHumanReadableString(services));
         }
-        
-        updateLocation();
     }
 
     /**
@@ -863,41 +879,6 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         final boolean hasCoarseLocation = ContextCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         return hasFineLocation && hasCoarseLocation;
-    }
-    
-    /**
-     * This static class is what loads the bus stop details.
-     */
-    private static class BusStopDetailsLoader extends SimpleCursorLoader {
-        
-        private final BusStopDatabase bsd;
-        private final String stopCode;
-        
-        /**
-         * Create a new {@link BusStopDetailsLoader}, specifying the {@code stopCode}.
-         * 
-         * @param context A {@link Context} instance.
-         * @param stopCode The {@code stopCode} to load.
-         */
-        public BusStopDetailsLoader(@NonNull final Context context,
-                @NonNull final String stopCode) {
-            super(context);
-            
-            bsd = BusStopDatabase.getInstance(context.getApplicationContext());
-            this.stopCode = stopCode;
-        }
-
-        @Override
-        public Cursor loadInBackground() {
-            final Cursor c = bsd.getBusStopByCode(stopCode);
-            
-            // This ensures the Cursor window is set properly.
-            if (c != null) {
-                c.getCount();
-            }
-            
-            return c;
-        }
     }
     
     /**

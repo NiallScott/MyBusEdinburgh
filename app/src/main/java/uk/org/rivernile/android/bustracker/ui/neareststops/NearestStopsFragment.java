@@ -58,6 +58,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavouriteStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
@@ -73,7 +74,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDe
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
 import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
@@ -100,9 +100,10 @@ public class NearestStopsFragment extends Fragment
     private static final float MIN_DISTANCE = 3.0f;
 
     private static final int LOADER_NEAREST_STOPS = 1;
-    private static final int LOADER_HAS_FAVOURITE_STOP = 2;
-    private static final int LOADER_HAS_PROXIMITY_ALERT = 3;
-    private static final int LOADER_HAS_TIME_ALERT = 4;
+    private static final int LOADER_SERVICES = 2;
+    private static final int LOADER_HAS_FAVOURITE_STOP = 3;
+    private static final int LOADER_HAS_PROXIMITY_ALERT = 4;
+    private static final int LOADER_HAS_TIME_ALERT = 5;
     
     private Callbacks callbacks;
     private LocationManager locMan;
@@ -154,8 +155,6 @@ public class NearestStopsFragment extends Fragment
         final Activity activity = getActivity();
         // Get references to required resources.
         locMan = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-        final BusStopDatabase bsd = BusStopDatabase.getInstance(activity.getApplicationContext());
-        services = bsd.getBusServiceList();
         adapter = new NearestStopsAdapter(activity);
         adapter.setOnItemClickedListener(this);
 
@@ -192,6 +191,7 @@ public class NearestStopsFragment extends Fragment
 
         // Force an update to initially show data.
         doUpdate(true);
+        getLoaderManager().initLoader(LOADER_SERVICES, null, this);
 
         if (selectedStop != null) {
             actionMode = ((AppCompatActivity) getActivity())
@@ -262,8 +262,11 @@ public class NearestStopsFragment extends Fragment
     public boolean onOptionsItemSelected(final MenuItem item) {
         switch(item.getItemId()) {
             case R.id.neareststops_option_menu_filter:
-                callbacks.onShowServicesChooser(services, chosenServices,
-                        getString(R.string.neareststops_service_chooser_title));
+                if (services != null && services.length > 0) {
+                    callbacks.onShowServicesChooser(services, chosenServices,
+                            getString(R.string.neareststops_service_chooser_title));
+                }
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -276,6 +279,8 @@ public class NearestStopsFragment extends Fragment
             case LOADER_NEAREST_STOPS:
                 return new NearestStopsLoader(getActivity(), lastLocation.getLatitude(),
                         lastLocation.getLongitude(), chosenServices);
+            case LOADER_SERVICES:
+                return new AllServiceNamesLoader(getContext());
             case LOADER_HAS_FAVOURITE_STOP:
                 return selectedStop != null
                         ? new HasFavouriteStopLoader(getActivity(), selectedStop.getStopCode())
@@ -299,6 +304,10 @@ public class NearestStopsFragment extends Fragment
         switch (loader.getId()) {
             case LOADER_NEAREST_STOPS:
                 populateResults((List<SearchResult>) result);
+                break;
+            case LOADER_SERVICES:
+                services = ((AllServiceNamesLoader) result).getServices();
+                updateFilterMenuItem();
                 break;
             case LOADER_HAS_FAVOURITE_STOP:
                 cursorFavourite = (Cursor) result;
