@@ -35,9 +35,11 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import java.util.List;
 
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.android.bustracker.BusApplication;
@@ -47,7 +49,6 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -79,7 +80,6 @@ public class TimeAlertService extends IntentService {
     private static final int ALERT_ID = 2;
     
     private BusApplication app;
-    private BusStopDatabase bsd;
     private NotificationManager notifMan;
     private AlertManager alertMan;
     private AlarmManager alarmMan;
@@ -98,7 +98,6 @@ public class TimeAlertService extends IntentService {
         super.onCreate();
         
         app = (BusApplication) getApplication();
-        bsd = app.getBusStopDatabase();
         notifMan = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         alertMan = app.getAlertManager();
         alarmMan = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -195,7 +194,7 @@ public class TimeAlertService extends IntentService {
         launchIntent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
                 stopCode);
 
-        final String stopName = bsd.getNameForBusStop(stopCode);
+        final String stopName = getBusStopName(stopCode);
         final String title = getString(R.string
                 .timeservice_notification_title);
         final String summary = getResources().getQuantityString(
@@ -259,6 +258,34 @@ public class TimeAlertService extends IntentService {
         // Reschedule ourself to run again in 60 seconds.
         alarmMan.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + 60000, pi);
+    }
+
+    /**
+     * Get the name of a bus stop.
+     *
+     * @param stopCode The code of the stop to get a name for.
+     * @return The name of the bus stop, or {@code null} if getting this failed.
+     */
+    @Nullable
+    private String getBusStopName(@NonNull final String stopCode) {
+        final Cursor c = getContentResolver().query(BusStopContract.BusStops.CONTENT_URI,
+                new String[] { BusStopContract.BusStops.STOP_NAME },
+                BusStopContract.BusStops.STOP_CODE + " = ?", new String[] { stopCode }, null);
+        final String result;
+
+        if (c != null) {
+            if (c.moveToFirst()) {
+                result = c.getString(c.getColumnIndex(BusStopContract.BusStops.STOP_NAME));
+            } else {
+                result = null;
+            }
+
+            c.close();
+        } else {
+            result = null;
+        }
+
+        return result;
     }
 
     /**

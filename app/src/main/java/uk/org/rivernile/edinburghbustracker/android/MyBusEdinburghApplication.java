@@ -57,7 +57,6 @@ public class MyBusEdinburghApplication extends BusApplication {
     private BusTrackerEndpoint busTrackerEndpoint;
     private DatabaseEndpoint databaseEndpoint;
     private TwitterEndpoint twitterEndpoint;
-    private BusStopDatabase busStopDatabase;
     private AlertManager alertManager;
     private FragmentFactory fragmentFactory;
     private Picasso picasso;
@@ -97,15 +96,6 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return twitterEndpoint;
-    }
-
-    @Override
-    public synchronized BusStopDatabase getBusStopDatabase() {
-        if (busStopDatabase == null) {
-            busStopDatabase = BusStopDatabase.getInstance(this);
-        }
-        
-        return busStopDatabase;
     }
 
     @Override

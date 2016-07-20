@@ -86,8 +86,6 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
     private static final String SERVICE_POINT_CHAINAGE = "chainage";
     private static final String SERVICE_POINT_LATITUDE = "latitude";
     private static final String SERVICE_POINT_LONGITUDE = "longitude";
-
-    private static BusStopDatabase instance = null;
     
     private Context context;
     private final File f;
@@ -120,20 +118,6 @@ public final class BusStopDatabase extends SQLiteOpenHelper {
                 new Thread(new RestoreDBFromAssetsTask(this)).start();
             }
         }
-    }
-
-    /**
-     * Get a new instance of the database object. If the physical database does
-     * not exist, it will be created from assets. This class uses the singleton
-     * design pattern, meaning that no more than 1 instance of this class will
-     * exist.
-     * 
-     * @param context Provide an application context.
-     * @return The singleton instance of this class.
-     */
-    public static BusStopDatabase getInstance(final Context context) {
-        if(instance == null) instance = new BusStopDatabase(context);
-        return instance;
     }
     
     /**
