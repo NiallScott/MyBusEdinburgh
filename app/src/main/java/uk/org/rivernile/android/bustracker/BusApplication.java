@@ -34,14 +34,13 @@ import com.bugsense.trace.BugSenseHandler;
 import com.squareup.picasso.Picasso;
 
 import uk.org.rivernile.android.bustracker.alerts.AlertManager;
-import uk.org.rivernile.android.bustracker.database.DatabaseUpdateService;
+import uk.org.rivernile.android.bustracker.database.busstop.DatabaseUpdateService;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 
 /**
  * This code is the very first code that will be executed when the application
@@ -70,9 +69,7 @@ public abstract class BusApplication extends Application
 
         getSharedPreferences(PreferenceConstants.PREF_FILE, 0)
                 .registerOnSharedPreferenceChangeListener(this);
-        
-        // Cause the bus stop database to be extracted straight away.
-        BusStopDatabase.getInstance(this);
+
         // Start the database update service.
         startService(new Intent(this, DatabaseUpdateService.class));
     }
@@ -105,13 +102,6 @@ public abstract class BusApplication extends Application
      * @return The TwitterEndpoint instance for this application.
      */
     public abstract TwitterEndpoint getTwitterEndpoint();
-    
-    /**
-     * Get an instance of the BusStopDatabase.
-     * 
-     * @return An instance of the BusStopDatabase.
-     */
-    public abstract BusStopDatabase getBusStopDatabase();
 
     /**
      * Get an instance of the {@link AlertManager}.

@@ -1,0 +1,153 @@
+/*
+ * Copyright (C) 2016 Niall 'Rivernile' Scott
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ * 1. This notice may not be removed or altered from any file it appears in.
+ *
+ * 2. Any modifications made to this software, except those defined in
+ *    clause 3 of this agreement, must be released under this license, and
+ *    the source code of any modifications must be made available on a
+ *    publically accessible (and locateable) website, or sent to the
+ *    original author of this software.
+ *
+ * 3. Software modifications that do not alter the functionality of the
+ *    software but are simply adaptations to a specific environment are
+ *    exempt from clause 2.
+ */
+
+package uk.org.rivernile.android.bustracker.database.busstop;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+/**
+ * This class contains static methods to aid in dealing with the bus stop database and provides
+ * consistency.
+ *
+ * @author Niall Scott
+ */
+public final class BusStopDatabase {
+
+    /**
+     * The constructor is private to prevent instantiation.
+     */
+    private BusStopDatabase() { }
+
+    /**
+     * Get the current topology ID of the database.
+     *
+     * @param context A {@link Context} instance.
+     * @return The topology ID of the database, or {@code null} if there was a problem getting it.
+     */
+    @Nullable
+    public static String getTopologyId(@NonNull final Context context) {
+        final Cursor c = context.getContentResolver().query(
+                BusStopContract.DatabaseInformation.CONTENT_URI,
+                new String[] { BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID },
+                null, null, null);
+        final String result;
+
+        if (c != null) {
+            // Fill the Cursor window.
+            c.getCount();
+
+            if (c.moveToFirst()) {
+                result = c.getString(c.getColumnIndex(
+                        BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID));
+            } else {
+                result = null;
+            }
+
+            c.close();
+        } else {
+            result = null;
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a SQLite {@code ORDER BY} condition to alphanumerically sort the service names.
+     *
+     * @param serviceColumnName The column name of the services within the table.
+     * @return A SQLite {@code ORDER BY} condition to alphanumerically sort the service names.
+     */
+    @NonNull
+    public static String getServicesSortByCondition(@NonNull final String serviceColumnName) {
+        return new StringBuilder()
+                .append("CASE WHEN ")
+                .append(serviceColumnName)
+                .append(" GLOB '[^0-9.]*' THEN ")
+                .append(serviceColumnName)
+                .append(" ELSE cast(")
+                .append(serviceColumnName)
+                .append(" AS int) END")
+                .toString();
+    }
+
+    /**
+     * Given a {@link String} array, convert it in to a {@link String} that is suitably formatted
+     * for the SQL {@code IN} clause.
+     *
+     * @param in The array to convert.
+     * @return The formatted {@link String} for the {@code IN} clause, or {@code null} if {@code in}
+     * is {@code null} or {@code 0}-length.
+     */
+    @Nullable
+    public static String convertArrayToInParameter(@Nullable final String[] in) {
+        if (in == null || in.length == 0) {
+            return null;
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        final int len = in.length;
+
+        for (int i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(',');
+            }
+
+            sb.append('\'').append(in[i]).append('\'');
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Given a {@link String} array, convert it in to a {@link String} that's human readable as a
+     * list.
+     *
+     * @param in The array to convert.
+     * @return The formatted {@link String}, or {@code null} if {@code in} is {@code null} or
+     * {@code 0}-length.
+     */
+    @Nullable
+    public static String convertArrayToHumanReadableString(@Nullable final String[] in) {
+        if (in == null || in.length == 0) {
+            return null;
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        final int len = in.length;
+
+        for (int i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(", ");
+            }
+
+            sb.append(in[i]);
+        }
+
+        return sb.toString();
+    }
+}

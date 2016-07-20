@@ -288,7 +288,7 @@
         <!-- DatabaseUpdateService, which checks to see if database updates are
              available and if so, apply them. -->
         <service
-            android:name="uk.org.rivernile.android.bustracker.database.DatabaseUpdateService"
+            android:name="uk.org.rivernile.android.bustracker.database.busstop.DatabaseUpdateService"
             android:label="@string/databaseservice_title"
             android:icon="@drawable/appicon"
             android:exported="false" />

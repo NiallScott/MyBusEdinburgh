@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -10,27 +10,25 @@
  * commercial applications), and to modify it and redistribute it, subject to
  * the following conditions:
  *
- *  1. This notice may not be removed or altered from any file it appears in.
+ * 1. This notice may not be removed or altered from any file it appears in.
  *
- *  2. Any modifications made to this software, except those defined in
- *     clause 3 of this agreement, must be released under this license, and
- *     the source code of any modifications must be made available on a
- *     publically accessible (and locateable) website, or sent to the
- *     original author of this software.
+ * 2. Any modifications made to this software, except those defined in
+ *    clause 3 of this agreement, must be released under this license, and
+ *    the source code of any modifications must be made available on a
+ *    publically accessible (and locateable) website, or sent to the
+ *    original author of this software.
  *
- *  3. Software modifications that do not alter the functionality of the
- *     software but are simply adaptations to a specific environment are
- *     exempt from clause 2.
+ * 3. Software modifications that do not alter the functionality of the
+ *    software but are simply adaptations to a specific environment are
+ *    exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.database;
+package uk.org.rivernile.android.bustracker.database.busstop;
 
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.v4.net.ConnectivityManagerCompat;
@@ -44,13 +42,16 @@ import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.fetchutils.fetchers.HttpFetcher;
 import uk.org.rivernile.android.fetchutils.fetchers.readers.FileWriterFetcherStreamReader;
 import uk.org.rivernile.android.utils.FileUtils;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 
 /**
  * The job of this {@link IntentService} is to check for bus stop database updates and apply them
  * if there is. As it is an {@link IntentService}, only one request is sent off at a time and the
  * checks are done in a non-UI thread. Successful checks can only happen as often as once per 12
  * hours, but this could be longer.
+ *
+ * <p>
+ *     TODO: replace this with a solution that integrates with the system sync framework.
+ * </p>
  * 
  * @author Niall Scott
  */
@@ -59,7 +60,6 @@ public class DatabaseUpdateService extends IntentService {
     private static final int CHECK_PERIOD = 43200000; // 12 hours
     
     private ConnectivityManager connMan;
-    private BusStopDatabase bsd;
     private SharedPreferences sp;
     private DatabaseEndpoint databaseEndpoint;
 
@@ -74,11 +74,9 @@ public class DatabaseUpdateService extends IntentService {
     public void onCreate() {
         super.onCreate();
 
-        final BusApplication app = (BusApplication) getApplication();
         connMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        bsd = app.getBusStopDatabase();
         sp = getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
-        databaseEndpoint = app.getDatabaseEndpoint();
+        databaseEndpoint = ((BusApplication) getApplication()).getDatabaseEndpoint();
     }
 
     @Override
@@ -91,15 +89,15 @@ public class DatabaseUpdateService extends IntentService {
      * The following happens;
      *
      * <ol>
-     * <li>A check is made to see if the user has enabled database updates over Wi-Fi only, and
-     * if so, it checks the connection status.</li>
-     * <li>If the last check was within the last 12 hours, then the process is abandoned.</li>
-     * <li>The version information is retrieved from the remote server.</li>
-     * <li>If there was a failure retrieving the version information, or it relates to a schema
-     * not supported by this app, the process is abandoned.</li>
-     * <li>If there is an update available, then it initiates the download of the update. If
-     * there's no update available, the check time is recorded so a check is not made again for
-     * another 12 hours.</li>
+     *     <li>A check is made to see if the user has enabled database updates over Wi-Fi only, and
+     *      if so, it checks the connection status.</li>
+     *     <li>If the last check was within the last 12 hours, then the process is abandoned.</li>
+     *     <li>The version information is retrieved from the remote server.</li>
+     *     <li>If there was a failure retrieving the version information, or it relates to a schema
+     *     not supported by this app, the process is abandoned.</li>
+     *     <li>If there is an update available, then it initiates the download of the update. If
+     *     there's no update available, the check time is recorded so a check is not made again for
+     *     another 12 hours.</li>
      * </ol>
      */
     private void doDatabaseUpdateTask() {
@@ -117,16 +115,16 @@ public class DatabaseUpdateService extends IntentService {
         final DatabaseVersion version;
         
         try {
-            version = databaseEndpoint.getDatabaseVersion(BusStopDatabase.SCHEMA_NAME);
+            version = databaseEndpoint.getDatabaseVersion(BusStopContract.SCHEMA_NAME);
         } catch (DatabaseEndpointException e) {
             return;
         }
         
-        if (!BusStopDatabase.SCHEMA_NAME.equals(version.getSchemaName())) {
+        if (!BusStopContract.SCHEMA_NAME.equals(version.getSchemaName())) {
             return;
         }
         
-        final String dbTopoId = bsd.getTopoId();
+        final String dbTopoId = BusStopDatabase.getTopologyId(this);
 
         if (!version.getTopologyId().equals(dbTopoId)) {
             updateDatabase(version);
@@ -147,8 +145,7 @@ public class DatabaseUpdateService extends IntentService {
         }
         
         // The new database is put in to a temporary file until it's ready to be swapped in.
-        final File tempFile = getDatabasePath(BusStopDatabase.STOP_DB_NAME + "_temp");
-        final File destFile = getDatabasePath(BusStopDatabase.STOP_DB_NAME);
+        final File tempFile = getDatabasePath(BusStopContract.DB_NAME + "_temp");
 
         final HttpFetcher fetcher = new HttpFetcher.Builder(this)
                 .setUrl(version.getUrl())
@@ -168,41 +165,15 @@ public class DatabaseUpdateService extends IntentService {
                 tempFile.delete();
                 return;
             }
-            
-            // Open the temp database and execute the index operation on it.
-            final SQLiteDatabase db = SQLiteDatabase.openDatabase(tempFile.getAbsolutePath(), null,
-                    SQLiteDatabase.OPEN_READWRITE);
-            BusStopDatabase.setUpIndexes(db);
-            db.close();
         } catch (IOException e) {
             tempFile.delete();
             return;
-        } catch (SQLiteException e) {
-            // No need to do anything. Indexing probably failed due to lack of disk space. If
-            // this is the case, the database is still usable, although map route lines may be
-            // quite slow.
         }
-        
-        // Synchronize the access to the database. This is done because we can't take the
-        // database away underneath any other operations. We'll wait our turn and do the swaperoo.
-        synchronized(bsd) {
-            try {
-                // Make sure the database is closed.
-                bsd.getReadableDatabase().close();
-            } catch (SQLiteException e) {
-                // Nothing to do here. Assume it's already closed.
-            }
-            
-            // Swaperoo!
-            destFile.delete();
-            tempFile.renameTo(destFile);
-        }
-        
-        // Delete the journal file if it was created.
-        getDatabasePath(BusStopDatabase.STOP_DB_NAME + "_temp-journal").delete();
-        
-        // Finally, if we reached this point, it means that everything was
-        // probably okay, so write the new check time.
+
+        getContentResolver().call(BusStopContract.CONTENT_URI,
+                BusStopContract.METHOD_REPLACE_DATABASE, tempFile.getAbsolutePath(), null);
+        // Finally, if we reached this point, it means that everything was probably okay, so
+        // write the new check time.
         writeUpdatedCheckTime();
     }
     
