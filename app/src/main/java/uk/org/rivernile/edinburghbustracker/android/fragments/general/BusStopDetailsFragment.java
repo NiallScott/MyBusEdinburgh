@@ -288,7 +288,7 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
 
         updateLocation();
         
-        map = mapView.getMap();
+        //map = mapView.getMap();
         // The Map can be null if Google Play Services is not available.
         if (map != null) {
             map.getUiSettings().setMyLocationButtonEnabled(false);
