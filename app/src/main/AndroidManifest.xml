@@ -48,9 +48,6 @@
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
               
     <application
         android:name=".MyBusEdinburghApplication"
@@ -73,7 +70,7 @@
         
         <!-- The API key for Google Maps Android API v2. -->
         <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
+            android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAv1VYsySkSWNqZ9UQ5jA2TEitLk2lIKIM" />
         
         <!-- This is required by Google Play Services. -->
