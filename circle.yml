@@ -1,0 +1,17 @@
+# This is used to integrate with Circle CI server at https://circleci.com
+machine:
+  java:
+    # JDK 8 is used for Android 24 and above.
+    version: oraclejdk8
+
+dependencies:
+  pre:
+    - echo y | android update sdk --no-ui --all --filter build-tools-24.0.2,android-24,extra-android-m2repository,extra-google-m2repository
+
+test:
+  override:
+    - emulator -avd circleci-android22 -no-audio -no-window:
+        background: true
+        parallel: true
+    - circle-android wait-for-boot
+    - ./gradlew clean check connectedAndroidTest
