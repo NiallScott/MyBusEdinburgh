@@ -39,7 +39,13 @@ android {
         // Populate the build config with API keys which are stored in local.properties so that
         // ApiKey.java can pick them up.
         final Properties properties = new Properties()
-        properties.load(new FileInputStream("local.properties"))
+
+        try {
+            properties.load(new FileInputStream("local.properties"))
+        } catch (IOException e) {
+            // Do nothing. This is probably happening on the CI server.
+        }
+
         buildConfigField("String", "API_KEY",
                 "\"" + properties.getProperty("apiKey", "invalid") + "\"")
         buildConfigField("String", "BUGSENSE_KEY",
