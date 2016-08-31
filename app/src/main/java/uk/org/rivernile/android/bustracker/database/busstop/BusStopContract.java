@@ -63,6 +63,11 @@ public final class BusStopContract {
     public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
+     * This is the name of the schema for the database.
+     */
+    public static final String SCHEMA_NAME = "MBE_10";
+
+    /**
      * The name of the database file.
      */
     static final String DB_NAME = "busstops10.db";
@@ -180,7 +185,7 @@ public final class BusStopContract {
         /**
          * The name of the table. To be used within the package.
          */
-        static final String TABLE_NAME = "service";
+        static final String TABLE_NAME = "view_services";
 
         private static final String TYPE_SERVICES = "vnd." + AUTHORITY + '.' + TABLE_NAME;
 
@@ -261,6 +266,16 @@ public final class BusStopContract {
          * </p>
          */
         String LOCALITY = "locality";
+
+        /**
+         * The listing of services as a comma separated list, suitable for displaying to users.
+         * Column name.
+         *
+         * <p>
+         *     Type: STRING
+         * </p>
+         */
+        String SERVICE_LISTING = "serviceListing";
     }
 
     /**
@@ -272,7 +287,7 @@ public final class BusStopContract {
         /**
          * The name of the table. To be used within the package.
          */
-        static final String TABLE_NAME = "bus_stops";
+        static final String TABLE_NAME = "view_bus_stops";
 
         private static final String TYPE_BUS_STOPS = "vnd." + AUTHORITY + '.' + TABLE_NAME;
 

@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -55,7 +56,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import org.json.JSONException;
-import uk.org.rivernile.android.bustracker.BusApplication;
+
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
@@ -114,9 +117,10 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
     public static final String ARG_STOPCODE = "stopCode";
 
     private static final int LOADER_BUS_TIMES = 1;
-    private static final int LOADER_FAVOURITE_STOP = 2;
-    private static final int LOADER_HAS_PROX_ALERT = 3;
-    private static final int LOADER_HAS_TIME_ALERT = 4;
+    private static final int LOADER_STOP_DETAILS = 2;
+    private static final int LOADER_FAVOURITE_STOP = 3;
+    private static final int LOADER_HAS_PROX_ALERT = 4;
+    private static final int LOADER_HAS_TIME_ALERT = 5;
     
     private static final String STATE_KEY_AUTOREFRESH = "autoRefresh";
     private static final String STATE_KEY_LAST_REFRESH = "lastRefresh";
@@ -126,7 +130,6 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
     private static final int LAST_REFRESH_PERIOD = 5000;
     
     private Callbacks callbacks;
-    private BusStopDatabase bsd;
     private SharedPreferences sp;
     
     private MenuItem sortMenuItem, autoRefreshMenuItem, proxMenuItem,
@@ -147,6 +150,7 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
     private long lastRefresh = 0;
     private final ArrayList<String> expandedServices = new ArrayList<String>();
     private boolean busTimesLoading = false;
+    private Cursor cursorStopDetails;
     private Cursor cursorFavourite;
     private Cursor cursorProxAlert;
     private Cursor cursorTimeAlert;
@@ -189,11 +193,7 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Get the various resources we need.
-        final BusApplication app = (BusApplication) getActivity()
-                .getApplicationContext();
-        bsd = app.getBusStopDatabase();
-        sp = app.getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
+        sp = getContext().getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         
         // Get the stop code from the arguments bundle.
         stopCode = getArguments().getString(ARG_STOPCODE);
@@ -270,18 +270,13 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
         super.onActivityCreated(savedInstanceState);
         
         if (!TextUtils.isEmpty(stopCode)) {
-            populateStopName();
-            // Since there is a stop code, there is no reason the bus service
-            // list cannot be populated.
-            txtServices.setText(BusStopDatabase.getColouredServiceListString(
-                    bsd.getBusServicesForStopAsString(stopCode)));
-            
             loadBusTimes(false);
             
             // Tell the fragment that there is an options menu.
             setHasOptionsMenu(true);
 
             final LoaderManager loaderManager = getLoaderManager();
+            loaderManager.initLoader(LOADER_STOP_DETAILS, null, this);
             loaderManager.initLoader(LOADER_FAVOURITE_STOP, null, this);
             loaderManager.initLoader(LOADER_HAS_PROX_ALERT, null, this);
             loaderManager.initLoader(LOADER_HAS_TIME_ALERT, null, this);
@@ -438,6 +433,13 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
             case LOADER_BUS_TIMES:
                 return new LiveBusTimesLoader(getActivity(), new String[] { stopCode },
                         numDepartures);
+            case LOADER_STOP_DETAILS:
+                return new BusStopLoader(getContext(), stopCode,
+                        new String[] {
+                                BusStopContract.BusStops.STOP_NAME,
+                                BusStopContract.BusStops.LOCALITY,
+                                BusStopContract.BusStops.SERVICE_LISTING
+                        });
             case LOADER_FAVOURITE_STOP:
                 return new FavouriteStopsLoader(getActivity(), stopCode);
             case LOADER_HAS_PROX_ALERT:
@@ -456,6 +458,9 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
             case LOADER_BUS_TIMES:
                 handleBusTimesResult((LiveTimesResult<LiveBusTimes>) result);
                 break;
+            case LOADER_STOP_DETAILS:
+                handleBusStopDetails((Cursor) result);
+                break;
             case LOADER_FAVOURITE_STOP:
                 configureFavouriteButton((Cursor) result);
                 break;
@@ -471,6 +476,9 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
     @Override
     public void onLoaderReset(final Loader loader) {
         switch (loader.getId()) {
+            case LOADER_STOP_DETAILS:
+                handleBusStopDetails(null);
+                break;
             case LOADER_FAVOURITE_STOP:
                 configureFavouriteButton(null);
                 break;
@@ -655,6 +663,19 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
         configureRefreshActionItem();
         configureSortActionItem();
     }
+
+    /**
+     * Handle the bus stop details being loaded from the bus stop database.
+     *
+     * @param cursor The {@link Cursor} containing the bus stop details.
+     */
+    private void handleBusStopDetails(@Nullable final Cursor cursor) {
+        cursorStopDetails = cursor;
+        txtServices.setText(cursor != null && cursor.moveToFirst()
+                ? cursor.getString(cursor.getColumnIndex(BusStopContract.BusStops.SERVICE_LISTING))
+                : null);
+        populateStopName();
+    }
     
     /**
      * Set the stop name. Firstly, it checks to see if there is a favourite stop
@@ -666,20 +687,25 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
     private void populateStopName() {
         if (cursorFavourite != null && cursorFavourite.moveToFirst()) {
             stopName = cursorFavourite.getString(columnStopName);
+            stopLocality = null;
+        } else if (cursorStopDetails != null && cursorStopDetails.moveToFirst()) {
+            stopName = cursorStopDetails.getString(cursorStopDetails.getColumnIndex(
+                    BusStopContract.BusStops.STOP_NAME));
+            stopLocality = cursorStopDetails.getString(cursorStopDetails.getColumnIndex(
+                    BusStopContract.BusStops.LOCALITY));
         } else {
-            stopName = bsd.getNameForBusStop(stopCode);
-            stopLocality = bsd.getLocalityForStopCode(stopCode);
+            stopName = null;
+            stopLocality = null;
         }
         
         if (TextUtils.isEmpty(stopName)) {
             txtStopName.setText(stopCode);
-            stopName = "";
         } else {
             final String name;
             
             if (!TextUtils.isEmpty(stopLocality)) {
-                name = getString(R.string.busstop_locality_coloured,
-                        stopName, stopLocality, stopCode);
+                name = getString(R.string.busstop_locality_coloured, stopName, stopLocality,
+                        stopCode);
             } else {
                 name = getString(R.string.busstop_coloured, stopName, stopCode);
             }

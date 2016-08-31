@@ -50,6 +50,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
@@ -69,9 +70,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.text.NumberFormat;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
-import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
-import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavouriteStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
@@ -102,10 +101,9 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     public static final String ARG_STOPCODE = "stopCode";
 
     private static final int LOADER_BUS_STOP_DATA = 1;
-    private static final int LOADER_BUS_STOP_SERVICES = 2;
-    private static final int LOADER_HAS_FAVOURITE_STOP = 3;
-    private static final int LOADER_HAS_PROX_ALERT = 4;
-    private static final int LOADER_HAS_TIME_ALERT = 5;
+    private static final int LOADER_HAS_FAVOURITE_STOP = 2;
+    private static final int LOADER_HAS_PROX_ALERT = 3;
+    private static final int LOADER_HAS_TIME_ALERT = 4;
 
     private static final NumberFormat DISTANCE_FORMAT = NumberFormat.getInstance();
     
@@ -132,6 +130,7 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     private double longitude;
     private int orientation;
     private String locality;
+    private String services;
 
     private Cursor cursorFavourite;
     private Cursor cursorProxAlert;
@@ -275,7 +274,6 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         super.onActivityCreated(savedInstanceState);
 
         final LoaderManager loaderManager = getLoaderManager();
-        loaderManager.initLoader(LOADER_BUS_STOP_SERVICES, null, this);
         loaderManager.initLoader(LOADER_HAS_FAVOURITE_STOP, null, this);
         loaderManager.initLoader(LOADER_HAS_PROX_ALERT, null, this);
         loaderManager.initLoader(LOADER_HAS_TIME_ALERT, null, this);
@@ -387,10 +385,9 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
                                 BusStopContract.BusStops.LATITUDE,
                                 BusStopContract.BusStops.LONGITUDE,
                                 BusStopContract.BusStops.ORIENTATION,
-                                BusStopContract.BusStops.LOCALITY
+                                BusStopContract.BusStops.LOCALITY,
+                                BusStopContract.BusStops.SERVICE_LISTING
                         });
-            case LOADER_BUS_STOP_SERVICES:
-                return new BusStopServiceNamesLoader(getContext(), stopCode);
             case LOADER_HAS_FAVOURITE_STOP:
                 return new HasFavouriteStopLoader(getActivity(), stopCode);
             case LOADER_HAS_PROX_ALERT:
@@ -408,8 +405,6 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
             case LOADER_BUS_STOP_DATA:
                 populateData(c);
                 break;
-            case LOADER_BUS_STOP_SERVICES:
-                handleBusStopServices(((BusStopServiceNamesLoader) loader).getServices());
             case LOADER_HAS_FAVOURITE_STOP:
                 updateFavouritesItem(c);
                 break;
@@ -548,6 +543,7 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
             longitude = c.getDouble(c.getColumnIndex(BusStopContract.BusStops.LOCALITY));
             orientation = c.getInt(c.getColumnIndex(BusStopContract.BusStops.ORIENTATION));
             locality = c.getString(c.getColumnIndex(BusStopContract.BusStops.LOCALITY));
+            services = c.getString(c.getColumnIndex(BusStopContract.BusStops.SERVICE_LISTING));
             
             c.close();
             populateView();
@@ -576,20 +572,9 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
         }
         
         txtName.setText(Html.fromHtml(name));
+        txtServices.setText(!TextUtils.isEmpty(services) ?
+                services : getString(R.string.busstopdetails_noservices));
         updateLocation();
-    }
-
-    /**
-     * Handle the load of serives for a bus stop.
-     *
-     * @param services The services that stop at this bus stop.
-     */
-    private void handleBusStopServices(@Nullable final String[] services) {
-        if (services == null || services.length == 0) {
-            txtServices.setText(R.string.busstopdetails_noservices);
-        } else {
-            txtServices.setText(BusStopDatabase.convertArrayToHumanReadableString(services));
-        }
     }
 
     /**

@@ -31,7 +31,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -39,7 +38,6 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.io.File;
-import java.util.HashMap;
 
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -236,26 +234,8 @@ public class BusStopProvider extends ContentProvider {
     private Cursor doServicesQuery(@Nullable final String[] projection,
             @Nullable final String selection, @Nullable final String[] selectionArgs,
             @Nullable final String sortOrder) {
-        // All of this stuff is required because internally a JOIN is required between two tables.
-        // ContentProviders seem okay until you want to do a JOIN. This will eventually be taken out
-        // when the server starts sending down databases with the two tables pre-JOINed.
-        final HashMap<String, String> projectionMap = new HashMap<>();
-        projectionMap.put(BusStopContract.Services._ID,
-                BusStopContract.Services.TABLE_NAME + '.' + BusStopContract.Services._ID);
-        projectionMap.put(BusStopContract.Services.NAME, BusStopContract.Services.NAME);
-        projectionMap.put(BusStopContract.Services.DESCRIPTION,
-                BusStopContract.Services.DESCRIPTION);
-        projectionMap.put(BusStopContract.Services.COLOUR, BusStopContract.Services.COLOUR);
-
-        final SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-        queryBuilder.setStrict(true);
-        queryBuilder.setProjectionMap(projectionMap);
-        queryBuilder.setTables(BusStopContract.Services.TABLE_NAME +
-                " LEFT JOIN service_colour ON " + BusStopContract.Services.TABLE_NAME + '.' +
-                BusStopContract.Services._ID + " = service_colour._id");
-
-        return queryBuilder.query(openHelper.getReadableDatabase(), projection, selection,
-                selectionArgs, null, null, sortOrder);
+        return openHelper.getReadableDatabase().query(BusStopContract.Services.TABLE_NAME,
+                projection, selection, selectionArgs, null, null, sortOrder);
     }
 
     /**

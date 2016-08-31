@@ -196,6 +196,7 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
             db = SQLiteDatabase.openDatabase(newDatabaseFile.getAbsolutePath(), null,
                     SQLiteDatabase.OPEN_READWRITE);
             setUpIndexes(db);
+            setUpViews(db);
         } finally {
             if (db != null && db.isOpen()) {
                 db.close();
@@ -231,5 +232,36 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
         } finally {
             db.endTransaction();
         }
+    }
+
+    /**
+     * Set up the views on the database to make interfacing with the database from the provider
+     * much easier.
+     *
+     * @param db The database to create the views on.
+     */
+    private static void setUpViews(@NonNull final SQLiteDatabase db) {
+        db.execSQL("CREATE VIEW IF NOT EXISTS " + BusStopContract.Services.TABLE_NAME +
+                " AS SELECT service._id AS " + BusStopContract.Services._ID + ", " +
+                BusStopContract.Services.NAME + ", " + BusStopContract.Services.DESCRIPTION + ", " +
+                BusStopContract.Services.COLOUR + " FROM service LEFT JOIN service_colour ON " +
+                "service._id = service_colour._id");
+        db.execSQL("CREATE VIEW IF NOT EXISTS " + BusStopContract.BusStops.TABLE_NAME +
+                " AS SELECT " + BusStopContract.BusStops._ID + ", " +
+                BusStopContract.BusStops.STOP_CODE + ", " + BusStopContract.BusStops.STOP_NAME +
+                ", " + BusStopContract.BusStops.LATITUDE + ", " +
+                BusStopContract.BusStops.LONGITUDE + ", " + BusStopContract.BusStops.ORIENTATION +
+                ", " + BusStopContract.BusStops.LOCALITY + ", " +
+                "(SELECT group_concat(" + BusStopContract.ServiceStops.SERVICE_NAME + ", ', ') " +
+                "FROM (SELECT " + BusStopContract.ServiceStops.STOP_CODE + ", " +
+                BusStopContract.ServiceStops.SERVICE_NAME + " FROM " +
+                BusStopContract.ServiceStops.TABLE_NAME + " WHERE bus_stops.stopCode = " +
+                BusStopContract.ServiceStops.TABLE_NAME + '.' +
+                BusStopContract.ServiceStops.STOP_CODE + " ORDER BY CASE WHEN " +
+                BusStopContract.ServiceStops.SERVICE_NAME + " GLOB '[^0-9.]*' THEN " +
+                BusStopContract.ServiceStops.SERVICE_NAME + " ELSE cast(" +
+                BusStopContract.ServiceStops.SERVICE_NAME + " AS int) END) GROUP BY " +
+                BusStopContract.ServiceStops.STOP_CODE + ") AS " +
+                BusStopContract.BusStops.SERVICE_LISTING + " FROM bus_stops");
     }
 }

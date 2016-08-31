@@ -273,8 +273,8 @@
              when typing in a search term. -->
         <provider
             android:name=".MapSearchSuggestionsProvider"
-            android:authorities="uk.org.rivernile.edinburghbustracker.android.MapSearchSuggestionsProvider"
-            android:permission="uk.org.rivernile.edinburghbustracker.android.MapSearchSuggestionsProvider.MAP_SEARCH_SUGGESTIONS"
+            android:authorities="${applicationId}.MapSearchSuggestionsProvider"
+            android:permission="${applicationId}.MapSearchSuggestionsProvider.MAP_SEARCH_SUGGESTIONS"
             android:exported="true" >
             <path-permission
                 android:pathPrefix="/search_suggest_query"
