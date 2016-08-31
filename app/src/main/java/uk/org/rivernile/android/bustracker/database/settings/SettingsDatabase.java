@@ -237,6 +237,69 @@ public final class SettingsDatabase {
     }
 
     /**
+     * Is there an active proximity alert?
+     *
+     * @param context A {@link Context} instance.
+     * @param stopCode The stop code to check proximity alerts for.
+     * @return {@code true} if there is a proximity alert set, {@code false} if there is no alert
+     * set or it could not be determined if there is an alert set.
+     */
+    @WorkerThread
+    public static boolean isActiveProximityAlert(@NonNull final Context context,
+            @NonNull final String stopCode) {
+        return isActiveAlert(context, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY, stopCode);
+    }
+
+    /**
+     * Is there an active time alert?
+     *
+     * @param context A {@link Context} instance.
+     * @param stopCode The stop code to check time alerts for.
+     * @return {@code true} if there is a time alert set, {@code false} if there is no alert set
+     * or it could not be determined if there is an alert set.
+     */
+    @WorkerThread
+    public static boolean isActiveTimeAlert(@NonNull final Context context,
+            @NonNull final String stopCode) {
+        return isActiveAlert(context, SettingsContract.Alerts.ALERTS_TYPE_TIME, stopCode);
+    }
+
+    /**
+     * Is there an active alert for the alert type?
+     *
+     * @param context A {@link Context} instance.
+     * @param alertType Either {@link SettingsContract.Alerts#ALERTS_TYPE_PROXIMITY} or
+     * {@link SettingsContract.Alerts#ALERTS_TYPE_TIME}.
+     * @param stopCode The stop code to check alerts for.
+     * @return {@code true} if there is an alert set for the alert type, {@code false} if there is
+     * no alert set or it could not be determined if there is an alert set.
+     */
+    @WorkerThread
+    private static boolean isActiveAlert(@NonNull final Context context, final int alertType,
+            @NonNull final String stopCode) {
+        final Cursor cursor = context.getContentResolver().query(
+                SettingsContract.Alerts.CONTENT_URI,
+                new String[] { SettingsContract.Alerts.STOP_CODE },
+                SettingsContract.Alerts.TYPE + " = ? AND " + SettingsContract.Alerts.STOP_CODE +
+                        " = ?",
+                new String[] {
+                        String.valueOf(alertType),
+                        stopCode
+                }, null);
+
+        final boolean result;
+
+        if (cursor != null) {
+            result = cursor.getCount() > 0;
+            cursor.close();
+        } else {
+            result = false;
+        }
+
+        return result;
+    }
+
+    /**
      * Backup the user's favourite stops in to the supplied {@link File}.
      *
      * @param context A {@link Context} instance.

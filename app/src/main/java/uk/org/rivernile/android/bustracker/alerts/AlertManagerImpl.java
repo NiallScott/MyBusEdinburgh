@@ -78,8 +78,8 @@ public class AlertManagerImpl implements AlertManager {
     public void removeProximityAlert() {
         // Remove the alert from the database.
         DeleteAllProximityAlertsTask.start(context);
-        final Intent intent = new Intent(context, ProximityAlertReceiver.class);
-        final PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
+        final Intent intent = new Intent(context, ProximityAlertService.class);
+        final PendingIntent pi = PendingIntent.getService(context, 0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
         // Remove the proximity alert from LocationManager.
         locMan.removeProximityAlert(pi);
@@ -176,11 +176,11 @@ public class AlertManagerImpl implements AlertManager {
             }
 
             // The intent to send to the BroadcastReceiver when the distance criteria has been met.
-            final Intent intent = new Intent(context, ProximityAlertReceiver.class);
-            intent.putExtra(ProximityAlertReceiver.ARG_STOPCODE, stopCode);
-            intent.putExtra(ProximityAlertReceiver.ARG_DISTANCE, distance);
+            final Intent intent = new Intent(context, ProximityAlertService.class);
+            intent.putExtra(ProximityAlertService.EXTRA_STOPCODE, stopCode);
+            intent.putExtra(ProximityAlertService.EXTRA_DISTANCE, distance);
 
-            final PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent,
+            final PendingIntent pi = PendingIntent.getService(context, 0, intent,
                     PendingIntent.FLAG_CANCEL_CURRENT);
             // Make sure the LocationManager is not looking out for any other locations for the
             // alerts.

@@ -29,7 +29,6 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -40,7 +39,7 @@ import android.support.v4.app.NotificationCompat;
 import java.util.List;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
-import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
+import uk.org.rivernile.android.bustracker.database.settings.SettingsDatabase;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
@@ -157,7 +156,7 @@ public class TimeAlertService extends IntentService {
                     // The alert may have been cancelled by the user recently,
                     // check it's still active to stay relevant. Cancel the
                     // alert if we're continuing.
-                    if (!isActiveTimeAlert(this, stopCode)) {
+                    if (!SettingsDatabase.isActiveTimeAlert(this, stopCode)) {
                         return;
                     }
                     
@@ -283,39 +282,6 @@ public class TimeAlertService extends IntentService {
             c.close();
         } else {
             result = null;
-        }
-
-        return result;
-    }
-
-    /**
-     * Is there an active time alert for the stop code?
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The stop code to check for.
-     * @return {@code true} if there is an active time alert for the stop code, {@code false} if
-     * not.
-     */
-    // FIXME: short term fix. See if this can be done better.
-    private static boolean isActiveTimeAlert(@NonNull final Context context,
-            @NonNull final String stopCode) {
-        final Cursor cursor = context.getContentResolver().query(
-                SettingsContract.Alerts.CONTENT_URI,
-                new String[] { SettingsContract.Alerts.STOP_CODE },
-                SettingsContract.Alerts.TYPE + " = ? AND " + SettingsContract.Alerts.STOP_CODE +
-                        " = ?",
-                new String[] {
-                        String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_TIME),
-                        stopCode
-                }, null);
-
-        final boolean result;
-
-        if (cursor != null) {
-            result = cursor.getCount() > 0;
-            cursor.close();
-        } else {
-            result = false;
         }
 
         return result;
