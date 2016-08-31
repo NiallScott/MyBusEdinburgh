@@ -77,6 +77,41 @@ public final class BusStopDatabase {
     }
 
     /**
+     * Search the bus stops table to look for bus stops which match {@code searchQuery}.
+     *
+     * @param context A {@link Context} instance.
+     * @param searchQuery The query to search for.
+     * @return A {@link Cursor} containing the matching bus stops.
+     */
+    @Nullable
+    public static Cursor searchBusStops(@NonNull final Context context,
+            @NonNull final String searchQuery) {
+        final String query = '%' + searchQuery + '%';
+        final Cursor c = context.getContentResolver().query(
+                BusStopContract.BusStops.CONTENT_URI,
+                new String[] {
+                        BusStopContract.BusStops.STOP_CODE,
+                        BusStopContract.BusStops.STOP_NAME,
+                        BusStopContract.BusStops.LATITUDE,
+                        BusStopContract.BusStops.LONGITUDE,
+                        BusStopContract.BusStops.ORIENTATION,
+                        BusStopContract.BusStops.LOCALITY,
+                        BusStopContract.BusStops.SERVICE_LISTING
+                },
+                BusStopContract.BusStops.STOP_CODE + " LIKE ? OR " +
+                        BusStopContract.BusStops.STOP_NAME + " LIKE ? OR " +
+                        BusStopContract.BusStops.LOCALITY + " LIKE ?",
+                new String[] { query, query, query }, null);
+
+        if (c != null) {
+            // Fill the Cursor window.
+            c.getCount();
+        }
+
+        return c;
+    }
+
+    /**
      * Return a SQLite {@code ORDER BY} condition to alphanumerically sort the service names.
      *
      * @param serviceColumnName The column name of the services within the table.
