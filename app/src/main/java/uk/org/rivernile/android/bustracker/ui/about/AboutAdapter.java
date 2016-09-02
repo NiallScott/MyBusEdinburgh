@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -141,12 +141,25 @@ class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> {
     }
 
     /**
+     * Rebind an item. This will cause the data to be re-set on the item {@link View}.
+     *
+     * @param item The item to rebind.
+     */
+    void rebindItem(@Nullable final AboutItem item) {
+        final int index = items != null ? items.indexOf(item) : -1;
+
+        if (index >= 0) {
+            notifyItemChanged(index);
+        }
+    }
+
+    /**
      * The {@link RecyclerView.ViewHolder} to populate rows with. Also deals with clicking events.
      */
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        View itemView;
-        TextView text1, text2;
+        private View itemView;
+        private TextView text1, text2;
 
         /**
          * Create a new {@code ViewHolder}.
@@ -198,7 +211,7 @@ class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.ViewHolder> {
      * This interface should be implemented by any classes wishing to be notified when a user has
      * clicked an item.
      */
-    static interface OnItemClickedListener {
+    interface OnItemClickedListener {
 
         /**
          * This is called when an item has been clicked.

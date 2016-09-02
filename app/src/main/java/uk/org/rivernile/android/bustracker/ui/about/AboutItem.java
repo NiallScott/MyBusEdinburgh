@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,7 +38,7 @@ import android.text.TextUtils;
 class AboutItem {
 
     private final String title;
-    private final String subTitle;
+    private String subTitle;
     private final boolean isClickable;
 
     /**
@@ -72,10 +72,23 @@ class AboutItem {
      * @return The sub title to display for the item. If this is {@code null}, it means there is
      * no subtitle for this item.
      * @see #hasSubTitle()
+     * @see #setSubTitle(String)
      */
     @Nullable
     String getSubTitle() {
         return subTitle;
+    }
+
+    /**
+     * Set the sub title to display for the item.
+     *
+     * @param subTitle The sub title to display for the item. If this is {@code null}, it means
+     * there is no subtitle for this item.
+     * @see #hasSubTitle()
+     * @see #setSubTitle(String)
+     */
+    void setSubTitle(@Nullable final String subTitle) {
+        this.subTitle = subTitle;
     }
 
     /**

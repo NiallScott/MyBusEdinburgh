@@ -56,6 +56,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="submit">Submit</string>
     <string name="yes">Yes</string>
     <string name="remove">Remove</string>
+    <string name="loading">Loading&#8230;</string>
     
     <string name="prox_alert_add">Add proximity alert</string>
     <string name="prox_alert_rem">Remove proximity alert</string>
@@ -265,6 +266,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="about_twitter">Twitter</string>
     <string name="about_credits">Credits</string>
     <string name="about_open_source">Open source licences</string>
+
+    <string name="about_database_version_loading">@string/loading</string>
+    <string name="about_database_version_error">Loading error</string>
+    <string name="about_topology_version_loading">@string/loading</string>
+    <string name="about_topology_version_error">@string/about_database_version_error</string>
 
     <string name="about_version_format" tools:ignore="MissingTranslation">%1$s (#%2$d)</string> <!-- %1$s = external version number. %2$d = internal version number. -->
     <string name="about_database_version_format" tools:ignore="MissingTranslation">%1$d (%2$s)</string> <!-- %1$d = UNIX timestamp. %2$s = human readable data. -->
