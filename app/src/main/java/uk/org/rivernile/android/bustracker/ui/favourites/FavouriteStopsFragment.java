@@ -48,6 +48,7 @@ import android.widget.TextView;
 
 import java.util.Map;
 
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServicesLoader;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
@@ -61,6 +62,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -286,7 +288,9 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
                 handleFavouriteStopsLoaded((Cursor) result);
                 break;
             case LOADER_BUS_STOP_SERVICES:
-                handleBusStopServicesLoaded((Map<String, String>) result);
+                handleBusStopServicesLoaded(
+                        ((ProcessedCursorLoader.ResultWrapper<Map<String, String>>) result)
+                                .getResult());
                 break;
             case LOADER_HAS_PROXIMITY_ALERT:
                 cursorProxAlert = (Cursor) result;
