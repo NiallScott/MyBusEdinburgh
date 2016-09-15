@@ -74,6 +74,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDe
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
 import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
@@ -303,7 +304,9 @@ public class NearestStopsFragment extends Fragment
     public void onLoadFinished(final Loader loader, final Object result) {
         switch (loader.getId()) {
             case LOADER_NEAREST_STOPS:
-                populateResults((List<SearchResult>) result);
+                populateResults(
+                        ((ProcessedCursorLoader.ResultWrapper<List<SearchResult>>) result)
+                                .getResult());
                 break;
             case LOADER_SERVICES:
                 services = ((AllServiceNamesLoader) result).getServices();

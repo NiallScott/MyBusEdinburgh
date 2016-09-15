@@ -72,14 +72,24 @@ public abstract class ProcessedCursorLoader<T>
 
     private final ForceLoadContentObserver forceLoadObserver = new ForceLoadContentObserver();
 
-    private final Uri uri;
-    private final String[] projection;
-    private final String selection;
-    private final String[] selectionArgs;
-    private final String sortOrder;
+    private Uri uri;
+    private String[] projection;
+    private String selection;
+    private String[] selectionArgs;
+    private String sortOrder;
 
     private ResultWrapper<T> result;
     private CancellationSignal cancellationSignal;
+
+    /**
+     * Create a new {@code ProcessedCursorLoader}. The query must later be defined by calling the
+     * query field setters.
+     *
+     * @param context A {@link Context} instance.
+     */
+    public ProcessedCursorLoader(@NonNull final Context context) {
+        super(context);
+    }
 
     /**
      * Create a new {@code ProcessedCursorLoader}. This constructor is the same as a
@@ -237,6 +247,51 @@ public abstract class ProcessedCursorLoader<T>
      */
     @Nullable
     public abstract T processCursor(@Nullable Cursor cursor);
+
+    /**
+     * Set the {@link Uri} of the data source.
+     *
+     * @param uri The {@link Uri} of the data source.
+     */
+    public void setUri(@NonNull final Uri uri) {
+        this.uri = uri;
+    }
+
+    /**
+     * Set the columns to fetch for the {@link Cursor}.
+     *
+     * @param projection The columns to fetch for the {@link Cursor}.
+     */
+    public void setProjection(@Nullable final String[] projection) {
+        this.projection = projection;
+    }
+
+    /**
+     * Set the {@code WHERE} clause.
+     *
+     * @param selection The {@code WHERE} clause.
+     */
+    public void setSelection(@Nullable final String selection) {
+        this.selection = selection;
+    }
+
+    /**
+     * Set the arguments to place in the {@code WHERE} clause.
+     *
+     * @param selectionArgs The arguments to place in the {@code WHERE} clause.
+     */
+    public void setSelectionArgs(@Nullable final String[] selectionArgs) {
+        this.selectionArgs = selectionArgs;
+    }
+
+    /**
+     * Set the sort of the returned data.
+     *
+     * @param sortOrder The sort of the returned data.
+     */
+    public void setSortOrder(@Nullable final String sortOrder) {
+        this.sortOrder = sortOrder;
+    }
 
     /**
      * This object represents the result of a loading operation by a {@link ProcessedCursorLoader}.
