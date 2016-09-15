@@ -35,8 +35,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import uk.org.rivernile.android.fetchutils.loaders.support.SimpleAsyncTaskLoader;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 
 /**
  * This {@link android.support.v4.content.Loader} will load nearby bus stops from the database. To
@@ -49,18 +50,15 @@ import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
  *
  * @author Niall Scott
  */
-class NearestStopsLoader extends SimpleAsyncTaskLoader<List<SearchResult>> {
+class NearestStopsLoader extends ProcessedCursorLoader<List<SearchResult>> {
 
     /** If modifying for another city, check that this value is correct. */
     private static final double LATITUDE_SPAN = 0.004499;
     /** If modifying for another city, check that this value is correct. */
     private static final double LONGITUDE_SPAN = 0.008001;
 
-    private final BusStopDatabase bsd;
-
     private final double latitude;
     private final double longitude;
-    private final String[] filteredServices;
 
     /**
      * Create a new {@code NearestStopsLoader}.
@@ -76,59 +74,93 @@ class NearestStopsLoader extends SimpleAsyncTaskLoader<List<SearchResult>> {
             final double longitude, @Nullable final String[] filteredServices) {
         super(context);
 
-        bsd = BusStopDatabase.getInstance(context.getApplicationContext());
         this.latitude = latitude;
         this.longitude = longitude;
-        this.filteredServices = filteredServices;
-    }
 
-    @Override
-    public List<SearchResult> loadInBackground() {
-        // Create the List where the results will be placed. If no results have been found, this
-        // list will be empty.
-        final ArrayList<SearchResult> result = new ArrayList<>();
+        setUri(BusStopContract.BusStops.CONTENT_URI);
+        setProjection(new String[] {
+                BusStopContract.BusStops.STOP_CODE,
+                BusStopContract.BusStops.STOP_NAME,
+                BusStopContract.BusStops.LATITUDE,
+                BusStopContract.BusStops.LONGITUDE,
+                BusStopContract.BusStops.ORIENTATION,
+                BusStopContract.BusStops.LOCALITY,
+                BusStopContract.BusStops.SERVICE_LISTING
+        });
 
         // Calculate the bounds.
-        final double minX = latitude - LATITUDE_SPAN;
-        final double minY = longitude - LONGITUDE_SPAN;
-        final double maxX = latitude + LATITUDE_SPAN;
-        final double maxY = longitude + LONGITUDE_SPAN;
+        final double minLatitude = latitude - LATITUDE_SPAN;
+        final double minLongitude = longitude - LONGITUDE_SPAN;
+        final double maxLatitude = latitude + LATITUDE_SPAN;
+        final double maxLongitude = longitude + LONGITUDE_SPAN;
 
-        final Cursor c;
-        // What query is executed depends on whether services are being filtered or not.
+        String selection = '(' + BusStopContract.BusStops.LATITUDE + " BETWEEN ? AND ?) AND " +
+                '(' + BusStopContract.BusStops.LONGITUDE + " BETWEEN ? AND ?)";
+
         if (filteredServices != null && filteredServices.length > 0) {
-            c = bsd.getFilteredStopsByCoords(minX, minY, maxX, maxY, filteredServices);
+            selection += " AND " + BusStopContract.BusStops.STOP_CODE + " IN (SELECT " +
+                    BusStopContract.ServiceStops.STOP_CODE + " FROM " +
+                    BusStopContract.ServiceStops.TABLE_NAME + " WHERE " +
+                    BusStopContract.ServiceStops.SERVICE_NAME + " IN (?)";
+            setSelectionArgs(new String[] {
+                    String.valueOf(minLatitude),
+                    String.valueOf(maxLatitude),
+                    String.valueOf(minLongitude),
+                    String.valueOf(maxLongitude),
+                    BusStopDatabase.convertArrayToInParameter(filteredServices)
+            });
         } else {
-            c = bsd.getBusStopsByCoords(minX, minY, maxX, maxY);
+            setSelectionArgs(new String[] {
+                    String.valueOf(minLatitude),
+                    String.valueOf(maxLatitude),
+                    String.valueOf(minLongitude),
+                    String.valueOf(maxLongitude)
+            });
         }
 
+        setSelection(selection);
+    }
+
+    @Nullable
+    @Override
+    public List<SearchResult> processCursor(@Nullable final Cursor cursor) {
+        final ArrayList<SearchResult> result = new ArrayList<>();
+
         // Defensive programming!
-        if (c != null) {
+        if (cursor != null) {
+            final int stopCodeColumn = cursor.getColumnIndex(BusStopContract.BusStops.STOP_CODE);
+            final int stopNameColumn = cursor.getColumnIndex(BusStopContract.BusStops.STOP_NAME);
+            final int latitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LATITUDE);
+            final int longitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LONGITUDE);
+            final int orientationColumn = cursor.getColumnIndex(
+                    BusStopContract.BusStops.ORIENTATION);
+            final int localityColumn = cursor.getColumnIndex(BusStopContract.BusStops.LOCALITY);
+            final int servicesColumn = cursor.getColumnIndex(
+                    BusStopContract.BusStops.SERVICE_LISTING);
+            cursor.moveToPosition(-1);
+
             // We don't care about the bearings so a float array of only 1 in size is required.
             final float[] distance = new float[1];
-            distance[0] = 0f;
 
             // Loop through all results.
-            while (c.moveToNext()) {
-                // Use the Location class in the Android framework to compute the
-                // distance between the handset and the bus stop.
-                Location.distanceBetween(latitude, longitude, c.getDouble(2), c.getDouble(3),
+            while (cursor.moveToNext()) {
+                // Use the Location class in the Android framework to compute the distance
+                // between the handset and the bus stop.
+                Location.distanceBetween(latitude, longitude,
+                        cursor.getDouble(latitudeColumn), cursor.getDouble(longitudeColumn),
                         distance);
-                final String stopCode = c.getString(0);
+                final String stopCode = cursor.getString(stopCodeColumn);
 
                 try {
                     // Create a new SearchResult and add it to the results list.
-                    result.add(new SearchResult(stopCode, c.getString(1),
-                            bsd.getBusServicesForStopAsString(stopCode), distance[0], c.getInt(4),
-                            c.getString(5)));
+                    result.add(new SearchResult(stopCode, cursor.getString(stopNameColumn),
+                            cursor.getString(servicesColumn), distance[0],
+                            cursor.getInt(orientationColumn), cursor.getString(localityColumn)));
                 } catch (IllegalArgumentException ignored) {
                     // Nothing to do here. Don't add the item if it doesn't meet the minimum data
                     // requirements.
                 }
             }
-
-            // Cursor is no longer needed, free the resource.
-            c.close();
         }
 
         // Sort the bus stop results in order of distance from the device.
