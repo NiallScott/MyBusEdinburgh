@@ -49,12 +49,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.ref.WeakReference;
+import java.util.Map;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.ui.RecyclerCursorAdapter;
 import uk.org.rivernile.android.utils.MapsUtils;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -68,8 +67,8 @@ class AlertsAdapter extends RecyclerCursorAdapter<AlertsAdapter.BaseViewHolder> 
     private static final int VIEW_TYPE_PROXIMITY = 1;
     private static final int VIEW_TYPE_TIME = 2;
 
-    private final BusStopDatabase bsd;
     private WeakReference<OnItemClickListener> clickListenerRef;
+    private Map<String, BusStop> busStops;
 
     private int typeColumnIndex;
     private int busStopCodeIndex;
@@ -84,8 +83,6 @@ class AlertsAdapter extends RecyclerCursorAdapter<AlertsAdapter.BaseViewHolder> 
      */
     AlertsAdapter(@NonNull final Context context) {
         super(context);
-
-        bsd = ((BusApplication) context.getApplicationContext()).getBusStopDatabase();
     }
 
     @Override
@@ -149,6 +146,19 @@ class AlertsAdapter extends RecyclerCursorAdapter<AlertsAdapter.BaseViewHolder> 
     }
 
     /**
+     * Set the {@link Map} of bus stops that the alerts reference, so that bus stop data is
+     * populated.
+     *
+     * @param busStops The {@link Map} of bus stop data.
+     */
+    void setBusStops(@Nullable final Map<String, BusStop> busStops) {
+        if (this.busStops != busStops) {
+            this.busStops = busStops;
+            notifyDataSetChanged();
+        }
+    }
+
+    /**
      * This {@link RecyclerView.ViewHolder} provides a base implementation of the items.
      */
     abstract class BaseViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
@@ -206,29 +216,22 @@ class AlertsAdapter extends RecyclerCursorAdapter<AlertsAdapter.BaseViewHolder> 
         void populate(@Nullable final Cursor cursor) {
             if (cursor != null) {
                 final String stopCode = cursor.getString(busStopCodeIndex);
-                final Cursor busStopCursor = bsd.getBusStopByCode(stopCode);
+                final BusStop busStop = busStops != null ? busStops.get(stopCode) : null;
 
-                if (busStopCursor != null) {
-                    if (busStopCursor.moveToFirst()) {
-                        final String stopName = busStopCursor.getString(2);
-                        latLon = new LatLng(busStopCursor.getDouble(3), busStopCursor.getDouble(4));
-                        stopOrientation = busStopCursor.getInt(5);
-                        final String stopLocality = busStopCursor.getString(6);
+                if (busStop != null) {
+                    final String stopName = busStop.getStopName();
+                    final String locality = busStop.getLocality();
 
-                        if (TextUtils.isEmpty(stopLocality)) {
-                            this.stopName = getContext().getString(R.string.busstop, stopName,
-                                    stopCode);
-                        } else {
-                            this.stopName = getContext().getString(R.string.busstop_locality,
-                                    stopName, stopLocality, stopCode);
-                        }
+                    if (TextUtils.isEmpty(locality)) {
+                        this.stopName = getContext().getString(R.string.busstop, stopName,
+                                stopCode);
                     } else {
-                        stopName = null;
-                        latLon = null;
-                        stopOrientation = -1;
+                        this.stopName = getContext().getString(R.string.busstop_locality,
+                                stopName, locality, stopCode);
                     }
 
-                    busStopCursor.close();
+                    latLon = new LatLng(busStop.getLatitude(), busStop.getLongitude());
+                    stopOrientation = busStop.getOrientation();
                 } else {
                     stopName = null;
                     latLon = null;

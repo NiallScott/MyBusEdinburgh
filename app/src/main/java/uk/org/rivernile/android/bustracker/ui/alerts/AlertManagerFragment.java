@@ -42,9 +42,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.Map;
+
+import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AlertsLoader;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -54,9 +58,10 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 public class AlertManagerFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Cursor>, AlertsAdapter.OnItemClickListener {
+        implements LoaderManager.LoaderCallbacks, AlertsAdapter.OnItemClickListener {
 
     private static final int LOADER_ALERTS = 1;
+    private static final int LOADER_BUS_STOPS = 2;
     
     private Callbacks callbacks;
     private AlertsAdapter adapter;
@@ -108,26 +113,35 @@ public class AlertManagerFragment extends Fragment
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
+    public Loader onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LOADER_ALERTS:
                 return new AlertsLoader(getActivity());
+            case LOADER_BUS_STOPS:
+                final String[] stopCodes = getStopCodes();
+                return stopCodes != null ? new AlertsBusStopLoader(getContext(), stopCodes) : null;
             default:
                 return null;
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void onLoadFinished(final Loader<Cursor> loader, final Cursor c) {
+    public void onLoadFinished(final Loader loader, final Object result) {
         switch (loader.getId()) {
             case LOADER_ALERTS:
-                handleAlertsLoaded(c);
+                handleAlertsLoaded((Cursor) result);
+                break;
+            case LOADER_BUS_STOPS:
+                handleBusStopsLoaded(
+                        ((ProcessedCursorLoader.ResultWrapper<Map<String, BusStop>>) result)
+                                .getResult());
                 break;
         }
     }
 
     @Override
-    public void onLoaderReset(final Loader<Cursor> loader) {
+    public void onLoaderReset(final Loader loader) {
         switch (loader.getId()) {
             case LOADER_ALERTS:
                 // If the Loader has been reset, empty the adapter.
@@ -162,12 +176,28 @@ public class AlertManagerFragment extends Fragment
     }
 
     /**
+     * Load bus stop information for the loaded alerts.
+     */
+    private void loadAlertBusStops() {
+        getLoaderManager().restartLoader(LOADER_BUS_STOPS, null, this);
+    }
+
+    /**
      * Handle the resulting {@link Cursor} from loading the active alerts.
      *
      * @param cursor The active alerts.
      */
     private void handleAlertsLoaded(@Nullable final Cursor cursor) {
         swapCursor(cursor);
+    }
+
+    /**
+     * Handle the resulting {@link Map} of bus stops loaded from the database.
+     *
+     * @param busStops The {@link Map} of bus stop data.
+     */
+    private void handleBusStopsLoaded(@Nullable final Map<String, BusStop> busStops) {
+        adapter.setBusStops(busStops);
     }
 
     /**
@@ -180,6 +210,7 @@ public class AlertManagerFragment extends Fragment
 
         if (cursor != null && cursor.getCount() > 0) {
             showContent();
+            loadAlertBusStops();
         } else {
             showEmpty();
         }
@@ -210,6 +241,37 @@ public class AlertManagerFragment extends Fragment
         recyclerView.setVisibility(View.GONE);
         progress.setVisibility(View.GONE);
         txtEmpty.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Get the stop codes for the currently loaded alerts {@link Cursor}.
+     *
+     * @return The stop codes for the currently loaded alerts {@link Cursor}, or {@code null} if
+     * there is no currently loaded {@link Cursor} or it is empty.
+     */
+    @Nullable
+    private String[] getStopCodes() {
+        final Cursor cursor = adapter.getCursor();
+
+        if (cursor != null) {
+            final int count = cursor.getCount();
+
+            if (count == 0) {
+                return null;
+            }
+
+            final int stopCodeColumn = cursor.getColumnIndex(SettingsContract.Alerts.STOP_CODE);
+            final String[] stopCodes = new String[count];
+
+            for (int i = 0; i < count; i++) {
+                cursor.moveToPosition(i);
+                stopCodes[i] = cursor.getString(stopCodeColumn);
+            }
+
+            return stopCodes;
+        } else {
+            return null;
+        }
     }
 
     /**
