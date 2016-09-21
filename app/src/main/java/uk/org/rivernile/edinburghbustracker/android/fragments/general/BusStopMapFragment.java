@@ -76,7 +76,7 @@ import uk.org.rivernile.edinburghbustracker.android.MapSearchSuggestionsProvider
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.MapTypeChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.maps.BusStopMarkerLoader;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopMarkerLoader;
 import uk.org.rivernile.edinburghbustracker.android.maps.GeoSearchLoader;
 import uk.org.rivernile.edinburghbustracker.android.maps.MapInfoWindow;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.RouteLineLoader;
@@ -438,26 +438,12 @@ public class BusStopMapFragment extends SupportMapFragment
     public Loader onCreateLoader(final int i, final Bundle bundle) {
         switch (i) {
             case LOADER_ID_BUS_STOPS:
-                if (bundle.containsKey(LOADER_ARG_FILTERED_SERVICES)) {
-                    return new BusStopMarkerLoader(
-                            getActivity(),
-                            bundle.getDouble(LOADER_ARG_MIN_X),
-                            bundle.getDouble(LOADER_ARG_MIN_Y),
-                            bundle.getDouble(LOADER_ARG_MAX_X),
-                            bundle.getDouble(LOADER_ARG_MAX_Y),
-                            bundle.getFloat(LOADER_ARG_ZOOM),
-                            bundle.getStringArray(LOADER_ARG_FILTERED_SERVICES)
-                        );
-                } else {
-                    return new BusStopMarkerLoader(
-                            getActivity(),
-                            bundle.getDouble(LOADER_ARG_MIN_X),
-                            bundle.getDouble(LOADER_ARG_MIN_Y),
-                            bundle.getDouble(LOADER_ARG_MAX_X),
-                            bundle.getDouble(LOADER_ARG_MAX_Y),
-                            bundle.getFloat(LOADER_ARG_ZOOM)
-                        );
-                }
+                return new BusStopMarkerLoader(getContext(),
+                        bundle.getDouble(LOADER_ARG_MIN_X),
+                        bundle.getDouble(LOADER_ARG_MIN_Y),
+                        bundle.getDouble(LOADER_ARG_MAX_X),
+                        bundle.getDouble(LOADER_ARG_MAX_Y),
+                        bundle.getStringArray(LOADER_ARG_FILTERED_SERVICES));
             case LOADER_ID_GEO_SEARCH:
                 String query = bundle.getString(LOADER_ARG_QUERY);
                 // Make sure the query arg is not null.
@@ -480,7 +466,8 @@ public class BusStopMapFragment extends SupportMapFragment
         if (isAdded()) {
             switch (loader.getId()) {
                 case LOADER_ID_BUS_STOPS:
-                    addBusStopMarkers((HashMap<String, MarkerOptions>) d);
+                    addBusStopMarkers(((ProcessedCursorLoader.ResultWrapper<Map<String,
+                            MarkerOptions>>) d).getResult());
                     break;
                 case LOADER_ID_GEO_SEARCH:
                     addGeoSearchResults((HashSet<MarkerOptions>) d);
@@ -728,7 +715,7 @@ public class BusStopMapFragment extends SupportMapFragment
      * 
      * @param result The data to be populated on the map.
      */
-    private void addBusStopMarkers(final HashMap<String, MarkerOptions> result) {
+    private void addBusStopMarkers(final Map<String, MarkerOptions> result) {
         if (map == null) {
             return;
         }
