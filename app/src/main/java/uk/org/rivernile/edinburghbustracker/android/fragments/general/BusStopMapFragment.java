@@ -62,12 +62,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.MapSearchSuggestionsProvider;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -76,7 +79,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesCh
 import uk.org.rivernile.edinburghbustracker.android.maps.BusStopMarkerLoader;
 import uk.org.rivernile.edinburghbustracker.android.maps.GeoSearchLoader;
 import uk.org.rivernile.edinburghbustracker.android.maps.MapInfoWindow;
-import uk.org.rivernile.edinburghbustracker.android.maps.RouteLineLoader;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.RouteLineLoader;
 
 /**
  * The {@code BusStopMapFragment} shows a Google Maps v2 {@link com.google.android.gms.maps.MapView}
@@ -471,6 +474,7 @@ public class BusStopMapFragment extends SupportMapFragment
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onLoadFinished(final Loader loader, final Object d) {
         if (isAdded()) {
@@ -482,7 +486,13 @@ public class BusStopMapFragment extends SupportMapFragment
                     addGeoSearchResults((HashSet<MarkerOptions>) d);
                     break;
                 case LOADER_ID_ROUTE_LINES:
-                    addRouteLines((HashMap<String, LinkedList<PolylineOptions>>) d);
+                    final Map<String, List<PolylineOptions>> result = ((ProcessedCursorLoader
+                            .ResultWrapper<Map<String, List<PolylineOptions>>>) d).getResult();
+
+                    if (result != null) {
+                        addRouteLines(result);
+                    }
+
                     break;
                 default:
                     break;
@@ -829,12 +839,12 @@ public class BusStopMapFragment extends SupportMapFragment
      * {@link PolylineOptions} objects. This is a {@link LinkedList} because a service may have
      * more than one {@link Polyline}.
      */
-    private void addRouteLines(@NonNull final HashMap<String, LinkedList<PolylineOptions>> result) {
+    private void addRouteLines(@NonNull final Map<String, List<PolylineOptions>> result) {
         if (map == null) {
             return;
         }
         
-        LinkedList<PolylineOptions> polyLineOptions;
+        List<PolylineOptions> polyLineOptions;
         LinkedList<Polyline> newPolyLines;
         
         // Loop through all services in the HashMap.

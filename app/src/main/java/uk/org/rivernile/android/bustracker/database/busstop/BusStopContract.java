@@ -432,7 +432,7 @@ public final class BusStopContract {
         /**
          * The name of the table. To be used within the package.
          */
-        static final String TABLE_NAME = "service_point";
+        static final String TABLE_NAME = "view_service_points";
 
         private static final String TYPE_SERVICE_POINTS = "vnd." + AUTHORITY + '.' + TABLE_NAME;
 
