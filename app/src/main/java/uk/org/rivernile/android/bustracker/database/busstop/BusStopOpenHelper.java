@@ -241,11 +241,30 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
      * @param db The database to create the views on.
      */
     private static void setUpViews(@NonNull final SQLiteDatabase db) {
+        setUpServicesView(db);
+        setUpBusStopsView(db);
+        setUpServicePointsView(db);
+    }
+
+    /**
+     * Set up a view on the database to make interacting with the services table easier.
+     *
+     * @param db The database to create the view on.
+     */
+    private static void setUpServicesView(@NonNull final SQLiteDatabase db) {
         db.execSQL("CREATE VIEW IF NOT EXISTS " + BusStopContract.Services.TABLE_NAME +
                 " AS SELECT service._id AS " + BusStopContract.Services._ID + ", " +
                 BusStopContract.Services.NAME + ", " + BusStopContract.Services.DESCRIPTION + ", " +
                 BusStopContract.Services.COLOUR + " FROM service LEFT JOIN service_colour ON " +
                 "service._id = service_colour._id");
+    }
+
+    /**
+     * Set up a view on the database to make interacting with the bus stops table easier.
+     *
+     * @param db The database to create the view on.
+     */
+    private static void setUpBusStopsView(@NonNull final SQLiteDatabase db) {
         db.execSQL("CREATE VIEW IF NOT EXISTS " + BusStopContract.BusStops.TABLE_NAME +
                 " AS SELECT " + BusStopContract.BusStops._ID + ", " +
                 BusStopContract.BusStops.STOP_CODE + ", " + BusStopContract.BusStops.STOP_NAME +
@@ -263,5 +282,23 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
                 BusStopContract.ServiceStops.SERVICE_NAME + " AS int) END) GROUP BY " +
                 BusStopContract.ServiceStops.STOP_CODE + ") AS " +
                 BusStopContract.BusStops.SERVICE_LISTING + " FROM bus_stops");
+    }
+
+    /**
+     * Set up a view on the database to make interacting with the service points table easier.
+     *
+     * @param db The database to create the view on.
+     */
+    private static void setUpServicePointsView(@NonNull final SQLiteDatabase db) {
+        db.execSQL("CREATE VIEW IF NOT EXISTS " + BusStopContract.ServicePoints.TABLE_NAME +
+                " AS SELECT service_point._id AS " + BusStopContract.ServicePoints._ID +
+                ", service.name AS " + BusStopContract.ServicePoints.SERVICE_NAME + ", " +
+                "bus_stops.stopCode AS " + BusStopContract.ServicePoints.STOP_CODE +
+                ", " + BusStopContract.ServicePoints.ORDER_VALUE + ", " +
+                BusStopContract.ServicePoints.CHAINAGE + ", " +
+                BusStopContract.ServicePoints.LATITUDE + ", " +
+                BusStopContract.ServicePoints.LONGITUDE +
+                " FROM service_point LEFT JOIN service ON service_id = service._id LEFT JOIN " +
+                "bus_stops ON stop_id = bus_stops._id");
     }
 }

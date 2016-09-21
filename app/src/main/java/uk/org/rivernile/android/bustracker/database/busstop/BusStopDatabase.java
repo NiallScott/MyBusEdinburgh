@@ -29,6 +29,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class contains static methods to aid in dealing with the bus stop database and provides
@@ -49,6 +54,7 @@ public final class BusStopDatabase {
      * @param context A {@link Context} instance.
      * @return The topology ID of the database, or {@code null} if there was a problem getting it.
      */
+    @WorkerThread
     @Nullable
     public static String getTopologyId(@NonNull final Context context) {
         final Cursor c = context.getContentResolver().query(
@@ -83,6 +89,7 @@ public final class BusStopDatabase {
      * @param searchQuery The query to search for.
      * @return A {@link Cursor} containing the matching bus stops.
      */
+    @WorkerThread
     @Nullable
     public static Cursor searchBusStops(@NonNull final Context context,
             @NonNull final String searchQuery) {
@@ -109,6 +116,56 @@ public final class BusStopDatabase {
         }
 
         return c;
+    }
+
+    /**
+     * Get a mapping of service to the colour attributed for the service.
+     *
+     * @param context A {@link Context} instance.
+     * @param services A {@link String} array of services to get colours for, or {@code null} if
+     * colours for all known services should be retrieved.
+     * @return A {@link Map} of service name to service colour, or {@code null} if there was a
+     * problem obtaining colours.
+     */
+    @WorkerThread
+    @Nullable
+    public static Map<String, String> getServiceColours(@NonNull final Context context,
+            @Nullable final String[] services) {
+        final String selection;
+        final String[] selectionArgs;
+
+        if (services != null && services.length > 0) {
+            selection = BusStopContract.Services.NAME + " IN (?)";
+            selectionArgs = new String[] { convertArrayToInParameter(services) };
+        } else {
+            selection = null;
+            selectionArgs = null;
+        }
+
+        final Cursor c = context.getContentResolver().query(BusStopContract.Services.CONTENT_URI,
+                new String[] {
+                        BusStopContract.Services.NAME,
+                        BusStopContract.Services.COLOUR
+                },
+                selection, selectionArgs, null);
+
+        if (c != null) {
+            final HashMap<String, String> serviceColours = new HashMap<>(c.getCount());
+            final int serviceNameColumn = c.getColumnIndex(BusStopContract.Services.NAME);
+            final int serviceColourColumn = c.getColumnIndex(BusStopContract.Services.COLOUR);
+            c.moveToPosition(-1);
+
+            while (c.moveToNext()) {
+                serviceColours.put(c.getString(serviceNameColumn),
+                        c.getString(serviceColourColumn));
+            }
+
+            c.close();
+
+            return Collections.unmodifiableMap(serviceColours);
+        } else {
+            return null;
+        }
     }
 
     /**
