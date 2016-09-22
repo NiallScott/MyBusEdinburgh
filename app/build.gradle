@@ -42,7 +42,7 @@ android {
 
         try {
             properties.load(new FileInputStream("local.properties"))
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             // Do nothing. This is probably happening on the CI server.
         }
 
@@ -70,19 +70,19 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:recyclerview-v7:24.2.0'
-    compile 'com.android.support:cardview-v7:24.2.0'
-    compile 'com.android.support:percent:24.2.0'
-    compile 'com.google.android.gms:play-services-maps:9.4.0'
+    compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.android.support:recyclerview-v7:24.2.1'
+    compile 'com.android.support:cardview-v7:24.2.1'
+    compile 'com.android.support:percent:24.2.1'
+    compile 'com.google.android.gms:play-services-maps:9.6.0'
     compile 'uk.org.rivernile.android.fetchutils:fetchutils-library:1.1.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
 
-    androidTestCompile 'com.android.support:support-annotations:24.2.0'
-    androidTestCompile 'com.android.support.test:runner:0.4.1'
-    androidTestCompile 'com.android.support.test:rules:0.4.1'
+    androidTestCompile 'com.android.support:support-annotations:24.2.1'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
 
     testCompile 'junit:junit:4.12'
 }
