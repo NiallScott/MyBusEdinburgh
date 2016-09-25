@@ -296,7 +296,7 @@ public class BusStopProvider extends ContentProvider {
                     BusStopContract.ServicePoints.ORDER_VALUE + " ASC";
         }
 
-        return openHelper.getReadableDatabase().query(BusStopContract.ServiceStops.TABLE_NAME,
+        return openHelper.getReadableDatabase().query(BusStopContract.ServicePoints.TABLE_NAME,
                 projection, selection, selectionArgs, null, null, sortOrder);
     }
 

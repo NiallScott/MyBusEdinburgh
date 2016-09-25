@@ -49,6 +49,7 @@ import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
@@ -60,9 +61,8 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesCh
  * @author Niall Scott
  */
 public class AddTimeAlertFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Cursor>,
-        ServicesChooserDialogFragment.Callbacks, View.OnClickListener,
-        AdapterView.OnItemSelectedListener {
+        implements LoaderManager.LoaderCallbacks, ServicesChooserDialogFragment.Callbacks,
+        View.OnClickListener, AdapterView.OnItemSelectedListener {
     
     /** The argument for the stopCode. */
     public static final String ARG_STOPCODE = "stopCode";
@@ -194,7 +194,7 @@ public class AddTimeAlertFragment extends Fragment
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
+    public Loader onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LOADER_BUS_STOP:
                 return new BusStopLoader(getContext(), stopCode,
@@ -209,20 +209,22 @@ public class AddTimeAlertFragment extends Fragment
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
+    public void onLoadFinished(final Loader loader, final Object data) {
         switch (loader.getId()) {
             case LOADER_BUS_STOP:
-                handleBusStopLoaded(data);
+                handleBusStopLoaded((Cursor) data);
                 break;
             case LOADER_SERVICES:
-                handleServicesLoaded(((BusStopServiceNamesLoader) data).getServices());
+                handleServicesLoaded(((ProcessedCursorLoader.ResultWrapper<String[]>) data)
+                        .getResult());
                 break;
         }
     }
 
     @Override
-    public void onLoaderReset(final Loader<Cursor> loader) {
+    public void onLoaderReset(final Loader loader) {
         // Nothing to do here.
     }
 

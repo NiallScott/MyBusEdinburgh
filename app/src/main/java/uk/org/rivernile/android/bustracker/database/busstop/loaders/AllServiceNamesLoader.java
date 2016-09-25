@@ -62,7 +62,7 @@ public class AllServiceNamesLoader extends ProcessedCursorLoader<String[]> {
         if (cursor != null) {
             final int count = cursor.getCount();
             final int serviceNameColumn = cursor.getColumnIndex(BusStopContract.Services.NAME);
-            services = new String[cursor.getCount()];
+            services = new String[count];
 
             for (int i = 0; i < count; i++) {
                 if (cursor.moveToPosition(i)) {
