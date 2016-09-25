@@ -31,9 +31,11 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
@@ -67,11 +69,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.MapSearchSuggestionsProvider;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.MapTypeChooserDialogFragment;
@@ -96,9 +99,8 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.RouteLineLoa
  */
 public class BusStopMapFragment extends SupportMapFragment
         implements OnMapReadyCallback, GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
-        LoaderManager.LoaderCallbacks, ServicesChooserDialogFragment.Callbacks,
-        MapTypeChooserDialogFragment.Callbacks {
+        GoogleMap.OnInfoWindowClickListener, LoaderManager.LoaderCallbacks,
+        ServicesChooserDialogFragment.Callbacks, MapTypeChooserDialogFragment.Callbacks {
     
     /** The stopCode argument. */
     public static final String ARG_STOPCODE = "stopCode";
@@ -135,11 +137,12 @@ public class BusStopMapFragment extends SupportMapFragment
     private static final int LOADER_ID_BUS_STOPS = 0;
     private static final int LOADER_ID_GEO_SEARCH = 1;
     private static final int LOADER_ID_ROUTE_LINES = 2;
+    private static final int LOADER_ID_SERVICES = 3;
+    private static final int LOADER_ID_BUS_STOP_COORDS = 4;
 
     private static final int PERMISSION_REQUEST_LOCATION = 1;
     
     private Callbacks callbacks;
-    private BusStopDatabase bsd;
     private GoogleMap map;
     private SharedPreferences sp;
     private SearchManager searchMan;
@@ -153,6 +156,7 @@ public class BusStopMapFragment extends SupportMapFragment
     private int actionBarHeight;
 
     private SearchView searchView;
+    private MenuItem menuItemServices;
     private MenuItem menuItemSearch;
     private MenuItem menuItemTrafficView;
     
@@ -223,10 +227,8 @@ public class BusStopMapFragment extends SupportMapFragment
         super.onCreate(savedInstanceState);
         
         final Context context = getActivity();
-        bsd = ((BusApplication) getActivity().getApplication()).getBusStopDatabase();
         sp = context.getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         searchMan = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
-        services = bsd.getBusServiceList();
         
         if (savedInstanceState != null) {
             chosenServices = savedInstanceState.getStringArray(STATE_CHOSEN_SERVICES);
@@ -247,6 +249,7 @@ public class BusStopMapFragment extends SupportMapFragment
         
         getActivity().setTitle(R.string.map_title);
         getMapAsync(this);
+        getLoaderManager().initLoader(LOADER_ID_SERVICES, null, this);
 
         if (savedInstanceState == null) {
             if (sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true) &&
@@ -326,7 +329,6 @@ public class BusStopMapFragment extends SupportMapFragment
 
         map.setInfoWindowAdapter(new MapInfoWindow(getActivity()));
         map.setOnCameraChangeListener(this);
-        map.setOnMarkerClickListener(this);
         map.setOnInfoWindowClickListener(this);
         map.setMapType(sp.getInt(PreferenceConstants.PREF_MAP_LAST_MAP_TYPE,
                 GoogleMap.MAP_TYPE_NORMAL));
@@ -356,6 +358,7 @@ public class BusStopMapFragment extends SupportMapFragment
         inflater.inflate(R.menu.busstopmap_option_menu, menu);
 
         menuItemTrafficView = menu.findItem(R.id.busstopmap_option_menu_trafficview);
+        menuItemServices = menu.findItem(R.id.busstopmap_option_menu_services);
         menuItemSearch = menu.findItem(R.id.busstopmap_option_menu_search);
         searchView = (SearchView) MenuItemCompat.getActionView(menuItemSearch);
         searchView.setSearchableInfo(searchMan.getSearchableInfo(getActivity().getComponentName()));
@@ -364,11 +367,9 @@ public class BusStopMapFragment extends SupportMapFragment
     @Override
     public void onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        
+
+        configureServicesMenuItem();
         configureTrafficViewMenuItem();
-        
-        final MenuItem item = menu.findItem(R.id.busstopmap_option_menu_services);
-        item.setEnabled(services != null && services.length > 0);
     }
 
     @Override
@@ -409,21 +410,6 @@ public class BusStopMapFragment extends SupportMapFragment
     }
 
     @Override
-    public boolean onMarkerClick(final Marker marker) {
-        final String snippet = marker.getSnippet();
-        
-        if (busStopMarkers.containsValue(marker) && TextUtils.isEmpty(snippet)) {
-            final Matcher matcher = STOP_CODE_PATTERN.matcher(marker.getTitle());
-
-            if (matcher.find()) {
-                marker.setSnippet(bsd.getBusServicesForStopAsString(matcher.group(1)));
-            }
-        }
-        
-        return false;
-    }
-
-    @Override
     public void onInfoWindowClick(final Marker marker) {
         if (busStopMarkers.containsValue(marker)) {
             final Matcher matcher = STOP_CODE_PATTERN.matcher(marker.getTitle());
@@ -455,6 +441,14 @@ public class BusStopMapFragment extends SupportMapFragment
             case LOADER_ID_ROUTE_LINES:
                 return new RouteLineLoader(getActivity(),
                         bundle.getStringArray(LOADER_ARG_FILTERED_SERVICES));
+            case LOADER_ID_SERVICES:
+                return new AllServiceNamesLoader(getContext());
+            case LOADER_ID_BUS_STOP_COORDS:
+                return new BusStopLoader(getContext(), searchedBusStop,
+                        new String[] {
+                                BusStopContract.BusStops.LATITUDE,
+                                BusStopContract.BusStops.LONGITUDE
+                        });
             default:
                 return null;
         }
@@ -481,6 +475,12 @@ public class BusStopMapFragment extends SupportMapFragment
                     }
 
                     break;
+                case LOADER_ID_SERVICES:
+                    services = ((ProcessedCursorLoader.ResultWrapper<String[]>) d).getResult();
+                    configureServicesMenuItem();
+                    break;
+                case LOADER_ID_BUS_STOP_COORDS:
+                    handleLoadBusStopCoords((Cursor) d);
                 default:
                     break;
             }
@@ -640,7 +640,7 @@ public class BusStopMapFragment extends SupportMapFragment
         }
         
         searchedBusStop = stopCode;
-        moveCameraToLocation(bsd.getLatLngForStopCode(stopCode), DEFAULT_SEARCH_ZOOM, true);
+        getLoaderManager().restartLoader(LOADER_ID_BUS_STOP_COORDS, null, this);
     }
     
     /**
@@ -751,14 +751,6 @@ public class BusStopMapFragment extends SupportMapFragment
             
             // If the marker has been found...
             if (marker != null) {
-                // Get the snippet text for the marker and if it does not exist, populate it with
-                // the bus services list.
-                final String snippet = marker.getSnippet();
-
-                if (TextUtils.isEmpty(snippet)) {
-                    marker.setSnippet(bsd.getBusServicesForStopAsString(searchedBusStop));
-                }
-                
                 // Show the info window of the marker to highlight it.
                 marker.showInfoWindow();
                 // Set this to null to make sure the stop isn't highlighted again, until the user
@@ -893,6 +885,25 @@ public class BusStopMapFragment extends SupportMapFragment
     }
 
     /**
+     * Handle bus stop coordinates being loaded. This is done when a bus stop is deep linked in to
+     * and the camera should pan to the selected bus stop.
+     *
+     * @param cursor The {@link Cursor} containing the latitude and longitude of the selected bus
+     * stop.
+     */
+    private void handleLoadBusStopCoords(@Nullable final Cursor cursor) {
+        getLoaderManager().destroyLoader(LOADER_ID_BUS_STOP_COORDS);
+
+        if (cursor != null) {
+            final int latitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LATITUDE);
+            final int longitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LONGITUDE);
+            final LatLng location =
+                    new LatLng(cursor.getDouble(latitudeColumn), cursor.getDouble(longitudeColumn));
+            moveCameraToLocation(location, DEFAULT_SEARCH_ZOOM, true);
+        }
+    }
+
+    /**
      * Configure the traffic view menu item.
      */
     private void configureTrafficViewMenuItem() {
@@ -908,6 +919,16 @@ public class BusStopMapFragment extends SupportMapFragment
             } else {
                 menuItemTrafficView.setEnabled(false);
             }
+        }
+    }
+
+    /**
+     * Update the filter {@link MenuItem} to be enabled/disabled depending on the current state.
+     */
+    private void configureServicesMenuItem() {
+        if (menuItemServices != null) {
+            menuItemServices.setEnabled(services != null && services.length > 0 &&
+                    hasLocationPermission());
         }
     }
 
