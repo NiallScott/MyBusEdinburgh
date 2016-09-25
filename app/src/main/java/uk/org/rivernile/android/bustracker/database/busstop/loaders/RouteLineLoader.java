@@ -72,10 +72,9 @@ public class RouteLineLoader extends ProcessedCursorLoader<Map<String, List<Poly
                         BusStopContract.ServicePoints.LATITUDE,
                         BusStopContract.ServicePoints.LONGITUDE
                 },
-                BusStopContract.ServicePoints.SERVICE_NAME + " IN (?)",
-                new String[] {
-                        BusStopDatabase.convertArrayToInParameter(services)
-                },
+                BusStopContract.ServicePoints.SERVICE_NAME + " IN (" +
+                        BusStopDatabase.generateInPlaceholders(services.length) + ')',
+                services,
                 BusStopContract.ServicePoints.SERVICE_NAME + " ASC, "
                         + BusStopContract.ServicePoints.CHAINAGE + " ASC, "
                         + BusStopContract.ServicePoints.ORDER_VALUE + " ASC");
