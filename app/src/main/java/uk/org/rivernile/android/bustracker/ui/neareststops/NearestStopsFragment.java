@@ -309,7 +309,7 @@ public class NearestStopsFragment extends Fragment
                                 .getResult());
                 break;
             case LOADER_SERVICES:
-                services = ((AllServiceNamesLoader) result).getServices();
+                services = ((ProcessedCursorLoader.ResultWrapper<String[]>) result).getResult();
                 updateFilterMenuItem();
                 break;
             case LOADER_HAS_FAVOURITE_STOP:
