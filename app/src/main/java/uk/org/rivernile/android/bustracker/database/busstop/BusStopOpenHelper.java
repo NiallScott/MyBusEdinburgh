@@ -224,9 +224,8 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
         db.beginTransaction();
 
         try {
-            db.execSQL("CREATE INDEX IF NOT EXISTS " + BusStopContract.ServicePoints.TABLE_NAME +
-                    "_index ON " + BusStopContract.ServicePoints.TABLE_NAME + "(service_id, " +
-                    BusStopContract.ServicePoints.CHAINAGE + ", " +
+            db.execSQL("CREATE INDEX IF NOT EXISTS service_point_index ON service_point " +
+                    "(service_id, " + BusStopContract.ServicePoints.CHAINAGE + ", " +
                     BusStopContract.ServicePoints.ORDER_VALUE + ")");
             db.setTransactionSuccessful();
         } finally {

@@ -426,8 +426,8 @@ public class BusStopMapFragment extends SupportMapFragment
             case LOADER_ID_BUS_STOPS:
                 return new BusStopMarkerLoader(getContext(),
                         bundle.getDouble(LOADER_ARG_MIN_X),
-                        bundle.getDouble(LOADER_ARG_MIN_Y),
                         bundle.getDouble(LOADER_ARG_MAX_X),
+                        bundle.getDouble(LOADER_ARG_MIN_Y),
                         bundle.getDouble(LOADER_ARG_MAX_Y),
                         bundle.getStringArray(LOADER_ARG_FILTERED_SERVICES));
             case LOADER_ID_GEO_SEARCH:

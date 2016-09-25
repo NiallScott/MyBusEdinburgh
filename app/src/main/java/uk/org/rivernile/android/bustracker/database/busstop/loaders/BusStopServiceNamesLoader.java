@@ -29,10 +29,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.CursorLoader;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 
 /**
  * This class is used to load the names of all services that are in the bus stop database that stop
@@ -42,9 +42,7 @@ import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
  *
  * @author Niall Scott
  */
-public class BusStopServiceNamesLoader extends CursorLoader {
-
-    private String[] services;
+public class BusStopServiceNamesLoader extends ProcessedCursorLoader<String[]> {
 
     /**
      * Create a new {@code BusStopServiceNamesLoader}.
@@ -61,35 +59,26 @@ public class BusStopServiceNamesLoader extends CursorLoader {
                         BusStopContract.ServiceStops.SERVICE_NAME));
     }
 
+    @Nullable
     @Override
-    public Cursor loadInBackground() {
-        final Cursor c = super.loadInBackground();
+    public String[] processCursor(@Nullable final Cursor cursor) {
+        final String[] services;
 
-        if (c != null) {
-            final int count = c.getCount();
-            final int serviceNameColumn = c.getColumnIndex(
+        if (cursor != null) {
+            final int count = cursor.getCount();
+            final int serviceNameColumn = cursor.getColumnIndex(
                     BusStopContract.ServiceStops.SERVICE_NAME);
-            services = new String[c.getCount()];
+            services = new String[count];
 
             for (int i = 0; i < count; i++) {
-                if (c.moveToPosition(i)) {
-                    services[i] = c.getString(serviceNameColumn);
+                if (cursor.moveToPosition(i)) {
+                    services[i] = cursor.getString(serviceNameColumn);
                 }
             }
         } else {
             services = null;
         }
 
-        return c;
-    }
-
-    /**
-     * Get the pre-processed services array. This could be {@code null}.
-     *
-     * @return The pre-processed services array.
-     */
-    @Nullable
-    public String[] getServices() {
         return services;
     }
 }
