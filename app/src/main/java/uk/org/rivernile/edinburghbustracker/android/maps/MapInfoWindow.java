@@ -33,7 +33,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -92,8 +91,7 @@ public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
             txt.setText(marker.getTitle());
             
             txt = (TextView) rootView.findViewById(R.id.txtSnippet);
-            // Set the snippet TextView to that of a coloured list String.
-            txt.setText(BusStopDatabase.getColouredServiceListString(marker.getSnippet()));
+            txt.setText(marker.getSnippet());
             
             return rootView;
         }

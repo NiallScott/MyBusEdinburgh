@@ -31,9 +31,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.text.TextUtils;
 import android.widget.TextView;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
-import uk.org.rivernile.android.bustracker.ui.bustimes
-        .BusTimesExpandableListAdapter;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
+import uk.org.rivernile.android.bustracker.ui.bustimes.BusTimesExpandableListAdapter;
 
 /**
  * This is an Edinburgh-specific implementation of
@@ -73,8 +71,7 @@ public class EdinburghBusTimesExpandableListAdapter
             }
             
             background.setColor(Color.BLACK);
-            txtBusService.setText(BusStopDatabase
-                    .getColouredServiceListString(serviceName));
+            txtBusService.setText(serviceName);
         }
     }
 

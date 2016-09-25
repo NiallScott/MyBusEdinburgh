@@ -89,7 +89,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
