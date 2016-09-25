@@ -50,7 +50,6 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoade
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 
@@ -290,8 +289,8 @@ public class AddTimeAlertFragment extends Fragment
         
         if (chosenServices != null && chosenServices.length > 0) {
             // If the services list is not empty, put the services list in the TextView.
-            txtServices.setText(BusStopDatabase.getColouredServiceListString(
-                    ServicesChooserDialogFragment.getChosenServicesAsString(chosenServices)));
+            txtServices.setText(
+                    ServicesChooserDialogFragment.getChosenServicesAsString(chosenServices));
         } else {
             // If the services list is empty, put the default text in the TextView.
             txtServices.setText(R.string.addtimealert_noservices);

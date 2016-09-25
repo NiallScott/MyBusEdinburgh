@@ -46,8 +46,8 @@ import uk.org.rivernile.edinburghbustracker.android.parser.database.EdinburghDat
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
- * This class is the main entry point to the My Bus Edinburgh application. Some app resources,
- * such as the {@link BusStopDatabase}, can be retrieved from here.
+ * This class is the main entry point to the My Bus Edinburgh application. Some app resources can
+ * be retrieved from here.
  *
  * @author Niall Scott
  */
