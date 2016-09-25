@@ -96,26 +96,26 @@ class NearestStopsLoader extends ProcessedCursorLoader<List<SearchResult>> {
 
         String selection = '(' + BusStopContract.BusStops.LATITUDE + " BETWEEN ? AND ?) AND " +
                 '(' + BusStopContract.BusStops.LONGITUDE + " BETWEEN ? AND ?)";
+        final String[] baseArgs = new String[] {
+                String.valueOf(minLatitude),
+                String.valueOf(maxLatitude),
+                String.valueOf(minLongitude),
+                String.valueOf(maxLongitude)
+        };
 
         if (filteredServices != null && filteredServices.length > 0) {
             selection += " AND " + BusStopContract.BusStops.STOP_CODE + " IN (SELECT " +
                     BusStopContract.ServiceStops.STOP_CODE + " FROM " +
                     BusStopContract.ServiceStops.TABLE_NAME + " WHERE " +
-                    BusStopContract.ServiceStops.SERVICE_NAME + " IN (?)";
-            setSelectionArgs(new String[] {
-                    String.valueOf(minLatitude),
-                    String.valueOf(maxLatitude),
-                    String.valueOf(minLongitude),
-                    String.valueOf(maxLongitude),
-                    BusStopDatabase.convertArrayToInParameter(filteredServices)
-            });
+                    BusStopContract.ServiceStops.SERVICE_NAME + " IN (" +
+                            BusStopDatabase.generateInPlaceholders(filteredServices.length) + "))";
+            final String[] selectionArgs = new String[baseArgs.length + filteredServices.length];
+            System.arraycopy(baseArgs, 0, selectionArgs, 0, baseArgs.length);
+            System.arraycopy(filteredServices, 0, selectionArgs, baseArgs.length,
+                    filteredServices.length);
+            setSelectionArgs(selectionArgs);
         } else {
-            setSelectionArgs(new String[] {
-                    String.valueOf(minLatitude),
-                    String.valueOf(maxLatitude),
-                    String.valueOf(minLongitude),
-                    String.valueOf(maxLongitude)
-            });
+            setSelectionArgs(baseArgs);
         }
 
         setSelection(selection);

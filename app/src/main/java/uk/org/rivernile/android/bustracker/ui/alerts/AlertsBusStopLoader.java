@@ -50,7 +50,7 @@ class AlertsBusStopLoader extends ProcessedCursorLoader<Map<String, BusStop>> {
      * @param context A {@link Context} instance.
      * @param stopCodes The stop codes to load information for.
      */
-    public AlertsBusStopLoader(@NonNull final Context context, @NonNull final String[] stopCodes) {
+    AlertsBusStopLoader(@NonNull final Context context, @NonNull final String[] stopCodes) {
         super(context, BusStopContract.BusStops.CONTENT_URI,
                 new String[] {
                         BusStopContract.BusStops.STOP_CODE,
@@ -60,10 +60,9 @@ class AlertsBusStopLoader extends ProcessedCursorLoader<Map<String, BusStop>> {
                         BusStopContract.BusStops.ORIENTATION,
                         BusStopContract.BusStops.LOCALITY
                 },
-                BusStopContract.BusStops.STOP_CODE + " IN (?)",
-                new String[] {
-                        BusStopDatabase.convertArrayToInParameter(stopCodes)
-                }, null);
+                BusStopContract.BusStops.STOP_CODE + " IN (" +
+                        BusStopDatabase.generateInPlaceholders(stopCodes.length) + ')',
+                stopCodes, null);
     }
 
     @Nullable

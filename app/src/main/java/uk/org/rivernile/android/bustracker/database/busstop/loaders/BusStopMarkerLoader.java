@@ -34,7 +34,6 @@ import android.text.TextUtils;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,32 +76,31 @@ public class BusStopMarkerLoader extends ProcessedCursorLoader<Map<String, Marke
                 BusStopContract.BusStops.LATITUDE,
                 BusStopContract.BusStops.LONGITUDE,
                 BusStopContract.BusStops.ORIENTATION,
-                BusStopContract.BusStops.LOCALITY,
-                BusStopContract.BusStops.SERVICE_LISTING
+                BusStopContract.BusStops.LOCALITY
         });
 
         String selection = '(' + BusStopContract.BusStops.LATITUDE + " BETWEEN ? AND ?) AND " +
                 '(' + BusStopContract.BusStops.LONGITUDE + " BETWEEN ? AND ?)";
+        final String[] baseArgs = new String[] {
+                String.valueOf(minLatitude),
+                String.valueOf(maxLatitude),
+                String.valueOf(minLongitude),
+                String.valueOf(maxLongitude),
+        };
 
         if (filteredServices != null && filteredServices.length > 0) {
             selection += " AND " + BusStopContract.BusStops.STOP_CODE + " IN (" +
                     "SELECT " + BusStopContract.ServiceStops.STOP_CODE + " FROM " +
                     BusStopContract.ServiceStops.TABLE_NAME + " WHERE " +
-                    BusStopContract.ServiceStops.SERVICE_NAME + " IN (?)";
-            setSelectionArgs(new String[] {
-                    String.valueOf(minLatitude),
-                    String.valueOf(maxLatitude),
-                    String.valueOf(minLongitude),
-                    String.valueOf(maxLongitude)
-            });
+                    BusStopContract.ServiceStops.SERVICE_NAME + " IN (" +
+                    BusStopDatabase.generateInPlaceholders(filteredServices.length) + "))";
+            final String[] selectionArgs = new String[baseArgs.length + filteredServices.length];
+            System.arraycopy(baseArgs, 0, selectionArgs, 0, baseArgs.length);
+            System.arraycopy(filteredServices, 0, selectionArgs, baseArgs.length,
+                    filteredServices.length);
+            setSelectionArgs(selectionArgs);
         } else {
-            setSelectionArgs(new String[] {
-                    String.valueOf(minLatitude),
-                    String.valueOf(maxLatitude),
-                    String.valueOf(minLongitude),
-                    String.valueOf(maxLongitude),
-                    BusStopDatabase.convertArrayToInParameter(filteredServices)
-            });
+            setSelectionArgs(baseArgs);
         }
 
         setSelection(selection);
@@ -120,8 +118,6 @@ public class BusStopMarkerLoader extends ProcessedCursorLoader<Map<String, Marke
             final int orientationColumn = cursor.getColumnIndex(
                     BusStopContract.BusStops.ORIENTATION);
             final int localityColumn = cursor.getColumnIndex(BusStopContract.BusStops.LOCALITY);
-            final int serviceListingColumn = cursor.getColumnIndex(
-                    BusStopContract.BusStops.SERVICE_LISTING);
             cursor.moveToPosition(-1);
 
             while (cursor.moveToNext()) {
@@ -139,12 +135,11 @@ public class BusStopMarkerLoader extends ProcessedCursorLoader<Map<String, Marke
                 mo.position(new LatLng(cursor.getDouble(latitudeColumn),
                         cursor.getDouble(longitudeColumn)));
                 mo.title(title);
-                mo.snippet(cursor.getString(serviceListingColumn));
                 MapsUtils.applyStopDirectionToMarker(mo, cursor.getInt(orientationColumn));
                 result.put(stopCode, mo);
             }
 
-            return Collections.unmodifiableMap(result);
+            return result;
         } else {
             return null;
         }

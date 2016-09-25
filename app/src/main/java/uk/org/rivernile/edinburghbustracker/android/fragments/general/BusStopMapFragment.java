@@ -481,6 +481,7 @@ public class BusStopMapFragment extends SupportMapFragment
                     break;
                 case LOADER_ID_BUS_STOP_COORDS:
                     handleLoadBusStopCoords((Cursor) d);
+                    break;
                 default:
                     break;
             }
@@ -892,15 +893,19 @@ public class BusStopMapFragment extends SupportMapFragment
      * stop.
      */
     private void handleLoadBusStopCoords(@Nullable final Cursor cursor) {
-        getLoaderManager().destroyLoader(LOADER_ID_BUS_STOP_COORDS);
-
         if (cursor != null) {
             final int latitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LATITUDE);
             final int longitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LONGITUDE);
-            final LatLng location =
-                    new LatLng(cursor.getDouble(latitudeColumn), cursor.getDouble(longitudeColumn));
-            moveCameraToLocation(location, DEFAULT_SEARCH_ZOOM, true);
+
+            if (cursor.moveToFirst()) {
+                final LatLng location =
+                        new LatLng(cursor.getDouble(latitudeColumn),
+                                cursor.getDouble(longitudeColumn));
+                moveCameraToLocation(location, DEFAULT_SEARCH_ZOOM, true);
+            }
         }
+
+        getLoaderManager().destroyLoader(LOADER_ID_BUS_STOP_COORDS);
     }
 
     /**

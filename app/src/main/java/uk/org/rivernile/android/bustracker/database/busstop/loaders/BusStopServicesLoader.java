@@ -60,8 +60,9 @@ public class BusStopServicesLoader extends ProcessedCursorLoader<Map<String, Str
                         BusStopContract.BusStops.STOP_CODE,
                         BusStopContract.BusStops.SERVICE_LISTING
                 },
-                BusStopContract.BusStops.STOP_CODE + " IN (?)",
-                new String[] { BusStopDatabase.convertArrayToInParameter(busStops) }, null);
+                BusStopContract.BusStops.STOP_CODE + " IN (" +
+                        BusStopDatabase.generateInPlaceholders(busStops.length) + ')',
+                busStops, null);
     }
 
     @Nullable

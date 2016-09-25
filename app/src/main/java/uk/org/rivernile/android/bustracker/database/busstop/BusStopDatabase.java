@@ -135,8 +135,9 @@ public final class BusStopDatabase {
         final String[] selectionArgs;
 
         if (services != null && services.length > 0) {
-            selection = BusStopContract.Services.NAME + " IN (?)";
-            selectionArgs = new String[] { convertArrayToInParameter(services) };
+            selection = BusStopContract.Services.NAME + " IN (" +
+                    generateInPlaceholders(services.length) + ')';
+            selectionArgs = services;
         } else {
             selection = null;
             selectionArgs = null;
@@ -188,56 +189,26 @@ public final class BusStopDatabase {
     }
 
     /**
-     * Given a {@link String} array, convert it in to a {@link String} that is suitably formatted
-     * for the SQL {@code IN} clause.
+     * Generate placeholders for a SQL 'IN' clause.
      *
-     * @param in The array to convert.
-     * @return The formatted {@link String} for the {@code IN} clause, or {@code null} if {@code in}
-     * is {@code null} or {@code 0}-length.
+     * @param count The number of placeholders to generate.
+     * @return A {@link String} of placeholders, or empty {@link String} if {@code count} is less
+     * than {@code 1}.
      */
-    @Nullable
-    public static String convertArrayToInParameter(@Nullable final String[] in) {
-        if (in == null || in.length == 0) {
-            return null;
+    @NonNull
+    public static String generateInPlaceholders(final int count) {
+        if (count < 1) {
+            return "";
         }
 
         final StringBuilder sb = new StringBuilder();
-        final int len = in.length;
 
-        for (int i = 0; i < len; i++) {
-            if (i != 0) {
+        for (int i = 0; i < count; i++) {
+            if (i > 0) {
                 sb.append(',');
             }
 
-            sb.append('\'').append(in[i]).append('\'');
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Given a {@link String} array, convert it in to a {@link String} that's human readable as a
-     * list.
-     *
-     * @param in The array to convert.
-     * @return The formatted {@link String}, or {@code null} if {@code in} is {@code null} or
-     * {@code 0}-length.
-     */
-    @Nullable
-    public static String convertArrayToHumanReadableString(@Nullable final String[] in) {
-        if (in == null || in.length == 0) {
-            return null;
-        }
-
-        final StringBuilder sb = new StringBuilder();
-        final int len = in.length;
-
-        for (int i = 0; i < len; i++) {
-            if (i != 0) {
-                sb.append(", ");
-            }
-
-            sb.append(in[i]);
+            sb.append('?');
         }
 
         return sb.toString();
