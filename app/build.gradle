@@ -74,10 +74,10 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:24.2.1'
     compile 'com.android.support:cardview-v7:24.2.1'
     compile 'com.android.support:percent:24.2.1'
-    compile 'com.google.android.gms:play-services-maps:9.6.0'
+    compile 'com.google.android.gms:play-services-maps:9.6.1'
     compile 'uk.org.rivernile.android.fetchutils:fetchutils-library:1.1.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+    compile 'com.squareup.okhttp3:okhttp:3.4.1'
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
 
     androidTestCompile 'com.android.support:support-annotations:24.2.1'
