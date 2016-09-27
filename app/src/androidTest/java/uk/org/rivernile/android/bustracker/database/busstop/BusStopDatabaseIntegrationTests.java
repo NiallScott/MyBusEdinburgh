@@ -210,7 +210,7 @@ public class BusStopDatabaseIntegrationTests {
                         BusStopContract.Services.NAME,
                         BusStopContract.Services.COLOUR
                 }, projection);
-                assertNull(selection);
+                assertEquals("hex_colour IS NOT NULL", selection);
                 assertNull(selectionArgs);
                 assertNull(sortOrder);
 
@@ -245,7 +245,7 @@ public class BusStopDatabaseIntegrationTests {
                         BusStopContract.Services.NAME,
                         BusStopContract.Services.COLOUR
                 }, projection);
-                assertEquals("name IN (?,?,?,?,?)", selection);
+                assertEquals("hex_colour IS NOT NULL AND name IN (?,?,?,?,?)", selection);
                 assertArrayEquals(services, selectionArgs);
                 assertNull(sortOrder);
 
