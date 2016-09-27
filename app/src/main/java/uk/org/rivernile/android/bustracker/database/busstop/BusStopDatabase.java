@@ -131,15 +131,14 @@ public final class BusStopDatabase {
     @Nullable
     public static Map<String, String> getServiceColours(@NonNull final Context context,
             @Nullable final String[] services) {
-        final String selection;
+        String selection = BusStopContract.Services.COLOUR + " IS NOT NULL";
         final String[] selectionArgs;
 
         if (services != null && services.length > 0) {
-            selection = BusStopContract.Services.NAME + " IN (" +
-                    generateInPlaceholders(services.length) + ')';
+            selection += " AND " + BusStopContract.Services.NAME + " IN (" +
+                    BusStopDatabase.generateInPlaceholders(services.length) + ')';
             selectionArgs = services;
         } else {
-            selection = null;
             selectionArgs = null;
         }
 

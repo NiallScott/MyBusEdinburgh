@@ -55,10 +55,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
+
 import org.json.JSONException;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.ServiceColoursLoader;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
@@ -89,6 +92,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowConfirmFavouriteDeletionListener;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -117,9 +121,10 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
 
     private static final int LOADER_BUS_TIMES = 1;
     private static final int LOADER_STOP_DETAILS = 2;
-    private static final int LOADER_FAVOURITE_STOP = 3;
-    private static final int LOADER_HAS_PROX_ALERT = 4;
-    private static final int LOADER_HAS_TIME_ALERT = 5;
+    private static final int LOADER_SERVICE_COLOURS = 3;
+    private static final int LOADER_FAVOURITE_STOP = 4;
+    private static final int LOADER_HAS_PROX_ALERT = 5;
+    private static final int LOADER_HAS_TIME_ALERT = 6;
     
     private static final String STATE_KEY_AUTOREFRESH = "autoRefresh";
     private static final String STATE_KEY_LAST_REFRESH = "lastRefresh";
@@ -267,6 +272,9 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
     @Override
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        final LoaderManager loaderManager = getLoaderManager();
+        loaderManager.initLoader(LOADER_SERVICE_COLOURS, null, this);
         
         if (!TextUtils.isEmpty(stopCode)) {
             loadBusTimes(false);
@@ -274,7 +282,6 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
             // Tell the fragment that there is an options menu.
             setHasOptionsMenu(true);
 
-            final LoaderManager loaderManager = getLoaderManager();
             loaderManager.initLoader(LOADER_STOP_DETAILS, null, this);
             loaderManager.initLoader(LOADER_FAVOURITE_STOP, null, this);
             loaderManager.initLoader(LOADER_HAS_PROX_ALERT, null, this);
@@ -439,6 +446,8 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
                                 BusStopContract.BusStops.LOCALITY,
                                 BusStopContract.BusStops.SERVICE_LISTING
                         });
+            case LOADER_SERVICE_COLOURS:
+                return new ServiceColoursLoader(getContext(), null);
             case LOADER_FAVOURITE_STOP:
                 return new FavouriteStopsLoader(getActivity(), stopCode);
             case LOADER_HAS_PROX_ALERT:
@@ -459,6 +468,11 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
                 break;
             case LOADER_STOP_DETAILS:
                 handleBusStopDetails((Cursor) result);
+                break;
+            case LOADER_SERVICE_COLOURS:
+                adapter.setServiceColours(
+                        ((ProcessedCursorLoader.ResultWrapper<Map<String, String>>) result)
+                                .getResult());
                 break;
             case LOADER_FAVOURITE_STOP:
                 configureFavouriteButton((Cursor) result);

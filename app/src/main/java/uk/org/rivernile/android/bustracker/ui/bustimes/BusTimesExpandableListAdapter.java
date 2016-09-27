@@ -42,13 +42,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import uk.org.rivernile.android.bustracker.BusApplication;
+import java.util.Map;
+
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDatabase;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -72,13 +71,12 @@ public class BusTimesExpandableListAdapter extends BaseExpandableListAdapter {
     
     private final Context context;
     private final LayoutInflater inflater;
-    private final BusStopDatabase bsd;
     private final int defaultColour;
     
     private DateFormat busTimeFormatter;
     private LiveBusStop busStop;
     private List<LiveBusService> busServices;
-    private HashMap<String, String> colours;
+    private Map<String, String> colours;
     private boolean showNightServices = true;
     private Order order = Order.SERVICE_NAME;
     
@@ -95,10 +93,6 @@ public class BusTimesExpandableListAdapter extends BaseExpandableListAdapter {
         this.context = context;
         inflater = LayoutInflater.from(context);
         defaultColour = ContextCompat.getColor(context, R.color.defaultBusColour);
-        
-        final BusApplication app = (BusApplication) context
-                .getApplicationContext();
-        bsd = app.getBusStopDatabase();
     }
 
     /**
@@ -340,6 +334,16 @@ public class BusTimesExpandableListAdapter extends BaseExpandableListAdapter {
             populateBusServices();
         }
     }
+
+    /**
+     * Set the colours to use for services.
+     *
+     * @param serviceColours A {@link Map} of service name to the colour for that service.
+     */
+    public void setServiceColours(final Map<String, String> serviceColours) {
+        colours = serviceColours;
+        notifyDataSetChanged();
+    }
     
     /**
      * Populate this Adapter's internal list of bus services. How this list is
@@ -373,29 +377,8 @@ public class BusTimesExpandableListAdapter extends BaseExpandableListAdapter {
             
             busServices = tempServices;
         }
-        
-        populateServiceColours();
+
         notifyDataSetChanged();
-    }
-    
-    /**
-     * Populate the cache of bus service colours by querying the bus stop
-     * database for the colours of all services we have.
-     */
-    private void populateServiceColours() {
-        if (busServices == null || busServices.isEmpty()) {
-            colours = null;
-            return;
-        }
-        
-        final int count = busServices.size();
-        final String[] services = new String[count];
-        
-        for (int i = 0; i < count; i++) {
-            services[i] = busServices.get(i).getServiceName();
-        }
-        
-        colours = bsd.getServiceColours(services);
     }
     
     /**
