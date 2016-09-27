@@ -56,7 +56,7 @@ public final class BusStopDatabase {
      */
     @WorkerThread
     @Nullable
-    public static String getTopologyId(@NonNull final Context context) {
+    static String getTopologyId(@NonNull final Context context) {
         final Cursor c = context.getContentResolver().query(
                 BusStopContract.DatabaseInformation.CONTENT_URI,
                 new String[] { BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID },
