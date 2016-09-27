@@ -63,8 +63,7 @@ public class BusStopOpenHelperTests {
 
     @Before
     public void setUp() {
-        context = new DatabaseRenamingContext(InstrumentationRegistry.getTargetContext(),
-                "test_");
+        context = new DatabaseRenamingContext(InstrumentationRegistry.getTargetContext(), "test_");
         // Delete the db if it exists here incase a previous one is left over from a failed test.
         context.deleteDatabase(BusStopContract.DB_NAME);
         assetDbVersion = Long.parseLong(
@@ -77,6 +76,7 @@ public class BusStopOpenHelperTests {
         helper.close();
         context.deleteDatabase(BusStopContract.DB_NAME);
         context = null;
+        helper = null;
     }
 
     /**
@@ -111,12 +111,12 @@ public class BusStopOpenHelperTests {
                         BusStopContract.DatabaseInformation.LAST_UPDATE_TIMESTAMP)));
         correctVersionCursor.close();
 
-        final Cursor servicesCursor = db.query(BusStopContract.Services.TABLE_NAME,
+        final Cursor servicesCursor = db.query("service",
                 new String[] { BusStopContract.Services._ID }, null, null, null, null, null);
         assertTrue(servicesCursor.getCount() > 0);
         servicesCursor.close();
 
-        final Cursor busStopsCursor = db.query(BusStopContract.BusStops.TABLE_NAME,
+        final Cursor busStopsCursor = db.query("bus_stops",
                 new String[] { BusStopContract.BusStops._ID }, null, null, null, null, null);
         assertTrue(busStopsCursor.getCount() > 0);
         busStopsCursor.close();
@@ -126,7 +126,7 @@ public class BusStopOpenHelperTests {
         assertTrue(serviceStopsCursor.getCount() > 0);
         serviceStopsCursor.close();
 
-        final Cursor servicePointsCursor = db.query(BusStopContract.ServicePoints.TABLE_NAME,
+        final Cursor servicePointsCursor = db.query("service_point",
                 new String[] { BusStopContract.ServicePoints._ID }, null, null, null, null, null);
         assertTrue(servicePointsCursor.getCount() > 0);
         servicePointsCursor.close();
@@ -150,6 +150,19 @@ public class BusStopOpenHelperTests {
         assertEquals("order_value",
                 indexInfoCursor.getString(indexInfoCursor.getColumnIndex("name")));
         indexInfoCursor.close();
+
+        final Cursor viewsCursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type = " +
+                "'view' ORDER BY name ASC;", null);
+        assertEquals(3, viewsCursor.getCount());
+        assertTrue(viewsCursor.moveToFirst());
+        assertEquals("view_bus_stops", viewsCursor.getString(viewsCursor.getColumnIndex("name")));
+        assertTrue(viewsCursor.moveToNext());
+        assertEquals("view_service_points",
+                viewsCursor.getString(viewsCursor.getColumnIndex("name")));
+        assertTrue(viewsCursor.moveToNext());
+        assertEquals("view_services",
+                viewsCursor.getString(viewsCursor.getColumnIndex("name")));
+        viewsCursor.close();
     }
 
     /**
