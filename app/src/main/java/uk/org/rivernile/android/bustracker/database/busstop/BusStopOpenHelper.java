@@ -173,7 +173,7 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
                     false);
             fetcher.executeFetcher(reader);
         } catch (IOException e) {
-            throw new IllegalStateException("Bus stop database could not be extracted.");
+            throw new IllegalStateException("Bus stop database could not be extracted.", e);
         }
 
         replaceDatabase(outFile);
