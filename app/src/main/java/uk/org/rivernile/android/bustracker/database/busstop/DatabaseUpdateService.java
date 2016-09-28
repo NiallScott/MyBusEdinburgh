@@ -145,6 +145,7 @@ public class DatabaseUpdateService extends IntentService {
         }
         
         // The new database is put in to a temporary file until it's ready to be swapped in.
+        BusStopOpenHelper.ensureDatabasePath(this);
         final File tempFile = getDatabasePath(BusStopContract.DB_NAME + "_temp");
 
         final HttpFetcher fetcher = new HttpFetcher.Builder(this)
