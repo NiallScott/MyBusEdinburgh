@@ -72,6 +72,7 @@ import java.util.regex.Pattern;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServicesLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
@@ -99,7 +100,8 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.RouteLineLoa
  */
 public class BusStopMapFragment extends SupportMapFragment
         implements OnMapReadyCallback, GoogleMap.OnCameraChangeListener,
-        GoogleMap.OnInfoWindowClickListener, LoaderManager.LoaderCallbacks,
+        GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowClickListener,
+        GoogleMap.OnInfoWindowCloseListener, LoaderManager.LoaderCallbacks,
         ServicesChooserDialogFragment.Callbacks, MapTypeChooserDialogFragment.Callbacks {
     
     /** The stopCode argument. */
@@ -122,8 +124,7 @@ public class BusStopMapFragment extends SupportMapFragment
     public static final float DEFAULT_ZOOM = 11f;
     /** The default search zoom. */
     public static final float DEFAULT_SEARCH_ZOOM =  16f;
-    
-    private static final Pattern STOP_CODE_PATTERN = Pattern.compile("(\\d{8})\\)$");
+
     private static final Pattern STOP_CODE_SEARCH_PATTERN = Pattern.compile("^\\d{8}$");
     
     private static final String LOADER_ARG_MIN_X = "minX";
@@ -139,6 +140,7 @@ public class BusStopMapFragment extends SupportMapFragment
     private static final int LOADER_ID_ROUTE_LINES = 2;
     private static final int LOADER_ID_SERVICES = 3;
     private static final int LOADER_ID_BUS_STOP_COORDS = 4;
+    private static final int LOADER_ID_BUS_STOP_SERVICES = 5;
 
     private static final int PERMISSION_REQUEST_LOCATION = 1;
     
@@ -329,7 +331,9 @@ public class BusStopMapFragment extends SupportMapFragment
 
         map.setInfoWindowAdapter(new MapInfoWindow(getActivity()));
         map.setOnCameraChangeListener(this);
+        map.setOnMarkerClickListener(this);
         map.setOnInfoWindowClickListener(this);
+        map.setOnInfoWindowCloseListener(this);
         map.setMapType(sp.getInt(PreferenceConstants.PREF_MAP_LAST_MAP_TYPE,
                 GoogleMap.MAP_TYPE_NORMAL));
         map.setPadding(0, actionBarHeight, 0, 0);
@@ -410,13 +414,30 @@ public class BusStopMapFragment extends SupportMapFragment
     }
 
     @Override
+    public boolean onMarkerClick(final Marker marker) {
+        final Object tag = marker.getTag();
+
+        if (tag instanceof String) {
+            searchedBusStop = (String) tag;
+            getLoaderManager().restartLoader(LOADER_ID_BUS_STOP_SERVICES, null, this);
+        }
+
+        return false;
+    }
+
+    @Override
     public void onInfoWindowClick(final Marker marker) {
         if (busStopMarkers.containsValue(marker)) {
-            final Matcher matcher = STOP_CODE_PATTERN.matcher(marker.getTitle());
+            callbacks.onShowBusStopDetails((String) marker.getTag());
+        }
+    }
 
-            if (matcher.find()) {
-                callbacks.onShowBusStopDetails(matcher.group(1));
-            }
+    @Override
+    public void onInfoWindowClose(final Marker marker) {
+        searchedBusStop = null;
+
+        if (marker.getTag() != null) {
+            getLoaderManager().destroyLoader(LOADER_ID_BUS_STOP_SERVICES);
         }
     }
 
@@ -449,6 +470,8 @@ public class BusStopMapFragment extends SupportMapFragment
                                 BusStopContract.BusStops.LATITUDE,
                                 BusStopContract.BusStops.LONGITUDE
                         });
+            case LOADER_ID_BUS_STOP_SERVICES:
+                return new BusStopServicesLoader(getContext(), new String[] { searchedBusStop });
             default:
                 return null;
         }
@@ -481,6 +504,10 @@ public class BusStopMapFragment extends SupportMapFragment
                     break;
                 case LOADER_ID_BUS_STOP_COORDS:
                     handleLoadBusStopCoords((Cursor) d);
+                    break;
+                case LOADER_ID_BUS_STOP_SERVICES:
+                    handleBusStopServices(((ProcessedCursorLoader
+                            .ResultWrapper<Map<String, String>>) d).getResult());
                     break;
                 default:
                     break;
@@ -742,7 +769,9 @@ public class BusStopMapFragment extends SupportMapFragment
         // Loop through all the new bus stops, and add them to the map. Bus stops common to the
         // existing collection and the new collection will not be touched.
         for (String newStop : result.keySet()) {
-            busStopMarkers.put(newStop, map.addMarker(result.get(newStop)));
+            final Marker marker = map.addMarker(result.get(newStop));
+            marker.setTag(newStop);
+            busStopMarkers.put(newStop, marker);
         }
         
         // If map has been moved to this location because the user searched for a specific bus
@@ -906,6 +935,30 @@ public class BusStopMapFragment extends SupportMapFragment
         }
 
         getLoaderManager().destroyLoader(LOADER_ID_BUS_STOP_COORDS);
+    }
+
+    /**
+     * Handle loading of the services listing for a bus stop marker.
+     *
+     * @param services A {@link Map} of bus stop code to the services {@link String}.
+     */
+    private void handleBusStopServices(@Nullable final Map<String, String> services) {
+        if (services != null && searchedBusStop != null) {
+            final Marker marker = busStopMarkers.get(searchedBusStop);
+
+            if (marker != null) {
+                final String servicesStr = services.get(searchedBusStop);
+
+                if (!TextUtils.isEmpty(servicesStr)) {
+                    marker.setSnippet(servicesStr);
+
+                    // Reshow the window to update the snippet text.
+                    if (marker.isInfoWindowShown()) {
+                        marker.showInfoWindow();
+                    }
+                }
+            }
+        }
     }
 
     /**

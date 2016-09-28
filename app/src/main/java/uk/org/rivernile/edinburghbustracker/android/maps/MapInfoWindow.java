@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,13 @@
 package uk.org.rivernile.edinburghbustracker.android.maps;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -48,9 +48,8 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
-    
-    private static final Pattern STOP_CODE_PATTERN = Pattern.compile("(\\d{8})\\)$");
-    
+
+    private final Context context;
     private final LayoutInflater inflater;
     private View rootView;
     
@@ -59,11 +58,8 @@ public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
      * 
      * @param context A {@link Context} instance, must be non-{@code null}.
      */
-    public MapInfoWindow(final Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("The context must not be null.");
-        }
-        
+    public MapInfoWindow(@NonNull final Context context) {
+        this.context = context;
         // Cache the LayoutInflater for later use.
         inflater = LayoutInflater.from(context);
     }
@@ -77,10 +73,10 @@ public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
 
     @Override
     public View getInfoContents(final Marker marker) {
-        final Matcher matcher = STOP_CODE_PATTERN.matcher(marker.getTitle());
+        final Object tag = marker.getTag();
 
         // If the Marker is a bus stop, we want to provide our own View.
-        if (matcher.find()) {
+        if (tag != null) {
             // Inflate the View from XML.
             if (rootView == null) {
                 rootView = inflater.inflate(R.layout.map_info_window, null, false);
@@ -91,7 +87,11 @@ public class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
             txt.setText(marker.getTitle());
             
             txt = (TextView) rootView.findViewById(R.id.txtSnippet);
-            txt.setText(marker.getSnippet());
+            final String snippet = marker.getSnippet();
+
+            txt.setText(!TextUtils.isEmpty(snippet)
+                    ? marker.getSnippet()
+                    : context.getString(R.string.loading));
             
             return rootView;
         }
