@@ -165,6 +165,7 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
      * the database will be swapped out with the current one (if it exists).
      */
     private void extractDatabaseFromAssets() {
+        ensureDatabasePath(context);
         final File outFile = context.getDatabasePath(BusStopContract.DB_NAME + "_temp");
 
         try {
@@ -212,6 +213,23 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
             throw new IllegalStateException("Unable to rename temporary database in to permanent " +
                     "position.");
         }
+    }
+
+    /**
+     * This method is used to ensure the database path has been properly created within the
+     * application's private data store. It relies on the platform to do this rather than just
+     * making the directories itself.
+     *
+     * @param context A {@link Context} instance.
+     */
+    static synchronized void ensureDatabasePath(@NonNull final Context context) {
+        try {
+            context.openOrCreateDatabase("temp.db", Context.MODE_PRIVATE, null).close();
+        } catch (SQLiteException ignored) {
+            // Nothing to do here.
+        }
+
+        context.deleteDatabase("temp.db");
     }
 
     /**
