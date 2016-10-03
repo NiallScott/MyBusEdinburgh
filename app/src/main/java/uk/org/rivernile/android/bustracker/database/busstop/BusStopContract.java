@@ -65,7 +65,7 @@ public final class BusStopContract {
     /**
      * This is the name of the schema for the database.
      */
-    public static final String SCHEMA_NAME = "MBE_10";
+    static final String SCHEMA_NAME = "MBE_10";
 
     /**
      * The name of the database file.
@@ -92,7 +92,7 @@ public final class BusStopContract {
     /**
      * Columns from the database information table.
      */
-    protected interface DatabaseInformationColumns extends BaseColumns {
+    interface DatabaseInformationColumns extends BaseColumns {
 
         /**
          * The current topology ID. Column name.
@@ -146,7 +146,7 @@ public final class BusStopContract {
     /**
      * Columns from the service table.
      */
-    protected interface ServicesColumns extends BaseColumns {
+    interface ServicesColumns extends BaseColumns {
 
         /**
          * The name of the service. Column name.
@@ -209,7 +209,7 @@ public final class BusStopContract {
     /**
      * Columns from the bus stop table.
      */
-    protected interface BusStopsColumns extends BaseColumns {
+    interface BusStopsColumns extends BaseColumns {
 
         /**
          * The unique code of the bus stop. Column name.
@@ -311,7 +311,7 @@ public final class BusStopContract {
     /**
      * Columns from the service stops table.
      */
-    protected interface ServiceStopsColumns extends BaseColumns {
+    interface ServiceStopsColumns extends BaseColumns {
 
         /**
          * The stop code. Column name.
@@ -365,7 +365,7 @@ public final class BusStopContract {
     /**
      * Columns from the service points table.
      */
-    protected interface ServicePointsColumns extends BaseColumns {
+    interface ServicePointsColumns extends BaseColumns {
 
         /**
          * The name of the service. Column name.
