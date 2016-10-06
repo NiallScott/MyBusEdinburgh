@@ -257,6 +257,28 @@
                 android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
 
+        <!-- SearchActivity, the single place in the application where the user can search for
+             content based on a search term. -->
+        <activity
+            android:name="uk.org.rivernile.android.bustracker.ui.search.SearchActivity"
+            android:label="@string/search_title"
+            android:launchMode="singleTop"
+            android:theme="@style/MyBusEdinburgh.NoActionBar"
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
+            <!-- This Activity handles searching. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+
         <!-- SettingsProvider, to provide the user's saved favourite stops and active alerts. -->
         <provider
             android:name="uk.org.rivernile.android.bustracker.database.settings.SettingsProvider"

@@ -39,7 +39,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_author_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/</string>
     <string name="app_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/bustracker/</string>
     <string name="app_twitter" tools:ignore="MissingTranslation">http://twitter.com/MyBusEdinburgh</string>
-    <string name="search_hint">Search stops and places</string>
+    <string name="search_hint">Search&#8230;</string>
     <string name="asset_db_version" tools:ignore="MissingTranslation">1402286404622</string> <!-- Should not be included in localised versions -->
 
     <!--
@@ -161,6 +161,15 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="main_drawer_open">Open application navigation</string>
     <string name="main_drawer_close">Close application navigation</string>
+
+    <!--
+    ******************************
+    * Strings for SearchActivity *
+    ******************************
+    -->
+    <string name="search_title">Search</string>
+    <string name="search_scan_error">There was a problem reading the QR code data</string>
+    <string name="search_invalid_qrcode">The scanned QR code does not contain stop data</string>
     
     <!--
     ********************************
@@ -527,8 +536,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***************************************************
     -->
     <string name="barcodescannerdialog_title">QR scanning app required</string>
-    <string name="barcodescannerdialog_message">To scan QR codes, your device must have a camera and you must have a compatible QR barcode scanning app installed. Do you wish to download this from the Google Play Store? The application is called Barcode Scanner by the ZXing Team and is free to download.</string>
-    <string name="barcodescannerdialog_noplaystore">Google Play Store is missing.</string>
+    <string name="barcodescannerdialog_message">To scan QR codes, your device must have a compatible scanning app installed. Do you wish to download this from the Google Play Store?\n\nThe application is called Barcode Scanner by the ZXing Team and is free to download.</string>
+    <string name="barcodescannerdialog_btn_positive">Go to Play Store</string>
+    <string name="barcodescannerdialog_btn_negative">No thanks</string>
+    <string name="barcodescannerdialog_noplaystore">Google Play Store is missing</string>
     
     <!--
     ***********************************************
@@ -656,6 +667,20 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="neareststops_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="neareststops_menu_time_add">@string/time_alert_add</string>
     <string name="neareststops_menu_time_rem">@string/time_alert_rem</string>
+
+    <!--
+    ***********************************
+    * Strings for SearchActivity menu *
+    ***********************************
+    -->
+    <string name="search_menu_scan">Scan QR code</string>
+
+    <!--
+    ****************************************
+    * Strings for SectionListFragment menu *
+    ****************************************
+    -->
+    <string name="section_list_menu_search">Search</string>
     
     <!--
     ************************

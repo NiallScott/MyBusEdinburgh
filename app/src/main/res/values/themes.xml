@@ -25,12 +25,21 @@
  *     exempt from clause 2.
 */ -->
 <resources>
-    <style name="MyBusEdinburgh" parent="@style/Theme.AppCompat.Light.DarkActionBar">
+    <style name="MyBusEdinburgh" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="actionModeBackground">@color/colorContextualActionBarBackground</item>
         <item name="actionBarStyle">@style/AppActionBar</item>
+    </style>
+
+    <style name="MyBusEdinburgh.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="actionModeBackground">@color/colorContextualActionBarBackground</item>
+        <item name="toolbarStyle">@style/Toolbar</item>
+        <item name="searchViewStyle">@style/Widget.AppCompat.SearchView.ActionBar</item>
     </style>
     
     <style name="MyBusEdinburgh.MapActivity">
