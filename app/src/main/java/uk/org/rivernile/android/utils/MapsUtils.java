@@ -25,6 +25,7 @@
 package uk.org.rivernile.android.utils;
 
 import android.content.Context;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -58,6 +59,37 @@ public final class MapsUtils {
     }
 
     /**
+     * Get a drawable resource ID for a given {@code orientation}.
+     *
+     * @param orientation The orientation, expressed as a number between 0 and 7, with 0 being north
+     * and 7 being north-west, going clockwise.
+     * @return A drawable resource ID for a given {@code orientation}.
+     */
+    @DrawableRes
+    public static int getDirectionDrawableResourceId(final int orientation) {
+        switch (orientation) {
+            case 0:
+                return R.drawable.mapmarker_n;
+            case 1:
+                return R.drawable.mapmarker_ne;
+            case 2:
+                return R.drawable.mapmarker_e;
+            case 3:
+                return R.drawable.mapmarker_se;
+            case 4:
+                return R.drawable.mapmarker_s;
+            case 5:
+                return R.drawable.mapmarker_sw;
+            case 6:
+                return R.drawable.mapmarker_w;
+            case 7:
+                return R.drawable.mapmarker_nw;
+            default:
+                return R.drawable.mapmarker;
+        }
+    }
+
+    /**
      * Apply the correct direction icon to the {@link MarkerOptions} object based on the supplied
      * {@code orientation}.
      *
@@ -68,34 +100,7 @@ public final class MapsUtils {
      */
     public static void applyStopDirectionToMarker(@NonNull final MarkerOptions markerOptions,
             final int orientation) {
-        switch (orientation) {
-            case 0:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_n));
-                break;
-            case 1:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_ne));
-                break;
-            case 2:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_e));
-                break;
-            case 3:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_se));
-                break;
-            case 4:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_s));
-                break;
-            case 5:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_sw));
-                break;
-            case 6:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_w));
-                break;
-            case 7:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_nw));
-                break;
-            default:
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker));
-                break;
-        }
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(
+                getDirectionDrawableResourceId(orientation)));
     }
 }

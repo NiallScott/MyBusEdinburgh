@@ -26,7 +26,6 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops;
 
 import android.content.Context;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -41,6 +40,7 @@ import android.widget.TextView;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -64,7 +64,7 @@ class NearestStopsAdapter extends RecyclerView.Adapter<NearestStopsAdapter.ViewH
     NearestStopsAdapter(@NonNull final Context context) {
         this.context = context;
         inflater = LayoutInflater.from(context);
-        directionStrings = context.getResources().getStringArray(R.array.neareststops_orientations);
+        directionStrings = context.getResources().getStringArray(R.array.orientations);
         setHasStableIds(true); // Enables animation of item changes.
     }
 
@@ -225,46 +225,15 @@ class NearestStopsAdapter extends RecyclerView.Adapter<NearestStopsAdapter.ViewH
             txtDistance.setText(context.getString(R.string.neareststops_distance_format,
                     (int) searchResult.getDistance()));
             final int orientation = searchResult.getOrientation();
-            imgDirection.setImageResource(getDirectionDrawableResourceId(
+            imgDirection.setImageResource(MapsUtils.getDirectionDrawableResourceId(
                     searchResult.getOrientation()));
 
-            if (orientation >=0 && orientation < 8) {
+            if (orientation >= 0 && orientation < directionStrings.length) {
                 imgDirection.setContentDescription(directionStrings[orientation]);
             } else {
                 imgDirection.setContentDescription(
-                        context.getString(R.string.neareststops_orientation_unknown));
+                        context.getString(R.string.orientation_unknown));
             }
-        }
-    }
-
-    /**
-     * Get a drawable resource ID for a given {@code orientation}.
-     *
-     * @param orientation The orientation, expressed as a number between 0 and 7, with 0 being north
-     * and 7 being north-west, going clockwise.
-     * @return A drawable resource ID for a given {@code orientation}.
-     */
-    @DrawableRes
-    static int getDirectionDrawableResourceId(final int orientation) {
-        switch (orientation) {
-            case 0:
-                return R.drawable.mapmarker_n;
-            case 1:
-                return R.drawable.mapmarker_ne;
-            case 2:
-                return R.drawable.mapmarker_e;
-            case 3:
-                return R.drawable.mapmarker_se;
-            case 4:
-                return R.drawable.mapmarker_s;
-            case 5:
-                return R.drawable.mapmarker_sw;
-            case 6:
-                return R.drawable.mapmarker_w;
-            case 7:
-                return R.drawable.mapmarker_nw;
-            default:
-                return R.drawable.mapmarker;
         }
     }
 

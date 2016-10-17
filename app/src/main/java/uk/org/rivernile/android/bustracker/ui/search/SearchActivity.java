@@ -31,22 +31,32 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
 
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopSearchLoader;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -56,7 +66,8 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 public class SearchActivity extends AppCompatActivity
-        implements InstallBarcodeScannerDialogFragment.Callbacks {
+        implements LoaderManager.LoaderCallbacks<Cursor>, SearchAdapter.OnItemClickedListener,
+        SearchView.OnQueryTextListener, InstallBarcodeScannerDialogFragment.Callbacks {
 
     /**
      * If this {@link android.app.Activity} was started with
@@ -75,7 +86,18 @@ public class SearchActivity extends AppCompatActivity
 
     private static final int REQUEST_CODE_SCAN_QR = 1;
 
+    private static final int LOADER_SEARCH = 1;
+
+    private static final String LOADER_ARG_SEARCH_TERM = "searchTerm";
+
     private static final String URI_QUERY_PARAMETER_STOP_CODE = "busStopCode";
+
+    private SearchAdapter adapter;
+
+    private SearchView searchView;
+    private RecyclerView recyclerView;
+    private ProgressBar progress;
+    private TextView txtError;
 
     private MenuItem menuItemScan;
 
@@ -92,10 +114,31 @@ public class SearchActivity extends AppCompatActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
+        searchView = (SearchView) findViewById(R.id.searchView);
+        recyclerView = (RecyclerView) findViewById(android.R.id.list);
+        progress = (ProgressBar) findViewById(R.id.progress);
+        txtError = (TextView) findViewById(R.id.txtError);
+
         final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        final SearchView searchView = (SearchView) findViewById(R.id.searchView);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextListener(this);
+
+        adapter = new SearchAdapter(this);
+        adapter.setOnItemClickedListener(this);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+
+        showEmptySearchTermError();
+        handleIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(final Intent intent) {
+        super.onNewIntent(intent);
+
+        setIntent(intent);
+        handleIntent(intent);
     }
 
     @Override
@@ -166,6 +209,59 @@ public class SearchActivity extends AppCompatActivity
     }
 
     @Override
+    public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
+        switch (id) {
+            case LOADER_SEARCH:
+                final String searchTerm =
+                        args != null ? args.getString(LOADER_ARG_SEARCH_TERM) : null;
+
+                return !TextUtils.isEmpty(searchTerm) ?
+                        new BusStopSearchLoader(this, searchTerm) : null;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
+        switch (loader.getId()) {
+            case LOADER_SEARCH:
+                handleSearchResultsLoaded(data);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(final Loader<Cursor> loader) {
+        switch (loader.getId()) {
+            case LOADER_SEARCH:
+                handleSearchResultsLoaded(null);
+                break;
+        }
+    }
+
+    @Override
+    public void onItemClicked(@NonNull final Cursor cursor) {
+        onStopCodeSelected(cursor.getString(
+                cursor.getColumnIndex(BusStopContract.BusStops.STOP_CODE)));
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(final String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(final String newText) {
+        if (TextUtils.isEmpty(newText)) {
+            showEmptySearchTermError();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
     public void onShowInstallBarcodeScanner() {
         final Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(BARCODE_APP_PACKAGE));
@@ -177,6 +273,97 @@ public class SearchActivity extends AppCompatActivity
             Toast.makeText(this, R.string.barcodescannerdialog_noplaystore, Toast.LENGTH_LONG)
                     .show();
         }
+    }
+
+    /**
+     * Handle the {@link Intent} that this {@link android.app.Activity} was created with or a new
+     * {@link Intent} that has since come in.
+     *
+     * @param intent The {@link Intent} to handle.
+     */
+    private void handleIntent(@NonNull final Intent intent) {
+        if (!Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            return;
+        }
+
+        final String searchTerm = intent.getStringExtra(SearchManager.QUERY);
+        searchView.setQuery(searchTerm, false);
+        final Bundle loaderArgs = new Bundle();
+        loaderArgs.putString(LOADER_ARG_SEARCH_TERM, searchTerm);
+
+        final LoaderManager loaderManager = getSupportLoaderManager();
+        final Loader<Cursor> loader = loaderManager.getLoader(LOADER_SEARCH);
+        final BusStopSearchLoader searchLoader = (BusStopSearchLoader) loader;
+        showProgress();
+
+        if (loader != null && searchLoader.getSearchTerm().equals(searchTerm)) {
+            loaderManager.initLoader(LOADER_SEARCH, loaderArgs, this);
+        } else {
+            loaderManager.restartLoader(LOADER_SEARCH, loaderArgs, this);
+        }
+    }
+
+    /**
+     * Handle the result of loading search results.
+     *
+     * @param cursor The {@link Cursor} containing the search results.
+     */
+    private void handleSearchResultsLoaded(@Nullable final Cursor cursor) {
+        adapter.swapCursor(cursor);
+
+        if (cursor != null) {
+            if (cursor.getCount() > 0) {
+                showContent();
+            } else {
+                showNoResultsError();
+            }
+        } else {
+            showEmptySearchTermError();
+        }
+    }
+
+    /**
+     * Show an error to the user when the search term is empty.
+     */
+    private void showEmptySearchTermError() {
+        showError(R.string.search_error_empty);
+    }
+
+    /**
+     * Show an error to the user when there were no search results.
+     */
+    private void showNoResultsError() {
+        showError(R.string.search_error_no_results);
+    }
+
+    /**
+     * Show a progress indicator to the user.
+     */
+    private void showProgress() {
+        txtError.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
+        progress.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Show the content to the user, that is, the search results.
+     */
+    private void showContent() {
+        txtError.setVisibility(View.GONE);
+        progress.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Show an error to the user.
+     *
+     * @param errorResId The resource ID of the error string.
+     */
+    private void showError(@StringRes final int errorResId) {
+        txtError.setText(errorResId);
+        progress.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.GONE);
+        txtError.setVisibility(View.VISIBLE);
     }
 
     /**
