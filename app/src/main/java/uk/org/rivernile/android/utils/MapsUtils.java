@@ -54,7 +54,7 @@ public final class MapsUtils {
      * @return {@code true} if the Google Maps should show, {@code false} if not.
      */
     public static boolean isGoogleMapsAvailable(@NonNull final Context context) {
-        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable (context) ==
+        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) ==
                 ConnectionResult.SUCCESS && GraphicsUtils.getOpenGLESVersion(context) >= 2;
     }
 
