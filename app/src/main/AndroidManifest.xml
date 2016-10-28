@@ -36,6 +36,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
     <!-- Tell the Google Play Store that this app uses location features, but
          app does not require that devices have them. -->
@@ -267,6 +269,7 @@
         <provider
             android:name="uk.org.rivernile.android.bustracker.database.busstop.BusStopProvider"
             android:authorities="${applicationId}.provider.busstop"
+            android:syncable="true"
             android:exported="false" />
 
         <!-- MapSearchHistoryProvider, to provide previous search history items
@@ -281,14 +284,6 @@
                 android:readPermission="android.permission.GLOBAL_SEARCH" />
         </provider>
         
-        <!-- DatabaseUpdateService, which checks to see if database updates are
-             available and if so, apply them. -->
-        <service
-            android:name="uk.org.rivernile.android.bustracker.database.busstop.DatabaseUpdateService"
-            android:label="@string/databaseservice_title"
-            android:icon="@drawable/appicon"
-            android:exported="false" />
-        
         <!-- TimeAlertService, which checks bus times periodically when the user
              has set an alert for bus times. -->
         <service
@@ -302,5 +297,31 @@
             android:name="uk.org.rivernile.android.bustracker.alerts.ProximityAlertService"
             android:icon="@drawable/appicon"
             android:exported="false" />
+
+        <!-- BusStopDatabaseAuthenticatorService, which is used by the system as part of the bus
+             stop database sync. -->
+        <service
+            android:name="uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabaseAuthenticatorService"
+            android:label="@string/busstopdatabaseauthenticatorservice_label">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <!-- BusStopDatabaseSyncService, which is used by the system to initiate a bus stop
+             database sync. -->
+        <service
+            android:name="uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabaseSyncService"
+            android:label="@string/busstopdatabasesyncservice_label">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
     </application>
 </manifest>

@@ -681,13 +681,20 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **************
     **************
     -->
-    
+
     <!--
-    *************************
-    * DatabaseUpdateService *
-    *************************
+    ***************************************
+    * BusStopDatabaseAuthenticatorService *
+    ***************************************
     -->
-    <string name="databaseservice_title">Stop database updater</string>
+    <string name="busstopdatabaseauthenticatorservice_label">Authenticator</string>
+
+    <!--
+    ******************************
+    * BusStopDatabaseSyncService *
+    ******************************
+    -->
+    <string name="busstopdatabasesyncservice_label">Bus stop database sync</string>
     
     <!--
     ********************

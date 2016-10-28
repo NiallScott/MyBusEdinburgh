@@ -25,16 +25,20 @@
 
 package uk.org.rivernile.android.bustracker;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Application;
 import android.app.backup.BackupManager;
-import android.content.Intent;
+import android.content.ContentResolver;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.Bundle;
+
 import com.bugsense.trace.BugSenseHandler;
 import com.squareup.picasso.Picasso;
 
 import uk.org.rivernile.android.bustracker.alerts.AlertManager;
-import uk.org.rivernile.android.bustracker.database.busstop.DatabaseUpdateService;
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
@@ -57,6 +61,10 @@ import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
  */
 public abstract class BusApplication extends Application
         implements OnSharedPreferenceChangeListener {
+
+    private static final String ACCOUNT_TYPE = "uk.org.rivernile.android.bustracker.account.stub";
+    private static final String ACCOUNT_NAME = BuildConfig.APPLICATION_ID + "_stub";
+    private static final int SYNC_FREQUENCY = 43200; // 12 hours, in seconds.
     
     @Override
     public void onCreate() {
@@ -70,8 +78,7 @@ public abstract class BusApplication extends Application
         getSharedPreferences(PreferenceConstants.PREF_FILE, 0)
                 .registerOnSharedPreferenceChangeListener(this);
 
-        // Start the database update service.
-        startService(new Intent(this, DatabaseUpdateService.class));
+        setUpBusStopDatabaseSync();
     }
     
     @Override
@@ -123,4 +130,19 @@ public abstract class BusApplication extends Application
      * @return An instance of {@link Picasso}.
      */
     public abstract Picasso getPicasso();
+
+    /**
+     * Set up the synchronisation of the bus stop database.
+     */
+    private void setUpBusStopDatabaseSync() {
+        final Account account = new Account(ACCOUNT_NAME, ACCOUNT_TYPE);
+        final AccountManager accountManager = AccountManager.get(this);
+
+        if (accountManager.addAccountExplicitly(account, null, null)) {
+            ContentResolver.setIsSyncable(account, BusStopContract.AUTHORITY, 1);
+            ContentResolver.setSyncAutomatically(account, BusStopContract.AUTHORITY, true);
+            ContentResolver.addPeriodicSync(account, BusStopContract.AUTHORITY, Bundle.EMPTY,
+                    SYNC_FREQUENCY);
+        }
+    }
 }
