@@ -47,7 +47,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
-import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity2;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
@@ -238,8 +238,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onShowBusTimes(final String stopCode) {
-        final Intent intent = new Intent(this, DisplayStopDataActivity.class);
-        intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
+        final Intent intent = new Intent(this, DisplayStopDataActivity2.class);
+        intent.putExtra(DisplayStopDataActivity2.EXTRA_STOP_CODE, stopCode);
         startActivity(intent);
     }
 

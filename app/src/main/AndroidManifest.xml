@@ -257,6 +257,10 @@
                 android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
 
+        <!-- TODO: remove me later. -->
+        <activity
+            android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity2" />
+
         <!-- SettingsProvider, to provide the user's saved favourite stops and active alerts. -->
         <provider
             android:name="uk.org.rivernile.android.bustracker.database.settings.SettingsProvider"
