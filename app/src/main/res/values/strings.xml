@@ -63,8 +63,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="time_alert_add">Add arrival alert</string>
     <string name="time_alert_rem">Remove arrival alert</string>
     
-    <string name="favourite_add">Add stop as favourite</string>
-    <string name="favourite_rem">Remove stop as favourite</string>
+    <string name="favourite_add">Add favourite</string>
+    <string name="favourite_rem">Remove favourite</string>
     
     <!--
     ******************************************
@@ -602,6 +602,18 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="map_menu_mapoverlay_trafficviewon">Traffic view on</string>
     <string name="map_menu_mapoverlay_trafficviewoff">Traffic view off</string>
     <string name="map_menu_services">Services</string>
+
+    <!--
+    ********************************************
+    * Strings for DisplayStopDataActivity menu *
+    ********************************************
+    -->
+    <string name="displaystopdata_menu_favourite_add">@string/favourite_add</string>
+    <string name="displaystopdata_menu_favourite_rem">@string/favourite_rem</string>
+    <string name="displaystopdata_menu_prox_add">@string/prox_alert_add</string>
+    <string name="displaystopdata_menu_prox_rem">@string/prox_alert_rem</string>
+    <string name="displaystopdata_menu_time_add">@string/time_alert_add</string>
+    <string name="displaystopdata_menu_time_rem">@string/time_alert_rem</string>
     
     <!--
     ********************************************
@@ -613,10 +625,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_menu_refresh">Refresh</string>
     <string name="displaystopdata_menu_sort_service">Sort by service</string>
     <string name="displaystopdata_menu_sort_times">Sort by time</string>
-    <string name="displaystopdata_menu_prox_add">@string/prox_alert_add</string>
-    <string name="displaystopdata_menu_prox_rem">@string/prox_alert_rem</string>
-    <string name="displaystopdata_menu_time_add">@string/time_alert_add</string>
-    <string name="displaystopdata_menu_time_rem">@string/time_alert_rem</string>
     
     <!--
     ***********************************************************************
@@ -652,8 +660,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************************************************
     -->
     <string name="neareststops_context_showonmap">Show on map</string>
-    <string name="neareststops_context_addasfav">Add as favourite</string>
-    <string name="neareststops_context_remasfav">Remove as favourite</string>
+    <string name="neareststops_context_addasfav">@string/favourite_add</string>
+    <string name="neareststops_context_remasfav">@string/favourite_rem</string>
     <string name="neareststops_menu_prox_add">@string/prox_alert_add</string>
     <string name="neareststops_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="neareststops_menu_time_add">@string/time_alert_add</string>

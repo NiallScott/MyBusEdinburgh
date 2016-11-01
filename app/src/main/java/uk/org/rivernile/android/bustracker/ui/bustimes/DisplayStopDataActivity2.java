@@ -26,6 +26,7 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -40,13 +41,22 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment;
+import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
+import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
+import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
+        .DeleteProximityAlertDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTimeAlertDialogFragment;
 
 /**
  * The purpose of this {@link android.app.Activity} it to display to the user live times and details
@@ -62,6 +72,18 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
     private static final int LOADER_FAVOURITE_STOP = 1;
     private static final int LOADER_HAS_PROX_ALERT = 2;
     private static final int LOADER_HAS_TIME_ALERT = 3;
+
+    private static final String DIALOG_REMOVE_FAVOURITE = "removeFavourite";
+    private static final String DIALOG_REMOVE_PROX_ALERT = "removeProxAlert";
+    private static final String DIALOG_REMOVE_TIME_ALERT = "removeTimeAlert";
+
+    private Cursor favouriteCursor;
+    private Cursor proxCursor;
+    private Cursor timeCursor;
+
+    private MenuItem favouriteMenuItem;
+    private MenuItem proxMenuItem;
+    private MenuItem timeMenuItem;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -86,6 +108,46 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
         loaderManager.initLoader(LOADER_FAVOURITE_STOP, null, this);
         loaderManager.initLoader(LOADER_HAS_PROX_ALERT, null, this);
         loaderManager.initLoader(LOADER_HAS_TIME_ALERT, null, this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        getMenuInflater().inflate(R.menu.displaystopdata_option_menu, menu);
+        favouriteMenuItem = menu.findItem(R.id.displaystopdata_option_menu_favourite);
+        proxMenuItem = menu.findItem(R.id.displaystopdata_option_menu_prox);
+        timeMenuItem = menu.findItem(R.id.displaystopdata_option_menu_time);
+
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(final Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        configureFavouriteMenuItem(favouriteCursor);
+        configureProximityAlertMenuItem(proxCursor);
+        configureTimeAlertMenuItem(timeCursor);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.displaystopdata_option_menu_favourite:
+                doFavouriteSelected();
+                return true;
+            case R.id.displaystopdata_option_menu_prox:
+                doProximityAlertSelected();
+                return true;
+            case R.id.displaystopdata_option_menu_time:
+                doTimeAlertSelected();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -140,7 +202,25 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
      * @param cursor The {@link Cursor} containing the favourite status of this bus stop.
      */
     private void configureFavouriteMenuItem(@Nullable final Cursor cursor) {
+        favouriteCursor = cursor;
 
+        if (cursor != null) {
+            if (favouriteMenuItem != null) {
+                favouriteMenuItem.setEnabled(true);
+
+                if (cursor.getCount() > 0) {
+                    favouriteMenuItem.setTitle(R.string.displaystopdata_menu_favourite_rem)
+                            .setIcon(R.drawable.ic_action_star);
+                } else {
+                    favouriteMenuItem.setTitle(R.string.displaystopdata_menu_favourite_add)
+                            .setIcon(R.drawable.ic_action_star_border);
+                }
+            }
+        } else {
+            if (favouriteMenuItem != null) {
+                favouriteMenuItem.setEnabled(false);
+            }
+        }
     }
 
     /**
@@ -150,7 +230,25 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
      * @param cursor The {@link Cursor} containing the proximity alert status of this bus stop.
      */
     private void configureProximityAlertMenuItem(@Nullable final Cursor cursor) {
+        proxCursor = cursor;
 
+        if (cursor != null) {
+            if (proxMenuItem != null) {
+                proxMenuItem.setEnabled(true);
+
+                if (cursor.getCount() > 0) {
+                    proxMenuItem.setTitle(R.string.displaystopdata_menu_prox_rem)
+                            .setIcon(R.drawable.ic_action_location_off);
+                } else {
+                    proxMenuItem.setTitle(R.string.displaystopdata_menu_prox_add)
+                            .setIcon(R.drawable.ic_action_location_on);
+                }
+            }
+        } else {
+            if (proxMenuItem != null) {
+                proxMenuItem.setEnabled(false);
+            }
+        }
     }
 
     /**
@@ -160,7 +258,120 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
      * @param cursor The {@link Cursor} containing the time alert status of this bus stop.
      */
     private void configureTimeAlertMenuItem(@Nullable final Cursor cursor) {
+        timeCursor = cursor;
 
+        if (cursor != null) {
+            if (timeMenuItem != null) {
+                timeMenuItem.setEnabled(true);
+
+                if (cursor.getCount() > 0) {
+                    timeMenuItem.setTitle(R.string.displaystopdata_menu_time_rem)
+                            .setIcon(R.drawable.ic_action_alarm_off);
+                } else {
+                    timeMenuItem.setTitle(R.string.displaystopdata_menu_time_add)
+                            .setIcon(R.drawable.ic_action_alarm_add);
+                }
+            }
+        } else {
+            if (timeMenuItem != null) {
+                timeMenuItem.setEnabled(false);
+            }
+        }
+    }
+
+    /**
+     * This is called when the favourite alert ActionItem is selected.
+     */
+    private void doFavouriteSelected() {
+        if (favouriteCursor != null) {
+            if (favouriteCursor.getCount() > 0) {
+                showRemoveFavourite();
+            } else {
+                showAddFavourite();
+            }
+        }
+    }
+
+    /**
+     * This is called when the proximity alert ActionItem is selected.
+     */
+    private void doProximityAlertSelected() {
+        if (proxCursor != null) {
+            if (proxCursor.getCount() > 0) {
+                showRemoveProximityAlert();
+            } else {
+                // Show the Activity for adding a new proximity alert.
+                showAddProximityAlert();
+            }
+        }
+    }
+
+    /**
+     * This is called when the time alert ActionItem is selected.
+     */
+    private void doTimeAlertSelected() {
+        if (timeCursor != null) {
+            if (timeCursor.getCount() > 0) {
+                showRemoveTimeAlert();
+            } else {
+                // Show the Activity for adding a new time alert.
+                showAddTimeAlert();
+            }
+        }
+    }
+
+    /**
+     * Show the UI for adding a new favourite bus stop.
+     */
+    private void showAddFavourite() {
+        final Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
+        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
+                getIntent().getStringExtra(EXTRA_STOP_CODE));
+        startActivity(intent);
+    }
+
+    /**
+     * Show the UI for removing a favourite bus stop.
+     */
+    private void showRemoveFavourite() {
+        new DeleteFavouriteDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_REMOVE_FAVOURITE);
+    }
+
+    /**
+     * Show the UI for adding a new proximity alert.
+     */
+    private void showAddProximityAlert() {
+        final Intent intent = new Intent(this, AddProximityAlertActivity.class);
+        intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
+                getIntent().getStringExtra(EXTRA_STOP_CODE));
+        startActivity(intent);
+    }
+
+    /**
+     * Show the UI for removing a proximity alert.
+     */
+    private void showRemoveProximityAlert() {
+        new DeleteProximityAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_REMOVE_PROX_ALERT);
+    }
+
+    /**
+     * Show the UI for adding a new time alert.
+     */
+    private void showAddTimeAlert() {
+        final Intent intent = new Intent(this, AddTimeAlertActivity.class);
+        intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
+                getIntent().getStringExtra(EXTRA_STOP_CODE));
+        startActivity(intent);
+    }
+
+    /**
+     * Show the UI for removing a time alert.
+     */
+    private void showRemoveTimeAlert() {
+        new DeleteTimeAlertDialogFragment()
+                .show(getSupportFragmentManager(), DIALOG_REMOVE_TIME_ALERT);
     }
 
     /**

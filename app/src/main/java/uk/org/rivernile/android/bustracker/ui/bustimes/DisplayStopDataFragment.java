@@ -340,7 +340,7 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
     public void onCreateOptionsMenu(final Menu menu,
             final MenuInflater inflater) {
         // Inflate the menu.
-        inflater.inflate(R.menu.displaystopdata_option_menu, menu);
+        inflater.inflate(R.menu.displaystopdata_option_menu_old, menu);
         
         sortMenuItem = menu.findItem(R.id.displaystopdata_option_menu_sort);
         autoRefreshMenuItem = menu.findItem(R.id
