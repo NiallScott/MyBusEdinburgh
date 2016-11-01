@@ -90,12 +90,12 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.displaystopdata2);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        /*setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         final ActionBar actionBar = getSupportActionBar();
 
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        }*/
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.viewPager);
         final TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
@@ -334,7 +334,7 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
      * Show the UI for removing a favourite bus stop.
      */
     private void showRemoveFavourite() {
-        new DeleteFavouriteDialogFragment()
+        DeleteFavouriteDialogFragment.newInstance(getIntent().getStringExtra(EXTRA_STOP_CODE))
                 .show(getSupportFragmentManager(), DIALOG_REMOVE_FAVOURITE);
     }
 

@@ -27,7 +27,13 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.details;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
  * The purpose of this {@link Fragment} is to show users details for a given bus stop code.
@@ -52,5 +58,12 @@ public class StopDetailsFragment extends Fragment {
         fragment.setArguments(args);
 
         return fragment;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container,
+            @Nullable final Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.stopdetails_fragment, container, false);
     }
 }
