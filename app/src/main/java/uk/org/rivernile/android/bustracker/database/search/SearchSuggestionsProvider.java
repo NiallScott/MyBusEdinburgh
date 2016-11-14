@@ -51,12 +51,13 @@ public class SearchSuggestionsProvider extends SearchRecentSuggestionsProvider {
             ".SearchSuggestionsProvider";
 
     /** The database modes. */
-    public static final int MODE = DATABASE_MODE_QUERIES;
+    public static final int MODE = DATABASE_MODE_QUERIES | DATABASE_MODE_2LINES;
 
     private static final String[] COLUMNS = new String[] {
             SearchManager.SUGGEST_COLUMN_FORMAT,
             SearchManager.SUGGEST_COLUMN_ICON_1,
             SearchManager.SUGGEST_COLUMN_TEXT_1,
+            SearchManager.SUGGEST_COLUMN_TEXT_2,
             SearchManager.SUGGEST_COLUMN_QUERY,
             BaseColumns._ID
     };
@@ -129,8 +130,10 @@ public class SearchSuggestionsProvider extends SearchRecentSuggestionsProvider {
 
                 result.addRow(new Object[] {
                         null,
-                        0,
+                        "android.resource://" + getContext().getPackageName() + '/' +
+                                android.R.color.transparent,
                         locality,
+                        null,
                         locality,
                         (startIndex + i)
                 });
