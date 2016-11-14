@@ -35,6 +35,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -57,6 +58,7 @@ import java.util.List;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopSearchLoader;
+import uk.org.rivernile.android.bustracker.database.search.SearchSuggestionsProvider;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -92,6 +94,7 @@ public class SearchActivity extends AppCompatActivity
 
     private static final String URI_QUERY_PARAMETER_STOP_CODE = "busStopCode";
 
+    private SearchRecentSuggestions recentSuggestions;
     private SearchAdapter adapter;
 
     private SearchView searchView;
@@ -128,6 +131,9 @@ public class SearchActivity extends AppCompatActivity
         adapter.setOnItemClickedListener(this);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
+
+        recentSuggestions = new SearchRecentSuggestions(this, SearchSuggestionsProvider.AUTHORITY,
+                SearchSuggestionsProvider.MODE);
 
         showEmptySearchTermError();
         handleIntent(getIntent());
@@ -299,6 +305,7 @@ public class SearchActivity extends AppCompatActivity
         if (loader != null && searchLoader.getSearchTerm().equals(searchTerm)) {
             loaderManager.initLoader(LOADER_SEARCH, loaderArgs, this);
         } else {
+            recentSuggestions.saveRecentQuery(searchTerm, null);
             loaderManager.restartLoader(LOADER_SEARCH, loaderArgs, this);
         }
     }
