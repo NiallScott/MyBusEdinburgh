@@ -212,9 +212,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onShowSearch() {
-        final Intent intent = new Intent(this, SearchActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startActivity(intent);
+        startActivity(new Intent(this, SearchActivity.class));
     }
 
     @Override

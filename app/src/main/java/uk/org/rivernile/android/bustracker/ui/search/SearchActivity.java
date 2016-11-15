@@ -115,6 +115,10 @@ public class SearchActivity extends AppCompatActivity
 
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+
+            if (getCallingActivity() != null) {
+                actionBar.setHomeAsUpIndicator(R.drawable.ic_action_close);
+            }
         }
 
         searchView = (SearchView) findViewById(R.id.searchView);
