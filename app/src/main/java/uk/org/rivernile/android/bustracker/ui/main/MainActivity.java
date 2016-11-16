@@ -64,7 +64,6 @@ import uk.org.rivernile.android.bustracker.ui.search.InstallBarcodeScannerDialog
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general.EnterStopCodeFragment;
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment;
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;
 
@@ -76,9 +75,9 @@ import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;
  */
 public class MainActivity extends AppCompatActivity
         implements SectionListFragment.Callbacks, AlertManagerFragment.Callbacks,
-        EnterStopCodeFragment.Callbacks, FavouriteStopsFragment.Callbacks,
-        NearestStopsFragment.Callbacks, ServicesChooserDialogFragment.Callbacks,
-        InstallBarcodeScannerDialogFragment.Callbacks, TurnOnGpsDialogFragment.Callbacks {
+        FavouriteStopsFragment.Callbacks, NearestStopsFragment.Callbacks,
+        ServicesChooserDialogFragment.Callbacks, InstallBarcodeScannerDialogFragment.Callbacks,
+        TurnOnGpsDialogFragment.Callbacks {
     
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
@@ -86,7 +85,6 @@ public class MainActivity extends AppCompatActivity
     private static final String DIALOG_DELETE_PROX_ALERT = "deleteProxAlertDialog";
     private static final String DIALOG_DELETE_TIME_ALERT = "deleteTimeAlertDialog";
     private static final String DIALOG_SERVICES_CHOOSER = "servicesChooserDialog";
-    private static final String DIALOG_INSTALL_BARCODE_SCANNER = "installBarcodeScannerDialog";
     private static final String DIALOG_CONFIRM_DELETE_FAVOURITE = "deleteFavouriteDialog";
     private static final String DIALOG_TURN_ON_GPS = "turnOnGpsDialog";
     
@@ -233,12 +231,6 @@ public class MainActivity extends AppCompatActivity
         ServicesChooserDialogFragment
                 .newInstance(services, selectedServices, title)
                 .show(getSupportFragmentManager(), DIALOG_SERVICES_CHOOSER);
-    }
-
-    @Override
-    public void onAskInstallBarcodeScanner() {
-        new InstallBarcodeScannerDialogFragment()
-                .show(getSupportFragmentManager(), DIALOG_INSTALL_BARCODE_SCANNER);
     }
 
     @Override

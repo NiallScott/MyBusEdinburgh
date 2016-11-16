@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import uk.org.rivernile.android.bustracker.ui.main.sections.AboutSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.AlertManagerSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.BusStopMapSection;
-import uk.org.rivernile.android.bustracker.ui.main.sections.EnterStopCodeSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.NearestStopsSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.NewsSection;
@@ -87,7 +86,6 @@ public class SectionListFragment extends Fragment {
         final Activity activity = getActivity();
         final ArrayList<Section> sectionsList = new ArrayList<>(9);
         sectionsList.add(FavouritesSection.getInstance());
-        sectionsList.add(EnterStopCodeSection.getInstance());
         sectionsList.add(BusStopMapSection.getInstance());
 
         if (activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION)) {

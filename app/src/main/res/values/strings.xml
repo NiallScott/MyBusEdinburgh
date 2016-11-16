@@ -53,7 +53,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="okay">OK</string>
     <string name="search">Search</string>
     <string name="select">Select</string>
-    <string name="submit">Submit</string>
     <string name="yes">Yes</string>
     <string name="remove">Remove</string>
     <string name="loading">Loading&#8230;</string>
@@ -187,7 +186,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="search_title">Search</string>
     <string name="search_scan_error">There was a problem reading the QR code data</string>
     <string name="search_invalid_qrcode">The scanned QR code does not contain stop data</string>
-    <string name="search_error_empty">Type your search term to begin</string>
+    <string name="search_error_empty">Type your search term or enter a stop code to begin</string>
     <string name="search_error_no_results">No results</string>
     
     <!--
@@ -427,20 +426,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_err_api_processing_error"><b>The service encountered a processing error.</b>\nPlease try again later.</string>
     <string name="displaystopdata_err_api_system_maintenance"><b>The service is currently undergoing maintenance and is unavailable.</b>\nPlease try again later.</string>
     <string name="displaystopdata_err_api_system_overloaded"><b>The system is currently experiencing high load.</b>\nPlease try again later.</string>
-    
-    <!--
-    *************************************
-    * Strings for EnterStopCodeFragment *
-    *************************************
-    -->
-    <string name="enterstopcode_title">Enter stop code</string>
-    <string name="enterstopcode_toast_inputerr">You need to enter a valid stop code to view stop information. Usually this is an 8 digit number.</string>
-    <string name="enterstopcode_hint">You can manually enter a stop code, or you can scan a QR code like the one shown which can be found on the bus timetable at the stop.</string>
-    <string name="enterstopcode_edit_hint">Enter 8-digit stop code</string>
-    <string name="enterstopcode_button_scan">Scan QR code</string>
-    <string name="enterstopcode_invalid_qrcode">The scanned QR code does not contain stop data. Either the code was not scanned correctly, or the QR code is invalid. Please rescan a valid QR code.</string>
-    <string name="enterstopcode_scan_error">There was a problem reading the QR code data.</string>
-    <string name="enterstopcode_stopicon_description">Example stop QR code</string>
     
     <!--
     **************************************
