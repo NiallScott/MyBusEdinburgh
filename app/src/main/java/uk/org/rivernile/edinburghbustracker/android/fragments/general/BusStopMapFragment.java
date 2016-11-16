@@ -33,7 +33,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -76,7 +75,6 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServi
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
-import uk.org.rivernile.edinburghbustracker.android.MapSearchSuggestionsProvider;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.MapTypeChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
@@ -641,13 +639,6 @@ public class BusStopMapFragment extends SupportMapFragment
             // If it's not a stop code, then do a geo search.
             final Bundle b = new Bundle();
             b.putString(LOADER_ARG_QUERY, searchTerm);
-            
-            // Save the search term as a search suggestion.
-            final SearchRecentSuggestions suggestions =
-                    new SearchRecentSuggestions(getActivity(),
-                        MapSearchSuggestionsProvider.AUTHORITY,
-                        MapSearchSuggestionsProvider.MODE);
-            suggestions.saveRecentQuery(searchTerm, null);
             
             // Start the search loader.
             getLoaderManager().restartLoader(LOADER_ID_GEO_SEARCH, b, this);
