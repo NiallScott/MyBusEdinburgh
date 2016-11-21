@@ -33,9 +33,9 @@ import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.provider.SearchRecentSuggestions;
 
+import uk.org.rivernile.android.bustracker.database.search.SearchSuggestionsProvider;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.utils.GenericDialogPreference;
-import uk.org.rivernile.edinburghbustracker.android.MapSearchSuggestionsProvider;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -109,8 +109,8 @@ public class SettingsFragment extends PreferenceFragment
                 if (which == DialogInterface.BUTTON_POSITIVE) {
                     final SearchRecentSuggestions suggestions =
                             new SearchRecentSuggestions(getActivity(),
-                                    MapSearchSuggestionsProvider.AUTHORITY,
-                                    MapSearchSuggestionsProvider.MODE);
+                                    SearchSuggestionsProvider.AUTHORITY,
+                                    SearchSuggestionsProvider.MODE);
                     suggestions.clearHistory();
                 }
             }

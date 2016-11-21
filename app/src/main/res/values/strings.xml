@@ -39,7 +39,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_author_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/</string>
     <string name="app_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/bustracker/</string>
     <string name="app_twitter" tools:ignore="MissingTranslation">http://twitter.com/MyBusEdinburgh</string>
-    <string name="search_hint">Search stops and places</string>
+    <string name="search_hint">Search&#8230;</string>
     <string name="asset_db_version" tools:ignore="MissingTranslation">1402286404622</string> <!-- Should not be included in localised versions -->
 
     <!--
@@ -53,7 +53,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="okay">OK</string>
     <string name="search">Search</string>
     <string name="select">Select</string>
-    <string name="submit">Submit</string>
     <string name="yes">Yes</string>
     <string name="remove">Remove</string>
     <string name="loading">Loading&#8230;</string>
@@ -96,6 +95,23 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="busstop_locality" tools:ignore="MissingTranslation">%1$s, %2$s (%3$s)</string>
     <string name="busstop_coloured" tools:ignore="MissingTranslation"><![CDATA[%1$s <font color="#989898">(%2$s)</font>]]></string>
     <string name="busstop_locality_coloured" tools:ignore="MissingTranslation"><![CDATA[%1$s, %2$s <font color="#989898">(%3$s)</font>]]></string>
+
+    <!--
+    ****************
+    * Orientations *
+    ****************
+    -->
+    <string name="orientation_unknown">Faces unknown direction</string>
+    <string-array name="orientations">
+        <item>Faces north</item>
+        <item>Faces north east</item>
+        <item>Faces east</item>
+        <item>Faces south east</item>
+        <item>Faces south</item>
+        <item>Faces south west</item>
+        <item>Faces west</item>
+        <item>Faces north west</item>
+    </string-array>
     
     <!--
     ****************
@@ -163,6 +179,17 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="main_drawer_open">Open application navigation</string>
     <string name="main_drawer_close">Close application navigation</string>
+
+    <!--
+    ******************************
+    * Strings for SearchActivity *
+    ******************************
+    -->
+    <string name="search_title">Search</string>
+    <string name="search_scan_error">There was a problem reading the QR code data</string>
+    <string name="search_invalid_qrcode">The scanned QR code does not contain stop data</string>
+    <string name="search_error_empty">Type your search term or enter a stop code to begin</string>
+    <string name="search_error_no_results">No results</string>
     
     <!--
     ********************************
@@ -423,20 +450,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_err_api_system_overloaded"><b>The system is currently experiencing high load.</b>\nPlease try again later.</string>
     
     <!--
-    *************************************
-    * Strings for EnterStopCodeFragment *
-    *************************************
-    -->
-    <string name="enterstopcode_title">Enter stop code</string>
-    <string name="enterstopcode_toast_inputerr">You need to enter a valid stop code to view stop information. Usually this is an 8 digit number.</string>
-    <string name="enterstopcode_hint">You can manually enter a stop code, or you can scan a QR code like the one shown which can be found on the bus timetable at the stop.</string>
-    <string name="enterstopcode_edit_hint">Enter 8-digit stop code</string>
-    <string name="enterstopcode_button_scan">Scan QR code</string>
-    <string name="enterstopcode_invalid_qrcode">The scanned QR code does not contain stop data. Either the code was not scanned correctly, or the QR code is invalid. Please rescan a valid QR code.</string>
-    <string name="enterstopcode_scan_error">There was a problem reading the QR code data.</string>
-    <string name="enterstopcode_stopicon_description">Example stop QR code</string>
-    
-    <!--
     **************************************
     * Strings for FavouriteStopsFragment *
     **************************************
@@ -458,18 +471,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="neareststops_error_location_sources_button">Open settings</string>
     <string name="neareststops_service_chooser_title">Select service(s) to filter</string>
     <string name="neareststops_distance_format">%d m</string>
-    <string name="neareststops_orientation_unknown">Faces unknown direction</string>
-
-    <string-array name="neareststops_orientations">
-        <item>Faces north</item>
-        <item>Faces north east</item>
-        <item>Faces east</item>
-        <item>Faces south east</item>
-        <item>Faces south</item>
-        <item>Faces south west</item>
-        <item>Faces west</item>
-        <item>Faces north west</item>
-    </string-array>
     
     <!--
     **************************************
@@ -549,8 +550,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***************************************************
     -->
     <string name="barcodescannerdialog_title">QR scanning app required</string>
-    <string name="barcodescannerdialog_message">To scan QR codes, your device must have a camera and you must have a compatible QR barcode scanning app installed. Do you wish to download this from the Google Play Store? The application is called Barcode Scanner by the ZXing Team and is free to download.</string>
-    <string name="barcodescannerdialog_noplaystore">Google Play Store is missing.</string>
+    <string name="barcodescannerdialog_message">To scan QR codes, your device must have a compatible scanning app installed. Do you wish to download this from the Google Play Store?\n\nThe application is called Barcode Scanner by the ZXing Team and is free to download.</string>
+    <string name="barcodescannerdialog_btn_positive">Go to Play Store</string>
+    <string name="barcodescannerdialog_btn_negative">No thanks</string>
+    <string name="barcodescannerdialog_noplaystore">Google Play Store is missing</string>
     
     <!--
     ***********************************************
@@ -697,6 +700,20 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="neareststops_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="neareststops_menu_time_add">@string/time_alert_add</string>
     <string name="neareststops_menu_time_rem">@string/time_alert_rem</string>
+
+    <!--
+    ***********************************
+    * Strings for SearchActivity menu *
+    ***********************************
+    -->
+    <string name="search_menu_scan">Scan QR code</string>
+
+    <!--
+    ****************************************
+    * Strings for SectionListFragment menu *
+    ****************************************
+    -->
+    <string name="section_list_menu_search">Search</string>
     
     <!--
     ************************

@@ -26,12 +26,18 @@
 */ -->
 <resources
     xmlns:tools="http://schemas.android.com/tools" >
+
     <style name="AppActionBar" parent="@style/Widget.AppCompat.ActionBar.Solid">
         <item name="displayOptions">showHome|homeAsUp|showTitle</item>
     </style>
     
     <style name="AppActionBar.Map">
         <item name="background">@color/mapActionBarColour</item>
+    </style>
+
+    <style name="Widget.MyBusEdinburgh.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="android:background">?colorPrimary</item>
     </style>
 
     <style name="TextAppearance.AppCompat.ListItem1" >

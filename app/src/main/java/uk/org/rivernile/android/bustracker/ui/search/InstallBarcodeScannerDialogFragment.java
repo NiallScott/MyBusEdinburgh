@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,10 +23,11 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
+package uk.org.rivernile.android.bustracker.ui.search;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -47,13 +48,13 @@ public class InstallBarcodeScannerDialogFragment extends DialogFragment {
     private Callbacks callbacks;
 
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(final Context context) {
+        super.onAttach(context);
         
         try {
-            callbacks = (Callbacks) activity;
+            callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
+            throw new IllegalStateException(context.getClass().getName() + " does not implement " +
                     Callbacks.class.getName());
         }
     }
@@ -61,19 +62,19 @@ public class InstallBarcodeScannerDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.barcodescannerdialog_title)
+        return new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.barcodescannerdialog_title)
                 .setCancelable(true)
                 .setMessage(R.string.barcodescannerdialog_message)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.barcodescannerdialog_btn_positive,
+                        new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface dialog, final int which) {
                         callbacks.onShowInstallBarcodeScanner();
                     }
                 })
-                .setNegativeButton(R.string.no, null);
-
-        return builder.create();
+                .setNegativeButton(R.string.barcodescannerdialog_btn_negative, null)
+                .create();
     }
     
     /**
