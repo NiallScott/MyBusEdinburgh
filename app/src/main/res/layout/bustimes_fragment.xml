@@ -24,22 +24,31 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
  */ -->
-<FrameLayout
+<android.support.v4.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <android.support.v7.widget.RecyclerView
-        android:id="@android:id/list"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="@dimen/padding_default"
-        android:paddingBottom="@dimen/padding_default"
-        android:scrollbars="vertical"
-        android:clipToPadding="false"
-        android:visibility="gone"
-        android:orientation="vertical"
-        app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-        tools:visbility="visible" />
-</FrameLayout>
+        android:layout_height="match_parent">
+        <android.support.v7.widget.RecyclerView
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="@dimen/padding_default"
+            android:paddingBottom="@dimen/padding_default"
+            android:scrollbars="vertical"
+            android:clipToPadding="false"
+            android:visibility="gone"
+            android:orientation="vertical"
+            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+            tools:visbility="visible" />
+        <include
+            layout="@layout/indeterminate_progress" />
+        <include
+            layout="@layout/error_with_resolve_button" />
+    </FrameLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

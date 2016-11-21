@@ -23,30 +23,23 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
- */ -->
-<android.support.design.widget.CoordinatorLayout
+*/ -->
+<menu
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <android.support.design.widget.AppBarLayout
-        android:theme="@style/ThemeOverlay.AppCompat.Dark"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll"
-            android:minHeight="?actionBarSize" />
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </android.support.design.widget.AppBarLayout>
-    <android.support.v4.view.ViewPager
-        android:id="@+id/viewPager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-</android.support.design.widget.CoordinatorLayout>
+    xmlns:compat="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <item
+        android:id="@+id/bustimes_option_menu_refresh"
+        android:title="@string/bustimes_menu_refresh"
+        android:icon="@drawable/ic_action_refresh"
+        compat:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/bustimes_option_menu_sort"
+        tools:title="@string/bustimes_menu_sort_times"
+        tools:ignore="MenuTitle" />
+    <item
+        android:id="@+id/bustimes_option_menu_autorefresh"
+        android:icon="@drawable/ic_menu_autorefresh"
+        tools:title="@string/bustimes_menu_turnautorefreshon"
+        tools:ignore="MenuTitle" />
+</menu>
