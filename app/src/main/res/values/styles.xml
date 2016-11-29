@@ -52,6 +52,11 @@
     <style name="TextAppearance.AppCompat.ListItem2.Secondary" >
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
+
+    <style name="TextAppearance.MyBus.DisplayStopData.Subheading"
+           parent="TextAppearance.AppCompat.Subhead">
+        <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
     
     <style name="BusStopDetailsButtons" >
         <item name="android:layout_gravity">center_vertical</item>

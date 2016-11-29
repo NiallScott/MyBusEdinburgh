@@ -259,7 +259,15 @@
 
         <!-- TODO: remove me later. -->
         <activity
-            android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity2" />
+            android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity2"
+            android:theme="@style/MyBusEdinburgh.NoActionBar"
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
+        </activity>
 
         <!-- SearchActivity, the single place in the application where the user can search for
              content based on a search term. -->

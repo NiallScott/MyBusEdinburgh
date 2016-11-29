@@ -31,6 +31,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -41,9 +43,13 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
@@ -65,13 +71,14 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTime
  * @author Niall Scott
  */
 public class DisplayStopDataActivity2 extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<Cursor> {
+        implements LoaderManager.LoaderCallbacks<Cursor>, AppBarLayout.OnOffsetChangedListener {
 
     public static final String EXTRA_STOP_CODE = "stopCode";
 
-    private static final int LOADER_FAVOURITE_STOP = 1;
-    private static final int LOADER_HAS_PROX_ALERT = 2;
-    private static final int LOADER_HAS_TIME_ALERT = 3;
+    private static final int LOADER_BUS_STOP = 1;
+    private static final int LOADER_FAVOURITE_STOP = 2;
+    private static final int LOADER_HAS_PROX_ALERT = 3;
+    private static final int LOADER_HAS_TIME_ALERT = 4;
 
     private static final String DIALOG_REMOVE_FAVOURITE = "removeFavourite";
     private static final String DIALOG_REMOVE_PROX_ALERT = "removeProxAlert";
@@ -80,6 +87,10 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
     private Cursor favouriteCursor;
     private Cursor proxCursor;
     private Cursor timeCursor;
+
+    private CollapsingToolbarLayout collapsingLayout;
+    private TextView txtStopName;
+    private TextView txtStopCode;
 
     private MenuItem favouriteMenuItem;
     private MenuItem proxMenuItem;
@@ -90,21 +101,29 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.displaystopdata2);
-        /*setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         final ActionBar actionBar = getSupportActionBar();
 
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }*/
+            actionBar.setDisplayShowTitleEnabled(false);
+        }
 
+        final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
+        collapsingLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsingLayout);
+        txtStopName = (TextView) findViewById(R.id.txtStopName);
+        txtStopCode = (TextView) findViewById(R.id.txtStopCode);
         final ViewPager viewPager = (ViewPager) findViewById(R.id.viewPager);
         final TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+
+        appBarLayout.addOnOffsetChangedListener(this);
 
         viewPager.setAdapter(new StopDataPagerAdapter(this, getSupportFragmentManager(),
                 getIntent().getStringExtra(EXTRA_STOP_CODE)));
         tabLayout.setupWithViewPager(viewPager);
 
         final LoaderManager loaderManager = getSupportLoaderManager();
+        loaderManager.initLoader(LOADER_BUS_STOP, null, this);
         loaderManager.initLoader(LOADER_FAVOURITE_STOP, null, this);
         loaderManager.initLoader(LOADER_HAS_PROX_ALERT, null, this);
         loaderManager.initLoader(LOADER_HAS_TIME_ALERT, null, this);
@@ -153,6 +172,12 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
         switch (id) {
+            case LOADER_BUS_STOP:
+                return new BusStopLoader(this, getIntent().getStringExtra(EXTRA_STOP_CODE),
+                        new String[] {
+                                BusStopContract.BusStops.STOP_NAME,
+                                BusStopContract.BusStops.LOCALITY
+                        });
             case LOADER_FAVOURITE_STOP:
                 return new FavouriteStopsLoader(this, getIntent().getStringExtra(EXTRA_STOP_CODE));
             case LOADER_HAS_PROX_ALERT:
@@ -168,6 +193,9 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
         switch (loader.getId()) {
+            case LOADER_BUS_STOP:
+                handleBusStopLoad(data);
+                break;
             case LOADER_FAVOURITE_STOP:
                 configureFavouriteMenuItem(data);
                 break;
@@ -183,6 +211,9 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
     @Override
     public void onLoaderReset(final Loader<Cursor> loader) {
         switch (loader.getId()) {
+            case LOADER_BUS_STOP:
+                handleBusStopLoad(null);
+                break;
             case LOADER_FAVOURITE_STOP:
                 configureFavouriteMenuItem(null);
                 break;
@@ -192,6 +223,43 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
             case LOADER_HAS_TIME_ALERT:
                 configureTimeAlertMenuItem(null);
                 break;
+        }
+    }
+
+    @Override
+    public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
+        final ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(
+                    Math.abs(verticalOffset) >= collapsingLayout.getScrimVisibleHeightTrigger());
+        }
+    }
+
+    /**
+     * Handle the load of the bus stop details {@link Cursor}.
+     *
+     * @param cursor The {@link Cursor} containing bus stop details, or {@code null}.
+     */
+    private void handleBusStopLoad(@Nullable final Cursor cursor) {
+        if (cursor != null && cursor.moveToFirst()) {
+            final String stopCode = getIntent().getStringExtra(EXTRA_STOP_CODE);
+            final String stopName = cursor.getString(
+                    cursor.getColumnIndex(BusStopContract.BusStops.STOP_NAME));
+            final String locality = cursor.getString(
+                    cursor.getColumnIndex(BusStopContract.BusStops.LOCALITY));
+            final String nameToDisplay = !TextUtils.isEmpty(locality)
+                    ? getString(R.string.bustimes_title_locality_format, stopName, locality)
+                    : stopName;
+
+            txtStopName.setText(nameToDisplay);
+            txtStopCode.setText(stopCode);
+            final ActionBar actionBar = getSupportActionBar();
+
+            if (actionBar != null) {
+                actionBar.setTitle(nameToDisplay);
+                actionBar.setSubtitle(stopCode);
+            }
         }
     }
 

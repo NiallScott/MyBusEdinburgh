@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,29 +21,41 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<resources>
-    <!-- General dimensions. -->
-    <dimen name="padding_half">4dp</dimen>
-    <dimen name="padding_default">8dp</dimen>
-    <dimen name="padding_double">16dp</dimen>
-    
-    <dimen name="text_size_small">14sp</dimen>
-    <dimen name="text_size_medium">16sp</dimen>
-    <dimen name="action_button_min_size">48dp</dimen>
-    <dimen name="indeterminate_progress_size">24dp</dimen>
-    <dimen name="app_bar_content_inset">72dp</dimen>
-    
-    <dimen name="navigation_drawer_width">280dp</dimen>
-    
-    <!-- Dimensions for bus times view. -->
-    <dimen name="service_name_width">55dp</dimen>
-    <dimen name="bustime_width">80dp</dimen>
+ */
 
-    <!-- Dimensions for news. -->
-    <dimen name="news_avatar_size">36dp</dimen>
-    <dimen name="news_divider_inset_start">72dp</dimen>
+package uk.org.rivernile.android.bustracker.ui.bustimes.details;
 
-    <!-- Dimens for alert manager. -->
-    <dimen name="map_range_ring_stroke">1dp</dimen>
-</resources>
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+
+/**
+ * @author Niall Scott
+ */
+class StopDetailsAdapter extends RecyclerView.Adapter {
+
+    private final Context context;
+    private final LayoutInflater inflater;
+
+    StopDetailsAdapter(@NonNull final Context context) {
+        this.context = context;
+        inflater = LayoutInflater.from(context);
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        return null;
+    }
+
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return 0;
+    }
+}

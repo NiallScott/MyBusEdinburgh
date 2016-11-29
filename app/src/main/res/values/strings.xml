@@ -407,6 +407,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for BusTimesFragment *
     ********************************
     -->
+    <string name="bustimes_title_locality_format">%1$s, %2$s</string>
     <string name="bustimes_btn_error_retry">Retry</string>
 
     <string name="bustimes_err_unknown">An error has occurred, but we\'re not quite sure what it is</string>
