@@ -23,24 +23,28 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
- */ -->
-<FrameLayout
+*/ -->
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:percent="http://schemas.android.com/apk/res-auto"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <android.support.v7.widget.RecyclerView
-        android:id="@android:id/list"
+    <android.support.percent.PercentFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/padding_default"
-        android:scrollbars="vertical"
-        android:clipToPadding="false"
-        android:visibility="gone"
-        android:orientation="vertical"
-        app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-        tools:visibility="visible" />
-    <include
-        layout="@layout/indeterminate_progress" />
-</FrameLayout>
+        android:layout_height="wrap_content">
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView"
+            android:visibility="gone"
+            percent:layout_widthPercent="100%"
+            percent:layout_aspectRatio="@fraction/alert_manager_map_aspect_ratio"
+            map:liteMode="true"
+            map:mapType="normal"
+            map:cameraZoom="17"
+            map:uiCompass="false"
+            tools:background="@android:color/holo_green_light"
+            tools:visibility="visible" />
+    </android.support.percent.PercentFrameLayout>
+</LinearLayout>

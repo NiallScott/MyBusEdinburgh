@@ -25,14 +25,21 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -40,9 +47,16 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * @author Niall Scott
  */
-public class StopDetailsFragment extends Fragment {
+public class StopDetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks {
 
     private static final String ARG_STOP_CODE = "stopCode";
+
+    private static final int LOADER_BUS_STOP = 1;
+
+    private StopDetailsAdapter adapter;
+
+    private RecyclerView recyclerView;
+    private ProgressBar progress;
 
     /**
      * Create a new instance of this {@link Fragment}.
@@ -60,10 +74,105 @@ public class StopDetailsFragment extends Fragment {
         return fragment;
     }
 
+    @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        adapter = new StopDetailsAdapter(getContext());
+    }
+
     @Nullable
     @Override
     public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container,
             @Nullable final Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.stopdetails_fragment, container, false);
+        final View v = inflater.inflate(R.layout.stopdetails_fragment, container, false);
+        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
+        progress = (ProgressBar) v.findViewById(R.id.progress);
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+
+        return v;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable final Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        showProgress();
+        getLoaderManager().initLoader(LOADER_BUS_STOP, null, this);
+    }
+
+    @Override
+    public Loader onCreateLoader(final int id, final Bundle args) {
+        switch (id) {
+            case LOADER_BUS_STOP:
+                return new BusStopLoader(getContext(), getArguments().getString(ARG_STOP_CODE),
+                        new String[] {
+                                BusStopContract.BusStops.LATITUDE,
+                                BusStopContract.BusStops.LONGITUDE,
+                                BusStopContract.BusStops.ORIENTATION
+                        });
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(final Loader loader, final Object data) {
+        switch (loader.getId()) {
+            case LOADER_BUS_STOP:
+                handleBusStopLoaded((Cursor) data);
+                break;
+        }
+    }
+
+    @Override
+    public void onLoaderReset(final Loader loader) {
+        switch (loader.getId()) {
+            case LOADER_BUS_STOP:
+                handleBusStopLoaded(null);
+                break;
+        }
+    }
+
+    /**
+     * Handle the bus stop data being loaded from the database.
+     *
+     * @param cursor The {@link Cursor} containing bus stop data.
+     */
+    private void handleBusStopLoaded(@Nullable final Cursor cursor) {
+        final BusStopLocation location;
+
+        if (cursor != null && cursor.moveToFirst()) {
+            final double latitude = cursor.getDouble(cursor.getColumnIndex(
+                    BusStopContract.BusStops.LATITUDE));
+            final double longitude = cursor.getDouble(cursor.getColumnIndex(
+                    BusStopContract.BusStops.LONGITUDE));
+            final int orientation = cursor.getInt(cursor.getColumnIndex(
+                    BusStopContract.BusStops.ORIENTATION));
+            location = new BusStopLocation(latitude, longitude, orientation);
+        } else {
+            location = null;
+        }
+
+        adapter.setBusStopLocation(location);
+        showContent();
+    }
+
+    /**
+     * Show the progress view.
+     */
+    private void showProgress() {
+        recyclerView.setVisibility(View.GONE);
+        progress.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Show the content view.
+     */
+    private void showContent() {
+        progress.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
     }
 }

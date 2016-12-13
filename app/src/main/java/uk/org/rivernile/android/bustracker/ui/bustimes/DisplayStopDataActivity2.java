@@ -118,6 +118,7 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
 
         appBarLayout.addOnOffsetChangedListener(this);
 
+        viewPager.setPageMargin(getResources().getDimensionPixelSize(R.dimen.padding_default));
         viewPager.setAdapter(new StopDataPagerAdapter(this, getSupportFragmentManager(),
                 getIntent().getStringExtra(EXTRA_STOP_CODE)));
         tabLayout.setupWithViewPager(viewPager);
