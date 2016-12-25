@@ -41,11 +41,11 @@
     </style>
 
     <style name="TextAppearance.AppCompat.ListItem1" >
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">@dimen/list_item_1_text_size</item>
     </style>
 
     <style name="TextAppearance.AppCompat.ListItem2" >
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">@dimen/list_item_2_text_size</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
@@ -56,6 +56,11 @@
     <style name="TextAppearance.MyBus.DisplayStopData.Subheading"
            parent="TextAppearance.AppCompat.Subhead">
         <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
+
+    <style name="TextAppearance.MyBus.DisplayStopData.ServiceName" parent="">
+        <item name="android:textSize">@dimen/display_stop_data_service_name_text_size</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
     
     <style name="BusStopDetailsButtons" >
@@ -123,5 +128,12 @@
 
     <style name="Card.Default">
         <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="ServiceName">
+        <item name="android:minWidth">@dimen/display_stop_data_service_name_min_width</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.MyBus.DisplayStopData.ServiceName</item>
+        <item name="android:background">@drawable/bus_service_rounded_background</item>
     </style>
 </resources>

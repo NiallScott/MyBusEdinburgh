@@ -48,4 +48,28 @@
 
     <!-- Dimens for alert manager. -->
     <dimen name="map_range_ring_stroke">1dp</dimen>
+
+    <!--
+    *************************
+    * Text appearance sizes *
+    *************************
+    -->
+
+    <!-- Default list item sizes -->
+    <dimen name="list_item_1_text_size">16sp</dimen>
+    <dimen name="list_item_2_text_size">14sp</dimen>
+
+    <!-- DisplayStopDataActivity -->
+    <dimen name="display_stop_data_service_name_text_size">@dimen/list_item_1_text_size</dimen>
+
+    <!--
+    ********************************
+    * Specific instance dimensions *
+    ********************************
+    -->
+
+    <!-- DisplayStopDataActivity -->
+    <dimen name="display_stop_data_service_background_radius">2dp</dimen>
+    <dimen name="display_stop_data_service_background_padding">4dp</dimen>
+    <dimen name="display_stop_data_service_name_min_width">56dp</dimen>
 </resources>

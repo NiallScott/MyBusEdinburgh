@@ -58,6 +58,7 @@ import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment;
 import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
+import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -71,7 +72,8 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTime
  * @author Niall Scott
  */
 public class DisplayStopDataActivity2 extends AppCompatActivity
-        implements LoaderManager.LoaderCallbacks<Cursor>, AppBarLayout.OnOffsetChangedListener {
+        implements LoaderManager.LoaderCallbacks<Cursor>, AppBarLayout.OnOffsetChangedListener,
+        StopDetailsFragment.Callbacks {
 
     public static final String EXTRA_STOP_CODE = "stopCode";
 
@@ -235,6 +237,13 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
             actionBar.setDisplayShowTitleEnabled(
                     Math.abs(verticalOffset) >= collapsingLayout.getScrimVisibleHeightTrigger());
         }
+    }
+
+    @Override
+    public void showMapForStop(@NonNull final String stopCode) {
+        final Intent intent = new Intent(this, BusStopMapActivity.class);
+        intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
+        startActivity(intent);
     }
 
     /**

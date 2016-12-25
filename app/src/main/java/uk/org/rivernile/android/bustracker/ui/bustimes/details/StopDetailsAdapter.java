@@ -26,12 +26,15 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.details;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,6 +43,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.lang.ref.WeakReference;
+import java.util.List;
 
 import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -57,7 +63,9 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
 
     private final Context context;
     private final LayoutInflater inflater;
+    private WeakReference<OnItemClickListener> clickListenerRef;
     private BusStopLocation location;
+    private List<Service> services;
 
     /**
      * Create a new {@code StopDetailsAdapter}.
@@ -76,6 +84,8 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
                 return new LocationViewHolder(
                         inflater.inflate(R.layout.stopdetails_location_item, parent, false));
             case VIEW_TYPE_SERVICE:
+                return new ServiceViewHolder(
+                        inflater.inflate(R.layout.stopdetails_service_item, parent, false));
             default:
                 return null;
         }
@@ -85,17 +95,34 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof LocationViewHolder) {
             ((LocationViewHolder) holder).populate(location);
+        } else if (holder instanceof ServiceViewHolder) {
+            ((ServiceViewHolder) holder).populate(getServiceForAdapterPosition(position));
         }
     }
 
     @Override
     public int getItemCount() {
-        return location != null ? 1 : 0;
+        int size = services != null ? services.size() : 0;
+
+        if (location != null) {
+            size++;
+        }
+
+        return size;
     }
 
     @Override
     public int getItemViewType(final int position) {
         return position == 0 && location != null ? VIEW_TYPE_LOCATION : VIEW_TYPE_SERVICE;
+    }
+
+    /**
+     * Set the listener to be called when the user has clicked on an item.
+     *
+     * @param listener The listener that is called when the user has clicked on an item.
+     */
+    void setOnItemClickedListener(@Nullable final OnItemClickListener listener) {
+        clickListenerRef = listener != null ? new WeakReference<>(listener) : null;
     }
 
     /**
@@ -111,9 +138,38 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
     }
 
     /**
-     * This view holder populates the location view.
+     * Set the {@link List} of {@link Service}s to use in this adapter.
+     *
+     * @param services The {@link List} of {@link Service}s to use in this adapter.
      */
-    private class LocationViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback {
+    void setServices(@Nullable final List<Service> services) {
+        this.services = services;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Get the {@link Service} for the given adapter position, or {@code null} if there is no
+     * {@link Service} at this position.
+     *
+     * @param position The position to get the {@link Service} for.
+     * @return The {@link Service} for the given adapter position, or {@code null} if there is no
+     * {@link Service} at this position.
+     */
+    @Nullable
+    private Service getServiceForAdapterPosition(int position) {
+        if (location != null) {
+            position--;
+        }
+
+        return services != null && position >= 0 && position < services.size()
+                ? services.get(position) : null;
+    }
+
+    /**
+     * This {@link RecyclerView.ViewHolder} populates the location {@link View}.
+     */
+    private class LocationViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback,
+            GoogleMap.OnMapClickListener {
 
         private final MapView mapView;
         private GoogleMap map;
@@ -143,7 +199,24 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
         public void onMapReady(final GoogleMap googleMap) {
             map = googleMap;
             map.getUiSettings().setMapToolbarEnabled(false);
+            map.setOnMapClickListener(this);
             populateMap();
+        }
+
+        @Override
+        public void onMapClick(final LatLng latLng) {
+            final int position = getAdapterPosition();
+
+            if (position == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            final OnItemClickListener clickListener =
+                    clickListenerRef != null ? clickListenerRef.get() : null;
+
+            if (clickListener != null) {
+                clickListener.onMapClicked();
+            }
         }
 
         /**
@@ -182,5 +255,87 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
                 mapView.setVisibility(View.GONE);
             }
         }
+    }
+
+    /**
+     * This {@link RecyclerView.ViewHolder} populates {@link View}s relating to {@link Service}s.
+     */
+    private class ServiceViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
+
+        private final AppCompatTextView txtServiceName;
+        private final TextView txtDescription;
+
+        /**
+         * Create a new {@code ServiceViewHolder}.
+         *
+         * @param itemView The {@link View} for this item.
+         */
+        private ServiceViewHolder(@NonNull final View itemView) {
+            super(itemView);
+
+            txtServiceName = (AppCompatTextView) itemView.findViewById(R.id.txtServiceName);
+            txtDescription = (TextView) itemView.findViewById(R.id.txtDescription);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(final View view) {
+            final int position = getAdapterPosition();
+
+            if (position == RecyclerView.NO_POSITION) {
+                return;
+            }
+
+            final Service service = getServiceForAdapterPosition(position);
+
+            if (service == null) {
+                return;
+            }
+
+            final OnItemClickListener clickListener =
+                    clickListenerRef != null ? clickListenerRef.get() : null;
+
+            if (clickListener != null) {
+                clickListener.onServiceClicked(service.getServiceName());
+            }
+        }
+
+        /**
+         * Populate the {@link View}s in this {@link RecyclerView.ViewHolder}.
+         *
+         * @param service The {@link Service} to populate in this {@link RecyclerView.ViewHolder}.
+         */
+        private void populate(@Nullable final Service service) {
+            if (service != null) {
+                txtServiceName.setSupportBackgroundTintList(
+                        ColorStateList.valueOf(service.getColour()));
+                txtServiceName.setText(service.getServiceName());
+                txtDescription.setText(service.getDescription());
+            } else {
+                txtServiceName.setText(null);
+                txtDescription.setText(null);
+            }
+        }
+    }
+
+    /**
+     * Implement this interface to receive callbacks when items inside this
+     * {@link RecyclerView.ViewHolder} have been clicked.
+     */
+    interface OnItemClickListener {
+
+        /**
+         * This is called when the map has been clicked.
+         */
+        void onMapClicked();
+
+        /**
+         * This is called when a {@link Service} has been clicked.
+         *
+         * @param serviceName The name of the {@link Service} that has been clicked.
+         */
+        void onServiceClicked(@NonNull String serviceName);
     }
 }

@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -38,8 +39,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import java.util.List;
+
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
+import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -47,13 +51,17 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * @author Niall Scott
  */
-public class StopDetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks {
+public class StopDetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks,
+        StopDetailsAdapter.OnItemClickListener {
 
     private static final String ARG_STOP_CODE = "stopCode";
 
     private static final int LOADER_BUS_STOP = 1;
+    private static final int LOADER_SERVICES = 2;
 
+    private Callbacks callbacks;
     private StopDetailsAdapter adapter;
+    private String stopCode;
 
     private RecyclerView recyclerView;
     private ProgressBar progress;
@@ -75,10 +83,24 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
+    public void onAttach(final Context context) {
+        super.onAttach(context);
+
+        try {
+            callbacks = (Callbacks) context;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(context.getClass().getName() + " must implement " +
+                    Callbacks.class.getName());
+        }
+    }
+
+    @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        stopCode = getArguments().getString(ARG_STOP_CODE);
         adapter = new StopDetailsAdapter(getContext());
+        adapter.setOnItemClickedListener(this);
     }
 
     @Nullable
@@ -101,28 +123,37 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
 
         showProgress();
         getLoaderManager().initLoader(LOADER_BUS_STOP, null, this);
+        getLoaderManager().initLoader(LOADER_SERVICES, null, this);
     }
 
     @Override
     public Loader onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LOADER_BUS_STOP:
-                return new BusStopLoader(getContext(), getArguments().getString(ARG_STOP_CODE),
+                return new BusStopLoader(getContext(), stopCode,
                         new String[] {
                                 BusStopContract.BusStops.LATITUDE,
                                 BusStopContract.BusStops.LONGITUDE,
                                 BusStopContract.BusStops.ORIENTATION
                         });
+            case LOADER_SERVICES:
+                return new BusStopServiceDetailsLoader(getContext(), stopCode);
             default:
                 return null;
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void onLoadFinished(final Loader loader, final Object data) {
         switch (loader.getId()) {
             case LOADER_BUS_STOP:
                 handleBusStopLoaded((Cursor) data);
+                break;
+            case LOADER_SERVICES:
+                final ProcessedCursorLoader.ResultWrapper<List<Service>> result =
+                        (ProcessedCursorLoader.ResultWrapper<List<Service>>) data;
+                handleServicesLoaded(result.getResult());
                 break;
         }
     }
@@ -134,6 +165,16 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
                 handleBusStopLoaded(null);
                 break;
         }
+    }
+
+    @Override
+    public void onMapClicked() {
+        callbacks.showMapForStop(stopCode);
+    }
+
+    @Override
+    public void onServiceClicked(@NonNull final String serviceName) {
+        // TODO: need to implement focusing on a service in the bus stop map.
     }
 
     /**
@@ -161,6 +202,15 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     }
 
     /**
+     * Handle the service listing for this stop being loaded from the database.
+     *
+     * @param services The {@link List} of {@link Service}s for this stop.
+     */
+    private void handleServicesLoaded(@Nullable final List<Service> services) {
+        adapter.setServices(services);
+    }
+
+    /**
      * Show the progress view.
      */
     private void showProgress() {
@@ -174,5 +224,20 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     private void showContent() {
         progress.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * This interface must be implemented by any {@link android.app.Activity Activites} which host
+     * this {@link Fragment}.
+     */
+    public interface Callbacks {
+
+        /**
+         * This is called when the user wishes to see the stop map, with this stop being selected
+         * by default.
+         *
+         * @param stopCode The stop code to view on the map.
+         */
+        void showMapForStop(@NonNull String stopCode);
     }
 }

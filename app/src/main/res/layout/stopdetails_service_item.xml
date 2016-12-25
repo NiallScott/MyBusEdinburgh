@@ -26,25 +26,32 @@
 */ -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:percent="http://schemas.android.com/apk/res-auto"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
-    <android.support.percent.PercentFrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/mapView"
-            android:visibility="gone"
-            percent:layout_widthPercent="100%"
-            percent:layout_aspectRatio="@fraction/alert_manager_map_aspect_ratio"
-            map:liteMode="true"
-            map:mapType="normal"
-            map:cameraZoom="17"
-            map:uiCompass="false"
-            tools:background="@android:color/holo_green_light"
-            tools:visibility="visible" />
-    </android.support.percent.PercentFrameLayout>
+    android:paddingTop="@dimen/padding_default"
+    android:paddingBottom="@dimen/padding_default"
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingStart="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight"
+    android:paddingEnd="?attr/listPreferredItemPaddingRight"
+    android:minHeight="?attr/listPreferredItemHeight"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="?selectableItemBackground"
+    android:clickable="true">
+    <android.support.v7.widget.AppCompatTextView
+        style="@style/ServiceName"
+        android:id="@+id/txtServiceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="TRAM" />
+    <TextView
+        android:id="@id/txtDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/padding_double"
+        android:layout_marginStart="@dimen/padding_double"
+        android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
+        tools:text="Airport - York Place" />
 </LinearLayout>
