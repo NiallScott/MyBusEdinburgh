@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,11 +25,14 @@
 package uk.org.rivernile.android.utils;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
+import android.support.v4.content.ContextCompat;
 
 import java.util.List;
 
@@ -49,6 +52,21 @@ public class LocationUtils {
      */
     private LocationUtils() {
         // Nothing to do here.
+    }
+
+    /**
+     * Does the package for the given {@link Context} have permission to use location services?
+     *
+     * @param context The {@link Context} of the package to check permission on.
+     * @return {@code true} if the package has permission to use location services, {@code false} if
+     * not.
+     */
+    public static boolean hasLocationPermission(@NonNull final Context context) {
+        final boolean hasFineLocation = ContextCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        final boolean hasCoarseLocation = ContextCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return hasFineLocation && hasCoarseLocation;
     }
 
     /**
@@ -143,7 +161,7 @@ public class LocationUtils {
      * @param provider2 The second provider {@link String} to compare.
      * @return {@code true} if they are the same, {@code false} if not.
      */
-    public static boolean isSameProvider(@Nullable final String provider1,
+    private static boolean isSameProvider(@Nullable final String provider1,
             @Nullable final String provider2) {
         if (provider1 == null) {
             return provider2 == null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,8 +25,13 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -43,6 +48,7 @@ import java.util.List;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
+import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -52,16 +58,27 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 public class StopDetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks,
-        StopDetailsAdapter.OnItemClickListener {
+        LocationListener, StopDetailsAdapter.OnItemClickListener {
 
     private static final String ARG_STOP_CODE = "stopCode";
+
+    private static final String STATE_ASKED_LOCATION_PERMISSION = "askedLocationPermission";
 
     private static final int LOADER_BUS_STOP = 1;
     private static final int LOADER_SERVICES = 2;
 
+    private static final int PERMISSION_REQUEST_LOCATION = 1;
+
+    private static final int LOCATION_REQUEST_PERIOD = 10000;
+    private static final float LOCATION_MIN_DISTANCE = 10.0f;
+
     private Callbacks callbacks;
+    private LocationManager locationManager;
     private StopDetailsAdapter adapter;
     private String stopCode;
+    private boolean isStarted;
+    private boolean isListeningForLocationUpdates;
+    private boolean hasAskedForLocationPermission;
 
     private RecyclerView recyclerView;
     private ProgressBar progress;
@@ -98,7 +115,13 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     public void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (savedInstanceState != null) {
+            hasAskedForLocationPermission =
+                    savedInstanceState.getBoolean(STATE_ASKED_LOCATION_PERMISSION);
+        }
+
         stopCode = getArguments().getString(ARG_STOP_CODE);
+        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
         adapter = new StopDetailsAdapter(getContext());
         adapter.setOnItemClickedListener(this);
     }
@@ -124,6 +147,57 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
         showProgress();
         getLoaderManager().initLoader(LOADER_BUS_STOP, null, this);
         getLoaderManager().initLoader(LOADER_SERVICES, null, this);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        isStarted = true;
+
+        if (getUserVisibleHint()) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        isStarted = false;
+        stopLocationUpdates();
+    }
+
+    @Override
+    public void onSaveInstanceState(final Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(STATE_ASKED_LOCATION_PERMISSION, hasAskedForLocationPermission);
+    }
+
+    @Override
+    public void setUserVisibleHint(final boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (getContext() != null) {
+            if (isVisibleToUser && isStarted) {
+                startLocationUpdates();
+            } else {
+                stopLocationUpdates();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(final int requestCode,
+            @NonNull final String[] permissions, @NonNull final int[] grantResults) {
+        if (grantResults.length == 2 && grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                grantResults[1] == PackageManager.PERMISSION_GRANTED &&
+                isStarted && getUserVisibleHint()) {
+            startLocationUpdates();
+        }
+
+        adapter.onLocationPermissionChanged();
     }
 
     @Override
@@ -168,6 +242,26 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
+    public void onLocationChanged(final Location location) {
+        adapter.setDeviceLocation(location);
+    }
+
+    @Override
+    public void onStatusChanged(final String provider, final int status, final Bundle extras) {
+        // Nothing to do here.
+    }
+
+    @Override
+    public void onProviderEnabled(final String provider) {
+        // Nothing to do here.
+    }
+
+    @Override
+    public void onProviderDisabled(final String provider) {
+        // Nothing to do here.
+    }
+
+    @Override
     public void onMapClicked() {
         callbacks.showMapForStop(stopCode);
     }
@@ -175,6 +269,60 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onServiceClicked(@NonNull final String serviceName) {
         // TODO: need to implement focusing on a service in the bus stop map.
+    }
+
+    /**
+     * Start listening for location updates.
+     */
+    private void startLocationUpdates() {
+        if (LocationUtils.hasLocationPermission(getContext())) {
+            if (!isListeningForLocationUpdates) {
+                isListeningForLocationUpdates = true;
+                adapter.setDeviceLocation(LocationUtils.getBestInitialLocation(locationManager));
+                final List<String> providers = locationManager.getAllProviders();
+
+                if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+                    startLocationProvider(LocationManager.NETWORK_PROVIDER);
+                }
+
+                if (providers.contains(LocationManager.GPS_PROVIDER)) {
+                    startLocationProvider(LocationManager.GPS_PROVIDER);
+                }
+            }
+        } else {
+            adapter.setDeviceLocation(null);
+
+            if (!hasAskedForLocationPermission) {
+                requestPermissions(
+                        new String[] {
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                        }, PERMISSION_REQUEST_LOCATION);
+            }
+        }
+
+        hasAskedForLocationPermission = true;
+    }
+
+    /**
+     * Starts a location provider in the {@link LocationManager}.
+     *
+     * @param provider The provider to start.
+     */
+    private void startLocationProvider(@NonNull final String provider) {
+        locationManager.requestLocationUpdates(provider, LOCATION_REQUEST_PERIOD,
+                LOCATION_MIN_DISTANCE, this);
+    }
+
+    /**
+     * Stops a location provider in the {@link LocationManager}.
+     */
+    private void stopLocationUpdates() {
+        if (isListeningForLocationUpdates && LocationUtils.hasLocationPermission(getContext())) {
+            locationManager.removeUpdates(this);
+        }
+
+        isListeningForLocationUpdates = false;
     }
 
     /**

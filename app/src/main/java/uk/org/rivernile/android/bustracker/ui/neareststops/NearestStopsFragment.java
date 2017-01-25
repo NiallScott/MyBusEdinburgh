@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
@@ -159,7 +158,7 @@ public class NearestStopsFragment extends Fragment
         adapter = new NearestStopsAdapter(activity);
         adapter.setOnItemClickedListener(this);
 
-        if (hasLocationPermission()) {
+        if (LocationUtils.hasLocationPermission(getContext())) {
             // Initialise the lastLocation to the best known location.
             lastLocation = LocationUtils.getBestInitialLocation(locMan);
         }
@@ -220,7 +219,7 @@ public class NearestStopsFragment extends Fragment
     public void onResume() {
         super.onResume();
 
-        if (hasLocationPermission()) {
+        if (LocationUtils.hasLocationPermission(getContext())) {
             startLocationUpdates();
         } else {
             showPermissionRequiredError();
@@ -533,7 +532,7 @@ public class NearestStopsFragment extends Fragment
     private void updateFilterMenuItem() {
         if (menuItemFilter != null) {
             menuItemFilter.setEnabled(services != null && services.length > 0 &&
-                    hasLocationPermission());
+                    LocationUtils.hasLocationPermission(getContext()));
         }
     }
 
@@ -639,20 +638,6 @@ public class NearestStopsFragment extends Fragment
                 doUpdate(false);
             }
         }
-    }
-
-    /**
-     * Does the application have access to the necessary location permissions?
-     *
-     * @return {@code true} if the application has access to the necessary location permissions,
-     * {@code false} if not.
-     */
-    private boolean hasLocationPermission() {
-        final boolean hasFineLocation = ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        final boolean hasCoarseLocation = ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        return hasFineLocation && hasCoarseLocation;
     }
 
     /**

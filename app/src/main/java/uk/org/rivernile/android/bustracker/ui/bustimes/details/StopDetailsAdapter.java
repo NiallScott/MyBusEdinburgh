@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.details;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatTextView;
@@ -47,6 +48,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -58,13 +60,16 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 class StopDetailsAdapter extends RecyclerView.Adapter {
 
-    private static final int VIEW_TYPE_LOCATION = 1;
-    private static final int VIEW_TYPE_SERVICE = 2;
+    private static final int VIEW_TYPE_MAP = 1;
+    private static final int VIEW_TYPE_LOCATION = 2;
+    private static final int VIEW_TYPE_SERVICE = 3;
 
     private final Context context;
     private final LayoutInflater inflater;
     private WeakReference<OnItemClickListener> clickListenerRef;
-    private BusStopLocation location;
+
+    private BusStopLocation busStopLocation;
+    private Location deviceLocation;
     private List<Service> services;
 
     /**
@@ -80,6 +85,9 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         switch (viewType) {
+            case VIEW_TYPE_MAP:
+                return new MapViewHolder(
+                        inflater.inflate(R.layout.stopdetails_map_item, parent, false));
             case VIEW_TYPE_LOCATION:
                 return new LocationViewHolder(
                         inflater.inflate(R.layout.stopdetails_location_item, parent, false));
@@ -93,8 +101,10 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-        if (holder instanceof LocationViewHolder) {
-            ((LocationViewHolder) holder).populate(location);
+        if (holder instanceof MapViewHolder) {
+            ((MapViewHolder) holder).populate();
+        } else if (holder instanceof LocationViewHolder) {
+            ((LocationViewHolder) holder).populate();
         } else if (holder instanceof ServiceViewHolder) {
             ((ServiceViewHolder) holder).populate(getServiceForAdapterPosition(position));
         }
@@ -102,18 +112,19 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        int size = services != null ? services.size() : 0;
-
-        if (location != null) {
-            size++;
-        }
-
-        return size;
+        return (services != null ? services.size() : 0) + 2;
     }
 
     @Override
     public int getItemViewType(final int position) {
-        return position == 0 && location != null ? VIEW_TYPE_LOCATION : VIEW_TYPE_SERVICE;
+        switch (position) {
+            case 0:
+                return VIEW_TYPE_MAP;
+            case 1:
+                return VIEW_TYPE_LOCATION;
+            default:
+                return VIEW_TYPE_SERVICE;
+        }
     }
 
     /**
@@ -131,10 +142,27 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
      * @param location The stop location.
      */
     void setBusStopLocation(@Nullable final BusStopLocation location) {
-        if (this.location != location) {
-            this.location = location;
-            notifyDataSetChanged();
+        if (busStopLocation != location) {
+            busStopLocation = location;
+            notifyItemRangeChanged(0, 2);
         }
+    }
+
+    /**
+     * Set the device location.
+     *
+     * @param location The device location.
+     */
+    void setDeviceLocation(@Nullable final Location location) {
+        if (location != null) {
+            if (LocationUtils.isBetterLocation(location, deviceLocation)) {
+                deviceLocation = location;
+            }
+        } else {
+            deviceLocation = null;
+        }
+
+        notifyItemChanged(1);
     }
 
     /**
@@ -148,6 +176,13 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
     }
 
     /**
+     * Update the location item when the status of the location permission has changed.
+     */
+    void onLocationPermissionChanged() {
+        notifyItemChanged(1);
+    }
+
+    /**
      * Get the {@link Service} for the given adapter position, or {@code null} if there is no
      * {@link Service} at this position.
      *
@@ -157,32 +192,31 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
      */
     @Nullable
     private Service getServiceForAdapterPosition(int position) {
-        if (location != null) {
-            position--;
-        }
+        position -= 2;
 
         return services != null && position >= 0 && position < services.size()
                 ? services.get(position) : null;
     }
 
     /**
-     * This {@link RecyclerView.ViewHolder} populates the location {@link View}.
+     * This {@link RecyclerView.ViewHolder} populates the map {@link View}.
      */
-    private class LocationViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback,
+    private class MapViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback,
             GoogleMap.OnMapClickListener {
 
         private final MapView mapView;
+
         private GoogleMap map;
         private LatLng latLon;
         private int stopOrientation;
         private Marker marker;
 
         /**
-         * Create a new {@code LocationViewHolder}.
+         * Create a new {@code MapViewHolder}.
          *
          * @param itemView The {@link View} for this view holder.
          */
-        private LocationViewHolder(@NonNull final View itemView) {
+        private MapViewHolder(@NonNull final View itemView) {
             super(itemView);
 
             mapView = (MapView) itemView.findViewById(R.id.mapView);
@@ -221,13 +255,11 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
 
         /**
          * Populate the data in this view holder.
-         *
-         * @param location The location data to populate in this view holder.
          */
-        private void populate(@Nullable final BusStopLocation location) {
-            if (location != null) {
-                latLon = new LatLng(location.getLatitude(), location.getLongitude());
-                stopOrientation = location.getOrientation();
+        private void populate() {
+            if (busStopLocation != null) {
+                latLon = new LatLng(busStopLocation.getLatitude(), busStopLocation.getLongitude());
+                stopOrientation = busStopLocation.getOrientation();
             } else {
                 latLon = null;
                 stopOrientation = -1;
@@ -253,6 +285,43 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
                 mapView.setVisibility(View.VISIBLE);
             } else {
                 mapView.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    /**
+     * This {@link RecyclerView.ViewHolder} populates the location {@link View}.
+     */
+    private class LocationViewHolder extends RecyclerView.ViewHolder {
+
+        private final TextView txtDistance;
+
+        /**
+         * Create a new {@code LocationViewHolder}.
+         *
+         * @param itemView The {@link View} for this view holder.
+         */
+        private LocationViewHolder(@NonNull final View itemView) {
+            super(itemView);
+
+            txtDistance = (TextView) itemView.findViewById(R.id.txtDistance);
+        }
+
+        /**
+         * Populate the data in this view holder.
+         */
+        private void populate() {
+            if (!LocationUtils.hasLocationPermission(context)) {
+                txtDistance.setText(R.string.stopdetails_stop_distance_permission_required);
+            } else if (busStopLocation != null && deviceLocation != null) {
+                final float[] distance = new float[1];
+                Location.distanceBetween(deviceLocation.getLatitude(),
+                        deviceLocation.getLongitude(), busStopLocation.getLatitude(),
+                        busStopLocation.getLongitude(), distance);
+                txtDistance.setText(context.getString(R.string.stopdetails_stop_distance,
+                        distance[0] / 1000f));
+            } else {
+                txtDistance.setText(R.string.stopdetails_stop_distance_unknown);
             }
         }
     }
