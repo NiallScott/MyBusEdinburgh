@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,24 +29,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingTop="@dimen/padding_default"
+    android:paddingBottom="@dimen/padding_default"
+    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
+    android:paddingStart="?attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?attr/listPreferredItemPaddingRight"
+    android:paddingEnd="?attr/listPreferredItemPaddingRight"
+    android:minHeight="?listPreferredItemHeight"
     android:orientation="horizontal"
-    android:minHeight="?listPreferredItemHeightLarge">
-    <TextView
+    android:gravity="center_vertical"
+    android:background="?selectableItemBackground"
+    android:clickable="true">
+    <android.support.v7.widget.AppCompatTextView
+        style="@style/ServiceName"
         android:id="@+id/txtServiceName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
         tools:text="TRAM" />
     <TextView
         android:id="@+id/txtDestination"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:layout_marginLeft="@dimen/padding_double"
+        android:layout_marginStart="@dimen/padding_double"
+        android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
+        android:maxLines="1"
         tools:text="York Place" />
     <TextView
         android:id="@+id/txtTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="@dimen/padding_double"
+        android:layout_marginStart="@dimen/padding_double"
+        android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
+        android:maxLines="1"
         tools:text="DUE" />
 </LinearLayout>

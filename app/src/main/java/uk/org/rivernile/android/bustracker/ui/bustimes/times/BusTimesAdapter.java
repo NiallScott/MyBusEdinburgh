@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,18 +26,24 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times;
 
 import android.content.Context;
-import android.support.annotation.IntDef;
+import android.content.res.ColorStateList;
+import android.os.Bundle;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.util.DiffUtil;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -46,35 +52,24 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This {@link RecyclerView.Adapter} shows a listing of times for the stop.
+ * This adapter populates bus times in an expandable fashion.
  *
  * @author Niall Scott
  */
-class BusTimesAdapter extends RecyclerView.Adapter<BusTimesAdapter.ViewHolder> {
+class BusTimesAdapter extends RecyclerView.Adapter {
 
-    /**
-     * Mark an {@code int} field as having to have the value of {@link #SORT_SERVICE_NAME} or
-     * {@link #SORT_ARRIVAL_TIME}.
-     */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ SORT_SERVICE_NAME, SORT_ARRIVAL_TIME })
-    @interface SortMode { }
+    private static final String STATE_KEY_EXPANDED_ITEMS = "expandedItems";
 
-    /**
-     * Sort the bus services by service name.
-     */
-    static final int SORT_SERVICE_NAME = 1;
-    /**
-     * Sort the bus services by arrival time.
-     */
-    static final int SORT_ARRIVAL_TIME = 2;
+    private static final int TYPE_PARENT = 1;
+    private static final int TYPE_CHILD = 2;
 
     private final Context context;
     private final LayoutInflater inflater;
+    private final HashSet<String> expandedItems = new HashSet<>();
     private List<LiveBusService> services;
-    private Map<String, String> serviceColours;
-    @SortMode
-    private int sortMode = SORT_SERVICE_NAME;
+    private List<BusTimesItem> items;
+    private Map<String, Integer> serviceColours;
+    private boolean sortByTime;
 
     /**
      * Create a new {@code BusTimesAdapter}.
@@ -88,140 +83,318 @@ class BusTimesAdapter extends RecyclerView.Adapter<BusTimesAdapter.ViewHolder> {
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
-        return new ViewHolder(inflater.inflate(R.layout.bustimes_item, parent, false));
+    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        switch (viewType) {
+            case TYPE_PARENT:
+                return new ParentViewHolder(
+                        inflater.inflate(R.layout.bustimes_parent_item, parent, false));
+            case TYPE_CHILD:
+                return new ChildViewHolder(
+                        inflater.inflate(R.layout.bustimes_child_item, parent, false));
+            default:
+                return null;
+        }
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, final int position) {
-        holder.populate(getService(position));
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+        final BusTimesItem item = getItem(position);
+
+        if (holder instanceof ParentViewHolder) {
+            ((ParentViewHolder) holder).populate(item);
+        } else if (holder instanceof ChildViewHolder) {
+            ((ChildViewHolder) holder).populate(item);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return services != null ? services.size() : 0;
+        return items != null ? items.size() : 0;
+    }
+
+    @Override
+    public int getItemViewType(final int position) {
+        final BusTimesItem item = getItem(position);
+
+        if (item != null) {
+            return item.isParent() ? TYPE_PARENT : TYPE_CHILD;
+        } else {
+            return 0;
+        }
     }
 
     /**
-     * Set the {@link List} of {@link LiveBusService}s for this adapter.
+     * Restore any previously saved state back in to this adapter.
      *
-     * @param services The {@link List} of {@link LiveBusService}s for this adapter.
+     * @param savedInstanceState The source of the state.
+     */
+    void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
+        expandedItems.clear();
+        expandedItems.addAll(savedInstanceState.getStringArrayList(STATE_KEY_EXPANDED_ITEMS));
+        repopulateServices();
+    }
+
+    /**
+     * Give this adapter an opportunity to save state related to it for a future instance.
+     *
+     * @param outState Where to save any state.
+     */
+    void onSaveInstanceState(@NonNull final Bundle outState) {
+        outState.putStringArrayList(STATE_KEY_EXPANDED_ITEMS, new ArrayList<>(expandedItems));
+    }
+
+    /**
+     * Set the {@link List} of {@link LiveBusService}s to be displayed by this adapter.
+     *
+     * @param services The {@link List} of {@link LiveBusService}s to be displayed by this adapter.
      */
     void setServices(@Nullable final List<LiveBusService> services) {
-        if (this.services != services) {
-            this.services = services;
-            notifyDataSetChanged();
-        }
+        this.services = services;
+        resortItems();
+        repopulateServices();
     }
 
     /**
-     * Set the mapping of service name -> hex colour.
+     * Set the mapping of service name -> colour integer.
      *
-     * @param serviceColours The mapping of service name -> hex colour.
+     * @param serviceColours The mapping of service name -> colour integer.
      */
-    void setServiceColours(@Nullable final Map<String, String> serviceColours) {
+    void setServiceColours(@Nullable final Map<String, Integer> serviceColours) {
         if (this.serviceColours != serviceColours) {
             this.serviceColours = serviceColours;
-            notifyDataSetChanged();
+
+            if (items != null) {
+                final int itemsSize = items.size();
+
+                for (int i = 0; i < itemsSize; i++) {
+                    if (items.get(i).isParent()) {
+                        notifyItemChanged(i);
+                    }
+                }
+            }
         }
     }
 
     /**
-     * Set the sort mode of this adapter.
+     * Should the services be sorted by time?
      *
-     * @param sortMode The sort mode of this adapter.
+     * @param sortByTime {@code true} if the services should be sorted by time, {@code false} if
+     * they should be sorted by service name in alphanumeric order.
      */
-    void setSortMode(@SortMode final int sortMode) {
-        if (this.sortMode != sortMode) {
-            this.sortMode = sortMode;
-            populateBusServices();
-        }
+    void setSortByTime(final boolean sortByTime) {
+        this.sortByTime = sortByTime;
+        resortItems();
+        repopulateServices();
     }
 
     /**
-     * Get the {@link LiveBusService} at the given position.
+     * Get the {@link BusTimesItem} at the given position.
      *
-     * @param position The position to get the service for.
-     * @return The {@link LiveBusService} at the given position or {@code null} if that position
-     * cannot be reached.
+     * @param position The position of the item to get.
+     * @return The {@link BusTimesItem} at the given position, or {@code null} if the position is
+     * {@code < 0} or {@code >= items.size()}.
      */
     @Nullable
-    private LiveBusService getService(final int position) {
-        return services != null && position >= 0 && position < services.size()
-                ? services.get(position) : null;
-    }
-
-    private void populateBusServices() {
-
+    private BusTimesItem getItem(final int position) {
+        return position >= 0 && position < items.size() ? items.get(position) : null;
     }
 
     /**
-     * The {@link RecyclerView.ViewHolder} for showing stop times.
+     * Sort the original {@link List} of {@link LiveBusService}s depending on the sort mode.
      */
-    class ViewHolder extends RecyclerView.ViewHolder {
+    private void resortItems() {
+        if (services != null) {
+            if (sortByTime) {
+                Collections.sort(services, timeComparator);
+            } else {
+                Collections.sort(services);
+            }
+        }
+    }
 
-        private final TextView txtServiceName;
+    /**
+     * Re-populate the services in to the adapter.
+     */
+    private void repopulateServices() {
+        final List<BusTimesItem> oldItems = items;
+        items = flattenServicesToItems(services);
+        DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return oldItems != null ? oldItems.size() : 0;
+            }
+
+            @Override
+            public int getNewListSize() {
+                return items != null ? items.size() : 0;
+            }
+
+            @Override
+            public boolean areItemsTheSame(final int oldItemPosition, final int newItemPosition) {
+                return oldItems.get(oldItemPosition).equals(items.get(newItemPosition));
+            }
+
+            @Override
+            public boolean areContentsTheSame(final int oldItemPosition,
+                    final int newItemPosition) {
+                return oldItems.get(oldItemPosition).getLiveBus().equals(
+                        items.get(newItemPosition).getLiveBus());
+            }
+        }).dispatchUpdatesTo(this);
+    }
+
+    /**
+     * The {@link List} of {@link LiveBusService}s is an object graph. Flatten this in to something
+     * that's more consumable by this adapter to populate a {@link List} of items rather than
+     * dealing with nested {@link List}s.
+     *
+     * @param services The provided {@link List} of {@link LiveBusService}s.
+     * @return A {@link List} of {@link BusTimesItem}s which represents a flattened version of the
+     * input. If the input is {@code null}, then return {@code null}.
+     */
+    @Nullable
+    private List<BusTimesItem> flattenServicesToItems(
+            @Nullable final List<LiveBusService> services) {
+        if (services == null) {
+            return null;
+        }
+
+        final int servicesSize = services.size();
+        final ArrayList<BusTimesItem> result = new ArrayList<>();
+
+        for (int i = 0; i < servicesSize; i++) {
+            final LiveBusService liveBusService = services.get(i);
+            final List<LiveBus> liveBuses = liveBusService.getLiveBuses();
+            final int busesSize = expandedItems.contains(liveBusService.getServiceName()) ?
+                    liveBuses.size() : 1;
+
+            for (int j = 0; j < busesSize; j++) {
+                result.add(new BusTimesItem(liveBusService, liveBuses.get(j), j == 0, j));
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * This {@link RecyclerView.ViewHolder} populates the view for a child item. Parent items also
+     * contain the same view as child items, so this is re-used for parent items.
+     */
+    private class ChildViewHolder extends RecyclerView.ViewHolder {
+
         private final TextView txtDestination;
         private final TextView txtTime;
 
         /**
-         * Create a new {@code ViewHolder}.
+         * Create a new {@code ChildViewHolder}.
          *
-         * @param itemView The inflated {@link View} for this {@code ViewHolder}.
+         * @param itemView The root {@link View} of this {@link RecyclerView.ViewHolder}.
          */
-        public ViewHolder(@NonNull final View itemView) {
+        ChildViewHolder(final View itemView) {
             super(itemView);
 
-            txtServiceName = (TextView) itemView.findViewById(R.id.txtServiceName);
             txtDestination = (TextView) itemView.findViewById(R.id.txtDestination);
             txtTime = (TextView) itemView.findViewById(R.id.txtTime);
         }
 
         /**
-         * Populate the contents of this {@code ViewHolder}.
+         * Populate this {@link RecyclerView.ViewHolder} with the given {@link BusTimesItem}.
          *
-         * @param service The {@link LiveBusService} to populate this {@code ViewHolder} with.
+         * @param item The item to populate.
          */
-        private void populate(@Nullable final LiveBusService service) {
-            if (service != null) {
-                final LiveBus bus = service.getLiveBuses().get(0);
-                txtServiceName.setText(service.getServiceName());
-                txtDestination.setText(bus.getDestination());
-                txtTime.setText(String.valueOf(bus.getDepartureMinutes()));
+        void populate(@Nullable final BusTimesItem item) {
+            if (item != null) {
+                final LiveBus liveBus = item.getLiveBus();
+                txtDestination.setText(liveBus.getDestination());
+                txtTime.setText(String.valueOf(liveBus.getDepartureMinutes()));
             } else {
-                txtServiceName.setText(null);
                 txtDestination.setText(null);
                 txtTime.setText(null);
             }
         }
     }
 
-    private final Comparator<LiveBusService> timeComparator = new Comparator<LiveBusService>() {
-            @Override
-            public int compare(final LiveBusService lhs, final LiveBusService rhs) {
-                if (lhs == rhs) {
-                    return 0;
-                } else if (lhs == null) {
-                    return 1;
-                } else if (rhs == null) {
-                    return -1;
-                }
+    /**
+     * This {@link RecyclerView.ViewHolder} populates the view for a parent item.
+     */
+    private class ParentViewHolder extends ChildViewHolder implements View.OnClickListener {
 
-                final List<LiveBus> lhsBuses = lhs.getLiveBuses();
-                final List<LiveBus> rhsBuses = rhs.getLiveBuses();
+        private final AppCompatTextView txtServiceName;
 
-                if (lhsBuses.isEmpty() && rhsBuses.isEmpty()) {
-                    return 0;
-                } else if (lhsBuses.isEmpty()) {
-                    return 1;
-                } else if (rhsBuses.isEmpty()) {
-                    return -1;
-                }
+        /**
+         * Create a new {@code ParentViewHolder}.
+         *
+         * @param itemView The root {@link View} of this {@link RecyclerView.ViewHolder}.
+         */
+        ParentViewHolder(@NonNull final View itemView) {
+            super(itemView);
 
-                final LiveBus lhsBus = lhsBuses.get(0);
-                final LiveBus rhsBus = rhsBuses.get(0);
+            txtServiceName = (AppCompatTextView) itemView.findViewById(R.id.txtServiceName);
+            itemView.setOnClickListener(this);
+        }
 
-                return lhsBus.getDepartureMinutes() - rhsBus.getDepartureMinutes();
+        @Override
+        void populate(@Nullable final BusTimesItem item) {
+            if (item != null) {
+                final String serviceName = item.getLiveBusService().getServiceName();
+                final Integer boxedColour = serviceColours != null
+                        ? serviceColours.get(serviceName) : null;
+                @ColorInt final int colour = boxedColour != null
+                        ? boxedColour : ContextCompat.getColor(context, R.color.colorAccent);
+                txtServiceName.setSupportBackgroundTintList(ColorStateList.valueOf(colour));
+                txtServiceName.setText(serviceName);
+                super.populate(item);
+            } else {
+                txtServiceName.setText(null);
+                super.populate(null);
             }
-        };
+        }
+
+        @Override
+        public void onClick(final View v) {
+            final BusTimesItem item = getItem(getAdapterPosition());
+
+            if (item != null) {
+                final String serviceName = item.getLiveBusService().getServiceName();
+
+                if (!expandedItems.add(serviceName)) {
+                    expandedItems.remove(serviceName);
+                }
+
+                repopulateServices();
+            }
+        }
+    }
+
+    /**
+     * The {@link Comparator} for sorting bus services by time.
+     */
+    private final Comparator<LiveBusService> timeComparator = new Comparator<LiveBusService>() {
+        @Override
+        public int compare(final LiveBusService lhs, final LiveBusService rhs) {
+            if (lhs == rhs) {
+                return 0;
+            } else if (lhs == null) {
+                return 1;
+            } else if (rhs == null) {
+                return -1;
+            }
+
+            final List<LiveBus> lhsBuses = lhs.getLiveBuses();
+            final List<LiveBus> rhsBuses = rhs.getLiveBuses();
+
+            if (lhsBuses.isEmpty() && rhsBuses.isEmpty()) {
+                return 0;
+            } else if (lhsBuses.isEmpty()) {
+                return 1;
+            } else if (rhsBuses.isEmpty()) {
+                return -1;
+            }
+
+            final LiveBus lhsBus = lhsBuses.get(0);
+            final LiveBus rhsBus = rhsBuses.get(0);
+
+            return lhsBus.getDepartureMinutes() - rhsBus.getDepartureMinutes();
+        }
+    };
 }

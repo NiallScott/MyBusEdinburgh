@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,8 +27,11 @@ package uk.org.rivernile.android.bustracker.database.busstop.loaders;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +40,7 @@ import java.util.Map;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
+import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
  * This {@link ProcessedCursorLoader} is used to get a {@link Map} of service name to a colour for
@@ -47,7 +51,9 @@ import uk.org.rivernile.android.utils.ProcessedCursorLoader;
  *
  * @author Niall Scott
  */
-public class ServiceColoursLoader extends ProcessedCursorLoader<Map<String, String>> {
+public class ServiceColoursLoader extends ProcessedCursorLoader<Map<String, Integer>> {
+
+    private final int defaultColour;
 
     /**
      * Create a new {@code ServiceColoursLoader}.
@@ -58,6 +64,8 @@ public class ServiceColoursLoader extends ProcessedCursorLoader<Map<String, Stri
      */
     public ServiceColoursLoader(@NonNull final Context context, @Nullable final String[] services) {
         super(context);
+
+        defaultColour = ContextCompat.getColor(getContext(), R.color.colorAccent);
 
         setUri(BusStopContract.Services.CONTENT_URI);
         setProjection(new String[] {
@@ -83,16 +91,28 @@ public class ServiceColoursLoader extends ProcessedCursorLoader<Map<String, Stri
 
     @Nullable
     @Override
-    public Map<String, String> processCursor(@Nullable final Cursor cursor) {
+    public Map<String, Integer> processCursor(@Nullable final Cursor cursor) {
         if (cursor != null) {
-            final HashMap<String, String> serviceColours = new HashMap<>(cursor.getCount());
+            final HashMap<String, Integer> serviceColours = new HashMap<>(cursor.getCount());
             final int serviceNameColumn = cursor.getColumnIndex(BusStopContract.Services.NAME);
             final int serviceColourColumn = cursor.getColumnIndex(BusStopContract.Services.COLOUR);
             cursor.moveToPosition(-1);
 
             while (cursor.moveToNext()) {
-                serviceColours.put(cursor.getString(serviceNameColumn),
-                        cursor.getString(serviceColourColumn));
+                final String colourHex = cursor.getString(serviceColourColumn);
+                int colour;
+
+                if (!TextUtils.isEmpty(colourHex)) {
+                    try {
+                        colour = Color.parseColor(colourHex);
+                    } catch (IllegalArgumentException e) {
+                        colour = defaultColour;
+                    }
+                } else {
+                    colour = defaultColour;
+                }
+
+                serviceColours.put(cursor.getString(serviceNameColumn), colour);
             }
 
             cursor.close();

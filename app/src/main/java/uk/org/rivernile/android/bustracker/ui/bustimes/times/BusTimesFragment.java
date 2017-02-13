@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -129,16 +129,15 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         stopCode = getArguments().getString(ARG_STOP_CODE);
         sp = getContext().getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         adapter = new BusTimesAdapter(getContext());
+        adapter.setSortByTime(sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false));
 
         if (savedInstanceState != null) {
             lastRefresh = savedInstanceState.getLong(STATE_LAST_REFRESH, 0);
             autoRefresh = savedInstanceState.getBoolean(STATE_AUTO_REFRESH, false);
+            adapter.onRestoreInstanceState(savedInstanceState);
         } else {
             autoRefresh = sp.getBoolean(PreferenceConstants.PREF_AUTO_REFRESH, false);
         }
-
-        adapter.setSortMode(sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false)
-                ? BusTimesAdapter.SORT_ARRIVAL_TIME : BusTimesAdapter.SORT_SERVICE_NAME);
 
         try {
             numberOfDepartures = Integer.parseInt(
@@ -207,6 +206,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
 
         outState.putLong(STATE_LAST_REFRESH, lastRefresh);
         outState.putBoolean(STATE_AUTO_REFRESH, autoRefresh);
+        adapter.onSaveInstanceState(outState);
     }
 
     @Override
@@ -266,7 +266,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
                 break;
             case LOADER_SERVICE_COLOURS:
                 adapter.setServiceColours(
-                        ((ProcessedCursorLoader.ResultWrapper<Map<String,String>>) data)
+                        ((ProcessedCursorLoader.ResultWrapper<Map<String, Integer>>) data)
                                 .getResult());
                 break;
         }
@@ -519,9 +519,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         edit.putBoolean(PreferenceConstants.PREF_SERVICE_SORTING, sortByTime);
         edit.apply();
 
-        adapter.setSortMode(sortByTime
-                ? BusTimesAdapter.SORT_ARRIVAL_TIME : BusTimesAdapter.SORT_SERVICE_NAME);
-
+        adapter.setSortByTime(sortByTime);
         configureSortActionItem(sortByTime);
     }
 
