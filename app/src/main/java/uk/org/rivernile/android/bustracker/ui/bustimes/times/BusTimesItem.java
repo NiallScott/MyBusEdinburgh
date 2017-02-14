@@ -39,7 +39,6 @@ class BusTimesItem {
 
     private final LiveBusService liveBusService;
     private final LiveBus liveBus;
-    private final boolean parent;
     private final int position;
 
     /**
@@ -47,14 +46,12 @@ class BusTimesItem {
      *
      * @param liveBusService The {@link LiveBusService} for the group of rows.
      * @param liveBus The {@link LiveBus} for the row.
-     * @param parent Is this item a group parent?
      * @param position The position of the item within the group.
      */
     BusTimesItem(@NonNull final LiveBusService liveBusService, @NonNull final LiveBus liveBus,
-            final boolean parent, final int position) {
+            final int position) {
         this.liveBusService = liveBusService;
         this.liveBus = liveBus;
-        this.parent = parent;
         this.position = position;
     }
 
@@ -84,7 +81,7 @@ class BusTimesItem {
      * @return {@code true} if the item is a group parent, {@code false} if not.
      */
     boolean isParent() {
-        return parent;
+        return position == 0;
     }
 
     @Override
@@ -100,14 +97,13 @@ class BusTimesItem {
         final BusTimesItem item = (BusTimesItem) o;
 
         return liveBusService.equals(item.liveBusService) &&
-                parent == item.parent &&
                 position == item.position;
     }
 
     @Override
     public int hashCode() {
         int result = liveBusService.hashCode();
-        result = 31 * result + (parent ? 1 : 0);
+        result = 31 * result + position;
         return result;
     }
 }

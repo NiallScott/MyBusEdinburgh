@@ -152,6 +152,32 @@ public class LiveBusService implements Comparable<LiveBusService> {
     }
 
     @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final LiveBusService that = (LiveBusService) o;
+
+        if (!serviceName.equals(that.serviceName)) {
+            return false;
+        }
+
+        return operator != null ? operator.equals(that.operator) : that.operator == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = serviceName.hashCode();
+        result = 31 * result + (operator != null ? operator.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public int compareTo(@NonNull final LiveBusService another) {
         return COMPARATOR.compare(this.serviceName, another.serviceName);
     }

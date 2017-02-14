@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -35,11 +36,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,6 +60,9 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 class BusTimesAdapter extends RecyclerView.Adapter {
+
+    @SuppressLint("SimpleDateFormat")
+    private static final SimpleDateFormat BUS_TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
     private static final String STATE_KEY_EXPANDED_ITEMS = "expandedItems";
 
@@ -121,6 +127,12 @@ class BusTimesAdapter extends RecyclerView.Adapter {
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public long getItemId(final int position) {
+        final BusTimesItem item = getItem(position);
+        return item != null ? item.hashCode() : 0;
     }
 
     /**
@@ -195,7 +207,7 @@ class BusTimesAdapter extends RecyclerView.Adapter {
      * {@code < 0} or {@code >= items.size()}.
      */
     @Nullable
-    private BusTimesItem getItem(final int position) {
+    BusTimesItem getItem(final int position) {
         return position >= 0 && position < items.size() ? items.get(position) : null;
     }
 
@@ -269,7 +281,7 @@ class BusTimesAdapter extends RecyclerView.Adapter {
                     liveBuses.size() : 1;
 
             for (int j = 0; j < busesSize; j++) {
-                result.add(new BusTimesItem(liveBusService, liveBuses.get(j), j == 0, j));
+                result.add(new BusTimesItem(liveBusService, liveBuses.get(j), j));
             }
         }
 
@@ -303,12 +315,71 @@ class BusTimesAdapter extends RecyclerView.Adapter {
          * @param item The item to populate.
          */
         void populate(@Nullable final BusTimesItem item) {
+            if (populateDestination(item)) {
+                populateTime(item);
+            }
+        }
+
+        /**
+         * Populate the destination text.
+         *
+         * @param item The item for this row.
+         * @return {@code true} if the time should be populated too, {@code false} if not.
+         */
+        private boolean populateDestination(@Nullable final BusTimesItem item) {
             if (item != null) {
-                final LiveBus liveBus = item.getLiveBus();
-                txtDestination.setText(liveBus.getDestination());
-                txtTime.setText(String.valueOf(liveBus.getDepartureMinutes()));
+                final LiveBus bus = item.getLiveBus();
+                final String destination = bus.getDestination();
+
+                if (bus.isDiverted()) {
+                    if (TextUtils.isEmpty(destination)) {
+                        txtDestination.setText(R.string.bustimes_diverted);
+                    } else {
+                        txtDestination.setText(context.getString(
+                                R.string.bustimes_diverted_with_destination, destination));
+                    }
+
+                    txtTime.setVisibility(View.GONE);
+
+                    return false;
+                } else {
+                    txtDestination.setText(destination);
+                }
             } else {
                 txtDestination.setText(null);
+            }
+
+            txtTime.setVisibility(View.VISIBLE);
+
+            return true;
+        }
+
+        /**
+         * Populate the time text.
+         *
+         * @param item The item for this row.
+         */
+        private void populateTime(@Nullable final BusTimesItem item) {
+            if (item != null) {
+                final LiveBus bus = item.getLiveBus();
+                String timeToDisplay;
+                final int minutes = bus.getDepartureMinutes();
+
+                if (minutes > 59) {
+                    timeToDisplay = BUS_TIME_FORMAT.format(bus.getDepartureTime());
+                } else if (minutes < 2) {
+                    timeToDisplay = context.getString(R.string.bustimes_due);
+                } else {
+                    timeToDisplay = String.valueOf(minutes);
+                }
+
+                if (bus.isEstimatedTime()) {
+                    timeToDisplay = context.getString(
+                            R.string.bustimes_estimated_time, timeToDisplay);
+                }
+
+                txtTime.setText(timeToDisplay);
+            } else {
                 txtTime.setText(null);
             }
         }
