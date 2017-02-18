@@ -54,6 +54,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/padding_double"
         android:layout_marginStart="@dimen/padding_double"
+        android:layout_marginRight="@dimen/display_stop_data_child_time_margin"
+        android:layout_marginEnd="@dimen/display_stop_data_child_time_margin"
         android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
         android:maxLines="1"
         tools:text="DUE" />

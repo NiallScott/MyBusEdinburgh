@@ -64,7 +64,6 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException
 import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
-import uk.org.rivernile.android.utils.DividerItemDecoration;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -160,8 +159,6 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         btnErrorResolve = (Button) v.findViewById(R.id.btnErrorResolve);
 
         recyclerView.setHasFixedSize(true);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),
-                DividerItemDecoration.VERTICAL_LIST));
         recyclerView.setAdapter(adapter);
 
         swipeRefreshLayout.setOnRefreshListener(this);

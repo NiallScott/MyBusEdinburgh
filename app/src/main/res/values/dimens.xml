@@ -73,4 +73,5 @@
     <dimen name="display_stop_data_service_background_padding">4dp</dimen>
     <dimen name="display_stop_data_service_name_min_width">56dp</dimen>
     <dimen name="display_stop_data_child_destination_margin">72dp</dimen>
+    <dimen name="display_stop_data_child_time_margin">32dp</dimen>
 </resources>

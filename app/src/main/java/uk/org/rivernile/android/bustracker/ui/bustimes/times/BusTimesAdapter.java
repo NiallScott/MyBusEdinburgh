@@ -33,6 +33,8 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.ViewPropertyAnimatorCompat;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
@@ -40,6 +42,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -390,7 +394,14 @@ class BusTimesAdapter extends RecyclerView.Adapter {
      */
     private class ParentViewHolder extends ChildViewHolder implements View.OnClickListener {
 
+        private static final float COLLAPSED_DEGREES = 0f;
+        private static final float EXPANDED_DEGREES = 180f;
+
         private final AppCompatTextView txtServiceName;
+        private final ImageView imgArrow;
+
+        private ViewPropertyAnimatorCompat expandAnimation;
+        private ViewPropertyAnimatorCompat collapseAnimation;
 
         /**
          * Create a new {@code ParentViewHolder}.
@@ -401,6 +412,8 @@ class BusTimesAdapter extends RecyclerView.Adapter {
             super(itemView);
 
             txtServiceName = (AppCompatTextView) itemView.findViewById(R.id.txtServiceName);
+            imgArrow = (ImageView) itemView.findViewById(R.id.imgArrow);
+
             itemView.setOnClickListener(this);
         }
 
@@ -414,6 +427,20 @@ class BusTimesAdapter extends RecyclerView.Adapter {
                         ? boxedColour : ContextCompat.getColor(context, R.color.colorAccent);
                 txtServiceName.setSupportBackgroundTintList(ColorStateList.valueOf(colour));
                 txtServiceName.setText(serviceName);
+
+                if (expandAnimation != null) {
+                    expandAnimation.cancel();
+                    expandAnimation = null;
+                }
+
+                if (collapseAnimation != null) {
+                    collapseAnimation.cancel();
+                    collapseAnimation = null;
+                }
+
+                imgArrow.setRotation(expandedItems.contains(serviceName)
+                        ? EXPANDED_DEGREES : COLLAPSED_DEGREES);
+
                 super.populate(item);
             } else {
                 txtServiceName.setText(null);
@@ -430,6 +457,29 @@ class BusTimesAdapter extends RecyclerView.Adapter {
 
                 if (!expandedItems.add(serviceName)) {
                     expandedItems.remove(serviceName);
+                    collapseAnimation = ViewCompat.animate(imgArrow)
+                            .setInterpolator(new LinearInterpolator())
+                            .setDuration(context.getResources().getInteger(
+                                    android.R.integer.config_shortAnimTime))
+                            .rotation(COLLAPSED_DEGREES)
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    collapseAnimation = null;
+                                }
+                            });
+                } else {
+                    expandAnimation = ViewCompat.animate(imgArrow)
+                            .setInterpolator(new LinearInterpolator())
+                            .setDuration(context.getResources().getInteger(
+                                    android.R.integer.config_shortAnimTime))
+                            .rotation(EXPANDED_DEGREES)
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    expandAnimation = null;
+                                }
+                            });
                 }
 
                 repopulateServices();

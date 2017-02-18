@@ -65,4 +65,12 @@
         android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
         android:maxLines="1"
         tools:text="DUE" />
+    <ImageView
+        android:id="@+id/imgArrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/padding_default"
+        android:layout_marginStart="@dimen/padding_default"
+        android:src="@drawable/ic_expandable_list_arrow"
+        android:contentDescription="@null" />
 </LinearLayout>
