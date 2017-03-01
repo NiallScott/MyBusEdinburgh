@@ -263,33 +263,6 @@ public class NearestStopsAdapterTests {
     }
 
     /**
-     * Test that {@link NearestStopsAdapter#getDirectionDrawableResourceId(int)} returns the
-     * correct direction {@link android.graphics.drawable.Drawable} resource IDs for the given
-     * orientation values.
-     */
-    @Test
-    public void testGetDirectionDrawableResourceId() {
-        assertEquals(R.drawable.mapmarker, NearestStopsAdapter.getDirectionDrawableResourceId(-1));
-        assertEquals(R.drawable.mapmarker_n,
-                NearestStopsAdapter.getDirectionDrawableResourceId(0));
-        assertEquals(R.drawable.mapmarker_ne,
-                NearestStopsAdapter.getDirectionDrawableResourceId(1));
-        assertEquals(R.drawable.mapmarker_e,
-                NearestStopsAdapter.getDirectionDrawableResourceId(2));
-        assertEquals(R.drawable.mapmarker_se,
-                NearestStopsAdapter.getDirectionDrawableResourceId(3));
-        assertEquals(R.drawable.mapmarker_s,
-                NearestStopsAdapter.getDirectionDrawableResourceId(4));
-        assertEquals(R.drawable.mapmarker_sw,
-                NearestStopsAdapter.getDirectionDrawableResourceId(5));
-        assertEquals(R.drawable.mapmarker_w,
-                NearestStopsAdapter.getDirectionDrawableResourceId(6));
-        assertEquals(R.drawable.mapmarker_nw,
-                NearestStopsAdapter.getDirectionDrawableResourceId(7));
-        assertEquals(R.drawable.mapmarker, NearestStopsAdapter.getDirectionDrawableResourceId(8));
-    }
-
-    /**
      * This is used to record when callback methods are called to ensure that the adapter calls its
      * data change notifier.
      */

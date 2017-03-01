@@ -50,6 +50,7 @@ import android.widget.Toast;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
+import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
@@ -59,12 +60,10 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavo
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteProximityAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTimeAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .InstallBarcodeScannerDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.search.InstallBarcodeScannerDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.general.EnterStopCodeFragment;
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment;
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;
 
@@ -76,9 +75,9 @@ import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;
  */
 public class MainActivity extends AppCompatActivity
         implements SectionListFragment.Callbacks, AlertManagerFragment.Callbacks,
-        EnterStopCodeFragment.Callbacks, FavouriteStopsFragment.Callbacks,
-        NearestStopsFragment.Callbacks, ServicesChooserDialogFragment.Callbacks,
-        InstallBarcodeScannerDialogFragment.Callbacks, TurnOnGpsDialogFragment.Callbacks {
+        FavouriteStopsFragment.Callbacks, NearestStopsFragment.Callbacks,
+        ServicesChooserDialogFragment.Callbacks, InstallBarcodeScannerDialogFragment.Callbacks,
+        TurnOnGpsDialogFragment.Callbacks {
     
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
@@ -86,7 +85,6 @@ public class MainActivity extends AppCompatActivity
     private static final String DIALOG_DELETE_PROX_ALERT = "deleteProxAlertDialog";
     private static final String DIALOG_DELETE_TIME_ALERT = "deleteTimeAlertDialog";
     private static final String DIALOG_SERVICES_CHOOSER = "servicesChooserDialog";
-    private static final String DIALOG_INSTALL_BARCODE_SCANNER = "installBarcodeScannerDialog";
     private static final String DIALOG_CONFIRM_DELETE_FAVOURITE = "deleteFavouriteDialog";
     private static final String DIALOG_TURN_ON_GPS = "turnOnGpsDialog";
     
@@ -211,6 +209,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onShowSearch() {
+        startActivity(new Intent(this, SearchActivity.class));
+    }
+
+    @Override
     public void onShowConfirmDeleteProximityAlert() {
         new DeleteProximityAlertDialogFragment()
                 .show(getSupportFragmentManager(), DIALOG_DELETE_PROX_ALERT);
@@ -228,12 +231,6 @@ public class MainActivity extends AppCompatActivity
         ServicesChooserDialogFragment
                 .newInstance(services, selectedServices, title)
                 .show(getSupportFragmentManager(), DIALOG_SERVICES_CHOOSER);
-    }
-
-    @Override
-    public void onAskInstallBarcodeScanner() {
-        new InstallBarcodeScannerDialogFragment()
-                .show(getSupportFragmentManager(), DIALOG_INSTALL_BARCODE_SCANNER);
     }
 
     @Override
@@ -379,10 +376,18 @@ public class MainActivity extends AppCompatActivity
      * @param isDrawerOpen {@code true} if the drawer is open, {@code false} if it is closed.
      */
     private void setFragmentOptionsMenuVisibility(final boolean isDrawerOpen) {
-        final Fragment f = getSupportFragmentManager().findFragmentById(R.id.layoutContainer);
+        final Fragment container = getSupportFragmentManager()
+                .findFragmentById(R.id.layoutContainer);
 
-        if (f != null) {
-            f.setMenuVisibility(!isDrawerOpen);
+        if (container != null) {
+            container.setMenuVisibility(!isDrawerOpen);
+        }
+
+        final Fragment drawer = getSupportFragmentManager()
+                .findFragmentById(R.id.fragmentSectionList);
+
+        if (drawer != null) {
+            drawer.setMenuVisibility(isDrawerOpen);
         }
     }
 }

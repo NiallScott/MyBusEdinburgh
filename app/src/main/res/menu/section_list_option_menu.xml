@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,11 +24,12 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<selector
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:compat="http://schemas.android.com/apk/res-auto">
     <item
-        android:state_checked="true"
-        android:drawable="@drawable/ic_drawer_entercode_checked" />
-    <item
-        android:drawable="@drawable/ic_drawer_entercode_unchecked" />
-</selector>
+        android:id="@+id/section_list_option_menu_search"
+        android:title="@string/section_list_menu_search"
+        android:icon="@drawable/ic_action_search"
+        compat:showAsAction="ifRoom" />
+</menu>

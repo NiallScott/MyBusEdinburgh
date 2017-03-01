@@ -27,7 +27,7 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="uk.org.rivernile.edinburghbustracker.android" >
+    package="uk.org.rivernile.edinburghbustracker.android">
     
     <!-- Request the required permissions. -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -257,6 +257,28 @@
                 android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
 
+        <!-- SearchActivity, the single place in the application where the user can search for
+             content based on a search term. -->
+        <activity
+            android:name="uk.org.rivernile.android.bustracker.ui.search.SearchActivity"
+            android:label="@string/search_title"
+            android:launchMode="singleTop"
+            android:theme="@style/MyBusEdinburgh.NoActionBar.Search"
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
+            <!-- This Activity handles searching. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <!-- PARENT_ACTIVITY is used by the support library for supporting
+                 up navigation. -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+
         <!-- SettingsProvider, to provide the user's saved favourite stops and active alerts. -->
         <provider
             android:name="uk.org.rivernile.android.bustracker.database.settings.SettingsProvider"
@@ -269,13 +291,13 @@
             android:authorities="${applicationId}.provider.busstop"
             android:exported="false" />
 
-        <!-- MapSearchHistoryProvider, to provide previous search history items
-             when typing in a search term. -->
+        <!-- SearchSuggestionsProvider, to provide previous search history items when typing in a
+             search term. -->
         <provider
-            android:name=".MapSearchSuggestionsProvider"
-            android:authorities="${applicationId}.MapSearchSuggestionsProvider"
-            android:permission="${applicationId}.MapSearchSuggestionsProvider.MAP_SEARCH_SUGGESTIONS"
-            android:exported="true" >
+            android:name="uk.org.rivernile.android.bustracker.database.search.SearchSuggestionsProvider"
+            android:authorities="${applicationId}.SearchSuggestionsProvider"
+            android:permission="${applicationId}.SearchSuggestionsProvider.SEARCH_SUGGESTIONS"
+            android:exported="true">
             <path-permission
                 android:pathPrefix="/search_suggest_query"
                 android:readPermission="android.permission.GLOBAL_SEARCH" />

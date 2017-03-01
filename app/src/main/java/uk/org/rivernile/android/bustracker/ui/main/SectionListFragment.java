@@ -33,6 +33,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -41,7 +44,6 @@ import java.util.ArrayList;
 import uk.org.rivernile.android.bustracker.ui.main.sections.AboutSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.AlertManagerSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.BusStopMapSection;
-import uk.org.rivernile.android.bustracker.ui.main.sections.EnterStopCodeSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.NearestStopsSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.NewsSection;
@@ -79,10 +81,11 @@ public class SectionListFragment extends Fragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
+
         final Activity activity = getActivity();
         final ArrayList<Section> sectionsList = new ArrayList<>(9);
         sectionsList.add(FavouritesSection.getInstance());
-        sectionsList.add(EnterStopCodeSection.getInstance());
         sectionsList.add(BusStopMapSection.getInstance());
 
         if (activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION)) {
@@ -127,12 +130,31 @@ public class SectionListFragment extends Fragment {
 
         outState.putInt(KEY_SELECTED, adapter.getSelected());
     }
-    
+
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        inflater.inflate(R.menu.section_list_option_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.section_list_option_menu_search:
+                callbacks.onShowSearch();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     /**
      * {@link Activity Activities} which host this {@link Fragment} must implement this interface.
      */
     public interface Callbacks extends SectionListAdapter.OnSectionChosenListener {
 
-        // No methods to declare here.
+        /**
+         * This is called when the user wishes to perform a search.
+         */
+        void onShowSearch();
     }
 }
