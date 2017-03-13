@@ -84,6 +84,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     private static final int LOADER_SERVICE_COLOURS = 2;
 
     private static final int AUTO_REFRESH_PERIOD = 60000; // 60 seconds.
+    private static final int LAST_REFRESH_PERIOD = 5000; // 5 seconds.
 
     private final Handler handler = new Handler();
     private SharedPreferences sp;
@@ -96,7 +97,8 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     private boolean busTimesLoading;
 
     private SwipeRefreshLayout swipeRefreshLayout;
-    private RecyclerView recyclerView;
+    private View layoutContent;
+    private TextView txtLastRefresh;
     private View layoutError;
     private TextView txtError;
     private Button btnErrorResolve;
@@ -153,7 +155,9 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
             @Nullable final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.bustimes_fragment, container, false);
         swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipeRefreshLayout);
-        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
+        layoutContent = v.findViewById(R.id.layoutContent);
+        txtLastRefresh = (TextView) v.findViewById(R.id.txtLastRefresh);
+        final RecyclerView recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
         layoutError = v.findViewById(R.id.layoutError);
         txtError = (TextView) v.findViewById(R.id.txtError);
         btnErrorResolve = (Button) v.findViewById(R.id.btnErrorResolve);
@@ -187,6 +191,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     public void onStart() {
         super.onStart();
 
+        handler.post(lastRefreshRunnable);
         setUpAutoRefresh();
     }
 
@@ -194,6 +199,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     public void onStop() {
         super.onStop();
 
+        handler.removeCallbacks(lastRefreshRunnable);
         handler.removeCallbacks(autoRefreshRunnable);
     }
 
@@ -351,6 +357,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         showContent();
+        updateLastRefreshed();
     }
 
     /**
@@ -388,6 +395,31 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     /**
+     * Update the text that informs the user how long it has been since the bus data was last
+     * refreshed. This normally gets called about every 5 seconds.
+     */
+    private void updateLastRefreshed() {
+        final long timeSinceRefresh = SystemClock.elapsedRealtime() - lastRefresh;
+        final int mins = (int) (timeSinceRefresh / 60000);
+        final String text;
+
+        if (lastRefresh <= 0) {
+            // The data has never been refreshed.
+            text = getString(R.string.times_never);
+        } else if (mins > 59) {
+            // The data was refreshed more than 1 hour ago.
+            text = getString(R.string.times_greaterthanhour);
+        } else if (mins == 0) {
+            // The data was refreshed less than 1 minute ago.
+            text = getString(R.string.times_lessthanoneminago);
+        } else {
+            text = getResources().getQuantityString(R.plurals.times_minsago, mins, mins);
+        }
+
+        txtLastRefresh.setText(getString(R.string.bustimes_lastupdated, text));
+    }
+
+    /**
      * Schedule the auto-refresh to execute again 60 seconds after the data was last refreshed.
      */
     private void setUpAutoRefresh() {
@@ -411,7 +443,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
      */
     private void showContent() {
         layoutError.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.VISIBLE);
+        layoutContent.setVisibility(View.VISIBLE);
         swipeRefreshLayout.setRefreshing(false);
 
         configureRefreshActionItem();
@@ -437,7 +469,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         btnErrorResolve.setVisibility(!TextUtils.isEmpty(resolveButtonText)
                 ? View.VISIBLE : View.GONE);
 
-        recyclerView.setVisibility(View.GONE);
+        layoutContent.setVisibility(View.GONE);
         swipeRefreshLayout.setRefreshing(false);
         layoutError.setVisibility(View.VISIBLE);
 
@@ -535,6 +567,14 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
 
         configureAutoRefreshActionItem();
     }
+
+    private final Runnable lastRefreshRunnable = new Runnable() {
+        @Override
+        public void run() {
+            updateLastRefreshed();
+            handler.postDelayed(lastRefreshRunnable, LAST_REFRESH_PERIOD);
+        }
+    };
 
     private final Runnable autoRefreshRunnable = new Runnable() {
         @Override

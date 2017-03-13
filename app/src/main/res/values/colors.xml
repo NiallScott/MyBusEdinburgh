@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,4 +37,7 @@
     <color name="sectionlist_text_default">#212121</color>
     <color name="map_range_ring_stroke">@color/colorPrimary</color>
     <color name="map_range_ring_fill">#1AC41411</color>
+
+    <!-- BusTimesFragment -->
+    <color name="bus_times_fragment_last_refresh_background">#525252</color>
 </resources>

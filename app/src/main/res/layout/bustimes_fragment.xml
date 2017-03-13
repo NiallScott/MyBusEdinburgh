@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,18 +34,41 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <android.support.v7.widget.RecyclerView
-            android:id="@android:id/list"
+        <LinearLayout
+            android:id="@+id/layoutContent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="@dimen/padding_default"
-            android:paddingBottom="@dimen/padding_default"
-            android:scrollbars="vertical"
-            android:clipToPadding="false"
-            android:visibility="gone"
             android:orientation="vertical"
-            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-            tools:visbility="visible" />
+            android:visibility="gone"
+            tools:visibility="visible">
+            <TextView
+                android:id="@+id/txtLastRefresh"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/bus_times_fragment_last_refresh_min_height"
+                android:paddingTop="@dimen/padding_default"
+                android:paddingBottom="@dimen/padding_default"
+                android:paddingLeft="@dimen/padding_double"
+                android:paddingStart="@dimen/padding_double"
+                android:paddingRight="@dimen/padding_double"
+                android:paddingEnd="@dimen/padding_double"
+                android:background="@color/bus_times_fragment_last_refresh_background"
+                android:elevation="@dimen/bus_times_fragment_last_refresh_elevation"
+                android:gravity="center_vertical"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
+                tools:text="Last refreshed less than a minute ago" />
+            <android.support.v7.widget.RecyclerView
+                android:id="@android:id/list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingTop="@dimen/padding_default"
+                android:paddingBottom="@dimen/padding_default"
+                android:scrollbars="vertical"
+                android:clipToPadding="false"
+                android:orientation="vertical"
+                app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+        </LinearLayout>
         <include
             layout="@layout/indeterminate_progress" />
         <include

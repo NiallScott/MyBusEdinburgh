@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,4 +34,6 @@
     android:padding="@dimen/padding_double"
     android:gravity="center"
     android:textIsSelectable="true"
+    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+    android:textColor="?android:textColorSecondary"
     tools:text="This is an example error." />
