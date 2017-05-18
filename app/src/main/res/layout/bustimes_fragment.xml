@@ -43,6 +43,7 @@
             tools:visibility="visible">
             <TextView
                 android:id="@+id/txtLastRefresh"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/bus_times_fragment_last_refresh_min_height"
@@ -55,7 +56,7 @@
                 android:background="@color/bus_times_fragment_last_refresh_background"
                 android:elevation="@dimen/bus_times_fragment_last_refresh_elevation"
                 android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small.Inverse"
+                android:textAppearance="@style/TextAppearance.Design.Snackbar.Message"
                 tools:text="Last refreshed less than a minute ago" />
             <android.support.v7.widget.RecyclerView
                 android:id="@android:id/list"

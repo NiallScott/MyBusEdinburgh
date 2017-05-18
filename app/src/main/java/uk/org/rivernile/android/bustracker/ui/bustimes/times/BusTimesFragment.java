@@ -25,10 +25,17 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -63,6 +70,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesResult;
 import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.fetchutils.fetchers.ConnectivityUnavailableException;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -87,6 +95,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     private static final int LAST_REFRESH_PERIOD = 5000; // 5 seconds.
 
     private final Handler handler = new Handler();
+    private ConnectivityManager connectivityManager;
     private SharedPreferences sp;
     private BusTimesAdapter adapter;
 
@@ -128,6 +137,8 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         super.onCreate(savedInstanceState);
 
         stopCode = getArguments().getString(ARG_STOP_CODE);
+        connectivityManager = (ConnectivityManager) getContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
         sp = getContext().getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         adapter = new BusTimesAdapter(getContext());
         adapter.setSortByTime(sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false));
@@ -191,6 +202,8 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     public void onStart() {
         super.onStart();
 
+        getContext().registerReceiver(connectivityReceiver,
+                new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         handler.post(lastRefreshRunnable);
         setUpAutoRefresh();
     }
@@ -199,6 +212,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     public void onStop() {
         super.onStop();
 
+        getContext().unregisterReceiver(connectivityReceiver);
         handler.removeCallbacks(lastRefreshRunnable);
         handler.removeCallbacks(autoRefreshRunnable);
     }
@@ -386,6 +400,9 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         } else if (e instanceof SystemOverloadedException) {
             errorMessage = getString(R.string.bustimes_err_api_system_overloaded);
             resolveButton = null;
+        } else if (e instanceof ConnectivityUnavailableException) {
+            errorMessage = getString(R.string.bustimes_err_noconn);
+            resolveButton = null;
         } else {
             errorMessage = getString(R.string.displaystopdata_err_unknown);
             resolveButton = null;
@@ -436,6 +453,17 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         } else {
             handler.post(autoRefreshRunnable);
         }
+    }
+
+    /**
+     * Handle a change in connectivity on the device, to communicate to the user that they are
+     * unable to load bus times.
+     */
+    private void handleConnectivityChange() {
+        final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        @DrawableRes final int icon = networkInfo != null && networkInfo.isConnectedOrConnecting()
+                ? 0 : R.drawable.ic_cloud_off;
+        txtLastRefresh.setCompoundDrawablesWithIntrinsicBounds(0, 0, icon, 0);
     }
 
     /**
@@ -567,6 +595,13 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
 
         configureAutoRefreshActionItem();
     }
+
+    private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            handleConnectivityChange();
+        }
+    };
 
     private final Runnable lastRefreshRunnable = new Runnable() {
         @Override
