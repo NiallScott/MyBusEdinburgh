@@ -120,9 +120,17 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
 
         appBarLayout.addOnOffsetChangedListener(this);
 
+        final Intent intent = getIntent();
+        final String stopCode;
+
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            stopCode = intent.getData().getQueryParameter("busStopCode");
+        } else {
+            stopCode = intent.getStringExtra(EXTRA_STOP_CODE);
+        }
+
         viewPager.setPageMargin(getResources().getDimensionPixelSize(R.dimen.padding_default));
-        viewPager.setAdapter(new StopDataPagerAdapter(this, getSupportFragmentManager(),
-                getIntent().getStringExtra(EXTRA_STOP_CODE)));
+        viewPager.setAdapter(new StopDataPagerAdapter(this, getSupportFragmentManager(), stopCode));
         tabLayout.setupWithViewPager(viewPager);
 
         final LoaderManager loaderManager = getSupportLoaderManager();
