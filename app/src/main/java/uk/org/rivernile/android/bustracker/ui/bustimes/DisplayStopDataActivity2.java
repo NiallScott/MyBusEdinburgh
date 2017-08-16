@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -34,9 +33,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
@@ -54,7 +50,6 @@ import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteSt
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment;
-import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment;
 import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
@@ -458,59 +453,5 @@ public class DisplayStopDataActivity2 extends AppCompatActivity
     private void showRemoveTimeAlert() {
         new DeleteTimeAlertDialogFragment()
                 .show(getSupportFragmentManager(), DIALOG_REMOVE_TIME_ALERT);
-    }
-
-    /**
-     * This {@link FragmentPagerAdapter} provides the pages and tabs for this
-     * {@link android.app.Activity}.
-     */
-    private static class StopDataPagerAdapter extends FragmentPagerAdapter {
-
-        private final Context context;
-        private final String stopCode;
-
-        /**
-         * Create a new {@code StopDataPagerAdapter}.
-         *
-         * @param context A {@link Context} instance.
-         * @param fragmentManager The {@link FragmentManager}.
-         * @param stopCode The stop code for this bus stop.
-         */
-        private StopDataPagerAdapter(@NonNull final Context context,
-                @NonNull final FragmentManager fragmentManager, @NonNull final String stopCode) {
-            super(fragmentManager);
-
-            this.context = context;
-            this.stopCode = stopCode;
-        }
-
-        @Override
-        public Fragment getItem(final int position) {
-            switch (position) {
-                case 0:
-                    return BusTimesFragment.newInstance(stopCode);
-                case 1:
-                    return StopDetailsFragment.newInstance(stopCode);
-                default:
-                    return null;
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return 2;
-        }
-
-        @Override
-        public CharSequence getPageTitle(final int position) {
-            switch (position) {
-                case 0:
-                    return context.getString(R.string.displaystopdata_tab_times);
-                case 1:
-                    return context.getString(R.string.displaystopdata_tab_details);
-                default:
-                    return null;
-            }
-        }
     }
 }
