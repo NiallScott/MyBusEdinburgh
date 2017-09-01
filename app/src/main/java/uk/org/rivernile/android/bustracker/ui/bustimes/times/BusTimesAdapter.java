@@ -146,7 +146,13 @@ class BusTimesAdapter extends RecyclerView.Adapter {
      */
     void onRestoreInstanceState(@NonNull final Bundle savedInstanceState) {
         expandedItems.clear();
-        expandedItems.addAll(savedInstanceState.getStringArrayList(STATE_KEY_EXPANDED_ITEMS));
+        final ArrayList<String> expandedAsList =
+                savedInstanceState.getStringArrayList(STATE_KEY_EXPANDED_ITEMS);
+
+        if (expandedAsList != null) {
+            expandedItems.addAll(expandedAsList);
+        }
+
         repopulateServices();
     }
 
@@ -211,7 +217,7 @@ class BusTimesAdapter extends RecyclerView.Adapter {
      * {@code < 0} or {@code >= items.size()}.
      */
     @Nullable
-    BusTimesItem getItem(final int position) {
+    private BusTimesItem getItem(final int position) {
         return position >= 0 && position < items.size() ? items.get(position) : null;
     }
 
@@ -234,6 +240,7 @@ class BusTimesAdapter extends RecyclerView.Adapter {
     private void repopulateServices() {
         final List<BusTimesItem> oldItems = items;
         items = flattenServicesToItems(services);
+
         DiffUtil.calculateDiff(new DiffUtil.Callback() {
             @Override
             public int getOldListSize() {
@@ -428,15 +435,8 @@ class BusTimesAdapter extends RecyclerView.Adapter {
                 txtServiceName.setSupportBackgroundTintList(ColorStateList.valueOf(colour));
                 txtServiceName.setText(serviceName);
 
-                if (expandAnimation != null) {
-                    expandAnimation.cancel();
-                    expandAnimation = null;
-                }
-
-                if (collapseAnimation != null) {
-                    collapseAnimation.cancel();
-                    collapseAnimation = null;
-                }
+                cancelExpandAnimation();
+                cancelCollapseAnimation();
 
                 imgArrow.setRotation(expandedItems.contains(serviceName)
                         ? EXPANDED_DEGREES : COLLAPSED_DEGREES);
@@ -457,32 +457,66 @@ class BusTimesAdapter extends RecyclerView.Adapter {
 
                 if (!expandedItems.add(serviceName)) {
                     expandedItems.remove(serviceName);
-                    collapseAnimation = ViewCompat.animate(imgArrow)
-                            .setInterpolator(new LinearInterpolator())
-                            .setDuration(context.getResources().getInteger(
-                                    android.R.integer.config_shortAnimTime))
-                            .rotation(COLLAPSED_DEGREES)
-                            .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    collapseAnimation = null;
-                                }
-                            });
+                    performCollapseAnimation();
                 } else {
-                    expandAnimation = ViewCompat.animate(imgArrow)
-                            .setInterpolator(new LinearInterpolator())
-                            .setDuration(context.getResources().getInteger(
-                                    android.R.integer.config_shortAnimTime))
-                            .rotation(EXPANDED_DEGREES)
-                            .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    expandAnimation = null;
-                                }
-                            });
+                    performExpandAnimation();
                 }
 
                 repopulateServices();
+            }
+        }
+
+        /**
+         * Perform the expand animation.
+         */
+        private void performExpandAnimation() {
+            expandAnimation = ViewCompat.animate(imgArrow)
+                    .setInterpolator(new LinearInterpolator())
+                    .setDuration(context.getResources().getInteger(
+                            android.R.integer.config_shortAnimTime))
+                    .rotation(EXPANDED_DEGREES)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            expandAnimation = null;
+                        }
+                    });
+        }
+
+        /**
+         * Perform the collapse animation.
+         */
+        private void performCollapseAnimation() {
+            collapseAnimation = ViewCompat.animate(imgArrow)
+                    .setInterpolator(new LinearInterpolator())
+                    .setDuration(context.getResources().getInteger(
+                            android.R.integer.config_shortAnimTime))
+                    .rotation(COLLAPSED_DEGREES)
+                    .withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            collapseAnimation = null;
+                        }
+                    });
+        }
+
+        /**
+         * Cancel the expand animation.
+         */
+        private void cancelExpandAnimation() {
+            if (expandAnimation != null) {
+                expandAnimation.cancel();
+                expandAnimation = null;
+            }
+        }
+
+        /**
+         * Cancel the collapse animation.
+         */
+        private void cancelCollapseAnimation() {
+            if (collapseAnimation != null) {
+                collapseAnimation.cancel();
+                collapseAnimation = null;
             }
         }
     }

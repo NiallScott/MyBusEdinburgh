@@ -78,6 +78,9 @@ import uk.org.rivernile.edinburghbustracker.android.R;
 /**
  * This {@link Fragment} shows bus times to the user in an expandable list.
  *
+ * TODO: do something with night buses preference.
+ * TODO: adapter item long click support.
+ *
  * @author Niall Scott
  */
 public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCallbacks,
