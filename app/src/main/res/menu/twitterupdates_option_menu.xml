@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,7 @@
     xmlns:compat="http://schemas.android.com/apk/res-auto" >
     <item
         android:id="@+id/twitterupdates_option_menu_refresh"
-        android:title="@string/displaystopdata_menu_refresh"
+        android:title="@string/twitterupdates_menu_refresh"
         android:icon="@drawable/ic_action_refresh"
         compat:showAsAction="ifRoom" />
 </menu>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -142,7 +142,7 @@ public class BusStopDetailsActivity extends AppCompatActivity
     @Override
     public void onShowBusTimes(final String stopCode) {
         final Intent intent = new Intent(this, DisplayStopDataActivity.class);
-        intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
+        intent.putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode);
         startActivity(intent);
     }
     

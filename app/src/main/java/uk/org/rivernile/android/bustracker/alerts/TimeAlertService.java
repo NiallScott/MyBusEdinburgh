@@ -190,7 +190,7 @@ public class TimeAlertService extends IntentService {
         launchIntent.setAction(DisplayStopDataActivity
                 .ACTION_VIEW_STOP_DATA);
         launchIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        launchIntent.putExtra(DisplayStopDataActivity.ARG_STOPCODE,
+        launchIntent.putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE,
                 stopCode);
 
         final String stopName = getBusStopName(stopCode);

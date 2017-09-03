@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -109,13 +109,6 @@ public abstract class BusApplication extends Application
      * @return An instance of the {@link AlertManager}.
      */
     public abstract AlertManager getAlertManager();
-    
-    /**
-     * Get an instance of the FragmentFactory.
-     * 
-     * @return An instance of the FragmentFactory.
-     */
-    public abstract FragmentFactory getFragmentFactory();
 
     /**
      * Get an instance of {@link Picasso} for image loading.

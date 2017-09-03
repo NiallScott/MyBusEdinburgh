@@ -80,6 +80,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * TODO: do something with night buses preference.
  * TODO: adapter item long click support.
+ * TODO: show night bus with black background.
  *
  * @author Niall Scott
  */

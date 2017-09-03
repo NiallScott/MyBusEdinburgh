@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -220,7 +220,7 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
                 final Intent intent = new Intent(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA);
                 intent.setClass(activity, DisplayStopDataActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra(DisplayStopDataActivity.ARG_STOPCODE, stopCode);
+                intent.putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode);
 
                 // Set the Activity result to send back to the launcher, which contains a name,
                 // Intent and icon.

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -119,6 +119,7 @@
         <!-- DisplayStopDataActivity, to show bus times. -->
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity"
+            android:theme="@style/MyBusEdinburgh.NoActionBar"
             android:label="@string/displaystopdata_title"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
             <!-- This Activity attempts to take over HTTP accessing of
@@ -250,18 +251,6 @@
             android:name="uk.org.rivernile.android.bustracker.ui.about.AboutActivity"
             android:label="@string/about_title"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
-            <!-- PARENT_ACTIVITY is used by the support library for supporting
-                 up navigation. -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
-        </activity>
-
-        <!-- TODO: remove me later. -->
-        <activity
-            android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity2"
-            android:theme="@style/MyBusEdinburgh.NoActionBar"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data

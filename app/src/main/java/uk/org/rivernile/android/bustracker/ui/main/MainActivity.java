@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,7 +47,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
-import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity2;
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
@@ -235,8 +235,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onShowBusTimes(final String stopCode) {
-        final Intent intent = new Intent(this, DisplayStopDataActivity2.class);
-        intent.putExtra(DisplayStopDataActivity2.EXTRA_STOP_CODE, stopCode);
+        final Intent intent = new Intent(this, DisplayStopDataActivity.class);
+        intent.putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode);
         startActivity(intent);
     }
 
