@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,8 +42,8 @@ import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsDatabase;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.utils.MapsUtils;
-import uk.org.rivernile.edinburghbustracker.android.BusStopDetailsActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -158,8 +158,8 @@ public class ProximityAlertService extends IntentService {
             launchIntent = new Intent(this, BusStopMapActivity.class);
             launchIntent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
         } else {
-            launchIntent = new Intent(this, BusStopDetailsActivity.class);
-            launchIntent.putExtra(BusStopDetailsActivity.ARG_STOPCODE, stopCode);
+            launchIntent = new Intent(this, DisplayStopDataActivity.class);
+            launchIntent.putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode);
         }
 
         notifBuilder.setContentIntent(

@@ -143,13 +143,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addtimealert_title">Add new arrival alert</string>
     
     <!--
-    **************************************
-    * Strings for BusStopDetailsActivity *
-    **************************************
-    -->
-    <string name="busstopdetails_title">Stop details</string>
-    
-    <!--
     **********************************
     * Strings for BusStopMapActivity *
     **********************************
@@ -381,20 +374,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="alertmanager_snackbar_remove_time">Time alert removed</string>
     
     <!--
-    **************************************
-    * Strings for BusStopDetailsFragment *
-    **************************************
-    -->
-    <string name="busstopdetails_btn_showtimes">Bus times</string>
-    <string name="busstopdetails_btn_streetview">Street view</string>
-    <string name="busstopdetails_noservices">No known services for this stop</string>
-    <string name="busstopdetails_load_failed"><b>Problem loading stop</b>\nThis stop could not be found in the stop database.</string>
-    <string name="busstopdetails_prox_add">@string/prox_alert_add</string>
-    <string name="busstopdetails_prox_rem">@string/prox_alert_rem</string>
-    <string name="busstopdetails_time_add">@string/time_alert_add</string>
-    <string name="busstopdetails_time_rem">@string/time_alert_rem</string>
-    
-    <!--
     **********************************
     * Strings for BusStopMapFragment *
     **********************************
@@ -542,16 +521,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="barcodescannerdialog_btn_positive">Go to Play Store</string>
     <string name="barcodescannerdialog_btn_negative">No thanks</string>
     <string name="barcodescannerdialog_noplaystore">Google Play Store is missing</string>
-    
-    <!--
-    ***********************************************
-    * Strings for InstallStreetViewDialogFragment *
-    ***********************************************
-    -->
-    <string name="streetviewdialog_title">Install Street View</string>
-    <string name="streetviewdialog_message">This feature requires that the Google Street View app is installed. Proceed to the Google Play Store?</string>
-    <string name="streetviewdialog_noplaystore">Google Play Store is missing.</string>
-    
+
     <!--
     ********************************************
     * Strings for MapTypeChooserDialogFragment *

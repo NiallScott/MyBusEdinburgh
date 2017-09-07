@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.google.android.gms.maps.model.LatLng;
+
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.MapTypeChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.BusStopMapFragment;
@@ -126,8 +128,8 @@ public class BusStopMapActivity extends AppCompatActivity implements BusStopMapF
 
     @Override
     public void onShowBusStopDetails(final String stopCode) {
-        final Intent intent = new Intent(this, BusStopDetailsActivity.class);
-        intent.putExtra(BusStopDetailsActivity.ARG_STOPCODE, stopCode);
+        final Intent intent = new Intent(this, DisplayStopDataActivity.class);
+        intent.putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode);
         startActivity(intent);
     }
 

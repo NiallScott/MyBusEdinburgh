@@ -24,8 +24,7 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources
-    xmlns:tools="http://schemas.android.com/tools" >
+<resources>
 
     <style name="AppActionBar" parent="@style/Widget.AppCompat.ActionBar.Solid">
         <item name="displayOptions">showHome|homeAsUp|showTitle</item>
@@ -61,31 +60,6 @@
     <style name="TextAppearance.MyBus.DisplayStopData.ServiceName" parent="">
         <item name="android:textSize">@dimen/display_stop_data_service_name_text_size</item>
         <item name="android:textColor">@android:color/white</item>
-    </style>
-    
-    <style name="BusStopDetailsButtons" >
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:background">?selectableItemBackground</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:textSize">@dimen/text_size_medium</item>
-    </style>
-
-    <style name="BusStopDetailsListItem" >
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">?selectableItemBackground</item>
-        <item name="android:textAppearance">?attr/textAppearanceListItemSmall</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingLeft">?attr/listPreferredItemPaddingLeft</item>
-        <item name="android:paddingRight">?attr/listPreferredItemPaddingRight</item>
-        <item name="android:paddingStart" tools:targetApi="17">?attr/listPreferredItemPaddingLeft</item>
-        <item name="android:paddingEnd" tools:targetApi="17">?attr/listPreferredItemPaddingRight</item>
-        <item name="android:minHeight">?android:attr/listPreferredItemHeightSmall</item>
-        <item name="android:focusable">true</item>
     </style>
 
     <style name="Card">
