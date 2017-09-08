@@ -78,10 +78,6 @@ import uk.org.rivernile.edinburghbustracker.android.R;
 /**
  * This {@link Fragment} shows bus times to the user in an expandable list.
  *
- * TODO: do something with night buses preference.
- * TODO: adapter item long click support.
- * TODO: show night bus with black background.
- *
  * @author Niall Scott
  */
 public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCallbacks,
@@ -146,6 +142,8 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         sp = getContext().getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
         adapter = new BusTimesAdapter(getContext());
         adapter.setSortByTime(sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false));
+        adapter.setShowNightServices(sp.getBoolean(
+                PreferenceConstants.PREF_SHOW_NIGHT_BUSES, true));
 
         if (savedInstanceState != null) {
             lastRefresh = savedInstanceState.getLong(STATE_LAST_REFRESH, 0);

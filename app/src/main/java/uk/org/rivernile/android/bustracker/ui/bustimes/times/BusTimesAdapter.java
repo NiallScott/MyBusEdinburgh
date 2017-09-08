@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
@@ -80,6 +81,7 @@ class BusTimesAdapter extends RecyclerView.Adapter {
     private List<BusTimesItem> items;
     private Map<String, Integer> serviceColours;
     private boolean sortByTime;
+    private boolean showNightServices = true;
 
     /**
      * Create a new {@code BusTimesAdapter}.
@@ -210,6 +212,17 @@ class BusTimesAdapter extends RecyclerView.Adapter {
     }
 
     /**
+     * Sets whether night services should be shown.
+     *
+     * @param showNightServices {@code true} if night services should be shown, {@code false} if
+     * not.
+     */
+    void setShowNightServices(final boolean showNightServices) {
+        this.showNightServices = showNightServices;
+        repopulateServices();
+    }
+
+    /**
      * Get the {@link BusTimesItem} at the given position.
      *
      * @param position The position of the item to get.
@@ -287,16 +300,29 @@ class BusTimesAdapter extends RecyclerView.Adapter {
 
         for (int i = 0; i < servicesSize; i++) {
             final LiveBusService liveBusService = services.get(i);
-            final List<LiveBus> liveBuses = liveBusService.getLiveBuses();
-            final int busesSize = expandedItems.contains(liveBusService.getServiceName()) ?
-                    liveBuses.size() : 1;
 
-            for (int j = 0; j < busesSize; j++) {
-                result.add(new BusTimesItem(liveBusService, liveBuses.get(j), j));
+            if (!isNightService(liveBusService.getServiceName()) || showNightServices) {
+                final List<LiveBus> liveBuses = liveBusService.getLiveBuses();
+                final int busesSize = expandedItems.contains(liveBusService.getServiceName()) ?
+                        liveBuses.size() : 1;
+
+                for (int j = 0; j < busesSize; j++) {
+                    result.add(new BusTimesItem(liveBusService, liveBuses.get(j), j));
+                }
             }
         }
 
         return result;
+    }
+
+    /**
+     * Is the given service a night service?
+     *
+     * @param serviceName The service name to test.
+     * @return {@code true} if the service name is that of a night service, {@code false} if not.
+     */
+    private static boolean isNightService(@NonNull final String serviceName) {
+        return serviceName.startsWith("N");
     }
 
     /**
@@ -428,10 +454,17 @@ class BusTimesAdapter extends RecyclerView.Adapter {
         void populate(@Nullable final BusTimesItem item) {
             if (item != null) {
                 final String serviceName = item.getLiveBusService().getServiceName();
-                final Integer boxedColour = serviceColours != null
-                        ? serviceColours.get(serviceName) : null;
-                @ColorInt final int colour = boxedColour != null
-                        ? boxedColour : ContextCompat.getColor(context, R.color.colorAccent);
+                @ColorInt final int colour;
+
+                if (isNightService(serviceName)) {
+                    colour = Color.BLACK;
+                } else {
+                    final Integer boxedColour = serviceColours != null
+                            ? serviceColours.get(serviceName) : null;
+                    colour = boxedColour != null
+                            ? boxedColour : ContextCompat.getColor(context, R.color.colorAccent);
+                }
+
                 txtServiceName.setSupportBackgroundTintList(ColorStateList.valueOf(colour));
                 txtServiceName.setText(serviceName);
 
