@@ -194,6 +194,8 @@ public class AddProximityAlertDialogFragment extends DialogFragment
                     new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
             handleLocationProvidersChange();
         }
+
+        updatePositiveButtonEnabledState();
     }
 
     @Override
@@ -260,6 +262,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     private void checkLocationPermission() {
         hasLocationPermission = ContextCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        updatePositiveButtonEnabledState();
 
         if (hasLocationPermission) {
             if (isLoadingBusStop) {
@@ -296,6 +299,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     private void handleBusStopLoaded(@Nullable final Cursor cursor) {
         isLoadingBusStop = false;
         populateStopName(cursor);
+        updatePositiveButtonEnabledState();
         showContent();
     }
 
@@ -414,6 +418,21 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         layoutContent.setVisibility(View.GONE);
         layoutLocationPermission.setVisibility(View.GONE);
         txtErrorNoLocationFeature.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Update the enabled state of the positive button on the {@link AlertDialog}.
+     */
+    private void updatePositiveButtonEnabledState() {
+        final AlertDialog dialog = (AlertDialog) getDialog();
+
+        if (dialog != null) {
+            final Button button = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+
+            if (button != null) {
+                button.setEnabled(hasLocationFeature && hasLocationPermission && !isLoadingBusStop);
+            }
+        }
     }
 
     /**
