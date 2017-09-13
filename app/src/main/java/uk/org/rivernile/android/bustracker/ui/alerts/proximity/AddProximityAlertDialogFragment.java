@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts;
+package uk.org.rivernile.android.bustracker.ui.alerts.proximity;
 
 import android.Manifest;
 import android.app.Dialog;
@@ -58,8 +58,6 @@ import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .ProximityLimitationsDialogFragment;
 
 /**
  * This {@link DialogFragment} allows a user to add a proximity alert for a supplied stop. It is

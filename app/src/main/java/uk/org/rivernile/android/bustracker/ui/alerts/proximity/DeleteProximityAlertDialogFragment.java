@@ -23,48 +23,49 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
+package uk.org.rivernile.android.bustracker.ui.alerts.proximity;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+
+import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This {@link DialogFragment} shows the user some disclaimer text regarding the proximity alert
- * feature in the application.
+ * This {@link DialogFragment} will show an {@link AlertDialog} which asks the user to confirm if
+ * they wish to delete the proximity alert or not.
  * 
  * @author Niall Scott
  */
-public class ProximityLimitationsDialogFragment extends DialogFragment {
-
-    /**
-     * Create a new instance of this {@code ProximityLimitationsDialogFragment}.
-     *
-     * @return A new instance of this {@code ProximityLimitationsDialogFragment}.
-     */
-    @NonNull
-    public static ProximityLimitationsDialogFragment newInstance() {
-        return new ProximityLimitationsDialogFragment();
-    }
+public class DeleteProximityAlertDialogFragment extends DialogFragment {
+    
+    private AlertManager alertMan;
 
     @Override
-    public void onCreate(@Nullable final Bundle savedInstanceState) {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setCancelable(true);
+        alertMan = ((BusApplication) getActivity().getApplication()).getAlertManager();
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getContext())
-                .setTitle(R.string.proxlimitationsdialog_title)
-                .setMessage(R.string.proxlimitationsdialog_message)
-                .setNegativeButton(R.string.close, null)
+        return new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.deleteproxdialog_title)
+                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        alertMan.removeProximityAlert();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
                 .create();
     }
 }
