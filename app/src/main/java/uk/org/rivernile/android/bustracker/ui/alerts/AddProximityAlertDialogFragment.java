@@ -27,10 +27,17 @@ package uk.org.rivernile.android.bustracker.ui.alerts;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -72,11 +79,13 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     private static final int PERMISSION_REQUEST_LOCATION = 1;
 
     private AlertManager alertManager;
+    private LocationManager locManager;
 
     private String stopCode;
     private boolean hasLocationFeature;
     private boolean hasLocationPermission;
     private boolean isLoadingBusStop;
+    private Intent locationSettingsIntent;
 
     private ProgressBar progress;
     private View layoutContent;
@@ -86,6 +95,8 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     private TextView txtBlurb;
     private Spinner spinnerDistance;
     private Button btnLimitations;
+    private View layoutLocationDisabled;
+    private Button btnLocationSettings;
 
     /**
      * Create a new {@code AddProximityAlertDialogFragment}.
@@ -110,11 +121,16 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         setCancelable(true);
         stopCode = getArguments().getString(ARG_STOPCODE);
 
-        final BusApplication app = (BusApplication) getContext().getApplicationContext();
+        final Context context = getContext();
+        final BusApplication app = (BusApplication) context.getApplicationContext();
         alertManager = app.getAlertManager();
+        locManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
-        hasLocationFeature = getActivity().getPackageManager()
+        hasLocationFeature = context.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_LOCATION);
+
+        locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
     }
 
     @NonNull
@@ -130,9 +146,12 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         txtBlurb = (TextView) v.findViewById(R.id.txtBlurb);
         spinnerDistance = (Spinner) v.findViewById(R.id.spinnerDistance);
         btnLimitations = (Button) v.findViewById(R.id.btnLimitations);
+        layoutLocationDisabled = v.findViewById(R.id.layoutLocationDisabled);
+        btnLocationSettings = (Button) v.findViewById(R.id.btnLocationSettings);
 
         btnLimitations.setOnClickListener(this);
         btnGrantPermission.setOnClickListener(this);
+        btnLocationSettings.setOnClickListener(this);
 
         return new AlertDialog.Builder(getContext())
                 .setTitle(R.string.addproxalertdialog_title)
@@ -171,6 +190,18 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
         if (hasLocationFeature) {
             checkLocationPermission();
+            getContext().registerReceiver(locationProviderChangedReceiver,
+                    new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
+            handleLocationProvidersChange();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (hasLocationFeature) {
+            getContext().unregisterReceiver(locationProviderChangedReceiver);
         }
     }
 
@@ -218,6 +249,8 @@ public class AddProximityAlertDialogFragment extends DialogFragment
             handleLimitationsButtonClick();
         } else if (v == btnGrantPermission) {
             requestLocationPermission();
+        } else if (v == btnLocationSettings) {
+            handleLocationSettingsButtonClick();
         }
     }
 
@@ -296,6 +329,22 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     }
 
     /**
+     * Handle the status of the location providers changing. This will show an advisory layout to
+     * the user if no location providers are enabled and an {@link android.app.Activity} exists on
+     * the system which can show location settings.
+     */
+    private void handleLocationProvidersChange() {
+        final boolean hasLocationSettings =
+                locationSettingsIntent.resolveActivity(getContext().getPackageManager()) != null;
+        final boolean gpsEnabled = locManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        final boolean networkEnabled = locManager.isProviderEnabled(
+                LocationManager.NETWORK_PROVIDER);
+        final boolean showLocationDisabled = hasLocationSettings && !gpsEnabled && !networkEnabled;
+
+        layoutLocationDisabled.setVisibility(showLocationDisabled ? View.VISIBLE : View.GONE);
+    }
+
+    /**
      * Handle the dialog positive button being clicked.
      */
     private void handlePositiveButtonClick() {
@@ -308,6 +357,19 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     private void handleLimitationsButtonClick() {
         ProximityLimitationsDialogFragment.newInstance()
                 .show(getFragmentManager(), DIALOG_PROX_ALERT_LIMITATIONS);
+    }
+
+    /**
+     * Handle the location settings button being clicked.
+     */
+    private void handleLocationSettingsButtonClick() {
+        try {
+            startActivity(locationSettingsIntent);
+        } catch (ActivityNotFoundException ignored) {
+            // The button should never be shown if nothing responds to this Intent, as this is
+            // checked elsewhere. However, this call has an exception handler check around it to
+            // prevent any crashes incase the button is shown due to any logic holes.
+        }
     }
 
     /**
@@ -382,4 +444,11 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
         return value;
     }
+
+    private BroadcastReceiver locationProviderChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+            handleLocationProvidersChange();
+        }
+    };
 }
