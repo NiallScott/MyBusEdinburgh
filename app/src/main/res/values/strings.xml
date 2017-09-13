@@ -129,13 +129,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addeditstop_title">Add/edit favourite stop</string>
     
     <!--
-    *****************************************
-    * Strings for AddProximityAlertActivity *
-    *****************************************
-    -->
-    <string name="addproxalert_title">Add new proximity alert</string>
-    
-    <!--
     ************************************
     * Strings for AddTimeAlertActivity *
     ************************************
@@ -313,23 +306,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addeditstop_edit_stopname_hint">Stop name</string>
     <string name="addeditstop_error_blankstopname">You cannot have a blank stop name.</string>
     <string name="addeditstop_btn_save">Save</string>
-    
-    <!--
-    *****************************
-    * AddProximityAlertFragment *
-    *****************************
-    -->
-    <string name="addproxalert_first">Alert me when I am within</string>
-    <string-array name="addproxalert_distance_array">
-        <item>100 metres (109 yards)</item>
-        <item>250 metres (273 yards)</item>
-        <item>500 metres (546 yards)</item>
-        <item>750 metres (820 yards)</item>
-        <item>1000 metres (1093 yards)</item>
-    </string-array>
-    <string name="addproxalert_second">of stop %s.</string> <!-- %s = bus stop name and code. -->
-    <string name="addproxalert_gps">For this feature to work properly, it is strongly advised that GPS is turned on. Tick this if you would like to go to the device preferences after you have set this alert to turn GPS on.</string>
-    <string name="addproxalert_limitations">Show limitations</string>
     
     <!--
     ************************

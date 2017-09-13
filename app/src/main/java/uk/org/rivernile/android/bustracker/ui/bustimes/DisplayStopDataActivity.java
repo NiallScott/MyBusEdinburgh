@@ -30,10 +30,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.ui.alerts.AddProximityAlertDialogFragment;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android
         .AddEditFavouriteStopActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
@@ -165,9 +165,8 @@ public class DisplayStopDataActivity extends AppCompatActivity
      */
     @Override
     public void onShowAddProximityAlert(final String stopCode) {
-        final Intent intent = new Intent(this, AddProximityAlertActivity.class);
-        intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE, stopCode);
-        startActivity(intent);
+        AddProximityAlertDialogFragment.newInstance(stopCode)
+                .show(getSupportFragmentManager(), "this will be removed soon");
     }
 
     /**
