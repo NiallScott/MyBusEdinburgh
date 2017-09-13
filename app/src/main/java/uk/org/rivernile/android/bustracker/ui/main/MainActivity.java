@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,12 +47,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
+
+import uk.org.rivernile.android.bustracker.ui.alerts.AddProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
 
+    private static final String DIALOG_ADD_PROX_ALERT = "addProxAlertDialog";
     private static final String DIALOG_DELETE_PROX_ALERT = "deleteProxAlertDialog";
     private static final String DIALOG_DELETE_TIME_ALERT = "deleteTimeAlertDialog";
     private static final String DIALOG_SERVICES_CHOOSER = "servicesChooserDialog";
@@ -255,9 +257,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onShowAddProximityAlert(final String stopCode) {
-        final Intent intent = new Intent(this, AddProximityAlertActivity.class);
-        intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE, stopCode);
-        startActivity(intent);
+        AddProximityAlertDialogFragment.newInstance(stopCode)
+                .show(getSupportFragmentManager(), DIALOG_ADD_PROX_ALERT);
     }
 
     @Override

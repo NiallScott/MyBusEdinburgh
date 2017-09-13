@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,4 +47,7 @@
 
     <!-- Dimens for alert manager. -->
     <dimen name="map_range_ring_stroke">1dp</dimen>
+
+    <!-- Dimens for AddProximityAlertDialogFragment. -->
+    <dimen name="addproxalertdialog_margin_start_end">24dp</dimen>
 </resources>
