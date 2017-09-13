@@ -77,7 +77,6 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     private boolean hasLocationFeature;
     private boolean hasLocationPermission;
     private boolean isLoadingBusStop;
-    private Cursor stopDetailsCursor;
 
     private ProgressBar progress;
     private View layoutContent;
@@ -113,6 +112,9 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
         final BusApplication app = (BusApplication) getContext().getApplicationContext();
         alertManager = app.getAlertManager();
+
+        hasLocationFeature = getActivity().getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_LOCATION);
     }
 
     @NonNull
@@ -150,17 +152,16 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        checkLocationCapability();
-
         if (hasLocationFeature) {
             checkLocationPermission();
             showProgress();
-            isLoadingBusStop = true;
-            getLoaderManager().initLoader(LOADER_BUS_STOP, null, this);
+            loadBusStopDetails();
 
             if (!hasLocationPermission && savedInstanceState == null) {
                 requestLocationPermission();
             }
+        } else {
+            showNoLocationFeatureLayout();
         }
     }
 
@@ -168,7 +169,9 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     public void onStart() {
         super.onStart();
 
-        checkLocationPermission();
+        if (hasLocationFeature) {
+            checkLocationPermission();
+        }
     }
 
     @Override
@@ -202,7 +205,11 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
     @Override
     public void onLoaderReset(final Loader<Cursor> loader) {
-        handleBusStopLoaded(null);
+        switch (loader.getId()) {
+            case LOADER_BUS_STOP:
+                handleBusStopLoaded(null);
+                break;
+        }
     }
 
     @Override
@@ -211,22 +218,6 @@ public class AddProximityAlertDialogFragment extends DialogFragment
             handleLimitationsButtonClick();
         } else if (v == btnGrantPermission) {
             requestLocationPermission();
-        }
-    }
-
-    /**
-     * Check to see if the device is capable of receiving location updates. Note that this does not
-     * check permissions - these are checked elsewhere.
-     */
-    private void checkLocationCapability() {
-        hasLocationFeature = getActivity().getPackageManager()
-                .hasSystemFeature(PackageManager.FEATURE_LOCATION);
-
-        if (!hasLocationFeature) {
-            progress.setVisibility(View.GONE);
-            layoutContent.setVisibility(View.GONE);
-            layoutLocationPermission.setVisibility(View.GONE);
-            txtErrorNoLocationFeature.setVisibility(View.VISIBLE);
         }
     }
 
@@ -257,28 +248,37 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     }
 
     /**
+     * Load details for the bus stop from the database.
+     */
+    private void loadBusStopDetails() {
+        isLoadingBusStop = true;
+        getLoaderManager().initLoader(LOADER_BUS_STOP, null, this);
+    }
+
+    /**
      * Handle the load of the bus stop data {@link Cursor}.
      *
      * @param cursor The bus stop data.
      */
     private void handleBusStopLoaded(@Nullable final Cursor cursor) {
-        stopDetailsCursor = cursor;
-        populateStopName();
-        showContent();
         isLoadingBusStop = false;
+        populateStopName(cursor);
+        showContent();
     }
 
     /**
      * Populate the bus stop name in the blurb text.
      */
-    private void populateStopName() {
+    private void populateStopName(@Nullable final Cursor cursor) {
         final String text;
 
-        if (stopDetailsCursor != null && stopDetailsCursor.moveToFirst()) {
-            final String name = stopDetailsCursor.getString(
-                    stopDetailsCursor.getColumnIndex(BusStopContract.BusStops.STOP_NAME));
-            final String locality = stopDetailsCursor.getString(
-                    stopDetailsCursor.getColumnIndex(BusStopContract.BusStops.LOCALITY));
+        if (cursor != null && cursor.moveToFirst()) {
+            final int nameColumnIndex = cursor.getColumnIndex(BusStopContract.BusStops.STOP_NAME);
+            final int localityColumnIndex =
+                    cursor.getColumnIndex(BusStopContract.BusStops.LOCALITY);
+
+            final String name = cursor.getString(nameColumnIndex);
+            final String locality = cursor.getString(localityColumnIndex);
             final String nameToDisplay;
 
             if (!TextUtils.isEmpty(locality)) {
@@ -289,7 +289,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
             text = getString(R.string.addproxalertdialog_blurb, nameToDisplay);
         } else {
-            text = stopCode;
+            text = getString(R.string.addproxalertdialog_blurb, stopCode);
         }
 
         txtBlurb.setText(text);
@@ -317,9 +317,8 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         if (hasLocationPermission) {
             layoutLocationPermission.setVisibility(View.GONE);
             layoutContent.setVisibility(View.GONE);
+            txtErrorNoLocationFeature.setVisibility(View.GONE);
             progress.setVisibility(View.VISIBLE);
-        } else {
-            showLocationPermissionLayout();
         }
     }
 
@@ -330,10 +329,8 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         if (hasLocationPermission) {
             layoutLocationPermission.setVisibility(View.GONE);
             progress.setVisibility(View.GONE);
+            txtErrorNoLocationFeature.setVisibility(View.GONE);
             layoutContent.setVisibility(View.VISIBLE);
-            //getAlertDialog().getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
-        } else {
-            showLocationPermissionLayout();
         }
     }
 
@@ -343,8 +340,18 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     private void showLocationPermissionLayout() {
         progress.setVisibility(View.GONE);
         layoutContent.setVisibility(View.GONE);
+        txtErrorNoLocationFeature.setVisibility(View.GONE);
         layoutLocationPermission.setVisibility(View.VISIBLE);
-        //getAlertDialog().getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
+    }
+
+    /**
+     * Show an error to the user when the device is not capable of receiving location updates.
+     */
+    private void showNoLocationFeatureLayout() {
+        progress.setVisibility(View.GONE);
+        layoutContent.setVisibility(View.GONE);
+        layoutLocationPermission.setVisibility(View.GONE);
+        txtErrorNoLocationFeature.setVisibility(View.VISIBLE);
     }
 
     /**
