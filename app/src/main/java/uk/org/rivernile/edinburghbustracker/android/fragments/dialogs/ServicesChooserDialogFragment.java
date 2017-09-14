@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -53,8 +54,7 @@ public class ServicesChooserDialogFragment extends DialogFragment {
 
     /** Used to store the checked state between configuration changes. */
     private static final String STATE_CHECK_BOXES = "checkBoxes";
-    
-    private Callbacks callbacks;
+
     private String[] services;
     private boolean[] checkBoxes;
     
@@ -78,18 +78,6 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         f.setArguments(b);
         
         return f;
-    }
-
-    @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
-        
-        try {
-            callbacks = (Callbacks) activity;
-        } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
-                    Callbacks.class.getName());
-        }
     }
 
     @Override
@@ -161,7 +149,7 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         super.onDismiss(dialog);
         
         // Tell the listener that there may be changes.
-        callbacks.onServicesChosen(getChosenServices());
+        dispatchServicesChosen();
     }
     
     /**
@@ -235,6 +223,28 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         }
         
         return sb.toString();
+    }
+
+    /**
+     * Dispatch chosen services to the {@link Callbacks} listener either provided by
+     * {@link #getTargetFragment()} or {@link #getActivity()}.
+     */
+    private void dispatchServicesChosen() {
+        final Fragment targetFragment = getTargetFragment();
+        final Activity activity = getActivity();
+        final Callbacks callbacks;
+
+        if (targetFragment != null && targetFragment instanceof Callbacks) {
+            callbacks = (Callbacks) targetFragment;
+        } else if (activity != null && activity instanceof Callbacks) {
+            callbacks = (Callbacks) activity;
+        } else {
+            callbacks = null;
+        }
+
+        if (callbacks != null) {
+            callbacks.onServicesChosen(getChosenServices());
+        }
     }
     
     /**

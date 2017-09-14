@@ -134,8 +134,10 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final LayoutInflater inflater = LayoutInflater.from(getContext());
-        final View v = inflater.inflate(R.layout.addproxalert2, null, false);
+        final Context context = getContext();
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        final View v = inflater.inflate(R.layout.addproxalert, null, false);
+
         progress = (ProgressBar) v.findViewById(R.id.progress);
         layoutContent = v.findViewById(R.id.layoutContent);
         txtErrorNoLocationFeature = v.findViewById(R.id.txtErrorNoLocationFeature);
@@ -151,7 +153,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         btnGrantPermission.setOnClickListener(this);
         btnLocationSettings.setOnClickListener(this);
 
-        return new AlertDialog.Builder(getContext())
+        return new AlertDialog.Builder(context)
                 .setTitle(R.string.addproxalertdialog_title)
                 .setPositiveButton(R.string.addproxalertdialog_button_add,
                         new DialogInterface.OnClickListener() {

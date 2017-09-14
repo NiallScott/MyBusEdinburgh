@@ -49,12 +49,12 @@ import android.view.Window;
 import android.widget.Toast;
 
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
 import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity
             "market://details?id=com.google.zxing.client.android";
 
     private static final String DIALOG_ADD_PROX_ALERT = "addProxAlertDialog";
+    private static final String DIALOG_ADD_TIME_ALERT = "addTimeAlertDialog";
     private static final String DIALOG_DELETE_PROX_ALERT = "deleteProxAlertDialog";
     private static final String DIALOG_DELETE_TIME_ALERT = "deleteTimeAlertDialog";
     private static final String DIALOG_SERVICES_CHOOSER = "servicesChooserDialog";
@@ -261,12 +262,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowAddTimeAlert(final String stopCode,
-            final String[] defaultServices) {
-        final Intent intent = new Intent(this, AddTimeAlertActivity.class);
-        intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE, stopCode);
-        intent.putExtra(AddTimeAlertActivity.ARG_DEFAULT_SERVICES, defaultServices);
-        startActivity(intent);
+    public void onShowAddTimeAlert(final String stopCode, final String[] defaultServices) {
+        AddTimeAlertDialogFragment.newInstance(stopCode, defaultServices)
+                .show(getSupportFragmentManager(), DIALOG_ADD_TIME_ALERT);
     }
 
     @Override

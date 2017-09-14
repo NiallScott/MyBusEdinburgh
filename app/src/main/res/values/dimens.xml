@@ -36,6 +36,8 @@
     <dimen name="indeterminate_progress_size">24dp</dimen>
     
     <dimen name="navigation_drawer_width">280dp</dimen>
+
+    <dimen name="dialog_margin_start_end">24dp</dimen>
     
     <!-- Dimensions for bus times view. -->
     <dimen name="service_name_width">55dp</dimen>
@@ -47,7 +49,4 @@
 
     <!-- Dimens for alert manager. -->
     <dimen name="map_range_ring_stroke">1dp</dimen>
-
-    <!-- Dimens for AddProximityAlertDialogFragment. -->
-    <dimen name="addproxalertdialog_margin_start_end">24dp</dimen>
 </resources>

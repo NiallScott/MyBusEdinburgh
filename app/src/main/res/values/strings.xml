@@ -465,6 +465,29 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addproxalertdialog_button_add">Add</string>
     <string name="addproxalertdialog_error_no_location_feature">This device is unable to receive location updates. As such, it is not possible to add proximity alerts.</string>
     <string name="addproxalertdialog_error_no_location_permission">To use the proximity alert feature, the location permission needs to be granted</string>
+
+    <!--
+    ******************************************
+    * Strings for AddTimeAlertDialogFragment *
+    ******************************************
+    -->
+    <string name="addtimealertdialog_title">Add arrival alert</string>
+    <string name="addtimealertdialog_blurb">Be alerted when any of the selected services are at the selected number of minutes or less from the stop %s</string>
+    <string name="addtimealertdialog_no_services_selected">No services selected</string>
+    <string name="addtimealertdialog_btn_select">Select</string>
+    <string-array name="addtimealertdialog_times_array">
+        <item>Now</item>
+        <item>2 minutes (or less)</item>
+        <item>5 minutes (or less)</item>
+        <item>10 minutes (or less)</item>
+        <item>15 minutes (or less)</item>
+        <item>20 minutes (or less)</item>
+        <item>25 minutes (or less)</item>
+        <item>30 minutes (or less)</item>
+    </string-array>
+    <string name="addtimealertdialog_button_add">Add</string>
+    <string name="addtimealertdialog_button_limitations">Show limitations</string>
+    <string name="addtimealertdialog_services_chooser_dialog_title">Select service(s)</string>
     
     <!--
     *************************************

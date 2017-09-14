@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,8 +32,7 @@ import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .ServicesChooserDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .TimeLimitationsDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.alerts.time.TimeLimitationsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
         .AddTimeAlertFragment;
 
