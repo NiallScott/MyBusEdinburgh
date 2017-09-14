@@ -57,7 +57,7 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getActivity())
+        return new AlertDialog.Builder(getContext())
                 .setTitle(R.string.deleteproxdialog_title)
                 .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
                     @Override

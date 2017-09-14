@@ -39,8 +39,7 @@ import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteFavouriteDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteTimeAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .InstallStreetViewDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general
