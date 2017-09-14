@@ -442,8 +442,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="addtimealertdialog_title">Add arrival alert</string>
     <string name="addtimealertdialog_blurb">Be alerted when any of the selected services are at the selected number of minutes or less from the stop %s</string>
+    <string name="addtimealertdialog_subheading_services">Services</string>
     <string name="addtimealertdialog_no_services_selected">No services selected</string>
     <string name="addtimealertdialog_btn_select">Select</string>
+    <string name="addtimealertdialog_subheading_time_trigger">Time trigger</string>
     <string-array name="addtimealertdialog_times_array">
         <item>Now</item>
         <item>2 minutes (or less)</item>
