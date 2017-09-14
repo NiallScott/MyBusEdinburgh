@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,60 +24,121 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="SelectableText"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <include
-        layout="@layout/button_bar_ok_cancel"
-        android:id="@+id/buttonBar"
+    android:layout_height="match_parent"
+    android:paddingTop="16dp">
+
+    <ScrollView
+        android:id="@+id/layoutContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" />
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/buttonBar">
+        android:visibility="gone"
+        tools:visibility="visible">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp" >
+            android:layout_marginLeft="@dimen/dialog_margin_start_end"
+            android:layout_marginRight="@dimen/dialog_margin_start_end"
+            android:layout_marginStart="@dimen/dialog_margin_start_end"
+            android:layout_marginEnd="@dimen/dialog_margin_start_end"
+            android:orientation="vertical">
+
             <TextView
+                android:id="@+id/txtBlurb"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#000" 
-                android:text="@string/addproxalert_first"
-                android:textSize="16sp" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+                tools:text="@string/addproxalertdialog_blurb" />
+
             <Spinner
-                android:id="@+id/prox_distance_select"
+                android:id="@+id/spinnerDistance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:prompt="@string/addproxalert_first"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp" />
-            <TextView
-                android:id="@+id/textProxDialogStop"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#000"
-                android:paddingBottom="10dp"
-                android:textSize="16sp"/>
-            <CheckBox
-                android:id="@+id/checkProxGPS"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/addproxalert_gps"
-                android:textColor="#000"
-                android:visibility="gone"
-                android:paddingBottom="10dp" />
+                android:layout_marginTop="@dimen/padding_double"
+                android:entries="@array/addproxalertdialog_distance_array" />
+
             <Button
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:id="@+id/btnLimitations"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/padding_double"
+                android:text="@string/addproxalertdialog_button_limitations" />
+
+            <LinearLayout
+                android:id="@+id/layoutLocationDisabled"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/addproxalert_limitations" />
+                android:layout_marginTop="@dimen/padding_default"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/addproxalertdialog_location_disabled_blurb"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
+
+                <Button
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:id="@+id/btnLocationSettings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/padding_double"
+                    android:text="@string/addproxalertdialog_location_disabled_button" />
+            </LinearLayout>
         </LinearLayout>
     </ScrollView>
-</RelativeLayout>
+
+    <TextView
+        android:id="@+id/txtErrorNoLocationFeature"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dialog_margin_start_end"
+        android:layout_marginRight="@dimen/dialog_margin_start_end"
+        android:layout_marginStart="@dimen/dialog_margin_start_end"
+        android:layout_marginEnd="@dimen/dialog_margin_start_end"
+        android:text="@string/addproxalertdialog_error_no_location_feature"
+        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/layoutLocationPermission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/dialog_margin_start_end"
+        android:layout_marginRight="@dimen/dialog_margin_start_end"
+        android:layout_marginStart="@dimen/dialog_margin_start_end"
+        android:layout_marginEnd="@dimen/dialog_margin_start_end"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:text="@string/addproxalertdialog_error_no_location_permission"
+            android:textAppearance="@style/TextAppearance.AppCompat.Menu" />
+
+        <Button
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:id="@+id/btnGrantPermission"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_double"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/addproxalertdialog_button_grant_permission" />
+    </LinearLayout>
+
+    <include
+        layout="@layout/indeterminate_progress"
+        android:visibility="visible"
+        tools:visibility="gone" />
+</FrameLayout>

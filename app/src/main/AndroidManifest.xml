@@ -208,31 +208,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
-        
-        <!-- AddProximityAlertActivity, to let the user add a new proximity
-             alert. -->
-        <activity
-            android:name=".AddProximityAlertActivity"
-            android:label="@string/addproxalert_title"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
-            <!-- PARENT_ACTIVITY is used by the support library for supporting
-                 up navigation. -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
-        </activity>
-        
-        <!-- AddTimeAlertActivity, to let the user add a new time alert. -->
-        <activity
-            android:name=".AddTimeAlertActivity"
-            android:label="@string/addtimealert_title"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
-            <!-- PARENT_ACTIVITY is used by the support library for supporting
-                 up navigation. -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
-        </activity>
 
         <!-- AboutActivity, to show 'about' information for the application. -->
         <activity

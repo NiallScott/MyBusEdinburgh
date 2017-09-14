@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,36 +23,50 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
+package uk.org.rivernile.android.bustracker.ui.alerts.time;
 
-import android.app.Activity;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.view.LayoutInflater;
+
+import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
- * This {@link DialogFragment} shows the user some disclaimer text regarding the time alert feature
- * in the application.
+ * This {@link DialogFragment} will show an {@link AlertDialog} which asks the user to confirm if
+ * they wish to delete the time alert or not.
  * 
  * @author Niall Scott
  */
-public class TimeLimitationsDialogFragment extends DialogFragment {
+public class DeleteTimeAlertDialogFragment extends DialogFragment {
+    
+    private AlertManager alertMan;
+
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setCancelable(true);
+        alertMan = ((BusApplication) getActivity().getApplication()).getAlertManager();
+    }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final Activity activity = getActivity();
-        final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(R.string.timelimitationsdialog_title)
-                .setCancelable(true)
-                .setView(LayoutInflater.from(activity).inflate(R.layout.addtimealert_dialog, null))
-                .setNegativeButton(R.string.close, null)
-                .setInverseBackgroundForced(true);
-
-        return builder.create();
+        return new AlertDialog.Builder(getContext())
+                .setTitle(R.string.deletetimedialog_title)
+                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        // The user has confirmed they want to delete the alert.
+                        alertMan.removeTimeAlert();
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .create();
     }
 }

@@ -52,6 +52,12 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
+    <style name="TextAppearance.AppCompat.Subheader">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
+        <item name="android:fontFamily">@string/fontFamilyMedium</item>
+    </style>
+
     <style name="TextAppearance.MyBus.DisplayStopData.Subheading"
            parent="TextAppearance.AppCompat.Subhead">
         <item name="android:textColor">?android:textColorSecondary</item>

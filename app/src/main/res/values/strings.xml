@@ -52,7 +52,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="no">No</string>
     <string name="okay">OK</string>
     <string name="search">Search</string>
-    <string name="select">Select</string>
     <string name="yes">Yes</string>
     <string name="remove">Remove</string>
     <string name="loading">Loading&#8230;</string>
@@ -129,20 +128,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addeditstop_title">Add/edit favourite stop</string>
     
     <!--
-    *****************************************
-    * Strings for AddProximityAlertActivity *
-    *****************************************
-    -->
-    <string name="addproxalert_title">Add new proximity alert</string>
-    
-    <!--
-    ************************************
-    * Strings for AddTimeAlertActivity *
-    ************************************
-    -->
-    <string name="addtimealert_title">Add new arrival alert</string>
-    
-    <!--
     **********************************
     * Strings for BusStopMapActivity *
     **********************************
@@ -157,7 +142,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_title">Live departures</string>
     <string name="displaystopdata_tab_times">Times</string>
     <string name="displaystopdata_tab_details">Details</string>
-    
+
     <!--
     **************************************
     * Strings for FavouriteStopsActivity *
@@ -308,47 +293,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addeditstop_edit_stopname_hint">Stop name</string>
     <string name="addeditstop_error_blankstopname">You cannot have a blank stop name.</string>
     <string name="addeditstop_btn_save">Save</string>
-    
-    <!--
-    *****************************
-    * AddProximityAlertFragment *
-    *****************************
-    -->
-    <string name="addproxalert_first">Alert me when I am within</string>
-    <string-array name="addproxalert_distance_array">
-        <item>100 metres (109 yards)</item>
-        <item>250 metres (273 yards)</item>
-        <item>500 metres (546 yards)</item>
-        <item>750 metres (820 yards)</item>
-        <item>1000 metres (1093 yards)</item>
-    </string-array>
-    <string name="addproxalert_second">of stop %s.</string> <!-- %s = bus stop name and code. -->
-    <string name="addproxalert_gps">For this feature to work properly, it is strongly advised that GPS is turned on. Tick this if you would like to go to the device preferences after you have set this alert to turn GPS on.</string>
-    <string name="addproxalert_limitations">Show limitations</string>
-    
-    <!--
-    ************************
-    * AddTimeAlertFragment *
-    ************************
-    -->
-    <string name="addtimealert_first">Alert me when any of these services</string>
-    <string name="addtimealert_noservices">No services selected. You must select at least 1 service to continue.</string>
-    <string name="addtimealert_isdue">is due</string>
-    <string name="addtimealert_spinner_prompt">Select time trigger</string>
-    <string name="addtimealert_services_title">Select service(s)</string>
-    <string-array name="addtimealert_array">
-        <item>now</item>
-        <item>in 2 minutes</item>
-        <item>in 5 minutes</item>
-        <item>in 10 minutes</item>
-        <item>in 15 minutes</item>
-        <item>in 20 minutes</item>
-        <item>in 25 minutes</item>
-        <item>in 30 minutes</item>
-    </string-array>
-    <string name="addtimealert_busstop">or less at stop %s.</string> <!-- %s = bus stop name and code. -->
-    <string name="addtimealert_limitations">Show limitations</string>
-    
+
     <!--
     ************************************
     * Strings for AlertManagerFragment *
@@ -372,7 +317,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="alertmanager_time_blurb">This alert is removed after 1 hour or if the device is restarted</string>
     <string name="alertmanager_snackbar_remove_proximity">Proximity alert removed</string>
     <string name="alertmanager_snackbar_remove_time">Time alert removed</string>
-    
+
     <!--
     **********************************
     * Strings for BusStopMapFragment *
@@ -438,7 +383,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="stopdetails_stop_distance">%.1f km away</string>
     <string name="stopdetails_stop_distance_unknown">Distance unknown</string>
     <string name="stopdetails_stop_distance_permission_required">Distance unknown (location permission required)</string>
-    
+
     <!--
     **************************************
     * Strings for TwitterUpdatesFragment *
@@ -456,7 +401,54 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************
     **********************
     -->
-    
+
+    <!--
+    ***********************************************
+    * Strings for AddProximityAlertDialogFragment *
+    ***********************************************
+    -->
+    <string name="addproxalertdialog_title">Add proximity alert</string>
+    <string name="addproxalertdialog_blurb">Be alerted when you are within the chosen distance of the stop %s</string>
+    <string-array name="addproxalertdialog_distance_array">
+        <item>100 meters (109 yards)</item>
+        <item>250 meters (273 yards)</item>
+        <item>500 meters (546 yards)</item>
+        <item>750 meters (820 yards)</item>
+        <item>1000 meters (1093 yards)</item>
+    </string-array>
+    <string name="addproxalertdialog_button_limitations">Show limitations</string>
+    <string name="addproxalertdialog_location_disabled_blurb">Location services need to be enabled for this feature to determine proximity</string>
+    <string name="addproxalertdialog_location_disabled_button">Location settings</string>
+    <string name="addproxalertdialog_button_grant_permission">Grant permission</string>
+    <string name="addproxalertdialog_button_add">Add</string>
+    <string name="addproxalertdialog_error_no_location_feature">This device is unable to receive location updates. As such, it is not possible to add proximity alerts.</string>
+    <string name="addproxalertdialog_error_no_location_permission">To use the proximity alert feature, the location permission needs to be granted</string>
+
+    <!--
+    ******************************************
+    * Strings for AddTimeAlertDialogFragment *
+    ******************************************
+    -->
+    <string name="addtimealertdialog_title">Add arrival alert</string>
+    <string name="addtimealertdialog_blurb">Be alerted when any of the selected services are at the selected number of minutes or less from the stop %s</string>
+    <string name="addtimealertdialog_subheading_services">Services</string>
+    <string name="addtimealertdialog_no_services_selected">No services selected</string>
+    <string name="addtimealertdialog_btn_select">Select</string>
+    <string name="addtimealertdialog_subheading_time_trigger">Time trigger</string>
+    <string-array name="addtimealertdialog_times_array">
+        <item>Now</item>
+        <item>2 minutes (or less)</item>
+        <item>5 minutes (or less)</item>
+        <item>10 minutes (or less)</item>
+        <item>15 minutes (or less)</item>
+        <item>20 minutes (or less)</item>
+        <item>25 minutes (or less)</item>
+        <item>30 minutes (or less)</item>
+    </string-array>
+    <string name="addtimealertdialog_button_add">Add</string>
+    <string name="addtimealertdialog_button_limitations">Show limitations</string>
+    <string name="addtimealertdialog_services_chooser_dialog_title">Select service(s)</string>
+
     <!--
     *************************************
     * Strings for CreditsDialogFragment *
@@ -606,7 +598,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="displaystopdata_menu_time_add">@string/time_alert_add</string>
     <string name="displaystopdata_menu_time_rem">@string/time_alert_rem</string>
-    
+
     <!--
     ************************************************************
     * Strings for FavouriteStopsFragment ListView context menu *
@@ -660,7 +652,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     *******************************************
     -->
     <string name="twitterupdates_menu_refresh">Refresh</string>
-    
+
     <!--
     ************************
     ************************

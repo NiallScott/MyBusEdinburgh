@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
+package uk.org.rivernile.android.bustracker.ui.alerts.proximity;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -50,14 +50,14 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setCancelable(true);
         alertMan = ((BusApplication) getActivity().getApplication()).getAlertManager();
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setCancelable(true)
+        return new AlertDialog.Builder(getContext())
                 .setTitle(R.string.deleteproxdialog_title)
                 .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
                     @Override
@@ -65,8 +65,7 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
                         alertMan.removeProximityAlert();
                     }
                 })
-                .setNegativeButton(R.string.cancel, null);
-        
-        return builder.create();
+                .setNegativeButton(R.string.cancel, null)
+                .create();
     }
 }

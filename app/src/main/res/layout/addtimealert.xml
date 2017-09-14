@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2011 - 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,90 +24,94 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="SelectableText"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <include
-        layout="@layout/button_bar_ok_cancel"
-        android:id="@+id/buttonBar"
+    android:layout_height="match_parent"
+    android:paddingTop="@dimen/padding_double">
+
+    <ScrollView
+        android:id="@+id/layoutContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" />
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/buttonBar" >
+        android:visibility="gone"
+        tools:visibility="visible">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp" >
+            android:layout_marginLeft="@dimen/dialog_margin_start_end"
+            android:layout_marginRight="@dimen/dialog_margin_start_end"
+            android:layout_marginStart="@dimen/dialog_margin_start_end"
+            android:layout_marginEnd="@dimen/dialog_margin_start_end"
+            android:orientation="vertical">
+
             <TextView
+                android:id="@+id/txtBlurb"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#000"
-                android:text="@string/addtimealert_first"
-                android:textSize="16sp"
-                android:paddingBottom="10dp" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+                tools:text="@string/addtimealertdialog_blurb" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/addtimealertdialog_subheading_services"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subheader" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="10dp"
+                android:layout_marginTop="@dimen/padding_default"
                 android:orientation="horizontal"
-                android:baselineAligned="false" >
+                android:baselineAligned="false">
+
                 <TextView
-                    android:id="@+id/txtTimeAlertServices"
+                    android:id="@+id/txtSelectedServices"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="#000"
-                    android:textSize="16sp"
-                    android:text="@string/addtimealert_noservices"
-                    android:paddingRight="10dp"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:layout_gravity="center_vertical"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+                    android:text="@string/addtimealertdialog_no_services_selected" />
+
                 <Button
-                    android:id="@+id/btnAlertTimeServices"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:id="@+id/btnSelectServices"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/select"
-                    android:layout_gravity="right"
-                    android:enabled="false"/>
+                    android:layout_marginLeft="@dimen/padding_double"
+                    android:layout_marginStart="@dimen/padding_double"
+                    android:text="@string/addtimealertdialog_btn_select" />
+
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="10dp"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#000"
-                    android:textSize="16sp"
-                    android:paddingBottom="10dp"
-                    android:paddingRight="10dp"
-                    android:text="@string/addtimealert_isdue" />
-                <Spinner
-                    android:id="@+id/time_time_select"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:prompt="@string/addtimealert_spinner_prompt"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp" />
-            </LinearLayout>
+
             <TextView
-                android:id="@+id/txtTimeDialogStop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/padding_double"
+                android:text="@string/addtimealertdialog_subheading_time_trigger"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subheader" />
+
+            <Spinner
+                android:id="@+id/spinnerTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#000"
-                android:paddingBottom="10dp"
-                android:textSize="16sp"/>
+                android:layout_marginTop="@dimen/padding_double"
+                android:entries="@array/addtimealertdialog_times_array" />
+
             <Button
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:id="@+id/btnLimitations"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/addtimealert_limitations" />
+                android:layout_marginTop="@dimen/padding_double"
+                android:text="@string/addtimealertdialog_button_limitations" />
         </LinearLayout>
     </ScrollView>
-</RelativeLayout>
+
+    <include
+        layout="@layout/indeterminate_progress" />
+</FrameLayout>

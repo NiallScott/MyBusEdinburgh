@@ -49,17 +49,16 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoade
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
+import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment;
 import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddProximityAlertActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteProximityAlertDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteTimeAlertDialogFragment;
 
 /**
  * The purpose of this {@link android.app.Activity} it to display to the user live times and details
@@ -81,6 +80,8 @@ public class DisplayStopDataActivity extends AppCompatActivity
     private static final int LOADER_HAS_PROX_ALERT = 3;
     private static final int LOADER_HAS_TIME_ALERT = 4;
 
+    private static final String DIALOG_ADD_PROX_ALERT = "addProxAlertDialog";
+    private static final String DIALOG_ADD_TIME_ALERT = "addTimeAlertDialog";
     private static final String DIALOG_REMOVE_FAVOURITE = "removeFavourite";
     private static final String DIALOG_REMOVE_PROX_ALERT = "removeProxAlert";
     private static final String DIALOG_REMOVE_TIME_ALERT = "removeTimeAlert";
@@ -427,10 +428,8 @@ public class DisplayStopDataActivity extends AppCompatActivity
      * Show the UI for adding a new proximity alert.
      */
     private void showAddProximityAlert() {
-        final Intent intent = new Intent(this, AddProximityAlertActivity.class);
-        intent.putExtra(AddProximityAlertActivity.ARG_STOPCODE,
-                getIntent().getStringExtra(EXTRA_STOP_CODE));
-        startActivity(intent);
+        AddProximityAlertDialogFragment.newInstance(getIntent().getStringExtra(EXTRA_STOP_CODE))
+                .show(getSupportFragmentManager(), DIALOG_ADD_PROX_ALERT);
     }
 
     /**
@@ -445,10 +444,8 @@ public class DisplayStopDataActivity extends AppCompatActivity
      * Show the UI for adding a new time alert.
      */
     private void showAddTimeAlert() {
-        final Intent intent = new Intent(this, AddTimeAlertActivity.class);
-        intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE,
-                getIntent().getStringExtra(EXTRA_STOP_CODE));
-        startActivity(intent);
+        AddTimeAlertDialogFragment.newInstance(getIntent().getStringExtra(EXTRA_STOP_CODE))
+                .show(getSupportFragmentManager(), DIALOG_ADD_TIME_ALERT);
     }
 
     /**
