@@ -34,7 +34,6 @@ import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlert
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.edinburghbustracker.android
         .AddEditFavouriteStopActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddTimeAlertActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
         .DeleteFavouriteDialogFragment;
@@ -174,14 +173,6 @@ public class DisplayStopDataActivity extends AppCompatActivity
     @Override
     public void onShowAddTimeAlert(final String stopCode,
             final String[] defaultServices) {
-        final Intent intent = new Intent(this, AddTimeAlertActivity.class);
-        intent.putExtra(AddTimeAlertActivity.ARG_STOPCODE, stopCode);
-        
-        if (defaultServices != null && defaultServices.length > 0) {
-            intent.putExtra(AddTimeAlertActivity.ARG_DEFAULT_SERVICES,
-                    defaultServices);
-        }
-        
-        startActivity(intent);
+        // This will soon be removed.
     }
 }

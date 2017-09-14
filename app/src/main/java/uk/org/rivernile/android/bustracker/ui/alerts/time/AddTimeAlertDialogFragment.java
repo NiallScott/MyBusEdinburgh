@@ -147,7 +147,7 @@ public class AddTimeAlertDialogFragment extends DialogFragment
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final Context context = getContext();
         final LayoutInflater inflater = LayoutInflater.from(context);
-        final View v = inflater.inflate(R.layout.addtimealert2, null, false);
+        final View v = inflater.inflate(R.layout.addtimealert, null, false);
 
         progress = (ProgressBar) v.findViewById(R.id.progress);
         layoutContent = v.findViewById(R.id.layoutContent);

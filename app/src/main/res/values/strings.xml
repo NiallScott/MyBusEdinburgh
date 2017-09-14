@@ -52,7 +52,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="no">No</string>
     <string name="okay">OK</string>
     <string name="search">Search</string>
-    <string name="select">Select</string>
     <string name="yes">Yes</string>
     <string name="remove">Remove</string>
     <string name="loading">Loading&#8230;</string>
@@ -127,13 +126,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ********************************************
     -->
     <string name="addeditstop_title">Add/edit favourite stop</string>
-    
-    <!--
-    ************************************
-    * Strings for AddTimeAlertActivity *
-    ************************************
-    -->
-    <string name="addtimealert_title">Add new arrival alert</string>
     
     <!--
     **************************************
@@ -306,29 +298,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addeditstop_edit_stopname_hint">Stop name</string>
     <string name="addeditstop_error_blankstopname">You cannot have a blank stop name.</string>
     <string name="addeditstop_btn_save">Save</string>
-    
-    <!--
-    ************************
-    * AddTimeAlertFragment *
-    ************************
-    -->
-    <string name="addtimealert_first">Alert me when any of these services</string>
-    <string name="addtimealert_noservices">No services selected. You must select at least 1 service to continue.</string>
-    <string name="addtimealert_isdue">is due</string>
-    <string name="addtimealert_spinner_prompt">Select time trigger</string>
-    <string name="addtimealert_services_title">Select service(s)</string>
-    <string-array name="addtimealert_array">
-        <item>now</item>
-        <item>in 2 minutes</item>
-        <item>in 5 minutes</item>
-        <item>in 10 minutes</item>
-        <item>in 15 minutes</item>
-        <item>in 20 minutes</item>
-        <item>in 25 minutes</item>
-        <item>in 30 minutes</item>
-    </string-array>
-    <string name="addtimealert_busstop">or less at stop %s.</string> <!-- %s = bus stop name and code. -->
-    <string name="addtimealert_limitations">Show limitations</string>
     
     <!--
     ************************************
