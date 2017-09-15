@@ -25,8 +25,10 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -90,6 +92,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
     private Cursor favouriteCursor;
     private Cursor proxCursor;
     private Cursor timeCursor;
+    private Intent streetViewIntent;
 
     private CollapsingToolbarLayout collapsingLayout;
     private TextView txtStopName;
@@ -98,6 +101,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
     private MenuItem favouriteMenuItem;
     private MenuItem proxMenuItem;
     private MenuItem timeMenuItem;
+    private MenuItem streetViewMenuItem;
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
@@ -149,6 +153,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
         favouriteMenuItem = menu.findItem(R.id.displaystopdata_option_menu_favourite);
         proxMenuItem = menu.findItem(R.id.displaystopdata_option_menu_prox);
         timeMenuItem = menu.findItem(R.id.displaystopdata_option_menu_time);
+        streetViewMenuItem = menu.findItem(R.id.displaystopdata_option_menu_street_view);
 
         return true;
     }
@@ -160,6 +165,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
         configureFavouriteMenuItem(favouriteCursor);
         configureProximityAlertMenuItem(proxCursor);
         configureTimeAlertMenuItem(timeCursor);
+        configureStreetViewMenuItem();
 
         return true;
     }
@@ -176,6 +182,9 @@ public class DisplayStopDataActivity extends AppCompatActivity
             case R.id.displaystopdata_option_menu_time:
                 doTimeAlertSelected();
                 return true;
+            case R.id.displaystopdata_option_menu_street_view:
+                doStreetViewSelected();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -188,7 +197,9 @@ public class DisplayStopDataActivity extends AppCompatActivity
                 return new BusStopLoader(this, getIntent().getStringExtra(EXTRA_STOP_CODE),
                         new String[] {
                                 BusStopContract.BusStops.STOP_NAME,
-                                BusStopContract.BusStops.LOCALITY
+                                BusStopContract.BusStops.LOCALITY,
+                                BusStopContract.BusStops.LATITUDE,
+                                BusStopContract.BusStops.LONGITUDE
                         });
             case LOADER_FAVOURITE_STOP:
                 return new FavouriteStopsLoader(this, getIntent().getStringExtra(EXTRA_STOP_CODE));
@@ -279,7 +290,20 @@ public class DisplayStopDataActivity extends AppCompatActivity
                 actionBar.setTitle(nameToDisplay);
                 actionBar.setSubtitle(stopCode);
             }
+
+            final double latitude = cursor.getDouble(
+                    cursor.getColumnIndex(BusStopContract.BusStops.LATITUDE));
+            final double longitude = cursor.getDouble(
+                    cursor.getColumnIndex(BusStopContract.BusStops.LONGITUDE));
+            final String uri = "google.streetview:cbll=" + latitude + ',' + longitude;
+            streetViewIntent = new Intent(Intent.ACTION_VIEW);
+            streetViewIntent.setData(Uri.parse(uri));
+            streetViewIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        } else {
+            streetViewIntent = null;
         }
+
+        configureStreetViewMenuItem();
     }
 
     /**
@@ -367,6 +391,18 @@ public class DisplayStopDataActivity extends AppCompatActivity
     }
 
     /**
+     * Configure the Street View menu item visibility depending on if there's an {@link Intent}
+     * available, and if another {@link android.app.Activity} on the system responds to that
+     * {@link Intent}.
+     */
+    private void configureStreetViewMenuItem() {
+        if (streetViewMenuItem != null) {
+            streetViewMenuItem.setVisible(streetViewIntent != null &&
+                    streetViewIntent.resolveActivity(getPackageManager()) != null);
+        }
+    }
+
+    /**
      * This is called when the favourite alert ActionItem is selected.
      */
     private void doFavouriteSelected() {
@@ -403,6 +439,20 @@ public class DisplayStopDataActivity extends AppCompatActivity
             } else {
                 // Show the Activity for adding a new time alert.
                 showAddTimeAlert();
+            }
+        }
+    }
+
+    /**
+     * This is called when the Street View ActionItem is selected.
+     */
+    private void doStreetViewSelected() {
+        if (streetViewIntent != null) {
+            try {
+                startActivity(streetViewIntent);
+            } catch (ActivityNotFoundException ignored) {
+                // This should never happen as the Intent has been checked before for a respondent
+                // Activity.
             }
         }
     }

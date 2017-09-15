@@ -591,6 +591,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_menu_prox_rem">@string/prox_alert_rem</string>
     <string name="displaystopdata_menu_time_add">@string/time_alert_add</string>
     <string name="displaystopdata_menu_time_rem">@string/time_alert_rem</string>
+    <string name="displaystopdata_menu_show_street_view">Show on Street View</string>
 
     <!--
     ************************************************************
