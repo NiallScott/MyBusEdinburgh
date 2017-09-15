@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -79,8 +79,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes
 import uk.org.rivernile.android.bustracker.parser.livetimes
         .SystemOverloadedException;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
-import uk.org.rivernile.android.bustracker.ui.callbacks.
-        OnShowAddFavouriteStopListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks
         .OnShowAddProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks
@@ -514,9 +513,7 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
                 if (cursorFavourite.getCount() > 0) {
                     callbacks.onShowConfirmFavouriteDeletion(stopCode);
                 } else {
-                    callbacks.onShowAddFavouriteStop(stopCode,
-                            !TextUtils.isEmpty(stopLocality) ?
-                                    stopName + ", " + stopLocality : stopName);
+                    callbacks.onShowAddEditFavouriteStop(stopCode);
                 }
             }
         }
@@ -1082,7 +1079,7 @@ public class DisplayStopDataFragment extends Fragment implements LoaderManager.L
             extends OnShowConfirmFavouriteDeletionListener,
             OnShowConfirmDeleteProximityAlertListener,
             OnShowConfirmDeleteTimeAlertListener,
-            OnShowAddFavouriteStopListener, OnShowAddProximityAlertListener,
+            OnShowAddEditFavouriteStopListener, OnShowAddProximityAlertListener,
             OnShowAddTimeAlertListener {
         
         // Nothing to add in here - the interfaces are defined elsewhere.

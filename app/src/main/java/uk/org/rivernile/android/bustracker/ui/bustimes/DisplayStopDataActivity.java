@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.bustracker.BusApplication;
@@ -144,8 +145,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
      * {@inheritDoc}
      */
     @Override
-    public void onShowAddFavouriteStop(final String stopCode,
-            final String stopName) {
+    public void onShowAddEditFavouriteStop(@NonNull final String stopCode) {
         // This will be deleted soon.
     }
 

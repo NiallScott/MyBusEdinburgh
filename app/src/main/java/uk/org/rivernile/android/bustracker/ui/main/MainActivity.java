@@ -244,12 +244,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowEditFavouriteStop(final String stopCode) {
-        AddEditFavouriteStopDialogFragment.newInstance(stopCode)
-                .show(getSupportFragmentManager(), DIALOG_ADD_FAVOURITE);
-    }
-
-    @Override
     public void onShowConfirmFavouriteDeletion(final String stopCode) {
         DeleteFavouriteDialogFragment.newInstance(stopCode)
                 .show(getSupportFragmentManager(), DIALOG_CONFIRM_DELETE_FAVOURITE);
@@ -280,8 +274,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowAddFavouriteStop(final String stopCode,
-            final String stopName) {
+    public void onShowAddEditFavouriteStop(@NonNull final String stopCode) {
         AddEditFavouriteStopDialogFragment.newInstance(stopCode)
                 .show(getSupportFragmentManager(), DIALOG_ADD_FAVOURITE);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -75,7 +75,7 @@ import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavourit
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddFavouriteStopListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddTimeAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopCodeListener;
@@ -233,8 +233,7 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
                     if (cursorFavourite.getCount() > 0) {
                         callbacks.onShowConfirmFavouriteDeletion(stopCode);
                     } else {
-                        callbacks.onShowAddFavouriteStop(stopCode,
-                                locality != null ? stopName + ", " + locality : stopName);
+                        callbacks.onShowAddEditFavouriteStop(stopCode);
                     }
                 }
             }
@@ -873,7 +872,7 @@ public class BusStopDetailsFragment extends Fragment implements LocationListener
     public interface Callbacks extends OnShowConfirmFavouriteDeletionListener,
             OnShowConfirmDeleteProximityAlertListener, OnShowConfirmDeleteTimeAlertListener,
             OnShowBusTimesListener, OnShowAddProximityAlertListener, OnShowAddTimeAlertListener,
-            OnShowBusStopMapWithStopCodeListener, OnShowAddFavouriteStopListener {
+            OnShowBusStopMapWithStopCodeListener, OnShowAddEditFavouriteStopListener {
         
         /**
          * This is called when the user wishes to see a location on Street View.

@@ -29,6 +29,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -212,8 +213,7 @@ public class BusStopDetailsActivity extends AppCompatActivity
      * {@inheritDoc}
      */
     @Override
-    public void onShowAddFavouriteStop(final String stopCode,
-            final String stopName) {
+    public void onShowAddEditFavouriteStop(@NonNull final String stopCode) {
         // This will be removed soon
     }
 }
