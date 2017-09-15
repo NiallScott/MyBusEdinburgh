@@ -36,8 +36,7 @@ import android.widget.Toast;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment;
 import uk.org.rivernile.android.utils.NavigationUtils;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteFavouriteDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.favourites.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs

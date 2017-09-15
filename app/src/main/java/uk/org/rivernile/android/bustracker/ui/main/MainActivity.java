@@ -57,7 +57,7 @@ import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.favourites.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.search.InstallBarcodeScannerDialogFragment;
