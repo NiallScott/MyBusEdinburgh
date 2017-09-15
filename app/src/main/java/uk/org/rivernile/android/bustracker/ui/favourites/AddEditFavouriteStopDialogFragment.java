@@ -119,7 +119,7 @@ public class AddEditFavouriteStopDialogFragment extends DialogFragment
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final Context context = getContext();
         final LayoutInflater inflater = LayoutInflater.from(context);
-        final View v = inflater.inflate(R.layout.addeditfavouritestop2, null, false);
+        final View v = inflater.inflate(R.layout.addeditfavouritestop, null, false);
         progress = (ProgressBar) v.findViewById(R.id.progress);
         layoutContent = v.findViewById(R.id.layoutContent);
         txtBlurb = (TextView) v.findViewById(R.id.txtBlurb);

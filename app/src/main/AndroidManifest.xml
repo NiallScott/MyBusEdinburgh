@@ -168,19 +168,6 @@
                 android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
         </activity>
         
-        <!-- AddEditFavouriteStopActivity, to add or edit a favourite bus
-             stop. -->
-        <activity
-            android:name=".AddEditFavouriteStopActivity"
-            android:label="@string/addeditstop_title"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
-            <!-- PARENT_ACTIVITY is used by the support library for supporting
-                 up navigation. -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
-        </activity>
-        
         <!-- BusStopMapActivity, to show bus stops on the map. -->
         <activity
             android:name=".BusStopMapActivity"

@@ -215,11 +215,6 @@ public class BusStopDetailsActivity extends AppCompatActivity
     @Override
     public void onShowAddFavouriteStop(final String stopCode,
             final String stopName) {
-        final Intent intent = new Intent(this,
-                AddEditFavouriteStopActivity.class);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME, stopName);
-        
-        startActivity(intent);
+        // This will be removed soon
     }
 }

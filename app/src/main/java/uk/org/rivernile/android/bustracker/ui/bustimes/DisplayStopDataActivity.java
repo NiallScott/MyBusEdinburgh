@@ -32,11 +32,8 @@ import android.view.MenuItem;
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment;
 import uk.org.rivernile.android.utils.NavigationUtils;
-import uk.org.rivernile.edinburghbustracker.android
-        .AddEditFavouriteStopActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs
-        .DeleteFavouriteDialogFragment;
+import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment;
 
@@ -149,12 +146,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
     @Override
     public void onShowAddFavouriteStop(final String stopCode,
             final String stopName) {
-        final Intent intent = new Intent(this,
-                AddEditFavouriteStopActivity.class);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME, stopName);
-        
-        startActivity(intent);
+        // This will be deleted soon.
     }
 
     /**
