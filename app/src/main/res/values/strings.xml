@@ -414,6 +414,18 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
 
     <!--
+    **************************************************
+    * Strings for AddEditFavouriteStopDialogFragment *
+    **************************************************
+    -->
+    <string name="addeditfavouritestopdialog_title_add">Add stop as favourite</string>
+    <string name="addeditfavouritestopdialog_title_edit">Edit favourite stop</string>
+    <string name="addeditfavouritestopdialog_blurb_add">Saving a stop as a favourite allows you to easily show arrival times for it later. The selected stop is %s.</string>
+    <string name="addeditfavouritestopdialog_blurb_edit">Edit the name of the favourite stop %s</string>
+    <string name="addeditfavouritestopdialog_edit_name_hint">Name</string>
+    <string name="addeditfavouritestopdialog_button_add">Save</string>
+
+    <!--
     ***********************************************
     * Strings for AddProximityAlertDialogFragment *
     ***********************************************

@@ -51,10 +51,10 @@ import android.widget.Toast;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
+import uk.org.rivernile.android.bustracker.ui.favourites.AddEditFavouriteStopDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
-import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
 
+    private static final String DIALOG_ADD_FAVOURITE = "addFavouriteDialog";
     private static final String DIALOG_ADD_PROX_ALERT = "addProxAlertDialog";
     private static final String DIALOG_ADD_TIME_ALERT = "addTimeAlertDialog";
     private static final String DIALOG_DELETE_PROX_ALERT = "deleteProxAlertDialog";
@@ -244,9 +245,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onShowEditFavouriteStop(final String stopCode) {
-        final Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
-        startActivity(intent);
+        AddEditFavouriteStopDialogFragment.newInstance(stopCode)
+                .show(getSupportFragmentManager(), DIALOG_ADD_FAVOURITE);
     }
 
     @Override
@@ -282,10 +282,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onShowAddFavouriteStop(final String stopCode,
             final String stopName) {
-        final Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE, stopCode);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPNAME, stopName);
-        startActivity(intent);
+        AddEditFavouriteStopDialogFragment.newInstance(stopCode)
+                .show(getSupportFragmentManager(), DIALOG_ADD_FAVOURITE);
     }
 
     @Override
