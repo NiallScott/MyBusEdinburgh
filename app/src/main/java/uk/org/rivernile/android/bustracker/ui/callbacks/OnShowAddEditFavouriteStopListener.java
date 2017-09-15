@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,19 +25,21 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks;
 
+import android.support.annotation.NonNull;
+
 /**
- * This listener is used to send callbacks from Fragments to Activities when the
- * user wishes to add a new favourite stop.
+ * This listener is used to send callbacks from
+ * {@link android.support.v4.app.Fragment Fragments} to
+ * {@link android.app.Activity Activities} when the user wishes to add a new favourite stop.
  * 
  * @author Niall Scott
  */
-public interface OnShowAddFavouriteStopListener {
+public interface OnShowAddEditFavouriteStopListener {
     
     /**
-     * This is called when the user wants to add a new favourite bus stop.
+     * This is called when the user wants to add or edit a favourite stop.
      * 
-     * @param stopCode The stop code of the bus stop to add.
-     * @param stopName The default name to use for the bus stop.
+     * @param stopCode The stop code of the stop to add or edit.
      */
-    public void onShowAddFavouriteStop(String stopCode, String stopName);
+    void onShowAddEditFavouriteStop(@NonNull String stopCode);
 }

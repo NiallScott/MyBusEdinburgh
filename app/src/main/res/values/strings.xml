@@ -121,13 +121,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     
     <!--
-    ********************************************
-    * Strings for AddEditFavouriteStopActivity *
-    ********************************************
-    -->
-    <string name="addeditstop_title">Add/edit favourite stop</string>
-    
-    <!--
     **********************************
     * Strings for BusStopMapActivity *
     **********************************
@@ -281,18 +274,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <string name="about_version_format" tools:ignore="MissingTranslation">%1$s (#%2$d)</string> <!-- %1$s = external version number. %2$d = internal version number. -->
     <string name="about_database_version_format" tools:ignore="MissingTranslation">%1$d (%2$s)</string> <!-- %1$d = UNIX timestamp. %2$s = human readable data. -->
-    
-    <!--
-    ********************************************
-    * Strings for AddEditFavouriteStopFragment *
-    ********************************************
-    -->
-    <string name="addeditstop_title_add">Add favourite stop %s</string>
-    <string name="addeditstop_title_edit">Edit stop name for %s</string>
-    <string name="addeditstop_description">Enter a name for this stop:</string>
-    <string name="addeditstop_edit_stopname_hint">Stop name</string>
-    <string name="addeditstop_error_blankstopname">You cannot have a blank stop name.</string>
-    <string name="addeditstop_btn_save">Save</string>
 
     <!--
     ************************************
@@ -401,6 +382,18 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************
     **********************
     -->
+
+    <!--
+    **************************************************
+    * Strings for AddEditFavouriteStopDialogFragment *
+    **************************************************
+    -->
+    <string name="addeditfavouritestopdialog_title_add">Add stop as favourite</string>
+    <string name="addeditfavouritestopdialog_title_edit">Edit favourite stop</string>
+    <string name="addeditfavouritestopdialog_blurb_add">Saving a stop as a favourite allows you to easily show arrival times for it later. The selected stop is %s.</string>
+    <string name="addeditfavouritestopdialog_blurb_edit">Edit the name of the favourite stop %s</string>
+    <string name="addeditfavouritestopdialog_edit_name_hint">Name</string>
+    <string name="addeditfavouritestopdialog_button_add">Save</string>
 
     <!--
     ***********************************************

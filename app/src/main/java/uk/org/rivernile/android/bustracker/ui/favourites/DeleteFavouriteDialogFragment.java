@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,7 +23,7 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
+package uk.org.rivernile.android.bustracker.ui.favourites;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -56,7 +56,8 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
      * @param stopCode The stopCode to potentially delete.
      * @return A new instance of this {@link DialogFragment}.
      */
-    public static DeleteFavouriteDialogFragment newInstance(final String stopCode) {
+    @NonNull
+    public static DeleteFavouriteDialogFragment newInstance(@NonNull final String stopCode) {
         final DeleteFavouriteDialogFragment f = new DeleteFavouriteDialogFragment();
         final Bundle b = new Bundle();
         b.putString(ARG_STOPCODE, stopCode);
@@ -77,6 +78,7 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
         }
         
         stopCode = args.getString(ARG_STOPCODE);
+        setCancelable(true);
 
         if (TextUtils.isEmpty(stopCode)) {
             throw new IllegalArgumentException("The stopCode argument cannot be null or empty.");
@@ -86,17 +88,15 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setCancelable(true)
+        return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.deletefavouritedialog_title)
                 .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(final DialogInterface dialog, final int id) {
-                        DeleteFavouriteStopTask.start(getActivity(), stopCode);
+                        DeleteFavouriteStopTask.start(getContext(), stopCode);
                     }
                 })
-                .setNegativeButton(R.string.cancel, null);
-        
-        return builder.create();
+                .setNegativeButton(R.string.cancel, null)
+                .create();
     }
 }

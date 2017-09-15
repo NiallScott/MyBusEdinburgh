@@ -53,6 +53,7 @@ import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener;
 import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
@@ -532,7 +533,7 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
             switch (item.getItemId()) {
                 case R.id.favouritestops_context_menu_modify:
                     // Allow the user to edit the name of the favourite stop.
-                    callbacks.onShowEditFavouriteStop(selectedStopCode);
+                    callbacks.onShowAddEditFavouriteStop(selectedStopCode);
                     result = true;
                     break;
                 case R.id.favouritestops_context_menu_delete:
@@ -593,16 +594,12 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
      * Any {@link Activity Activities} which host this {@link Fragment} must implement this
      * interface to handle navigation events.
      */
-    public interface Callbacks extends OnShowConfirmFavouriteDeletionListener,
-            OnShowConfirmDeleteProximityAlertListener, OnShowConfirmDeleteTimeAlertListener,
-            OnShowAddProximityAlertListener, OnShowAddTimeAlertListener,
-            OnShowBusStopMapWithStopCodeListener, OnShowBusTimesListener {
+    public interface Callbacks extends OnShowAddEditFavouriteStopListener,
+            OnShowConfirmFavouriteDeletionListener, OnShowConfirmDeleteProximityAlertListener,
+            OnShowConfirmDeleteTimeAlertListener, OnShowAddProximityAlertListener,
+            OnShowAddTimeAlertListener, OnShowBusStopMapWithStopCodeListener,
+            OnShowBusTimesListener {
         
-        /**
-         * This is called when the user wants to edit a favourite bus stop.
-         * 
-         * @param stopCode The stop code of the bus stop to add.
-         */
-        void onShowEditFavouriteStop(String stopCode);
+        // Nothing new to add here.
     }
 }

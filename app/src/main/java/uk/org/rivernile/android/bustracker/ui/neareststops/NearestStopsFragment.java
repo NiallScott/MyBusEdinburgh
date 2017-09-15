@@ -62,7 +62,7 @@ import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavourit
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
-import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddFavouriteStopListener;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddTimeAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusStopMapWithStopCodeListener;
@@ -733,11 +733,7 @@ public class NearestStopsFragment extends Fragment
                             callbacks.onShowConfirmFavouriteDeletion(stopCode);
                         } else {
                             // If it doesn't exist, show the Add Favourite Stop interface.
-                            final String locality = selectedStop.getLocality();
-                            callbacks.onShowAddFavouriteStop(stopCode,
-                                    locality != null
-                                            ? selectedStop.getStopName() + ", " + locality
-                                            : selectedStop.getStopName());
+                            callbacks.onShowAddEditFavouriteStop(stopCode);
                         }
                     }
 
@@ -820,7 +816,7 @@ public class NearestStopsFragment extends Fragment
      */
     public interface Callbacks extends OnShowConfirmFavouriteDeletionListener,
             OnShowConfirmDeleteProximityAlertListener, OnShowConfirmDeleteTimeAlertListener,
-            OnShowAddFavouriteStopListener, OnShowAddProximityAlertListener,
+            OnShowAddEditFavouriteStopListener, OnShowAddProximityAlertListener,
             OnShowAddTimeAlertListener, OnShowServicesChooserListener,
             OnShowBusTimesListener, OnShowBusStopMapWithStopCodeListener {
         

@@ -54,11 +54,11 @@ import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAl
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment;
-import uk.org.rivernile.edinburghbustracker.android.AddEditFavouriteStopActivity;
+import uk.org.rivernile.android.bustracker.ui.favourites.AddEditFavouriteStopDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.favourites.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.DeleteFavouriteDialogFragment;
 
 /**
  * The purpose of this {@link android.app.Activity} it to display to the user live times and details
@@ -80,6 +80,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
     private static final int LOADER_HAS_PROX_ALERT = 3;
     private static final int LOADER_HAS_TIME_ALERT = 4;
 
+    private static final String DIALOG_ADD_FAVOURITE = "addFavouriteDialog";
     private static final String DIALOG_ADD_PROX_ALERT = "addProxAlertDialog";
     private static final String DIALOG_ADD_TIME_ALERT = "addTimeAlertDialog";
     private static final String DIALOG_REMOVE_FAVOURITE = "removeFavourite";
@@ -410,10 +411,8 @@ public class DisplayStopDataActivity extends AppCompatActivity
      * Show the UI for adding a new favourite bus stop.
      */
     private void showAddFavourite() {
-        final Intent intent = new Intent(this, AddEditFavouriteStopActivity.class);
-        intent.putExtra(AddEditFavouriteStopActivity.ARG_STOPCODE,
-                getIntent().getStringExtra(EXTRA_STOP_CODE));
-        startActivity(intent);
+        AddEditFavouriteStopDialogFragment.newInstance(getIntent().getStringExtra(EXTRA_STOP_CODE))
+                .show(getSupportFragmentManager(), DIALOG_ADD_FAVOURITE);
     }
 
     /**

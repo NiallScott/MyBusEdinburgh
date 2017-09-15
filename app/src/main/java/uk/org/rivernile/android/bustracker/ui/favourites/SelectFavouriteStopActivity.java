@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker.ui.favourites;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import uk.org.rivernile.android.utils.NavigationUtils;
@@ -89,7 +90,7 @@ public class SelectFavouriteStopActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowEditFavouriteStop(final String stopCode) {
+    public void onShowAddEditFavouriteStop(@NonNull final String stopCode) {
         // Not required here.
     }
 
