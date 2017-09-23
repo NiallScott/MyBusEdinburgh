@@ -354,8 +354,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
      */
     private void handleBusTimesSuccess(@Nullable final LiveBusTimes busTimes) {
         if (busTimes == null) {
-            showError(getString(R.string.bustimes_err_nodata),
-                    getString(R.string.bustimes_btn_error_retry));
+            showEmptyError();
             adapter.setServices(null);
             return;
         }
@@ -363,8 +362,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         final LiveBusStop busStop = busTimes.getBusStop(stopCode);
 
         if (busStop == null) {
-            showError(getString(R.string.bustimes_err_nodata),
-                    getString(R.string.bustimes_btn_error_retry));
+            showEmptyError();
             adapter.setServices(null);
             return;
         }
@@ -373,8 +371,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         adapter.setServices(services);
 
         if (services.isEmpty()) {
-            showError(getString(R.string.bustimes_err_nodata),
-                    getString(R.string.bustimes_btn_error_retry));
+            showEmptyError();
             return;
         }
 
@@ -532,6 +529,20 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     /**
+     * Show the special case empty state.
+     */
+    private void showEmptyError() {
+        txtError.setText(R.string.bustimes_err_nodata);
+        btnErrorResolve.setText(null);
+        btnErrorResolve.setVisibility(View.GONE);
+        layoutContent.setVisibility(View.GONE);
+        layoutError.setVisibility(View.VISIBLE);
+
+        configureRefreshActionItem();
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    /**
      * Show an error as a {@link Snackbar} instead of in-line with the UI.
      *
      * @param errorText The error text to show.
@@ -540,7 +551,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
      */
     private void showErrorAsSnackbar(@NonNull final String errorText,
             @Nullable final String resolveButtonText) {
-        snackbar = Snackbar.make(layoutContent, errorText, Snackbar.LENGTH_INDEFINITE)
+        snackbar = Snackbar.make(layoutContent, errorText, Snackbar.LENGTH_LONG)
                 .addCallback(new Snackbar.Callback() {
                     @Override
                     public void onDismissed(final Snackbar transientBottomBar, final int event) {
