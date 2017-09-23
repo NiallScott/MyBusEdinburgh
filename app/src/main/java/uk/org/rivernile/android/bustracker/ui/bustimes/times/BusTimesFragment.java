@@ -38,6 +38,7 @@ import android.os.SystemClock;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -56,6 +57,8 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +71,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimesLoader;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesResult;
 import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException;
+import uk.org.rivernile.android.bustracker.parser.livetimes.ServerErrorException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
 import uk.org.rivernile.android.fetchutils.fetchers.ConnectivityUnavailableException;
@@ -115,6 +119,8 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     private MenuItem menuItemRefresh;
     private MenuItem menuItemSort;
     private MenuItem menuItemAutoRefresh;
+
+    private Snackbar snackbar;
 
     /**
      * Create a new instance of this {@link Fragment}.
@@ -396,18 +402,27 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         } else if (e instanceof AuthenticationException) {
             errorMessage = getString(R.string.bustimes_err_api_invalid_key);
             resolveButton = null;
+        } else if (e instanceof SystemOverloadedException) {
+            errorMessage = getString(R.string.bustimes_err_api_system_overloaded);
+            resolveButton = null;
         } else if (e instanceof MaintenanceException) {
             errorMessage = getString(R.string.bustimes_err_api_system_maintenance);
             resolveButton = null;
-        } else if (e instanceof SystemOverloadedException) {
-            errorMessage = getString(R.string.bustimes_err_api_system_overloaded);
+        } else if (e instanceof ServerErrorException) {
+            errorMessage = getString(R.string.bustimes_err_api_processing_error);
             resolveButton = null;
         } else if (e instanceof ConnectivityUnavailableException) {
             errorMessage = getString(R.string.bustimes_err_noconn);
             resolveButton = null;
+        } else if (e instanceof UnknownHostException) {
+            errorMessage = getString(R.string.bustimes_err_noresolv);
+            resolveButton = getString(R.string.bustimes_btn_error_retry);
+        } else if (e instanceof IOException) {
+            errorMessage = getString(R.string.bustimes_err_connection_issue);
+            resolveButton = getString(R.string.bustimes_btn_error_retry);
         } else {
-            errorMessage = getString(R.string.displaystopdata_err_unknown);
-            resolveButton = null;
+            errorMessage = getString(R.string.bustimes_err_unknown);
+            resolveButton = getString(R.string.bustimes_btn_error_retry);
         }
 
         showError(errorMessage, resolveButton);
@@ -475,6 +490,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         layoutError.setVisibility(View.GONE);
         layoutContent.setVisibility(View.VISIBLE);
         swipeRefreshLayout.setRefreshing(false);
+        dismissCurrentSnackbar();
 
         configureRefreshActionItem();
     }
@@ -485,12 +501,17 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     private void showProgress() {
         layoutError.setVisibility(View.GONE);
         swipeRefreshLayout.setRefreshing(true);
+        dismissCurrentSnackbar();
 
         configureRefreshActionItem();
     }
 
     /**
      * Show the error view to the user.
+     *
+     * @param errorText The error text blurb to display.
+     * @param resolveButtonText The text to set for a resolve button, or {@code null} if a
+     * resolve button should not be shown.
      */
     private void showError(@NonNull final String errorText,
             @Nullable final String resolveButtonText) {
@@ -499,11 +520,46 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         btnErrorResolve.setVisibility(!TextUtils.isEmpty(resolveButtonText)
                 ? View.VISIBLE : View.GONE);
 
-        layoutContent.setVisibility(View.GONE);
-        swipeRefreshLayout.setRefreshing(false);
-        layoutError.setVisibility(View.VISIBLE);
-
         configureRefreshActionItem();
+        swipeRefreshLayout.setRefreshing(false);
+
+        if (layoutContent.getVisibility() == View.VISIBLE) {
+            showErrorAsSnackbar(errorText, resolveButtonText);
+        } else {
+            layoutContent.setVisibility(View.GONE);
+            layoutError.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Show an error as a {@link Snackbar} instead of in-line with the UI.
+     *
+     * @param errorText The error text to show.
+     * @param resolveButtonText The text to set for a resolve button, or {@code null} if a
+     * resolve button should not be shown.
+     */
+    private void showErrorAsSnackbar(@NonNull final String errorText,
+            @Nullable final String resolveButtonText) {
+        snackbar = Snackbar.make(layoutContent, errorText, Snackbar.LENGTH_INDEFINITE)
+                .addCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(final Snackbar transientBottomBar, final int event) {
+                        if (snackbar == transientBottomBar) {
+                            snackbar = null;
+                        }
+                    }
+                });
+
+        if (!TextUtils.isEmpty(resolveButtonText)) {
+            snackbar.setAction(resolveButtonText, new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    loadBusTimes(true);
+                }
+            });
+        }
+
+        snackbar.show();
     }
 
     /**
@@ -596,6 +652,16 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         }
 
         configureAutoRefreshActionItem();
+    }
+
+    /**
+     * Dismiss any {@link Snackbar}s that may currently be displayed.
+     */
+    private void dismissCurrentSnackbar() {
+        if (snackbar != null) {
+            snackbar.dismiss();
+            snackbar = null;
+        }
     }
 
     private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {

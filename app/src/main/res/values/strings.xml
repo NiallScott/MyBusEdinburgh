@@ -323,14 +323,15 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="bustimes_err_unknown">An error has occurred, but we\'re not quite sure what it is</string>
     <string name="bustimes_err_nocode">No stop code was provided</string>
     <string name="bustimes_err_parseerr">Data was received, but it could not be understood</string>
-    <string name="bustimes_err_noconn">Unable to load live times. Are you connected to the internet? It is also possible the live times service is down.</string>
+    <string name="bustimes_err_noconn">No internet connection</string>
+    <string name="bustimes_err_connection_issue">Connection failed</string>
     <string name="bustimes_err_noresolv">Unable to find live times service</string>
     <string name="bustimes_err_nodata">There are no departures from this stop in the near future</string>
     <string name="bustimes_err_urlmismatch">Sign in to the Wi-Fi network through your web browser and try again</string>
 
-    <string name="bustimes_err_api_invalid_key">Check your device date and time is correct in the system preferences. If you are sure it is, contact the application developer for further assistance.</string>
-    <string name="bustimes_err_api_processing_error">The live times service encountered an error processing the times for this stop. This error is usually temporary.</string>
-    <string name="bustimes_err_api_system_maintenance">The live times service will be unavailable for a short time while it is down for maintenance</string>
+    <string name="bustimes_err_api_invalid_key">Check the date and time is correct in the system systems</string>
+    <string name="bustimes_err_api_processing_error">There was an error processing the times for this stop. This is usually temporary.</string>
+    <string name="bustimes_err_api_system_maintenance">The live times service is briefly down for maintenance. Try again soon.</string>
     <string name="bustimes_err_api_system_overloaded">The live times service is experiencing a high volume of users. Try again soon.</string>
     
     <!--
