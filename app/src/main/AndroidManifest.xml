@@ -60,6 +60,7 @@
         android:allowBackup="true"
         android:fullBackupContent="@xml/autobackup"
         android:fullBackupOnly="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:ignore="UnusedAttribute">
         
         <!-- This is the API key used by the backup service. This is linked
