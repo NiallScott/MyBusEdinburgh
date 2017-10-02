@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.details;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -48,6 +49,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
+import uk.org.rivernile.android.bustracker.ui.bustimes.BusServiceUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -378,8 +380,10 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
          */
         private void populate(@Nullable final Service service) {
             if (service != null) {
-                txtServiceName.setSupportBackgroundTintList(
-                        ColorStateList.valueOf(service.getColour()));
+                final int serviceColour = BusServiceUtils.isNightService(service.getServiceName())
+                        ? Color.BLACK : service.getColour();
+
+                txtServiceName.setSupportBackgroundTintList(ColorStateList.valueOf(serviceColour));
                 txtServiceName.setText(service.getServiceName());
                 txtDescription.setText(service.getDescription());
             } else {

@@ -57,6 +57,7 @@ import java.util.Map;
 
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
+import uk.org.rivernile.android.bustracker.ui.bustimes.BusServiceUtils;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -301,7 +302,8 @@ class BusTimesAdapter extends RecyclerView.Adapter {
         for (int i = 0; i < servicesSize; i++) {
             final LiveBusService liveBusService = services.get(i);
 
-            if (!isNightService(liveBusService.getServiceName()) || showNightServices) {
+            if (!BusServiceUtils.isNightService(liveBusService.getServiceName()) ||
+                    showNightServices) {
                 final List<LiveBus> liveBuses = liveBusService.getLiveBuses();
                 final int busesSize = expandedItems.contains(liveBusService.getServiceName()) ?
                         liveBuses.size() : 1;
@@ -313,16 +315,6 @@ class BusTimesAdapter extends RecyclerView.Adapter {
         }
 
         return result;
-    }
-
-    /**
-     * Is the given service a night service?
-     *
-     * @param serviceName The service name to test.
-     * @return {@code true} if the service name is that of a night service, {@code false} if not.
-     */
-    private static boolean isNightService(@NonNull final String serviceName) {
-        return serviceName.startsWith("N");
     }
 
     /**
@@ -456,7 +448,7 @@ class BusTimesAdapter extends RecyclerView.Adapter {
                 final String serviceName = item.getLiveBusService().getServiceName();
                 @ColorInt final int colour;
 
-                if (isNightService(serviceName)) {
+                if (BusServiceUtils.isNightService(serviceName)) {
                     colour = Color.BLACK;
                 } else {
                     final Integer boxedColour = serviceColours != null
