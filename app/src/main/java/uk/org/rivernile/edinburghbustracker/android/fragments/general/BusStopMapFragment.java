@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -68,11 +67,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServicesLoader;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserListener;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -87,7 +87,7 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.RouteLineLoa
  * The {@code BusStopMapFragment} shows a Google Maps v2 {@link com.google.android.gms.maps.MapView}
  * and depending on the location of the camera, the zoom level and service filter, it shows bus stop
  * icons on the map. The user can tap on a bus stop icon to show the info window (bubble). If the
- * user taps on the info window, then the {@link BusStopDetailsFragment} is shown.
+ * user taps on the info window, then the BusStopDetailsFragment is shown.
  *
  * <p>
  *     The user can also select the type of map they wish to see and search for bus stops and
@@ -113,13 +113,7 @@ public class BusStopMapFragment extends SupportMapFragment
     
     private static final String STATE_CHOSEN_SERVICES = "chosenServices";
     private static final String STATE_CHOSEN_STOP = "chosenStop";
-    
-    /** The default latitude. */
-    public static final double DEFAULT_LAT = 55.948611;
-    /** The default longitude. */
-    public static final double DEFAULT_LONG = -3.199811;
-    /** The default zoom. */
-    public static final float DEFAULT_ZOOM = 11f;
+
     /** The default search zoom. */
     public static final float DEFAULT_SEARCH_ZOOM =  16f;
 
@@ -144,7 +138,7 @@ public class BusStopMapFragment extends SupportMapFragment
     
     private Callbacks callbacks;
     private GoogleMap map;
-    private SharedPreferences sp;
+    private PreferenceManager preferenceManager;
     private SearchManager searchMan;
     
     private final HashMap<String, Marker> busStopMarkers = new HashMap<>();
@@ -227,7 +221,8 @@ public class BusStopMapFragment extends SupportMapFragment
         super.onCreate(savedInstanceState);
         
         final Context context = getActivity();
-        sp = context.getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
+        preferenceManager = ((BusApplication) context.getApplicationContext())
+                .getPreferenceManager();
         searchMan = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
         
         if (savedInstanceState != null) {
@@ -252,8 +247,7 @@ public class BusStopMapFragment extends SupportMapFragment
         getLoaderManager().initLoader(LOADER_ID_SERVICES, null, this);
 
         if (savedInstanceState == null) {
-            if (sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true) &&
-                    !hasLocationPermission()) {
+            if (preferenceManager.isMapLocationShownAutomatically() && !hasLocationPermission()) {
                 requestPermissions(
                         new String[] {
                                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -269,8 +263,7 @@ public class BusStopMapFragment extends SupportMapFragment
         
         if (map != null) {
             updateMyLocationFeature();
-            map.getUiSettings().setZoomControlsEnabled(
-                    sp.getBoolean(PreferenceConstants.PREF_ZOOM_BUTTONS, true));
+            map.getUiSettings().setZoomControlsEnabled(preferenceManager.isMapZoomButtonsShown());
         }
     }
 
@@ -281,17 +274,13 @@ public class BusStopMapFragment extends SupportMapFragment
         if (map != null) {
             // Save the camera location to SharedPreferences, so the user is shown this location
             // when they load the map again.
-            final SharedPreferences.Editor edit = sp.edit();
             final CameraPosition position = map.getCameraPosition();
             final LatLng latLng = position.target;
-            
-            edit.putString(PreferenceConstants.PREF_MAP_LAST_LATITUDE,
-                    String.valueOf(latLng.latitude));
-            edit.putString(PreferenceConstants.PREF_MAP_LAST_LONGITUDE,
-                    String.valueOf(latLng.longitude));
-            edit.putFloat(PreferenceConstants.PREF_MAP_LAST_ZOOM, position.zoom);
-            edit.putInt(PreferenceConstants.PREF_MAP_LAST_MAP_TYPE, map.getMapType());
-            edit.apply();
+
+            preferenceManager.setLastMapLatitude(latLng.latitude);
+            preferenceManager.setLastMapLongitude(latLng.longitude);
+            preferenceManager.setLastMapZoomLevel(position.zoom);
+            preferenceManager.setLastMapType(map.getMapType());
         }
     }
 
@@ -324,16 +313,14 @@ public class BusStopMapFragment extends SupportMapFragment
         uiSettings.setCompassEnabled(false);
         uiSettings.setMyLocationButtonEnabled(true);
         uiSettings.setMapToolbarEnabled(false);
-        uiSettings.setZoomControlsEnabled(
-                sp.getBoolean(PreferenceConstants.PREF_ZOOM_BUTTONS, true));
+        uiSettings.setZoomControlsEnabled(preferenceManager.isMapZoomButtonsShown());
 
         map.setInfoWindowAdapter(new MapInfoWindow(getActivity()));
         map.setOnCameraChangeListener(this);
         map.setOnMarkerClickListener(this);
         map.setOnInfoWindowClickListener(this);
         map.setOnInfoWindowCloseListener(this);
-        map.setMapType(sp.getInt(PreferenceConstants.PREF_MAP_LAST_MAP_TYPE,
-                GoogleMap.MAP_TYPE_NORMAL));
+        map.setMapType(preferenceManager.getLastMapType());
         map.setPadding(0, actionBarHeight, 0, 0);
         updateMyLocationFeature();
 
@@ -690,7 +677,7 @@ public class BusStopMapFragment extends SupportMapFragment
      */
     private void updateMyLocationFeature() {
         if (map != null) {
-            map.setMyLocationEnabled(sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true) &&
+            map.setMyLocationEnabled(preferenceManager.isMapLocationShownAutomatically() &&
                     hasLocationPermission());
         }
     }
@@ -871,8 +858,8 @@ public class BusStopMapFragment extends SupportMapFragment
      *     <li>If the args contains a stopCode, go there.</li>
      *     <li>If the args contains a latitude AND a longitude, go there.</li>
      *     <li>If the SharedPreferences have mappings for a previous location, then go there.</li>
-     *     <li>Otherwise, go to the default map location, as defined by {@link #DEFAULT_LAT} and
-     *         {@link #DEFAULT_LONG) at {@link #DEFAULT_ZOOM}.</li>
+     *     <li>Otherwise, go to the default map location, as defined by DEFAULT_LAT and
+     *         DEFAULT_LONG at DEFAULT_ZOOM.</li>
      * </ol>
      */
     private void moveCameraToInitialLocation() {
@@ -888,20 +875,11 @@ public class BusStopMapFragment extends SupportMapFragment
             args.remove(ARG_LATITUDE);
             args.remove(ARG_LONGITUDE);
         } else if (map != null) {
-            // The Lat/Lons have to be treated as Strings because SharedPreferences has no support
-            // for doubles.
-            final String latitude = sp.getString(PreferenceConstants.PREF_MAP_LAST_LATITUDE,
-                    String.valueOf(DEFAULT_LAT));
-            final String longitude = sp.getString(PreferenceConstants.PREF_MAP_LAST_LONGITUDE,
-                    String.valueOf(DEFAULT_LONG));
-            final float zoom = sp.getFloat(PreferenceConstants.PREF_MAP_LAST_ZOOM, DEFAULT_ZOOM);
-            
-            try {
-                moveCameraToLocation(new LatLng(Double.parseDouble(latitude),
-                        Double.parseDouble(longitude)), zoom, false);
-            } catch (NumberFormatException e) {
-                moveCameraToLocation(new LatLng(DEFAULT_LAT, DEFAULT_LONG), DEFAULT_ZOOM, false);
-            }
+            final double latitude = preferenceManager.getLastMapLatitude();
+            final double longitude = preferenceManager.getLastMapLongitude();
+            final float zoom = preferenceManager.getLastMapZoomLevel();
+
+            moveCameraToLocation(new LatLng(latitude, longitude), zoom, false);
         }
     }
 

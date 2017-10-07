@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,20 +27,22 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
-import uk.org.rivernile.android.bustracker.ui.callbacks
-        .OnShowSystemLocationPreferencesListener;
+
+import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -56,7 +58,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
     public static final Intent TURN_ON_GPS_INTENT;
     
     private Callbacks callbacks;
-    private SharedPreferences sp;
+    private PreferenceManager preferenceManager;
     
     static {
         // TODO: sort deprecation.
@@ -65,13 +67,13 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onAttach(final Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(final Context context) {
+        super.onAttach(context);
         
         try {
-            callbacks = (Callbacks) activity;
+            callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(activity.getClass().getName() + " does not implement " +
+            throw new IllegalStateException(context.getClass().getName() + " does not implement " +
                     Callbacks.class.getName());
         }
     }
@@ -80,9 +82,11 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        sp = getActivity().getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
+        preferenceManager = ((BusApplication) getContext().getApplicationContext())
+                .getPreferenceManager();
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final Activity activity = getActivity();
@@ -93,9 +97,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(final CompoundButton v, final boolean isChecked) {
-                final SharedPreferences.Editor edit = sp.edit();
-                edit.putBoolean(PreferenceConstants.PREF_DISABLE_GPS_PROMPT, isChecked);
-                edit.apply();
+                preferenceManager.setGpsPromptDisabled(isChecked);
             }
         });
 

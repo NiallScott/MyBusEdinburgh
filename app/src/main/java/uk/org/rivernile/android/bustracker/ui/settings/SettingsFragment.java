@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,9 @@ import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.provider.SearchRecentSuggestions;
 
+import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.search.SearchSuggestionsProvider;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.utils.GenericDialogPreference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -51,6 +52,7 @@ public class SettingsFragment extends PreferenceFragment
 
     private Callbacks callbacks;
     private SharedPreferences sp;
+    private PreferenceManager preferenceManager;
     private ListPreference numberOfDeparturesPref;
     private String[] numberOfDeparturesStrings;
 
@@ -70,20 +72,22 @@ public class SettingsFragment extends PreferenceFragment
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getPreferenceManager().setSharedPreferencesName(PreferenceConstants.PREF_FILE);
+        getPreferenceManager().setSharedPreferencesName(PreferenceManager.PREF_FILE);
         addPreferencesFromResource(R.xml.preferences);
         sp = getPreferenceScreen().getSharedPreferences();
+        preferenceManager = ((BusApplication) getActivity().getApplicationContext())
+                .getPreferenceManager();
         numberOfDeparturesStrings = getResources()
                 .getStringArray(R.array.preferences_num_departures_entries);
 
         final GenericDialogPreference backupDialog = (GenericDialogPreference)
-                findPreference(PreferenceConstants.PREF_BACKUP_FAVOURITES);
+                findPreference(PreferenceManager.PREF_BACKUP_FAVOURITES);
         final GenericDialogPreference restoreDialog = (GenericDialogPreference)
-                findPreference(PreferenceConstants.PREF_RESTORE_FAVOURITES);
+                findPreference(PreferenceManager.PREF_RESTORE_FAVOURITES);
         final GenericDialogPreference clearSearchHistoryDialog = (GenericDialogPreference)
-                findPreference(PreferenceConstants.PREF_CLEAR_MAP_SEARCH_HISTORY);
+                findPreference(PreferenceManager.PREF_CLEAR_MAP_SEARCH_HISTORY);
         numberOfDeparturesPref = (ListPreference)
-                findPreference(PreferenceConstants.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE);
+                findPreference(PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE);
 
         backupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
             @Override
@@ -135,10 +139,10 @@ public class SettingsFragment extends PreferenceFragment
 
     @Override
     public void onSharedPreferenceChanged(final SharedPreferences sp, final String key) {
-        if (PreferenceConstants.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE.equals(key)) {
+        if (PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE.equals(key)) {
             populateNumberOfDeparturesSummary();
-        } else if (PreferenceConstants.PREF_AUTO_LOCATION.equals(key)) {
-            if (sp.getBoolean(PreferenceConstants.PREF_AUTO_LOCATION, true)) {
+        } else if (PreferenceManager.PREF_AUTO_LOCATION.equals(key)) {
+            if (preferenceManager.isMapLocationShownAutomatically()) {
                 callbacks.requestLocationPermission();
             }
         }
@@ -148,16 +152,7 @@ public class SettingsFragment extends PreferenceFragment
      * Populate the summary text for number of departures.
      */
     private void populateNumberOfDeparturesSummary() {
-        final String s = sp.getString(PreferenceConstants
-                .PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE, "4");
-        int val;
-
-        try {
-            val = Integer.parseInt(s);
-        } catch(NumberFormatException e) {
-            val = 4;
-        }
-
+        final int val = preferenceManager.getBusTimesNumberOfDeparturesToShowPerService();
         numberOfDeparturesPref.setSummary(numberOfDeparturesStrings[val - 1]);
     }
 

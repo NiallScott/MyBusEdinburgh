@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.database.busstop;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.v4.net.ConnectivityManagerCompat;
@@ -38,7 +37,7 @@ import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseEndpointException;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersion;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.fetchutils.fetchers.HttpFetcher;
 import uk.org.rivernile.android.fetchutils.fetchers.readers.FileWriterFetcherStreamReader;
 import uk.org.rivernile.android.utils.FileUtils;
@@ -60,7 +59,7 @@ public class DatabaseUpdateService extends IntentService {
     private static final int CHECK_PERIOD = 43200000; // 12 hours
     
     private ConnectivityManager connMan;
-    private SharedPreferences sp;
+    private PreferenceManager preferenceManager;
     private DatabaseEndpoint databaseEndpoint;
 
     /**
@@ -75,8 +74,9 @@ public class DatabaseUpdateService extends IntentService {
         super.onCreate();
 
         connMan = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        sp = getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
-        databaseEndpoint = ((BusApplication) getApplication()).getDatabaseEndpoint();
+        final BusApplication app = (BusApplication) getApplication();
+        preferenceManager = app.getPreferenceManager();
+        databaseEndpoint = app.getDatabaseEndpoint();
     }
 
     @Override
@@ -105,7 +105,7 @@ public class DatabaseUpdateService extends IntentService {
             return;
         }
         
-        final long lastCheck = sp.getLong(PreferenceConstants.PREF_DATABASE_UPDATE_LAST_CHECK, 0);
+        final long lastCheck = preferenceManager.getBusStopDatabaseUpdateLastCheckTimestamp();
         
         if ((System.currentTimeMillis() - lastCheck) < CHECK_PERIOD) {
             // If it has been less than the check period since the last check, then do not proceed.
@@ -184,7 +184,7 @@ public class DatabaseUpdateService extends IntentService {
      * @return {@code true} if the check should be halted, {@code false} if not.
      */
     private boolean shouldStopCheck() {
-        return sp.getBoolean(PreferenceConstants.PREF_BUS_STOP_DATABASE_WIFI_ONLY, false) &&
+        return preferenceManager.isBusStopDatabaseUpdateWifiOnly() &&
                 ConnectivityManagerCompat.isActiveNetworkMetered(connMan);
     }
     
@@ -192,9 +192,6 @@ public class DatabaseUpdateService extends IntentService {
      * Write a new check time to the preferences. This should only be done in success cases.
      */
     private void writeUpdatedCheckTime() {
-        final SharedPreferences.Editor edit = sp.edit();
-        edit.putLong(PreferenceConstants.PREF_DATABASE_UPDATE_LAST_CHECK,
-                System.currentTimeMillis());
-        edit.apply();
+        preferenceManager.setBusStopDatabaseUpdateLastCheckTimestamp(System.currentTimeMillis());
     }
 }

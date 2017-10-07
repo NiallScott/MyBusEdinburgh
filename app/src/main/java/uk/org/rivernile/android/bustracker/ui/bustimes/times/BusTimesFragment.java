@@ -29,7 +29,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -62,6 +61,7 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
+import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.ServiceColoursLoader;
 import uk.org.rivernile.android.bustracker.parser.livetimes.AuthenticationException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
@@ -73,7 +73,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesResult;
 import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.ServerErrorException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.fetchutils.fetchers.ConnectivityUnavailableException;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
@@ -100,7 +100,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
 
     private final Handler handler = new Handler();
     private ConnectivityManager connectivityManager;
-    private SharedPreferences sp;
+    private PreferenceManager preferenceManager;
     private BusTimesAdapter adapter;
 
     private String stopCode;
@@ -145,27 +145,21 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         stopCode = getArguments().getString(ARG_STOP_CODE);
         connectivityManager = (ConnectivityManager) getContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
-        sp = getContext().getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
+        preferenceManager = ((BusApplication) getContext().getApplicationContext())
+                .getPreferenceManager();
         adapter = new BusTimesAdapter(getContext());
-        adapter.setSortByTime(sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false));
-        adapter.setShowNightServices(sp.getBoolean(
-                PreferenceConstants.PREF_SHOW_NIGHT_BUSES, true));
+        adapter.setSortByTime(preferenceManager.isBusTimesSortedByTime());
+        adapter.setShowNightServices(preferenceManager.isBusTimesShowingNightServices());
 
         if (savedInstanceState != null) {
             lastRefresh = savedInstanceState.getLong(STATE_LAST_REFRESH, 0);
             autoRefresh = savedInstanceState.getBoolean(STATE_AUTO_REFRESH, false);
             adapter.onRestoreInstanceState(savedInstanceState);
         } else {
-            autoRefresh = sp.getBoolean(PreferenceConstants.PREF_AUTO_REFRESH, false);
+            autoRefresh = preferenceManager.isBusTimesAutoRefreshEnabled();
         }
 
-        try {
-            numberOfDepartures = Integer.parseInt(
-                    sp.getString(PreferenceConstants
-                            .PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE, "4"));
-        } catch (NumberFormatException e) {
-            numberOfDepartures = 4;
-        }
+        numberOfDepartures = preferenceManager.getBusTimesNumberOfDeparturesToShowPerService();
     }
 
     @Nullable
@@ -593,7 +587,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
      * Configure the sort menu item with the correct state.
      */
     private void configureSortActionItem() {
-        configureSortActionItem(sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false));
+        configureSortActionItem(preferenceManager.isBusTimesSortedByTime());
     }
 
     /**
@@ -640,10 +634,8 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
      */
     private void performSortSelected() {
         // Change the sort preference and ask for a data redisplay.
-        final boolean sortByTime = !sp.getBoolean(PreferenceConstants.PREF_SERVICE_SORTING, false);
-        final SharedPreferences.Editor edit = sp.edit();
-        edit.putBoolean(PreferenceConstants.PREF_SERVICE_SORTING, sortByTime);
-        edit.apply();
+        final boolean sortByTime = !preferenceManager.isBusTimesSortedByTime();
+        preferenceManager.setBusTimesSortedByTime(sortByTime);
 
         adapter.setSortByTime(sortByTime);
         configureSortActionItem(sortByTime);

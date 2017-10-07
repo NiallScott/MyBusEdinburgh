@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker;
 
 import android.app.Application;
 import android.app.backup.BackupManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -38,7 +39,7 @@ import uk.org.rivernile.android.bustracker.database.busstop.DatabaseUpdateServic
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
 
@@ -67,7 +68,7 @@ public abstract class BusApplication extends Application
             BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY);
         }
 
-        getSharedPreferences(PreferenceConstants.PREF_FILE, 0)
+        getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
                 .registerOnSharedPreferenceChangeListener(this);
 
         // Start the database update service.
@@ -75,8 +76,7 @@ public abstract class BusApplication extends Application
     }
     
     @Override
-    public void onSharedPreferenceChanged(final SharedPreferences sp,
-            final String key) {
+    public void onSharedPreferenceChanged(final SharedPreferences sp, final String key) {
         BackupManager.dataChanged(getPackageName());
     }
     
@@ -109,6 +109,13 @@ public abstract class BusApplication extends Application
      * @return An instance of the {@link AlertManager}.
      */
     public abstract AlertManager getAlertManager();
+
+    /**
+     * Get an instance of the {@link PreferenceManager}.
+     *
+     * @return An instance of the {@link PreferenceManager}.
+     */
+    public abstract PreferenceManager getPreferenceManager();
 
     /**
      * Get an instance of {@link Picasso} for image loading.

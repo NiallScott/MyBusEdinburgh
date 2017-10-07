@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.neareststops;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
@@ -57,11 +56,12 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavouriteStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddTimeAlertListener;
@@ -107,6 +107,7 @@ public class NearestStopsFragment extends Fragment
     
     private Callbacks callbacks;
     private LocationManager locMan;
+    private PreferenceManager preferenceManager;
     
     private NearestStopsAdapter adapter;
     private ActionMode actionMode;
@@ -155,6 +156,8 @@ public class NearestStopsFragment extends Fragment
         final Activity activity = getActivity();
         // Get references to required resources.
         locMan = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        preferenceManager = ((BusApplication) getContext().getApplicationContext())
+                .getPreferenceManager();
         adapter = new NearestStopsAdapter(activity);
         adapter.setOnItemClickedListener(this);
 
@@ -199,12 +202,10 @@ public class NearestStopsFragment extends Fragment
         }
 
         if (savedInstanceState == null) {
-            final SharedPreferences sp = getActivity()
-                    .getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
             // Show a dialog asking the user to turn on GPS if required. This will be shown when
             // the user has not asked for this dialog to not be shown, when the system has the GPS
             // feature, the GPS provider is disabled and there is a GPS resolution Activity.
-            if (!sp.getBoolean(PreferenceConstants.PREF_DISABLE_GPS_PROMPT, false) &&
+            if (!preferenceManager.isGpsPromptDisabled() &&
                     getActivity().getPackageManager()
                             .hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS) &&
                     !locMan.isProviderEnabled(LocationManager.GPS_PROVIDER) &&

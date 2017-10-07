@@ -31,7 +31,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -41,7 +40,7 @@ import android.text.TextUtils;
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsDatabase;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
@@ -64,7 +63,7 @@ public class ProximityAlertService extends IntentService {
     private static final int ALERT_ID = 1;
 
     private NotificationManager notifMan;
-    private SharedPreferences sp;
+    private PreferenceManager preferenceManager;
     private AlertManager alertMan;
 
     /**
@@ -79,8 +78,9 @@ public class ProximityAlertService extends IntentService {
         super.onCreate();
 
         notifMan = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        sp = getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
-        alertMan = ((BusApplication) getApplication()).getAlertManager();
+        final BusApplication app = (BusApplication) getApplication();
+        preferenceManager = app.getPreferenceManager();
+        alertMan = app.getAlertManager();
     }
 
     @Override
@@ -167,15 +167,15 @@ public class ProximityAlertService extends IntentService {
 
         final Notification n = notifBuilder.build();
 
-        if (sp.getBoolean(PreferenceConstants.PREF_ALERT_SOUND, true)) {
+        if (preferenceManager.isNotificationWithSound()) {
             n.defaults |= Notification.DEFAULT_SOUND;
         }
 
-        if (sp.getBoolean(PreferenceConstants.PREF_ALERT_VIBRATE, true)) {
+        if (preferenceManager.isNotificationWithVibration()) {
             n.defaults |= Notification.DEFAULT_VIBRATE;
         }
 
-        if (sp.getBoolean(PreferenceConstants.PREF_ALERT_LED, true)) {
+        if (preferenceManager.isNotificationWithLed()) {
             n.defaults |= Notification.DEFAULT_LIGHTS;
             n.flags |= Notification.FLAG_SHOW_LIGHTS;
         }

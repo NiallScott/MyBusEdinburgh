@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
@@ -46,7 +45,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceConstants;
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -82,7 +81,7 @@ public class TimeAlertService extends IntentService {
     private NotificationManager notifMan;
     private AlertManager alertMan;
     private AlarmManager alarmMan;
-    private SharedPreferences sp;
+    private PreferenceManager preferenceManager;
     
     /**
      * Create a new instance of the {@code TimeAlertService}. This simply calls
@@ -100,7 +99,7 @@ public class TimeAlertService extends IntentService {
         notifMan = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         alertMan = app.getAlertManager();
         alarmMan = (AlarmManager) getSystemService(ALARM_SERVICE);
-        sp = getSharedPreferences(PreferenceConstants.PREF_FILE, 0);
+        preferenceManager = app.getPreferenceManager();
     }
 
     @Override
@@ -216,13 +215,13 @@ public class TimeAlertService extends IntentService {
                     PendingIntent.FLAG_ONE_SHOT));
 
         final Notification n = notifBuilder.build();
-        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_SOUND, true))
+        if (preferenceManager.isNotificationWithSound())
             n.defaults |= Notification.DEFAULT_SOUND;
 
-        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_VIBRATE, true))
+        if (preferenceManager.isNotificationWithVibration())
             n.defaults |= Notification.DEFAULT_VIBRATE;
 
-        if(sp.getBoolean(PreferenceConstants.PREF_ALERT_LED, true)) {
+        if (preferenceManager.isNotificationWithLed()) {
             n.defaults |= Notification.DEFAULT_LIGHTS;
             n.flags |= Notification.FLAG_SHOW_LIGHTS;
         }
