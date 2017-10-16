@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+* Copyright (C) 2017 Niall 'Rivernile' Scott
+*
+* This software is provided 'as-is', without any express or implied
+* warranty.  In no event will the authors or contributors be held liable for
+* any damages arising from the use of this software.
+*
+* The aforementioned copyright holder(s) hereby grant you a
+* non-transferrable right to use this software for any purpose (including
+* commercial applications), and to modify it and redistribute it, subject to
+* the following conditions:
+*
+*  1. This notice may not be removed or altered from any file it appears in.
+*
+*  2. Any modifications made to this software, except those defined in
+*     clause 3 of this agreement, must be released under this license, and
+*     the source code of any modifications must be made available on a
+*     publically accessible (and locateable) website, or sent to the
+*     original author of this software.
+*
+*  3. Software modifications that do not alter the functionality of the
+*     software but are simply adaptations to a specific environment are
+*     exempt from clause 2.
+*/ -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/padding_double"
+        android:text="@string/maptypebottomsheetdialog_title"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+    <uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout
+        style="@style/MapTypeBottomSheetRow"
+        android:id="@+id/layoutNormal">
+
+        <uk.org.rivernile.android.bustracker.ui.widgets.CheckableImageView
+            style="@style/MapTypeBottomSheetTickIcon" />
+
+        <CheckedTextView
+            style="@style/MapTypeBottomSheetTextItem"
+            android:text="@string/maptypebottomsheetdialog_type_normal"/>
+    </uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout>
+
+    <uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout
+        style="@style/MapTypeBottomSheetRow"
+        android:id="@+id/layoutSatellite">
+
+        <uk.org.rivernile.android.bustracker.ui.widgets.CheckableImageView
+            style="@style/MapTypeBottomSheetTickIcon" />
+
+        <CheckedTextView
+            style="@style/MapTypeBottomSheetTextItem"
+            android:text="@string/maptypebottomsheetdialog_type_satellite"
+            android:textAppearance="@style/TextAppearance.AppCompat.ListItem1" />
+    </uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout>
+
+    <uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout
+        style="@style/MapTypeBottomSheetRow"
+        android:id="@+id/layoutHybrid"
+        android:layout_marginBottom="@dimen/padding_default">
+
+        <uk.org.rivernile.android.bustracker.ui.widgets.CheckableImageView
+            style="@style/MapTypeBottomSheetTickIcon" />
+
+        <CheckedTextView
+            style="@style/MapTypeBottomSheetTextItem"
+            android:text="@string/maptypebottomsheetdialog_type_hybrid" />
+    </uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout>
+</LinearLayout>

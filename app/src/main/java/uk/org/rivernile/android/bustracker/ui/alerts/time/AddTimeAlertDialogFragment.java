@@ -51,7 +51,7 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoade
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopServiceNamesLoader;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment;
 
 /**
  * This {@link DialogFragment} allows a user to add a time alert for a supplied stop. It is

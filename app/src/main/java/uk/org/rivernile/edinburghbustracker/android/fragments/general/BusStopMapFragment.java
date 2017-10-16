@@ -77,7 +77,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowServicesChooserLis
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.MapTypeChooserDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopMarkerLoader;
 import uk.org.rivernile.edinburghbustracker.android.maps.GeoSearchLoader;
 import uk.org.rivernile.edinburghbustracker.android.maps.MapInfoWindow;

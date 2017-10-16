@@ -34,7 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.MapTypeChooserDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.general.BusStopMapFragment;
 
 public class BusStopMapActivity extends AppCompatActivity implements BusStopMapFragment.Callbacks,

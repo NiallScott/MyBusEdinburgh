@@ -75,7 +75,7 @@ import uk.org.rivernile.android.utils.MapsUtils;
 import uk.org.rivernile.android.utils.LocationUtils;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.ServicesChooserDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
 
 /**
