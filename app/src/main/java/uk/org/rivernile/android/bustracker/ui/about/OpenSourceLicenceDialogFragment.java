@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,12 @@
 package uk.org.rivernile.android.bustracker.ui.about;
 
 import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
-import com.google.android.gms.common.GoogleApiAvailability;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -43,28 +42,20 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class OpenSourceLicenceDialogFragment extends DialogFragment {
 
+    @Override
+    public void onCreate(@Nullable final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setCancelable(true);
+    }
+
     @NonNull
     @Override
-    public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final Context context = getActivity();
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        
-        // License information may not be available for Google Play Services if
-        // the device does not have Google Play Services installed.
-        final String playServicesLicenses = GoogleApiAvailability.getInstance()
-                .getOpenSourceSoftwareLicenseInfo(context);
-        // This String contains non-Google Play Services license information.
-        String appLicenses = getString(R.string.open_source_licenses);
-        
-        if (playServicesLicenses != null) {
-            appLicenses = playServicesLicenses + appLicenses;
-        }
-        
-        builder.setCancelable(true)
+    public Dialog onCreateDialog(@Nullable final Bundle savedInstanceState) {
+        return new AlertDialog.Builder(getContext())
                 .setTitle(R.string.opensourcelicensedialog_title)
-                .setMessage(appLicenses)
-                .setPositiveButton(R.string.close, null);
-        
-        return builder.create();
+                .setMessage(R.string.open_source_licenses)
+                .setPositiveButton(R.string.close, null)
+                .create();
     }
 }
