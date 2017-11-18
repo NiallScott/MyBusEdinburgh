@@ -275,7 +275,7 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
      * Start listening for location updates.
      */
     private void startLocationUpdates() {
-        if (LocationUtils.hasLocationPermission(getContext())) {
+        if (LocationUtils.checkLocationPermission(getContext())) {
             if (!isListeningForLocationUpdates) {
                 isListeningForLocationUpdates = true;
                 adapter.setDeviceLocation(LocationUtils.getBestInitialLocation(locationManager));
@@ -318,7 +318,7 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
      * Stops a location provider in the {@link LocationManager}.
      */
     private void stopLocationUpdates() {
-        if (isListeningForLocationUpdates && LocationUtils.hasLocationPermission(getContext())) {
+        if (isListeningForLocationUpdates && LocationUtils.checkLocationPermission(getContext())) {
             locationManager.removeUpdates(this);
         }
 

@@ -313,7 +313,7 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
          * Populate the data in this view holder.
          */
         private void populate() {
-            if (!LocationUtils.hasLocationPermission(context)) {
+            if (!LocationUtils.checkLocationPermission(context)) {
                 txtDistance.setText(R.string.stopdetails_stop_distance_permission_required);
             } else if (busStopLocation != null && deviceLocation != null) {
                 final float[] distance = new float[1];

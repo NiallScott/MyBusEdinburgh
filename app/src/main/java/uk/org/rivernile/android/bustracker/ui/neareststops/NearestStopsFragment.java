@@ -161,7 +161,7 @@ public class NearestStopsFragment extends Fragment
         adapter = new NearestStopsAdapter(activity);
         adapter.setOnItemClickedListener(this);
 
-        if (LocationUtils.hasLocationPermission(getContext())) {
+        if (LocationUtils.checkLocationPermission(getContext())) {
             // Initialise the lastLocation to the best known location.
             lastLocation = LocationUtils.getBestInitialLocation(locMan);
         }
@@ -220,7 +220,7 @@ public class NearestStopsFragment extends Fragment
     public void onResume() {
         super.onResume();
 
-        if (LocationUtils.hasLocationPermission(getContext())) {
+        if (LocationUtils.checkLocationPermission(getContext())) {
             startLocationUpdates();
         } else {
             showPermissionRequiredError();
@@ -533,7 +533,7 @@ public class NearestStopsFragment extends Fragment
     private void updateFilterMenuItem() {
         if (menuItemFilter != null) {
             menuItemFilter.setEnabled(services != null && services.length > 0 &&
-                    LocationUtils.hasLocationPermission(getContext()));
+                    LocationUtils.checkLocationPermission(getContext()));
         }
     }
 

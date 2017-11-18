@@ -61,7 +61,7 @@ public class LocationUtils {
      * @return {@code true} if the package has permission to use location services, {@code false} if
      * not.
      */
-    public static boolean hasLocationPermission(@NonNull final Context context) {
+    public static boolean checkLocationPermission(@NonNull final Context context) {
         final boolean hasFineLocation = ContextCompat.checkSelfPermission(context,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         final boolean hasCoarseLocation = ContextCompat.checkSelfPermission(context,
