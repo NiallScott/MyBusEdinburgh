@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2017 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,13 @@
 package uk.org.rivernile.android.bustracker.ui.main.sections;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
+
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -83,23 +81,17 @@ public class BusStopMapSection implements Section {
     @Override
     @Nullable
     public Fragment getFragment() {
-        return null;
+        return BusStopMapFragment.newInstance();
     }
 
     @Override
     @Nullable
     public String getFragmentTag() {
-        return null;
+        return "TAG_BUS_STOP_MAP";
     }
     
     @Override
     public void doAlternativeAction(@NonNull final FragmentActivity activity) {
-        final int errorCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(activity);
-        
-        if (errorCode == ConnectionResult.SUCCESS) {
-            activity.startActivity(new Intent(activity, BusStopMapActivity.class));
-        } else {
-            GooglePlayServicesUtil.showErrorDialogFragment(errorCode, activity, 1);
-        }
+        // Nothing to do here.
     }
 }
