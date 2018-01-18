@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2017 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -49,10 +50,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
+
+import java.util.List;
 
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
+import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment;
 import uk.org.rivernile.android.utils.LocationUtils;
@@ -66,7 +73,11 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class BusStopMapFragment extends Fragment implements LoaderManager.LoaderCallbacks,
         OnMapReadyCallback, ServicesChooserDialogFragment.Callbacks,
-        MapTypeBottomSheetDialogFragment.OnMapTypeSelectedListener {
+        MapTypeBottomSheetDialogFragment.OnMapTypeSelectedListener,
+        ClusterManager.OnClusterClickListener<Stop>,
+        ClusterManager.OnClusterItemClickListener<Stop>,
+        ClusterManager.OnClusterItemInfoWindowClickListener<Stop>,
+        GetStopServicesTask.OnStopServicesLoadedListener {
 
     private static final String ARG_STOPCODE = "stopCode";
     private static final String ARG_LATITUDE = "latitude";
@@ -82,12 +93,19 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     private static final int REQUEST_CODE_SEARCH = 100;
 
     private static final int LOADER_SERVICES = 1;
+    private static final int LOADER_STOPS = 2;
 
+    private Callbacks callbacks;
     private PreferenceManager preferenceManager;
+
     private GoogleMap map;
+    private ClusterManager<Stop> clusterManager;
+    private StopClusterRenderer clusterRenderer;
+    private GetStopServicesTask getStopServicesTask;
 
     private String[] services;
     private String[] selectedServices;
+    private Marker currentSelectedMarker;
 
     private MapView mapView;
 
@@ -138,6 +156,18 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
         fragment.setArguments(b);
 
         return fragment;
+    }
+
+    @Override
+    public void onAttach(final Context context) {
+        super.onAttach(context);
+
+        try {
+            callbacks = (Callbacks) context;
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(context.getClass().getName() + " does not implement " +
+                    Callbacks.class.getName());
+        }
     }
 
     @Override
@@ -216,10 +246,15 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
             final CameraPosition position = map.getCameraPosition();
             final LatLng latLng = position.target;
 
-            /*preferenceManager.setLastMapLatitude(latLng.latitude);
+            preferenceManager.setLastMapLatitude(latLng.latitude);
             preferenceManager.setLastMapLongitude(latLng.longitude);
             preferenceManager.setLastMapZoomLevel(position.zoom);
-            preferenceManager.setLastMapType(map.getMapType());*/
+            preferenceManager.setLastMapType(map.getMapType());
+        }
+
+        if (getStopServicesTask != null) {
+            getStopServicesTask.cancel(false);
+            getStopServicesTask = null;
         }
     }
 
@@ -303,6 +338,8 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
         switch (id) {
             case LOADER_SERVICES:
                 return new AllServiceNamesLoader(getContext());
+            case LOADER_STOPS:
+                return new StopMarkerLoader(getContext(), selectedServices);
             default:
                 return null;
         }
@@ -313,8 +350,12 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     public void onLoadFinished(final Loader loader, final Object data) {
         switch (loader.getId()) {
             case LOADER_SERVICES:
-                services = ((ProcessedCursorLoader.ResultWrapper<String[]>) data).getResult();
-                configureServicesMenuItem();
+                handleServicesLoaded(
+                        ((ProcessedCursorLoader.ResultWrapper<String[]>) data).getResult());
+                break;
+            case LOADER_STOPS:
+                handleBusStopsLoaded(((ProcessedCursorLoader.ResultWrapper<List<Stop>>)
+                        data).getResult());
                 break;
         }
     }
@@ -333,6 +374,7 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onServicesChosen(final String[] chosenServices) {
         selectedServices = chosenServices;
+        startStopsLoader(true);
     }
 
     @Override
@@ -340,11 +382,71 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
         setMapType(toGoogleMapType(mapType));
     }
 
+    @Override
+    public boolean onClusterClick(final Cluster<Stop> cluster) {
+        final float currentZoom = map.getCameraPosition().zoom;
+        moveCameraToLocation(cluster.getPosition(), currentZoom + 1f, true);
+
+        return true;
+    }
+
+    @Override
+    public boolean onClusterItemClick(final Stop stop) {
+        if (getStopServicesTask != null) {
+            getStopServicesTask.cancel(false);
+            getStopServicesTask = null;
+        }
+
+        final Marker marker = clusterRenderer.getMarker(stop);
+
+        if (marker != null) {
+            currentSelectedMarker = marker;
+            final String stopCode = (String) marker.getTag();
+
+            if (stopCode != null) {
+                getStopServicesTask = new GetStopServicesTask(getContext(), this);
+                getStopServicesTask.execute(stopCode);
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onClusterItemInfoWindowClick(final Stop stop) {
+        callbacks.onShowBusTimes(stop.getStopCode());
+    }
+
+    @Override
+    public void onStopServicesLoaded(@Nullable final String services) {
+        if (currentSelectedMarker != null) {
+            currentSelectedMarker.setSnippet(services);
+            currentSelectedMarker.showInfoWindow();
+            final float zoomLevel = map.getCameraPosition().zoom;
+            moveCameraToLocation(currentSelectedMarker.getPosition(), zoomLevel, true);
+        }
+
+        getStopServicesTask = null;
+    }
+
     /**
      * Start the services loader to get all known services. This is used for service filtering.
      */
     private void startServicesLoader() {
         getLoaderManager().initLoader(LOADER_SERVICES, null, this);
+    }
+
+    /**
+     * Start the stops loader to populate the stops on the map.
+     *
+     * @param force {@code true} if the loader should be re-created, {@code false} if not.
+     */
+    private void startStopsLoader(final boolean force) {
+        if (force) {
+            getLoaderManager().restartLoader(LOADER_STOPS, null, this);
+        } else {
+            getLoaderManager().initLoader(LOADER_STOPS, null, this);
+        }
     }
 
     /**
@@ -360,6 +462,52 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
 
         map.setMapType(preferenceManager.getLastMapType());
         updateMyLocationFeature();
+
+        final Context context = getContext();
+        clusterManager = new ClusterManager<>(context, map);
+        clusterRenderer = new StopClusterRenderer(context, map, clusterManager);
+        clusterManager.setRenderer(clusterRenderer);
+        clusterManager.setOnClusterClickListener(this);
+        clusterManager.setOnClusterItemClickListener(this);
+        clusterManager.setOnClusterItemInfoWindowClickListener(this);
+        map.setOnCameraIdleListener(clusterManager);
+        map.setOnMarkerClickListener(clusterManager);
+        map.setOnInfoWindowClickListener(clusterManager);
+        map.setInfoWindowAdapter(new MapInfoWindow(getActivity(), (ViewGroup) getView()));
+        startStopsLoader(false);
+        moveCameraToInitialLocation();
+    }
+
+    /**
+     * Handle a load of the service listing.
+     *
+     * @param services All known services in the stop database.
+     */
+    private void handleServicesLoaded(@Nullable final String[] services) {
+        this.services = services;
+        configureServicesMenuItem();
+    }
+
+    /**
+     * Handle the stops load completing.
+     *
+     * @param stops The {@link List} of stops to show on the map.
+     */
+    private void handleBusStopsLoaded(@Nullable final List<Stop> stops) {
+        clusterManager.clearItems();
+        clusterManager.addItems(stops);
+        clusterManager.cluster();
+    }
+
+    /**
+     * Move the camera of the map to its initial location.
+     */
+    private void moveCameraToInitialLocation() {
+        final double latitude = preferenceManager.getLastMapLatitude();
+        final double longitude = preferenceManager.getLastMapLongitude();
+        final float zoom = preferenceManager.getLastMapZoomLevel();
+
+        moveCameraToLocation(latitude, longitude, zoom, false);
     }
 
     /**
@@ -541,5 +689,14 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
             default:
                 return GoogleMap.MAP_TYPE_NORMAL;
         }
+    }
+
+    /**
+     * Any {@link Activity Activities} which host this {@link android.support.v4.app.Fragment} must
+     * implement this interface to handle navigation events.
+     */
+    public interface Callbacks extends OnShowBusTimesListener {
+
+        // No other methods to define.
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,6 +50,7 @@ import android.widget.Toast;
 
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.favourites.AddEditFavouriteStopDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity
         implements SectionListFragment.Callbacks, AlertManagerFragment.Callbacks,
         FavouriteStopsFragment.Callbacks, NearestStopsFragment.Callbacks,
         ServicesChooserDialogFragment.Callbacks, InstallBarcodeScannerDialogFragment.Callbacks,
-        TurnOnGpsDialogFragment.Callbacks {
+        TurnOnGpsDialogFragment.Callbacks, BusStopMapFragment.Callbacks {
     
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
