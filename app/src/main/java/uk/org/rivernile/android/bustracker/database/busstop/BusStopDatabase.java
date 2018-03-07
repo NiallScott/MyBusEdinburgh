@@ -91,7 +91,7 @@ public final class BusStopDatabase {
      */
     @WorkerThread
     @Nullable
-    public static Cursor searchBusStops(@NonNull final Context context,
+    static Cursor searchBusStops(@NonNull final Context context,
             @NonNull final String searchQuery) {
         final String query = '%' + searchQuery + '%';
         final Cursor c = context.getContentResolver().query(
@@ -166,34 +166,6 @@ public final class BusStopDatabase {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Get a {@link String} listing of services for a given stop code.
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The stop code to get the service listing for.
-     * @return A {@link String} listing of services for the given stop code, or {@code null} if
-     * there is no listing or the listing couldn't be loaded.
-     */
-    @WorkerThread
-    @Nullable
-    public static String getServicesForStop(@NonNull final Context context,
-            @NonNull final String stopCode) {
-        final Cursor c = context.getContentResolver().query(BusStopContract.BusStops.CONTENT_URI,
-                new String[] { BusStopContract.BusStops.SERVICE_LISTING },
-                BusStopContract.BusStops.STOP_CODE + " = ?",
-                new String[] { stopCode }, null);
-
-        if (c != null && c.moveToFirst()) {
-            final int servicesColumn = c.getColumnIndex(BusStopContract.BusStops.SERVICE_LISTING);
-            final String services = c.getString(servicesColumn);
-            c.close();
-
-            return services;
-        }
-
-        return null;
     }
 
     /**

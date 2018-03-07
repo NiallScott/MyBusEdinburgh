@@ -33,9 +33,9 @@ import android.text.TextUtils;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
@@ -47,7 +47,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * @author Niall Scott
  */
-class StopMarkerLoader extends ProcessedCursorLoader<List<Stop>> {
+class StopMarkerLoader extends ProcessedCursorLoader<Map<String, Stop>> {
 
     /**
      * Create a new {@code StopMarkerLoader}.
@@ -81,9 +81,9 @@ class StopMarkerLoader extends ProcessedCursorLoader<List<Stop>> {
 
     @Nullable
     @Override
-    public List<Stop> processCursor(@Nullable final Cursor cursor) {
+    public Map<String, Stop> processCursor(@Nullable final Cursor cursor) {
         if (cursor != null) {
-            final ArrayList<Stop> result = new ArrayList<>(cursor.getCount());
+            final HashMap<String, Stop> result = new HashMap<>(cursor.getCount());
             final int stopCodeColumn = cursor.getColumnIndex(BusStopContract.BusStops.STOP_CODE);
             final int stopNameColumn = cursor.getColumnIndex(BusStopContract.BusStops.STOP_NAME);
             final int latitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LATITUDE);
@@ -103,11 +103,11 @@ class StopMarkerLoader extends ProcessedCursorLoader<List<Stop>> {
                         : getContext().getString(R.string.busstop, stopName, stopCode);
                 final LatLng position = new LatLng(cursor.getDouble(latitudeColumn),
                         cursor.getDouble(longitudeColumn));
-                result.add(new Stop(position, title, stopCode,
+                result.put(stopCode, new Stop(position, title, stopCode,
                         cursor.getInt(orientationColumn)));
             }
 
-            return Collections.unmodifiableList(result);
+            return Collections.unmodifiableMap(result);
         } else {
             return null;
         }

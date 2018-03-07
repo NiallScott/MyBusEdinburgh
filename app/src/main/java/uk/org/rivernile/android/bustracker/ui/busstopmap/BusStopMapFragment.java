@@ -29,12 +29,14 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,10 +56,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
-import java.util.List;
+import java.util.Map;
 
 import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
@@ -77,13 +81,15 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
         ClusterManager.OnClusterClickListener<Stop>,
         ClusterManager.OnClusterItemClickListener<Stop>,
         ClusterManager.OnClusterItemInfoWindowClickListener<Stop>,
-        GetStopServicesTask.OnStopServicesLoadedListener {
+        GoogleMap.OnInfoWindowCloseListener,
+        StopClusterRenderer.OnItemRenderedListener {
 
     private static final String ARG_STOPCODE = "stopCode";
     private static final String ARG_LATITUDE = "latitude";
     private static final String ARG_LONGITUDE = "longitude";
 
     private static final String STATE_SELECTED_SERVICES = "selectedServices";
+    private static final String STATE_SELECTED_STOP_CODE = "selectedStopCode";
 
     private static final String DIALOG_SERVICES_CHOOSER = "dialogServicesChooser";
     private static final String DIALOG_MAP_TYPE_BOTTOM_SHEET = "bottomSheetMapType";
@@ -94,6 +100,7 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
 
     private static final int LOADER_SERVICES = 1;
     private static final int LOADER_STOPS = 2;
+    private static final int LOADER_STOP = 3;
 
     private Callbacks callbacks;
     private PreferenceManager preferenceManager;
@@ -101,11 +108,12 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     private GoogleMap map;
     private ClusterManager<Stop> clusterManager;
     private StopClusterRenderer clusterRenderer;
-    private GetStopServicesTask getStopServicesTask;
 
     private String[] services;
     private String[] selectedServices;
-    private Marker currentSelectedMarker;
+    private String selectedStopCode;
+    private String servicesForStop;
+    private Map<String, Stop> displayedStops;
 
     private MapView mapView;
 
@@ -179,6 +187,13 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
 
         if (savedInstanceState != null) {
             selectedServices = savedInstanceState.getStringArray(STATE_SELECTED_SERVICES);
+            setSelectedStopCode(savedInstanceState.getString(STATE_SELECTED_STOP_CODE));
+        } else {
+            final Bundle args = getArguments();
+
+            if (args != null) {
+                setSelectedStopCode(args.getString(ARG_STOPCODE));
+            }
         }
     }
 
@@ -251,11 +266,6 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
             preferenceManager.setLastMapZoomLevel(position.zoom);
             preferenceManager.setLastMapType(map.getMapType());
         }
-
-        if (getStopServicesTask != null) {
-            getStopServicesTask.cancel(false);
-            getStopServicesTask = null;
-        }
     }
 
     @Override
@@ -271,6 +281,7 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
 
         mapView.onSaveInstanceState(outState);
         outState.putStringArray(STATE_SELECTED_SERVICES, selectedServices);
+        outState.putString(STATE_SELECTED_STOP_CODE, selectedStopCode);
     }
 
     @Override
@@ -340,6 +351,13 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
                 return new AllServiceNamesLoader(getContext());
             case LOADER_STOPS:
                 return new StopMarkerLoader(getContext(), selectedServices);
+            case LOADER_STOP:
+                return new BusStopLoader(getContext(), selectedStopCode,
+                        new String[] {
+                                BusStopContract.BusStops.LATITUDE,
+                                BusStopContract.BusStops.LONGITUDE,
+                                BusStopContract.BusStops.SERVICE_LISTING
+                        });
             default:
                 return null;
         }
@@ -354,8 +372,11 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
                         ((ProcessedCursorLoader.ResultWrapper<String[]>) data).getResult());
                 break;
             case LOADER_STOPS:
-                handleBusStopsLoaded(((ProcessedCursorLoader.ResultWrapper<List<Stop>>)
+                handleBusStopsLoaded(((ProcessedCursorLoader.ResultWrapper<Map<String, Stop>>)
                         data).getResult());
+                break;
+            case LOADER_STOP:
+                handleStopLoaded((Cursor) data);
                 break;
         }
     }
@@ -392,22 +413,8 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public boolean onClusterItemClick(final Stop stop) {
-        if (getStopServicesTask != null) {
-            getStopServicesTask.cancel(false);
-            getStopServicesTask = null;
-        }
-
-        final Marker marker = clusterRenderer.getMarker(stop);
-
-        if (marker != null) {
-            currentSelectedMarker = marker;
-            final String stopCode = (String) marker.getTag();
-
-            if (stopCode != null) {
-                getStopServicesTask = new GetStopServicesTask(getContext(), this);
-                getStopServicesTask.execute(stopCode);
-            }
-        }
+        setSelectedStopCode(stop.getStopCode());
+        startStopLoader(true);
 
         return true;
     }
@@ -418,15 +425,20 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     }
 
     @Override
-    public void onStopServicesLoaded(@Nullable final String services) {
-        if (currentSelectedMarker != null) {
-            currentSelectedMarker.setSnippet(services);
-            currentSelectedMarker.showInfoWindow();
-            final float zoomLevel = map.getCameraPosition().zoom;
-            moveCameraToLocation(currentSelectedMarker.getPosition(), zoomLevel, true);
-        }
+    public void onInfoWindowClose(final Marker marker) {
+        setSelectedStopCode(null);
+        getLoaderManager().destroyLoader(LOADER_STOP);
+        servicesForStop = null;
+    }
 
-        getStopServicesTask = null;
+    @Override
+    public void onItemRendered(@NonNull final Marker marker) {
+        final String stopCode = (String) marker.getTag();
+
+        if (stopCode != null && stopCode.equals(selectedStopCode)) {
+            marker.setSnippet(servicesForStop);
+            marker.showInfoWindow();
+        }
     }
 
     /**
@@ -450,6 +462,19 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     }
 
     /**
+     * Start a stop loader, which loads data for the currently selected stop.
+     *
+     * @param force {@code true} if the loader should be re-created, {@code false} if not.
+     */
+    private void startStopLoader(final boolean force) {
+        if (force) {
+            getLoaderManager().restartLoader(LOADER_STOP, null, this);
+        } else {
+            getLoaderManager().initLoader(LOADER_STOP, null, this);
+        }
+    }
+
+    /**
      * Perform setup on the map.
      */
     private void setUpMap() {
@@ -465,17 +490,25 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
 
         final Context context = getContext();
         clusterManager = new ClusterManager<>(context, map);
-        clusterRenderer = new StopClusterRenderer(context, map, clusterManager);
+        clusterRenderer = new StopClusterRenderer(context, map, clusterManager, this);
+        clusterRenderer.setSelectedStopCode(selectedStopCode);
         clusterManager.setRenderer(clusterRenderer);
         clusterManager.setOnClusterClickListener(this);
         clusterManager.setOnClusterItemClickListener(this);
         clusterManager.setOnClusterItemInfoWindowClickListener(this);
+
         map.setOnCameraIdleListener(clusterManager);
         map.setOnMarkerClickListener(clusterManager);
         map.setOnInfoWindowClickListener(clusterManager);
+        map.setOnInfoWindowCloseListener(this);
         map.setInfoWindowAdapter(new MapInfoWindow(getActivity(), (ViewGroup) getView()));
+
         startStopsLoader(false);
         moveCameraToInitialLocation();
+
+        if (!TextUtils.isEmpty(selectedStopCode)) {
+            startStopLoader(false);
+        }
     }
 
     /**
@@ -491,12 +524,51 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     /**
      * Handle the stops load completing.
      *
-     * @param stops The {@link List} of stops to show on the map.
+     * @param stops The {@link Map} of stops to show on the map.
      */
-    private void handleBusStopsLoaded(@Nullable final List<Stop> stops) {
+    private void handleBusStopsLoaded(@Nullable final Map<String, Stop> stops) {
         clusterManager.clearItems();
-        clusterManager.addItems(stops);
+
+        if (stops != null) {
+            displayedStops = stops;
+            clusterManager.addItems(stops.values());
+        } else {
+            displayedStops = null;
+        }
+
         clusterManager.cluster();
+    }
+
+    /**
+     * Handle data for the selected stop being loaded.
+     *
+     * @param stopCursor A {@link Cursor} containing data for the selected stop.
+     */
+    private void handleStopLoaded(@Nullable final Cursor stopCursor) {
+        if (stopCursor != null && stopCursor.moveToFirst()) {
+            final int latitudeColumn = stopCursor.getColumnIndex(BusStopContract.BusStops.LATITUDE);
+            final int longitudeColumn = stopCursor.getColumnIndex(
+                    BusStopContract.BusStops.LONGITUDE);
+            final double latitude = stopCursor.getDouble(latitudeColumn);
+            final double longitude = stopCursor.getDouble(longitudeColumn);
+            final float zoomLevel = map.getCameraPosition().zoom;
+
+            moveCameraToLocation(latitude, longitude, zoomLevel, true);
+
+            final Stop stop = displayedStops.get(selectedStopCode);
+
+            if (stop != null) {
+                final Marker marker = clusterRenderer.getMarker(stop);
+                final int servicesColumn = stopCursor.getColumnIndex(
+                        BusStopContract.BusStops.SERVICE_LISTING);
+                servicesForStop = stopCursor.getString(servicesColumn);
+
+                if (marker != null) {
+                    marker.setSnippet(servicesForStop);
+                    marker.showInfoWindow();
+                }
+            }
+        }
     }
 
     /**
@@ -553,6 +625,19 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     }
 
     /**
+     * Set the selected stop code.
+     *
+     * @param selectedStopCode The selected stop code.
+     */
+    private void setSelectedStopCode(@Nullable final String selectedStopCode) {
+        this.selectedStopCode = selectedStopCode;
+
+        if (clusterRenderer != null) {
+            clusterRenderer.setSelectedStopCode(selectedStopCode);
+        }
+    }
+
+    /**
      * Handle the search menu item being selected.
      */
     private void handleSearchMenuItemSelected() {
@@ -597,7 +682,14 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
      */
     private void handleSearchActivityResult(final int resultCode, @NonNull final Intent intent) {
         if (resultCode == Activity.RESULT_OK) {
-            // TODO: pan to the chosen bus stop.
+            setSelectedStopCode(intent.getStringExtra(SearchActivity.EXTRA_STOP_CODE));
+            startStopLoader(true);
+
+            if (map != null) {
+                final LatLng currentLocation = map.getCameraPosition().target;
+                final float maxZoom = map.getMaxZoomLevel();
+                moveCameraToLocation(currentLocation, maxZoom, false);
+            }
         }
     }
 
