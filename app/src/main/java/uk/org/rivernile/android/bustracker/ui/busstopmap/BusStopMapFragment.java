@@ -53,15 +53,23 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
+import uk.org.rivernile.android.bustracker.database.busstop.loaders.RouteLineLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
@@ -94,6 +102,8 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     private static final String DIALOG_SERVICES_CHOOSER = "dialogServicesChooser";
     private static final String DIALOG_MAP_TYPE_BOTTOM_SHEET = "bottomSheetMapType";
 
+    private static final String LOADER_ARG_SERVICES_TO_LOAD = "servicesToLoad";
+
     private static final int PERMISSION_REQUEST_LOCATION = 1;
 
     private static final int REQUEST_CODE_SEARCH = 100;
@@ -101,6 +111,7 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     private static final int LOADER_SERVICES = 1;
     private static final int LOADER_STOPS = 2;
     private static final int LOADER_STOP = 3;
+    private static final int LOADER_ROUTE_LINE = 4;
 
     private Callbacks callbacks;
     private PreferenceManager preferenceManager;
@@ -114,6 +125,7 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     private String selectedStopCode;
     private String servicesForStop;
     private Map<String, Stop> displayedStops;
+    private Map<String, List<Polyline>> routeLines = new HashMap<>();
 
     private MapView mapView;
 
@@ -210,6 +222,8 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onActivityCreated(@Nullable final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        getActivity().setTitle(R.string.map_title);
 
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
@@ -358,6 +372,16 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
                                 BusStopContract.BusStops.LONGITUDE,
                                 BusStopContract.BusStops.SERVICE_LISTING
                         });
+            case LOADER_ROUTE_LINE:
+                if (args != null) {
+                    final String[] servicesToLoad =
+                            args.getStringArray(LOADER_ARG_SERVICES_TO_LOAD);
+                    if (servicesToLoad != null) {
+                        return new RouteLineLoader(getContext(), servicesToLoad);
+                    }
+                }
+
+                return null;
             default:
                 return null;
         }
@@ -378,6 +402,11 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
             case LOADER_STOP:
                 handleStopLoaded((Cursor) data);
                 break;
+            case LOADER_ROUTE_LINE:
+                final Map<String, List<PolylineOptions>> result = ((ProcessedCursorLoader
+                        .ResultWrapper<Map<String, List<PolylineOptions>>>) data).getResult();
+                handleRouteLinesLoaded(result);
+                break;
         }
     }
 
@@ -396,6 +425,54 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
     public void onServicesChosen(final String[] chosenServices) {
         selectedServices = chosenServices;
         startStopsLoader(true);
+
+        final Iterator<String> itRouteLines = routeLines.keySet().iterator();
+
+        // Loop through all existing route lines on the map...
+        while (itRouteLines.hasNext()) {
+            final String key = itRouteLines.next();
+            boolean found = false;
+
+            // ...and then loop through the chosen services list from the user...
+            for (String fs : chosenServices) {
+                if (key.equals(fs)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            // ...and if the service is not found in the user's list, remove it from the map.
+            if (!found) {
+                final List<Polyline> polyLines = routeLines.get(key);
+
+                for (Polyline pl : polyLines) {
+                    pl.remove();
+                }
+
+                itRouteLines.remove();
+            }
+        }
+
+        final ArrayList<String> tempList = new ArrayList<>();
+
+        // Loop through the filteredServices array. If the element does not appear in the existing
+        // route lines, then add it to the to-be-added list.
+        for (String fs : chosenServices) {
+            if (!routeLines.containsKey(fs)) {
+                tempList.add(fs);
+            }
+        }
+
+        final int size = tempList.size();
+        // Execute the load if there are routes to be loaded.
+        if (size > 0) {
+            final String[] servicesToLoad = new String[size];
+            tempList.toArray(servicesToLoad);
+
+            final Bundle b = new Bundle();
+            b.putStringArray(LOADER_ARG_SERVICES_TO_LOAD, servicesToLoad);
+            getLoaderManager().restartLoader(LOADER_ROUTE_LINE, b, this);
+        }
     }
 
     @Override
@@ -509,6 +586,10 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
         if (!TextUtils.isEmpty(selectedStopCode)) {
             startStopLoader(false);
         }
+
+        if (selectedServices != null && selectedServices.length >= 0) {
+            onServicesChosen(selectedServices);
+        }
     }
 
     /**
@@ -567,6 +648,39 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
                     marker.setSnippet(servicesForStop);
                     marker.showInfoWindow();
                 }
+            }
+        }
+    }
+
+    /**
+     * Add route lines to the map. This is called when the route lines loader has finished loading
+     * the route lines.
+     *
+     * @param result A {@link HashMap}, mapping the service name to a {@link List} of
+     * {@link PolylineOptions} objects. This is a {@link List} because a service may have more
+     * than one {@link Polyline}.
+     */
+    private void handleRouteLinesLoaded(
+            @Nullable final Map<String, List<PolylineOptions>> result) {
+        if (map == null || result == null) {
+            return;
+        }
+
+        List<PolylineOptions> polyLineOptions;
+        LinkedList<Polyline> newPolyLines;
+
+        // Loop through all services in the HashMap.
+        for (String service : result.keySet()) {
+            polyLineOptions = result.get(service);
+            // Create the LinkedList that the Polylines will be stored in.
+            newPolyLines = new LinkedList<>();
+            // Add the LinkedList to the routeLines HashMap.
+            routeLines.put(service, newPolyLines);
+
+            // Loop through all the PolylineOptions for this service, and add them to the map and
+            // the Polyline LinkedList.
+            for (PolylineOptions plo : polyLineOptions) {
+                newPolyLines.add(map.addPolyline(plo));
             }
         }
     }
