@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,39 +23,33 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.about;
+package uk.org.rivernile.android.bustracker.ui.about
 
-import android.app.Dialog;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
-
-import uk.org.rivernile.edinburghbustracker.android.R;
+import android.app.Dialog
+import android.os.Bundle
+import android.support.v4.app.DialogFragment
+import android.support.v7.app.AlertDialog
+import android.text.Html
+import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
- * This {@link DialogFragment} will show a dialog which contains open source license information for
- * external code used inside this application.
- * 
+ * This [DialogFragment] shows a dialog to the user showing credits for the application.
+ *
  * @author Niall Scott
  */
-public class OpenSourceLicenceDialogFragment extends DialogFragment {
+class CreditsDialogFragment : DialogFragment() {
 
-    @Override
-    public void onCreate(@Nullable final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-        setCancelable(true);
+        isCancelable = true
     }
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable final Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getContext())
-                .setTitle(R.string.opensourcelicensedialog_title)
-                .setMessage(R.string.open_source_licenses)
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return AlertDialog.Builder(requireContext())
+                .setTitle(R.string.creditsdialog_title)
+                .setMessage(Html.fromHtml(getString(R.string.creditsdialog_body)))
                 .setPositiveButton(R.string.close, null)
-                .create();
+                .create()
     }
 }

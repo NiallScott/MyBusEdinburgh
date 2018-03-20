@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,29 +23,33 @@
  *     exempt from clause 2.
  */
 
-buildscript {
-    ext {
-        kotlinVersion = '1.2.30'
+package uk.org.rivernile.android.bustracker.ui.about
+
+import android.app.Dialog
+import android.os.Bundle
+import android.support.v4.app.DialogFragment
+import android.support.v7.app.AlertDialog
+import uk.org.rivernile.edinburghbustracker.android.R
+
+/**
+ * This [DialogFragment] will show a dialog which contains open source license information for
+ * external code used inside this application.
+ *
+ * @author Niall Scott
+ */
+class OpenSourceLicenceDialogFragment : DialogFragment() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        isCancelable = true
     }
 
-    repositories {
-        jcenter()
-        google()
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return AlertDialog.Builder(requireContext())
+                .setTitle(R.string.opensourcelicensedialog_title)
+                .setMessage(R.string.open_source_licenses)
+                .setPositiveButton(R.string.close, null)
+                .create()
     }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-        google()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

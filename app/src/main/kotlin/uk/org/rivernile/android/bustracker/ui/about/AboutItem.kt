@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,38 +23,18 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.about;
-
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-
-import uk.org.rivernile.edinburghbustracker.android.R;
+package uk.org.rivernile.android.bustracker.ui.about
 
 /**
- * This {@link android.app.Activity} hosts {@link AboutFragment} to show application 'about'
- * information.
+ * This is an item in the 'about' list.
  *
+ * @param id The ID of the item.
+ * @param title The title of the item.
+ * @param subtitle An optional subtitle for the item.
+ * @param clickable Should the item be clickable?
  * @author Niall Scott
  */
-public class AboutActivity extends AppCompatActivity implements AboutFragment.Callbacks {
-
-    private static final String DIALOG_CREDITS = "creditsDialog";
-    private static final String DIALOG_LICENCES = "licencesDialog";
-
-    @Override
-    protected void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.about);
-    }
-
-    @Override
-    public void onShowCredits() {
-        new CreditsDialogFragment().show(getSupportFragmentManager(), DIALOG_CREDITS);
-    }
-
-    @Override
-    public void onShowLicences() {
-        new OpenSourceLicenceDialogFragment().show(getSupportFragmentManager(), DIALOG_LICENCES);
-    }
-}
+internal data class AboutItem(val id: Int,
+                              val title: String,
+                              var subtitle: String? = null,
+                              val clickable: Boolean = false)

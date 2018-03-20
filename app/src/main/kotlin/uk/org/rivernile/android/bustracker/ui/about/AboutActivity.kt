@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,33 +23,36 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.about;
+package uk.org.rivernile.android.bustracker.ui.about
 
-import android.app.Dialog;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
-import android.text.Html;
-import uk.org.rivernile.edinburghbustracker.android.R;
-
+import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
+import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
- * This {@link DialogFragment} shows a dialog to the user showing credits for the application.
+ * This [android.app.Activity] hosts [AboutFragment] to show application 'about' information.
  *
  * @author Niall Scott
  */
-public class CreditsDialogFragment extends DialogFragment {
+class AboutActivity : AppCompatActivity(), AboutFragment.Callbacks {
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setCancelable(true)
-                .setTitle(R.string.creditsdialog_title)
-                .setMessage(Html.fromHtml(getString(R.string.creditsdialog_body)))
-                .setPositiveButton(R.string.close, null);
+    companion object {
 
-        return builder.create();
+        private const val DIALOG_CREDITS = "creditsDialog"
+        private const val DIALOG_LICENCES = "licencesDialog"
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.about)
+    }
+
+    override fun onShowCredits() {
+        CreditsDialogFragment().show(supportFragmentManager, DIALOG_CREDITS)
+    }
+
+    override fun onShowLicences() {
+        OpenSourceLicenceDialogFragment().show(supportFragmentManager, DIALOG_LICENCES)
     }
 }
