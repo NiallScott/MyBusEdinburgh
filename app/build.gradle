@@ -29,7 +29,9 @@ apply plugin: 'kotlin-kapt'
 
 ext {
     supportLibraryVersion = '27.1.0'
+    architectureComponentsVersion = '1.1.0'
     googlePlayServicesVersion = '11.8.0'
+    daggerVersion = '2.14.1'
 
     testSupportLibraryVersion = '1.0.1'
 }
@@ -97,8 +99,20 @@ dependencies {
     implementation "com.android.support:cardview-v7:" + supportLibraryVersion
     implementation "com.android.support:percent:" + supportLibraryVersion
 
+    // Android Architecture Components
+    implementation "android.arch.lifecycle:extensions:$architectureComponentsVersion"
+    implementation "android.arch.lifecycle:common-java8:$architectureComponentsVersion"
+    annotationProcessor "android.arch.lifecycle:compiler:$architectureComponentsVersion"
+
     // Google Play Services
     implementation "com.google.android.gms:play-services-maps:" + googlePlayServicesVersion
+
+    // Dagger 2
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    implementation "com.google.dagger:dagger-android:$daggerVersion"
+    implementation "com.google.dagger:dagger-android-support:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     implementation 'uk.org.rivernile.android.fetchutils:fetchutils-library:1.1.1'
 

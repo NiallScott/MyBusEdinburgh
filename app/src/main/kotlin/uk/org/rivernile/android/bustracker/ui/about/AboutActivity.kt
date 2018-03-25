@@ -26,15 +26,20 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
+import dagger.android.AndroidInjection
+import dagger.android.DispatchingAndroidInjector
+import dagger.android.support.HasSupportFragmentInjector
 import uk.org.rivernile.edinburghbustracker.android.R
+import javax.inject.Inject
 
 /**
  * This [android.app.Activity] hosts [AboutFragment] to show application 'about' information.
  *
  * @author Niall Scott
  */
-class AboutActivity : AppCompatActivity(), AboutFragment.Callbacks {
+class AboutActivity : AppCompatActivity(), HasSupportFragmentInjector, AboutFragment.Callbacks {
 
     companion object {
 
@@ -42,11 +47,18 @@ class AboutActivity : AppCompatActivity(), AboutFragment.Callbacks {
         private const val DIALOG_LICENCES = "licencesDialog"
     }
 
+    @Inject
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        AndroidInjection.inject(this)
+
         setContentView(R.layout.about)
     }
+
+    override fun supportFragmentInjector() = dispatchingAndroidInjector
 
     override fun onShowCredits() {
         CreditsDialogFragment().show(supportFragmentManager, DIALOG_CREDITS)
