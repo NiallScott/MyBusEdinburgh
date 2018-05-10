@@ -21,48 +21,28 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.dagger
+package uk.org.rivernile.android.bustracker.data.platform
 
-import android.app.Application
 import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
-import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
-import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
-import javax.inject.Singleton
+import android.content.pm.PackageManager
+import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
- * The main application [Module].
+ * This is an Android specific implementation of [PlatformDataSource].
  *
+ * @property context A [Context] instance.
  * @author Niall Scott
  */
-@Module(includes = [
-    ViewModelModule::class,
-    AboutDataModule::class
-])
-class ApplicationModule {
+class AndroidPlatformDataSource(private val context: Context) : PlatformDataSource {
 
-    /**
-     * Provide the [Application] [Context] to Dagger.
-     *
-     * @param application The [Application] instance.
-     * @return The [Application] [Context].
-     */
-    @Provides
-    fun provideApplicationContext(application: Application): Context = application
-
-    /**
-     * Provide a [PlatformDataSource] to Dagger.
-     *
-     * @param context A [Context] instance.
-     * @return A [PlatformDataSource].
-     */
-    @Provides
-    @Singleton
-    fun providePlatformDataSource(context: Context): PlatformDataSource {
-        return AndroidPlatformDataSource(context)
+    override fun getAppVersionString(): String = try {
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        context.getString(R.string.about_version_format, info.versionName, info.versionCode)
+    } catch (e: PackageManager.NameNotFoundException) {
+        // This should never happen.
+        ""
     }
 }

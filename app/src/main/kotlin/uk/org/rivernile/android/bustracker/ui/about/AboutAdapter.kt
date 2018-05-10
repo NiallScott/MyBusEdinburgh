@@ -31,6 +31,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import uk.org.rivernile.android.bustracker.repositories.about.AboutItem
 import uk.org.rivernile.edinburghbustracker.android.R
 
 internal typealias OnItemClickedListener = (item: AboutItem) -> Unit

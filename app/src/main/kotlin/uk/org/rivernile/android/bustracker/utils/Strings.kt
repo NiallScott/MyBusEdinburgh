@@ -21,48 +21,32 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.dagger
+package uk.org.rivernile.android.bustracker.utils
 
-import android.app.Application
 import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
-import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
-import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
-import javax.inject.Singleton
+import android.support.annotation.StringRes
+import javax.inject.Inject
 
 /**
- * The main application [Module].
+ * This class is used to access Android platform strings, in a way that can be mocked in unit
+ * testing.
  *
+ * @property A [Context] instance.
  * @author Niall Scott
  */
-@Module(includes = [
-    ViewModelModule::class,
-    AboutDataModule::class
-])
-class ApplicationModule {
+class Strings @Inject constructor(private val context: Context) {
 
     /**
-     * Provide the [Application] [Context] to Dagger.
-     *
-     * @param application The [Application] instance.
-     * @return The [Application] [Context].
+     * @see Context.getString
      */
-    @Provides
-    fun provideApplicationContext(application: Application): Context = application
+    fun getString(@StringRes resId: Int): String = context.getString(resId)
 
     /**
-     * Provide a [PlatformDataSource] to Dagger.
-     *
-     * @param context A [Context] instance.
-     * @return A [PlatformDataSource].
+     * @see Context.getString
      */
-    @Provides
-    @Singleton
-    fun providePlatformDataSource(context: Context): PlatformDataSource {
-        return AndroidPlatformDataSource(context)
-    }
+    fun getString(@StringRes resId: Int, vararg formatArgs: Any): String =
+            context.getString(resId, *formatArgs)
 }

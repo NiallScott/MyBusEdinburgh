@@ -21,48 +21,40 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.dagger
+package uk.org.rivernile.android.bustracker.dagger.about
 
-import android.app.Application
 import android.content.Context
 import dagger.Module
 import dagger.Provides
-import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
-import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
-import javax.inject.Singleton
+import uk.org.rivernile.android.bustracker.repositories.about.AboutDatabaseLiveData
+import uk.org.rivernile.android.bustracker.repositories.about.AboutRepository
+import uk.org.rivernile.android.bustracker.utils.Strings
 
 /**
- * The main application [Module].
+ * This Dagger [Module] provides data dependencies for the 'about' screen.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    ViewModelModule::class,
-    AboutDataModule::class
-])
-class ApplicationModule {
+@Module
+class AboutDataModule {
 
     /**
-     * Provide the [Application] [Context] to Dagger.
+     * Provide the repository which provides the items to be shown on the 'about' screen.
      *
-     * @param application The [Application] instance.
-     * @return The [Application] [Context].
+     * @param context The application [Context].
+     * @param strings The provider of localised strings.
+     * @param platformDataSource The data source to use which provides system data.
+     * @return The repository which provides the items to be shown on the 'about' screen.
      */
     @Provides
-    fun provideApplicationContext(application: Application): Context = application
+    fun providesAboutRepository(context: Context, strings: Strings,
+                                platformDataSource: PlatformDataSource): AboutRepository {
+        val databaseLiveData = AboutDatabaseLiveData(context)
 
-    /**
-     * Provide a [PlatformDataSource] to Dagger.
-     *
-     * @param context A [Context] instance.
-     * @return A [PlatformDataSource].
-     */
-    @Provides
-    @Singleton
-    fun providePlatformDataSource(context: Context): PlatformDataSource {
-        return AndroidPlatformDataSource(context)
+        return AboutRepository(strings, platformDataSource, databaseLiveData)
     }
 }

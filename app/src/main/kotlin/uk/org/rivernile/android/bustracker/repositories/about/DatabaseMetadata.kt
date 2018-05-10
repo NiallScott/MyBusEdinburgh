@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,20 +21,18 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.ui.about
+package uk.org.rivernile.android.bustracker.repositories.about
+
+import java.util.Date
 
 /**
- * This is an item in the 'about' list.
+ * This class contains metadata for the bus stop database.
  *
- * @param id The ID of the item.
- * @param title The title of the item.
- * @param subtitle An optional subtitle for the item.
- * @param clickable Should the item be clickable?
+ * @property databaseVersion The version of the database.
+ * @property topologyVersion The topology of the database.
  * @author Niall Scott
  */
-internal data class AboutItem(val id: Int,
-                              val title: String,
-                              var subtitle: String? = null,
-                              val clickable: Boolean = false)
+data class DatabaseMetadata(val databaseVersion: Date, val topologyVersion: String)

@@ -21,48 +21,22 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.dagger
-
-import android.app.Application
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
-import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
-import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.data.platform
 
 /**
- * The main application [Module].
+ * This is a data source for any data that comes from the platform.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    ViewModelModule::class,
-    AboutDataModule::class
-])
-class ApplicationModule {
+interface PlatformDataSource {
 
     /**
-     * Provide the [Application] [Context] to Dagger.
+     * Get the version of the app.
      *
-     * @param application The [Application] instance.
-     * @return The [Application] [Context].
+     * @return The version of the app.
      */
-    @Provides
-    fun provideApplicationContext(application: Application): Context = application
-
-    /**
-     * Provide a [PlatformDataSource] to Dagger.
-     *
-     * @param context A [Context] instance.
-     * @return A [PlatformDataSource].
-     */
-    @Provides
-    @Singleton
-    fun providePlatformDataSource(context: Context): PlatformDataSource {
-        return AndroidPlatformDataSource(context)
-    }
+    fun getAppVersionString(): String
 }
