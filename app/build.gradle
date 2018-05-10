@@ -29,9 +29,9 @@ apply plugin: 'kotlin-kapt'
 
 ext {
     supportLibraryVersion = '27.1.0'
-    architectureComponentsVersion = '1.1.0'
+    architectureComponentsVersion = '1.1.1'
     googlePlayServicesVersion = '11.8.0'
-    daggerVersion = '2.14.1'
+    daggerVersion = '2.15'
 
     testSupportLibraryVersion = '1.0.1'
 }
@@ -101,7 +101,6 @@ dependencies {
 
     // Android Architecture Components
     implementation "android.arch.lifecycle:extensions:$architectureComponentsVersion"
-    implementation "android.arch.lifecycle:common-java8:$architectureComponentsVersion"
     annotationProcessor "android.arch.lifecycle:compiler:$architectureComponentsVersion"
 
     // Google Play Services
@@ -120,7 +119,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
     // Okhttp
-    implementation 'com.squareup.okhttp3:okhttp:3.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
 
     // Test dependencies
