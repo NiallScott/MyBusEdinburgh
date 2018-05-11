@@ -26,6 +26,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-allopen'
 
 ext {
     supportLibraryVersion = '27.1.0'
@@ -83,7 +84,12 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
     }
+}
+
+allOpen {
+    annotation 'uk.org.rivernile.android.bustracker.utils.OpenClass'
 }
 
 dependencies {
@@ -128,4 +134,7 @@ dependencies {
     androidTestImplementation "com.android.support.test:rules:" + testSupportLibraryVersion
 
     testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.18.3'
+    testImplementation 'com.nhaarman:mockito-kotlin:1.5.0'
+    testImplementation "android.arch.core:core-testing:" + architectureComponentsVersion
 }

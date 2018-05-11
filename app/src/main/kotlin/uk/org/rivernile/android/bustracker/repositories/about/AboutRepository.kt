@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.repositories.about
 
 import android.arch.lifecycle.LiveData
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
+import uk.org.rivernile.android.bustracker.utils.OpenForTesting
 import uk.org.rivernile.android.bustracker.utils.Strings
 import uk.org.rivernile.edinburghbustracker.android.R
 
@@ -39,6 +40,7 @@ import uk.org.rivernile.edinburghbustracker.android.R
  * @property databaseLiveData [LiveData] representing the database data.
  * @author Niall Scott
  */
+@OpenForTesting
 class AboutRepository constructor(private val strings: Strings,
                                   private val platformDataSource: PlatformDataSource,
                                   val databaseLiveData: LiveData<DatabaseMetadata>) {

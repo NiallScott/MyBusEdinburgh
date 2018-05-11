@@ -37,6 +37,7 @@ import javax.inject.Inject
  * @property A [Context] instance.
  * @author Niall Scott
  */
+@OpenForTesting
 class Strings @Inject constructor(private val context: Context) {
 
     /**

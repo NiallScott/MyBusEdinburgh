@@ -38,7 +38,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_author" tools:ignore="MissingTranslation">Niall Scott</string> <!-- Should not be included in localised versions -->
     <string name="app_author_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/</string>
     <string name="app_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/bustracker/</string>
-    <string name="app_twitter" tools:ignore="MissingTranslation">http://twitter.com/MyBusEdinburgh</string>
+    <string name="app_twitter" tools:ignore="MissingTranslation">https://twitter.com/MyBusEdinburgh</string>
     <string name="search_hint">Search&#8230;</string>
     <string name="asset_db_version" tools:ignore="MissingTranslation">1402286404622</string> <!-- Should not be included in localised versions -->
 
