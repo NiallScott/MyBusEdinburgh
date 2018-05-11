@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,32 +21,28 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-buildscript {
-    ext {
-        kotlinVersion = '1.2.41'
-    }
+package uk.org.rivernile.android.bustracker.data.platform
 
-    repositories {
-        jcenter()
-        google()
-    }
+import android.content.Context
+import android.content.pm.PackageManager
+import uk.org.rivernile.edinburghbustracker.android.R
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
+/**
+ * This is an Android specific implementation of [PlatformDataSource].
+ *
+ * @property context A [Context] instance.
+ * @author Niall Scott
+ */
+class AndroidPlatformDataSource(private val context: Context) : PlatformDataSource {
 
-allprojects {
-    repositories {
-        jcenter()
-        google()
+    override fun getAppVersionString(): String = try {
+        val info = context.packageManager.getPackageInfo(context.packageName, 0)
+        context.getString(R.string.about_version_format, info.versionName, info.versionCode)
+    } catch (e: PackageManager.NameNotFoundException) {
+        // This should never happen.
+        ""
     }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

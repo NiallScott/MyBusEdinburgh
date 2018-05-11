@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,32 +21,22 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-buildscript {
-    ext {
-        kotlinVersion = '1.2.41'
-    }
+package uk.org.rivernile.android.bustracker.data.platform
 
-    repositories {
-        jcenter()
-        google()
-    }
+/**
+ * This is a data source for any data that comes from the platform.
+ *
+ * @author Niall Scott
+ */
+interface PlatformDataSource {
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-        google()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    /**
+     * Get the version of the app.
+     *
+     * @return The version of the app.
+     */
+    fun getAppVersionString(): String
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,38 +23,26 @@
  *     exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.ui.about;
+package uk.org.rivernile.android.bustracker.dagger
 
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-
-import uk.org.rivernile.edinburghbustracker.android.R;
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.dagger.about.AboutFragmentsModule
+import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 
 /**
- * This {@link android.app.Activity} hosts {@link AboutFragment} to show application 'about'
- * information.
+ * This [Module] is used to inject [android.app.Activity] instance in this application.
  *
  * @author Niall Scott
  */
-public class AboutActivity extends AppCompatActivity implements AboutFragment.Callbacks {
+@Module
+abstract class ActivityModule {
 
-    private static final String DIALOG_CREDITS = "creditsDialog";
-    private static final String DIALOG_LICENCES = "licencesDialog";
-
-    @Override
-    protected void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.about);
-    }
-
-    @Override
-    public void onShowCredits() {
-        new CreditsDialogFragment().show(getSupportFragmentManager(), DIALOG_CREDITS);
-    }
-
-    @Override
-    public void onShowLicences() {
-        new OpenSourceLicenceDialogFragment().show(getSupportFragmentManager(), DIALOG_LICENCES);
-    }
+    /**
+     * Presents an instance of [AboutActivity] as an item to be injected.
+     *
+     * @return An instance of [AboutActivity] to be injected.
+     */
+    @ContributesAndroidInjector(modules = [AboutFragmentsModule::class])
+    abstract fun contributeAboutActivity(): AboutActivity
 }

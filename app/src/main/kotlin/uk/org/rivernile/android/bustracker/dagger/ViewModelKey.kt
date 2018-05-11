@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,30 +23,19 @@
  *     exempt from clause 2.
  */
 
-buildscript {
-    ext {
-        kotlinVersion = '1.2.41'
-    }
+package uk.org.rivernile.android.bustracker.dagger
 
-    repositories {
-        jcenter()
-        google()
-    }
+import android.arch.lifecycle.ViewModel
+import dagger.MapKey
+import kotlin.reflect.KClass
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-        google()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+/**
+ * This is required to create [ViewModel] instances.
+ *
+ * @author Google
+ */
+@MustBeDocumented
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+@MapKey
+annotation class ViewModelKey(val value: KClass<out ViewModel>)

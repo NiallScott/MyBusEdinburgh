@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,35 +21,18 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.ui.about;
+package uk.org.rivernile.android.bustracker.repositories.about
 
-import android.app.Dialog;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
-import android.text.Html;
-import uk.org.rivernile.edinburghbustracker.android.R;
-
+import java.util.Date
 
 /**
- * This {@link DialogFragment} shows a dialog to the user showing credits for the application.
+ * This class contains metadata for the bus stop database.
  *
+ * @property databaseVersion The version of the database.
+ * @property topologyVersion The topology of the database.
  * @author Niall Scott
  */
-public class CreditsDialogFragment extends DialogFragment {
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setCancelable(true)
-                .setTitle(R.string.creditsdialog_title)
-                .setMessage(Html.fromHtml(getString(R.string.creditsdialog_body)))
-                .setPositiveButton(R.string.close, null);
-
-        return builder.create();
-    }
-}
+data class DatabaseMetadata(val databaseVersion: Date, val topologyVersion: String)

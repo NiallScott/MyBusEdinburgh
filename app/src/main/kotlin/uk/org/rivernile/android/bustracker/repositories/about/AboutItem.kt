@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,30 +23,18 @@
  *     exempt from clause 2.
  */
 
-buildscript {
-    ext {
-        kotlinVersion = '1.2.41'
-    }
+package uk.org.rivernile.android.bustracker.repositories.about
 
-    repositories {
-        jcenter()
-        google()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-        google()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+/**
+ * This is an item in the 'about' list.
+ *
+ * @property id The ID of the item.
+ * @property title The title of the item.
+ * @property subtitle An optional subtitle for the item.
+ * @property clickable Should the item be clickable?
+ * @author Niall Scott
+ */
+data class AboutItem(val id: Int,
+                     val title: String,
+                     var subtitle: String? = null,
+                     val clickable: Boolean = false)

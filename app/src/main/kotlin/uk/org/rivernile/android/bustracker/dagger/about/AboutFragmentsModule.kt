@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,30 +23,26 @@
  *     exempt from clause 2.
  */
 
-buildscript {
-    ext {
-        kotlinVersion = '1.2.41'
-    }
+package uk.org.rivernile.android.bustracker.dagger.about
 
-    repositories {
-        jcenter()
-        google()
-    }
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.ui.about.AboutFragment
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
+/**
+ * This [Module] is used to inject [android.support.v4.app.Fragment]s owned by
+ * [uk.org.rivernile.android.bustracker.ui.about.AboutActivity].
+ *
+ * @author Niall Scott
+ */
+@Module
+abstract class AboutFragmentsModule {
 
-allprojects {
-    repositories {
-        jcenter()
-        google()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    /**
+     * Presents [AboutFragment] as an item to be injected.
+     *
+     * @return An instance of the [AboutFragment] to be injected.
+     */
+    @ContributesAndroidInjector
+    abstract fun contributeAboutFragment(): AboutFragment
 }
