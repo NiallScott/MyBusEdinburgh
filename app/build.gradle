@@ -107,7 +107,7 @@ dependencies {
 
     // Android Architecture Components
     implementation "android.arch.lifecycle:extensions:$architectureComponentsVersion"
-    annotationProcessor "android.arch.lifecycle:compiler:$architectureComponentsVersion"
+    kapt "android.arch.lifecycle:compiler:$architectureComponentsVersion"
 
     // Google Play Services
     implementation "com.google.android.gms:play-services-maps:" + googlePlayServicesVersion

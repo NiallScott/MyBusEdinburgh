@@ -24,32 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
-
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
+package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
+ * This is a data class to hold details about the currently selected stop.
  *
  * @author Niall Scott
+ * @property stopCode The stop code.
+ * @property latitude The latitude of the stop.
+ * @property longitude The longitude of the stop.
+ * @property serviceListing A [String] to display to show the services that stop at this stop.
  */
-@Module
-class AboutDataModule {
-
-    /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
-    }
-}
+data class SelectedStop(val stopCode: String,
+                        val latitude: Double,
+                        val longitude: Double,
+                        val serviceListing: String?)

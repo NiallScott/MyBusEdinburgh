@@ -24,32 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
+package uk.org.rivernile.android.utils;
 
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
+import android.support.annotation.Nullable;
+
+import uk.org.rivernile.android.bustracker.utils.ClearableLiveData;
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
- *
  * @author Niall Scott
  */
-@Module
-class AboutDataModule {
+public class TestableClearableLiveData<T> extends ClearableLiveData<T> {
 
-    /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
+    @Override
+    public void setValue(@Nullable final T value) {
+        super.setValue(value);
+    }
+
+    @Nullable
+    @Override
+    public T getValue() {
+        return super.getValue();
     }
 }

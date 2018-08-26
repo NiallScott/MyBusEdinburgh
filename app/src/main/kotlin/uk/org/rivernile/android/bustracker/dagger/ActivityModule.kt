@@ -28,7 +28,9 @@ package uk.org.rivernile.android.bustracker.dagger
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import uk.org.rivernile.android.bustracker.dagger.about.AboutFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapFragmentsModule
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
+import uk.org.rivernile.android.bustracker.ui.main.MainActivity
 
 /**
  * This [Module] is used to inject [android.app.Activity] instance in this application.
@@ -37,6 +39,14 @@ import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
  */
 @Module
 abstract class ActivityModule {
+
+    /**
+     * Presents an instance of [MainActivity] as an item to be injected.
+     *
+     * @return An instance of [MainActivity] to be injected.
+     */
+    @ContributesAndroidInjector(modules = [BusStopMapFragmentsModule::class])
+    abstract fun contributeMainActivity(): MainActivity
 
     /**
      * Presents an instance of [AboutActivity] as an item to be injected.

@@ -62,6 +62,8 @@ abstract class BusApplication : Application(), HasActivityInjector,
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
+    @Inject
+    lateinit var preferenceManager: PreferenceManager
 
     override fun onCreate() {
         super.onCreate()
@@ -118,13 +120,6 @@ abstract class BusApplication : Application(), HasActivityInjector,
      * @return An instance of the [AlertManager].
      */
     abstract fun getAlertManager(): AlertManager
-
-    /**
-     * Get an instance of the [PreferenceManager].
-     *
-     * @return An instance of the [PreferenceManager].
-     */
-    abstract fun getPreferenceManager(): PreferenceManager
 
     /**
      * Get an instance of [Picasso] for image loading.

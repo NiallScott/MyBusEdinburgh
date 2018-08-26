@@ -24,32 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
+package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.clustering.ClusterItem
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
+ * This class describes a stop to be rendered on the map.
  *
  * @author Niall Scott
+ * @property stopCode The stop code.
+ * @property stopName The human friendly name for the stop.
+ * @property latitude The latitude of the stop.
+ * @property longitude The longitude of the stop.
+ * @property orientation The orientation of the stop.
  */
-@Module
-class AboutDataModule {
+data class Stop(val stopCode: String,
+                val stopName: String,
+                val latitude: Double,
+                val longitude: Double,
+                val orientation: Int) : ClusterItem {
 
-    /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
-    }
+    private val latLng = LatLng(latitude, longitude)
+
+    override fun getPosition() = latLng
+
+    override fun getTitle() = stopName
+
+    override fun getSnippet() = null
 }

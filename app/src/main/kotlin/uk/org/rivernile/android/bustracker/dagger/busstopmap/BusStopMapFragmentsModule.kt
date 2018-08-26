@@ -24,32 +24,26 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
+package uk.org.rivernile.android.bustracker.dagger.busstopmap
 
-import android.content.Context
 import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
+ * This [Module] is used to inject [android.support.v4.app.Fragment]s owned by
+ * [uk.org.rivernile.android.bustracker.ui.main.MainActivity].
  *
  * @author Niall Scott
  */
 @Module
-class AboutDataModule {
+abstract class BusStopMapFragmentsModule {
 
     /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
+     * Presents [BusStopMapFragment] as an item to be injected.
      *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
+     * @return An instance of the [BusStopMapFragment] to be injected.
      */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
-    }
+    @ContributesAndroidInjector
+    abstract fun contributeBusStopMapFragment(): BusStopMapFragment
 }

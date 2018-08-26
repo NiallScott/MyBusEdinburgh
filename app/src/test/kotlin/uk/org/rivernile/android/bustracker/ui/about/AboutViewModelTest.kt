@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Observer
 import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.argumentCaptor
@@ -46,6 +45,7 @@ import uk.org.rivernile.android.bustracker.repositories.about.AboutItem
 import uk.org.rivernile.android.bustracker.repositories.about.AboutRepository
 import uk.org.rivernile.android.bustracker.repositories.about.DatabaseMetadata
 import uk.org.rivernile.android.bustracker.utils.Strings
+import uk.org.rivernile.android.utils.TestableClearableLiveData
 import uk.org.rivernile.edinburghbustracker.android.R
 import java.util.Date
 
@@ -62,7 +62,7 @@ class AboutViewModelTest {
 
     private val aboutRepository: AboutRepository = mock()
     private val strings: Strings = mock()
-    private val metadataLiveData = MutableLiveData<DatabaseMetadata>()
+    private val metadataLiveData = TestableClearableLiveData<DatabaseMetadata>()
 
     private lateinit var aboutViewModel: AboutViewModel
 
@@ -71,9 +71,15 @@ class AboutViewModelTest {
         whenever(aboutRepository.createItems()).thenReturn(listOf(
                 AboutItem(AboutRepository.ITEM_ID_DATABASE_VERSION, "Test"),
                 AboutItem(AboutRepository.ITEM_ID_TOPOLOGY_VERSION, "Test 2")))
-        whenever(aboutRepository.databaseLiveData)
+        whenever(aboutRepository.createDatabaseLiveData())
                 .thenReturn(metadataLiveData)
         aboutViewModel = AboutViewModel(aboutRepository, strings)
+    }
+
+    @Test
+    fun retrievesAboutDatabaseLiveDataOnCreate() {
+        verify(aboutRepository)
+                .createDatabaseLiveData()
     }
 
     @Test

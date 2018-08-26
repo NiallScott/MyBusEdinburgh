@@ -24,43 +24,50 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.repositories.about
+package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
 import android.content.Context
 import android.database.Cursor
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract
 import uk.org.rivernile.android.bustracker.utils.CursorLiveData
-import java.util.Date
 
 /**
- * This is a concrete implementation of [CursorLiveData] to provide database metadata for the
- * 'about' screen.
+ * This [android.arch.lifecycle.LiveData] instance is responsible for providing data for a single
+ * given stop.
  *
- * @param context A [Context] instance.
  * @author Niall Scott
+ * @param context A [Context] instance.
+ * @param stopCode The code of the stop to return.
  */
-class AboutDatabaseLiveData(private val context: Context) : CursorLiveData<DatabaseMetadata>() {
-
+class BusStopLiveData(private val context: Context,
+                      private val stopCode: String) : CursorLiveData<SelectedStop>() {
     init {
-        context.contentResolver.registerContentObserver(
-                BusStopContract.DatabaseInformation.CONTENT_URI, false, contentObserver)
+        context.contentResolver.registerContentObserver(BusStopContract.BusStops.CONTENT_URI,
+                false, contentObserver)
     }
 
     override fun loadCursor(): Cursor? = context.contentResolver.query(
-            BusStopContract.DatabaseInformation.CONTENT_URI,
-            arrayOf(BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID,
-                BusStopContract.DatabaseInformation.LAST_UPDATE_TIMESTAMP),
-            null, null, null, cancellationSignal)
+            BusStopContract.BusStops.CONTENT_URI,
+            arrayOf(BusStopContract.BusStops.STOP_CODE,
+                    BusStopContract.BusStops.LATITUDE,
+                    BusStopContract.BusStops.LONGITUDE,
+                    BusStopContract.BusStops.SERVICE_LISTING),
+            "${BusStopContract.BusStops.STOP_CODE} = ?",
+            arrayOf(stopCode),
+            null)
 
-    override fun processCursor(cursor: Cursor?): DatabaseMetadata? {
+    override fun processCursor(cursor: Cursor?): SelectedStop? {
         return if (cursor != null && cursor.moveToFirst()) {
-            val versionColumn = cursor.getColumnIndex(
-                    BusStopContract.DatabaseInformation.LAST_UPDATE_TIMESTAMP)
-            val topologyColumn = cursor.getColumnIndex(
-                    BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID)
-            val version = Date(cursor.getLong(versionColumn))
+            val stopCodeColumn = cursor.getColumnIndex(BusStopContract.BusStops.STOP_CODE)
+            val latitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LATITUDE)
+            val longitudeColumn = cursor.getColumnIndex(BusStopContract.BusStops.LONGITUDE)
+            val serviceListingColumn = cursor.getColumnIndex(
+                    BusStopContract.BusStops.SERVICE_LISTING)
 
-            DatabaseMetadata(version, cursor.getString(topologyColumn))
+            SelectedStop(cursor.getString(stopCodeColumn),
+                    cursor.getDouble(latitudeColumn),
+                    cursor.getDouble(longitudeColumn),
+                    cursor.getString(serviceListingColumn))
         } else {
             null
         }

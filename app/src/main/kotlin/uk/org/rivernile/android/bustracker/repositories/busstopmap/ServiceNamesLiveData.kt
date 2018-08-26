@@ -24,46 +24,52 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.repositories.about
+package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
 import android.content.Context
 import android.database.Cursor
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract
+import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase
 import uk.org.rivernile.android.bustracker.utils.CursorLiveData
-import java.util.Date
 
 /**
- * This is a concrete implementation of [CursorLiveData] to provide database metadata for the
- * 'about' screen.
+ * This [CursorLiveData] loads all known service names from the database. The names will be reloaded
+ * when a change is detected in the database.
  *
- * @param context A [Context] instance.
  * @author Niall Scott
+ * @param context A [Context] instance.
  */
-class AboutDatabaseLiveData(private val context: Context) : CursorLiveData<DatabaseMetadata>() {
+internal class ServiceNamesLiveData(private val context: Context)
+    : CursorLiveData<Array<String>>() {
 
     init {
-        context.contentResolver.registerContentObserver(
-                BusStopContract.DatabaseInformation.CONTENT_URI, false, contentObserver)
+        context.contentResolver.registerContentObserver(BusStopContract.Services.CONTENT_URI,
+                false, contentObserver)
     }
 
-    override fun loadCursor(): Cursor? = context.contentResolver.query(
-            BusStopContract.DatabaseInformation.CONTENT_URI,
-            arrayOf(BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID,
-                BusStopContract.DatabaseInformation.LAST_UPDATE_TIMESTAMP),
-            null, null, null, cancellationSignal)
+    override fun loadCursor() = context.contentResolver.query(BusStopContract.Services.CONTENT_URI,
+            arrayOf(BusStopContract.Services.NAME),
+            null,
+            null,
+            BusStopDatabase.getServicesSortByCondition(BusStopContract.Services.NAME),
+            cancellationSignal)
 
-    override fun processCursor(cursor: Cursor?): DatabaseMetadata? {
-        return if (cursor != null && cursor.moveToFirst()) {
-            val versionColumn = cursor.getColumnIndex(
-                    BusStopContract.DatabaseInformation.LAST_UPDATE_TIMESTAMP)
-            val topologyColumn = cursor.getColumnIndex(
-                    BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID)
-            val version = Date(cursor.getLong(versionColumn))
+    override fun processCursor(cursor: Cursor?): Array<String>? {
+        cursor?.let {
+            val count = it.count
+            val serviceNameColumn = it.getColumnIndex(BusStopContract.Services.NAME)
+            val result = Array(count) { _ -> "" }
 
-            DatabaseMetadata(version, cursor.getString(topologyColumn))
-        } else {
-            null
+            for (i in 0..count) {
+                if (it.moveToPosition(i)) {
+                    result[i] = it.getString(serviceNameColumn)
+                }
+            }
+
+            return result
         }
+
+        return null
     }
 
     override fun onCleared() {

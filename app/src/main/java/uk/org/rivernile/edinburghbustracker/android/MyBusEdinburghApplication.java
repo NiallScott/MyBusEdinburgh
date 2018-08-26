@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,6 @@ import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManagerImpl;
 import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghParser;
 import uk.org.rivernile.edinburghbustracker.android.parser.database.EdinburghDatabaseVersionParser;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
@@ -106,15 +105,6 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
 
         return alertManager;
-    }
-
-    @Override
-    public synchronized PreferenceManager getPreferenceManager() {
-        if (preferenceManager == null) {
-            preferenceManager = new PreferenceManagerImpl(this);
-        }
-
-        return preferenceManager;
     }
 
     @Override

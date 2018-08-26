@@ -24,32 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
+package uk.org.rivernile.android.bustracker.repositories.about
 
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
+import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
+ * This class creates new [ClearableLiveData] instances for the 'about' section.
  *
  * @author Niall Scott
  */
-@Module
-class AboutDataModule {
+interface AboutLiveDataFactory {
 
     /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
+     * Create a new [ClearableLiveData] which gets [DatabaseMetadata].
      *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
+     * @return A new [ClearableLiveData] which gets [DatabaseMetadata].
      */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
-    }
+    fun createDatabaseLiveData(): ClearableLiveData<DatabaseMetadata>
 }

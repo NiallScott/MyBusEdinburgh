@@ -31,6 +31,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
 import uk.org.rivernile.android.bustracker.ui.about.AboutViewModel
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
 
 /**
  * This [Module] is used for injecting classes with [ViewModel] instances
@@ -49,7 +50,18 @@ abstract class ViewModelModule {
     @Binds
     @IntoMap
     @ViewModelKey(AboutViewModel::class)
-    abstract fun bindAboutViewModule(viewModel: AboutViewModel): ViewModel
+    abstract fun bindAboutViewModel(viewModel: AboutViewModel): ViewModel
+
+    /**
+     * Inject a [BusStopMapViewModel] when requested.
+     *
+     * @param viewModel A [BusStopMapViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Binds
+    @IntoMap
+    @ViewModelKey(BusStopMapViewModel::class)
+    abstract fun bindBusStopMapViewModel(viewModel: BusStopMapViewModel): ViewModel
 
     /**
      * Inject a [ViewModelFactory] when requested.

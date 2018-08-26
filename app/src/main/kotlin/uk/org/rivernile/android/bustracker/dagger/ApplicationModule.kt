@@ -30,8 +30,11 @@ import android.content.Context
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
+import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapDataModule
 import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.preferences.PreferenceManagerImpl
 import javax.inject.Singleton
 
 /**
@@ -41,7 +44,8 @@ import javax.inject.Singleton
  */
 @Module(includes = [
     ViewModelModule::class,
-    AboutDataModule::class
+    AboutDataModule::class,
+    BusStopMapDataModule::class
 ])
 class ApplicationModule {
 
@@ -64,5 +68,17 @@ class ApplicationModule {
     @Singleton
     fun providePlatformDataSource(context: Context): PlatformDataSource {
         return AndroidPlatformDataSource(context)
+    }
+
+    /**
+     * Provide a [PreferenceManager] to Dagger.
+     *
+     * @param context A [Context] instance.
+     * @return A [PreferenceManager].
+     */
+    @Provides
+    @Singleton
+    fun providePreferenceManager(context: Context): PreferenceManager {
+        return PreferenceManagerImpl(context)
     }
 }

@@ -32,7 +32,9 @@ import android.database.Cursor
 import android.os.AsyncTask
 import android.os.CancellationSignal
 import android.os.Handler
+import android.support.annotation.CallSuper
 import android.support.annotation.WorkerThread
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * This is an abstract version of [LiveData] which is used to load a [Cursor] and optionally
@@ -41,30 +43,34 @@ import android.support.annotation.WorkerThread
  * @param T The type of data set in the [LiveData].
  * @author Niall Scott
  */
-abstract class CursorLiveData<T> : LiveData<T>() {
+abstract class CursorLiveData<T> : ClearableLiveData<T>() {
 
     /**
      * The cancellation signal is called when the loading of a [Cursor] should be cancelled. If you
      * are loading the [Cursor] from a [android.content.ContentProvider], then please pass in this
      * field.
      */
-    internal var cancellationSignal = CancellationSignal()
+    var cancellationSignal = CancellationSignal()
         private set
-    private val contentObserver = CursorContentObserver()
-    private var data: ProcessedResult<T>? = null
+    val contentObserver: ContentObserver = CursorContentObserver()
+    private var data: T? = null
         set (value) {
             field = value
-            setValue(value?.data)
+            setValue(value)
         }
     private var currentLoadTask: CursorAsyncTask<T>? = null
+    private val invalidated = AtomicBoolean(true)
 
+    @CallSuper
     override fun onActive() {
-        beginLoadCursor()
+        if (invalidated.compareAndSet(true, false)) {
+            beginLoadCursor()
+        }
     }
 
+    @CallSuper
     override fun onInactive() {
         cancelCurrentTask()
-        replaceCurrentData(null)
     }
 
     /**
@@ -86,6 +92,17 @@ abstract class CursorLiveData<T> : LiveData<T>() {
     open fun processCursor(cursor: Cursor?): T? = null
 
     /**
+     * Invalidate the current data.
+     */
+    fun invalidate() {
+        if (hasActiveObservers()) {
+            beginLoadCursor()
+        } else {
+            invalidated.set(true)
+        }
+    }
+
+    /**
      * Begin loading the [Cursor]. This will be performed on a background thread.
      */
     private fun beginLoadCursor() {
@@ -100,13 +117,8 @@ abstract class CursorLiveData<T> : LiveData<T>() {
      *
      * @param newData The new data to replace the old data with.
      */
-    private fun replaceCurrentData(newData: ProcessedResult<T>?) {
-        data?.cursor?.apply {
-            unregisterContentObserver(contentObserver)
-            close()
-        }
-
-        data = newData?.also { it.cursor?.registerContentObserver(contentObserver) }
+    private fun replaceCurrentData(newData: T?) {
+        data = newData
     }
 
     /**
@@ -128,21 +140,18 @@ abstract class CursorLiveData<T> : LiveData<T>() {
     private class CursorAsyncTask<T>(
             private val onLoadCursor: () -> Cursor?,
             private val onProcessCursor: (Cursor?) -> T?,
-            private val onTaskFinished: (ProcessedResult<T>?) -> Unit)
-        : AsyncTask<Void, Void, ProcessedResult<T>?>() {
+            private val onTaskFinished: (T?) -> Unit)
+        : AsyncTask<Void, Void, T?>() {
 
-        override fun doInBackground(vararg params: Void?): ProcessedResult<T>? {
+        override fun doInBackground(vararg params: Void?): T? {
             val cursor = onLoadCursor()
-            val processed = onProcessCursor(cursor)
+            val processed = if (!isCancelled) onProcessCursor(cursor) else null
+            cursor?.close()
 
-            return ProcessedResult(cursor, processed)
+            return processed
         }
 
-        override fun onCancelled(result: ProcessedResult<T>?) {
-            result?.cursor?.close()
-        }
-
-        override fun onPostExecute(result: ProcessedResult<T>?) {
+        override fun onPostExecute(result: T?) {
             onTaskFinished(result)
         }
     }
@@ -156,16 +165,7 @@ abstract class CursorLiveData<T> : LiveData<T>() {
         override fun deliverSelfNotifications() = true
 
         override fun onChange(selfChange: Boolean) {
-            beginLoadCursor()
+            invalidate()
         }
     }
-
-    /**
-     * This holds result data.
-     *
-     * @param T The type of data returned as the processed data.
-     * @property cursor The [Cursor] - the loaded source of data.
-     * @property data The processed version of the [Cursor].
-     */
-    private data class ProcessedResult<T>(val cursor: Cursor?, val data: T?)
 }

@@ -68,7 +68,7 @@ class AboutViewModel @Inject constructor(aboutRepository: AboutRepository,
     val showOpenSourceLicences: LiveData<Void>
         get() = _showOpenSourceLicences
 
-    private val databaseData = aboutRepository.databaseLiveData
+    private val databaseData = aboutRepository.createDatabaseLiveData()
     /** This [LiveData] changes when the database version item is updated. */
     val databaseVersionItem: LiveData<AboutItem> =
             Transformations.map(databaseData, this::processDatabaseVersion)
@@ -99,6 +99,10 @@ class AboutViewModel @Inject constructor(aboutRepository: AboutRepository,
             AboutRepository.ITEM_ID_CREDITS -> _showCredits.call()
             AboutRepository.ITEM_ID_OPEN_SOURCE_LICENCES -> _showOpenSourceLicences.call()
         }
+    }
+
+    override fun onCleared() {
+        databaseData.onCleared()
     }
 
     /**

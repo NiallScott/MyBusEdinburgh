@@ -24,32 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
+package uk.org.rivernile.android.bustracker.utils
 
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
+import android.arch.lifecycle.LiveData
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
+ * This adds a method to the base [LiveData] which can be called to inform the instance that it
+ * should release any remaining resources, such as content changed listeners, as this instance will
+ * no longer be used.
  *
  * @author Niall Scott
+ * @param T The type of data to be supplied by this [LiveData].
  */
-@Module
-class AboutDataModule {
+open class ClearableLiveData<T> : LiveData<T>() {
 
     /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
+     * This is called when this instance will be no longer used. Any tidy up, for example
+     * unregistering any content changed listeners, should be done here.
      */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
+    open fun onCleared() {
+
     }
 }

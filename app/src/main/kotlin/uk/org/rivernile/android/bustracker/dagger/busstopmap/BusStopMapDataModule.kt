@@ -24,32 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
+package uk.org.rivernile.android.bustracker.dagger.busstopmap
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
+import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
+import uk.org.rivernile.android.bustracker.repositories.busstopmap.LiveDataFactory
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
+ * This Dagger [Module] provides classes related to providing data for the bus stop map.
  *
  * @author Niall Scott
  */
 @Module
-class AboutDataModule {
+class BusStopMapDataModule {
 
     /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
+     * Provide the [BusStopMapRepository].
      *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
+     * @param liveDataFactory A factory for creating [android.arch.lifecycle.LiveData] instances for
+     * the stop map.
+     * @return A [BusStopMapRepository] instance.
      */
     @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
+    fun providesBusStopMapRepository(liveDataFactory: LiveDataFactory) : BusStopMapRepository {
+        return BusStopMapRepository(liveDataFactory)
     }
 }

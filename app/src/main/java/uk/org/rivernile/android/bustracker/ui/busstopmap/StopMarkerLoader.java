@@ -39,6 +39,7 @@ import java.util.Map;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
+import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -103,8 +104,8 @@ class StopMarkerLoader extends ProcessedCursorLoader<Map<String, Stop>> {
                         : getContext().getString(R.string.busstop, stopName, stopCode);
                 final LatLng position = new LatLng(cursor.getDouble(latitudeColumn),
                         cursor.getDouble(longitudeColumn));
-                result.put(stopCode, new Stop(position, title, stopCode,
-                        cursor.getInt(orientationColumn)));
+                //result.put(stopCode, new Stop(position, title, stopCode,
+                //        cursor.getInt(orientationColumn)));
             }
 
             return Collections.unmodifiableMap(result);

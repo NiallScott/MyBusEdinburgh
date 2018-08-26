@@ -48,6 +48,12 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.support.HasSupportFragmentInjector;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment;
@@ -78,7 +84,8 @@ public class MainActivity extends AppCompatActivity
         implements SectionListFragment.Callbacks, AlertManagerFragment.Callbacks,
         FavouriteStopsFragment.Callbacks, NearestStopsFragment.Callbacks,
         ServicesChooserDialogFragment.Callbacks, InstallBarcodeScannerDialogFragment.Callbacks,
-        TurnOnGpsDialogFragment.Callbacks, BusStopMapFragment.Callbacks {
+        TurnOnGpsDialogFragment.Callbacks, BusStopMapFragment.Callbacks,
+        HasSupportFragmentInjector {
     
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
@@ -91,6 +98,9 @@ public class MainActivity extends AppCompatActivity
     private static final String DIALOG_SERVICES_CHOOSER = "servicesChooserDialog";
     private static final String DIALOG_CONFIRM_DELETE_FAVOURITE = "deleteFavouriteDialog";
     private static final String DIALOG_TURN_ON_GPS = "turnOnGpsDialog";
+
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
     
     private ActionBar actionBar;
     private DrawerLayout drawer;
@@ -100,6 +110,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.main_activity);
@@ -315,7 +327,12 @@ public class MainActivity extends AppCompatActivity
             // Do nothing.
         }
     }
-    
+
+    @Override
+    public AndroidInjector<Fragment> supportFragmentInjector() {
+        return dispatchingAndroidInjector;
+    }
+
     /**
      * Show a new {@link Section} to the user.
      * 

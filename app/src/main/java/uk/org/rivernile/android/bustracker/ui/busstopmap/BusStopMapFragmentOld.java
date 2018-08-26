@@ -71,6 +71,7 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNa
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.RouteLineLoader;
 import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
+import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment;
@@ -83,7 +84,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * @author Niall Scott
  */
-public class BusStopMapFragment extends Fragment implements LoaderManager.LoaderCallbacks,
+public class BusStopMapFragmentOld extends Fragment implements LoaderManager.LoaderCallbacks,
         OnMapReadyCallback, ServicesChooserDialogFragment.Callbacks,
         MapTypeBottomSheetDialogFragment.OnMapTypeSelectedListener,
         ClusterManager.OnClusterClickListener<Stop>,
@@ -567,8 +568,8 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
 
         final Context context = getContext();
         clusterManager = new ClusterManager<>(context, map);
-        clusterRenderer = new StopClusterRenderer(context, map, clusterManager, this);
-        clusterRenderer.setSelectedStopCode(selectedStopCode);
+        //clusterRenderer = new StopClusterRenderer(context, map, clusterManager, this, );
+        //clusterRenderer.setSelectedStopCode(selectedStopCode);
         clusterManager.setRenderer(clusterRenderer);
         clusterManager.setOnClusterClickListener(this);
         clusterManager.setOnClusterItemClickListener(this);
@@ -747,7 +748,7 @@ public class BusStopMapFragment extends Fragment implements LoaderManager.Loader
         this.selectedStopCode = selectedStopCode;
 
         if (clusterRenderer != null) {
-            clusterRenderer.setSelectedStopCode(selectedStopCode);
+            //clusterRenderer.setSelectedStopCode(selectedStopCode);
         }
     }
 

@@ -24,32 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
-
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
+package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
+ * A data class which represents a camera location update.
  *
  * @author Niall Scott
+ * @property latitude The latitude the camera should be centered on.
+ * @property longitude The longitude the camera should be centered on.
+ * @property zoomLevel An optional parameter to specify the zoom level of the camera. `null` means
+ * the zoom level should not be changed.
+ * @property animate Whether the camera update should be animated or not.
  */
-@Module
-class AboutDataModule {
-
-    /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
-    }
-}
+data class CameraLocation(
+        val latitude: Double,
+        val longitude: Double,
+        val zoomLevel: Float? = null,
+        val animate: Boolean)

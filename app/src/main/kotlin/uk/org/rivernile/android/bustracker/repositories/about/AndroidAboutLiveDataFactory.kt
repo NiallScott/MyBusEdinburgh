@@ -24,32 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.about
+package uk.org.rivernile.android.bustracker.repositories.about
 
 import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
 
 /**
- * This Dagger [Module] provides data dependencies for the 'about' screen.
+ * An Android specific implementation of [AboutLiveDataFactory].
  *
  * @author Niall Scott
+ * @param context A [Context] instance.
  */
-@Module
-class AboutDataModule {
+class AndroidAboutLiveDataFactory(private val context: Context) : AboutLiveDataFactory {
 
-    /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
-    }
+    override fun createDatabaseLiveData() = AboutDatabaseLiveData(context)
 }

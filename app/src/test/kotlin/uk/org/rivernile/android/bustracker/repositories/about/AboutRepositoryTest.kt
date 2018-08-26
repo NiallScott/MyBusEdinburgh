@@ -26,8 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.repositories.about
 
-import android.arch.lifecycle.MutableLiveData
 import com.nhaarman.mockito_kotlin.mock
+import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -45,13 +45,21 @@ class AboutRepositoryTest {
 
     private val strings: Strings = mock()
     private val platformDataSource: PlatformDataSource = mock()
-    private val databaseLiveData = MutableLiveData<DatabaseMetadata>()
+    private val aboutLiveDataFactory: AboutLiveDataFactory = mock()
 
     private lateinit var aboutRepository: AboutRepository
 
     @Before
     fun setUp() {
-        aboutRepository = AboutRepository(strings, platformDataSource, databaseLiveData)
+        aboutRepository = AboutRepository(strings, platformDataSource, aboutLiveDataFactory)
+    }
+
+    @Test
+    fun creatingDatabaseLiveDataCallsFavtory() {
+        aboutRepository.createDatabaseLiveData()
+
+        verify(aboutLiveDataFactory)
+                .createDatabaseLiveData()
     }
 
     @Test

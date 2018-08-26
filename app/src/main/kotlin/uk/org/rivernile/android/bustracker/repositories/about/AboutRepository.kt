@@ -31,19 +31,20 @@ import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
 import uk.org.rivernile.android.bustracker.utils.OpenForTesting
 import uk.org.rivernile.android.bustracker.utils.Strings
 import uk.org.rivernile.edinburghbustracker.android.R
+import javax.inject.Inject
 
 /**
  * Data for the application about screen is provided here.
  *
- * @property strings Platform string accessor.
- * @property platformDataSource Accessor for platform data values.
- * @property databaseLiveData [LiveData] representing the database data.
+ * @param strings Platform string accessor.
+ * @param platformDataSource Accessor for platform data values.
+ * @param databaseLiveData [LiveData] representing the database data.
  * @author Niall Scott
  */
 @OpenForTesting
-class AboutRepository constructor(private val strings: Strings,
-                                  private val platformDataSource: PlatformDataSource,
-                                  val databaseLiveData: LiveData<DatabaseMetadata>) {
+class AboutRepository @Inject constructor(private val strings: Strings,
+                                          private val platformDataSource: PlatformDataSource,
+                                          private val aboutLiveDataFactory: AboutLiveDataFactory) {
 
     companion object {
 
@@ -79,6 +80,11 @@ class AboutRepository constructor(private val strings: Strings,
             createTopologyVersionItem(),
             createCreditsItem(),
             createOpenSourceLicencesItem())
+
+    /**
+     * Create a [LiveData] instance for accessing database items.
+     */
+    fun createDatabaseLiveData() = aboutLiveDataFactory.createDatabaseLiveData()
 
     /**
      * Create the version item.
