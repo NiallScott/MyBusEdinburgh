@@ -41,7 +41,7 @@ import java.util.Date
  */
 class AboutDatabaseLiveData(private val context: Context) : CursorLiveData<DatabaseMetadata>() {
 
-    init {
+    override fun onBeginObservingCursor() {
         context.contentResolver.registerContentObserver(
                 BusStopContract.DatabaseInformation.CONTENT_URI, false, contentObserver)
     }
@@ -66,7 +66,7 @@ class AboutDatabaseLiveData(private val context: Context) : CursorLiveData<Datab
         }
     }
 
-    override fun onCleared() {
+    override fun onStopObservingCursor() {
         context.contentResolver.unregisterContentObserver(contentObserver)
     }
 }

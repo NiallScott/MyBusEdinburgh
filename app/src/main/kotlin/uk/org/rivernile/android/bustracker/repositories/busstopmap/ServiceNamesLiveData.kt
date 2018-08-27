@@ -42,7 +42,7 @@ import uk.org.rivernile.android.bustracker.utils.CursorLiveData
 internal class ServiceNamesLiveData(private val context: Context)
     : CursorLiveData<Array<String>>() {
 
-    init {
+    override fun onBeginObservingCursor() {
         context.contentResolver.registerContentObserver(BusStopContract.Services.CONTENT_URI,
                 false, contentObserver)
     }
@@ -72,7 +72,7 @@ internal class ServiceNamesLiveData(private val context: Context)
         return null
     }
 
-    override fun onCleared() {
+    override fun onStopObservingCursor() {
         context.contentResolver.unregisterContentObserver(contentObserver)
     }
 }

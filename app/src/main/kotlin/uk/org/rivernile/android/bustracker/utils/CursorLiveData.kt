@@ -50,27 +50,30 @@ abstract class CursorLiveData<T> : ClearableLiveData<T>() {
      * are loading the [Cursor] from a [android.content.ContentProvider], then please pass in this
      * field.
      */
-    var cancellationSignal = CancellationSignal()
+    protected var cancellationSignal: CancellationSignal? = null
         private set
-    val contentObserver: ContentObserver = CursorContentObserver()
-    private var data: T? = null
-        set (value) {
-            field = value
-            setValue(value)
-        }
+    protected val contentObserver: ContentObserver = CursorContentObserver()
     private var currentLoadTask: CursorAsyncTask<T>? = null
     private val invalidated = AtomicBoolean(true)
+    private val isObserving = AtomicBoolean(false)
 
     @CallSuper
     override fun onActive() {
+        if (isObserving.compareAndSet(false, true)) {
+            invalidated.set(true) // If we've not been observing, assume the data is stale.
+            onBeginObservingCursor()
+        }
+
         if (invalidated.compareAndSet(true, false)) {
             beginLoadCursor()
         }
     }
 
-    @CallSuper
-    override fun onInactive() {
-        cancelCurrentTask()
+    override fun onCleared() {
+        if (!hasObservers()) {
+            cancelCurrentTask()
+            stopObservingCursor()
+        }
     }
 
     /**
@@ -92,14 +95,38 @@ abstract class CursorLiveData<T> : ClearableLiveData<T>() {
     open fun processCursor(cursor: Cursor?): T? = null
 
     /**
+     * This is called when subclasses should begin observing the source of their `Cursor` for
+     * changes in data.
+     */
+    open fun onBeginObservingCursor() {
+
+    }
+
+    /**
+     * This is called when subclasses should stop observing the source of their `Cursor` for changes
+     * in data.
+     */
+    open fun onStopObservingCursor() {
+
+    }
+
+    /**
      * Invalidate the current data.
      */
     fun invalidate() {
-        if (hasActiveObservers()) {
+        invalidated.set(true)
+
+        if (hasObservers()) {
             beginLoadCursor()
-        } else {
-            invalidated.set(true)
         }
+    }
+
+    /**
+     * `finalize()` is declared as a last-resort cleanup of resources.
+     */
+    protected fun finalize() {
+        cancelCurrentTask()
+        stopObservingCursor()
     }
 
     /**
@@ -107,28 +134,45 @@ abstract class CursorLiveData<T> : ClearableLiveData<T>() {
      */
     private fun beginLoadCursor() {
         cancelCurrentTask()
-        currentLoadTask = CursorAsyncTask(this::loadCursor, this::processCursor,
+        cancellationSignal = CancellationSignal()
+        currentLoadTask = CursorAsyncTask(this::loadCursor,
+                this::processCursor,
                 this::replaceCurrentData)
-                .also { it.execute() }
+                .apply { execute() }
     }
 
     /**
-     * Replace the current data with a new [ProcessedResult].
+     * Replace the current data.
      *
      * @param newData The new data to replace the old data with.
      */
     private fun replaceCurrentData(newData: T?) {
-        data = newData
+        value = newData
+        invalidated.set(false)
     }
 
     /**
      * Cancel the current operation, if there is one.
      */
     private fun cancelCurrentTask() {
-        cancellationSignal.cancel()
-        cancellationSignal = CancellationSignal()
-        currentLoadTask?.cancel(false)
+        currentLoadTask?.let {
+            it.cancel(false)
+            invalidated.set(true) // If a load was happening, assume data is still stale.
+        }
+
+        cancellationSignal?.cancel()
         currentLoadTask = null
+        cancellationSignal = null
+    }
+
+    /**
+     * Stop observing the [Cursor] for changes. This calls through to the subclass if it is
+     * currently observing.
+     */
+    private fun stopObservingCursor() {
+        if (isObserving.compareAndSet(true, false)) {
+            onStopObservingCursor()
+        }
     }
 
     /**
@@ -136,6 +180,11 @@ abstract class CursorLiveData<T> : ClearableLiveData<T>() {
      * process it in to a model object.
      *
      * @param T the type of data to be returned by the [Cursor] processing.
+     * @param onLoadCursor A lambda executed on a background thread to load the `Cursor`.
+     * @param onProcessCursor A lambda executed on a background thread to turn the `Cursor` data in
+     * to a model object.
+     * @param onTaskFinished A lambda executed on the main thread to deal with the result of the
+     * data load.
      */
     private class CursorAsyncTask<T>(
             private val onLoadCursor: () -> Cursor?,

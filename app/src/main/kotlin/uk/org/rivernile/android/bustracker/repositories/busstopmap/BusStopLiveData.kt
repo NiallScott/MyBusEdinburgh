@@ -41,7 +41,8 @@ import uk.org.rivernile.android.bustracker.utils.CursorLiveData
  */
 class BusStopLiveData(private val context: Context,
                       private val stopCode: String) : CursorLiveData<SelectedStop>() {
-    init {
+
+    override fun onBeginObservingCursor() {
         context.contentResolver.registerContentObserver(BusStopContract.BusStops.CONTENT_URI,
                 false, contentObserver)
     }
@@ -73,7 +74,7 @@ class BusStopLiveData(private val context: Context,
         }
     }
 
-    override fun onCleared() {
+    override fun onStopObservingCursor() {
         context.contentResolver.unregisterContentObserver(contentObserver)
     }
 }

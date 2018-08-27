@@ -51,7 +51,7 @@ internal class BusStopsLiveData(private val context: Context,
                                 private val filteredServices: Array<String>?)
     : CursorLiveData<Map<String, Stop>>() {
 
-    init {
+    override fun onBeginObservingCursor() {
         context.contentResolver.registerContentObserver(BusStopContract.BusStops.CONTENT_URI,
                 false, contentObserver)
     }
@@ -116,7 +116,7 @@ internal class BusStopsLiveData(private val context: Context,
         }
     }
 
-    override fun onCleared() {
+    override fun onStopObservingCursor() {
         context.contentResolver.unregisterContentObserver(contentObserver)
     }
 }
