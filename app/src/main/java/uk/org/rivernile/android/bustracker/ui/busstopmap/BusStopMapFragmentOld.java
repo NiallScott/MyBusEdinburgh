@@ -477,7 +477,7 @@ public class BusStopMapFragmentOld extends Fragment implements LoaderManager.Loa
     }
 
     @Override
-    public void onMapTypeSelected(@MapTypeBottomSheetDialogFragment.MapType final int mapType) {
+    public void onMapTypeSelected(@MapType final int mapType) {
         setMapType(toGoogleMapType(mapType));
     }
 
@@ -862,7 +862,7 @@ public class BusStopMapFragmentOld extends Fragment implements LoaderManager.Loa
      *
      * @return The current map type as understood by {@link MapTypeBottomSheetDialogFragment}.
      */
-    @MapTypeBottomSheetDialogFragment.MapType
+    @MapType
     private int toMapType() {
         if (map != null) {
             switch (map.getMapType()) {
@@ -885,7 +885,7 @@ public class BusStopMapFragmentOld extends Fragment implements LoaderManager.Loa
      * @param mapType The map type returned by {@link MapTypeBottomSheetDialogFragment}.
      * @return The {@link GoogleMap} version of the map type.
      */
-    private int toGoogleMapType(@MapTypeBottomSheetDialogFragment.MapType final int mapType) {
+    private int toGoogleMapType(@MapType final int mapType) {
         switch (mapType) {
             case MapTypeBottomSheetDialogFragment.MAP_TYPE_NORMAL:
                 return GoogleMap.MAP_TYPE_NORMAL;

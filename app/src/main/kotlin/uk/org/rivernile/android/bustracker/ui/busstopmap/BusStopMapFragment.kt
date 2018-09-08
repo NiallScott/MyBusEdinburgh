@@ -358,7 +358,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         viewModel.onServicesChosen(chosenServices)
     }
 
-    override fun onMapTypeSelected(@MapTypeBottomSheetDialogFragment.MapType mapType: Int) {
+    override fun onMapTypeSelected(@MapType mapType: Int) {
         viewModel.onMapTypeSelected(mapType)
     }
 
@@ -601,7 +601,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      *
      * @return The current map type as understood by [MapTypeBottomSheetDialogFragment].
      */
-    @MapTypeBottomSheetDialogFragment.MapType
+    @MapType
     private fun toMapType() = when (map?.mapType) {
         GoogleMap.MAP_TYPE_SATELLITE -> MapTypeBottomSheetDialogFragment.MAP_TYPE_SATELLITE
         GoogleMap.MAP_TYPE_HYBRID -> MapTypeBottomSheetDialogFragment.MAP_TYPE_HYBRID
@@ -615,13 +615,12 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * @param mapType The map type returned by [MapTypeBottomSheetDialogFragment].
      * @return The [GoogleMap] version of the map type.
      */
-    private fun toGoogleMapType(@MapTypeBottomSheetDialogFragment.MapType mapType: Int) =
-        when (mapType) {
-            MapTypeBottomSheetDialogFragment.MAP_TYPE_NORMAL -> GoogleMap.MAP_TYPE_NORMAL
-            MapTypeBottomSheetDialogFragment.MAP_TYPE_SATELLITE -> GoogleMap.MAP_TYPE_SATELLITE
-            MapTypeBottomSheetDialogFragment.MAP_TYPE_HYBRID -> GoogleMap.MAP_TYPE_HYBRID
-            else -> GoogleMap.MAP_TYPE_NORMAL
-        }
+    private fun toGoogleMapType(@MapType mapType: Int) = when (mapType) {
+        MapTypeBottomSheetDialogFragment.MAP_TYPE_NORMAL -> GoogleMap.MAP_TYPE_NORMAL
+        MapTypeBottomSheetDialogFragment.MAP_TYPE_SATELLITE -> GoogleMap.MAP_TYPE_SATELLITE
+        MapTypeBottomSheetDialogFragment.MAP_TYPE_HYBRID -> GoogleMap.MAP_TYPE_HYBRID
+        else -> GoogleMap.MAP_TYPE_NORMAL
+    }
 
     /**
      * Any [Activities][Activity] which host this [android.support.v4.app.Fragment] must
