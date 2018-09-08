@@ -399,6 +399,30 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     }
 
     /**
+     * This should be called by the hosting [android.app.Activity] when a new stop code has been
+     * selected. For example, the hosting [android.app.Activity] may receive a call to
+     * [android.app.Activity.onNewIntent]. Set the newly supplied stop code here in this case.
+     *
+     * @param stopCode The new stop code.
+     */
+    fun onNewStopCode(stopCode: String) {
+        viewModel.onStopSearchResult(stopCode)
+    }
+
+    /**
+     * This should be called by the hosting [android.app.Activity] when a new latitude/longitude
+     * pair has bee selected. For example, the hosting [android.app.Activity] may receive a call to
+     * [android.app.Activity.onNewIntent]. Set the newly supplied latitude/longitude pair here in
+     * this case.
+     *
+     * @param latitude The new latitude.
+     * @param longitude The new longitude.
+     */
+    fun onRequestCameraLocation(latitude: Double, longitude: Double) {
+        viewModel.onRequestCameraLocation(latitude, longitude)
+    }
+
+    /**
      * Handle the collection of stop markers changing.
      *
      * @param stops The new stops collection to display.

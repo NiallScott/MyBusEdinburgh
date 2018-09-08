@@ -189,7 +189,8 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
         val longitude = initialLongitude
 
         if (stopCode != null) {
-
+            searchedBusStop = stopCode
+            _selectedStopCode.value = stopCode
         } else if (latitude != null && longitude != null) {
             _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
         } else {
@@ -325,12 +326,23 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     }
 
     /**
+     * This is called when a new camera location is requested.
+     *
+     * @param latitude The requested latitude.
+     * @param longitude The requested longitude.
+     */
+    fun onRequestCameraLocation(latitude: Double, longitude: Double) {
+        _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
+    }
+
+    /**
      * This is called when stops should be loaded.
      *
      * @param filteredServices Filtered services, if any.
      */
     private fun loadBusStops(filteredServices: Array<String>?) =
             repository.getBusStops(filteredServices).also {
+                _busStops?.onCleared()
                 _busStops = it
             }
 
@@ -341,6 +353,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     private fun loadBusStop(stopCode: String?) = stopCode?.let {
         repository.getBusStop(it).also { liveData ->
+            _selectedStop?.onCleared()
             _selectedStop = liveData
         }
     }
@@ -352,6 +365,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     private fun loadRouteLines(services: Array<String>?) =
             repository.getRouteLines(services).also {
+                _routeLines?.onCleared()
                 _routeLines = it
             }
 

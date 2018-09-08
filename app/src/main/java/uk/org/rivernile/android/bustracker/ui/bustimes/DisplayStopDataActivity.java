@@ -55,11 +55,11 @@ import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlert
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity;
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment;
 import uk.org.rivernile.android.bustracker.ui.favourites.AddEditFavouriteStopDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.favourites.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
-import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -262,7 +262,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
     @Override
     public void showMapForStop(@NonNull final String stopCode) {
         final Intent intent = new Intent(this, BusStopMapActivity.class);
-        intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
+        intent.putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode);
         startActivity(intent);
     }
 

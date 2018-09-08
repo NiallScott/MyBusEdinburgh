@@ -172,24 +172,16 @@
         
         <!-- BusStopMapActivity, to show bus stops on the map. -->
         <activity
-            android:name=".BusStopMapActivity"
+            android:name="uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity"
             android:label="@string/map_title"
             android:launchMode="singleTop"
-            android:theme="@style/MyBusEdinburgh.MapActivity"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
-            <!-- This Activity handles searching. -->
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
             <!-- External applications can call this Intent action to show the
                  bus stop map. -->
             <intent-filter>
                 <action android:name="uk.org.rivernile.edinburghbustracker.android.ACTION_VIEW_BUS_STOP_MAP" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
             <!-- PARENT_ACTIVITY is used by the support library for supporting
                  up navigation. -->
             <meta-data

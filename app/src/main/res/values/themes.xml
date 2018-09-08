@@ -42,9 +42,4 @@
     <style name="MyBusEdinburgh.NoActionBar.Search">
         <item name="searchViewStyle">@style/Widget.AppCompat.SearchView.ActionBar</item>
     </style>
-    
-    <style name="MyBusEdinburgh.MapActivity">
-        <item name="actionBarStyle">@style/AppActionBar.Map</item>
-        <item name="windowActionBarOverlay">true</item>
-    </style>
 </resources>

@@ -56,13 +56,13 @@ import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity;
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.favourites.AddEditFavouriteStopDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
-import uk.org.rivernile.edinburghbustracker.android.BusStopMapActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.android.bustracker.ui.favourites.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment;
@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onShowBusStopMapWithStopCode(final String stopCode) {
         final Intent intent = new Intent(this, BusStopMapActivity.class);
-        intent.putExtra(BusStopMapActivity.ARG_STOPCODE, stopCode);
+        intent.putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode);
         startActivity(intent);
     }
 

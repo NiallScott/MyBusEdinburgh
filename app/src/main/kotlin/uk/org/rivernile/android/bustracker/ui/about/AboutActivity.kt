@@ -51,9 +51,9 @@ class AboutActivity : AppCompatActivity(), HasSupportFragmentInjector, AboutFrag
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         AndroidInjection.inject(this)
+
+        super.onCreate(savedInstanceState)
 
         setContentView(R.layout.about)
     }

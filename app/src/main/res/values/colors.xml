@@ -32,7 +32,6 @@
     <color name="colorContextualStatusBarBackground">#616161</color>
     <color name="colorContextualActionBarBackground">#757575</color>
 
-    <color name="mapActionBarColour">#90000000</color>
     <color name="sectionlist_text_default">#212121</color>
     <color name="map_range_ring_stroke">@color/colorPrimary</color>
     <color name="map_range_ring_fill">#1AC41411</color>
