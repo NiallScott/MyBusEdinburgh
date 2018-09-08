@@ -113,8 +113,8 @@ class AboutViewModel @Inject constructor(aboutRepository: AboutRepository,
      * @return A new version of the database version [AboutItem].
      */
     private fun processDatabaseVersion(metadata: DatabaseMetadata?): AboutItem {
-        return items.first {
-            item -> item.id == AboutRepository.ITEM_ID_DATABASE_VERSION
+        return items.first { item ->
+            item.id == AboutRepository.ITEM_ID_DATABASE_VERSION
         }.apply {
             val version = metadata?.databaseVersion
 
@@ -135,8 +135,8 @@ class AboutViewModel @Inject constructor(aboutRepository: AboutRepository,
      * @return A new version of the topology version [AboutItem].
      */
     private fun processTopologyVersion(metadata: DatabaseMetadata?): AboutItem {
-        return items.first {
-            item -> item.id == AboutRepository.ITEM_ID_TOPOLOGY_VERSION
+        return items.first { item ->
+            item.id == AboutRepository.ITEM_ID_TOPOLOGY_VERSION
         }.apply {
             subtitle = metadata?.topologyVersion
         }

@@ -39,8 +39,9 @@ import uk.org.rivernile.edinburghbustracker.android.R
 class AndroidPlatformDataSource(private val context: Context) : PlatformDataSource {
 
     override fun getAppVersionString(): String = try {
-        val info = context.packageManager.getPackageInfo(context.packageName, 0)
-        context.getString(R.string.about_version_format, info.versionName, info.versionCode)
+        context.packageManager.getPackageInfo(context.packageName, 0).let {
+            context.getString(R.string.about_version_format, it.versionName, it.versionCode)
+        }
     } catch (e: PackageManager.NameNotFoundException) {
         // This should never happen.
         ""

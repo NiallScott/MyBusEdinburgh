@@ -97,33 +97,29 @@ class AboutFragment : Fragment() {
         viewModel.showOpenSourceLicences.observe(this, Observer {
             callbacks.onShowLicences()
         })
-        viewModel.databaseVersionItem.observe(this, Observer { item ->
-            adapter.rebindItem(item)
-        })
-        viewModel.topologyVersionItem.observe(this, Observer { item ->
-            adapter.rebindItem(item)
-        })
+        viewModel.databaseVersionItem.observe(this, Observer(adapter::rebindItem))
+        viewModel.topologyVersionItem.observe(this, Observer(adapter::rebindItem))
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.about_fragment, container, false)
-        val recyclerView = v.findViewById(android.R.id.list) as RecyclerView
+        return inflater.inflate(R.layout.about_fragment, container, false).also {
+            val recyclerView = it.findViewById(android.R.id.list) as RecyclerView
 
-        recyclerView.setHasFixedSize(true)
-        recyclerView.addItemDecoration(DividerItemDecoration(requireContext(),
-                DividerItemDecoration.VERTICAL))
-        recyclerView.adapter = adapter
-
-        return v
+            recyclerView.setHasFixedSize(true)
+            recyclerView.addItemDecoration(DividerItemDecoration(requireContext(),
+                    DividerItemDecoration.VERTICAL))
+            recyclerView.adapter = adapter
+        }
     }
 
     /**
      * Handle the app version item being clicked.
      */
     private fun handleAppVersionItemClick() {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("market://details?id=${requireActivity().packageName}")
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("market://details?id=${requireActivity().packageName}")
+        }
 
         try {
             startActivity(intent)
@@ -136,8 +132,9 @@ class AboutFragment : Fragment() {
      * Handle the author item being clicked.
      */
     private fun handleAuthorItemClick() {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse(getString(R.string.app_author_website))
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(getString(R.string.app_author_website))
+        }
 
         try {
             startActivity(intent)
@@ -150,8 +147,9 @@ class AboutFragment : Fragment() {
      * Handle the website item being clicked.
      */
     private fun handleWebsiteItemClick() {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse(getString(R.string.app_website))
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(getString(R.string.app_website))
+        }
 
         try {
             startActivity(intent)
@@ -164,8 +162,9 @@ class AboutFragment : Fragment() {
      * Handle the Twitter item being clicked.
      */
     private fun handleTwitterItemClick() {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse(getString(R.string.app_twitter))
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(getString(R.string.app_twitter))
+        }
 
         try {
             startActivity(intent)
