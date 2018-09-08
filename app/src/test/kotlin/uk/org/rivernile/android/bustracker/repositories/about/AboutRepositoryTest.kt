@@ -26,12 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.repositories.about
 
-import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
 import uk.org.rivernile.android.bustracker.utils.Strings
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -41,11 +43,15 @@ import uk.org.rivernile.edinburghbustracker.android.R
  *
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner::class)
 class AboutRepositoryTest {
 
-    private val strings: Strings = mock()
-    private val platformDataSource: PlatformDataSource = mock()
-    private val aboutLiveDataFactory: AboutLiveDataFactory = mock()
+    @Mock
+    lateinit var strings: Strings
+    @Mock
+    lateinit var platformDataSource: PlatformDataSource
+    @Mock
+    lateinit var aboutLiveDataFactory: AboutLiveDataFactory
 
     private lateinit var aboutRepository: AboutRepository
 

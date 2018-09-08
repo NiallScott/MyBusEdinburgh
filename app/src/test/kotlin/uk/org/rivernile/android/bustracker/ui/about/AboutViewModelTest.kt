@@ -31,7 +31,6 @@ import android.arch.lifecycle.Observer
 import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.eq
-import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
@@ -40,7 +39,10 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.repositories.about.AboutItem
 import uk.org.rivernile.android.bustracker.repositories.about.AboutRepository
 import uk.org.rivernile.android.bustracker.repositories.about.DatabaseMetadata
@@ -54,14 +56,23 @@ import java.util.Date
  *
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner::class)
 class AboutViewModelTest {
 
     @Rule
     @JvmField
     val rule = InstantTaskExecutorRule()
 
-    private val aboutRepository: AboutRepository = mock()
-    private val strings: Strings = mock()
+    @Mock
+    lateinit var aboutRepository: AboutRepository
+    @Mock
+    lateinit var strings: Strings
+
+    @Mock
+    lateinit var voidObserver: Observer<Void>
+    @Mock
+    lateinit var aboutItemObserver: Observer<AboutItem>
+
     private val metadataLiveData = TestableClearableLiveData<DatabaseMetadata>()
 
     private lateinit var aboutViewModel: AboutViewModel
@@ -92,80 +103,73 @@ class AboutViewModelTest {
 
     @Test
     fun clickingOnAppVersionItemShowsStoreListing() {
-        val observer: Observer<Void> = mock()
-        aboutViewModel.showStoreListing.observeForever(observer)
+        aboutViewModel.showStoreListing.observeForever(voidObserver)
 
         aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_APP_VERSION, "Test"))
 
-        verify(observer, times(1))
+        verify(voidObserver, times(1))
                 .onChanged(anyOrNull())
     }
 
     @Test
     fun clickingOnAuthorItemShowsAuthorWebsite() {
-        val observer: Observer<Void> = mock()
-        aboutViewModel.showAuthorWebsite.observeForever(observer)
+        aboutViewModel.showAuthorWebsite.observeForever(voidObserver)
 
         aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_AUTHOR, "Test"))
 
-        verify(observer, times(1))
+        verify(voidObserver, times(1))
                 .onChanged(anyOrNull())
     }
 
     @Test
     fun clickingOnWebsiteItemShowsAppWebsite() {
-        val observer: Observer<Void> = mock()
-        aboutViewModel.showAppWebsite.observeForever(observer)
+        aboutViewModel.showAppWebsite.observeForever(voidObserver)
 
         aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_WEBSITE, "Test"))
 
-        verify(observer, times(1))
+        verify(voidObserver, times(1))
                 .onChanged(anyOrNull())
     }
 
     @Test
     fun clickingOnTwitterItemShowsAppTwitter() {
-        val observer: Observer<Void> = mock()
-        aboutViewModel.showAppTwitter.observeForever(observer)
+        aboutViewModel.showAppTwitter.observeForever(voidObserver)
 
         aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_TWITTER, "Test"))
 
-        verify(observer, times(1))
+        verify(voidObserver, times(1))
                 .onChanged(anyOrNull())
     }
 
     @Test
     fun clickingOnCreditsItemShowsCredits() {
-        val observer: Observer<Void> = mock()
-        aboutViewModel.showCredits.observeForever(observer)
+        aboutViewModel.showCredits.observeForever(voidObserver)
 
         aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_CREDITS, "Test"))
 
-        verify(observer, times(1))
+        verify(voidObserver, times(1))
                 .onChanged(anyOrNull())
     }
 
     @Test
     fun clickingOnOpenSourceItemShowsOpenSourceLicences() {
-        val observer: Observer<Void> = mock()
-        aboutViewModel.showOpenSourceLicences.observeForever(observer)
+        aboutViewModel.showOpenSourceLicences.observeForever(voidObserver)
 
         aboutViewModel.onItemClicked(
                 AboutItem(AboutRepository.ITEM_ID_OPEN_SOURCE_LICENCES, "Test"))
 
-        verify(observer, times(1))
+        verify(voidObserver, times(1))
                 .onChanged(anyOrNull())
     }
 
     @Test
     fun databaseVersionItemWithNullDatabaseMetadata() {
-        val observer: Observer<AboutItem> = mock()
-        aboutViewModel.databaseVersionItem.observeForever(observer)
+        aboutViewModel.databaseVersionItem.observeForever(aboutItemObserver)
 
         metadataLiveData.value = null
 
         argumentCaptor<AboutItem>().apply {
-            verify(observer)
+            verify(aboutItemObserver)
                     .onChanged(capture())
 
             assertNull(firstValue.subtitle)
@@ -174,8 +178,7 @@ class AboutViewModelTest {
 
     @Test
     fun databaseVersionItemWithPopulatedData() {
-        val observer: Observer<AboutItem> = mock()
-        aboutViewModel.databaseVersionItem.observeForever(observer)
+        aboutViewModel.databaseVersionItem.observeForever(aboutItemObserver)
         val date = Date()
         val metadata = DatabaseMetadata(date, "abc123")
         whenever(strings.getString(eq(R.string.about_database_version_format), eq(date.time),
@@ -185,7 +188,7 @@ class AboutViewModelTest {
         metadataLiveData.value = metadata
 
         argumentCaptor<AboutItem>().apply {
-            verify(observer)
+            verify(aboutItemObserver)
                     .onChanged(capture())
 
             assertEquals("Time ms (time human)", firstValue.subtitle)
@@ -194,13 +197,12 @@ class AboutViewModelTest {
 
     @Test
     fun topologyVersionItemWithNullDatabaseMetadata() {
-        val observer: Observer<AboutItem> = mock()
-        aboutViewModel.topologyVersionItem.observeForever(observer)
+        aboutViewModel.topologyVersionItem.observeForever(aboutItemObserver)
 
         metadataLiveData.value = null
 
         argumentCaptor<AboutItem>().apply {
-            verify(observer)
+            verify(aboutItemObserver)
                     .onChanged(capture())
 
             assertNull(firstValue.subtitle)
@@ -209,15 +211,14 @@ class AboutViewModelTest {
 
     @Test
     fun topologyVersionItemWithPopulatedData() {
-        val observer: Observer<AboutItem> = mock()
-        aboutViewModel.topologyVersionItem.observeForever(observer)
+        aboutViewModel.topologyVersionItem.observeForever(aboutItemObserver)
         val date = Date()
         val metadata = DatabaseMetadata(date, "abc123")
 
         metadataLiveData.value = metadata
 
         argumentCaptor<AboutItem>().apply {
-            verify(observer)
+            verify(aboutItemObserver)
                     .onChanged(capture())
 
             assertEquals("abc123", firstValue.subtitle)
