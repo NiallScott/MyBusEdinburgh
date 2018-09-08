@@ -68,7 +68,8 @@ internal class RouteLineLiveData(private val context: Context,
                 it,
                 BusStopContract.ServicePoints.SERVICE_NAME + " ASC, " +
                         BusStopContract.ServicePoints.CHAINAGE + " ASC, " +
-                        BusStopContract.ServicePoints.ORDER_VALUE + " ASC")
+                        BusStopContract.ServicePoints.ORDER_VALUE + " ASC",
+                cancellationSignal)
     }
 
     override fun processCursor(cursor: Cursor?): Map<String, List<PolylineOptions>>? {

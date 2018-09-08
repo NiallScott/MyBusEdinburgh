@@ -24,32 +24,36 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.busstopmap
+package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
 import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.AndroidBusStopMapLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapLiveDataFactory
+import com.google.android.gms.maps.model.PolylineOptions
+import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 import uk.org.rivernile.android.bustracker.utils.Strings
 
 /**
- * This Dagger [Module] provides classes related to providing data for the bus stop map.
+ * An Android specific implementation of [BusStopMapLiveDataFactory].
  *
  * @author Niall Scott
+ * @param context A [Context] instance.
+ * @param strings A [Strings] instance.
  */
-@Module
-class BusStopMapDataModule {
+class AndroidBusStopMapLiveDataFactory constructor(private val context: Context,
+                                                   private val strings: Strings)
+    : BusStopMapLiveDataFactory {
 
-    /**
-     * Provide an instance of [BusStopMapLiveDataFactory].
-     *
-     * @param context A [Context] instance.
-     * @param strings A [Strings] instance.
-     */
-    @Provides
-    fun providesBusStopMapLiveDataFactory(context: Context, strings: Strings)
-            : BusStopMapLiveDataFactory {
-        return AndroidBusStopMapLiveDataFactory(context, strings)
+    override fun createServiceNamesLiveData(): ClearableLiveData<Array<String>> =
+            ServiceNamesLiveData(context)
+
+    override fun createBusStopsLiveData(filteredServices: Array<String>?)
+            : ClearableLiveData<Map<String, Stop>> =
+            BusStopsLiveData(context, strings, filteredServices)
+
+    override fun createBusStopLiveData(stopCode: String): ClearableLiveData<SelectedStop> =
+            BusStopLiveData(context, stopCode)
+
+    override fun createRouteLineLiveData(services: Array<String>?)
+            : ClearableLiveData<Map<String, List<PolylineOptions>>> {
+        return RouteLineLiveData(context, services)
     }
 }

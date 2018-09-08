@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
 import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
+import uk.org.rivernile.android.bustracker.utils.OpenForTesting
+import javax.inject.Inject
 
 /**
  * A repository for providing data for the stop map.
@@ -35,7 +37,9 @@ import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
  * @param liveDataFactory A factory for creating required [android.arch.lifecycle.LiveData]
  * instances.
  */
-class BusStopMapRepository(private val liveDataFactory: LiveDataFactory) {
+@OpenForTesting
+class BusStopMapRepository @Inject constructor(
+        private val liveDataFactory: BusStopMapLiveDataFactory) {
 
     /**
      * Get a [ClearableLiveData] instance for getting service names.

@@ -47,12 +47,13 @@ internal class ServiceNamesLiveData(private val context: Context)
                 false, contentObserver)
     }
 
-    override fun loadCursor() = context.contentResolver.query(BusStopContract.Services.CONTENT_URI,
-            arrayOf(BusStopContract.Services.NAME),
-            null,
-            null,
-            BusStopDatabase.getServicesSortByCondition(BusStopContract.Services.NAME),
-            cancellationSignal)
+    override fun loadCursor(): Cursor? =
+            context.contentResolver.query(BusStopContract.Services.CONTENT_URI,
+                    arrayOf(BusStopContract.Services.NAME),
+                    null,
+                    null,
+                    BusStopDatabase.getServicesSortByCondition(BusStopContract.Services.NAME),
+                    cancellationSignal)
 
     override fun processCursor(cursor: Cursor?): Array<String>? {
         cursor?.let {

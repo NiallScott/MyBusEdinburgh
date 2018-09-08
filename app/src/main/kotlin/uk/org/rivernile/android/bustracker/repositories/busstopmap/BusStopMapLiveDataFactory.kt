@@ -26,30 +26,23 @@
 
 package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
-import android.content.Context
 import com.google.android.gms.maps.model.PolylineOptions
 import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
-import uk.org.rivernile.android.bustracker.utils.Strings
-import javax.inject.Inject
 
 /**
- * This class is used to create instances of [android.arch.lifecycle.LiveData] objects required by
- * the stop map.
+ * This is used to create instances of [android.arch.lifecycle.LiveData] objects required by the
+ * stop map.
  *
  * @author Niall Scott
- * @param context A [Context] instance.
- * @param strings A [Strings] instance.
  */
-class LiveDataFactory @Inject constructor(private val context: Context,
-                                          private val strings: Strings) {
+interface BusStopMapLiveDataFactory {
 
     /**
      * Obtain a new instance of a [ClearableLiveData] object which is able to get all service names.
      *
      * @return A new [ClearableLiveData] for getting all service names.
      */
-    internal fun createServiceNamesLiveData(): ClearableLiveData<Array<String>> =
-            ServiceNamesLiveData(context)
+    fun createServiceNamesLiveData(): ClearableLiveData<Array<String>>
 
     /**
      * Obtain a new instance of a [ClearableLiveData] object which is able to get stops based on an
@@ -58,9 +51,8 @@ class LiveDataFactory @Inject constructor(private val context: Context,
      * @param filteredServices An optional array of [String] services to filter stops on.
      * @return A new [ClearableLiveData] for getting stops.
      */
-    internal fun createBusStopsLiveData(filteredServices: Array<String>?)
-            : ClearableLiveData<Map<String, Stop>> =
-            BusStopsLiveData(context, strings, filteredServices)
+    fun createBusStopsLiveData(filteredServices: Array<String>?)
+            : ClearableLiveData<Map<String, Stop>>
 
     /**
      * Obtain a new instance of a [ClearableLiveData] object which is able to get a stop based on
@@ -69,8 +61,7 @@ class LiveDataFactory @Inject constructor(private val context: Context,
      * @param stopCode The stop code of the stop.
      * @return A new [ClearableLiveData] for getting the given stop.
      */
-    internal fun createBusStopLiveData(stopCode: String): ClearableLiveData<SelectedStop> =
-            BusStopLiveData(context, stopCode)
+    fun createBusStopLiveData(stopCode: String): ClearableLiveData<SelectedStop>
 
     /**
      * Obtain a new instance of a [ClearableLiveData] object which is able to load route lines for
@@ -79,8 +70,6 @@ class LiveDataFactory @Inject constructor(private val context: Context,
      * @param services Services to filter for while loading the route lines.
      * @return A new [ClearableLiveData] for getting route lines for the given services.
      */
-    internal fun createRouteLineLiveData(services: Array<String>?)
-            : ClearableLiveData<Map<String, List<PolylineOptions>>> {
-        return RouteLineLiveData(context, services)
-    }
+    fun createRouteLineLiveData(services: Array<String>?)
+            : ClearableLiveData<Map<String, List<PolylineOptions>>>
 }

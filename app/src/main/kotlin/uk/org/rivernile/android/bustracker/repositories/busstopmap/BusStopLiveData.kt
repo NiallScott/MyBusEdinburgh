@@ -55,7 +55,8 @@ class BusStopLiveData(private val context: Context,
                     BusStopContract.BusStops.SERVICE_LISTING),
             "${BusStopContract.BusStops.STOP_CODE} = ?",
             arrayOf(stopCode),
-            null)
+            null,
+            cancellationSignal)
 
     override fun processCursor(cursor: Cursor?): SelectedStop? {
         return if (cursor != null && cursor.moveToFirst()) {
