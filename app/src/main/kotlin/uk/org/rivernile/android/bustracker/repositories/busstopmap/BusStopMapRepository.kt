@@ -51,15 +51,23 @@ class BusStopMapRepository(private val liveDataFactory: LiveDataFactory) {
      * services in this array are returned.
      * @return A [ClearableLiveData] instance for getting stops to display on the map.
      */
-    fun getBusStops(filteredServices: Array<String>?): ClearableLiveData<Map<String, Stop>> =
+    fun getBusStops(filteredServices: Array<String>?) =
             liveDataFactory.createBusStopsLiveData(filteredServices)
 
     /**
-     * Get a [ClearableLiveData] for getting data for a given stop.
+     * Get a [ClearableLiveData] instance for getting data for a given stop.
      *
      * @param stopCode The code of the stop to return.
      * @return A [ClearableLiveData] for getting data for a given stop.
      */
-    fun getBusStop(stopCode: String): ClearableLiveData<SelectedStop>? =
-            liveDataFactory.createBusStopLiveData(stopCode)
+    fun getBusStop(stopCode: String) = liveDataFactory.createBusStopLiveData(stopCode)
+
+    /**
+     * Get a [ClearableLiveData] instance for getting route lines for given services.
+     *
+     * @param services The route lines to load services for. Passing `null` here will return no
+     * route lines.
+     * @return A [ClearableLiveData] for getting route lines for given services.
+     */
+    fun getRouteLines(services: Array<String>?) = liveDataFactory.createRouteLineLiveData(services)
 }

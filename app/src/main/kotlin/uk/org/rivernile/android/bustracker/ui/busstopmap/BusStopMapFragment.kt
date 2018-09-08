@@ -47,6 +47,8 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
 import dagger.android.support.AndroidSupportInjection
@@ -81,6 +83,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     private var map: GoogleMap? = null
     private var clusterManager: ClusterManager<Stop>? = null
     private var stopClusterRenderer: StopClusterRenderer? = null
+    private var routeLines: Map<String, List<Polyline>>? = null
 
     private lateinit var mapView: MapView
 
@@ -164,9 +167,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         viewModel.serviceNames.observe(this, Observer {
             configureServicesMenuItem()
         })
-        viewModel.showStopDetails.observe(this, Observer { stopCode ->
-            callbacks.onShowBusTimes(stopCode)
-        })
+        viewModel.showStopDetails.observe(this, Observer(callbacks::onShowBusTimes))
         viewModel.showSearch.observe(this, Observer {
             showSearch()
         })
@@ -346,18 +347,11 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         this.clusterManager = clusterManager
         this.stopClusterRenderer = clusterRenderer
 
-        viewModel.mapType.observe(this, Observer { mapType ->
-            handleMapTypeChanged(mapType)
-        })
-        viewModel.cameraLocation.observe(this, Observer { cameraLocation ->
-            handleCameraPositionChanged(cameraLocation)
-        })
-        viewModel.busStops.observe(this, Observer { stops ->
-            handleStopsChanged(stops)
-        })
-        viewModel.showMapMarkerBubble.observe(this, Observer { selectedStop ->
-            handleShowMapMarkerBubble(selectedStop)
-        })
+        viewModel.mapType.observe(this, Observer(this::handleMapTypeChanged))
+        viewModel.cameraLocation.observe(this, Observer(this::handleCameraPositionChanged))
+        viewModel.busStops.observe(this, Observer(this::handleStopsChanged))
+        viewModel.routeLines.observe(this, Observer(this::handleRouteLinesChanged))
+        viewModel.showMapMarkerBubble.observe(this, Observer(this::handleShowMapMarkerBubble))
     }
 
     override fun onServicesChosen(chosenServices: Array<String>?) {
@@ -410,14 +404,33 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * @param stops The new stops collection to display.
      */
     private fun handleStopsChanged(stops: Map<String, Stop>?) {
-        clusterManager?.let {
-            it.clearItems()
+        clusterManager?.apply {
+            clearItems()
 
-            if (stops != null) {
-                it.addItems(stops.values)
+            stops?.let {
+                addItems(it.values)
             }
 
-            it.cluster()
+            cluster()
+        }
+    }
+
+    /**
+     * Handle the collection of route lines changing.
+     *
+     * @param routeLines The new route lines collection to display.
+     */
+    private fun handleRouteLinesChanged(routeLines: Map<String, List<PolylineOptions>>?) {
+        this.routeLines?.forEach { _, polyLines ->
+            polyLines.forEach(Polyline::remove)
+        }
+
+        map?.let { map ->
+            this.routeLines = routeLines?.mapValues {
+                it.value.map(map::addPolyline)
+            }
+        } ?: run {
+            this.routeLines = null
         }
     }
 
@@ -490,20 +503,22 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * Show the services chooser UI.
      */
     private fun showServicesChooser() {
-        val dialog = ServicesChooserDialogFragment.newInstance(viewModel.serviceNames.value,
+        ServicesChooserDialogFragment.newInstance(viewModel.serviceNames.value,
                 viewModel.selectedServices,
-                getString(R.string.busstopmapfragment_service_chooser_title))
-        dialog.setTargetFragment(this, 0)
-        dialog.show(requireFragmentManager(), DIALOG_SERVICES_CHOOSER)
+                getString(R.string.busstopmapfragment_service_chooser_title)).also {
+            it.setTargetFragment(this, 0)
+            it.show(requireFragmentManager(), DIALOG_SERVICES_CHOOSER)
+        }
     }
 
     /**
      * Handle the map type menu item being selected.
      */
     private fun showMapTypeSelection() {
-        val bottomSheet = MapTypeBottomSheetDialogFragment.newInstance(toMapType())
-        bottomSheet.setTargetFragment(this, 0)
-        bottomSheet.show(requireFragmentManager(), DIALOG_MAP_TYPE_BOTTOM_SHEET)
+        MapTypeBottomSheetDialogFragment.newInstance(toMapType()).also {
+            it.setTargetFragment(this, 0)
+            it.show(requireFragmentManager(), DIALOG_MAP_TYPE_BOTTOM_SHEET)
+        }
     }
 
     /**
@@ -542,8 +557,10 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * granted.
      */
     private fun updateMyLocationFeature() {
-        if (LocationUtils.checkLocationPermission(requireContext())) {
-            map?.isMyLocationEnabled = true
+        map?.let {
+            if (LocationUtils.checkLocationPermission(requireContext())) {
+                it.isMyLocationEnabled = true
+            }
         }
     }
 
@@ -561,19 +578,19 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * Configure the traffic view menu item.
      */
     private fun configureTrafficViewMenuItem() {
-        menuItemTrafficView?.let { menuItem ->
-            map?.let { m ->
-                menuItem.isEnabled = true
+        menuItemTrafficView?.apply {
+            map?.let {
+                isEnabled = true
 
-                val titleRes = if (m.isTrafficEnabled) {
+                val titleRes = if (it.isTrafficEnabled) {
                     R.string.map_menu_mapoverlay_trafficviewoff
                 } else {
                     R.string.map_menu_mapoverlay_trafficviewon
                 }
 
-                menuItem.setTitle(titleRes)
+                setTitle(titleRes)
             } ?: run {
-                menuItem.isEnabled = false
+                isEnabled = false
             }
         }
     }

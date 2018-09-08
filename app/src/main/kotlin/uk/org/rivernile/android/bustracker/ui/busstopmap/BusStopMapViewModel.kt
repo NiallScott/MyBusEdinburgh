@@ -31,6 +31,7 @@ import android.arch.lifecycle.MediatorLiveData
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
+import com.google.android.gms.maps.model.PolylineOptions
 import uk.org.rivernile.android.bustracker.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
@@ -85,6 +86,13 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     val busStops: LiveData<Map<String, Stop>> =
             Transformations.switchMap(_selectedServices, this::loadBusStops)
+
+    /**
+     * A [LiveData] which represents route lines shown on the map.
+     */
+    val routeLines: LiveData<Map<String, List<PolylineOptions>>> =
+            Transformations.switchMap(_selectedServices, this::loadRouteLines)
+    private var _routeLines: ClearableLiveData<Map<String, List<PolylineOptions>>>? = null
 
     /**
      * A [LiveData] representing the type of map to be displayed.
@@ -201,6 +209,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
         serviceNames.onCleared()
         _busStops?.onCleared()
         _selectedStop?.onCleared()
+        _routeLines?.onCleared()
     }
 
     /**
@@ -330,13 +339,21 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      *
      * @param stopCode The stop code of the stop to load. `null` will mean no loading will occur.
      */
-    private fun loadBusStop(stopCode: String?) = if (stopCode != null) {
-        repository.getBusStop(stopCode)?.also {
-            _selectedStop = it
+    private fun loadBusStop(stopCode: String?) = stopCode?.let {
+        repository.getBusStop(it).also { liveData ->
+            _selectedStop = liveData
         }
-    } else {
-        null
     }
+
+    /**
+     * This is called when route lines should be loaded.
+     *
+     * @param services A service filter for the route lines.
+     */
+    private fun loadRouteLines(services: Array<String>?) =
+            repository.getRouteLines(services).also {
+                _routeLines = it
+            }
 
     /**
      * Handle a selected stop load result.

@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
 import android.content.Context
+import com.google.android.gms.maps.model.PolylineOptions
 import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 import uk.org.rivernile.android.bustracker.utils.Strings
 import javax.inject.Inject
@@ -70,4 +71,16 @@ class LiveDataFactory @Inject constructor(private val context: Context,
      */
     internal fun createBusStopLiveData(stopCode: String): ClearableLiveData<SelectedStop> =
             BusStopLiveData(context, stopCode)
+
+    /**
+     * Obtain a new instance of a [ClearableLiveData] object which is able to load route lines for
+     * given services.
+     *
+     * @param services Services to filter for while loading the route lines.
+     * @return A new [ClearableLiveData] for getting route lines for the given services.
+     */
+    internal fun createRouteLineLiveData(services: Array<String>?)
+            : ClearableLiveData<Map<String, List<PolylineOptions>>> {
+        return RouteLineLiveData(context, services)
+    }
 }
