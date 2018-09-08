@@ -273,7 +273,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.busstopmap2_option_menu, menu)
+        inflater.inflate(R.menu.busstopmap_option_menu, menu)
 
         menuItemServices = menu.findItem(R.id.busstopmap_option_menu_services)
         menuItemTrafficView = menu.findItem(R.id.busstopmap_option_menu_trafficview)

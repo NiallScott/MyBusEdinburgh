@@ -304,7 +304,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for BusStopMapFragment *
     **********************************
     -->
-    <string name="busstopmapfragment_nosearchresults">No results found.</string>
     <string name="busstopmapfragment_service_chooser_title">Select route(s) to show</string>
 
     <!--
@@ -517,18 +516,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="maptypebottomsheetdialog_type_normal">Normal</string>
     <string name="maptypebottomsheetdialog_type_satellite">Satellite</string>
     <string name="maptypebottomsheetdialog_type_hybrid">Hybrid</string>
-
-    <!--
-    ********************************************
-    * Strings for MapTypeChooserDialogFragment *
-    ********************************************
-    -->
-    <string name="maptypechooserdialog_title">Choose map type</string>
-    <string-array name="maptypechooserdialog_items">
-        <item>Normal</item>
-        <item>Satellite</item>
-        <item>Terrain</item>
-    </string-array>
     
     <!--
     ***********************************************
