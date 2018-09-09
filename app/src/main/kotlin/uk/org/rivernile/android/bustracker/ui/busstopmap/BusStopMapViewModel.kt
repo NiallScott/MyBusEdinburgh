@@ -58,19 +58,6 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     }
 
     /**
-     * The initially selected stop code.
-     */
-    var initialStopCode: String? = null
-    /**
-     * The initial latitude to be set. Please also ensure [initialLongitude] is also set.
-     */
-    var initialLatitude: Double? = null
-    /**
-     * The initial longitude to be set. Please also ensure [initialLatitude] is also set.
-     */
-    var initialLongitude: Double? = null
-
-    /**
      * A [LiveData] which represents all known services.
      */
     val serviceNames = repository.getServiceNames()
@@ -154,8 +141,8 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     private val _selectedStopLiveData =
             Transformations.switchMap(_selectedStopCode, this::loadBusStop)
     private var _selectedStop: ClearableLiveData<SelectedStop>? = null
-    private val _showMapMarkerBubble = MediatorLiveData<SelectedStop>().apply {
-        addSource(_selectedStopLiveData, this@BusStopMapViewModel::handleSelectedStopLoaded)
+    private val _showMapMarkerBubble = MediatorLiveData<SelectedStop>().also {
+        it.addSource(_selectedStopLiveData, this::handleSelectedStopLoaded)
     }
 
     private var searchedBusStop: String? = null
@@ -181,29 +168,35 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     }
 
     /**
-     * This is called when the UI is created for the first time.
+     * This is called when the hosting UI is first created and has no arguments.
      */
-    fun onCreated() {
-        val stopCode = initialStopCode
-        val latitude = initialLatitude
-        val longitude = initialLongitude
+    fun onFirstCreate() {
+        _cameraLocation.value = CameraLocation(
+                preferenceManager.lastMapLatitude,
+                preferenceManager.lastMapLongitude,
+                preferenceManager.lastMapZoomLevel,
+                false)
+    }
 
-        if (stopCode != null) {
-            searchedBusStop = stopCode
-            _selectedStopCode.value = stopCode
-        } else if (latitude != null && longitude != null) {
-            _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
-        } else {
-            _cameraLocation.value = CameraLocation(
-                    preferenceManager.lastMapLatitude,
-                    preferenceManager.lastMapLongitude,
-                    preferenceManager.lastMapZoomLevel,
-                    false)
-        }
+    /**
+     * This is called when the hosting UI is first created and has a stop code argument.
+     *
+     * @param stopCode The supplied stop code.
+     */
+    fun onFirstCreate(stopCode: String) {
+        searchedBusStop = stopCode
+        _selectedStopCode.value = stopCode
+    }
 
-        initialStopCode = null
-        initialLatitude = null
-        initialLongitude = null
+    /**
+     * This is called when the hosting UI is first created and has a latitude/longitude pair as
+     * arguments.
+     *
+     * @param latitude The supplied latitude.
+     * @param longitude The supplied longitude.
+     */
+    fun onFirstCreate(latitude: Double, longitude: Double) {
+        _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
     }
 
     override fun onCleared() {
@@ -382,5 +375,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
                 _cameraLocation.value = CameraLocation(it.latitude, it.longitude, 99f, false)
             }
         }
+
+        searchedBusStop = null
     }
 }

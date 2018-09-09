@@ -186,16 +186,21 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
                     state.getString(STATE_SELECTED_STOP_CODE))
         } ?: run {
             arguments?.let { args ->
-                viewModel.initialStopCode = args.getString(ARG_STOPCODE)
-
-                if (args.containsKey(ARG_LATITUDE) && args.containsKey(ARG_LONGITUDE)) {
-                    viewModel.initialLatitude = args.getDouble(ARG_LATITUDE)
-                    viewModel.initialLongitude = args.getDouble(ARG_LONGITUDE)
+                when {
+                    args.containsKey(ARG_STOPCODE) -> {
+                        viewModel.onFirstCreate(args.getString(ARG_STOPCODE))
+                    }
+                    args.containsKey(ARG_LATITUDE) && args.containsKey(ARG_LONGITUDE) -> {
+                        val latitude = args.getDouble(ARG_LATITUDE, 0.0)
+                        val longitude = args.getDouble(ARG_LONGITUDE, 0.0)
+                        viewModel.onFirstCreate(latitude, longitude)
+                    }
+                    else -> viewModel.onFirstCreate()
                 }
+            } ?: run {
+                viewModel.onFirstCreate()
             }
         }
-
-        viewModel.onCreated()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
