@@ -31,6 +31,7 @@ import android.arch.lifecycle.Observer
 import com.nhaarman.mockito_kotlin.anyOrNull
 import com.nhaarman.mockito_kotlin.argumentCaptor
 import com.nhaarman.mockito_kotlin.eq
+import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import com.nhaarman.mockito_kotlin.whenever
@@ -73,7 +74,7 @@ class AboutViewModelTest {
     @Mock
     lateinit var aboutItemObserver: Observer<AboutItem>
 
-    private val metadataLiveData = TestableClearableLiveData<DatabaseMetadata>()
+    private val metadataLiveData = spy(TestableClearableLiveData<DatabaseMetadata>())
 
     private lateinit var aboutViewModel: AboutViewModel
 
@@ -223,5 +224,20 @@ class AboutViewModelTest {
 
             assertEquals("abc123", firstValue.subtitle)
         }
+    }
+
+    @Test
+    fun onClearedCallsOnClearedOnLiveData() {
+        callOnCleared()
+
+        verify(metadataLiveData)
+                .onCleared()
+    }
+
+    private fun callOnCleared() {
+        // This is required because Kotlin can't access the protected method.
+        val method = aboutViewModel.javaClass.getDeclaredMethod("onCleared")
+        method.isAccessible = true
+        method.invoke(aboutViewModel)
     }
 }
