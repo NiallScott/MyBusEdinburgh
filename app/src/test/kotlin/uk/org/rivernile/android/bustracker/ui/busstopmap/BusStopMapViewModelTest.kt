@@ -443,13 +443,27 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun onMapMarkerBubbleClosedSetsSelectedStopToNull() {
+    fun onMapMarkerBubbleClosedSetsSelectedStopToNullWhenStopCodeMatches() {
         viewModel.showMapMarkerBubble.observeForever(selectedStopObserver)
+        val stop = Stop("123456", "Stop name", 1.0, 2.0, 3)
+        viewModel.onMapMarkerClicked(stop)
 
-        viewModel.onMapMarkerBubbleClosed()
+        viewModel.onMapMarkerBubbleClosed("123456")
 
         verify(selectedStopObserver)
                 .onChanged(null)
+    }
+
+    @Test
+    fun onMapMarkerBubbleClosedDoesNotSetSelectedStopToNullWhenStopCodeDoesNotMatch() {
+        viewModel.showMapMarkerBubble.observeForever(selectedStopObserver)
+        val stop = Stop("123456", "Stop name", 1.0, 2.0, 3)
+        viewModel.onMapMarkerClicked(stop)
+
+        viewModel.onMapMarkerBubbleClosed("098765")
+
+        verify(selectedStopObserver, never())
+                .onChanged(anyOrNull())
     }
 
     @Test
@@ -492,6 +506,23 @@ class BusStopMapViewModelTest {
                 .onCleared()
         verify(busStopLiveData)
                 .onCleared()
+    }
+
+    @Test
+    fun onRestoreStateMovesCameraToPreferenceLocation() {
+        whenever(preferenceManager.lastMapLatitude)
+                .thenReturn(1.0)
+        whenever(preferenceManager.lastMapLongitude)
+                .thenReturn(2.0)
+        whenever(preferenceManager.lastMapZoomLevel)
+                .thenReturn(3f)
+        viewModel.cameraLocation.observeForever(cameraLocationObserver)
+
+        viewModel.onRestoreState(null, null)
+
+        val expected = CameraLocation(1.0, 2.0, 3f, false)
+        verify(cameraLocationObserver)
+                .onChanged(expected)
     }
 
     @Test

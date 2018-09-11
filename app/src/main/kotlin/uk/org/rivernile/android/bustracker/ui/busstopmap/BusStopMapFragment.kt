@@ -85,7 +85,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     private var stopClusterRenderer: StopClusterRenderer? = null
     private var routeLines: Map<String, List<Polyline>>? = null
 
-    private lateinit var mapView: MapView
+    private var mapView: MapView? = null
 
     private var menuItemServices: MenuItem? = null
     private var menuItemTrafficView: MenuItem? = null
@@ -215,8 +215,10 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
         requireActivity().setTitle(R.string.map_title)
 
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(this)
+        mapView?.let {
+            it.onCreate(savedInstanceState)
+            it.getMapAsync(this)
+        }
 
         if (savedInstanceState == null) {
             if (!LocationUtils.checkLocationPermission(requireContext())) {
@@ -228,25 +230,25 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onStart() {
         super.onStart()
 
-        mapView.onStart()
+        mapView?.onStart()
     }
 
     override fun onResume() {
         super.onResume()
 
-        mapView.onResume()
+        mapView?.onResume()
     }
 
     override fun onPause() {
         super.onPause()
 
-        mapView.onPause()
+        mapView?.onPause()
     }
 
     override fun onStop() {
         super.onStop()
 
-        mapView.onStop()
+        mapView?.onStop()
 
         map?.let {
             val position = it.cameraPosition
@@ -257,16 +259,17 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
 
-        mapView.onDestroy()
+        mapView?.onDestroy()
+        mapView = null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        mapView.onSaveInstanceState(outState)
+        mapView?.onSaveInstanceState(outState)
         outState.putStringArray(STATE_SELECTED_SERVICES, viewModel.selectedServices)
         outState.putString(STATE_SELECTED_STOP_CODE, viewModel.showMapMarkerBubble.value?.stopCode)
     }
@@ -274,7 +277,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onLowMemory() {
         super.onLowMemory()
 
-        mapView.onLowMemory()
+        mapView?.onLowMemory()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -390,7 +393,9 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     }
 
     override fun onInfoWindowClose(marker: Marker) {
-        viewModel.onMapMarkerBubbleClosed()
+        (marker.tag as? String)?.let {
+            viewModel.onMapMarkerBubbleClosed(it)
+        }
     }
 
     override fun onItemRendered(marker: Marker) {

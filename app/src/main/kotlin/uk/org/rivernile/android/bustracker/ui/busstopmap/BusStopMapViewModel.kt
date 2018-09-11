@@ -158,6 +158,11 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      * @param selectedStopCode The selected stop code.
      */
     fun onRestoreState(selectedServices: Array<String>?, selectedStopCode: String?) {
+        _cameraLocation.value = CameraLocation(
+                preferenceManager.lastMapLatitude,
+                preferenceManager.lastMapLongitude,
+                preferenceManager.lastMapZoomLevel, false)
+
         if (!Arrays.equals(_selectedServices.value, selectedServices)) {
             _selectedServices.value = selectedServices
         }
@@ -313,9 +318,11 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     /**
      * This is called when the map marker bubble has been closed.
      */
-    fun onMapMarkerBubbleClosed() {
-        _selectedStopCode.value = null
-        _showMapMarkerBubble.value = null
+    fun onMapMarkerBubbleClosed(stopCode: String) {
+        if (stopCode == _selectedStopCode.value) {
+            _selectedStopCode.value = null
+            _showMapMarkerBubble.value = null
+        }
     }
 
     /**
@@ -375,7 +382,5 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
                 _cameraLocation.value = CameraLocation(it.latitude, it.longitude, 99f, false)
             }
         }
-
-        searchedBusStop = null
     }
 }
