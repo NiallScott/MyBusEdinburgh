@@ -262,6 +262,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onDestroyView() {
         super.onDestroyView()
 
+        map = null
         mapView?.onDestroy()
         mapView = null
     }
