@@ -141,10 +141,6 @@ public class SettingsFragment extends PreferenceFragment
     public void onSharedPreferenceChanged(final SharedPreferences sp, final String key) {
         if (PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE.equals(key)) {
             populateNumberOfDeparturesSummary();
-        } else if (PreferenceManager.PREF_AUTO_LOCATION.equals(key)) {
-            if (preferenceManager.isMapLocationShownAutomatically()) {
-                callbacks.requestLocationPermission();
-            }
         }
     }
 
@@ -171,10 +167,5 @@ public class SettingsFragment extends PreferenceFragment
          * This is called when the user wishes to restore their favourites.
          */
         void onRestoreFavourites();
-
-        /**
-         * This is called when the location permission should be requested.
-         */
-        void requestLocationPermission();
     }
 }

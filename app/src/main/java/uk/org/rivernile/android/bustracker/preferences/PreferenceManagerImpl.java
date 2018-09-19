@@ -117,11 +117,6 @@ public class PreferenceManagerImpl implements PreferenceManager {
     }
 
     @Override
-    public boolean isMapLocationShownAutomatically() {
-        return preferences.getBoolean(PREF_AUTO_LOCATION, true);
-    }
-
-    @Override
     public boolean isMapZoomButtonsShown() {
         return preferences.getBoolean(PREF_ZOOM_BUTTONS, true);
     }

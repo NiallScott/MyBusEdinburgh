@@ -44,8 +44,6 @@ public interface PreferenceManager {
 
     /** The Preference for number of shown departures per service. */
     String PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE = "pref_numberOfShownDeparturesPerService";
-    /** The Preference for automatically showing the user's location on the map. */
-    String PREF_AUTO_LOCATION = "pref_autolocation_state";
 
     /**
      * Should the bus stop database only be updated over Wi-Fi?
@@ -112,14 +110,6 @@ public interface PreferenceManager {
      * @return The number of departures to show per service on the bus times display.
      */
     int getBusTimesNumberOfDeparturesToShowPerService();
-
-    /**
-     * Is the user's location shown on the map automatically?
-     *
-     * @return {@code true} if the user's location is shown on the map automatically, {@code false}
-     * if not.
-     */
-    boolean isMapLocationShownAutomatically();
 
     /**
      * Is the map zoom buttons shown?

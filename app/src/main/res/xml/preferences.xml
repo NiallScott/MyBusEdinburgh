@@ -103,10 +103,6 @@
     <PreferenceCategory
         android:title="@string/preferences_category_map">
         <CheckBoxPreference
-            android:key="pref_autolocation_state"
-            android:title="@string/preferences_checkbox_map_autolocation"
-            android:defaultValue="true" />
-        <CheckBoxPreference
             android:key="pref_map_zoom_buttons_state"
             android:title="@string/preferences_checkbox_map_zoom_buttons"
             android:defaultValue="true" />

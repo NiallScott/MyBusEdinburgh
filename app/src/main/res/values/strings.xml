@@ -196,7 +196,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_list_bustimes_dialog">Number of departures to show</string>
 
     <string name="preferences_category_map">Map</string>
-    <string name="preferences_checkbox_map_autolocation">Enable location services</string>
     <string name="preferences_checkbox_map_zoom_buttons">Zoom buttons</string>
     <string name="preferences_dialog_map_clearsearchhistory">Clear search history</string>
     <string name="preferences_dialog_map_clearsearchhistory_summary">Remove all previous search terms from the map search facility</string>

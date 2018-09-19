@@ -353,6 +353,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         map.setOnInfoWindowClickListener(clusterManager)
         map.setOnInfoWindowCloseListener(this)
         map.setInfoWindowAdapter(MapInfoWindow(requireActivity(), view as ViewGroup))
+        map.isMyLocationEnabled = LocationUtils.checkLocationPermission(context)
         this.clusterManager = clusterManager
         this.stopClusterRenderer = clusterRenderer
 
@@ -592,11 +593,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * granted.
      */
     private fun updateMyLocationFeature() {
-        map?.let {
-            if (LocationUtils.checkLocationPermission(requireContext())) {
-                it.isMyLocationEnabled = true
-            }
-        }
+        map?.isMyLocationEnabled = LocationUtils.checkLocationPermission(requireContext())
     }
 
     /**

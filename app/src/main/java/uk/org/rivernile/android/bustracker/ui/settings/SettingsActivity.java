@@ -53,7 +53,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
 
     private static final int PERMISSION_REQUEST_BACKUP = 1;
     private static final int PERMISSION_REQUEST_RESTORE = 2;
-    private static final int PERMISSION_REQUEST_LOCATION = 3;
 
     private static final int LOADER_BACKUP_FAVOURITES = 1;
     private static final int LOADER_RESTORE_FAVOURITES = 2;
@@ -119,13 +118,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
                 PERMISSION_REQUEST_RESTORE)) {
             performRestore();
         }
-    }
-
-    @Override
-    public void requestLocationPermission() {
-        // No other actions are performed with location here. Simply just ask for the permission to
-        // be granted.
-        checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, PERMISSION_REQUEST_LOCATION);
     }
 
     @TargetApi(23)
