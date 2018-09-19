@@ -149,6 +149,18 @@ class BusStopMapViewModelTest {
     }
 
     @Test
+    fun onFirstCreateWithNoArgumentsSetsMapTypeToLastType() {
+        whenever(preferenceManager.lastMapType)
+                .thenReturn(2)
+        viewModel.mapType.observeForever(mapTypeObserver)
+
+        viewModel.onFirstCreate()
+
+        verify(mapTypeObserver)
+                .onChanged(2)
+    }
+
+    @Test
     fun onFirstCreateWithStopCodeArgumentLoadsStopAndCentersCameraOnStop() {
         val selectedStop = SelectedStop("123456", 1.0, 2.0, "1, 2, 3, 4, 5")
         val selectedStopLiveData = TestableClearableLiveData<SelectedStop>()
@@ -165,6 +177,18 @@ class BusStopMapViewModelTest {
                 .onChanged(expectedCameraLocation)
         verify(selectedStopObserver)
                 .onChanged(selectedStop)
+    }
+
+    @Test
+    fun onFirstCreateWithStopCodeArgumentSetsMapTypeToLastType() {
+        whenever(preferenceManager.lastMapType)
+                .thenReturn(2)
+        viewModel.mapType.observeForever(mapTypeObserver)
+
+        viewModel.onFirstCreate("123456")
+
+        verify(mapTypeObserver)
+                .onChanged(2)
     }
 
     @Test
@@ -213,6 +237,18 @@ class BusStopMapViewModelTest {
         val expected = CameraLocation(1.0, 2.0, DEFAULT_ZOOM, false)
         verify(cameraLocationObserver)
                 .onChanged(expected)
+    }
+
+    @Test
+    fun onFirstCreateWithLatitudeAndLongitudeSetsMapTypeToLastType() {
+        whenever(preferenceManager.lastMapType)
+                .thenReturn(2)
+        viewModel.mapType.observeForever(mapTypeObserver)
+
+        viewModel.onFirstCreate(1.0, 2.0)
+
+        verify(mapTypeObserver)
+                .onChanged(2)
     }
 
     @Test
@@ -523,6 +559,18 @@ class BusStopMapViewModelTest {
         val expected = CameraLocation(1.0, 2.0, 3f, false)
         verify(cameraLocationObserver)
                 .onChanged(expected)
+    }
+
+    @Test
+    fun onRestoreStateSetsMapTypeToLastType() {
+        whenever(preferenceManager.lastMapType)
+                .thenReturn(2)
+        viewModel.mapType.observeForever(mapTypeObserver)
+
+        viewModel.onRestoreState(null, null)
+
+        verify(mapTypeObserver)
+                .onChanged(2)
     }
 
     @Test

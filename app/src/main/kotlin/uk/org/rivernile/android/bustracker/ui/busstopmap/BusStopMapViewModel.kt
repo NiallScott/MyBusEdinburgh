@@ -162,6 +162,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
                 preferenceManager.lastMapLatitude,
                 preferenceManager.lastMapLongitude,
                 preferenceManager.lastMapZoomLevel, false)
+        _mapType.value = preferenceManager.lastMapType
 
         if (!Arrays.equals(_selectedServices.value, selectedServices)) {
             _selectedServices.value = selectedServices
@@ -181,6 +182,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
                 preferenceManager.lastMapLongitude,
                 preferenceManager.lastMapZoomLevel,
                 false)
+        _mapType.value = preferenceManager.lastMapType
     }
 
     /**
@@ -191,6 +193,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     fun onFirstCreate(stopCode: String) {
         searchedBusStop = stopCode
         _selectedStopCode.value = stopCode
+        _mapType.value = preferenceManager.lastMapType
     }
 
     /**
@@ -202,6 +205,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     fun onFirstCreate(latitude: Double, longitude: Double) {
         _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
+        _mapType.value = preferenceManager.lastMapType
     }
 
     override fun onCleared() {
