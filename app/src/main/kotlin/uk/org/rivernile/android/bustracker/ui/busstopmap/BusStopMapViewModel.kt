@@ -131,7 +131,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     private val _selectedStopCode = MutableLiveData<String>()
 
     private val _mapType = MutableLiveData<Int>()
-    private val _cameraLocation = SingleLiveEvent<CameraLocation>()
+    private val _cameraLocation = MutableLiveData<CameraLocation>()
     private val _showStopDetails = SingleLiveEvent<String>()
     private val _showSearch = SingleLiveEvent<Void>()
     private val _showServicesChooser = SingleLiveEvent<Void>()

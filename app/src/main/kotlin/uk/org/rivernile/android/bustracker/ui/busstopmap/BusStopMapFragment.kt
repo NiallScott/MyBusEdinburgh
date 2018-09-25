@@ -180,27 +180,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         viewModel.updateTrafficView.observe(this, Observer {
             handleTrafficViewMenuItemSelected()
         })
-
-        savedInstanceState?.let { state ->
-            viewModel.onRestoreState(state.getStringArray(STATE_SELECTED_SERVICES),
-                    state.getString(STATE_SELECTED_STOP_CODE))
-        } ?: run {
-            arguments?.let { args ->
-                when {
-                    args.containsKey(ARG_STOPCODE) -> {
-                        viewModel.onFirstCreate(args.getString(ARG_STOPCODE))
-                    }
-                    args.containsKey(ARG_LATITUDE) && args.containsKey(ARG_LONGITUDE) -> {
-                        val latitude = args.getDouble(ARG_LATITUDE, 0.0)
-                        val longitude = args.getDouble(ARG_LONGITUDE, 0.0)
-                        viewModel.onFirstCreate(latitude, longitude)
-                    }
-                    else -> viewModel.onFirstCreate()
-                }
-            } ?: run {
-                viewModel.onFirstCreate()
-            }
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -214,6 +193,8 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         super.onActivityCreated(savedInstanceState)
 
         requireActivity().setTitle(R.string.map_title)
+
+        savedInstanceState?.let(this::restoreState) ?: doFirstCreate()
 
         mapView?.let {
             it.onCreate(savedInstanceState)
@@ -432,6 +413,36 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      */
     fun onRequestCameraLocation(latitude: Double, longitude: Double) {
         viewModel.onRequestCameraLocation(latitude, longitude)
+    }
+
+    /**
+     * Do what is required on the first create of this [Fragment]. This occurs when the saved
+     * instance state is `null`.
+     */
+    private fun doFirstCreate() {
+        arguments?.let { args ->
+            when {
+                args.containsKey(ARG_STOPCODE) -> {
+                    viewModel.onFirstCreate(args.getString(ARG_STOPCODE))
+                }
+                args.containsKey(ARG_LATITUDE) && args.containsKey(ARG_LONGITUDE) -> {
+                    val latitude = args.getDouble(ARG_LATITUDE, 0.0)
+                    val longitude = args.getDouble(ARG_LONGITUDE, 0.0)
+                    viewModel.onFirstCreate(latitude, longitude)
+                }
+                else -> viewModel.onFirstCreate()
+            }
+        } ?: viewModel.onFirstCreate()
+    }
+
+    /**
+     * Restore saved instance state from a given [Bundle].
+     *
+     * @param savedInstanceState Previously saved state.
+     */
+    private fun restoreState(savedInstanceState: Bundle) {
+        viewModel.onRestoreState(savedInstanceState.getStringArray(STATE_SELECTED_SERVICES),
+                savedInstanceState.getString(STATE_SELECTED_STOP_CODE))
     }
 
     /**
