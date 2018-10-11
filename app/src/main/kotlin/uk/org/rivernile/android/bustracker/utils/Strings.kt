@@ -34,7 +34,7 @@ import javax.inject.Inject
  * This class is used to access Android platform strings, in a way that can be mocked in unit
  * testing.
  *
- * @property A [Context] instance.
+ * @property context A [Context] instance.
  * @author Niall Scott
  */
 @OpenForTesting

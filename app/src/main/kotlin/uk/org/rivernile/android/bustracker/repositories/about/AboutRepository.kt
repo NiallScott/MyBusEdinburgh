@@ -38,7 +38,7 @@ import javax.inject.Inject
  *
  * @param strings Platform string accessor.
  * @param platformDataSource Accessor for platform data values.
- * @param databaseLiveData [LiveData] representing the database data.
+ * @param aboutLiveDataFactory A factory for creating [LiveData] instances.
  * @author Niall Scott
  */
 @OpenForTesting

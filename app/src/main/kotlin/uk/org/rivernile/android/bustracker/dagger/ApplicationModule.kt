@@ -90,5 +90,5 @@ class ApplicationModule {
      */
     @Provides
     @Singleton
-    fun provideGoogleApiAvailability() = GoogleApiAvailability.getInstance()
+    fun provideGoogleApiAvailability(): GoogleApiAvailability = GoogleApiAvailability.getInstance()
 }

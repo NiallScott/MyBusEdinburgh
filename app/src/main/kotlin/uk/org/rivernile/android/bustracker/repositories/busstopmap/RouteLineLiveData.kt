@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.repositories.busstopmap
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.database.Cursor
 import android.graphics.Color
@@ -56,6 +57,7 @@ internal class RouteLineLiveData(private val context: Context,
                 false, contentObserver)
     }
 
+    @SuppressLint("Recycle")
     override fun loadCursor() = services?.let {
         context.contentResolver.query(
                 BusStopContract.ServicePoints.CONTENT_URI,
