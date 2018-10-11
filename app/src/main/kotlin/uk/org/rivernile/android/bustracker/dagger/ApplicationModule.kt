@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker.dagger
 
 import android.app.Application
 import android.content.Context
+import com.google.android.gms.common.GoogleApiAvailability
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
@@ -81,4 +82,13 @@ class ApplicationModule {
     fun providePreferenceManager(context: Context): PreferenceManager {
         return PreferenceManagerImpl(context)
     }
+
+    /**
+     * Provide a [GoogleApiAvailability] instance to Dagger.
+     *
+     * @return A [GoogleApiAvailability] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideGoogleApiAvailability() = GoogleApiAvailability.getInstance()
 }

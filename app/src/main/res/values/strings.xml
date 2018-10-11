@@ -304,6 +304,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **********************************
     -->
     <string name="busstopmapfragment_service_chooser_title">Select route(s) to show</string>
+    <string name="busstopmapfragment_button_resolve">Resolve</string>
+    <string name="busstopmapfragment_error_play_services_missing">Google Play Services is missing on this device</string>
+    <string name="busstopmapfragment_error_play_services_updating">Google Play Services is currently updating. This error is temporary - please come back here in a few moments</string>
+    <string name="busstopmapfragment_error_play_services_update_required">Google Play Services requires an update before the map can he shown</string>
+    <string name="busstopmapfragment_error_play_services_disabled">Google Play Services has been disabled on this device. To show the map, it needs to be enabled</string>
+    <string name="busstopmapfragment_error_play_services_invalid">Google Play Services is reporting itself as invalid on this device</string>
+    <string name="busstopmapfragment_error_play_services_unknown">An unknown error has occurred with Google Play Services</string>
+    <string name="busstopmapfragment_error_play_services_resolve_failed">Unable to resolve Google Play Services issue</string>
 
     <!--
     ********************************

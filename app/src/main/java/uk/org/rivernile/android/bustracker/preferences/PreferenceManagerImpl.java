@@ -53,6 +53,9 @@ public class PreferenceManagerImpl implements PreferenceManager {
     private static final String PREF_MAP_LAST_MAP_TYPE = "pref_map_last_map_type";
     private static final String PREF_DATABASE_UPDATE_LAST_CHECK = "pref_database_update_last_check";
 
+    private static final String DEFAULT_LATITUDE = "55.953";
+    private static final String DEFAULT_LONGITUDE = "-3.189";
+
     private final SharedPreferences preferences;
 
     /**
@@ -136,7 +139,8 @@ public class PreferenceManagerImpl implements PreferenceManager {
     @Override
     public double getLastMapLatitude() {
         try {
-            return Double.parseDouble(preferences.getString(PREF_MAP_LAST_LATITUDE, "0.0"));
+            return Double.parseDouble(preferences.getString(PREF_MAP_LAST_LATITUDE,
+                    DEFAULT_LATITUDE));
         } catch (NumberFormatException ignored) {
             return 0;
         }
@@ -152,7 +156,8 @@ public class PreferenceManagerImpl implements PreferenceManager {
     @Override
     public double getLastMapLongitude() {
         try {
-            return Double.parseDouble(preferences.getString(PREF_MAP_LAST_LONGITUDE, "0.0"));
+            return Double.parseDouble(preferences.getString(PREF_MAP_LAST_LONGITUDE,
+                    DEFAULT_LONGITUDE));
         } catch (NumberFormatException ignored) {
             return 0;
         }

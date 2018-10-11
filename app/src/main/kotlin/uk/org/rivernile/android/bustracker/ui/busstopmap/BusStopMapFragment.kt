@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import android.Manifest
 import android.app.Activity
+import android.app.PendingIntent
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProvider
 import android.arch.lifecycle.ViewModelProviders
@@ -41,6 +42,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -77,6 +83,8 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+    @Inject
+    lateinit var googleApiAvailability: GoogleApiAvailability
 
     private lateinit var callbacks: Callbacks
     private lateinit var viewModel: BusStopMapViewModel
@@ -85,6 +93,9 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     private var stopClusterRenderer: StopClusterRenderer? = null
     private var routeLines: Map<String, List<Polyline>>? = null
 
+    private var layoutError: View? = null
+    private var txtError: TextView? = null
+    private var btnErrorResolve: Button? = null
     private var mapView: MapView? = null
 
     private var menuItemServices: MenuItem? = null
@@ -185,7 +196,12 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.busstopmap_fragment, container, false).apply {
+            layoutError = findViewById(R.id.layoutError)
+            txtError = findViewById(R.id.txtError)
+            btnErrorResolve = findViewById(R.id.btnErrorResolve)
             mapView = findViewById(R.id.mapView)
+
+            btnErrorResolve?.setText(R.string.busstopmapfragment_button_resolve)
         }
     }
 
@@ -211,6 +227,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onStart() {
         super.onStart()
 
+        checkGooglePlayServices()
         mapView?.onStart()
     }
 
@@ -246,6 +263,10 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         map = null
         mapView?.onDestroy()
         mapView = null
+
+        layoutError = null
+        txtError = null
+        btnErrorResolve = null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -468,7 +489,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * @param routeLines The new route lines collection to display.
      */
     private fun handleRouteLinesChanged(routeLines: Map<String, List<PolylineOptions>>?) {
-        this.routeLines?.forEach { _, polyLines ->
+        this.routeLines?.forEach { (_, polyLines) ->
             polyLines.forEach(Polyline::remove)
         }
 
@@ -663,6 +684,80 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         MapTypeBottomSheetDialogFragment.MAP_TYPE_SATELLITE -> GoogleMap.MAP_TYPE_SATELLITE
         MapTypeBottomSheetDialogFragment.MAP_TYPE_HYBRID -> GoogleMap.MAP_TYPE_HYBRID
         else -> GoogleMap.MAP_TYPE_NORMAL
+    }
+
+    /**
+     * Check Google Play Services to ensure it is working correctly on this device. If an error is
+     * returned, then present error UI to the user.
+     *
+     * The error UI may contain a button which helps the user resolve the issue, if Googe Play
+     * Services tells us the error can be resolved.
+     */
+    private fun checkGooglePlayServices() {
+        val context = requireContext()
+        val result = googleApiAvailability.isGooglePlayServicesAvailable(context)
+
+        if (result == ConnectionResult.SUCCESS) {
+            layoutError?.visibility = View.GONE
+            mapView?.visibility = View.VISIBLE
+            btnErrorResolve?.setOnClickListener(null)
+        } else {
+            mapView?.visibility = View.GONE
+            layoutError?.visibility = View.VISIBLE
+            txtError?.setText(getPlayServicesErrorString(result))
+
+            btnErrorResolve?.apply {
+                if (googleApiAvailability.isUserResolvableError(result)) {
+                    visibility = View.VISIBLE
+                    setOnClickListener {
+                        val pendingIntent = googleApiAvailability
+                                .getErrorResolutionPendingIntent(context, result, 0)
+
+                        try {
+                            pendingIntent?.send() ?: showFailedToResolvePlayServicesToast()
+                        } catch (ignored: PendingIntent.CanceledException) {
+                            showFailedToResolvePlayServicesToast()
+                        }
+                    }
+                } else {
+                    visibility = View.GONE
+                    setOnClickListener(null)
+                }
+            }
+        }
+    }
+
+    /**
+     * When [GoogleApiAvailability.isGooglePlayServicesAvailable] returns a non-success code,
+     * then pass the error code in to this method to obtain the error string resource to display to
+     * the user.
+     *
+     * @param errorCode The error code returned from
+     * [GoogleApiAvailability.isGooglePlayServicesAvailable]. Must not be
+     * [ConnectionResult.SUCCESS].
+     * @return A string resource ID for the error string to display to the user.
+     */
+    private fun getPlayServicesErrorString(errorCode: Int) = when (errorCode) {
+        ConnectionResult.SERVICE_MISSING -> R.string.busstopmapfragment_error_play_services_missing
+        ConnectionResult.SERVICE_UPDATING ->
+            R.string.busstopmapfragment_error_play_services_updating
+        ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED ->
+            R.string.busstopmapfragment_error_play_services_update_required
+        ConnectionResult.SERVICE_DISABLED ->
+            R.string.busstopmapfragment_error_play_services_disabled
+        ConnectionResult.SERVICE_INVALID -> R.string.busstopmapfragment_error_play_services_invalid
+        else -> R.string.busstopmapfragment_error_play_services_unknown
+    }
+
+    /**
+     * Show the user a [Toast] message which informs them that the resolution action could not be
+     * performed to make Google Play Services work.
+     */
+    private fun showFailedToResolvePlayServicesToast() {
+        Toast.makeText(requireContext(),
+                R.string.busstopmapfragment_error_play_services_resolve_failed,
+                Toast.LENGTH_SHORT)
+                .show()
     }
 
     /**
