@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,15 +28,16 @@ package uk.org.rivernile.android.bustracker.database.busstop.loaders;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.loader.content.Loader;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
@@ -46,7 +47,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * This {@link ProcessedCursorLoader} is used to get a {@link Map} of service name to a colour for
  * the service. It is the same implementation as
  * {@link BusStopDatabase#getServiceColours(Context, String[])}, except suitable for a
- * {@link android.support.v4.content.Loader} which manages threading and automatic reloading of the
+ * {@link Loader} which manages threading and automatic reloading of the
  * {@link Cursor} upon a data change.
  *
  * @author Niall Scott

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,25 +23,25 @@
  *    exempt from clause 2.
  */
 
-package uk.org.rivernile.android.bustracker.database.busstop;
+package uk.org.rivernile.android.utils;
 
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.util.ArrayList;
 
 /**
  * This {@link Context} renames databases for testing so they do not interfere with live databases
- * on the device. It does the same as {@link android.test.RenamingDelegatingContext}, but works
+ * on the device. It does the same as the old platform {@code RenamingDelegatingContext}, but works
  * around the problem of that class deleting database files unexpectedly.
  *
  * @author Niall Scott
  */
-class DatabaseRenamingContext extends ContextWrapper {
+public class DatabaseRenamingContext extends ContextWrapper {
 
     private final String filePrefix;
 
@@ -91,7 +91,7 @@ class DatabaseRenamingContext extends ContextWrapper {
             }
         }
 
-        return isolatedDatabases.toArray(new String[isolatedDatabases.size()]);
+        return (String[]) isolatedDatabases.toArray();
     }
 
     /**

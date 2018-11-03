@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,18 +25,15 @@
 
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.core.app.ApplicationProvider;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link JourneyTimesLoader}.
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class JourneyTimesLoaderTests {
 
     /**
@@ -45,7 +42,7 @@ public class JourneyTimesLoaderTests {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyStopCode() {
-        new JourneyTimesLoader(InstrumentationRegistry.getTargetContext(), "", "abc123");
+        new JourneyTimesLoader(ApplicationProvider.getApplicationContext(), "", "abc123");
     }
 
     /**
@@ -54,7 +51,7 @@ public class JourneyTimesLoaderTests {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyJourneyId() {
-        new JourneyTimesLoader(InstrumentationRegistry.getTargetContext(), "123456", "");
+        new JourneyTimesLoader(ApplicationProvider.getApplicationContext(), "123456", "");
     }
 
     /**
@@ -63,6 +60,6 @@ public class JourneyTimesLoaderTests {
      */
     @Test
     public void testConstructorSuccess() {
-        new JourneyTimesLoader(InstrumentationRegistry.getTargetContext(), "123456", "abc123");
+        new JourneyTimesLoader(ApplicationProvider.getApplicationContext(), "123456", "abc123");
     }
 }

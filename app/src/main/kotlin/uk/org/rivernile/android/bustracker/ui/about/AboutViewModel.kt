@@ -25,9 +25,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.about
 
-import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.Transformations
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
+import androidx.lifecycle.ViewModel
 import uk.org.rivernile.android.bustracker.repositories.about.AboutItem
 import uk.org.rivernile.android.bustracker.repositories.about.AboutRepository
 import uk.org.rivernile.android.bustracker.repositories.about.DatabaseMetadata

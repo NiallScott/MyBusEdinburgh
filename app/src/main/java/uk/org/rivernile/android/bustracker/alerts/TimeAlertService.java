@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,9 +32,9 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 import java.util.List;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,9 @@ package uk.org.rivernile.android.utils;
 
 import static org.junit.Assert.assertEquals;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,7 +42,6 @@ import uk.org.rivernile.android.fetchutils.fetchers.readers.FileWriterFetcherStr
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class FileUtilsTests {
     
     private static final String EXPECTED_HASH = "bae7aa5c017ead84fe44197bea819d63";

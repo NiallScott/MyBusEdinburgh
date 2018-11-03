@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,8 @@ import android.database.Cursor;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.SystemClock;
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
+import androidx.annotation.IntRange;
+import androidx.annotation.NonNull;
 
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddProximityAlertTask;

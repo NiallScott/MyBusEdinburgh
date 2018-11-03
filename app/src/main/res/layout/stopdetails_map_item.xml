@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<android.support.percent.PercentFrameLayout
+<androidx.percentlayout.widget.PercentFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:percent="http://schemas.android.com/apk/res-auto"
     xmlns:map="http://schemas.android.com/apk/res-auto"
@@ -42,4 +42,4 @@
         map:uiCompass="false"
         tools:background="@android:color/holo_green_light"
         tools:visibility="visible" />
-</android.support.percent.PercentFrameLayout>
+</androidx.percentlayout.widget.PercentFrameLayout>

@@ -30,7 +30,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.database.Cursor
 import android.graphics.Color
-import android.support.annotation.ColorInt
+import androidx.annotation.ColorInt
 import android.text.TextUtils
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions

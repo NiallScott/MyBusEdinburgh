@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,22 +32,20 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.test.core.app.ApplicationProvider;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -55,14 +53,13 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class NearestStopsAdapterTests {
 
     private NearestStopsAdapter adapter;
 
     @Before
     public void setUp() {
-        final Context context = InstrumentationRegistry.getTargetContext();
+        final Context context = ApplicationProvider.getApplicationContext();
         context.setTheme(R.style.MyBusEdinburgh);
         adapter = new NearestStopsAdapter(context);
     }
@@ -90,7 +87,7 @@ public class NearestStopsAdapterTests {
     public void testNoItems() {
         final DataObserver observer = new DataObserver();
         adapter.registerAdapterDataObserver(observer);
-        adapter.setSearchResults(new ArrayList<SearchResult>(1));
+        adapter.setSearchResults(new ArrayList<>(1));
 
         assertTrue(observer.onChangeCalled);
         assertEquals(0, adapter.getItemCount());
@@ -105,10 +102,10 @@ public class NearestStopsAdapterTests {
         final NearestStopsAdapter.ViewHolder viewHolder = adapter.createViewHolder(null, 0);
         adapter.bindViewHolder(viewHolder, 0);
         final View itemView = viewHolder.itemView;
-        final ImageView imgDirection = (ImageView) itemView.findViewById(R.id.imgDirection);
-        final TextView text1 = (TextView) itemView.findViewById(android.R.id.text1);
-        final TextView text2 = (TextView) itemView.findViewById(android.R.id.text2);
-        final TextView txtDistance = (TextView) itemView.findViewById(R.id.txtDistance);
+        final ImageView imgDirection = itemView.findViewById(R.id.imgDirection);
+        final TextView text1 = itemView.findViewById(android.R.id.text1);
+        final TextView text2 = itemView.findViewById(android.R.id.text2);
+        final TextView txtDistance = itemView.findViewById(R.id.txtDistance);
 
         assertNull(imgDirection.getDrawable());
         assertNull(imgDirection.getContentDescription());
@@ -141,10 +138,10 @@ public class NearestStopsAdapterTests {
 
         final NearestStopsAdapter.ViewHolder vh = adapter.createViewHolder(null, 0);
         final View itemView = vh.itemView;
-        final ImageView imgDirection = (ImageView) itemView.findViewById(R.id.imgDirection);
-        final TextView text1 = (TextView) itemView.findViewById(android.R.id.text1);
-        final TextView text2 = (TextView) itemView.findViewById(android.R.id.text2);
-        final TextView txtDistance = (TextView) itemView.findViewById(R.id.txtDistance);
+        final ImageView imgDirection = itemView.findViewById(R.id.imgDirection);
+        final TextView text1 = itemView.findViewById(android.R.id.text1);
+        final TextView text2 = itemView.findViewById(android.R.id.text2);
+        final TextView txtDistance = itemView.findViewById(R.id.txtDistance);
 
         assertNull(imgDirection.getDrawable());
         assertNull(imgDirection.getContentDescription());
@@ -195,10 +192,10 @@ public class NearestStopsAdapterTests {
 
         final NearestStopsAdapter.ViewHolder vh1 = adapter.createViewHolder(null, 0);
         final View itemView1 = vh1.itemView;
-        final ImageView imgDirection1 = (ImageView) itemView1.findViewById(R.id.imgDirection);
-        final TextView text1_1 = (TextView) itemView1.findViewById(android.R.id.text1);
-        final TextView text2_1 = (TextView) itemView1.findViewById(android.R.id.text2);
-        final TextView txtDistance1 = (TextView) itemView1.findViewById(R.id.txtDistance);
+        final ImageView imgDirection1 = itemView1.findViewById(R.id.imgDirection);
+        final TextView text1_1 = itemView1.findViewById(android.R.id.text1);
+        final TextView text2_1 = itemView1.findViewById(android.R.id.text2);
+        final TextView txtDistance1 = itemView1.findViewById(R.id.txtDistance);
 
         assertNull(imgDirection1.getDrawable());
         assertNull(imgDirection1.getContentDescription());
@@ -208,10 +205,10 @@ public class NearestStopsAdapterTests {
 
         final NearestStopsAdapter.ViewHolder vh2 = adapter.createViewHolder(null, 0);
         final View itemView2 = vh2.itemView;
-        final ImageView imgDirection2 = (ImageView) itemView2.findViewById(R.id.imgDirection);
-        final TextView text1_2 = (TextView) itemView2.findViewById(android.R.id.text1);
-        final TextView text2_2 = (TextView) itemView2.findViewById(android.R.id.text2);
-        final TextView txtDistance2 = (TextView) itemView2.findViewById(R.id.txtDistance);
+        final ImageView imgDirection2 = itemView2.findViewById(R.id.imgDirection);
+        final TextView text1_2 = itemView2.findViewById(android.R.id.text1);
+        final TextView text2_2 = itemView2.findViewById(android.R.id.text2);
+        final TextView txtDistance2 = itemView2.findViewById(R.id.txtDistance);
 
         assertNull(imgDirection2.getDrawable());
         assertNull(imgDirection2.getContentDescription());
@@ -269,10 +266,6 @@ public class NearestStopsAdapterTests {
     private static class DataObserver extends RecyclerView.AdapterDataObserver {
 
         private boolean onChangeCalled;
-        private boolean onItemRangeChangeCalled;
-        private boolean onItemRangeInsertedCalled;
-        private boolean onItemRangeRemovedCalled;
-        private boolean onItemRangeMovedCalled;
 
         @Override
         public void onChanged() {
@@ -281,23 +274,23 @@ public class NearestStopsAdapterTests {
 
         @Override
         public void onItemRangeChanged(final int positionStart, final int itemCount) {
-            onItemRangeChangeCalled = true;
+
         }
 
         @Override
         public void onItemRangeInserted(final int positionStart, final int itemCount) {
-            onItemRangeInsertedCalled = true;
+
         }
 
         @Override
         public void onItemRangeRemoved(final int positionStart, final int itemCount) {
-            onItemRangeRemovedCalled = true;
+
         }
 
         @Override
         public void onItemRangeMoved(final int fromPosition, final int toPosition,
                 final int itemCount) {
-            onItemRangeMovedCalled = true;
+
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,23 +30,24 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.support.annotation.NonNull;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.core.app.ApplicationProvider;
 import uk.org.rivernile.android.fetchutils.fetchers.AssetFileFetcher;
 import uk.org.rivernile.android.fetchutils.fetchers.readers.FileWriterFetcherStreamReader;
+import uk.org.rivernile.android.utils.DatabaseRenamingContext;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -54,7 +55,6 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class BusStopOpenHelperTests {
 
     private DatabaseRenamingContext context;
@@ -63,11 +63,11 @@ public class BusStopOpenHelperTests {
 
     @Before
     public void setUp() {
-        context = new DatabaseRenamingContext(InstrumentationRegistry.getTargetContext(), "test_");
+        final Context applicationContext = ApplicationProvider.getApplicationContext();
+        context = new DatabaseRenamingContext(applicationContext, "test_");
         // Delete the db if it exists here incase a previous one is left over from a failed test.
         context.deleteDatabase(BusStopContract.DB_NAME);
-        assetDbVersion = Long.parseLong(
-                InstrumentationRegistry.getTargetContext().getString(R.string.asset_db_version));
+        assetDbVersion = Long.parseLong(applicationContext.getString(R.string.asset_db_version));
         helper = new BusStopOpenHelper(context, assetDbVersion);
     }
 

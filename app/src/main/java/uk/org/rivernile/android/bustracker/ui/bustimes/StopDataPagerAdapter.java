@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2017 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,10 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment;

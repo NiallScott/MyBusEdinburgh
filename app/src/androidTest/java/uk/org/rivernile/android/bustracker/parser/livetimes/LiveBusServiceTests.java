@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,10 +30,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.support.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,7 +42,6 @@ import java.util.List;
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class LiveBusServiceTests {
 
     /**
@@ -56,7 +52,7 @@ public class LiveBusServiceTests {
     public void testBuilderWithNullServiceName() {
         new LiveBusService.Builder()
                 .setServiceName(null)
-                .setBuses(Collections.<LiveBus>emptyList())
+                .setBuses(Collections.emptyList())
                 .build();
     }
 
@@ -68,7 +64,7 @@ public class LiveBusServiceTests {
     public void testBuilderWithEmptyServiceName() {
         new LiveBusService.Builder()
                 .setServiceName("")
-                .setBuses(Collections.<LiveBus>emptyList())
+                .setBuses(Collections.emptyList())
                 .build();
     }
 
@@ -92,7 +88,7 @@ public class LiveBusServiceTests {
     public void testBuilderWithEmptyOperator() {
         new LiveBusService.Builder()
                 .setServiceName("1")
-                .setBuses(Collections.<LiveBus>emptyList())
+                .setBuses(Collections.emptyList())
                 .setOperator("")
                 .build();
     }
@@ -105,7 +101,7 @@ public class LiveBusServiceTests {
     public void testBuilderWithEmptyRoute() {
         new LiveBusService.Builder()
                 .setServiceName("1")
-                .setBuses(Collections.<LiveBus>emptyList())
+                .setBuses(Collections.emptyList())
                 .setRoute("")
                 .build();
     }
@@ -117,7 +113,7 @@ public class LiveBusServiceTests {
     public void testDefault() {
         final LiveBusService service = new LiveBusService.Builder()
                 .setServiceName("1")
-                .setBuses(Collections.<LiveBus>emptyList())
+                .setBuses(Collections.emptyList())
                 .build();
 
         assertEquals("1", service.getServiceName());
@@ -166,11 +162,11 @@ public class LiveBusServiceTests {
     public void testOrdering() {
         final LiveBusService serviceA = new LiveBusService.Builder()
                 .setServiceName("25")
-                .setBuses(Collections.<LiveBus>emptyList())
+                .setBuses(Collections.emptyList())
                 .build();
         final LiveBusService serviceB = new LiveBusService.Builder()
                 .setServiceName("X25")
-                .setBuses(Collections.<LiveBus>emptyList())
+                .setBuses(Collections.emptyList())
                 .build();
 
         assertEquals(0, serviceA.compareTo(serviceA));

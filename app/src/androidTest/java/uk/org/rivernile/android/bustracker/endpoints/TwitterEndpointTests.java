@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,16 +27,13 @@ package uk.org.rivernile.android.bustracker.endpoints;
 
 import static org.junit.Assert.assertSame;
 
-import android.support.annotation.NonNull;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
 
 import java.util.List;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
-import uk.org.rivernile.android.bustracker.parser.twitter.TwitterException;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParser;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
 
@@ -45,7 +42,6 @@ import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class TwitterEndpointTests {
     
     /**
@@ -71,13 +67,13 @@ public class TwitterEndpointTests {
          * 
          * @param parser The parser to use.
          */
-        public MockTwitterEndpoint(@NonNull final TwitterParser parser) {
+        MockTwitterEndpoint(@NonNull final TwitterParser parser) {
             super(parser);
         }
 
         @NonNull
         @Override
-        public List<Tweet> getTweets() throws TwitterException {
+        public List<Tweet> getTweets() {
             throw new UnsupportedOperationException();
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,48 +30,37 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.ProviderTestCase2;
 
-import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import androidx.test.rule.provider.ProviderTestRule;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link SettingsProvider}.
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
-public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
+public class SettingsProviderTests {
+
+    @Rule
+    public ProviderTestRule providerRule =
+            new ProviderTestRule.Builder(SettingsProvider.class, SettingsContract.AUTHORITY)
+                    .build();
 
     private long currentTime;
 
-    public SettingsProviderTests() {
-        super(SettingsProvider.class, SettingsContract.AUTHORITY);
-    }
-
     @Before
-    @Override
-    public void setUp() throws Exception {
-        setContext(InstrumentationRegistry.getTargetContext());
+    public void setUp() {
         currentTime = System.currentTimeMillis();
-
-        super.setUp();
-    }
-
-    @After
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-
-        getMockContext().deleteDatabase(SettingsContract.DB_NAME);
-        currentTime = 0;
     }
 
     /**
@@ -80,15 +69,17 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      */
     @Test
     public void testGetTypeSuccess() {
+        final ContentResolver resolver = providerRule.getResolver();
+
         assertEquals(SettingsContract.Favourites.CONTENT_TYPE,
-                getMockContentResolver().getType(SettingsContract.Favourites.CONTENT_URI));
+                resolver.getType(SettingsContract.Favourites.CONTENT_URI));
         assertEquals(SettingsContract.Favourites.CONTENT_ITEM_TYPE,
-                getMockContentResolver().getType(
+                resolver.getType(
                         ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1)));
         assertEquals(SettingsContract.Alerts.CONTENT_TYPE,
-                getMockContentResolver().getType(SettingsContract.Alerts.CONTENT_URI));
+                resolver.getType(SettingsContract.Alerts.CONTENT_URI));
         assertEquals(SettingsContract.Alerts.CONTENT_ITEM_TYPE,
-                getMockContentResolver().getType(
+                resolver.getType(
                         ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1)));
     }
 
@@ -98,10 +89,11 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      */
     @Test
     public void testGetTypeWithInvalidUris() {
-        assertNull(getMockContentResolver().getType(Uri.parse("content://invalid.uri/thing")));
-        assertNull(getMockContentResolver()
-                .getType(Uri.parse("content://" + SettingsContract.AUTHORITY)));
-        assertNull(getMockContentResolver()
+        final ContentResolver resolver = providerRule.getResolver();
+
+        assertNull(resolver.getType(Uri.parse("content://invalid.uri/thing")));
+        assertNull(resolver.getType(Uri.parse("content://" + SettingsContract.AUTHORITY)));
+        assertNull(resolver
                 .getType(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid")));
     }
 
@@ -111,7 +103,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testQueryWithInvalidUri() {
-        getMockContentResolver()
+        providerRule.getResolver()
                 .query(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), null,
                         null, null, null);
     }
@@ -125,7 +117,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         final ContentValues cv = new ContentValues();
         cv.put("a", "1");
         cv.put("b", "2");
-        getMockContentResolver()
+        providerRule.getResolver()
                 .insert(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), cv);
     }
 
@@ -139,7 +131,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         final ContentValues cv = new ContentValues();
         cv.put(SettingsContract.Favourites.STOP_CODE, "123456");
         cv.put(SettingsContract.Favourites.STOP_NAME, "Name");
-        getMockContentResolver().insert(
+        providerRule.getResolver().insert(
                 ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1), cv);
     }
 
@@ -155,7 +147,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         cv.put(SettingsContract.Alerts.TIME_ADDED, 1234567890L);
         cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
         cv.put(SettingsContract.Alerts.DISTANCE_FROM, 1);
-        getMockContentResolver().insert(
+        providerRule.getResolver().insert(
                 ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), cv);
     }
 
@@ -165,7 +157,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDeleteWithInvalidUri() {
-        getMockContentResolver()
+        providerRule.getResolver()
                 .delete(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), null,
                         null);
     }
@@ -179,7 +171,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         final ContentValues cv = new ContentValues();
         cv.put("a", "1");
         cv.put("b", "2");
-        getMockContentResolver()
+        providerRule.getResolver()
                 .update(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"), cv,
                         null, null);
     }
@@ -192,7 +184,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     public void testUpdateWithAlerts() {
         final ContentValues cv = new ContentValues();
         cv.put(SettingsContract.Alerts.STOP_CODE, "24680");
-        getMockContentResolver()
+        providerRule.getResolver()
                 .update(SettingsContract.Alerts.CONTENT_URI, cv, null, null);
     }
 
@@ -205,7 +197,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     public void testUpdateWithAlertsUri() {
         final ContentValues cv = new ContentValues();
         cv.put(SettingsContract.Alerts.STOP_CODE, "24680");
-        getMockContentResolver()
+        providerRule.getResolver()
                 .update(ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), cv,
                         null, null);
     }
@@ -217,7 +209,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      */
     @Test
     public void testQueryFavouritesWithEmptyTable() {
-        final Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
+        final Cursor c = providerRule.getResolver().query(SettingsContract.Favourites.CONTENT_URI,
                 null, null, null, null);
         assertNotNull(c);
         assertEquals(0, c.getCount());
@@ -232,7 +224,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      */
     @Test
     public void testQueryAlertsWithEmptyTable() {
-        final Cursor c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI, null,
+        final Cursor c = providerRule.getResolver().query(SettingsContract.Alerts.CONTENT_URI, null,
                 null, null, null);
         assertNotNull(c);
         assertEquals(0, c.getCount());
@@ -247,9 +239,9 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testQueryFavourites() {
         populateFavouritesWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
-        Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
-                null, null, null, null);
+        Cursor c = resolver.query(SettingsContract.Favourites.CONTENT_URI, null, null, null, null);
         assertNotNull(c);
         assertEquals(3, c.getCount());
 
@@ -262,8 +254,8 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         assertNotificationUri(SettingsContract.Favourites.CONTENT_URI, c);
         c.close();
 
-        c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
-                null, null, null, SettingsContract.Favourites.STOP_NAME + " DESC");
+        c = resolver.query(SettingsContract.Favourites.CONTENT_URI, null, null, null,
+                SettingsContract.Favourites.STOP_NAME + " DESC");
         assertNotNull(c);
         assertEquals(3, c.getCount());
 
@@ -276,7 +268,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         assertNotificationUri(SettingsContract.Favourites.CONTENT_URI, c);
         c.close();
 
-        c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
+        c = resolver.query(SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_NAME },
                 SettingsContract.Favourites.STOP_CODE + " = ?",
                 new String[] { "323456" }, null);
@@ -295,9 +287,9 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testQueryAlerts() {
         populateAlertsWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
-        Cursor c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI, null, null,
-                null, null);
+        Cursor c = resolver.query(SettingsContract.Alerts.CONTENT_URI, null, null, null, null);
         assertNotNull(c);
         assertEquals(2, c.getCount());
 
@@ -308,7 +300,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         assertNotificationUri(SettingsContract.Alerts.CONTENT_URI, c);
         c.close();
 
-        c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI,
+        c = resolver.query(SettingsContract.Alerts.CONTENT_URI,
                 new String[] { SettingsContract.Alerts.STOP_CODE },
                 SettingsContract.Alerts.TYPE + " = ?",
                 new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY) },
@@ -328,8 +320,9 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testQueryFavouritesById() {
         populateFavouritesWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
-        Cursor c = getMockContentResolver().query(
+        Cursor c = resolver.query(
                 ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1), null,
                 null, null, null);
         assertNotNull(c);
@@ -338,14 +331,14 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         assertEquals("B", c.getString(2));
         c.close();
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 42), null,
                 null, null, null);
         assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1),
                 new String[] { SettingsContract.Favourites.STOP_NAME },
                 SettingsContract.Favourites.STOP_CODE + " = ?",
@@ -364,8 +357,9 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testQueryAlertsById() {
         populateAlertsWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
-        Cursor c = getMockContentResolver().query(
+        Cursor c = resolver.query(
                 ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), null, null,
                 null, null);
         assertNotNull(c);
@@ -374,14 +368,14 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         assertEquals("123456", c.getString(3));
         c.close();
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 42), null, null,
                 null, null);
         assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1),
                 new String[] { SettingsContract.Alerts.STOP_CODE },
                 SettingsContract.Alerts.TYPE + " = ?",
@@ -398,8 +392,8 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      */
     @Test
     public void testInsertFavourites() {
-        Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
-                null, null, null, null);
+        final ContentResolver resolver = providerRule.getResolver();
+        Cursor c = resolver.query(SettingsContract.Favourites.CONTENT_URI, null, null, null, null);
         assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
@@ -407,13 +401,13 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         final ContentValues cv = new ContentValues();
         cv.put(SettingsContract.Favourites.STOP_CODE, "24680");
         cv.put(SettingsContract.Favourites.STOP_NAME, "Test stop");
-        final Uri returnedUri = getMockContentResolver()
+        final Uri returnedUri = resolver
                 .insert(SettingsContract.Favourites.CONTENT_URI, cv);
         assertNotNull(returnedUri);
         assertEquals(ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1),
                 returnedUri);
 
-        c = getMockContentResolver().query(returnedUri, null, null, null, null);
+        c = resolver.query(returnedUri, null, null, null, null);
         assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
@@ -428,8 +422,8 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      */
     @Test
     public void testInsertAlerts() {
-        Cursor c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI, null,
-                null, null, null);
+        final ContentResolver resolver = providerRule.getResolver();
+        Cursor c = resolver.query(SettingsContract.Alerts.CONTENT_URI, null, null, null, null);
         assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
@@ -439,13 +433,12 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         cv.put(SettingsContract.Alerts.TIME_ADDED, currentTime);
         cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
         cv.put(SettingsContract.Alerts.DISTANCE_FROM, 10);
-        final Uri returnedUri = getMockContentResolver()
-                .insert(SettingsContract.Alerts.CONTENT_URI, cv);
+        final Uri returnedUri = resolver.insert(SettingsContract.Alerts.CONTENT_URI, cv);
         assertNotNull(returnedUri);
         assertEquals(ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1),
                 returnedUri);
 
-        c = getMockContentResolver().query(returnedUri, null, null, null, null);
+        c = resolver.query(returnedUri, null, null, null, null);
         assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
@@ -465,11 +458,11 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testDeleteAllFavourites() {
         populateFavouritesWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
-        assertEquals(3, getMockContentResolver()
-                .delete(SettingsContract.Favourites.CONTENT_URI, null, null));
-        final Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI,
-                null, null, null, null);
+        assertEquals(3, resolver.delete(SettingsContract.Favourites.CONTENT_URI, null, null));
+        final Cursor c = resolver.query(SettingsContract.Favourites.CONTENT_URI, null, null,
+                null, null);
         assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
@@ -481,11 +474,11 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testDeleteAllAlerts() {
         populateAlertsWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
-        assertEquals(2, getMockContentResolver()
-                .delete(SettingsContract.Alerts.CONTENT_URI, null, null));
-        final Cursor c = getMockContentResolver().query(SettingsContract.Alerts.CONTENT_URI,
-                null, null, null, null);
+        assertEquals(2, resolver.delete(SettingsContract.Alerts.CONTENT_URI, null, null));
+        final Cursor c = resolver.query(SettingsContract.Alerts.CONTENT_URI, null, null, null,
+                null);
         assertNotNull(c);
         assertEquals(0, c.getCount());
         c.close();
@@ -497,12 +490,13 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testDeleteFavourites() {
         populateFavouritesWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
-        int count = getMockContentResolver().delete(SettingsContract.Favourites.CONTENT_URI,
+        int count = resolver.delete(SettingsContract.Favourites.CONTENT_URI,
                 SettingsContract.Favourites.STOP_NAME + " = ?", new String[] { "A" });
         assertEquals(1, count);
 
-        Cursor c = getMockContentResolver().query(
+        Cursor c = resolver.query(
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
@@ -514,11 +508,11 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         assertEquals("323456", c.getString(0));
         c.close();
 
-        count = getMockContentResolver().delete(SettingsContract.Favourites.CONTENT_URI,
+        count = resolver.delete(SettingsContract.Favourites.CONTENT_URI,
                 SettingsContract.Favourites.STOP_NAME + " = ?", new String[] { "C" });
         assertEquals(1, count);
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
@@ -535,13 +529,14 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testDeleteAlerts() {
         populateAlertsWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
-        int count = getMockContentResolver().delete(SettingsContract.Alerts.CONTENT_URI,
+        int count = resolver.delete(SettingsContract.Alerts.CONTENT_URI,
                 SettingsContract.Alerts.TYPE + " = ?",
                 new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY) });
         assertEquals(1, count);
 
-        Cursor c = getMockContentResolver().query(
+        Cursor c = resolver.query(
                 SettingsContract.Alerts.CONTENT_URI,
                 new String[] { SettingsContract.Alerts.STOP_CODE },
                 null, null, null);
@@ -551,12 +546,12 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         assertEquals("223456", c.getString(0));
         c.close();
 
-        count = getMockContentResolver().delete(SettingsContract.Alerts.CONTENT_URI,
+        count = resolver.delete(SettingsContract.Alerts.CONTENT_URI,
                 SettingsContract.Alerts.TYPE + " = ?",
                 new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_TIME) });
         assertEquals(1, count);
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 SettingsContract.Alerts.CONTENT_URI,
                 new String[] { SettingsContract.Alerts.STOP_CODE },
                 null, null, null);
@@ -571,13 +566,14 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testDeleteFavouritesById() {
         populateFavouritesWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
         Uri deleteUri = ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 2);
-        int count = getMockContentResolver().delete(deleteUri,
+        int count = resolver.delete(deleteUri,
                 SettingsContract.Favourites.STOP_NAME + " = ?", new String[] { "C" });
         assertEquals(1, count);
 
-        Cursor c = getMockContentResolver().query(
+        Cursor c = resolver.query(
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
@@ -590,10 +586,10 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         c.close();
 
         deleteUri = ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 3);
-        count = getMockContentResolver().delete(deleteUri, null, null);
+        count = resolver.delete(deleteUri, null, null);
         assertEquals(1, count);
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
@@ -610,14 +606,15 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testDeleteAlertsById() {
         populateAlertsWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
         Uri deleteUri = ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 2);
-        int count = getMockContentResolver().delete(deleteUri,
+        int count = resolver.delete(deleteUri,
                 SettingsContract.Alerts.TYPE + " = ?",
                 new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY) });
         assertEquals(1, count);
 
-        Cursor c = getMockContentResolver().query(
+        Cursor c = resolver.query(
                 SettingsContract.Alerts.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_CODE },
                 null, null, null);
@@ -628,10 +625,10 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         c.close();
 
         deleteUri = ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1);
-        count = getMockContentResolver().delete(deleteUri, null, null);
+        count = resolver.delete(deleteUri, null, null);
         assertEquals(1, count);
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 SettingsContract.Alerts.CONTENT_URI,
                 new String[] { SettingsContract.Alerts.STOP_CODE },
                 null, null, null);
@@ -647,13 +644,13 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testUpdateAllFavourites() {
         populateFavouritesWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
         final ContentValues cv = new ContentValues();
         cv.put(SettingsContract.Favourites.STOP_NAME, "Z");
-        assertEquals(3, getMockContentResolver()
-                .update(SettingsContract.Favourites.CONTENT_URI, cv, null, null));
+        assertEquals(3, resolver.update(SettingsContract.Favourites.CONTENT_URI, cv, null, null));
 
-        final Cursor c = getMockContentResolver().query(
+        final Cursor c = resolver.query(
                 SettingsContract.Favourites.CONTENT_URI,
                 new String[] { SettingsContract.Favourites.STOP_NAME },
                 null, null, null);
@@ -673,14 +670,15 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testUpdateFavourites() {
         populateFavouritesWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
         ContentValues cv = new ContentValues();
         cv.put(SettingsContract.Favourites.STOP_NAME, "Z");
-        int count = getMockContentResolver().update(SettingsContract.Favourites.CONTENT_URI, cv,
+        int count = resolver.update(SettingsContract.Favourites.CONTENT_URI, cv,
                 SettingsContract.Favourites.STOP_CODE + " = ?", new String[] { "123456" });
         assertEquals(1, count);
 
-        Cursor c = getMockContentResolver().query(
+        Cursor c = resolver.query(
                 SettingsContract.Favourites.CONTENT_URI, null, null, null,
                 SettingsContract.Favourites._ID + " ASC");
         assertNotNull(c);
@@ -698,11 +696,11 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
 
         cv = new ContentValues();
         cv.put(SettingsContract.Favourites.STOP_NAME, "X");
-        count = getMockContentResolver().update(SettingsContract.Favourites.CONTENT_URI, cv,
+        count = resolver.update(SettingsContract.Favourites.CONTENT_URI, cv,
                 SettingsContract.Favourites.STOP_NAME + " = ?", new String[] { "C" });
         assertEquals(1, count);
 
-        c = getMockContentResolver().query(
+        c = resolver.query(
                 SettingsContract.Favourites.CONTENT_URI, null, null, null,
                 SettingsContract.Favourites._ID + " ASC");
         assertNotNull(c);
@@ -726,15 +724,16 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
     @Test
     public void testUpdateFavouritesById() {
         populateFavouritesWithTestData();
+        final ContentResolver resolver = providerRule.getResolver();
 
         Uri deleteUri = ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 2);
         ContentValues cv = new ContentValues();
         cv.put(SettingsContract.Favourites.STOP_NAME, "Z");
-        int count = getMockContentResolver().update(deleteUri, cv,
+        int count = resolver.update(deleteUri, cv,
                 SettingsContract.Favourites.STOP_NAME + " = ?", new String[] { "C" });
         assertEquals(1, count);
 
-        Cursor c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI, null,
+        Cursor c = resolver.query(SettingsContract.Favourites.CONTENT_URI, null,
                 null, null, SettingsContract.Favourites._ID + " ASC");
         assertNotNull(c);
         assertEquals(3, c.getCount());
@@ -752,10 +751,10 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
         deleteUri = ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 3);
         cv = new ContentValues();
         cv.put(SettingsContract.Favourites.STOP_NAME, "X");
-        count = getMockContentResolver().update(deleteUri, cv, null, null);
+        count = resolver.update(deleteUri, cv, null, null);
         assertEquals(1, count);
 
-        c = getMockContentResolver().query(SettingsContract.Favourites.CONTENT_URI, null,
+        c = resolver.query(SettingsContract.Favourites.CONTENT_URI, null,
                 null, null, SettingsContract.Favourites._ID + " ASC");
         assertNotNull(c);
         assertEquals(3, c.getCount());
@@ -780,7 +779,7 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * @param expected The expected notification {@link Uri}.
      * @param cursor The {@link Cursor} that the notification {@link Uri} should have been set on.
      */
-    @TargetApi(19)
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     private static void assertNotificationUri(final Uri expected, final Cursor cursor) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             assertEquals(expected, cursor.getNotificationUri());
@@ -791,47 +790,40 @@ public class SettingsProviderTests extends ProviderTestCase2<SettingsProvider> {
      * Populate the favourites table with some test data.
      */
     private void populateFavouritesWithTestData() {
-        final SQLiteDatabase db = new SettingsOpenHelper(getMockContext()).getWritableDatabase();
-
-        ContentValues cv = new ContentValues();
-        cv.put(SettingsContract.Favourites.STOP_CODE, "123456");
-        cv.put(SettingsContract.Favourites.STOP_NAME, "B");
-        db.insertOrThrow(SettingsContract.Favourites.TABLE_NAME, null, cv);
-
-        cv = new ContentValues();
-        cv.put(SettingsContract.Favourites.STOP_CODE, "223456");
-        cv.put(SettingsContract.Favourites.STOP_NAME, "A");
-        db.insertOrThrow(SettingsContract.Favourites.TABLE_NAME, null, cv);
-
-        cv = new ContentValues();
-        cv.put(SettingsContract.Favourites.STOP_CODE, "323456");
-        cv.put(SettingsContract.Favourites.STOP_NAME, "C");
-        db.insertOrThrow(SettingsContract.Favourites.TABLE_NAME, null, cv);
-
-        db.close();
+        forceCreationOfDatabase();
+        providerRule.runDatabaseCommands(SettingsContract.DB_NAME,
+                "INSERT INTO favourite_stops (stopCode, stopName) VALUES (" +
+                        "\"123456\", \"B\")",
+                "INSERT INTO favourite_stops (stopCode, stopName) VALUES (" +
+                        "\"223456\", \"A\")",
+                "INSERT INTO favourite_stops (stopCode, stopName) VALUES (" +
+                        "\"323456\", \"C\")");
     }
 
     /**
      * Populate the alerts table with some test data.
      */
     private void populateAlertsWithTestData() {
-        final SQLiteDatabase db = new SettingsOpenHelper(getMockContext()).getWritableDatabase();
+        forceCreationOfDatabase();
+        providerRule.runDatabaseCommands(SettingsContract.DB_NAME,
+                "INSERT INTO active_alerts (type, timeAdded, stopCode, distanceFrom) VALUES (" +
+                        "1, " + currentTime + ", \"123456\", 10)",
+                "INSERT INTO active_alerts (type, timeAdded, stopCode, serviceNames, timeTrigger)" +
+                        " VALUES (2, " + currentTime + ", \"223456\", \"1,2,3\", 5)");
+    }
 
-        ContentValues cv = new ContentValues();
-        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
-        cv.put(SettingsContract.Alerts.TIME_ADDED, currentTime);
-        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
-        cv.put(SettingsContract.Alerts.DISTANCE_FROM, 10);
-        db.insertOrThrow(SettingsContract.Alerts.TABLE_NAME, null, cv);
-
-        cv = new ContentValues();
-        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_TIME);
-        cv.put(SettingsContract.Alerts.TIME_ADDED, currentTime);
-        cv.put(SettingsContract.Alerts.STOP_CODE, "223456");
-        cv.put(SettingsContract.Alerts.SERVICE_NAMES, "1,2,3");
-        cv.put(SettingsContract.Alerts.TIME_TRIGGER, 5);
-        db.insertOrThrow(SettingsContract.Alerts.TABLE_NAME, null, cv);
-
-        db.close();
+    /**
+     * Because of the order in which the test setup code is run, we need to force the
+     * {@link SettingsProvider} to create the necessary tables in the database. By sending a useless
+     * query, this should force this to happen.
+     */
+    private void forceCreationOfDatabase() {
+        providerRule.getResolver().query(
+                SettingsContract.Favourites.CONTENT_URI,
+                null,
+                null,
+                null,
+                null)
+                .close();
     }
 }

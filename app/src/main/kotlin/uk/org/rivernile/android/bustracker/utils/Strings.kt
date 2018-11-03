@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.utils
 
 import android.content.Context
-import android.support.annotation.StringRes
+import androidx.annotation.StringRes
 import javax.inject.Inject
 
 /**

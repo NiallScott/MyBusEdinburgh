@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,22 +26,17 @@
 package uk.org.rivernile.android.bustracker.parser.database;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
-import android.support.annotation.NonNull;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link DatabaseVersion}.
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class DatabaseVersionTests {
 
     /**
@@ -182,15 +177,15 @@ public class DatabaseVersionTests {
     public void testEquals() {
         final DatabaseVersion[] versions = getObjectsForTestingEqualsAndHashCode();
 
-        assertTrue(versions[0].equals(versions[0]));
-        assertTrue(versions[0].equals(versions[1]));
-        assertTrue(versions[0].equals(versions[4]));
-        assertTrue(versions[0].equals(versions[5]));
+        assertEquals(versions[0], versions[0]);
+        assertEquals(versions[0], versions[1]);
+        assertEquals(versions[0], versions[4]);
+        assertEquals(versions[0], versions[5]);
 
-        assertFalse(versions[0].equals(versions[2]));
-        assertFalse(versions[0].equals(versions[3]));
-        assertFalse(versions[0].equals(null));
-        assertFalse(versions[0].equals(new Object()));
+        assertNotEquals(versions[0], versions[2]);
+        assertNotEquals(versions[0], versions[3]);
+        assertNotEquals(versions[0], null);
+        assertNotEquals(versions[0], new Object());
     }
 
     /**

@@ -25,9 +25,9 @@
 
 package uk.org.rivernile.android.bustracker.dagger
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import javax.inject.Inject
-import android.arch.lifecycle.ViewModelProvider
 import javax.inject.Provider
 import javax.inject.Singleton
 

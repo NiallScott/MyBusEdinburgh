@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,15 +30,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
 import uk.org.rivernile.android.bustracker.parser.livetimes.JourneyDeparture;
@@ -55,7 +53,6 @@ import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class EdinburghParserTests {
     
     private EdinburghParser parser;

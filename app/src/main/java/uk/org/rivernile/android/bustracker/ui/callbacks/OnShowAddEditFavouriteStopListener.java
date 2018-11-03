@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,11 +25,12 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
 /**
  * This listener is used to send callbacks from
- * {@link android.support.v4.app.Fragment Fragments} to
+ * {@link Fragment Fragments} to
  * {@link android.app.Activity Activities} when the user wishes to add a new favourite stop.
  * 
  * @author Niall Scott

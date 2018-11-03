@@ -27,9 +27,9 @@ package uk.org.rivernile.android.bustracker.database.busstop;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import java.util.Collections;
 import java.util.HashMap;

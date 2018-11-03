@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,9 @@ package uk.org.rivernile.android.utils;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v4.app.NavUtils;
-import android.support.v4.app.TaskStackBuilder;
+import androidx.annotation.NonNull;
+import androidx.core.app.NavUtils;
+import androidx.core.app.TaskStackBuilder;
 
 /**
  * This class contains various code related to navigation that may be reused in multiple places
@@ -50,13 +50,13 @@ public final class NavigationUtils {
     /**
      * Call this method when it is necessary to navigate 'up' from an {@link Activity} that only
      * has a single known entry point. The parent {@link Activity} that is used is defined in the
-     * AndroidManifest.xml, as described in {@link android.support.v4.app.NavUtils}.
+     * AndroidManifest.xml, as described in {@link androidx.core.app.NavUtils}.
      * 
      * @param activity The {@link Activity} on which 'up' was pressed.
      * @return {@code true} if the navigation operation succeeded, {@code false} if it didn't.
      * This may happen if activity is {@code null}, or the parent {@link Activity} was not
      * defined in AndroidManifest.xml.
-     * @see android.support.v4.app.NavUtils
+     * @see androidx.core.app.NavUtils
      */
     public static boolean navigateUpOnActivityWithSingleEntryPoint(
             @NonNull final Activity activity) {
@@ -80,12 +80,12 @@ public final class NavigationUtils {
      * Call this method when it is necessary to navigate 'up' from an {@link Activity} that has
      * multiple entry points. A parent {@link Activity} should be defined in AndroidManifest.xml,
      * most likely the home {@link Activity} of the application, that will be navigated to if
-     * {@link android.support.v4.app.NavUtils#shouldUpRecreateTask(android.app.Activity, android.content.Intent)}
+     * {@link androidx.core.app.NavUtils#shouldUpRecreateTask(android.app.Activity, android.content.Intent)}
      * returns {@link true}.
      * 
      * @param activity The {@link Activity} on which 'up' was pressed.
      * @return {@code true} if the navigation operation succeeded, {@code false} if it didn't.
-     * @see android.support.v4.app.NavUtils
+     * @see androidx.core.app.NavUtils
      */
     public static boolean navigateUpOnActivityWithMultipleEntryPoints(
             @NonNull final Activity activity) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,20 +30,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.support.test.runner.AndroidJUnit4;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link LiveBusStop}.
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class LiveBusStopTests {
 
     /**
@@ -54,7 +50,7 @@ public class LiveBusStopTests {
     public void testBuilderWithNullStopCode() {
         new LiveBusStop.Builder()
                 .setStopCode(null)
-                .setServices(Collections.<LiveBusService>emptyList())
+                .setServices(Collections.emptyList())
                 .build();
     }
 
@@ -66,7 +62,7 @@ public class LiveBusStopTests {
     public void testBuilderWithEmptyStopCode() {
         new LiveBusStop.Builder()
                 .setStopCode("")
-                .setServices(Collections.<LiveBusService>emptyList())
+                .setServices(Collections.emptyList())
                 .build();
     }
 
@@ -79,7 +75,7 @@ public class LiveBusStopTests {
         new LiveBusStop.Builder()
                 .setStopCode("123456")
                 .setStopName("")
-                .setServices(Collections.<LiveBusService>emptyList())
+                .setServices(Collections.emptyList())
                 .build();
     }
 
@@ -102,7 +98,7 @@ public class LiveBusStopTests {
     public void testDefault() {
         final LiveBusStop busStop = new LiveBusStop.Builder()
                 .setStopCode("123456")
-                .setServices(Collections.<LiveBusService>emptyList())
+                .setServices(Collections.emptyList())
                 .build();
 
         assertEquals("123456", busStop.getStopCode());
@@ -119,7 +115,7 @@ public class LiveBusStopTests {
     public void testValid() {
         final LiveBusService service = new LiveBusService.Builder()
                 .setServiceName("1")
-                .setBuses(Collections.<LiveBus>emptyList())
+                .setBuses(Collections.emptyList())
                 .build();
         final ArrayList<LiveBusService> services = new ArrayList<>();
         services.add(service);

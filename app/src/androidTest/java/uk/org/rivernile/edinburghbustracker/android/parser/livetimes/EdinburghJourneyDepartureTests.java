@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,19 +27,15 @@ package uk.org.rivernile.edinburghbustracker.android.parser.livetimes;
 
 import static org.junit.Assert.assertEquals;
 
-import android.support.test.runner.AndroidJUnit4;
-
 import java.util.Date;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link EdinburghJourneyDeparture}.
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class EdinburghJourneyDepartureTests {
 
     /**

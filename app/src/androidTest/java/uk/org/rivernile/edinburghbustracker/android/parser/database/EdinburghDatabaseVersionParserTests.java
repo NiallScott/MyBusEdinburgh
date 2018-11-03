@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,13 +27,11 @@ package uk.org.rivernile.edinburghbustracker.android.parser.database;
 
 import static org.junit.Assert.assertEquals;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseEndpointException;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersion;
@@ -44,7 +42,6 @@ import uk.org.rivernile.android.fetchutils.fetchers.AssetFileFetcher;
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class EdinburghDatabaseVersionParserTests {
     
     private EdinburghDatabaseVersionParser parser;

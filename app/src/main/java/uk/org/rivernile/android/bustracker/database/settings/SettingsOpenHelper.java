@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.database.settings;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 /**
  * This class is used to open the settings database and if necessary, create the schema.

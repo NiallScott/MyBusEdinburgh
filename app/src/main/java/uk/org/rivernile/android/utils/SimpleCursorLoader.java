@@ -18,7 +18,7 @@ package uk.org.rivernile.android.utils;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 
 /**
  * Used to write apps that run on platforms prior to Android 3.0. When running

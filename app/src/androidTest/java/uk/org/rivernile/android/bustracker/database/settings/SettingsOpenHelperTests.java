@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,31 +33,28 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.NonNull;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.RenamingDelegatingContext;
+import androidx.annotation.NonNull;
+import androidx.test.core.app.ApplicationProvider;
+import uk.org.rivernile.android.utils.DatabaseRenamingContext;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link SettingsOpenHelper}.
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class SettingsOpenHelperTests {
 
     private static final String DB_NAME = "settings.db";
 
-    private RenamingDelegatingContext context;
+    private DatabaseRenamingContext context;
 
     @Before
     public void setUp() {
-        context = new RenamingDelegatingContext(InstrumentationRegistry.getTargetContext(),
+        context = new DatabaseRenamingContext(ApplicationProvider.getApplicationContext(),
                 "test_");
     }
 

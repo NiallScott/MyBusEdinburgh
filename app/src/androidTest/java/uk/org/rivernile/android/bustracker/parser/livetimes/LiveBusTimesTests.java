@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,22 +31,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.support.test.runner.AndroidJUnit4;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link LiveBusTimes}.
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class LiveBusTimesTests {
 
     /**
@@ -66,7 +62,7 @@ public class LiveBusTimesTests {
     @Test
     public void testWithEmptyBusStops() {
         final Map<String, LiveBusStop> map =
-                Collections.unmodifiableMap(Collections.<String, LiveBusStop>emptyMap());
+                Collections.unmodifiableMap(Collections.emptyMap());
         final LiveBusTimes busTimes = new LiveBusTimes.Builder()
                 .setBusStops(map)
                 .setReceiveTime(123456789L)
@@ -91,7 +87,7 @@ public class LiveBusTimesTests {
         map.put("123456", new LiveBusStop.Builder()
                 .setStopCode("123456")
                 .setStopName("stop name")
-                .setServices(Collections.<LiveBusService>emptyList())
+                .setServices(Collections.emptyList())
                 .build());
         final LiveBusTimes busTimes = new LiveBusTimes.Builder()
                 .setBusStops(Collections.unmodifiableMap(map))
@@ -128,17 +124,17 @@ public class LiveBusTimesTests {
         map.put("123456", new LiveBusStop.Builder()
                 .setStopCode("123456")
                 .setStopName("stop name")
-                .setServices(Collections.<LiveBusService>emptyList())
+                .setServices(Collections.emptyList())
                 .build());
         map.put("112233", new LiveBusStop.Builder()
                 .setStopCode("112233")
                 .setStopName("stop name")
-                .setServices(Collections.<LiveBusService>emptyList())
+                .setServices(Collections.emptyList())
                 .build());
         map.put("214365", new LiveBusStop.Builder()
                 .setStopCode("214365")
                 .setStopName("stop name")
-                .setServices(Collections.<LiveBusService>emptyList())
+                .setServices(Collections.emptyList())
                 .build());
         final LiveBusTimes busTimes = new LiveBusTimes.Builder()
                 .setBusStops(Collections.unmodifiableMap(map))

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,20 +28,16 @@ package uk.org.rivernile.android.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import android.support.test.runner.AndroidJUnit4;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link JSONUtils}.
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class JSONUtilsTestCase {
     
     /**
@@ -203,12 +199,9 @@ public class JSONUtilsTestCase {
     /**
      * Test that {@link JSONUtils#optString(JSONArray, int, String)} returns {@code null} when
      * the mapping is set as {@link JSONObject#NULL}.
-     * 
-     * @throws JSONException There are no other exceptions expected from this test, so if there
-     * are, let the test fail.
      */
     @Test
-    public void testOptStringForArrayWithNullMapping() throws JSONException {
+    public void testOptStringForArrayWithNullMapping() {
         final JSONArray ja = new JSONArray();
         ja.put(JSONObject.NULL);
         assertNull(JSONUtils.optString(ja, 0, "test"));
@@ -217,12 +210,9 @@ public class JSONUtilsTestCase {
     /**
      * Test that {@link JSONUtils#optString(JSONArray, int, String)} returns non-{@code null}
      * when the mapping is set as something other than {@link JSONObject#NULL}.
-     * 
-     * @throws JSONException There are no other exceptions expected from this test, so if there
-     * are, let the test fail.
      */
     @Test
-    public void testOptStringForArrayWithNonNullMapping() throws JSONException {
+    public void testOptStringForArrayWithNonNullMapping() {
         final JSONArray ja = new JSONArray();
         ja.put("value");
         assertEquals("value", JSONUtils.optString(ja, 0, "test"));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,19 +30,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import android.support.test.runner.AndroidJUnit4;
-
 import java.util.Collections;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link Journey}.
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class JourneyTests {
 
     /**
@@ -54,7 +50,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId(null)
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setTerminus("123456")
                 .build();
     }
@@ -68,7 +64,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId("")
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setTerminus("123456")
                 .build();
     }
@@ -82,7 +78,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName(null)
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setTerminus("123456")
                 .build();
     }
@@ -96,7 +92,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName("")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setTerminus("123456")
                 .build();
     }
@@ -124,7 +120,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setOperator("")
                 .setTerminus("123456")
                 .build();
@@ -139,7 +135,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setRoute("")
                 .setTerminus("123456")
                 .build();
@@ -154,7 +150,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setDestination("")
                 .setTerminus("123456")
                 .build();
@@ -169,7 +165,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setTerminus(null)
                 .build();
     }
@@ -183,7 +179,7 @@ public class JourneyTests {
         new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setTerminus("")
                 .build();
     }
@@ -196,7 +192,7 @@ public class JourneyTests {
         final Journey journey = new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setTerminus("123456")
                 .build();
 
@@ -222,7 +218,7 @@ public class JourneyTests {
         final Journey journey = new Journey.Builder()
                 .setJourneyId("abc123")
                 .setServiceName("1")
-                .setDepartures(Collections.<JourneyDeparture>emptyList())
+                .setDepartures(Collections.emptyList())
                 .setOperator("LB")
                 .setRoute("A -- B")
                 .setDestination("End")

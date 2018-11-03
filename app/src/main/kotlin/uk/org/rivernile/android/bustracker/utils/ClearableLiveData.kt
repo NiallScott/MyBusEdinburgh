@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.utils
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 
 /**
  * This adds a method to the base [LiveData] which can be called to inform the instance that it

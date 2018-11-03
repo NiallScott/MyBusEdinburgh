@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.repositories.about
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
 import uk.org.rivernile.android.bustracker.utils.OpenForTesting
 import uk.org.rivernile.android.bustracker.utils.Strings

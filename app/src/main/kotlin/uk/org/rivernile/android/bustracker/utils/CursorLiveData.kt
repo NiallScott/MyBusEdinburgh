@@ -26,14 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.utils
 
-import android.arch.lifecycle.LiveData
 import android.database.ContentObserver
 import android.database.Cursor
 import android.os.AsyncTask
 import android.os.CancellationSignal
 import android.os.Handler
-import android.support.annotation.CallSuper
-import android.support.annotation.WorkerThread
+import androidx.annotation.CallSuper
+import androidx.annotation.WorkerThread
+import androidx.lifecycle.LiveData
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**

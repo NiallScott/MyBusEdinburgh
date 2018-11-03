@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,23 +26,19 @@
 package uk.org.rivernile.android.bustracker.ui.neareststops;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
-import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for {@link SearchResult}.
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class SearchResultTests {
 
     /**
@@ -210,11 +206,11 @@ public class SearchResultTests {
         final SearchResult result3 = new SearchResult("987654", "Name", "1, 2, 3", 2f, 2, "Area");
 
         // Equals.
-        assertTrue(result1.equals(result1));
-        assertTrue(result1.equals(result2));
-        assertFalse(result1.equals(result3));
-        assertFalse(result1.equals(null));
-        assertFalse(result1.equals(new Object()));
+        assertEquals(result1, result1);
+        assertEquals(result1, result2);
+        assertNotEquals(result1, result3);
+        assertNotEquals(result1, null);
+        assertNotEquals(result1, new Object());
 
         // Hash code.
         assertEquals(result1.hashCode(), result1.hashCode());

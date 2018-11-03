@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,24 +33,21 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.Arrays;
 
+import androidx.test.core.app.ApplicationProvider;
+
 /**
  * Tests for {@link SettingsDatabase}.
  */
-@RunWith(AndroidJUnit4.class)
 public class SettingsDatabaseTests {
 
     private Context mockContext;
@@ -65,12 +62,6 @@ public class SettingsDatabaseTests {
                 return mockContentResolver;
             }
         };
-    }
-
-    @After
-    public void tearDown() {
-        mockContentResolver = null;
-        mockContext = null;
     }
 
     /**
@@ -241,7 +232,8 @@ public class SettingsDatabaseTests {
     public void testBackupFavouritesToInvalidLocation() {
         final File out = new File("/settings.backup");
         assertEquals(SettingsDatabase.ERROR_BACKUP_UNABLE_TO_WRITE,
-                SettingsDatabase.backupFavourites(InstrumentationRegistry.getTargetContext(), out));
+                SettingsDatabase.backupFavourites(ApplicationProvider.getApplicationContext(),
+                        out));
     }
 
     /**
@@ -252,7 +244,8 @@ public class SettingsDatabaseTests {
     public void testRestoreFavouritesFromInvalidLocation() {
         final File in = new File("/settings.backup");
         assertEquals(SettingsDatabase.ERROR_RESTORE_FILE_DOES_NOT_EXIST,
-                SettingsDatabase.restoreFavourites(InstrumentationRegistry.getTargetContext(), in));
+                SettingsDatabase.restoreFavourites(ApplicationProvider.getApplicationContext(),
+                        in));
     }
 
     /**

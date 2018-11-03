@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,19 +27,20 @@ package uk.org.rivernile.android.bustracker.database.busstop.loaders;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.loader.content.Loader;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopDatabase;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;
 
 /**
- * This {@link android.support.v4.content.Loader} will load lists of service bus services for the
+ * This {@link Loader} will load lists of service bus services for the
  * given array of stop codes and will return this data as a {@link Map} through
  * {@link ProcessedCursorLoader.ResultWrapper}.
  *

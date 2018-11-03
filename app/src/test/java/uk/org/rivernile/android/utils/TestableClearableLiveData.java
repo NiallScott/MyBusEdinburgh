@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.utils;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import uk.org.rivernile.android.bustracker.utils.ClearableLiveData;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,16 +27,13 @@ package uk.org.rivernile.android.bustracker.endpoints;
 
 import static org.junit.Assert.assertSame;
 
-import android.support.annotation.NonNull;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
-import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghParser;
 
 /**
@@ -44,7 +41,6 @@ import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghPa
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class BusTrackerEndpointTests {
 
     /**
@@ -70,21 +66,21 @@ public class BusTrackerEndpointTests {
          * 
          * @param parser The parser to use.
          */
-        public MockBusTrackerEndpoint(@NonNull final BusParser parser) {
+        MockBusTrackerEndpoint(@NonNull final BusParser parser) {
             super(parser);
         }
 
         @NonNull
         @Override
         public LiveBusTimes getBusTimes(@NonNull final String[] stopCodes,
-                final int numDepartures) throws LiveTimesException {
+                final int numDepartures) {
             throw new UnsupportedOperationException();
         }
 
         @NonNull
         @Override
         public Journey getJourneyTimes(@NonNull final String stopCode,
-                @NonNull final String journeyId) throws LiveTimesException {
+                @NonNull final String journeyId) {
             throw new UnsupportedOperationException();
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,13 +29,13 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.loader.app.LoaderManager;
+import androidx.core.content.ContextCompat;
+import androidx.loader.content.Loader;
+import androidx.appcompat.app.AppCompatActivity;
 
 import uk.org.rivernile.android.bustracker.database.settings.SettingsDatabase;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.BackupFavouritesLoader;

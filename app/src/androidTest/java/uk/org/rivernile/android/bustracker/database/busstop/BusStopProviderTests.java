@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,43 +25,28 @@
 
 package uk.org.rivernile.android.bustracker.database.busstop;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.test.ProviderTestCase2;
+import androidx.test.rule.provider.ProviderTestRule;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Tests for {@link BusStopProvider}.
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
-public class BusStopProviderTests extends ProviderTestCase2<BusStopProvider> {
+public class BusStopProviderTests {
 
-    public BusStopProviderTests() {
-        super(BusStopProvider.class, BusStopContract.AUTHORITY);
-    }
-
-    @Before
-    @Override
-    public void setUp() throws Exception {
-        setContext(InstrumentationRegistry.getTargetContext());
-        super.setUp();
-    }
-
-    @After
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-
-        getMockContext().deleteDatabase(BusStopContract.DB_NAME);
-    }
+    @Rule
+    public ProviderTestRule providerRule =
+            new ProviderTestRule.Builder(BusStopProvider.class, BusStopContract.AUTHORITY)
+            .build();
 
     /**
      * Test that {@link BusStopProvider#getType(Uri)} returns the correct MIME types for the
@@ -69,16 +54,18 @@ public class BusStopProviderTests extends ProviderTestCase2<BusStopProvider> {
      */
     @Test
     public void testGetTypeSuccess() {
+        final ContentResolver resolver = providerRule.getResolver();
+
         assertEquals(BusStopContract.DatabaseInformation.CONTENT_TYPE,
-                getMockContentResolver().getType(BusStopContract.DatabaseInformation.CONTENT_URI));
+                resolver.getType(BusStopContract.DatabaseInformation.CONTENT_URI));
         assertEquals(BusStopContract.Services.CONTENT_TYPE,
-                getMockContentResolver().getType(BusStopContract.Services.CONTENT_URI));
+                resolver.getType(BusStopContract.Services.CONTENT_URI));
         assertEquals(BusStopContract.BusStops.CONTENT_TYPE,
-                getMockContentResolver().getType(BusStopContract.BusStops.CONTENT_URI));
+                resolver.getType(BusStopContract.BusStops.CONTENT_URI));
         assertEquals(BusStopContract.ServiceStops.CONTENT_TYPE,
-                getMockContentResolver().getType(BusStopContract.ServiceStops.CONTENT_URI));
+                resolver.getType(BusStopContract.ServiceStops.CONTENT_URI));
         assertEquals(BusStopContract.ServicePoints.CONTENT_TYPE,
-                getMockContentResolver().getType(BusStopContract.ServicePoints.CONTENT_URI));
+                resolver.getType(BusStopContract.ServicePoints.CONTENT_URI));
     }
 
     /**
@@ -87,10 +74,11 @@ public class BusStopProviderTests extends ProviderTestCase2<BusStopProvider> {
      */
     @Test
     public void testGetTypeWithInvalidUris() {
-        assertNull(getMockContentResolver().getType(Uri.parse("content://invalid.uri/thing")));
-        assertNull(getMockContentResolver()
-                .getType(Uri.parse("content://" + BusStopContract.AUTHORITY)));
-        assertNull(getMockContentResolver()
+        final ContentResolver resolver = providerRule.getResolver();
+
+        assertNull(resolver.getType(Uri.parse("content://invalid.uri/thing")));
+        assertNull(resolver.getType(Uri.parse("content://" + BusStopContract.AUTHORITY)));
+        assertNull(resolver
                 .getType(Uri.parse("content://" + BusStopContract.AUTHORITY + "/invalid")));
     }
 
@@ -100,7 +88,7 @@ public class BusStopProviderTests extends ProviderTestCase2<BusStopProvider> {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testQueryWithInvalidUri() {
-        getMockContentResolver()
+        providerRule.getResolver()
                 .query(Uri.parse("content://" + BusStopContract.AUTHORITY + "/invalid"), null,
                         null, null, null);
     }
@@ -114,7 +102,7 @@ public class BusStopProviderTests extends ProviderTestCase2<BusStopProvider> {
         final ContentValues cv = new ContentValues();
         cv.put(BusStopContract.ServiceStops.SERVICE_NAME, "1");
         cv.put(BusStopContract.ServiceStops.STOP_CODE, "123456");
-        getMockContentResolver().insert(BusStopContract.ServiceStops.CONTENT_URI, cv);
+        providerRule.getResolver().insert(BusStopContract.ServiceStops.CONTENT_URI, cv);
     }
 
     /**
@@ -123,7 +111,7 @@ public class BusStopProviderTests extends ProviderTestCase2<BusStopProvider> {
      */
     @Test(expected = UnsupportedOperationException.class)
     public void testDeleteIsNoOp() {
-        getMockContentResolver().delete(BusStopContract.BusStops.CONTENT_URI, null, null);
+        providerRule.getResolver().delete(BusStopContract.BusStops.CONTENT_URI, null, null);
     }
 
     /**
@@ -135,6 +123,6 @@ public class BusStopProviderTests extends ProviderTestCase2<BusStopProvider> {
         final ContentValues cv = new ContentValues();
         cv.put(BusStopContract.ServiceStops.SERVICE_NAME, "1");
         cv.put(BusStopContract.ServiceStops.STOP_CODE, "123456");
-        getMockContentResolver().update(BusStopContract.ServiceStops.CONTENT_URI, cv, null, null);
+        providerRule.getResolver().update(BusStopContract.ServiceStops.CONTENT_URI, cv, null, null);
     }
 }

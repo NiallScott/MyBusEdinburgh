@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,8 +29,8 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.support.annotation.NonNull;
-import android.support.v4.net.ConnectivityManagerCompat;
+import androidx.annotation.NonNull;
+import androidx.core.net.ConnectivityManagerCompat;
 import java.io.File;
 import java.io.IOException;
 import uk.org.rivernile.android.bustracker.BusApplication;

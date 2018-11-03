@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,15 +36,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.net.Uri;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.test.mock.MockContext;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.Map;
 
@@ -53,7 +50,6 @@ import java.util.Map;
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class BusStopDatabaseIntegrationTests {
 
     private Context mockContext;
@@ -68,12 +64,6 @@ public class BusStopDatabaseIntegrationTests {
                 return mockContentResolver;
             }
         };
-    }
-
-    @After
-    public void tearDown() {
-        mockContentResolver = null;
-        mockContext = null;
     }
 
     /**
@@ -350,13 +340,11 @@ public class BusStopDatabaseIntegrationTests {
                 BusStopDatabase.getServiceColours(mockContext, services);
         assertNotNull(colours);
         assertEquals(5, colours.size());
-
         assertEquals("#000001", colours.get("1"));
         assertEquals("#000002", colours.get("3"));
         assertEquals("#000003", colours.get("44A"));
         assertEquals("#000004", colours.get("100"));
         assertEquals("#000005", colours.get("TRAM"));
-
         colours.put("a", "b");
     }
 }

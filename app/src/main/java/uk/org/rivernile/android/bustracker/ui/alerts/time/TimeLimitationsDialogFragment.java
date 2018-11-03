@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,10 +27,10 @@ package uk.org.rivernile.android.bustracker.ui.alerts.time;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.appcompat.app.AlertDialog;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**

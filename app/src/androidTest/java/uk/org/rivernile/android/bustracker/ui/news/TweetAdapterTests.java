@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,18 +31,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.annotation.UiThreadTest;
-import android.support.test.rule.UiThreadTestRule;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import androidx.test.annotation.UiThreadTest;
+import androidx.test.core.app.ApplicationProvider;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -56,17 +52,13 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class TweetAdapterTests {
-
-    @Rule
-    public UiThreadTestRule uiThreadTestRule = new UiThreadTestRule();
     
     private TweetAdapter adapter;
 
     @Before
     public void setUp() {
-        final Context context = InstrumentationRegistry.getTargetContext();
+        final Context context = ApplicationProvider.getApplicationContext();
         context.setTheme(R.style.MyBusEdinburgh);
         adapter = new TweetAdapter(context);
     }
@@ -95,7 +87,7 @@ public class TweetAdapterTests {
     public void testNoItems() {
         final DataObserver observer = new DataObserver();
         adapter.registerAdapterDataObserver(observer);
-        adapter.setTweets(new ArrayList<Tweet>(1));
+        adapter.setTweets(new ArrayList<>(1));
 
         assertTrue(observer.onChangeCalled);
         assertTrue(adapter.isEmpty());

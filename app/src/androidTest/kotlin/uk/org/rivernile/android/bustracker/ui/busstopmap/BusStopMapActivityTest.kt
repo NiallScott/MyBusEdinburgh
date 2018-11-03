@@ -26,13 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
+import android.Manifest
 import android.content.Intent
-import android.support.test.espresso.intent.Intents.intended
-import android.support.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import android.support.test.espresso.intent.matcher.IntentMatchers.hasExtra
-import android.support.test.espresso.intent.rule.IntentsTestRule
-import android.support.test.filters.LargeTest
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.espresso.intent.Intents.intended
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
+import androidx.test.espresso.intent.rule.IntentsTestRule
+import androidx.test.filters.LargeTest
+import androidx.test.rule.GrantPermissionRule
 import org.hamcrest.CoreMatchers.allOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -40,7 +41,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
 
@@ -49,13 +49,15 @@ import uk.org.rivernile.edinburghbustracker.android.R
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4::class)
 @LargeTest
 class BusStopMapActivityTest {
 
     @Rule
     @JvmField
     val activityRule = IntentsTestRule(BusStopMapActivity::class.java, false, false)
+    @Rule
+    @JvmField
+    val permissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
 
     @Test
     fun startingActivityWithNoArgumentsInIntentDoesNotSetStopCodeOrLatLon() {

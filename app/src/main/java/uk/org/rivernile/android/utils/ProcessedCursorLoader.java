@@ -19,20 +19,22 @@ package uk.org.rivernile.android.utils;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.ContentResolverCompat;
-import android.support.v4.os.CancellationSignal;
-import android.support.v4.os.OperationCanceledException;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.loader.content.AsyncTaskLoader;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
+import androidx.core.content.ContentResolverCompat;
+import androidx.core.os.CancellationSignal;
+import androidx.core.os.OperationCanceledException;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
- * This {@link android.support.v4.content.Loader} is a different type of
- * {@link android.support.v4.content.CursorLoader} that allows data from a {@link Cursor} to be
+ * This {@link Loader} is a different type of
+ * {@link CursorLoader} that allows data from a {@link Cursor} to be
  * processed in Java code before being returned as the loading result.
  *
  * <p>
@@ -49,13 +51,13 @@ import java.util.Arrays;
  *     called with the {@link Cursor} reference to give subclasses the opportunity to process the
  *     {@link Cursor} data. It's acceptable to return {@code null} from
  *     {@link #processCursor(Cursor)} but that would render this class useless. If that's the case,
- *     revert back to {@link android.support.v4.content.CursorLoader} and if required override
- *     {@link android.support.v4.content.CursorLoader#loadInBackground()} instead.
+ *     revert back to {@link CursorLoader} and if required override
+ *     {@link CursorLoader#loadInBackground()} instead.
  * </p>
  *
  * <p>
  *     As for the management of the {@link Cursor} itself, the implementation in this class copies
- *     that of {@link android.support.v4.content.CursorLoader} and therefore closing of the
+ *     that of {@link CursorLoader} and therefore closing of the
  *     {@link Cursor} is handled in here for you.
  * </p>
  *
@@ -93,7 +95,7 @@ public abstract class ProcessedCursorLoader<T>
 
     /**
      * Create a new {@code ProcessedCursorLoader}. This constructor is the same as a
-     * {@link android.support.v4.content.CursorLoader}.
+     * {@link CursorLoader}.
      *
      * @param context A {@link Context} instance.
      * @param uri The {@link Uri} of the data source.
@@ -238,8 +240,8 @@ public abstract class ProcessedCursorLoader<T>
     /**
      * Process a {@link Cursor} to return a resulting object. It is acceptable to return
      * {@code null} here, but if you did that, you would be better off extending
-     * {@link android.support.v4.content.CursorLoader} and overriding
-     * {@link android.support.v4.content.CursorLoader#loadInBackground()}.
+     * {@link CursorLoader} and overriding
+     * {@link CursorLoader#loadInBackground()}.
      *
      * @param cursor The {@link Cursor} to process. This could be {@code null} so please sanity
      * check the {@link Cursor} before using it.

@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
-import android.support.annotation.IntDef
+import androidx.annotation.IntDef
 
 /**
  * An enumeration of map types.

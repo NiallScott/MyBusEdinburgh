@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 package uk.org.rivernile.android.utils;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 
 /**
  * This class extends the AsyncTaskLoader to make it behave better. The

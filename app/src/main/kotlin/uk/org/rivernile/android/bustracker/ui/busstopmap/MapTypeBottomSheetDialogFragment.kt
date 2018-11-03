@@ -27,10 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import android.os.Bundle
-import android.support.design.widget.BottomSheetDialogFragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout
 import uk.org.rivernile.edinburghbustracker.android.R
 

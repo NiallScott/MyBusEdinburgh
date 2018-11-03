@@ -26,21 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.ui.about
 
-import android.support.test.annotation.UiThreadTest
-import android.support.test.filters.LargeTest
-import android.support.test.rule.ActivityTestRule
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.annotation.UiThreadTest
+import androidx.test.filters.LargeTest
+import androidx.test.rule.ActivityTestRule
 import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 /**
  * [android.app.Activity] test cases for [AboutActivity].
  *
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4::class)
 @LargeTest
 class AboutActivityTest {
 

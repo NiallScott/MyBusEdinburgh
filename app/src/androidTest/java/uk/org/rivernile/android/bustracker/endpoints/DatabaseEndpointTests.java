@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2015 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,13 +27,10 @@ package uk.org.rivernile.android.bustracker.endpoints;
 
 import static org.junit.Assert.assertSame;
 
-import android.support.annotation.NonNull;
-import android.support.test.runner.AndroidJUnit4;
+import androidx.annotation.NonNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import uk.org.rivernile.android.bustracker.parser.database.DatabaseEndpointException;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersion;
 import uk.org.rivernile.android.bustracker.parser.database.DatabaseVersionParser;
 import uk.org.rivernile.edinburghbustracker.android.parser.database.EdinburghDatabaseVersionParser;
@@ -43,7 +40,6 @@ import uk.org.rivernile.edinburghbustracker.android.parser.database.EdinburghDat
  * 
  * @author Niall Scott
  */
-@RunWith(AndroidJUnit4.class)
 public class DatabaseEndpointTests {
     
     /**
@@ -69,14 +65,13 @@ public class DatabaseEndpointTests {
          * 
          * @param parser The parser to use.
          */
-        public MockDatabaseEndpoint(@NonNull final DatabaseVersionParser parser) {
+        MockDatabaseEndpoint(@NonNull final DatabaseVersionParser parser) {
             super(parser);
         }
 
         @NonNull
         @Override
-        public DatabaseVersion getDatabaseVersion(@NonNull final String schemaType)
-                throws DatabaseEndpointException {
+        public DatabaseVersion getDatabaseVersion(@NonNull final String schemaType) {
             throw new UnsupportedOperationException();
         }
     }
