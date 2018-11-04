@@ -149,13 +149,13 @@ public class AddTimeAlertDialogFragment extends DialogFragment
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View v = inflater.inflate(R.layout.addtimealert, null, false);
 
-        progress = (ProgressBar) v.findViewById(R.id.progress);
+        progress = v.findViewById(R.id.progress);
         layoutContent = v.findViewById(R.id.layoutContent);
-        txtBlurb = (TextView) v.findViewById(R.id.txtBlurb);
-        txtSelectedServices = (TextView) v.findViewById(R.id.txtSelectedServices);
-        btnSelectServices = (Button) v.findViewById(R.id.btnSelectServices);
-        spinnerTime = (Spinner) v.findViewById(R.id.spinnerTime);
-        btnLimitations = (Button) v.findViewById(R.id.btnLimitations);
+        txtBlurb = v.findViewById(R.id.txtBlurb);
+        txtSelectedServices = v.findViewById(R.id.txtSelectedServices);
+        btnSelectServices = v.findViewById(R.id.btnSelectServices);
+        spinnerTime = v.findViewById(R.id.spinnerTime);
+        btnLimitations = v.findViewById(R.id.btnLimitations);
 
         btnSelectServices.setOnClickListener(this);
         btnLimitations.setOnClickListener(this);
@@ -165,12 +165,7 @@ public class AddTimeAlertDialogFragment extends DialogFragment
         return new AlertDialog.Builder(context)
                 .setTitle(R.string.addtimealertdialog_title)
                 .setPositiveButton(R.string.addtimealertdialog_button_add,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog, final int which) {
-                                handlePositiveButtonClick();
-                            }
-                        })
+                        (dialog, which) -> handlePositiveButtonClick())
                 .setNegativeButton(android.R.string.cancel, null)
                 .setView(v)
                 .create();

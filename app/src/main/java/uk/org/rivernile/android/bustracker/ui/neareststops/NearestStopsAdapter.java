@@ -144,10 +144,10 @@ class NearestStopsAdapter extends RecyclerView.Adapter<NearestStopsAdapter.ViewH
 
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
-            imgDirection = (ImageView) itemView.findViewById(R.id.imgDirection);
-            text1 = (TextView) itemView.findViewById(android.R.id.text1);
-            text2 = (TextView) itemView.findViewById(android.R.id.text2);
-            txtDistance = (TextView) itemView.findViewById(R.id.txtDistance);
+            imgDirection = itemView.findViewById(R.id.imgDirection);
+            text1 = itemView.findViewById(android.R.id.text1);
+            text2 = itemView.findViewById(android.R.id.text2);
+            txtDistance = itemView.findViewById(R.id.txtDistance);
         }
 
         @Override

@@ -127,8 +127,8 @@ class FavouriteStopsAdapter extends RecyclerCursorAdapter<FavouriteStopsAdapter.
             itemView.setLongClickable(true);
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
-            text1 = (TextView) itemView.findViewById(android.R.id.text1);
-            text2 = (TextView) itemView.findViewById(android.R.id.text2);
+            text1 = itemView.findViewById(android.R.id.text1);
+            text2 = itemView.findViewById(android.R.id.text2);
         }
 
         @Override

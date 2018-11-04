@@ -28,14 +28,12 @@ package uk.org.rivernile.edinburghbustracker.android.fragments.dialogs;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
@@ -93,24 +91,16 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
         final LayoutInflater inflater = LayoutInflater.from(activity);
         
         final View v = inflater.inflate(R.layout.turn_on_gps, null);
-        final CheckBox cb = (CheckBox)v.findViewById(R.id.chkTurnongps);
-        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(final CompoundButton v, final boolean isChecked) {
-                preferenceManager.setGpsPromptDisabled(isChecked);
-            }
-        });
+        final CheckBox cb = v.findViewById(R.id.chkTurnongps);
+        cb.setOnCheckedChangeListener(
+                (v1, isChecked) -> preferenceManager.setGpsPromptDisabled(isChecked));
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setCancelable(true)
                 .setTitle(R.string.turnongpsdialog_title)
                 .setView(v)
-                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        callbacks.onShowSystemLocationPreferences();
-                    }
-                })
+                .setPositiveButton(R.string.yes,
+                        (dialog, id) -> callbacks.onShowSystemLocationPreferences())
                 .setNegativeButton(R.string.no, null);
         
         return builder.create();

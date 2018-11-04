@@ -221,7 +221,7 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
         private MapViewHolder(@NonNull final View itemView) {
             super(itemView);
 
-            mapView = (MapView) itemView.findViewById(R.id.mapView);
+            mapView = itemView.findViewById(R.id.mapView);
 
             if (MapsUtils.isGoogleMapsAvailable(context)) {
                 mapView.onCreate(null);
@@ -306,7 +306,7 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
         private LocationViewHolder(@NonNull final View itemView) {
             super(itemView);
 
-            txtDistance = (TextView) itemView.findViewById(R.id.txtDistance);
+            txtDistance = itemView.findViewById(R.id.txtDistance);
         }
 
         /**
@@ -345,8 +345,8 @@ class StopDetailsAdapter extends RecyclerView.Adapter {
         private ServiceViewHolder(@NonNull final View itemView) {
             super(itemView);
 
-            txtServiceName = (AppCompatTextView) itemView.findViewById(R.id.txtServiceName);
-            txtDescription = (TextView) itemView.findViewById(R.id.txtDescription);
+            txtServiceName = itemView.findViewById(R.id.txtServiceName);
+            txtDescription = itemView.findViewById(R.id.txtDescription);
 
             itemView.setOnClickListener(this);
         }

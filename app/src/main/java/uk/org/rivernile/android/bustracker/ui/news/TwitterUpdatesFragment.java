@@ -27,7 +27,7 @@ package uk.org.rivernile.android.bustracker.ui.news;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -84,9 +84,9 @@ public class TwitterUpdatesFragment extends Fragment
             final ViewGroup container, final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.twitterupdates, container, false);
 
-        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
-        progress = (ProgressBar) v.findViewById(R.id.progress);
-        txtError = (TextView) v.findViewById(R.id.txtError);
+        recyclerView = v.findViewById(android.R.id.list);
+        progress = v.findViewById(R.id.progress);
+        txtError = v.findViewById(R.id.txtError);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new NewsItemDecoration(getActivity(),

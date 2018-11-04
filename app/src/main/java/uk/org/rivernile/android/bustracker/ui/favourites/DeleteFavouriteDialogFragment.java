@@ -26,7 +26,6 @@
 package uk.org.rivernile.android.bustracker.ui.favourites;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import androidx.annotation.NonNull;
@@ -90,12 +89,8 @@ public class DeleteFavouriteDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.deletefavouritedialog_title)
-                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        DeleteFavouriteStopTask.start(getContext(), stopCode);
-                    }
-                })
+                .setPositiveButton(R.string.okay,
+                        (dialog, id) -> DeleteFavouriteStopTask.start(getContext(), stopCode))
                 .setNegativeButton(R.string.cancel, null)
                 .create();
     }

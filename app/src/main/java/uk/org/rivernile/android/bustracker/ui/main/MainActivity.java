@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity
         actionBar = getSupportActionBar();
         drawerOpenTitle = getTitle();
         
-        drawer = (DrawerLayout) findViewById(R.id.drawer);
+        drawer = findViewById(R.id.drawer);
         drawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         drawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.main_drawer_open,
                 R.string.main_drawer_close) {

@@ -120,22 +120,17 @@ public class AddEditFavouriteStopDialogFragment extends DialogFragment
         final Context context = getContext();
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View v = inflater.inflate(R.layout.addeditfavouritestop, null, false);
-        progress = (ProgressBar) v.findViewById(R.id.progress);
+        progress = v.findViewById(R.id.progress);
         layoutContent = v.findViewById(R.id.layoutContent);
-        txtBlurb = (TextView) v.findViewById(R.id.txtBlurb);
-        editName = (EditText) v.findViewById(R.id.editName);
+        txtBlurb = v.findViewById(R.id.txtBlurb);
+        editName = v.findViewById(R.id.editName);
 
         editName.addTextChangedListener(new NameWatcher());
 
         return new AlertDialog.Builder(context)
                 .setTitle(R.string.addeditfavouritestopdialog_title_add)
                 .setPositiveButton(R.string.addeditfavouritestopdialog_button_add,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog, final int which) {
-                                handlePositiveButtonClick();
-                            }
-                        })
+                        (dialog, which) -> handlePositiveButtonClick())
                 .setNegativeButton(R.string.cancel, null)
                 .setView(v)
                 .create();

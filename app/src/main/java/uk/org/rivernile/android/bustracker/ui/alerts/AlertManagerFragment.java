@@ -95,9 +95,9 @@ public class AlertManagerFragment extends Fragment
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.alertmanager, container, false);
-        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
-        progress = (ProgressBar) v.findViewById(R.id.progress);
-        txtEmpty = (TextView) v.findViewById(android.R.id.empty);
+        recyclerView = v.findViewById(android.R.id.list);
+        progress = v.findViewById(R.id.progress);
+        txtEmpty = v.findViewById(android.R.id.empty);
 
         recyclerView.setAdapter(adapter);
 

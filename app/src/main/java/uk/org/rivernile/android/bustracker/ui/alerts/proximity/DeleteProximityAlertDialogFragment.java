@@ -26,7 +26,6 @@
 package uk.org.rivernile.android.bustracker.ui.alerts.proximity;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
@@ -59,12 +58,7 @@ public class DeleteProximityAlertDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         return new AlertDialog.Builder(getContext())
                 .setTitle(R.string.deleteproxdialog_title)
-                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        alertMan.removeProximityAlert();
-                    }
-                })
+                .setPositiveButton(R.string.okay, (dialog, id) -> alertMan.removeProximityAlert())
                 .setNegativeButton(R.string.cancel, null)
                 .create();
     }

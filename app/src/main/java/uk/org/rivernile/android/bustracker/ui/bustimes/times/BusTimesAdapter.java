@@ -334,8 +334,8 @@ class BusTimesAdapter extends RecyclerView.Adapter {
         ChildViewHolder(final View itemView) {
             super(itemView);
 
-            txtDestination = (TextView) itemView.findViewById(R.id.txtDestination);
-            txtTime = (TextView) itemView.findViewById(R.id.txtTime);
+            txtDestination = itemView.findViewById(R.id.txtDestination);
+            txtTime = itemView.findViewById(R.id.txtTime);
         }
 
         /**
@@ -436,8 +436,8 @@ class BusTimesAdapter extends RecyclerView.Adapter {
         ParentViewHolder(@NonNull final View itemView) {
             super(itemView);
 
-            txtServiceName = (AppCompatTextView) itemView.findViewById(R.id.txtServiceName);
-            imgArrow = (ImageView) itemView.findViewById(R.id.imgArrow);
+            txtServiceName = itemView.findViewById(R.id.txtServiceName);
+            imgArrow = itemView.findViewById(R.id.imgArrow);
 
             itemView.setOnClickListener(this);
         }
@@ -500,12 +500,7 @@ class BusTimesAdapter extends RecyclerView.Adapter {
                     .setDuration(context.getResources().getInteger(
                             android.R.integer.config_shortAnimTime))
                     .rotation(EXPANDED_DEGREES)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            expandAnimation = null;
-                        }
-                    });
+                    .withEndAction(() -> expandAnimation = null);
         }
 
         /**
@@ -517,12 +512,7 @@ class BusTimesAdapter extends RecyclerView.Adapter {
                     .setDuration(context.getResources().getInteger(
                             android.R.integer.config_shortAnimTime))
                     .rotation(COLLAPSED_DEGREES)
-                    .withEndAction(new Runnable() {
-                        @Override
-                        public void run() {
-                            collapseAnimation = null;
-                        }
-                    });
+                    .withEndAction(() -> collapseAnimation = null);
         }
 
         /**
@@ -549,32 +539,29 @@ class BusTimesAdapter extends RecyclerView.Adapter {
     /**
      * The {@link Comparator} for sorting bus services by time.
      */
-    private final Comparator<LiveBusService> timeComparator = new Comparator<LiveBusService>() {
-        @Override
-        public int compare(final LiveBusService lhs, final LiveBusService rhs) {
-            if (lhs == rhs) {
-                return 0;
-            } else if (lhs == null) {
-                return 1;
-            } else if (rhs == null) {
-                return -1;
-            }
-
-            final List<LiveBus> lhsBuses = lhs.getLiveBuses();
-            final List<LiveBus> rhsBuses = rhs.getLiveBuses();
-
-            if (lhsBuses.isEmpty() && rhsBuses.isEmpty()) {
-                return 0;
-            } else if (lhsBuses.isEmpty()) {
-                return 1;
-            } else if (rhsBuses.isEmpty()) {
-                return -1;
-            }
-
-            final LiveBus lhsBus = lhsBuses.get(0);
-            final LiveBus rhsBus = rhsBuses.get(0);
-
-            return lhsBus.getDepartureMinutes() - rhsBus.getDepartureMinutes();
+    private final Comparator<LiveBusService> timeComparator = (lhs, rhs) -> {
+        if (lhs == rhs) {
+            return 0;
+        } else if (lhs == null) {
+            return 1;
+        } else if (rhs == null) {
+            return -1;
         }
+
+        final List<LiveBus> lhsBuses = lhs.getLiveBuses();
+        final List<LiveBus> rhsBuses = rhs.getLiveBuses();
+
+        if (lhsBuses.isEmpty() && rhsBuses.isEmpty()) {
+            return 0;
+        } else if (lhsBuses.isEmpty()) {
+            return 1;
+        } else if (rhsBuses.isEmpty()) {
+            return -1;
+        }
+
+        final LiveBus lhsBus = lhsBuses.get(0);
+        final LiveBus rhsBus = rhsBuses.get(0);
+
+        return lhsBus.getDepartureMinutes() - rhsBus.getDepartureMinutes();
     };
 }

@@ -131,13 +131,7 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getArguments().getString(ARG_TITLE));
         builder.setMultiChoiceItems(services, checkBoxes,
-                new DialogInterface.OnMultiChoiceClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int which, boolean isChecked) {
-                // Change the flag for that service.
-                checkBoxes[which] = isChecked;
-            }
-        });
+                (dialog, which, isChecked) -> checkBoxes[which] = isChecked);
 
         builder.setPositiveButton(R.string.close, null);
 

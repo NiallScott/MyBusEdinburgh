@@ -177,12 +177,12 @@ class AlertsAdapter extends RecyclerCursorAdapter<AlertsAdapter.BaseViewHolder> 
          *
          * @param itemView The root {@link View} of the item.
          */
-        public BaseViewHolder(@NonNull final View itemView) {
+        BaseViewHolder(@NonNull final View itemView) {
             super(itemView);
 
-            mapView = (MapView) itemView.findViewById(R.id.mapView);
-            txtDescription = (TextView) itemView.findViewById(R.id.txtDescription);
-            btnRemove = (Button) itemView.findViewById(R.id.btnRemove);
+            mapView = itemView.findViewById(R.id.mapView);
+            txtDescription = itemView.findViewById(R.id.txtDescription);
+            btnRemove = itemView.findViewById(R.id.btnRemove);
 
             btnRemove.setOnClickListener(this);
             mapView.setClickable(false);
@@ -281,7 +281,7 @@ class AlertsAdapter extends RecyclerCursorAdapter<AlertsAdapter.BaseViewHolder> 
          *
          * @param itemView The root {@link View} of the item.
          */
-        public ProximityViewHolder(@NonNull final View itemView) {
+        ProximityViewHolder(@NonNull final View itemView) {
             super(itemView);
 
             rangeRingStrokeColour = ContextCompat.getColor(getContext(),
@@ -290,7 +290,7 @@ class AlertsAdapter extends RecyclerCursorAdapter<AlertsAdapter.BaseViewHolder> 
                     R.color.map_range_ring_fill);
             rangeRingStrokeWidth = getContext().getResources()
                     .getDimension(R.dimen.map_range_ring_stroke);
-            btnLocationSettings = (Button) itemView.findViewById(R.id.btnLocationSettings);
+            btnLocationSettings = itemView.findViewById(R.id.btnLocationSettings);
             btnLocationSettings.setOnClickListener(this);
         }
 
@@ -364,7 +364,7 @@ class AlertsAdapter extends RecyclerCursorAdapter<AlertsAdapter.BaseViewHolder> 
          *
          * @param itemView The root {@link View} of the item.
          */
-        public TimeViewHolder(@NonNull final View itemView) {
+        TimeViewHolder(@NonNull final View itemView) {
             super(itemView);
         }
 

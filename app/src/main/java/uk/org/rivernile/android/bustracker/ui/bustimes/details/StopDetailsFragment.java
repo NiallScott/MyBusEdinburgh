@@ -131,8 +131,8 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container,
             @Nullable final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.stopdetails_fragment, container, false);
-        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
-        progress = (ProgressBar) v.findViewById(R.id.progress);
+        recyclerView = v.findViewById(android.R.id.list);
+        progress = v.findViewById(R.id.progress);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);

@@ -49,7 +49,6 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.RecyclerView;
@@ -109,7 +108,7 @@ public class SearchActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.search);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar(findViewById(R.id.toolbar));
 
         final ActionBar actionBar = getSupportActionBar();
 
@@ -121,10 +120,10 @@ public class SearchActivity extends AppCompatActivity
             }
         }
 
-        searchView = (SearchView) findViewById(R.id.searchView);
-        recyclerView = (RecyclerView) findViewById(android.R.id.list);
-        progress = (ProgressBar) findViewById(R.id.progress);
-        txtError = (TextView) findViewById(R.id.txtError);
+        searchView = findViewById(R.id.searchView);
+        recyclerView = findViewById(android.R.id.list);
+        progress = findViewById(R.id.progress);
+        txtError = findViewById(R.id.txtError);
 
         final SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);

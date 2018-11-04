@@ -116,7 +116,7 @@ public class SectionListFragment extends Fragment {
     public View onCreateView(final LayoutInflater inflater,
             final ViewGroup container, final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.sectionlist_fragment, container, false);
-        final RecyclerView recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
+        final RecyclerView recyclerView = v.findViewById(android.R.id.list);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);

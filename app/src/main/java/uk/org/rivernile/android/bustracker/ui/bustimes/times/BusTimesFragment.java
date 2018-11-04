@@ -168,13 +168,13 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     public View onCreateView(final LayoutInflater inflater, @Nullable final ViewGroup container,
             @Nullable final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.bustimes_fragment, container, false);
-        swipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipeRefreshLayout);
+        swipeRefreshLayout = v.findViewById(R.id.swipeRefreshLayout);
         layoutContent = v.findViewById(R.id.layoutContent);
-        txtLastRefresh = (TextView) v.findViewById(R.id.txtLastRefresh);
-        final RecyclerView recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
+        txtLastRefresh = v.findViewById(R.id.txtLastRefresh);
+        final RecyclerView recyclerView = v.findViewById(android.R.id.list);
         layoutError = v.findViewById(R.id.layoutError);
-        txtError = (TextView) v.findViewById(R.id.txtError);
-        btnErrorResolve = (Button) v.findViewById(R.id.btnErrorResolve);
+        txtError = v.findViewById(R.id.txtError);
+        btnErrorResolve = v.findViewById(R.id.btnErrorResolve);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
@@ -557,12 +557,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
                 });
 
         if (!TextUtils.isEmpty(resolveButtonText)) {
-            snackbar.setAction(resolveButtonText, new View.OnClickListener() {
-                @Override
-                public void onClick(final View v) {
-                    loadBusTimes(true);
-                }
-            });
+            snackbar.setAction(resolveButtonText, v -> loadBusTimes(true));
         }
 
         snackbar.show();

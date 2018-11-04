@@ -61,7 +61,7 @@ public class SectionListAdapter extends RecyclerView.Adapter {
      *
      * @param context The {@link Context} of the hosting {@link android.app.Activity}.
      */
-    public SectionListAdapter(@NonNull final Context context) {
+    SectionListAdapter(@NonNull final Context context) {
         this.context = context;
         inflater = LayoutInflater.from(context);
         setHasStableIds(true);
@@ -123,7 +123,7 @@ public class SectionListAdapter extends RecyclerView.Adapter {
      *
      * @param listener The listener that is called when the user has selected a {@link Section}.
      */
-    public void setOnSectionChosenListener(@Nullable final OnSectionChosenListener listener) {
+    void setOnSectionChosenListener(@Nullable final OnSectionChosenListener listener) {
         if (listener != null) {
             sectionChosenListener = new WeakReference<>(listener);
         } else {
@@ -230,13 +230,13 @@ public class SectionListAdapter extends RecyclerView.Adapter {
      *
      * @see #setOnSectionChosenListener(uk.org.rivernile.android.bustracker.ui.main.SectionListAdapter.OnSectionChosenListener)
      */
-    public static interface OnSectionChosenListener {
+    public interface OnSectionChosenListener {
 
         /**
          * This is called when a {@link Section} has been chosen.
          *
          * @param section The chosen {@link Section}.
          */
-        public void onSectionChosen(@NonNull Section section);
+        void onSectionChosen(@NonNull Section section);
     }
 }

@@ -159,9 +159,9 @@ class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
         ViewHolder(@NonNull final View itemView) {
             super(itemView);
 
-            imgAvatar = (ImageView) itemView.findViewById(R.id.imgAvatar);
-            text1 = (TextView) itemView.findViewById(android.R.id.text1);
-            text2 = (TextView) itemView.findViewById(android.R.id.text2);
+            imgAvatar = itemView.findViewById(R.id.imgAvatar);
+            text1 = itemView.findViewById(android.R.id.text1);
+            text2 = itemView.findViewById(android.R.id.text2);
 
             imgAvatar.setOnClickListener(this);
         }

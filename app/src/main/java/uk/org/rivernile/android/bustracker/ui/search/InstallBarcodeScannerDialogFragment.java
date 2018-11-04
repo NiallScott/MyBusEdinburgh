@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.search;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
@@ -67,12 +66,7 @@ public class InstallBarcodeScannerDialogFragment extends DialogFragment {
                 .setCancelable(true)
                 .setMessage(R.string.barcodescannerdialog_message)
                 .setPositiveButton(R.string.barcodescannerdialog_btn_positive,
-                        new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int which) {
-                        callbacks.onShowInstallBarcodeScanner();
-                    }
-                })
+                        (dialog, which) -> callbacks.onShowInstallBarcodeScanner())
                 .setNegativeButton(R.string.barcodescannerdialog_btn_negative, null)
                 .create();
     }

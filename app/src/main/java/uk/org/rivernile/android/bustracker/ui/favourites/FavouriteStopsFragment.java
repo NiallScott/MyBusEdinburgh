@@ -174,9 +174,9 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
             final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.favouritestops, container, false);
-        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
-        progress = (ProgressBar) v.findViewById(R.id.progress);
-        txtError = (TextView) v.findViewById(R.id.txtError);
+        recyclerView = v.findViewById(android.R.id.list);
+        progress = v.findViewById(R.id.progress);
+        txtError = v.findViewById(R.id.txtError);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);

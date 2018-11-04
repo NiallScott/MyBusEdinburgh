@@ -38,7 +38,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.viewpager.widget.ViewPager;
@@ -109,7 +108,7 @@ public class DisplayStopDataActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.displaystopdata);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar(findViewById(R.id.toolbar));
         final ActionBar actionBar = getSupportActionBar();
 
         if (actionBar != null) {
@@ -117,12 +116,12 @@ public class DisplayStopDataActivity extends AppCompatActivity
             actionBar.setDisplayShowTitleEnabled(false);
         }
 
-        final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
-        collapsingLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsingLayout);
-        txtStopName = (TextView) findViewById(R.id.txtStopName);
-        txtStopCode = (TextView) findViewById(R.id.txtStopCode);
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.viewPager);
-        final TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        final AppBarLayout appBarLayout = findViewById(R.id.appBarLayout);
+        collapsingLayout = findViewById(R.id.collapsingLayout);
+        txtStopName = findViewById(R.id.txtStopName);
+        txtStopCode = findViewById(R.id.txtStopCode);
+        final ViewPager viewPager = findViewById(R.id.viewPager);
+        final TabLayout tabLayout = findViewById(R.id.tabLayout);
 
         appBarLayout.addOnOffsetChangedListener(this);
 

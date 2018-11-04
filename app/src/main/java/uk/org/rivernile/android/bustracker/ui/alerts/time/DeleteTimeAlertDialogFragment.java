@@ -26,7 +26,6 @@
 package uk.org.rivernile.android.bustracker.ui.alerts.time;
 
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
@@ -59,13 +58,7 @@ public class DeleteTimeAlertDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
         return new AlertDialog.Builder(getContext())
                 .setTitle(R.string.deletetimedialog_title)
-                .setPositiveButton(R.string.okay, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int id) {
-                        // The user has confirmed they want to delete the alert.
-                        alertMan.removeTimeAlert();
-                    }
-                })
+                .setPositiveButton(R.string.okay, (dialog, id) -> alertMan.removeTimeAlert())
                 .setNegativeButton(R.string.cancel, null)
                 .create();
     }

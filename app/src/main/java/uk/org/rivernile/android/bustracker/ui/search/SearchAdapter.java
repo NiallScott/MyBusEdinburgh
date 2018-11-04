@@ -122,9 +122,9 @@ class SearchAdapter extends RecyclerCursorAdapter<SearchAdapter.ViewHolder> {
             super(itemView);
 
             itemView.setOnClickListener(this);
-            imgDirection = (ImageView) itemView.findViewById(R.id.imgDirection);
-            text1 = (TextView) itemView.findViewById(android.R.id.text1);
-            text2 = (TextView) itemView.findViewById(android.R.id.text2);
+            imgDirection = itemView.findViewById(R.id.imgDirection);
+            text1 = itemView.findViewById(android.R.id.text1);
+            text2 = itemView.findViewById(android.R.id.text2);
         }
 
         @Override

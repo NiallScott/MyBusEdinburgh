@@ -174,11 +174,11 @@ public class NearestStopsFragment extends Fragment
     public View onCreateView(final LayoutInflater inflater,
             final ViewGroup container, final Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.neareststops, container, false);
-        recyclerView = (RecyclerView) v.findViewById(android.R.id.list);
-        progress = (ProgressBar) v.findViewById(R.id.progress);
+        recyclerView = v.findViewById(android.R.id.list);
+        progress = v.findViewById(R.id.progress);
         layoutError = v.findViewById(R.id.layoutError);
-        txtError = (TextView) v.findViewById(R.id.txtError);
-        btnErrorResolve = (Button) v.findViewById(R.id.btnErrorResolve);
+        txtError = v.findViewById(R.id.txtError);
+        btnErrorResolve = v.findViewById(R.id.btnErrorResolve);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
@@ -217,8 +217,8 @@ public class NearestStopsFragment extends Fragment
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
 
         if (LocationUtils.checkLocationPermission(getContext())) {
             startLocationUpdates();
@@ -230,10 +230,10 @@ public class NearestStopsFragment extends Fragment
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
         
-        // When the Activity is being paused, cancel location updates.
+        // When the Activity is being stopped, cancel location updates.
         locMan.removeUpdates(this);
     }
 
@@ -793,23 +793,14 @@ public class NearestStopsFragment extends Fragment
         }
     };
 
-    private final View.OnClickListener locationClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            requestPermissions(
-                    new String[] {
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                    }, PERMISSION_REQUEST_LOCATION);
-        }
-    };
+    private final View.OnClickListener locationClickListener = v -> requestPermissions(
+            new String[] {
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            }, PERMISSION_REQUEST_LOCATION);
 
-    private final View.OnClickListener noProvidersClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(final View v) {
-            startActivity(TurnOnGpsDialogFragment.TURN_ON_GPS_INTENT);
-        }
-    };
+    private final View.OnClickListener noProvidersClickListener =
+            v -> startActivity(TurnOnGpsDialogFragment.TURN_ON_GPS_INTENT);
     
     /**
      * Any {@link Activity Activities} which host this {@link Fragment} must implement this

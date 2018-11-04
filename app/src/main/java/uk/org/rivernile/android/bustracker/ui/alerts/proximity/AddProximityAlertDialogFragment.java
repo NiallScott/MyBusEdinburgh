@@ -138,16 +138,16 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View v = inflater.inflate(R.layout.addproxalert, null, false);
 
-        progress = (ProgressBar) v.findViewById(R.id.progress);
+        progress = v.findViewById(R.id.progress);
         layoutContent = v.findViewById(R.id.layoutContent);
         txtErrorNoLocationFeature = v.findViewById(R.id.txtErrorNoLocationFeature);
         layoutLocationPermission = v.findViewById(R.id.layoutLocationPermission);
-        btnGrantPermission = (Button) v.findViewById(R.id.btnGrantPermission);
-        txtBlurb = (TextView) v.findViewById(R.id.txtBlurb);
-        spinnerDistance = (Spinner) v.findViewById(R.id.spinnerDistance);
-        btnLimitations = (Button) v.findViewById(R.id.btnLimitations);
+        btnGrantPermission = v.findViewById(R.id.btnGrantPermission);
+        txtBlurb = v.findViewById(R.id.txtBlurb);
+        spinnerDistance = v.findViewById(R.id.spinnerDistance);
+        btnLimitations = v.findViewById(R.id.btnLimitations);
         layoutLocationDisabled = v.findViewById(R.id.layoutLocationDisabled);
-        btnLocationSettings = (Button) v.findViewById(R.id.btnLocationSettings);
+        btnLocationSettings = v.findViewById(R.id.btnLocationSettings);
 
         btnLimitations.setOnClickListener(this);
         btnGrantPermission.setOnClickListener(this);
@@ -156,12 +156,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         return new AlertDialog.Builder(context)
                 .setTitle(R.string.addproxalertdialog_title)
                 .setPositiveButton(R.string.addproxalertdialog_button_add,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(final DialogInterface dialog, final int which) {
-                                handlePositiveButtonClick();
-                            }
-                        })
+                        (dialog, which) -> handlePositiveButtonClick())
                 .setNegativeButton(android.R.string.cancel, null)
                 .setView(v)
                 .create();

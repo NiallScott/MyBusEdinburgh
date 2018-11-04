@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -89,49 +89,40 @@ public class SettingsFragment extends PreferenceFragment
         numberOfDeparturesPref = (ListPreference)
                 findPreference(PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE);
 
-        backupDialog.setOnClickListener(new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int which) {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
-                    callbacks.onBackupFavourites();
-                }
+        backupDialog.setOnClickListener((dialog, which) -> {
+            if (which == DialogInterface.BUTTON_POSITIVE) {
+                callbacks.onBackupFavourites();
             }
         });
 
-        restoreDialog.setOnClickListener(new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int which) {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
-                    callbacks.onRestoreFavourites();
-                }
+        restoreDialog.setOnClickListener((dialog, which) -> {
+            if (which == DialogInterface.BUTTON_POSITIVE) {
+                callbacks.onRestoreFavourites();
             }
         });
 
-        clearSearchHistoryDialog.setOnClickListener(new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, final int which) {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
-                    final SearchRecentSuggestions suggestions =
-                            new SearchRecentSuggestions(getActivity(),
-                                    SearchSuggestionsProvider.AUTHORITY,
-                                    SearchSuggestionsProvider.MODE);
-                    suggestions.clearHistory();
-                }
+        clearSearchHistoryDialog.setOnClickListener((dialog, which) -> {
+            if (which == DialogInterface.BUTTON_POSITIVE) {
+                final SearchRecentSuggestions suggestions =
+                        new SearchRecentSuggestions(getActivity(),
+                                SearchSuggestionsProvider.AUTHORITY,
+                                SearchSuggestionsProvider.MODE);
+                suggestions.clearHistory();
             }
         });
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
 
         sp.registerOnSharedPreferenceChangeListener(this);
         populateNumberOfDeparturesSummary();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStop() {
+        super.onStop();
 
         getPreferenceScreen().getSharedPreferences()
                 .unregisterOnSharedPreferenceChangeListener(this);
