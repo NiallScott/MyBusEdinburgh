@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -78,6 +78,13 @@ public class BusStopProvider extends ContentProvider {
         final long assetVersion = Long.parseLong(context.getString(R.string.asset_db_version));
         openHelper = new BusStopOpenHelper(context, assetVersion);
         return true;
+    }
+
+    @Override
+    public void shutdown() {
+        super.shutdown();
+
+        openHelper.close();
     }
 
     @Nullable

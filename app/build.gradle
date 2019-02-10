@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ apply plugin: 'kotlin-allopen'
 
 ext {
     architectureComponentsVersion = '1.1.1'
-    googlePlayServicesVersion = '16.0.0'
+    googlePlayServicesVersion = '16.1.0'
     daggerVersion = '2.16'
 
     testSupportLibraryVersion = '1.0.2'
@@ -108,7 +108,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
     // Android support libraries
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.android.material:material:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
     implementation 'androidx.cardview:cardview:1.0.0'
@@ -135,14 +135,13 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
     // Okhttp
-    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     implementation 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
 
     // Test dependencies
-    androidTestImplementation 'androidx.annotation:annotation:1.0.0'
-    androidTestImplementation 'androidx.test:core:1.0.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
+    androidTestImplementation 'androidx.test:core:1.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.1'
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
 
     testImplementation 'junit:junit:4.12'

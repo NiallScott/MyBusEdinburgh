@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,9 +51,27 @@ import static org.junit.Assert.assertTrue;
  */
 public class SettingsProviderTests {
 
+    private static final String STATEMENT_CREATE_FAVOURITES_TABLE =
+            "CREATE TABLE IF NOT EXISTS " + SettingsContract.Favourites.TABLE_NAME + " (" +
+                SettingsContract.Favourites._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                SettingsContract.Favourites.STOP_CODE + " TEXT NOT NULL UNIQUE," +
+                SettingsContract.Favourites.STOP_NAME + " TEXT NOT NULL)";
+    private static final String STATEMENT_CREATE_ALERTS_TABLE =
+            "CREATE TABLE IF NOT EXISTS " + SettingsContract.Alerts.TABLE_NAME + " (" +
+                SettingsContract.Alerts._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                SettingsContract.Alerts.TYPE + " NUMERIC NOT NULL," +
+                SettingsContract.Alerts.TIME_ADDED + " INTEGER NOT NULL," +
+                SettingsContract.Alerts.STOP_CODE + " TEXT NOT NULL," +
+                SettingsContract.Alerts.DISTANCE_FROM + " INTEGER," +
+                SettingsContract.Alerts.SERVICE_NAMES + " TEXT," +
+                SettingsContract.Alerts.TIME_TRIGGER + " INTEGER)";
+
     @Rule
     public ProviderTestRule providerRule =
             new ProviderTestRule.Builder(SettingsProvider.class, SettingsContract.AUTHORITY)
+                    .setDatabaseCommands(SettingsContract.DB_NAME,
+                            STATEMENT_CREATE_FAVOURITES_TABLE,
+                            STATEMENT_CREATE_ALERTS_TABLE)
                     .build();
 
     private long currentTime;
@@ -790,7 +808,6 @@ public class SettingsProviderTests {
      * Populate the favourites table with some test data.
      */
     private void populateFavouritesWithTestData() {
-        forceCreationOfDatabase();
         providerRule.runDatabaseCommands(SettingsContract.DB_NAME,
                 "INSERT INTO favourite_stops (stopCode, stopName) VALUES (" +
                         "\"123456\", \"B\")",
@@ -804,26 +821,10 @@ public class SettingsProviderTests {
      * Populate the alerts table with some test data.
      */
     private void populateAlertsWithTestData() {
-        forceCreationOfDatabase();
         providerRule.runDatabaseCommands(SettingsContract.DB_NAME,
                 "INSERT INTO active_alerts (type, timeAdded, stopCode, distanceFrom) VALUES (" +
                         "1, " + currentTime + ", \"123456\", 10)",
                 "INSERT INTO active_alerts (type, timeAdded, stopCode, serviceNames, timeTrigger)" +
                         " VALUES (2, " + currentTime + ", \"223456\", \"1,2,3\", 5)");
-    }
-
-    /**
-     * Because of the order in which the test setup code is run, we need to force the
-     * {@link SettingsProvider} to create the necessary tables in the database. By sending a useless
-     * query, this should force this to happen.
-     */
-    private void forceCreationOfDatabase() {
-        providerRule.getResolver().query(
-                SettingsContract.Favourites.CONTENT_URI,
-                null,
-                null,
-                null,
-                null)
-                .close();
     }
 }

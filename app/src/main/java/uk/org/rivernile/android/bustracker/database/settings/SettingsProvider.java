@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -66,6 +66,13 @@ public class SettingsProvider extends ContentProvider {
     public boolean onCreate() {
         openHelper = new SettingsOpenHelper(getContext());
         return true;
+    }
+
+    @Override
+    public void shutdown() {
+        super.shutdown();
+
+        openHelper.close();
     }
 
     @Nullable
