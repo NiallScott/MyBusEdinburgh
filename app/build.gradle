@@ -44,7 +44,7 @@ android {
 
     defaultConfig {
         applicationId "uk.org.rivernile.edinburghbustracker.android"
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 15
         versionName "3.0 development"
