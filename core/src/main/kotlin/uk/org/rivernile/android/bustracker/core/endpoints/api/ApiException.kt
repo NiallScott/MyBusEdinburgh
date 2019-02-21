@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,39 +21,42 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-buildscript {
-    ext {
-        androidCompileSdkVersion = 28
-        androidMinSdkVersion = 21
-        androidTargetSdkVersion = 28
-        androidBuildToolsVersion = '28.0.3'
+package uk.org.rivernile.android.bustracker.core.endpoints.api
 
-        kotlinVersion = '1.3.21'
-        junitVersion = '4.12'
-        androidTestCoreVersion = '1.1.0'
-    }
+/**
+ * This [Exception] is thrown when were was an issue communicating with the API.
+ *
+ * @author Niall Scott
+ */
+class ApiException : Exception {
 
-    repositories {
-        google()
-        jcenter()
-    }
+    /**
+     * Default constructor.
+     */
+    constructor() : super()
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
+    /**
+     * Constructor that specifies a message.
+     *
+     * @param message Exception message.
+     */
+    constructor(message: String) : super(message)
 
-allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
+    /**
+     * Constructor that specifies a cause [Throwable].
+     *
+     * @param throwable The cause [Throwable].
+     */
+    constructor(throwable: Throwable) : super(throwable)
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    /**
+     * Constructor that specifies a message and a cause [Throwable].
+     *
+     * @param message Exception message.
+     * @param throwable The cause [Throwable].
+     */
+    constructor(message: String, throwable: Throwable) : super(message, throwable)
 }

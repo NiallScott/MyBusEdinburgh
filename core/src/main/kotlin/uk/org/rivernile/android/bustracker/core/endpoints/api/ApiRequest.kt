@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,39 +21,29 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-buildscript {
-    ext {
-        androidCompileSdkVersion = 28
-        androidMinSdkVersion = 21
-        androidTargetSdkVersion = 28
-        androidBuildToolsVersion = '28.0.3'
+package uk.org.rivernile.android.bustracker.core.endpoints.api
 
-        kotlinVersion = '1.3.21'
-        junitVersion = '4.12'
-        androidTestCoreVersion = '1.1.0'
-    }
+/**
+ * Instances of this class represent a single API request.
+ *
+ * @author Niall Scott
+ */
+interface ApiRequest<out T> {
 
-    repositories {
-        google()
-        jcenter()
-    }
+    /**
+     * Perform the request and return the result. This method is blocking.
+     *
+     * @return The result of the request.
+     * @throws ApiException When there was a problem with the request.
+     */
+    @Throws(ApiException::class)
+    fun performRequest(): T
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    /**
+     * Cancel the request.
+     */
+    fun cancel()
 }
