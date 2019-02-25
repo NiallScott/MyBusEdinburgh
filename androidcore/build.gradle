@@ -27,6 +27,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
+ext {
+    retrofitVersion = '2.5.0'
+    okhttpVersion = '3.13.1'
+}
+
 android {
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
@@ -54,6 +59,15 @@ android {
     productFlavors {
         edinburgh {
             dimension "city"
+
+            // URLs
+            buildConfigField("String", "API_BASE_URL", "\"http://edinb.us/api/\"")
+
+            // API keys
+            buildConfigField("String", "API_KEY", "\"${getApiKey()}\"")
+
+            // Other
+            buildConfigField("String", "SCHEMA_NAME", "\"MBE_10\"")
         }
     }
 
@@ -78,17 +92,36 @@ dependencies {
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
+    // Dagger
+    api "com.google.dagger:dagger:$daggerVersion"
+
     // Gson
     implementation 'com.google.code.gson:gson:2.8.5'
 
     // Okhttp
-    implementation 'com.squareup.okhttp3:okhttp:3.13.1'
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
 
     // Retrofit
-    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
     // Test dependencies
     androidTestImplementation "androidx.test:core:$androidTestCoreVersion"
 
     testImplementation "junit:junit:$junitVersion"
+}
+
+private static def getApiKey() {
+    // Populate the build config with API keys which are stored in local.properties so that
+    // ApiKey.java can pick them up.
+    final Properties properties = new Properties()
+
+    try {
+        properties.load(new FileInputStream("local.properties"))
+    } catch (IOException ignored) {
+        // Do nothing. This is probably happening on the CI server.
+    }
+
+    return properties.getProperty("apiKey", "invalid")
 }

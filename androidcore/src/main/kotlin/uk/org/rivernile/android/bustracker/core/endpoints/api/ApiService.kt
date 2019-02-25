@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,10 +21,28 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission android:name="android.permission.INTERNET" />
-</manifest>
+package uk.org.rivernile.android.bustracker.core.endpoints.api
+
+import retrofit2.Call
+import retrofit2.http.Query
+
+/**
+ * This interface defines a Retrofit interface for accessing the API.
+ *
+ * @author Niall Scott
+ */
+internal interface ApiService {
+
+    /**
+     * Get the database version.
+     *
+     * @param apiKey The API key.
+     * @param schemaType The schema type.
+     * @return A Retrofit [Call] object.
+     */
+    fun getDatabaseVersion(@Query("key") apiKey: String,
+                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+}

@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,10 +21,27 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission android:name="android.permission.INTERNET" />
-</manifest>
+package uk.org.rivernile.android.bustracker.core.endpoints.api
+
+/**
+ * This class represents the JSON version of the [ApiEndpoint] that connects over HTTP(S).
+ *
+ * @property service A concrete implementation of the Retrofit service declaration.
+ * @property apiKeyGenerator An implementation to generate API keys.
+ * @property schemaType The schema type.
+ * @author Niall Scott
+ */
+internal class JsonApiEndpoint(private val service: ApiService,
+                               private val apiKeyGenerator: ApiKeyGenerator,
+                               private val schemaType: String) : ApiEndpoint {
+
+    override fun createDatabaseVersionRequest(): ApiRequest<DatabaseVersion> {
+        val hashedApiKey = apiKeyGenerator.generateHashedApiKey()
+        val call = service.getDatabaseVersion(hashedApiKey, schemaType)
+
+        return DatabaseVersionApiRequest(call)
+    }
+}

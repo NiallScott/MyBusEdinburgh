@@ -31,7 +31,6 @@ apply plugin: 'kotlin-allopen'
 ext {
     architectureComponentsVersion = '1.1.1'
     googlePlayServicesVersion = '16.1.0'
-    daggerVersion = '2.16'
 
     testSupportLibraryVersion = '1.0.2'
     espressoVersion = '3.0.2'
@@ -134,7 +133,6 @@ dependencies {
     implementation 'com.google.maps.android:android-maps-utils:0.5'
 
     // Dagger 2
-    implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "com.google.dagger:dagger-android:$daggerVersion"
     implementation "com.google.dagger:dagger-android-support:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
