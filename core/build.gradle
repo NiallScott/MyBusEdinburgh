@@ -43,4 +43,10 @@ dependencies {
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+    // Dagger
+    api "com.google.dagger:dagger:$daggerVersion"
+
+    // Okhttp
+    api "com.squareup.okhttp3:okhttp:$okhttpVersion"
 }

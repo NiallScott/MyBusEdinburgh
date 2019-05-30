@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,17 +21,37 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+package uk.org.rivernile.android.bustracker.core.database
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import android.content.Context
+import android.database.sqlite.SQLiteException
+import java.io.File
+
+/**
+ * This class is an Android specific implementation of [DatabaseUtils].
+ *
+ * @param context The application [Context].
+ * @author Niall Scott
+ */
+internal class AndroidDatabaseUtils(private val context: Context): DatabaseUtils {
+
+    companion object {
+
+        private const val TEMP_DB = "temp.db"
+    }
+
+    override fun ensureDatabasePathExists() {
+        try {
+            context.openOrCreateDatabase(TEMP_DB, Context.MODE_PRIVATE, null).close()
+        } catch (ignored: SQLiteException) {
+            // Nothing to do here.
+        }
+
+        context.deleteDatabase(TEMP_DB)
+    }
+
+    override fun getDatabasePath(dbFileName: String): File = context.getDatabasePath(dbFileName)
+}

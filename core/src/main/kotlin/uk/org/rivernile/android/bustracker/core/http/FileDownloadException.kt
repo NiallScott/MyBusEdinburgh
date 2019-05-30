@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,17 +21,44 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+package uk.org.rivernile.android.bustracker.core.http
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import java.io.IOException
+
+/**
+ * This [IOException] is thrown when there was an issue downloading a file.
+ *
+ * @author Niall Scott
+ */
+class FileDownloadException : IOException {
+
+    /**
+     * Default constructor with empty message and no causes.
+     */
+    internal constructor() : super()
+
+    /**
+     * Constructor which specifies a message and no cause.
+     *
+     * @param message The exception message.
+     */
+    internal constructor(message: String?) : super(message)
+
+    /**
+     * Constructor which specifies a message and a cause.
+     *
+     * @param message The exception message.
+     * @param cause The causing [Throwable].
+     */
+    internal constructor(message: String?, cause: Throwable?) : super(message, cause)
+
+    /**
+     * Constructor which specifies a cause but no message.
+     *
+     * @param cause The causing [Throwable].
+     */
+    internal constructor(cause: Throwable?) : super(cause)
+}

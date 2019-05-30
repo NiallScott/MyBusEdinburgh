@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -444,7 +444,9 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         arguments?.let { args ->
             when {
                 args.containsKey(ARG_STOPCODE) -> {
-                    viewModel.onFirstCreate(args.getString(ARG_STOPCODE))
+                    args.getString(ARG_STOPCODE)?.let {
+                        viewModel.onFirstCreate(it)
+                    }
                 }
                 args.containsKey(ARG_LATITUDE) && args.containsKey(ARG_LONGITUDE) -> {
                     val latitude = args.getDouble(ARG_LATITUDE, 0.0)
@@ -761,7 +763,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     }
 
     /**
-     * Any [Activities][Activity] which host this [android.support.v4.app.Fragment] must
+     * Any [Activities][Activity] which host this [androidx.fragment.app.Fragment] must
      * implement this interface to handle navigation events.
      */
     interface Callbacks : OnShowBusTimesListener

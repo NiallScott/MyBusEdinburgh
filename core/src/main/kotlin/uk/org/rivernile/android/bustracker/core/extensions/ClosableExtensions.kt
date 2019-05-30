@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,17 +21,23 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+package uk.org.rivernile.android.bustracker.core.extensions
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import java.io.Closeable
+import java.io.IOException
+
+/**
+ * The [Closeable] interface defines the method [Closeable.close] which requires an [IOException]
+ * exception handler be written. Often during closing a resource, we don't care at that point about
+ * errors. This extension method allows us to close a resource and silently drop errors.
+ */
+fun Closeable.closeSafely() {
+    try {
+        close()
+    } catch (ignored: IOException) {
+        // Do nothing here.
+    }
+}

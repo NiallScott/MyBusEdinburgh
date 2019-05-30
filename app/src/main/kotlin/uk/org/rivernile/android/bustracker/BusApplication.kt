@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker
 
 import android.app.Activity
 import android.app.Application
+import android.app.Service
 import android.app.backup.BackupManager
 import android.content.Context
 import android.content.Intent
@@ -35,6 +36,7 @@ import com.bugsense.trace.BugSenseHandler
 import com.squareup.picasso.Picasso
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
+import dagger.android.HasServiceInjector
 import uk.org.rivernile.android.bustracker.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
 import uk.org.rivernile.android.bustracker.database.busstop.DatabaseUpdateService
@@ -57,11 +59,13 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-abstract class BusApplication : Application(), HasActivityInjector,
+abstract class BusApplication : Application(), HasActivityInjector, HasServiceInjector,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Activity>
+    lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
+    @Inject
+    lateinit var dispatchingServiceInjector: DispatchingAndroidInjector<Service>
     @Inject
     lateinit var preferenceManager: PreferenceManager
 
@@ -85,7 +89,9 @@ abstract class BusApplication : Application(), HasActivityInjector,
         startService(Intent(this, DatabaseUpdateService::class.java))
     }
 
-    override fun activityInjector() = dispatchingAndroidInjector
+    override fun activityInjector() = dispatchingActivityInjector
+
+    override fun serviceInjector() = dispatchingServiceInjector
 
     override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
         BackupManager.dataChanged(packageName)

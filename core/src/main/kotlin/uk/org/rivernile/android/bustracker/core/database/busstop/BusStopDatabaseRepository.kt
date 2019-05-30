@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,17 +21,24 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+package uk.org.rivernile.android.bustracker.core.database.busstop
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import java.io.File
+
+/**
+ * This repository is used to access the bus stop database.
+ *
+ * @author Niall Scott
+ */
+interface BusStopDatabaseRepository {
+
+    /**
+     * Replace the current database with the given [File].
+     *
+     * @param newDatabase The [File] to replace the current database with.
+     */
+    fun replaceDatabase(newDatabase: File)
+}

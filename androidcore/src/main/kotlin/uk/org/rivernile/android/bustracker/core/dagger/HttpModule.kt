@@ -61,9 +61,10 @@ internal class HttpModule {
      */
     @Provides
     @Singleton
-    fun provideLoggingInterceptor() = if (BuildConfig.DEBUG) {
-        HttpLoggingInterceptor { message -> Log.v(HTTP_LOG_TAG, message) }
-                .level = HttpLoggingInterceptor.Level.BODY
+    fun provideLoggingInterceptor(): HttpLoggingInterceptor? = if (BuildConfig.DEBUG) {
+        HttpLoggingInterceptor { message -> Log.v(HTTP_LOG_TAG, message) }.apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
     } else {
         null
     }
@@ -75,11 +76,14 @@ internal class HttpModule {
      * @return A [OkHttpClient.Builder] to be used to construct [OkHttpClient] instances.
      */
     @Provides
-    fun provideOkhttpClientBuilder() = OkHttpClient.Builder()
+    fun provideOkhttpClientBuilder(): OkHttpClient.Builder = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .followRedirects(false)
+
+    @Provides
+    fun provideOkhttpClient(builder: OkHttpClient.Builder): OkHttpClient = builder.build()
 
     /**
      * Provide a [GsonConverterFactory] instance which uses the app-wide [Gson] instance.
@@ -89,5 +93,6 @@ internal class HttpModule {
      */
     @Provides
     @Singleton
-    fun provideGsonConverterFactory(gson: Gson) = GsonConverterFactory.create(gson)
+    fun provideGsonConverterFactory(gson: Gson): GsonConverterFactory =
+            GsonConverterFactory.create(gson)
 }

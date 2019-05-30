@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,17 +21,31 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+package uk.org.rivernile.android.bustracker.core.database
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import java.io.File
+
+/**
+ * This interface contains methods for performing common database actions.
+ *
+ * @author Niall Scott
+ */
+interface DatabaseUtils {
+
+    /**
+     * Ensure the database path exists by creating it if it doesn't exist.
+     */
+    fun ensureDatabasePathExists()
+
+    /**
+     * Given the name of a database, return a [File] object representing this database on the file
+     * system.
+     *
+     * @param dbFileName The name of the database.
+     * @return A [File] object representing the database on the file system.
+     */
+    fun getDatabasePath(dbFileName: String): File
+}

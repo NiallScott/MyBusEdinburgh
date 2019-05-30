@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,17 +21,28 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+package uk.org.rivernile.android.bustracker.core.dagger
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService
+
+/**
+ * This [Module] is used to inject [android.app.Service] instances in this application.
+ *
+ * @author Niall Scott
+ */
+@Module
+abstract class ServiceModule {
+
+    /**
+     * Presents an instance of [DatabaseUpdateJobService] as an item to be injected.
+     *
+     * @return An instance of [DatabaseUpdateJobService] to be injected.
+     */
+    @ContributesAndroidInjector
+    abstract fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
+}

@@ -26,10 +26,10 @@
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
 ext {
     retrofitVersion = '2.5.0'
-    okhttpVersion = '3.13.1'
 }
 
 android {
@@ -92,19 +92,20 @@ dependencies {
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-    // Dagger
-    api "com.google.dagger:dagger:$daggerVersion"
+    // Dagger 2
+    api "com.google.dagger:dagger-android:$daggerVersion"
+    api "com.google.dagger:dagger-android-support:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     // Gson
-    implementation 'com.google.code.gson:gson:2.8.5'
+    api 'com.google.code.gson:gson:2.8.5'
 
-    // Okhttp
-    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+    api "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
 
     // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    api "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
     // Test dependencies
     androidTestImplementation "androidx.test:core:$androidTestCoreVersion"

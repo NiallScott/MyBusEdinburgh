@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,17 +21,38 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+package uk.org.rivernile.android.bustracker.core.database.busstop
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import android.app.job.JobParameters
+import android.app.job.JobService
+import dagger.android.AndroidInjection
+import javax.inject.Inject
+
+/**
+ * This is the [JobService] for running the database update job. This class is minimal - the work
+ * is performed in [DatabaseUpdateChecker].
+ *
+ * @author Niall Scott
+ */
+class DatabaseUpdateJobService : JobService() {
+
+    @Inject
+    lateinit var updateChecker: DatabaseUpdateChecker
+
+    override fun onCreate() {
+        AndroidInjection.inject(this)
+
+        super.onCreate()
+    }
+
+    override fun onStartJob(params: JobParameters): Boolean {
+        TODO("not implemented")
+    }
+
+    override fun onStopJob(params: JobParameters): Boolean {
+        TODO("not implemented")
+    }
+}

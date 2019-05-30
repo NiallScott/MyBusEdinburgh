@@ -37,7 +37,9 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Module(includes = [
-    HttpModule::class
+    DatabaseModule::class,
+    HttpModule::class,
+    ApiModule::class
 ])
 class CoreModule {
 

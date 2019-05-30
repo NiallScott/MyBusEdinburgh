@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
@@ -23,17 +21,42 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+package uk.org.rivernile.android.bustracker.core.database
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import android.net.Uri
+import android.provider.BaseColumns
+
+/**
+ * This interface defines methods common to a table contract when dealing with Android
+ * [android.content.ContentProvider]s.
+ *
+ * @author Niall Scott
+ */
+internal interface TableContract : BaseColumns {
+
+    companion object {
+
+        /**
+         * This forms the first part of the type [String] for a result set containing multiple
+         * entries.
+         */
+        const val SUBTYPE_MULTIPLE = "vnd.android.cursor.dir/"
+    }
+
+    /**
+     * Get the type for the table, as returned by [android.content.ContentProvider.getType].
+     *
+     * @return The type for the table.
+     */
+    fun getType(): String
+
+    /**
+     * Get the content [Uri] for the table.
+     *
+     * @return The content [Uri] for the table.
+     */
+    fun getContentUri(): Uri
+}

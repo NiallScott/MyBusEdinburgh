@@ -76,7 +76,8 @@ internal class ApiModule {
      * @return The [ApiService] implementation.
      */
     @Provides
-    fun provideApiService(@ForApi retrofit: Retrofit) = retrofit.create(ApiService::class.java)
+    fun provideApiService(@ForApi retrofit: Retrofit): ApiService =
+            retrofit.create(ApiService::class.java)
 
     /**
      * Provide the [Retrofit] instance for the API.
@@ -88,7 +89,7 @@ internal class ApiModule {
     @Provides
     @ForApi
     fun provideRetrofit(@ForApi okHttpClient: OkHttpClient,
-                        gsonConverterFactory: GsonConverterFactory) =
+                        gsonConverterFactory: GsonConverterFactory): Retrofit =
             Retrofit.Builder()
                     .baseUrl(BuildConfig.API_BASE_URL)
                     .client(okHttpClient)

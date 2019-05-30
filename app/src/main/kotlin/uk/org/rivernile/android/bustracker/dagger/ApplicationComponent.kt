@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,8 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjectionModule
 import uk.org.rivernile.android.bustracker.BusApplication
+import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
+import uk.org.rivernile.android.bustracker.core.dagger.ServiceModule
 import javax.inject.Singleton
 
 /**
@@ -41,7 +43,9 @@ import javax.inject.Singleton
 @Component(modules = [
         AndroidInjectionModule::class,
         ApplicationModule::class,
-        ActivityModule::class
+        CoreModule::class,
+        ActivityModule::class,
+        ServiceModule::class
 ])
 interface ApplicationComponent {
 
