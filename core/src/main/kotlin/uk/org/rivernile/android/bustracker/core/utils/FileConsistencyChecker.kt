@@ -32,7 +32,6 @@ import java.io.IOException
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import javax.inject.Inject
-import kotlin.experimental.and
 
 /**
  * This class is used to check the consistency of [File]s.
@@ -92,7 +91,7 @@ class FileConsistencyChecker @Inject constructor() {
             val sb = StringBuilder()
 
             bytes.forEach { byte ->
-                val str = Integer.toString((byte and 0xFF.toByte()) + 0x100, 16).substring(1)
+                val str = Integer.toString((byte.toInt() and 0xFF) + 0x100, 16).substring(1)
                 sb.append(str)
             }
 

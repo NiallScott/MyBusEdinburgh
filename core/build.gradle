@@ -49,4 +49,8 @@ dependencies {
 
     // Okhttp
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation 'com.nhaarman:mockito-kotlin:1.6.0'
 }

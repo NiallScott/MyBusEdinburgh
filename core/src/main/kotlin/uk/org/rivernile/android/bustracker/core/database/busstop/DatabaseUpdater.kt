@@ -28,80 +28,36 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
-import uk.org.rivernile.android.bustracker.core.http.FileDownloadException
-import uk.org.rivernile.android.bustracker.core.http.FileDownloadSession
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
-import java.io.IOException
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
 
 /**
- * The purpose of this class is to update the bus stop database.
- *
- * The new database is downloaded to a temporary path. It is then consistency checked with the
- * expected file hash. It is then moved in to place, replacing the existing database file.
- *
- * The temporary path will be deleted if any of the steps in the process fail.
+ * This class will create new [DatabaseUpdaterSession] object which will perform the action of
+ * updating the database.
  *
  * @param databaseUtils Utilities for dealing with databases.
  * @param fileDownloader An implementation for downloading files to a path.
  * @param fileConsistencyChecker An implementation for checking the consistency of files.
  * @param databaseRepository The repository which represents this database.
+ * @param timeUtils Used to access timestamps.
  * @author Niall Scott
  */
 class DatabaseUpdater @Inject constructor(
         private val databaseUtils: DatabaseUtils,
         private val fileDownloader: FileDownloader,
         private val fileConsistencyChecker: FileConsistencyChecker,
-        private val databaseRepository: BusStopDatabaseRepository) {
-
-    private var downloadSession: FileDownloadSession? = null
+        private val databaseRepository: BusStopDatabaseRepository,
+        private val timeUtils: TimeUtils) {
 
     /**
-     * Given a [DatabaseVersion] descriptor object, which supplies the database URL and expected
-     * hash checksum, update the database.
+     * Create a new database update session.
      *
-     * @param databaseVersion An object which describes the database to download.
-     * @return `true` when the update succeeded, otherwise `false`.
+     * @param databaseVersion Metadata describing the database to update to.
+     * @return A [DatabaseUpdaterSession] object.
      */
-    fun updateDatabase(databaseVersion: DatabaseVersion): Boolean {
-        databaseUtils.ensureDatabasePathExists()
-        val downloadFile = databaseUtils.getDatabasePath("busstops.db_temp")
-        val downloadSession = fileDownloader.createFileDownloadSession(databaseVersion.databaseUrl,
-                downloadFile)
-
-        try {
-            downloadSession.downloadFile()
-        } catch (ignored: FileDownloadException) {
-            downloadFile.delete()
-
-            return false
-        }
-
-        try {
-            if (!fileConsistencyChecker.checkFileMatchesHash(downloadFile,
-                            databaseVersion.checksum)) {
-                downloadFile.delete()
-
-                return false
-            }
-        } catch (ignored: IOException) {
-            downloadFile.delete()
-
-            return false
-        }
-
-        databaseRepository.replaceDatabase(downloadFile)
-
-        return true
-    }
-
-    /**
-     * Cancel any existing database downloads currently in-flight.
-     */
-    fun cancel() {
-        val downloadSession = this.downloadSession
-        this.downloadSession = null
-        downloadSession?.cancel()
-    }
+    fun createNewSession(databaseVersion: DatabaseVersion) =
+            DatabaseUpdaterSession(databaseUtils, fileDownloader, fileConsistencyChecker,
+                    databaseRepository, timeUtils, databaseVersion)
 }

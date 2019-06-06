@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,42 +21,28 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-buildscript {
-    ext {
-        androidCompileSdkVersion = 28
-        androidMinSdkVersion = 21
-        androidTargetSdkVersion = 28
-        androidBuildToolsVersion = '28.0.3'
+package uk.org.rivernile.android.bustracker.core.utils
 
-        kotlinVersion = '1.3.31'
-        daggerVersion = '2.21'
-        okhttpVersion = '3.13.1'
-        junitVersion = '4.12'
-        androidTestCoreVersion = '1.1.0'
-        mockitoVersion = '2.28.2'
-    }
+import javax.inject.Inject
+import javax.inject.Singleton
 
-    repositories {
-        google()
-        jcenter()
-    }
+/**
+ * This class is a proxy through to framework time methods to allow easy mocking of time in unit
+ * tests.
+ *
+ * @author Niall Scott
+ */
+@Singleton
+class TimeUtils @Inject constructor() {
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    /**
+     * Get the current wall time in milliseconds with the UNIX epoch. This merely proxies through to
+     * [System.currentTimeMillis].
+     *
+     * @return Get the current wall time in milliseconds since the UNIX epoch.
+     */
+    fun getCurrentTimeMillis() = System.currentTimeMillis()
 }

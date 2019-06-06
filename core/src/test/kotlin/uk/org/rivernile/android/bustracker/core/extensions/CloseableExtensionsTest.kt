@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,42 +21,40 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-buildscript {
-    ext {
-        androidCompileSdkVersion = 28
-        androidMinSdkVersion = 21
-        androidTargetSdkVersion = 28
-        androidBuildToolsVersion = '28.0.3'
+package uk.org.rivernile.android.bustracker.core.extensions
 
-        kotlinVersion = '1.3.31'
-        daggerVersion = '2.21'
-        okhttpVersion = '3.13.1'
-        junitVersion = '4.12'
-        androidTestCoreVersion = '1.1.0'
-        mockitoVersion = '2.28.2'
+import com.nhaarman.mockito_kotlin.whenever
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnitRunner
+import java.io.Closeable
+import java.io.IOException
+
+/**
+ * Unit tests for extensions methods on the [java.io.Closeable] interface.
+ *
+ * @author Niall Scott
+ */
+@RunWith(MockitoJUnitRunner::class)
+class CloseableExtensionsTest {
+
+    @Mock
+    private lateinit var closeable: Closeable
+
+    @Test
+    fun safeCloseWithNoExceptionSucceeds() {
+        closeable.closeSafely()
     }
 
-    repositories {
-        google()
-        jcenter()
-    }
+    @Test
+    fun safeCloseWithExceptionSafelyCatchesException() {
+        whenever(closeable.close())
+                .thenThrow(IOException::class.java)
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
+        closeable.closeSafely()
     }
-}
-
-allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

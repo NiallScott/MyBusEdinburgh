@@ -34,7 +34,6 @@ ext {
 
     testSupportLibraryVersion = '1.0.2'
     espressoVersion = '3.0.2'
-    mockitoVersion = '2.22.0'
 }
 
 android {

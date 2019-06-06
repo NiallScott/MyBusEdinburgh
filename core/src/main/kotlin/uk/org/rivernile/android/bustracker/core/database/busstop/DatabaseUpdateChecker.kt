@@ -28,14 +28,11 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiException
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiRequest
-import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import javax.inject.Inject
 
 /**
- * This class will check to see if a new bus stop database is available, and if so, perform the
- * update of the database.
+ * This class will create new [DatabaseUpdateCheckerSession] objects which allow the database to
+ * be updated.
  *
  * @param apiEndpoint The endpoint to get the database metadata from, which describes the latest
  * database.
@@ -48,43 +45,11 @@ class DatabaseUpdateChecker @Inject constructor(
         private val databaseInformationDao: DatabaseInformationDao,
         private val databaseUpdater: DatabaseUpdater) {
 
-    private var currentRequest: ApiRequest<DatabaseVersion>? = null
-
     /**
-     * Check for any new database updates, and if an update is available, update the database.
+     * Create a new database update check session.
      *
-     * @return `true` if the check was successful, otherwise `false`.
+     * @return A [DatabaseUpdateCheckerSession] object.
      */
-    fun checkForDatabaseUpdates(): Boolean {
-        // Make sure any previous invocations have been cancelled.
-        cancel()
-
-        val currentRequest = apiEndpoint.createDatabaseVersionRequest()
-        this.currentRequest = currentRequest
-
-        val databaseVersion = try {
-            currentRequest.performRequest()
-        } catch (ignored: ApiException) {
-            return false
-        }
-
-        val currentTopologyId = databaseInformationDao.getTopologyId()
-
-        return if (databaseVersion.topologyId != currentTopologyId) {
-            databaseUpdater.updateDatabase(databaseVersion)
-        } else {
-            // The check was successful but there was no change.
-            true
-        }
-    }
-
-    /**
-     * Cancel any current in-flight database checks or updates.
-     */
-    fun cancel() {
-        val currentRequest = this.currentRequest
-        this.currentRequest = null
-        currentRequest?.cancel()
-        databaseUpdater.cancel()
-    }
+    fun createNewSession() =
+            DatabaseUpdateCheckerSession(apiEndpoint, databaseInformationDao, databaseUpdater)
 }
