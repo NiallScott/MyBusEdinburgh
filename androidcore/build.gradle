@@ -111,6 +111,8 @@ dependencies {
     androidTestImplementation "androidx.test:core:$androidTestCoreVersion"
 
     testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoVersion"
+    testImplementation "com.nhaarman:mockito-kotlin:$mockitoKotlinVersion"
 }
 
 private static def getApiKey() {

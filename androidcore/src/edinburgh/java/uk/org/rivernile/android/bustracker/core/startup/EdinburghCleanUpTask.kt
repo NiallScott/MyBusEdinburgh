@@ -24,27 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.startup
 
-import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 
 /**
- * This interface defines a Retrofit interface for accessing the API.
+ * This is the Edinburgh-specific implementation of [CleanUpTask].
  *
  * @author Niall Scott
  */
-internal interface ApiService {
+internal class EdinburghCleanUpTask(private val databaseUtils: DatabaseUtils) : CleanUpTask {
 
-    /**
-     * Get the database version.
-     *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
-     * @return A Retrofit [Call] object.
-     */
-    @GET("DatabaseVersion")
-    fun getDatabaseVersion(@Query("key") apiKey: String,
-                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+    override fun performCleanUp() {
+        arrayOf(
+                databaseUtils.getDatabasePath("busstops.db"),
+                databaseUtils.getDatabasePath("busstops.db-journal"),
+                databaseUtils.getDatabasePath("busstops2.db"),
+                databaseUtils.getDatabasePath("busstops2.db-journal"),
+                databaseUtils.getDatabasePath("busstops8.db"),
+                databaseUtils.getDatabasePath("busstops8.db-journal")
+        ).forEach { it.delete() }
+    }
 }

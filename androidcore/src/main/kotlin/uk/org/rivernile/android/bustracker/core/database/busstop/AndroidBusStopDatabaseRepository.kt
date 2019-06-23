@@ -33,12 +33,16 @@ import java.io.File
  * This class represents an Android-specific implementation of the bus stop database repository.
  *
  * @param context The application [Context].
+ * @param contract The contract for the bus stop database.
  * @author Niall Scott
  */
-internal class AndroidBusStopDatabaseRepository(private val context: Context)
+internal class AndroidBusStopDatabaseRepository(
+        private val context: Context,
+        private val contract: BusStopDatabaseContract)
     : BusStopDatabaseRepository {
 
     override fun replaceDatabase(newDatabase: File) {
-        TODO("not implemented")
+        context.contentResolver.call(contract.getContentUri(),
+                BusStopDatabaseContract.METHOD_REPLACE_DATABASE, newDatabase.absolutePath, null)
     }
 }

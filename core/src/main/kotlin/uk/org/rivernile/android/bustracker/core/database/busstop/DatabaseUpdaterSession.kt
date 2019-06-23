@@ -35,6 +35,7 @@ import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The purpose of this class is to update the bus stop database.
@@ -63,6 +64,7 @@ class DatabaseUpdaterSession internal constructor(
         private val timeUtils: TimeUtils,
         private val databaseVersion: DatabaseVersion) {
 
+    private val hasRun = AtomicBoolean(false)
     private var downloadSession: FileDownloadSession? = null
 
     /**
@@ -76,7 +78,7 @@ class DatabaseUpdaterSession internal constructor(
      * @throws IllegalStateException When this session object is attempted more than once.
      */
     fun updateDatabase(): Boolean {
-        if (downloadSession != null) {
+        if (!hasRun.compareAndSet(false, true)) {
             throw IllegalStateException("Each session can only be run once.")
         }
 

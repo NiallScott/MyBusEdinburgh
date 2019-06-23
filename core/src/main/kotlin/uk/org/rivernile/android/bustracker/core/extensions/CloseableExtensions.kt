@@ -33,6 +33,8 @@ import java.io.IOException
  * The [Closeable] interface defines the method [Closeable.close] which requires an [IOException]
  * exception handler be written. Often during closing a resource, we don't care at that point about
  * errors. This extension method allows us to close a resource and silently drop errors.
+ *
+ * @author Niall Scott
  */
 fun Closeable.closeSafely() {
     try {

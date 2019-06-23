@@ -33,6 +33,7 @@ import okio.Okio
 import uk.org.rivernile.android.bustracker.core.extensions.closeSafely
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * This object represents a single transfer sessions for a file download. This instance should only
@@ -50,7 +51,8 @@ class FileDownloadSession internal constructor(
         private val toLocation: File) {
 
     private var call: Call? = null
-    private var cancelled = false
+    private val hasRun = AtomicBoolean(false)
+    private val cancelled = AtomicBoolean(false)
 
     /**
      * Using the parameters supplied to this session instance, download a file to a [File] location.
@@ -60,12 +62,12 @@ class FileDownloadSession internal constructor(
      */
     @Throws(FileDownloadException::class)
     fun downloadFile() {
-        ensureNotCancelled(null)
-
-        if (call != null) {
+        if (!hasRun.compareAndSet(false, true)) {
             throw IllegalStateException("Do not reuse this object. Obtain a new instance from " +
                     "FileDownloader.")
         }
+
+        ensureNotCancelled(null)
 
         val fileSink = createFileSink()
         val call = createCall()
@@ -99,9 +101,7 @@ class FileDownloadSession internal constructor(
      * beginning.
      */
     fun cancel() {
-        cancelled = true
-        val call = this.call
-        this.call = null
+        cancelled.set(true)
         call?.cancel()
     }
 
@@ -110,9 +110,11 @@ class FileDownloadSession internal constructor(
      *
      * @param cleanupBlock A block of code to execute to perform cleanup if this session has been
      * cancelled.
+     * @throws FileDownloadException When the session has been previously cancelled.
      */
+    @Throws(FileDownloadException::class)
     private fun ensureNotCancelled(cleanupBlock: (() -> Unit)?) {
-        if (cancelled) {
+        if (cancelled.get()) {
             cleanupBlock?.invoke()
             throw FileDownloadException("Session cancelled.")
         }
@@ -122,9 +124,9 @@ class FileDownloadSession internal constructor(
      * Create the [File] [okio.Sink] to output the HTTP response body to.
      *
      * @return The [File] [okio.Sink] to output the HTTP response body to.
-     * @throws IOException When there was an issue opening the file path.
+     * @throws FileDownloadException When there was an issue opening the file path.
      */
-    @Throws(IOException::class)
+    @Throws(FileDownloadException::class)
     private fun createFileSink() = try {
         Okio.buffer(Okio.sink(toLocation))
     } catch (e: IOException) {
@@ -136,11 +138,8 @@ class FileDownloadSession internal constructor(
      *
      * @return The Okhttp [Call] object.
      */
-    private fun createCall(): Call {
-        val request = Request.Builder()
-                .url(url)
-                .build()
-
-        return okHttpClient.newCall(request)
-    }
+    private fun createCall() = Request.Builder()
+            .url(url)
+            .build()
+            .run(okHttpClient::newCall)
 }

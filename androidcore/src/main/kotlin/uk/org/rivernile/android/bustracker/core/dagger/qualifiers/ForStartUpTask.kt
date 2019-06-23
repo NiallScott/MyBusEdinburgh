@@ -24,27 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.dagger.qualifiers
 
-import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This interface defines a Retrofit interface for accessing the API.
+ * This annotation defines a Dagger qualifier for the start-up task.
  *
  * @author Niall Scott
  */
-internal interface ApiService {
-
-    /**
-     * Get the database version.
-     *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
-     * @return A Retrofit [Call] object.
-     */
-    @GET("DatabaseVersion")
-    fun getDatabaseVersion(@Query("key") apiKey: String,
-                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForStartUpTask

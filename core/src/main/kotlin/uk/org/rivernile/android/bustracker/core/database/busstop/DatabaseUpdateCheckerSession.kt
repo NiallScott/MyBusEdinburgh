@@ -31,6 +31,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiException
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * This class will check to see if a new bus stop database is available, and if so, perform the
@@ -50,6 +51,7 @@ class DatabaseUpdateCheckerSession internal constructor(
         private val databaseInformationDao: DatabaseInformationDao,
         private val databaseUpdater: DatabaseUpdater) {
 
+    private val hasRun = AtomicBoolean(false)
     private var request: ApiRequest<DatabaseVersion>? = null
     private var databaseUpdaterSession: DatabaseUpdaterSession? = null
 
@@ -63,7 +65,7 @@ class DatabaseUpdateCheckerSession internal constructor(
      * @throws IllegalStateException When this session object is attempted more than once.
      */
     fun checkForDatabaseUpdates(): Boolean {
-        if (request != null) {
+        if (!hasRun.compareAndSet(false, true)) {
             throw IllegalStateException("Each session can only be run once.")
         }
 

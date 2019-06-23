@@ -24,27 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.startup
 
-import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import androidx.annotation.WorkerThread
 
 /**
- * This interface defines a Retrofit interface for accessing the API.
+ * This interface defines a process which cleans up data from old versions of the application. For
+ * example, old databases and files may need to be removed from the file system. This interface can
+ * be implemented by flavours which require it.
  *
  * @author Niall Scott
  */
-internal interface ApiService {
+interface CleanUpTask {
 
     /**
-     * Get the database version.
-     *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
-     * @return A Retrofit [Call] object.
+     * Perform a clean-up of data left behind from old versions of the app. This method is called
+     * on a background thread.
      */
-    @GET("DatabaseVersion")
-    fun getDatabaseVersion(@Query("key") apiKey: String,
-                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+    @WorkerThread
+    fun performCleanUp()
 }

@@ -24,27 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.database.busstop
 
-import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import android.net.Uri
+import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForBusStopDatabase
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * This interface defines a Retrofit interface for accessing the API.
+ * This class defines the contract for the Bus Stop Database as a whole entity. It does not define
+ * the contract for individual tables within this database - these are defined in the other
+ * contract classes.
  *
+ * @param authority The authority URI [String] of the database
  * @author Niall Scott
  */
-internal interface ApiService {
+@Singleton
+internal class BusStopDatabaseContract @Inject constructor(
+        @ForBusStopDatabase authority: String) {
+
+    companion object {
+
+        /**
+         * The method to "call" on the [android.content.ContentProvider] to replace the database,
+         * for example when a new version of the database has been downloaded.
+         */
+        internal const val METHOD_REPLACE_DATABASE = "replaceDatabase"
+    }
+
+    private val uri = Uri.parse("content://$authority")
 
     /**
-     * Get the database version.
+     * Get the content [Uri] for the database.
      *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
-     * @return A Retrofit [Call] object.
+     * @return The content [Uri] for the database.
      */
-    @GET("DatabaseVersion")
-    fun getDatabaseVersion(@Query("key") apiKey: String,
-                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+    fun getContentUri(): Uri = uri
 }

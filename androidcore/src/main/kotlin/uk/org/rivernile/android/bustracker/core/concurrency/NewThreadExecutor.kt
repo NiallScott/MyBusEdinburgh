@@ -24,27 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.concurrency
 
-import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import java.util.concurrent.Executor
 
 /**
- * This interface defines a Retrofit interface for accessing the API.
+ * This [Executor] takes a [Runnable] and executes it on a new thread. This should only be used for
+ * short-lived tasks that run on a new [Thread].
  *
  * @author Niall Scott
  */
-internal interface ApiService {
+class NewThreadExecutor : Executor {
 
-    /**
-     * Get the database version.
-     *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
-     * @return A Retrofit [Call] object.
-     */
-    @GET("DatabaseVersion")
-    fun getDatabaseVersion(@Query("key") apiKey: String,
-                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+    override fun execute(command: Runnable) {
+        Thread(command).run()
+    }
 }

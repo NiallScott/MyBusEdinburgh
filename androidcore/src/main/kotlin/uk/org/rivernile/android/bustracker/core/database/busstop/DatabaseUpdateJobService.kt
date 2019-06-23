@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.app.job.JobParameters
 import android.app.job.JobService
+import android.os.AsyncTask
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
@@ -42,6 +43,8 @@ class DatabaseUpdateJobService : JobService() {
     @Inject
     lateinit var updateChecker: DatabaseUpdateChecker
 
+    private var updateTask: UpdateTask? = null
+
     override fun onCreate() {
         AndroidInjection.inject(this)
 
@@ -49,10 +52,43 @@ class DatabaseUpdateJobService : JobService() {
     }
 
     override fun onStartJob(params: JobParameters): Boolean {
-        TODO("not implemented")
+        updateTask = UpdateTask(params, updateChecker.createNewSession(),
+                this::handleResult).apply {
+            executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null)
+        }
+
+        return true
     }
 
     override fun onStopJob(params: JobParameters): Boolean {
-        TODO("not implemented")
+        updateTask?.cancel()
+        updateTask = null
+
+        return true
+    }
+
+    private fun handleResult(params: JobParameters, result: Boolean) {
+        jobFinished(params, !result)
+        updateTask = null
+    }
+
+    private class UpdateTask(
+            private val jobParameters: JobParameters,
+            private val updateSession: DatabaseUpdateCheckerSession,
+            private val resultHandler: (JobParameters, Boolean) -> Unit)
+        : AsyncTask<Unit, Unit, Boolean>() {
+
+        override fun doInBackground(vararg params: Unit?): Boolean {
+            return updateSession.checkForDatabaseUpdates()
+        }
+
+        override fun onPostExecute(result: Boolean) {
+            resultHandler(jobParameters, result)
+        }
+
+        fun cancel() {
+            cancel(false)
+            updateSession.cancel()
+        }
     }
 }

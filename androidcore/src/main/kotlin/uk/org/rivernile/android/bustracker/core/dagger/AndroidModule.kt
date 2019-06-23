@@ -24,27 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.dagger
 
-import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import android.app.job.JobScheduler
+import android.content.Context
+import dagger.Module
+import dagger.Provides
+import javax.inject.Singleton
 
 /**
- * This interface defines a Retrofit interface for accessing the API.
+ * This [Module] provides resources owned by the Android platform.
  *
  * @author Niall Scott
  */
-internal interface ApiService {
+@Module
+class AndroidModule {
 
     /**
-     * Get the database version.
+     * Provide the [JobScheduler].
      *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
-     * @return A Retrofit [Call] object.
+     * @param context The application [Context].
+     * @return The [JobScheduler] instance.
      */
-    @GET("DatabaseVersion")
-    fun getDatabaseVersion(@Query("key") apiKey: String,
-                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+    @Provides
+    @Singleton
+    fun provideJobScheduler(context: Context): JobScheduler =
+            context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
 }

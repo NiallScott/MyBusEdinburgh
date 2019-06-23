@@ -30,7 +30,6 @@ import android.app.Application
 import android.app.Service
 import android.app.backup.BackupManager
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import com.bugsense.trace.BugSenseHandler
 import com.squareup.picasso.Picasso
@@ -38,8 +37,8 @@ import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasActivityInjector
 import dagger.android.HasServiceInjector
 import uk.org.rivernile.android.bustracker.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
-import uk.org.rivernile.android.bustracker.database.busstop.DatabaseUpdateService
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint
 import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint
@@ -67,6 +66,8 @@ abstract class BusApplication : Application(), HasActivityInjector, HasServiceIn
     @Inject
     lateinit var dispatchingServiceInjector: DispatchingAndroidInjector<Service>
     @Inject
+    lateinit var startUpTask: StartUpTask
+    @Inject
     lateinit var preferenceManager: PreferenceManager
 
     override fun onCreate() {
@@ -85,8 +86,7 @@ abstract class BusApplication : Application(), HasActivityInjector, HasServiceIn
         getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
                 .registerOnSharedPreferenceChangeListener(this)
 
-        // Start the database update service.
-        startService(Intent(this, DatabaseUpdateService::class.java))
+        startUpTask.performStartUpTasks()
     }
 
     override fun activityInjector() = dispatchingActivityInjector

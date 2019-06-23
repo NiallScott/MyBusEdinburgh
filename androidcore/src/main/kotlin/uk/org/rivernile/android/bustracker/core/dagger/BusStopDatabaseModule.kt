@@ -31,6 +31,7 @@ import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidDatabaseInformationDao
@@ -60,13 +61,15 @@ internal class BusStopDatabaseModule {
      * Provide the [BusStopDatabaseRepository].
      *
      * @param context The application [Context].
+     * @param contract The contract for talking to the database.
      * @return The [BusStopDatabaseRepository].
      */
     @Provides
     @Singleton
-    fun provideBusStopDatabaseRepository(context: Context)
+    fun provideBusStopDatabaseRepository(context: Context,
+                                         contract: BusStopDatabaseContract)
             : BusStopDatabaseRepository {
-        return AndroidBusStopDatabaseRepository(context)
+        return AndroidBusStopDatabaseRepository(context, contract)
     }
 
     /**

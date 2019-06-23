@@ -24,27 +24,29 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.dagger
 
-import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Query
+import dagger.Module
+import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
+import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
+import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
 
 /**
- * This interface defines a Retrofit interface for accessing the API.
+ * Any dependencies which are flavour-specific should go here.
  *
  * @author Niall Scott
  */
-internal interface ApiService {
+@Module
+class FlavourModule {
 
     /**
-     * Get the database version.
+     * Provide a [CleanUpTask] instance.
      *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
-     * @return A Retrofit [Call] object.
+     * @param databaseUtils Database utilities.
+     * @return [CleanUpTask].
      */
-    @GET("DatabaseVersion")
-    fun getDatabaseVersion(@Query("key") apiKey: String,
-                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+    @Provides
+    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
+            EdinburghCleanUpTask(databaseUtils)
 }

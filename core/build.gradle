@@ -52,5 +52,5 @@ dependencies {
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation 'com.nhaarman:mockito-kotlin:1.6.0'
+    testImplementation "com.nhaarman:mockito-kotlin:$mockitoKotlinVersion"
 }

@@ -29,6 +29,9 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.concurrency.NewThreadExecutor
+import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForStartUpTask
+import java.util.concurrent.Executor
 import javax.inject.Singleton
 
 /**
@@ -37,9 +40,11 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Module(includes = [
+    AndroidModule::class,
     DatabaseModule::class,
     HttpModule::class,
-    ApiModule::class
+    ApiModule::class,
+    FlavourModule::class
 ])
 class CoreModule {
 
@@ -51,4 +56,13 @@ class CoreModule {
     @Provides
     @Singleton
     fun provideGson() = Gson()
+
+    /**
+     * Provide the [Executor] to run the start-up tasks on.
+     *
+     * @return The [Executor] to run the start-up tasks on,
+     */
+    @Provides
+    @ForStartUpTask
+    fun provideStartUpTaskExecutor(): Executor = NewThreadExecutor()
 }
