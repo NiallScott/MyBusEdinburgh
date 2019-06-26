@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -67,19 +67,6 @@ public class EdinburghUrlBuilderTests {
         
         checkBusTrackerUri(uri);
         assertEquals("getTopoId", uri.getQueryParameter("function"));
-    }
-    
-    /**
-     * Test that the URL for checking the database version from the database server is correctly
-     * constructed.
-     */
-    @Test
-    public void testGetDbVersionCheckUrl() {
-        final Uri uri = builder.getDbVersionCheckUrl("test");
-
-        checkDatabaseServerUri(uri);
-        assertEquals("/api/DatabaseVersion", uri.getPath());
-        assertEquals("test", uri.getQueryParameter("schemaType"));
     }
     
     /**

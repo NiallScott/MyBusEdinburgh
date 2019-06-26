@@ -40,7 +40,6 @@ import uk.org.rivernile.android.bustracker.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint
-import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint
 import uk.org.rivernile.android.bustracker.preferences.PreferenceManager
 import uk.org.rivernile.edinburghbustracker.android.ApiKey
@@ -103,14 +102,6 @@ abstract class BusApplication : Application(), HasActivityInjector, HasServiceIn
      * @return The BusTrackerEndpoint instance for this application.
      */
     abstract fun getBusTrackerEndpoint(): BusTrackerEndpoint
-
-    /**
-     * Get the database endpoint, used for checking for bus stop database
-     * updates.
-     *
-     * @return The DatabaseEndpoint instance for this application.
-     */
-    abstract fun getDatabaseEndpoint(): DatabaseEndpoint
 
     /**
      * Get the Twitter endpoint, used for loading a list of Tweets to show the

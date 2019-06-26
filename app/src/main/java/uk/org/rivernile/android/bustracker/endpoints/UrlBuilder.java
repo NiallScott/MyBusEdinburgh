@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,17 +44,6 @@ public interface UrlBuilder {
      */
     @NonNull
     Uri getTopologyUrl();
-    
-    /**
-     * Get a {@link Uri} instance which represents a URL for getting the latest database version
-     * for a given {@code schemaType} from the database server.
-     * 
-     * @param schemaType The {@code schemaType} to check for.
-     * @return A {@link Uri} instance which represents a URL for getting the latest database
-     * version for a given {@code schemaType} from the database server.
-     */
-    @NonNull
-    Uri getDbVersionCheckUrl(@NonNull String schemaType);
     
     /**
      * Get a {@link Uri} instance which represents a URL for getting bus stop times from the bus

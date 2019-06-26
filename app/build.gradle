@@ -32,7 +32,6 @@ ext {
     architectureComponentsVersion = '1.1.1'
     googlePlayServicesVersion = '16.1.0'
 
-    testSupportLibraryVersion = '1.0.2'
     espressoVersion = '3.0.2'
 }
 
@@ -105,7 +104,7 @@ android {
 }
 
 allOpen {
-    annotation 'uk.org.rivernile.android.bustracker.utils.OpenClass'
+    annotation 'uk.org.rivernile.android.bustracker.core.utils.OpenClass'
 }
 
 dependencies {
@@ -152,6 +151,6 @@ dependencies {
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "com.nhaarman:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation 'androidx.arch.core:core-testing:2.0.1'
 }

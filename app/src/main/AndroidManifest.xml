@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -246,14 +246,6 @@
                 android:pathPrefix="/search_suggest_query"
                 android:readPermission="android.permission.GLOBAL_SEARCH" />
         </provider>
-        
-        <!-- DatabaseUpdateService, which checks to see if database updates are
-             available and if so, apply them. -->
-        <service
-            android:name="uk.org.rivernile.android.bustracker.database.busstop.DatabaseUpdateService"
-            android:label="@string/databaseservice_title"
-            android:icon="@drawable/appicon"
-            android:exported="false" />
         
         <!-- TimeAlertService, which checks bus times periodically when the user
              has set an alert for bus times. -->

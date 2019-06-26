@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,40 +47,6 @@ public final class BusStopDatabase {
      * The constructor is private to prevent instantiation.
      */
     private BusStopDatabase() { }
-
-    /**
-     * Get the current topology ID of the database.
-     *
-     * @param context A {@link Context} instance.
-     * @return The topology ID of the database, or {@code null} if there was a problem getting it.
-     */
-    @WorkerThread
-    @Nullable
-    static String getTopologyId(@NonNull final Context context) {
-        final Cursor c = context.getContentResolver().query(
-                BusStopContract.DatabaseInformation.CONTENT_URI,
-                new String[] { BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID },
-                null, null, null);
-        final String result;
-
-        if (c != null) {
-            // Fill the Cursor window.
-            c.getCount();
-
-            if (c.moveToFirst()) {
-                result = c.getString(c.getColumnIndex(
-                        BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID));
-            } else {
-                result = null;
-            }
-
-            c.close();
-        } else {
-            result = null;
-        }
-
-        return result;
-    }
 
     /**
      * Search the bus stops table to look for bus stops which match {@code searchQuery}.

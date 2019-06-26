@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.repositories.about
 
 import androidx.lifecycle.LiveData
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
-import uk.org.rivernile.android.bustracker.utils.OpenForTesting
+import uk.org.rivernile.android.bustracker.core.utils.OpenForTesting
 import uk.org.rivernile.android.bustracker.utils.Strings
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject

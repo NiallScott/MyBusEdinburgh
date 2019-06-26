@@ -32,15 +32,12 @@ import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.android.bustracker.alerts.AlertManagerImpl;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
-import uk.org.rivernile.android.bustracker.endpoints.DatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint;
-import uk.org.rivernile.android.bustracker.endpoints.HttpDatabaseEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpTwitterEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
 import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghParser;
-import uk.org.rivernile.edinburghbustracker.android.parser.database.EdinburghDatabaseVersionParser;
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
@@ -53,7 +50,6 @@ public class MyBusEdinburghApplication extends BusApplication {
     
     private EdinburghUrlBuilder urlBuilder;
     private BusTrackerEndpoint busTrackerEndpoint;
-    private DatabaseEndpoint databaseEndpoint;
     private TwitterEndpoint twitterEndpoint;
     private AlertManager alertManager;
     private Picasso picasso;
@@ -66,16 +62,6 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return busTrackerEndpoint;
-    }
-
-    @Override
-    public synchronized DatabaseEndpoint getDatabaseEndpoint() {
-        if (databaseEndpoint == null) {
-            databaseEndpoint = new HttpDatabaseEndpoint(this, new EdinburghDatabaseVersionParser(),
-                    getUrlBuilder());
-        }
-        
-        return databaseEndpoint;
     }
 
     @Override

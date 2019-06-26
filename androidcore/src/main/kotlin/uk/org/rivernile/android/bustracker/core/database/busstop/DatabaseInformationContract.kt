@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 import android.net.Uri
 import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.TableContract
+import uk.org.rivernile.android.bustracker.core.utils.OpenForTesting
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,6 +41,7 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Singleton
+@OpenForTesting
 internal class DatabaseInformationContract @Inject constructor(
         @ForBusStopDatabase authority: String)
     : TableContract {

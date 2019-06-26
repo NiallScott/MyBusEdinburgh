@@ -55,15 +55,6 @@ public class EdinburghUrlBuilder implements UrlBuilder {
 
     @NonNull
     @Override
-    public Uri getDbVersionCheckUrl(@NonNull final String schemaType) {
-        return getDbServerBuilder()
-                .appendPath("DatabaseVersion")
-                .appendQueryParameter("schemaType", schemaType)
-                .build();
-    }
-
-    @NonNull
-    @Override
     public Uri getBusTimesUrl(@NonNull final String[] stopCodes, final int numDepartures) {
         if (stopCodes.length == 0) {
             throw new IllegalArgumentException("The stopCodes array must not be empty.");

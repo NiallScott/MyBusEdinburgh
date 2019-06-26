@@ -26,7 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.startup
 
-import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockitokotlin2.verify
+
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock

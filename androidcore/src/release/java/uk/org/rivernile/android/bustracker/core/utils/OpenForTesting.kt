@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,31 +24,12 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.utils
-
-import android.content.Context
-import androidx.annotation.StringRes
-import uk.org.rivernile.android.bustracker.core.utils.OpenForTesting
-import javax.inject.Inject
+package uk.org.rivernile.android.bustracker.core.utils
 
 /**
- * This class is used to access Android platform strings, in a way that can be mocked in unit
- * testing.
+ * Annotate a class with [OpenForTesting] if you want it to be extendable in debug builds.
  *
- * @property context A [Context] instance.
- * @author Niall Scott
+ * As this is a release build, classes will not be opened.
  */
-@OpenForTesting
-class Strings @Inject constructor(private val context: Context) {
-
-    /**
-     * @see Context.getString
-     */
-    fun getString(@StringRes resId: Int): String = context.getString(resId)
-
-    /**
-     * @see Context.getString
-     */
-    fun getString(@StringRes resId: Int, vararg formatArgs: Any): String =
-            context.getString(resId, *formatArgs)
-}
+@Target(AnnotationTarget.CLASS)
+annotation class OpenForTesting

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -64,90 +64,6 @@ public class BusStopDatabaseIntegrationTests {
                 return mockContentResolver;
             }
         };
-    }
-
-    /**
-     * Test the query arguments for {@link BusStopDatabase#getTopologyId(Context)}.
-     */
-    @Test
-    public void testGetTopologyIdQuery() {
-        mockContentResolver.addProvider(BusStopContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public Cursor query(final Uri uri, final String[] projection, final String selection,
-                    final String[] selectionArgs, final String sortOrder) {
-                assertEquals(BusStopContract.DatabaseInformation.CONTENT_URI, uri);
-                assertNotNull(projection);
-                assertEquals(1, projection.length);
-                assertEquals(BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID,
-                        projection[0]);
-                assertNull(selection);
-                assertNull(selectionArgs);
-                assertNull(sortOrder);
-
-                return null;
-            }
-        });
-
-        BusStopDatabase.getTopologyId(mockContext);
-    }
-
-    /**
-     * Test that a {@code null} topology ID is returned when a {@code null} {@link Cursor} is
-     * returned.
-     */
-    @Test
-    public void testGetTopologyIdWithNullCursor() {
-        mockContentResolver.addProvider(BusStopContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public Cursor query(final Uri uri, final String[] projection, final String selection,
-                    final String[] selectionArgs, final String sortOrder) {
-                return null;
-            }
-        });
-
-        assertNull(BusStopDatabase.getTopologyId(mockContext));
-    }
-
-    /**
-     * Test that a {@code null} topology ID is returned when an empty {@link Cursor} is returned.
-     */
-    @Test
-    public void testGetTopologyIdWithEmptyCursor() {
-        mockContentResolver.addProvider(BusStopContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public Cursor query(final Uri uri, final String[] projection, final String selection,
-                    final String[] selectionArgs,
-                    final String sortOrder) {
-                return new MatrixCursor(new String[] {
-                        BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID
-                });
-            }
-        });
-
-        assertNull(BusStopDatabase.getTopologyId(mockContext));
-    }
-
-    /**
-     * Test that {@link BusStopDatabase#getTopologyId(Context)} returns the correct item from the
-     * {@link Cursor}.
-     */
-    @Test
-    public void testGetTopologyIdWithPopulatedCursor() {
-        mockContentResolver.addProvider(BusStopContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public Cursor query(final Uri uri, final String[] projection, final String selection,
-                    final String[] selectionArgs, final String sortOrder) {
-                final MatrixCursor cursor = new MatrixCursor(new String[] {
-                        BusStopContract.DatabaseInformation.CURRENT_TOPOLOGY_ID
-                });
-
-                cursor.addRow(new String[] { "testTopoId" });
-
-                return cursor;
-            }
-        });
-
-        assertEquals("testTopoId", BusStopDatabase.getTopologyId(mockContext));
     }
 
     /**
