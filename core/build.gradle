@@ -42,10 +42,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 
-    // Dagger
-    api "com.google.dagger:dagger:$daggerVersion"
+    // Java dependency injection annotations
+    api 'javax.inject:javax.inject:1'
 
     // Okhttp
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
