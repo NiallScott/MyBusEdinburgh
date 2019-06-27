@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
 
 /**
@@ -38,12 +40,16 @@ import javax.inject.Inject
  * database.
  * @param databaseInformationDao A DAO for accessing the current topology metadata.
  * @param databaseUpdater The implementation to download and update the database.
+ * @param preferenceManager The [PreferenceManager].
+ * @param timeUtils Utility class for obtaining a timestamp.
  * @author Niall Scott
  */
 class DatabaseUpdateChecker @Inject constructor(
         private val apiEndpoint: ApiEndpoint,
         private val databaseInformationDao: DatabaseInformationDao,
-        private val databaseUpdater: DatabaseUpdater) {
+        private val databaseUpdater: DatabaseUpdater,
+        private val preferenceManager: PreferenceManager,
+        private val timeUtils: TimeUtils) {
 
     /**
      * Create a new database update check session.
@@ -51,5 +57,6 @@ class DatabaseUpdateChecker @Inject constructor(
      * @return A [DatabaseUpdateCheckerSession] object.
      */
     fun createNewSession() =
-            DatabaseUpdateCheckerSession(apiEndpoint, databaseInformationDao, databaseUpdater)
+            DatabaseUpdateCheckerSession(apiEndpoint, databaseInformationDao, databaseUpdater,
+                    preferenceManager, timeUtils)
 }

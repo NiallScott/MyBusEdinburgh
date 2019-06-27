@@ -31,6 +31,8 @@ import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiException
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -44,12 +46,16 @@ import java.util.concurrent.atomic.AtomicBoolean
  * database.
  * @param databaseInformationDao A DAO for accessing the current topology metadata.
  * @param databaseUpdater The implementation to download and update the database.
+ * @param preferenceManager The [PreferenceManager].
+ * @param timeUtils Utility class for obtaining a timestamp.
  * @author Niall Scott
  */
 class DatabaseUpdateCheckerSession internal constructor(
         private val apiEndpoint: ApiEndpoint,
         private val databaseInformationDao: DatabaseInformationDao,
-        private val databaseUpdater: DatabaseUpdater) {
+        private val databaseUpdater: DatabaseUpdater,
+        private val preferenceManager: PreferenceManager,
+        private val timeUtils: TimeUtils) {
 
     private val hasRun = AtomicBoolean(false)
     private var request: ApiRequest<DatabaseVersion>? = null
@@ -80,12 +86,18 @@ class DatabaseUpdateCheckerSession internal constructor(
 
         val currentTopologyId = databaseInformationDao.getTopologyId()
 
-        return if (databaseVersion.topologyId != currentTopologyId) {
+        val result = if (databaseVersion.topologyId != currentTopologyId) {
             updateDatabase(databaseVersion)
         } else {
             // The check was successful but there was no change in topology ID.
             true
         }
+
+        if (result) {
+            recordSuccessfulUpdateTime()
+        }
+
+        return result
     }
 
     /**
@@ -109,5 +121,13 @@ class DatabaseUpdateCheckerSession internal constructor(
         this.databaseUpdaterSession = databaseUpdaterSession
 
         return databaseUpdaterSession.updateDatabase()
+    }
+
+    /**
+     * Record the timestamp of the last successful check or update of the database.
+     */
+    private fun recordSuccessfulUpdateTime() {
+        val currentTime = timeUtils.getCurrentTimeMillis()
+        preferenceManager.setBusStopDatabaseUpdateLastCheckTimestamp(currentTime)
     }
 }

@@ -35,6 +35,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
@@ -42,6 +43,8 @@ import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiException
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 
 /**
  * Unit tests for [DatabaseUpdateCheckerSession].
@@ -57,6 +60,10 @@ class DatabaseUpdateCheckerSessionTest {
     lateinit var databaseInformationDao: DatabaseInformationDao
     @Mock
     lateinit var databaseUpdater: DatabaseUpdater
+    @Mock
+    lateinit var preferenceManager: PreferenceManager
+    @Mock
+    lateinit var timeUtils: TimeUtils
 
     @Mock
     lateinit var apiRequest: ApiRequest<DatabaseVersion>
@@ -68,7 +75,7 @@ class DatabaseUpdateCheckerSessionTest {
     @Before
     fun setUp() {
         session = DatabaseUpdateCheckerSession(apiEndpoint, databaseInformationDao,
-                databaseUpdater)
+                databaseUpdater, preferenceManager, timeUtils)
 
         whenever(apiEndpoint.createDatabaseVersionRequest())
                 .thenReturn(apiRequest)
@@ -84,6 +91,8 @@ class DatabaseUpdateCheckerSessionTest {
         val result = session.checkForDatabaseUpdates()
 
         assertFalse(result)
+        verify(preferenceManager, never())
+                .setBusStopDatabaseUpdateLastCheckTimestamp(anyLong())
     }
 
     @Test
@@ -93,12 +102,15 @@ class DatabaseUpdateCheckerSessionTest {
                 .thenReturn(databaseVersion)
         whenever(databaseInformationDao.getTopologyId())
                 .thenReturn("abc123")
+        givenTimestampIsReturned()
 
         val result = session.checkForDatabaseUpdates()
 
         assertTrue(result)
         verify(updateSession, never())
                 .updateDatabase()
+        verify(preferenceManager)
+                .setBusStopDatabaseUpdateLastCheckTimestamp(123L)
     }
 
     @Test
@@ -110,12 +122,15 @@ class DatabaseUpdateCheckerSessionTest {
                 .thenReturn("xyz789")
         whenever(updateSession.updateDatabase())
                 .thenReturn(true)
+        givenTimestampIsReturned()
 
         val result = session.checkForDatabaseUpdates()
 
         assertTrue(result)
         verify(updateSession)
                 .updateDatabase()
+        verify(preferenceManager)
+                .setBusStopDatabaseUpdateLastCheckTimestamp(123L)
     }
 
     @Test
@@ -133,6 +148,8 @@ class DatabaseUpdateCheckerSessionTest {
         assertFalse(result)
         verify(updateSession)
                 .updateDatabase()
+        verify(preferenceManager, never())
+                .setBusStopDatabaseUpdateLastCheckTimestamp(anyLong())
     }
 
     @Test(expected = IllegalStateException::class)
@@ -164,6 +181,11 @@ class DatabaseUpdateCheckerSessionTest {
 
         verify(apiRequest)
                 .cancel()
+    }
+
+    private fun givenTimestampIsReturned() {
+        whenever(timeUtils.getCurrentTimeMillis())
+                .thenReturn(123L)
     }
 
     private fun createDatabaseVersion(topologyId: String) =
