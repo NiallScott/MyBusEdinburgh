@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,184 +21,186 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.preferences;
+package uk.org.rivernile.android.bustracker.core.preferences
 
 /**
  * This interface should be used to access application preferences.
  *
  * @author Niall Scott
  */
-public interface PreferenceManager {
+interface PreferenceManager {
 
-    /** The name of the preferences file. */
-    String PREF_FILE = "preferences";
+    companion object {
 
-    /** The preference for backing up favourites. */
-    String PREF_BACKUP_FAVOURITES = "pref_backup_favourites";
-    /** The preference for restoring favourites. */
-    String PREF_RESTORE_FAVOURITES = "pref_restore_favourites";
-    /** The Preference for clearing the map search history. */
-    String PREF_CLEAR_MAP_SEARCH_HISTORY = "pref_clear_search_history";
+        /** The name of the preferences file. */
+        const val PREF_FILE = "preferences"
 
-    /** The Preference for number of shown departures per service. */
-    String PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE = "pref_numberOfShownDeparturesPerService";
+        /** The preference for backing up favourites. */
+        const val PREF_BACKUP_FAVOURITES = "pref_backup_favourites"
+        /** The preference for restoring favourites. */
+        const val PREF_RESTORE_FAVOURITES = "pref_restore_favourites"
+        /** The Preference for clearing the map search history. */
+        const val PREF_CLEAR_MAP_SEARCH_HISTORY = "pref_clear_search_history"
+
+        /** The Preference for number of shown departures per service. */
+        const val PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE =
+                "pref_numberOfShownDeparturesPerService"
+    }
 
     /**
      * Should the bus stop database only be updated over Wi-Fi?
      *
-     * @return {@code true} if the bus stop database should only be updated over Wi-Fi,
-     * {@code false} if not.
+     * @return `true` if the bus stop database should only be updated over Wi-Fi, `false` if not.
      */
-    boolean isBusStopDatabaseUpdateWifiOnly();
+    fun isBusStopDatabaseUpdateWifiOnly(): Boolean
 
     /**
      * Should system notifications include sound?
      *
-     * @return {@code true} if system notifications should include sound, {@code false} if not.
+     * @return `true` if system notifications should include sound, `false` if not.
      */
-    boolean isNotificationWithSound();
+    fun isNotificationWithSound(): Boolean
 
     /**
      * Should system notifications include vibration?
      *
-     * @return {@code true} if system notifications should include vibration, {@code false} if not.
+     * @return `true` if system notifications should include vibration, `false` if not.
      */
-    boolean isNotificationWithVibration();
+    fun isNotificationWithVibration(): Boolean
 
     /**
      * Should system notification include LED lights?
      *
-     * @return {@code true} if system notifications should include LED lights, {@code false} if not.
+     * @return `true` if system notifications should include LED lights, `false` if not.
      */
-    boolean isNotificationWithLed();
+    fun isNotificationWithLed(): Boolean
 
     /**
      * Is bus times auto refresh enabled?
      *
-     * @return {@code true} if bus times auto refresh is enabled, {@code false} if not.
+     * @return `true` if bus times auto refresh is enabled, `false` if not.
      */
-    boolean isBusTimesAutoRefreshEnabled();
+    fun isBusTimesAutoRefreshEnabled(): Boolean
 
     /**
      * Should the bus times display show night services?
      *
-     * @return {@code true} if the bus times display should show night services, {@code false} if
-     * not.
+     * @return `true` if the bus times display should show night services, `false` if not.
      */
-    boolean isBusTimesShowingNightServices();
+    fun isBusTimesShowingNightServices(): Boolean
 
     /**
      * Are bus times sorted by time?
      *
-     * @return {@code true} if bus times are sorted by time, {@code false} if by service.
+     * @return `true` if bus times are sorted by time, `false` if by service.
      */
-    boolean isBusTimesSortedByTime();
+    fun isBusTimesSortedByTime(): Boolean
 
     /**
      * Set whether bus times should be sorted by time or not.
      *
-     * @param sortedByTime {@code true} if bus times should be sorted by time, {@code false} if by
-     * service.
+     * @param sortedByTime `true` if bus times should be sorted by time, `false` if by service.
      */
-    void setBusTimesSortedByTime(boolean sortedByTime);
+    fun setBusTimesSortedByTime(sortedByTime: Boolean)
 
     /**
      * Get the number of departures to show per service on the bus times display.
      *
      * @return The number of departures to show per service on the bus times display.
      */
-    int getBusTimesNumberOfDeparturesToShowPerService();
+    fun getBusTimesNumberOfDeparturesToShowPerService(): Int
 
     /**
      * Is the map zoom buttons shown?
      *
-     * @return {@code true} if the map zoom buttons are shown, {@code false} if not.
+     * @return `true` if the map zoom buttons are shown, `false` if not.
      */
-    boolean isMapZoomButtonsShown();
+    fun isMapZoomButtonsShown(): Boolean
 
     /**
      * Is the GPS prompt disabled?
      *
-     * @return {@code true} if the GPS prompt is disabled, {@code false} if not.
+     * @return `true` if the GPS prompt is disabled, `false` if not.
      */
-    boolean isGpsPromptDisabled();
+    fun isGpsPromptDisabled(): Boolean
 
     /**
      * Set whether the GPS prompt is disabled or not.
      *
-     * @param disabled {@code true} if the GPS prompt should be disabled, {@code false} if not.
+     * @param disabled `true` if the GPS prompt should be disabled, `false` if not.
      */
-    void setGpsPromptDisabled(boolean disabled);
+    fun setGpsPromptDisabled(disabled: Boolean)
 
     /**
      * Get the last known latitude the user saw on the map.
      *
      * @return The last known latitude the user saw on the map.
      */
-    double getLastMapLatitude();
+    fun getLastMapLatitude(): Double
 
     /**
      * Set the last known latitude the user saw on the map.
      *
      * @param latitude The last known latitude the user saw on the map.
      */
-    void setLastMapLatitude(double latitude);
+    fun setLastMapLatitude(latitude: Double)
 
     /**
      * Get the last known longitude the user saw on the map.
      *
      * @return The last known longitude the user saw on the map.
      */
-    double getLastMapLongitude();
+    fun getLastMapLongitude(): Double
 
     /**
      * Set the last known longitude the user saw on the map.
      *
      * @param longitude The last known longitude the user saw on the map.
      */
-    void setLastMapLongitude(double longitude);
+    fun setLastMapLongitude(longitude: Double)
 
     /**
      * Get the last known zoom level the user saw on the map.
      *
      * @return The last known zoom level the user saw on the map.
      */
-    float getLastMapZoomLevel();
+    fun getLastMapZoomLevel(): Float
 
     /**
      * Set the last known zoom level the user saw on the map.
      *
      * @param zoomLevel The last known zoom level the user saw on the map.
      */
-    void setLastMapZoomLevel(float zoomLevel);
+    fun setLastMapZoomLevel(zoomLevel: Float)
 
     /**
      * Get the last known map type.
      *
      * @return The last known map type.
      */
-    int getLastMapType();
+    fun getLastMapType(): Int
 
     /**
      * Set the last known map type.
      *
      * @param mapType The last known map type.
      */
-    void setLastMapType(int mapType);
+    fun setLastMapType(mapType: Int)
 
     /**
      * Get the timestamp of when the last check was for a bus stop database update.
      *
      * @return The timestamp of when the last check was for a bus stop database update.
      */
-    long getBusStopDatabaseUpdateLastCheckTimestamp();
+    fun getBusStopDatabaseUpdateLastCheckTimestamp(): Long
 
     /**
      * Set the timestamp of when the last check was for a bus stop database update.
      *
      * @param timestamp The timestamp of when the last check was for a bus stop database update.
      */
-    void setBusStopDatabaseUpdateLastCheckTimestamp(long timestamp);
+    fun setBusStopDatabaseUpdateLastCheckTimestamp(timestamp: Long)
 }

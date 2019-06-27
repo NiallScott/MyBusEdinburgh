@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBus;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 

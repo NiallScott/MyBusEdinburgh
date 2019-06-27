@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,7 @@ import android.provider.SearchRecentSuggestions;
 
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.database.search.SearchSuggestionsProvider;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager;
 import uk.org.rivernile.android.utils.GenericDialogPreference;
 import uk.org.rivernile.edinburghbustracker.android.R;
 

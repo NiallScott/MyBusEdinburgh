@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,7 @@ import java.io.File;
 import java.io.IOException;
 
 import uk.org.rivernile.android.bustracker.database.settings.SettingsDatabase;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager;
 
 /**
  * This is the backup helper that will be called if the device implements the Google Backup agent.

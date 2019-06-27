@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.android.bustracker.dagger
 
-import android.app.Application
 import android.content.Context
 import com.google.android.gms.common.GoogleApiAvailability
 import dagger.Module
@@ -34,8 +33,6 @@ import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapDataModule
 import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManagerImpl
 import javax.inject.Singleton
 
 /**
@@ -51,15 +48,6 @@ import javax.inject.Singleton
 class ApplicationModule {
 
     /**
-     * Provide the [Application] [Context] to Dagger.
-     *
-     * @param application The [Application] instance.
-     * @return The [Application] [Context].
-     */
-    @Provides
-    fun provideApplicationContext(application: Application): Context = application
-
-    /**
      * Provide a [PlatformDataSource] to Dagger.
      *
      * @param context A [Context] instance.
@@ -69,18 +57,6 @@ class ApplicationModule {
     @Singleton
     fun providePlatformDataSource(context: Context): PlatformDataSource {
         return AndroidPlatformDataSource(context)
-    }
-
-    /**
-     * Provide a [PreferenceManager] to Dagger.
-     *
-     * @param context A [Context] instance.
-     * @return A [PreferenceManager].
-     */
-    @Provides
-    @Singleton
-    fun providePreferenceManager(context: Context): PreferenceManager {
-        return PreferenceManagerImpl(context)
     }
 
     /**

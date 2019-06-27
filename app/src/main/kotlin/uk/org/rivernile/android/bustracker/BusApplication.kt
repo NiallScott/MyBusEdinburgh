@@ -41,7 +41,7 @@ import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint
 import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.edinburghbustracker.android.ApiKey
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import javax.inject.Inject

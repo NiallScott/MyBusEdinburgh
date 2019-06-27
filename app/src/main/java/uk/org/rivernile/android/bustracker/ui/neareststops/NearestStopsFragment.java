@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -61,7 +61,7 @@ import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNa
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavouriteStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasTimeAlertLoader;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddProximityAlertListener;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddTimeAlertListener;

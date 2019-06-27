@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.PolylineOptions
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
@@ -126,7 +126,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      * A [LiveData] representing a request to show the zoom controls.
      */
     val shouldShowZoomControls: Boolean
-        get() = preferenceManager.isMapZoomButtonsShown
+        get() = preferenceManager.isMapZoomButtonsShown()
 
     private val _selectedStopCode = MutableLiveData<String>()
 
@@ -159,10 +159,10 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     fun onRestoreState(selectedServices: Array<String>?, selectedStopCode: String?) {
         _cameraLocation.value = CameraLocation(
-                preferenceManager.lastMapLatitude,
-                preferenceManager.lastMapLongitude,
-                preferenceManager.lastMapZoomLevel, false)
-        _mapType.value = preferenceManager.lastMapType
+                preferenceManager.getLastMapLatitude(),
+                preferenceManager.getLastMapLongitude(),
+                preferenceManager.getLastMapZoomLevel(), false)
+        _mapType.value = preferenceManager.getLastMapType()
 
         if (!Arrays.equals(_selectedServices.value, selectedServices)) {
             _selectedServices.value = selectedServices
@@ -178,11 +178,11 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     fun onFirstCreate() {
         _cameraLocation.value = CameraLocation(
-                preferenceManager.lastMapLatitude,
-                preferenceManager.lastMapLongitude,
-                preferenceManager.lastMapZoomLevel,
+                preferenceManager.getLastMapLatitude(),
+                preferenceManager.getLastMapLongitude(),
+                preferenceManager.getLastMapZoomLevel(),
                 false)
-        _mapType.value = preferenceManager.lastMapType
+        _mapType.value = preferenceManager.getLastMapType()
     }
 
     /**
@@ -193,7 +193,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     fun onFirstCreate(stopCode: String) {
         searchedBusStop = stopCode
         _selectedStopCode.value = stopCode
-        _mapType.value = preferenceManager.lastMapType
+        _mapType.value = preferenceManager.getLastMapType()
     }
 
     /**
@@ -205,7 +205,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     fun onFirstCreate(latitude: Double, longitude: Double) {
         _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
-        _mapType.value = preferenceManager.lastMapType
+        _mapType.value = preferenceManager.getLastMapType()
     }
 
     override fun onCleared() {
@@ -263,10 +263,10 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     fun onPersistMapParameters(latitude: Double, longitude: Double, zoomLevel: Float,
                                mapType: Int) {
         preferenceManager.apply {
-            lastMapLatitude = latitude
-            lastMapLongitude = longitude
-            lastMapZoomLevel = zoomLevel
-            lastMapType = mapType
+            setLastMapLatitude(latitude)
+            setLastMapLongitude(longitude)
+            setLastMapZoomLevel(zoomLevel)
+            setLastMapType(mapType)
         }
     }
 

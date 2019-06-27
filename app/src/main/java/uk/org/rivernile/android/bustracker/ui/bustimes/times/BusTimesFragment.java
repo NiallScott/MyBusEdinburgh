@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -74,7 +74,7 @@ import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesResult;
 import uk.org.rivernile.android.bustracker.parser.livetimes.MaintenanceException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.ServerErrorException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.SystemOverloadedException;
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager;
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager;
 import uk.org.rivernile.android.fetchutils.fetchers.ConnectivityUnavailableException;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.utils.ProcessedCursorLoader;

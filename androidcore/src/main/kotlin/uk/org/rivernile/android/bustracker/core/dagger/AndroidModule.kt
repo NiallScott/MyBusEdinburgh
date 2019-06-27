@@ -26,10 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import android.app.Application
 import android.app.job.JobScheduler
 import android.content.Context
+import android.content.SharedPreferences
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import javax.inject.Singleton
 
 /**
@@ -41,6 +44,15 @@ import javax.inject.Singleton
 class AndroidModule {
 
     /**
+     * Provide the [Application] [Context] to Dagger.
+     *
+     * @param application The [Application] instance.
+     * @return The [Application] [Context].
+     */
+    @Provides
+    fun provideApplicationContext(application: Application): Context = application
+
+    /**
      * Provide the [JobScheduler].
      *
      * @param context The application [Context].
@@ -50,4 +62,15 @@ class AndroidModule {
     @Singleton
     fun provideJobScheduler(context: Context): JobScheduler =
             context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+
+    /**
+     * Provide the [SharedPreferences].
+     *
+     * @param context The application [Context].
+     * @return The [SharedPreferences] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(context: Context): SharedPreferences =
+            context.getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
 }

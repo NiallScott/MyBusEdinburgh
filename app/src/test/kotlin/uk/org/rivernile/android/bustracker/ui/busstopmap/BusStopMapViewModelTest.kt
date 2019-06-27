@@ -44,7 +44,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
@@ -133,11 +133,11 @@ class BusStopMapViewModelTest {
 
     @Test
     fun onFirstCreateWithNoArgumentsMovesCameraToLastPosition() {
-        whenever(preferenceManager.lastMapLatitude)
+        whenever(preferenceManager.getLastMapLatitude())
                 .thenReturn(1.0)
-        whenever(preferenceManager.lastMapLongitude)
+        whenever(preferenceManager.getLastMapLongitude())
                 .thenReturn(2.0)
-        whenever(preferenceManager.lastMapZoomLevel)
+        whenever(preferenceManager.getLastMapZoomLevel())
                 .thenReturn(3f)
         viewModel.cameraLocation.observeForever(cameraLocationObserver)
 
@@ -150,7 +150,7 @@ class BusStopMapViewModelTest {
 
     @Test
     fun onFirstCreateWithNoArgumentsSetsMapTypeToLastType() {
-        whenever(preferenceManager.lastMapType)
+        whenever(preferenceManager.getLastMapType())
                 .thenReturn(2)
         viewModel.mapType.observeForever(mapTypeObserver)
 
@@ -181,7 +181,7 @@ class BusStopMapViewModelTest {
 
     @Test
     fun onFirstCreateWithStopCodeArgumentSetsMapTypeToLastType() {
-        whenever(preferenceManager.lastMapType)
+        whenever(preferenceManager.getLastMapType())
                 .thenReturn(2)
         viewModel.mapType.observeForever(mapTypeObserver)
 
@@ -241,7 +241,7 @@ class BusStopMapViewModelTest {
 
     @Test
     fun onFirstCreateWithLatitudeAndLongitudeSetsMapTypeToLastType() {
-        whenever(preferenceManager.lastMapType)
+        whenever(preferenceManager.getLastMapType())
                 .thenReturn(2)
         viewModel.mapType.observeForever(mapTypeObserver)
 
@@ -256,13 +256,13 @@ class BusStopMapViewModelTest {
         viewModel.onPersistMapParameters(1.0, 2.0, 3f, 4)
 
         verify(preferenceManager)
-                .lastMapLatitude = 1.0
+                .setLastMapLatitude(1.0)
         verify(preferenceManager)
-                .lastMapLongitude = 2.0
+                .setLastMapLongitude(2.0)
         verify(preferenceManager)
-                .lastMapZoomLevel = 3f
+                .setLastMapZoomLevel(3f)
         verify(preferenceManager)
-                .lastMapType = 4
+                .setLastMapType(4)
     }
 
     @Test
@@ -318,7 +318,7 @@ class BusStopMapViewModelTest {
 
     @Test
     fun shouldShowZoomControlsWhenSetInPreferences() {
-        whenever(preferenceManager.isMapZoomButtonsShown)
+        whenever(preferenceManager.isMapZoomButtonsShown())
                 .thenReturn(true)
 
         val result = viewModel.shouldShowZoomControls
@@ -546,11 +546,11 @@ class BusStopMapViewModelTest {
 
     @Test
     fun onRestoreStateMovesCameraToPreferenceLocation() {
-        whenever(preferenceManager.lastMapLatitude)
+        whenever(preferenceManager.getLastMapLatitude())
                 .thenReturn(1.0)
-        whenever(preferenceManager.lastMapLongitude)
+        whenever(preferenceManager.getLastMapLongitude())
                 .thenReturn(2.0)
-        whenever(preferenceManager.lastMapZoomLevel)
+        whenever(preferenceManager.getLastMapZoomLevel())
                 .thenReturn(3f)
         viewModel.cameraLocation.observeForever(cameraLocationObserver)
 
@@ -563,7 +563,7 @@ class BusStopMapViewModelTest {
 
     @Test
     fun onRestoreStateSetsMapTypeToLastType() {
-        whenever(preferenceManager.lastMapType)
+        whenever(preferenceManager.getLastMapType())
                 .thenReturn(2)
         viewModel.mapType.observeForever(mapTypeObserver)
 

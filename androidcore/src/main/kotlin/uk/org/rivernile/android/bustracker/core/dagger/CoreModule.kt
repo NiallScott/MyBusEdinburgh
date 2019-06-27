@@ -26,11 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import android.content.SharedPreferences
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.concurrency.NewThreadExecutor
 import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForStartUpTask
+import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import java.util.concurrent.Executor
 import javax.inject.Singleton
 
@@ -65,4 +68,15 @@ class CoreModule {
     @Provides
     @ForStartUpTask
     fun provideStartUpTaskExecutor(): Executor = NewThreadExecutor()
+
+    /**
+     * Provide the [PreferenceManager].
+     *
+     * @param preferences The Android [SharedPreferences] for this [PreferenceManager].
+     * @return The [PreferenceManager].
+     */
+    @Provides
+    @Singleton
+    fun providePreferenceManager(preferences: SharedPreferences): PreferenceManager =
+            AndroidPreferenceManager(preferences)
 }
