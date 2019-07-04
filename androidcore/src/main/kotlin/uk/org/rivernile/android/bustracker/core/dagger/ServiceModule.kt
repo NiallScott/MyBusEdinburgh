@@ -36,7 +36,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJ
  * @author Niall Scott
  */
 @Module
-abstract class ServiceModule {
+internal abstract class ServiceModule {
 
     /**
      * Presents an instance of [DatabaseUpdateJobService] as an item to be injected.

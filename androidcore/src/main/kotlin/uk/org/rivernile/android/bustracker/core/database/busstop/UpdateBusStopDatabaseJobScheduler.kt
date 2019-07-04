@@ -30,7 +30,9 @@ import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
+import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * The purpose of this class is to schedule the job to perform the bus stop database update checks.
@@ -39,9 +41,11 @@ import javax.inject.Inject
  * @param jobScheduler The Android [JobScheduler].
  * @author Niall Scott
  */
+@Singleton
 internal class UpdateBusStopDatabaseJobScheduler @Inject constructor(
         private val context: Context,
-        private val jobScheduler: JobScheduler) {
+        private val jobScheduler: JobScheduler,
+        private val preferenceManager: AndroidPreferenceManager) {
 
     companion object {
 
@@ -49,21 +53,16 @@ internal class UpdateBusStopDatabaseJobScheduler @Inject constructor(
         private const val JOB_PERIOD = 43200000L // 12 hours
     }
 
+    init {
+        preferenceManager.wifiOnlyChangedListener = this::scheduleJob
+    }
+
     /**
      * Schedules the recurring job to update the bus stop database, if required.
      */
     fun scheduleUpdateBusStopDatabaseJob() {
         if (requiresScheduling()) {
-            val componentName = ComponentName(context, DatabaseUpdateJobService::class.java)
-            JobInfo.Builder(JOB_ID, componentName)
-                    .setPeriodic(JOB_PERIOD)
-                    .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-                    .setPrefetchCompat(true)
-                    .setRequiresBatteryNotLowCompat(true)
-                    .build()
-                    .also {
-                        jobScheduler.schedule(it)
-                    }
+            scheduleJob()
         }
     }
 
@@ -76,4 +75,26 @@ internal class UpdateBusStopDatabaseJobScheduler @Inject constructor(
     private fun requiresScheduling() =
             jobScheduler.allPendingJobs
                     .find { it.id == JOB_ID } == null
+
+    /**
+     * Schedule the job.
+     */
+    private fun scheduleJob() {
+        val networkType = if (preferenceManager.isBusStopDatabaseUpdateWifiOnly()) {
+            JobInfo.NETWORK_TYPE_UNMETERED
+        } else {
+            JobInfo.NETWORK_TYPE_ANY
+        }
+
+        val componentName = ComponentName(context, DatabaseUpdateJobService::class.java)
+        JobInfo.Builder(JOB_ID, componentName)
+                .setPeriodic(JOB_PERIOD)
+                .setRequiredNetworkType(networkType)
+                .setPrefetchCompat(true)
+                .setRequiresBatteryNotLowCompat(true)
+                .build()
+                .also {
+                    jobScheduler.schedule(it)
+                }
+    }
 }

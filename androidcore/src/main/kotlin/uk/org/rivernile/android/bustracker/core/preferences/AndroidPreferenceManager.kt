@@ -35,7 +35,7 @@ import java.lang.NumberFormatException
  * @author Niall Scott
  */
 internal class AndroidPreferenceManager(private val preferences: SharedPreferences)
-    : PreferenceManager {
+    : PreferenceManager, SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {
 
@@ -68,6 +68,12 @@ internal class AndroidPreferenceManager(private val preferences: SharedPreferenc
         private const val DEFAULT_LONGITUDE = -3.189
         private const val DEFAULT_MAP_LAST_ZOOM = 11f
         private const val DEFAULT_MAP_LAST_TYPE = 1
+    }
+
+    internal var wifiOnlyChangedListener: (() -> Unit)? = null
+
+    init {
+        preferences.registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun isBusStopDatabaseUpdateWifiOnly(): Boolean =
@@ -178,5 +184,11 @@ internal class AndroidPreferenceManager(private val preferences: SharedPreferenc
         preferences.edit()
                 .putLong(PREF_DATABASE_UPDATE_LAST_CHECK, timestamp)
                 .apply()
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        if (key == PREF_BUS_STOP_DATABASE_WIFI_ONLY) {
+            wifiOnlyChangedListener?.invoke()
+        }
     }
 }

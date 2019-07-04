@@ -39,7 +39,7 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Module(includes = [ BusStopDatabaseModule::class ])
-class DatabaseModule {
+internal class DatabaseModule {
 
     /**
      * Provide a [DatabaseUtils] instance.

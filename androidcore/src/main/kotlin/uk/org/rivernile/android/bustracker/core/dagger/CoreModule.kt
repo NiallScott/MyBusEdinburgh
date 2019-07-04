@@ -47,7 +47,8 @@ import javax.inject.Singleton
     DatabaseModule::class,
     HttpModule::class,
     ApiModule::class,
-    FlavourModule::class
+    FlavourModule::class,
+    ServiceModule::class
 ])
 class CoreModule {
 
@@ -58,7 +59,7 @@ class CoreModule {
      */
     @Provides
     @Singleton
-    fun provideGson() = Gson()
+    internal fun provideGson() = Gson()
 
     /**
      * Provide the [Executor] to run the start-up tasks on.
@@ -67,16 +68,28 @@ class CoreModule {
      */
     @Provides
     @ForStartUpTask
-    fun provideStartUpTaskExecutor(): Executor = NewThreadExecutor()
+    internal fun provideStartUpTaskExecutor(): Executor = NewThreadExecutor()
+
+    /**
+     * Provide the [AndroidPreferenceManager]. This is a special case for exposing the real
+     * implementation within this module.
+     *
+     * @param preferences The Android [SharedPreferences] for this [AndroidPreferenceManager].
+     * @return The [AndroidPreferenceManager].
+     */
+    @Provides
+    @Singleton
+    internal fun provideAndroidPreferenceManager(sharedPreferences: SharedPreferences) =
+            AndroidPreferenceManager(sharedPreferences)
 
     /**
      * Provide the [PreferenceManager].
      *
-     * @param preferences The Android [SharedPreferences] for this [PreferenceManager].
+     * @param androidPreferenceManager The [AndroidPreferenceManager].
      * @return The [PreferenceManager].
      */
     @Provides
     @Singleton
-    fun providePreferenceManager(preferences: SharedPreferences): PreferenceManager =
-            AndroidPreferenceManager(preferences)
+    internal fun providePreferenceManager(androidPreferenceManager: AndroidPreferenceManager)
+            : PreferenceManager = androidPreferenceManager
 }

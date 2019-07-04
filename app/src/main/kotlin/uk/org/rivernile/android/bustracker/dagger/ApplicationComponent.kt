@@ -31,7 +31,6 @@ import dagger.Component
 import dagger.android.AndroidInjectionModule
 import uk.org.rivernile.android.bustracker.BusApplication
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
-import uk.org.rivernile.android.bustracker.core.dagger.ServiceModule
 import javax.inject.Singleton
 
 /**
@@ -44,8 +43,7 @@ import javax.inject.Singleton
         AndroidInjectionModule::class,
         ApplicationModule::class,
         CoreModule::class,
-        ActivityModule::class,
-        ServiceModule::class
+        ActivityModule::class
 ])
 interface ApplicationComponent {
 

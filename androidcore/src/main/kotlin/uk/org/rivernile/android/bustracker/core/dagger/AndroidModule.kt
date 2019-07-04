@@ -41,7 +41,7 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Module
-class AndroidModule {
+internal class AndroidModule {
 
     /**
      * Provide the [Application] [Context] to Dagger.
