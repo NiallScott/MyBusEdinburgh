@@ -30,6 +30,7 @@ import android.app.job.JobParameters
 import android.app.job.JobService
 import android.os.AsyncTask
 import dagger.android.AndroidInjection
+import uk.org.rivernile.android.bustracker.core.job.getNetworkCompat
 import javax.inject.Inject
 
 /**
@@ -52,8 +53,10 @@ class DatabaseUpdateJobService : JobService() {
     }
 
     override fun onStartJob(params: JobParameters): Boolean {
-        updateTask = UpdateTask(params, updateChecker.createNewSession(),
-                this::handleResult).apply {
+        val network = params.getNetworkCompat()
+        val socketFactory = network?.socketFactory
+        val updateSession = updateChecker.createNewSession(socketFactory)
+        updateTask = UpdateTask(params, updateSession, this::handleResult).apply {
             executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null)
         }
 

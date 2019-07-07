@@ -36,7 +36,7 @@ import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
 import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForApi
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiService
+import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiServiceFactory
 import uk.org.rivernile.android.bustracker.core.endpoints.api.JsonApiEndpoint
 import javax.inject.Singleton
 
@@ -51,15 +51,15 @@ internal class ApiModule {
     /**
      * Provide the [ApiEndpoint] implementation.
      *
-     * @param apiService An [ApiService] instance.
+     * @param apiServiceFactory An [ApiServiceFactory] instance.
      * @param apiKeyGenerator An [ApiKeyGenerator] instance.
      * @return The [ApiEndpoint] implementation.
      */
     @Provides
     @Singleton
-    fun provideApiEndpoint(apiService: ApiService,
+    fun provideApiEndpoint(apiServiceFactory: ApiServiceFactory,
                            apiKeyGenerator: ApiKeyGenerator): ApiEndpoint =
-            JsonApiEndpoint(apiService, apiKeyGenerator, BuildConfig.SCHEMA_NAME)
+            JsonApiEndpoint(apiServiceFactory, apiKeyGenerator, BuildConfig.SCHEMA_NAME)
 
     /**
      * Provide the [ApiKeyGenerator] implementation.
@@ -68,16 +68,6 @@ internal class ApiModule {
      */
     @Provides
     fun provideApiKeyGenerator() = ApiKeyGenerator(BuildConfig.API_KEY)
-
-    /**
-     * Provide the [ApiService] implementation.
-     *
-     * @param retrofit The [Retrofit] instance to create the [ApiService] from.
-     * @return The [ApiService] implementation.
-     */
-    @Provides
-    fun provideApiService(@ForApi retrofit: Retrofit): ApiService =
-            retrofit.create(ApiService::class.java)
 
     /**
      * Provide the [Retrofit] instance for the API.

@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.http
 import okhttp3.OkHttpClient
 import java.io.File
 import javax.inject.Inject
+import javax.net.SocketFactory
 
 /**
  * This class is used to create new [FileDownloadSession]s.
@@ -43,7 +44,19 @@ class FileDownloader @Inject constructor(private val okHttpClient: OkHttpClient)
      *
      * @param url The URL of the file, as a [String].
      * @param toLocation A [File] object describing the location to download the file to.
+     * @param socketFactory The [SocketFactory] to use to create connections.
      */
-    fun createFileDownloadSession(url: String, toLocation: File)
-            = FileDownloadSession(okHttpClient, url, toLocation)
+    fun createFileDownloadSession(url: String,
+                                  toLocation: File,
+                                  socketFactory: SocketFactory? = null): FileDownloadSession {
+        val okHttpClient = if (socketFactory != null) {
+            this.okHttpClient.newBuilder()
+                    .socketFactory(socketFactory)
+                    .build()
+        } else {
+            this.okHttpClient
+        }
+
+        return FileDownloadSession(okHttpClient, url, toLocation)
+    }
 }

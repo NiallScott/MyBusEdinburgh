@@ -36,6 +36,7 @@ import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.net.SocketFactory
 
 /**
  * The purpose of this class is to update the bus stop database.
@@ -54,6 +55,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @param databaseRepository The repository which represents this database.
  * @param timeUtils Used to access timestamps.
  * @param databaseVersion An object which holds data about the database we're updating to.
+ * @param socketFactory The [SocketFactory] to use to denote what interface to perform the network
+ * transfer over.
  * @author Niall Scott
  */
 class DatabaseUpdaterSession internal constructor(
@@ -62,7 +65,8 @@ class DatabaseUpdaterSession internal constructor(
         private val fileConsistencyChecker: FileConsistencyChecker,
         private val databaseRepository: BusStopDatabaseRepository,
         private val timeUtils: TimeUtils,
-        private val databaseVersion: DatabaseVersion) {
+        private val databaseVersion: DatabaseVersion,
+        private val socketFactory: SocketFactory? = null) {
 
     private val hasRun = AtomicBoolean(false)
     private var downloadSession: FileDownloadSession? = null
@@ -85,7 +89,7 @@ class DatabaseUpdaterSession internal constructor(
         val downloadFile = databaseUtils.getDatabasePath(
                 "busstops.${timeUtils.getCurrentTimeMillis()}.db_temp")
         val downloadSession = fileDownloader.createFileDownloadSession(databaseVersion.databaseUrl,
-                downloadFile)
+                downloadFile, socketFactory)
         this.downloadSession = downloadSession
         databaseUtils.ensureDatabasePathExists()
 

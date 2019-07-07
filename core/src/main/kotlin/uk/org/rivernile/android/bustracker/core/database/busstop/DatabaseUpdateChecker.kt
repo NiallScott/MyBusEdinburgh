@@ -31,6 +31,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
+import javax.net.SocketFactory
 
 /**
  * This class will create new [DatabaseUpdateCheckerSession] objects which allow the database to
@@ -54,9 +55,13 @@ class DatabaseUpdateChecker @Inject constructor(
     /**
      * Create a new database update check session.
      *
+     * @param socketFactory The [SocketFactory] to use to connect to the API service.
      * @return A [DatabaseUpdateCheckerSession] object.
      */
-    fun createNewSession() =
-            DatabaseUpdateCheckerSession(apiEndpoint, databaseInformationDao, databaseUpdater,
-                    preferenceManager, timeUtils)
+    fun createNewSession(socketFactory: SocketFactory? = null): DatabaseUpdateCheckerSession {
+        val apiRequest = apiEndpoint.createDatabaseVersionRequest(socketFactory)
+
+        return DatabaseUpdateCheckerSession(apiRequest, databaseInformationDao, databaseUpdater,
+                preferenceManager, timeUtils, socketFactory)
+    }
 }

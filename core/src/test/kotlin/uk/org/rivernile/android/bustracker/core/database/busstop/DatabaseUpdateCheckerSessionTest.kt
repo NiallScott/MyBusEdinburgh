@@ -36,15 +36,16 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyLong
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiException
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import javax.net.SocketFactory
 
 /**
  * Unit tests for [DatabaseUpdateCheckerSession].
@@ -55,7 +56,7 @@ import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 class DatabaseUpdateCheckerSessionTest {
 
     @Mock
-    lateinit var apiEndpoint: ApiEndpoint
+    lateinit var apiRequest: ApiRequest<DatabaseVersion>
     @Mock
     lateinit var databaseInformationDao: DatabaseInformationDao
     @Mock
@@ -64,9 +65,9 @@ class DatabaseUpdateCheckerSessionTest {
     lateinit var preferenceManager: PreferenceManager
     @Mock
     lateinit var timeUtils: TimeUtils
-
     @Mock
-    lateinit var apiRequest: ApiRequest<DatabaseVersion>
+    lateinit var socketFactory: SocketFactory
+
     @Mock
     lateinit var updateSession: DatabaseUpdaterSession
 
@@ -74,12 +75,10 @@ class DatabaseUpdateCheckerSessionTest {
 
     @Before
     fun setUp() {
-        session = DatabaseUpdateCheckerSession(apiEndpoint, databaseInformationDao,
-                databaseUpdater, preferenceManager, timeUtils)
+        session = DatabaseUpdateCheckerSession(apiRequest, databaseInformationDao,
+                databaseUpdater, preferenceManager, timeUtils, socketFactory)
 
-        whenever(apiEndpoint.createDatabaseVersionRequest())
-                .thenReturn(apiRequest)
-        whenever(databaseUpdater.createNewSession(any()))
+        whenever(databaseUpdater.createNewSession(any(), eq(socketFactory)))
                 .thenReturn(updateSession)
     }
 

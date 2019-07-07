@@ -24,28 +24,26 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.job
 
-import javax.net.SocketFactory
+import android.app.job.JobParameters
+import android.net.Network
+import android.os.Build
 
 /**
- * This class represents the JSON version of the [ApiEndpoint] that connects over HTTP(S).
+ * This extension function on [JobParameters] allows the caller to retrieve the [Network] a job
+ * should perform networking over in a backwards compatible way. This API was introduced in
+ * [Build.VERSION_CODES.P]. On the supported SDK versions, this function will return the value
+ * returned by [JobParameters.getNetwork], otherwise `null` will be returned.
  *
- * @property apiServiceFactory An implementation to retrieve instances of [ApiService].
- * @property apiKeyGenerator An implementation to generate API keys.
- * @property schemaType The schema type.
+ * @return The [Network] as provided by [JobParameters.getNetwork] if on a suitable platform
+ * version, otherwise `null`.
+ * @see JobParameters.getNetwork
  * @author Niall Scott
  */
-internal class JsonApiEndpoint(private val apiServiceFactory: ApiServiceFactory,
-                               private val apiKeyGenerator: ApiKeyGenerator,
-                               private val schemaType: String) : ApiEndpoint {
-
-    override fun createDatabaseVersionRequest(socketFactory: SocketFactory?)
-            : ApiRequest<DatabaseVersion> {
-        val hashedApiKey = apiKeyGenerator.generateHashedApiKey()
-        val call = apiServiceFactory.getApiInstance(socketFactory)
-                .getDatabaseVersion(hashedApiKey, schemaType)
-
-        return DatabaseVersionApiRequest(call)
-    }
-}
+fun JobParameters.getNetworkCompat(): Network? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            network
+        } else {
+            null
+        }

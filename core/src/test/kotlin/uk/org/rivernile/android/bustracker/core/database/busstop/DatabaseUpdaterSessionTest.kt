@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.inOrder
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
@@ -47,6 +48,7 @@ import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.io.File
 import java.io.IOException
+import javax.net.SocketFactory
 
 /**
  * Unit tests for [DatabaseUpdaterSession].
@@ -71,6 +73,8 @@ class DatabaseUpdaterSessionTest {
     private lateinit var downloadSession: FileDownloadSession
     @Mock
     private lateinit var downloadFile: File
+    @Mock
+    private lateinit var socketFactory: SocketFactory
 
     private val databaseVersion = DatabaseVersion("MBE", "abc123", "http://host/db.db", "xyz789")
 
@@ -78,7 +82,7 @@ class DatabaseUpdaterSessionTest {
     fun setUp() {
         whenever(databaseUtils.getDatabasePath(any()))
                 .thenReturn(downloadFile)
-        whenever(fileDownloader.createFileDownloadSession(any(), any()))
+        whenever(fileDownloader.createFileDownloadSession(any(), any(), eq(socketFactory)))
                 .thenReturn(downloadSession)
     }
 
@@ -198,5 +202,5 @@ class DatabaseUpdaterSessionTest {
 
     private fun createSession(databaseVersion: DatabaseVersion) =
             DatabaseUpdaterSession(databaseUtils, fileDownloader, fileConsistencyChecker,
-                    databaseRepository, timeUtils, databaseVersion)
+                    databaseRepository, timeUtils, databaseVersion, socketFactory)
 }

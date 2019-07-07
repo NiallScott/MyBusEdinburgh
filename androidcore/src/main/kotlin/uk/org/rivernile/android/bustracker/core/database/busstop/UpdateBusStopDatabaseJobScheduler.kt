@@ -30,6 +30,8 @@ import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.ComponentName
 import android.content.Context
+import uk.org.rivernile.android.bustracker.core.job.setPrefetchCompat
+import uk.org.rivernile.android.bustracker.core.job.setRequiresBatteryNotLowCompat
 import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
 import javax.inject.Inject
 import javax.inject.Singleton

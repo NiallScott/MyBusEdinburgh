@@ -32,6 +32,7 @@ import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
+import javax.net.SocketFactory
 
 /**
  * This class will create new [DatabaseUpdaterSession] object which will perform the action of
@@ -55,9 +56,12 @@ class DatabaseUpdater @Inject constructor(
      * Create a new database update session.
      *
      * @param databaseVersion Metadata describing the database to update to.
+     * @param socketFactory A [SocketFactory] to create a socket on the correct interface to
+     * download the database update.
      * @return A [DatabaseUpdaterSession] object.
      */
-    fun createNewSession(databaseVersion: DatabaseVersion) =
+    fun createNewSession(databaseVersion: DatabaseVersion,
+                         socketFactory: SocketFactory? = null) =
             DatabaseUpdaterSession(databaseUtils, fileDownloader, fileConsistencyChecker,
-                    databaseRepository, timeUtils, databaseVersion)
+                    databaseRepository, timeUtils, databaseVersion, socketFactory)
 }

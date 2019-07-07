@@ -27,13 +27,13 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiException
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.net.SocketFactory
 
 /**
  * This class will check to see if a new bus stop database is available, and if so, perform the
@@ -42,23 +42,23 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Each instance of this class represents a single session. Each session can only be attempted
  * once. A new instance will need to be acquired to attempt a new session.
  *
- * @param apiEndpoint The endpoint to get the database metadata from, which describes the latest
- * database.
+ * @param apiRequest The [ApiRequest] object to use for this session.
  * @param databaseInformationDao A DAO for accessing the current topology metadata.
  * @param databaseUpdater The implementation to download and update the database.
  * @param preferenceManager The [PreferenceManager].
  * @param timeUtils Utility class for obtaining a timestamp.
+ * @param socketFactory The [SocketFactory] to create connections for.
  * @author Niall Scott
  */
 class DatabaseUpdateCheckerSession internal constructor(
-        private val apiEndpoint: ApiEndpoint,
+        private val apiRequest: ApiRequest<DatabaseVersion>,
         private val databaseInformationDao: DatabaseInformationDao,
         private val databaseUpdater: DatabaseUpdater,
         private val preferenceManager: PreferenceManager,
-        private val timeUtils: TimeUtils) {
+        private val timeUtils: TimeUtils,
+        private val socketFactory: SocketFactory? = null) {
 
     private val hasRun = AtomicBoolean(false)
-    private var request: ApiRequest<DatabaseVersion>? = null
     private var databaseUpdaterSession: DatabaseUpdaterSession? = null
 
     /**
@@ -75,11 +75,8 @@ class DatabaseUpdateCheckerSession internal constructor(
             throw IllegalStateException("Each session can only be run once.")
         }
 
-        val request = apiEndpoint.createDatabaseVersionRequest()
-        this.request = request
-
         val databaseVersion = try {
-            request.performRequest()
+            apiRequest.performRequest()
         } catch (ignored: ApiException) {
             return false
         }
@@ -105,7 +102,7 @@ class DatabaseUpdateCheckerSession internal constructor(
      * run, calling this method will have no effect.
      */
     fun cancel() {
-        request?.cancel()
+        apiRequest.cancel()
         databaseUpdaterSession?.cancel()
     }
 
@@ -117,7 +114,8 @@ class DatabaseUpdateCheckerSession internal constructor(
      * @return `true` if updating the database was successful, `false` if not.
      */
     private fun updateDatabase(databaseVersion: DatabaseVersion): Boolean {
-        val databaseUpdaterSession = databaseUpdater.createNewSession(databaseVersion)
+        val databaseUpdaterSession = databaseUpdater.createNewSession(databaseVersion,
+                socketFactory)
         this.databaseUpdaterSession = databaseUpdaterSession
 
         return databaseUpdaterSession.updateDatabase()

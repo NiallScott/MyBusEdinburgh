@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop
+package uk.org.rivernile.android.bustracker.core.job
 
 import android.app.job.JobInfo
 import android.os.Build

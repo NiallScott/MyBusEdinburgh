@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.api
 
+import javax.net.SocketFactory
+
 /**
  * This interface represents methods to access the API.
  *
@@ -36,7 +38,9 @@ interface ApiEndpoint {
     /**
      * Create a new [ApiRequest] to obtain the latest database version.
      *
+     * @param socketFactory An optional [SocketFactory] to use to create connections.
      * @return A new [ApiRequest] to obtain the latest database version.
      */
-    fun createDatabaseVersionRequest(): ApiRequest<DatabaseVersion>
+    fun createDatabaseVersionRequest(socketFactory: SocketFactory? = null):
+            ApiRequest<DatabaseVersion>
 }
