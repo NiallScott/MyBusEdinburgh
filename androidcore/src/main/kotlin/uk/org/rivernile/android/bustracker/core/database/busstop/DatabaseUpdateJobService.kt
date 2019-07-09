@@ -70,11 +70,24 @@ class DatabaseUpdateJobService : JobService() {
         return true
     }
 
+    /**
+     * Handle the result from the execution of the [UpdateTask].
+     *
+     * @param params The parameters for this job.
+     * @param result `true` if execution was successful, otherwise `false`.
+     */
     private fun handleResult(params: JobParameters, result: Boolean) {
         jobFinished(params, !result)
         updateTask = null
     }
 
+    /**
+     * This is an [AsyncTask] to run the update process.
+     *
+     * @param jobParameters The parameters the job was started with.
+     * @param updateSession An [DatabaseUpdateCheckerSession] instance to run the update check.
+     * @param resultHandler A handler for processing the result of this task.
+     */
     private class UpdateTask(
             private val jobParameters: JobParameters,
             private val updateSession: DatabaseUpdateCheckerSession,
@@ -89,6 +102,9 @@ class DatabaseUpdateJobService : JobService() {
             resultHandler(jobParameters, result)
         }
 
+        /**
+         * Cancel the execution of this task.
+         */
         fun cancel() {
             cancel(false)
             updateSession.cancel()

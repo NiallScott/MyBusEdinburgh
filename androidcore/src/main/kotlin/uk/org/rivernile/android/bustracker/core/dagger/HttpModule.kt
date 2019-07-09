@@ -82,6 +82,12 @@ internal class HttpModule {
             .writeTimeout(30, TimeUnit.SECONDS)
             .followRedirects(false)
 
+    /**
+     * Provide a minimally configured [OkHttpClient] instance.
+     *
+     * @param builder The [OkHttpClient.Builder] to base the instance on.
+     * @return A [OkHttpClient] instance.
+     */
     @Provides
     fun provideOkhttpClient(builder: OkHttpClient.Builder): OkHttpClient = builder.build()
 

@@ -70,6 +70,10 @@ internal class AndroidPreferenceManager(private val preferences: SharedPreferenc
         private const val DEFAULT_MAP_LAST_TYPE = 1
     }
 
+    /**
+     * Set this property to receive callbacks when the database update Wi-Fi only preference has
+     * been changed.
+     */
     internal var wifiOnlyChangedListener: (() -> Unit)? = null
 
     init {

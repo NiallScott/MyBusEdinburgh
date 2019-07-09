@@ -41,6 +41,7 @@ import javax.inject.Singleton
  *
  * @param context The application [Context].
  * @param jobScheduler The Android [JobScheduler].
+ * @param preferenceManager An [AndroidPreferenceManager] instance.
  * @author Niall Scott
  */
 @Singleton
