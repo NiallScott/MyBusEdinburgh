@@ -65,10 +65,13 @@ internal class DatabaseInformationContract @Inject constructor(
         private const val TABLE_NAME = "database_info"
     }
 
-    private val type = "${TableContract.SUBTYPE_MULTIPLE}vnd.$authority.$TABLE_NAME"
+    private val typeSingle = "${TableContract.SUBTYPE_SINGLE}/vnd.$authority.$TABLE_NAME"
+    private val typeMultiple = "${TableContract.SUBTYPE_MULTIPLE}/vnd.$authority.$TABLE_NAME"
     private val uri = Uri.parse("content://$authority/$TABLE_NAME")
 
-    override fun getType() = type
+    override fun getSingleItemType() = typeSingle
+
+    override fun getMultipleItemsType() = typeMultiple
 
     override fun getContentUri(): Uri = uri
 }

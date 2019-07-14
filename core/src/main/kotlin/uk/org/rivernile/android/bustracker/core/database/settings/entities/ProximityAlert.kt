@@ -24,33 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
-
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.core.database.settings.entities
 
 /**
- * This is a Dagger module for database dependencies.
+ * This data class describes a proximity alert that is persisted in the settings database.
  *
+ * @property id The ID of this alert.
+ * @property timeAdded The UNIX timestamp, in milliseconds, that the alert was created at.
+ * @property stopCode What stop code does the alert concern?
+ * @property distanceFrom At what maximum distance from the stop should the alert fire at? Or, what
+ * is the radius of the proximity area.
  * @author Niall Scott
  */
-@Module(includes = [
-    BusStopDatabaseModule::class,
-    SettingsDatabaseModule::class
-])
-internal class DatabaseModule {
-
-    /**
-     * Provide a [DatabaseUtils] instance.
-     *
-     * @param context The application [Context].
-     * @return A [DatabaseUtils] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideDatabaseUtils(context: Context): DatabaseUtils = AndroidDatabaseUtils(context)
-}
+data class ProximityAlert(val id: Int,
+                          val timeAdded: Long,
+                          val stopCode: String,
+                          val distanceFrom: Int)

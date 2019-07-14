@@ -24,33 +24,43 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.database.settings.daos
 
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import javax.inject.Singleton
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 
 /**
- * This is a Dagger module for database dependencies.
+ * This DAO is used to access alerts created in the app.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    BusStopDatabaseModule::class,
-    SettingsDatabaseModule::class
-])
-internal class DatabaseModule {
+interface AlertsDao {
 
     /**
-     * Provide a [DatabaseUtils] instance.
+     * Add a new arrival alert to the database.
      *
-     * @param context The application [Context].
-     * @return A [DatabaseUtils] instance.
+     * @param arrivalAlert The alert to add.
      */
-    @Provides
-    @Singleton
-    fun provideDatabaseUtils(context: Context): DatabaseUtils = AndroidDatabaseUtils(context)
+    fun addArrivalAlert(arrivalAlert: ArrivalAlert)
+
+    /**
+     * Add a new proximity alert to the database.
+     *
+     * @param proximityAlert The alert to add.
+     */
+    fun addProximityAlert(proximityAlert: ProximityAlert)
+
+    /**
+     * Remove an arrival alert.
+     *
+     * @param id The ID of the arrival alert to remove.
+     */
+    fun removeArrivalAlert(id: Int)
+
+    /**
+     * Remove a proximity alert.
+     *
+     * @param id The ID of the proximity alert to remove.
+     */
+    fun removeProximityAlert(id: Int)
 }

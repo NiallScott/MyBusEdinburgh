@@ -29,28 +29,41 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import android.content.Context
 import dagger.Module
 import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
+import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForSettingsDatabase
+import uk.org.rivernile.android.bustracker.core.database.settings.AlertsContract
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidAlertsDao
 import javax.inject.Singleton
 
 /**
- * This is a Dagger module for database dependencies.
+ * This is a Dagger [Module] to provide dependencies for the settings database.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    BusStopDatabaseModule::class,
-    SettingsDatabaseModule::class
-])
-internal class DatabaseModule {
+@Module
+internal class SettingsDatabaseModule {
 
     /**
-     * Provide a [DatabaseUtils] instance.
+     * Provide the settings database authority URI [String].
      *
      * @param context The application [Context].
-     * @return A [DatabaseUtils] instance.
+     * @return The settings database authority URI [String].
      */
     @Provides
     @Singleton
-    fun provideDatabaseUtils(context: Context): DatabaseUtils = AndroidDatabaseUtils(context)
+    @ForSettingsDatabase
+    fun provideAuthority(context: Context) = "${context.packageName}.provider.settings"
+
+    /**
+     * Provide the [AlertsDao].
+     *
+     * @param context The application [Context].
+     * @param contract The table contract for the alerts table.
+     * @return The [AlertsDao].
+     */
+    @Provides
+    @Singleton
+    fun provideAlertsDao(context: Context,
+                         contract: AlertsContract): AlertsDao =
+            AndroidAlertsDao(context, contract)
 }

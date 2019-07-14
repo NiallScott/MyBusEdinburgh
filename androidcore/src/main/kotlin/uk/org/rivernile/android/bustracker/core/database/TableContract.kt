@@ -40,18 +40,38 @@ internal interface TableContract : BaseColumns {
     companion object {
 
         /**
+         * Expose [BaseColumns._ID]
+         */
+        const val ID = BaseColumns._ID
+
+        /**
+         * This forms the first part of the type [String] for a result set containing a single
+         * entry.
+         */
+        const val SUBTYPE_SINGLE = "vnd.android.cursor.item"
+
+        /**
          * This forms the first part of the type [String] for a result set containing multiple
          * entries.
          */
-        const val SUBTYPE_MULTIPLE = "vnd.android.cursor.dir/"
+        const val SUBTYPE_MULTIPLE = "vnd.android.cursor.dir"
     }
 
     /**
-     * Get the type for the table, as returned by [android.content.ContentProvider.getType].
+     * Get the type for single items in this table, as returned by
+     * [android.content.ContentProvider.getType].
      *
-     * @return The type for the table.
+     * @return The type for single items in this table.
      */
-    fun getType(): String
+    fun getSingleItemType(): String
+
+    /**
+     * Get the type for multiple items in this table, as returned by
+     * [android.content.ContentProvider.getType].
+     *
+     * @return The type for multiple items in this table.
+     */
+    fun getMultipleItemsType(): String
 
     /**
      * Get the content [Uri] for the table.

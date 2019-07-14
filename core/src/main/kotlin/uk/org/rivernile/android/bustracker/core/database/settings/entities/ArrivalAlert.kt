@@ -24,33 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
-
-import android.content.Context
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.core.database.settings.entities
 
 /**
- * This is a Dagger module for database dependencies.
+ * This data class describes an arrival alert that is persisted in the settings database.
  *
+ * @property id The ID of this alert.
+ * @property timeAdded The UNIX timestamp, in milliseconds, that the alert was created at.
+ * @property stopCode What stop code does the alert concern?
+ * @property serviceNames A non-empty [List] of service names to trigger the alert for.
+ * @property timeTrigger The alert should be fired when any of the named services is due at the
+ * named stop at this value or less.
  * @author Niall Scott
  */
-@Module(includes = [
-    BusStopDatabaseModule::class,
-    SettingsDatabaseModule::class
-])
-internal class DatabaseModule {
-
-    /**
-     * Provide a [DatabaseUtils] instance.
-     *
-     * @param context The application [Context].
-     * @return A [DatabaseUtils] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideDatabaseUtils(context: Context): DatabaseUtils = AndroidDatabaseUtils(context)
-}
+data class ArrivalAlert(val id: Int,
+                        val timeAdded: Long,
+                        val stopCode: String,
+                        val serviceNames: List<String>,
+                        val timeTrigger: Int)
