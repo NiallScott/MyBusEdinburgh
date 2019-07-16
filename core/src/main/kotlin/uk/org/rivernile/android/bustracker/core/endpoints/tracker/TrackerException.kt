@@ -24,14 +24,14 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
 /**
- * This [Exception] is thrown when there was an issue communicating with the API.
+ * This [Exception] is thrown when there was an issue communicating with the tracker endpoint.
  *
  * @author Niall Scott
  */
-class ApiException : Exception {
+class TrackerException : Exception {
 
     /**
      * Default constructor.

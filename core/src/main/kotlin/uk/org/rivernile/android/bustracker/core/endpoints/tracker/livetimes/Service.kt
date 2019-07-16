@@ -24,39 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 /**
- * This [Exception] is thrown when there was an issue communicating with the API.
+ * A `Service` represents a single service that stops at a single stop. It holds a collection of
+ * [Vehicle]s (or rather, live vehicle departures).
  *
+ * @property serviceName The display name of the service.
+ * @property vehicles A [List] of [Vehicle]s for this service.
+ * @property operator An optional operator name for the service.
+ * @property routeDescription An optional textual description of the route.
+ * @property isDisrupted `true` if the service is currently disrupted.
+ * @property isDiverted `true` if the service is currently diverted from its published route.
  * @author Niall Scott
  */
-class ApiException : Exception {
-
-    /**
-     * Default constructor.
-     */
-    constructor() : super()
-
-    /**
-     * Constructor that specifies a message.
-     *
-     * @param message Exception message.
-     */
-    constructor(message: String) : super(message)
-
-    /**
-     * Constructor that specifies a cause [Throwable].
-     *
-     * @param throwable The cause [Throwable].
-     */
-    constructor(throwable: Throwable) : super(throwable)
-
-    /**
-     * Constructor that specifies a message and a cause [Throwable].
-     *
-     * @param message Exception message.
-     * @param throwable The cause [Throwable].
-     */
-    constructor(message: String, throwable: Throwable) : super(message, throwable)
-}
+data class Service(val serviceName: String,
+                   val vehicles: List<Vehicle>,
+                   val operator: String?,
+                   val routeDescription: String?,
+                   val isDisrupted: Boolean,
+                   val isDiverted: Boolean)

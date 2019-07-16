@@ -24,39 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 /**
- * This [Exception] is thrown when there was an issue communicating with the API.
+ * `LiveTimes` maps unique stop codes to [Stop] instances. It also returns data that is global to
+ * the live times request.
  *
+ * @property stops A [Map] of stop code to the stop result.
+ * @property receiveTime The time this data was received at.
+ * @property hasGlobalDisruption `true` if there is a global disruption on the network.
  * @author Niall Scott
  */
-class ApiException : Exception {
-
-    /**
-     * Default constructor.
-     */
-    constructor() : super()
-
-    /**
-     * Constructor that specifies a message.
-     *
-     * @param message Exception message.
-     */
-    constructor(message: String) : super(message)
-
-    /**
-     * Constructor that specifies a cause [Throwable].
-     *
-     * @param throwable The cause [Throwable].
-     */
-    constructor(throwable: Throwable) : super(throwable)
-
-    /**
-     * Constructor that specifies a message and a cause [Throwable].
-     *
-     * @param message Exception message.
-     * @param throwable The cause [Throwable].
-     */
-    constructor(message: String, throwable: Throwable) : super(message, throwable)
-}
+data class LiveTimes(val stops: Map<String, Stop>,
+                     val receiveTime: Long,
+                     val hasGlobalDisruption: Boolean)

@@ -24,39 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 /**
- * This [Exception] is thrown when there was an issue communicating with the API.
+ * A `Stop` represents a single stop returned from the real-time system. It holds a [List] of
+ * [Service]s which in turn hold a [List] of [Vehicle]s which hold the departure times.
  *
+ * @property stopCode The unique identifier of the stop.
+ * @property stopName The display name of the stop.
+ * @property services The [List] of [Service]s for this stop.
+ * @property isDisrupted `true` if there is a current disruption affecting this stop.
  * @author Niall Scott
  */
-class ApiException : Exception {
-
-    /**
-     * Default constructor.
-     */
-    constructor() : super()
-
-    /**
-     * Constructor that specifies a message.
-     *
-     * @param message Exception message.
-     */
-    constructor(message: String) : super(message)
-
-    /**
-     * Constructor that specifies a cause [Throwable].
-     *
-     * @param throwable The cause [Throwable].
-     */
-    constructor(throwable: Throwable) : super(throwable)
-
-    /**
-     * Constructor that specifies a message and a cause [Throwable].
-     *
-     * @param message Exception message.
-     * @param throwable The cause [Throwable].
-     */
-    constructor(message: String, throwable: Throwable) : super(message, throwable)
-}
+data class Stop(val stopCode: String,
+                val stopName: String?,
+                val services: List<Service>,
+                val isDisrupted: Boolean)

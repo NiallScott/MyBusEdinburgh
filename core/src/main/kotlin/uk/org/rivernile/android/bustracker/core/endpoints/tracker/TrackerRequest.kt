@@ -24,39 +24,26 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
 /**
- * This [Exception] is thrown when there was an issue communicating with the API.
+ * Instance of this class represent a single tracker API request.
  *
  * @author Niall Scott
  */
-class ApiException : Exception {
+interface TrackerRequest<out T> {
 
     /**
-     * Default constructor.
-     */
-    constructor() : super()
-
-    /**
-     * Constructor that specifies a message.
+     * Perform the request and return the result. This method is blocking.
      *
-     * @param message Exception message.
+     * @return The result of the request.
+     * @throws TrackerException When there was a problem with the request.
      */
-    constructor(message: String) : super(message)
+    @Throws(TrackerException::class)
+    fun performRequest(): T
 
     /**
-     * Constructor that specifies a cause [Throwable].
-     *
-     * @param throwable The cause [Throwable].
+     * Cancel the request.
      */
-    constructor(throwable: Throwable) : super(throwable)
-
-    /**
-     * Constructor that specifies a message and a cause [Throwable].
-     *
-     * @param message Exception message.
-     * @param throwable The cause [Throwable].
-     */
-    constructor(message: String, throwable: Throwable) : super(message, throwable)
+    fun cancel()
 }

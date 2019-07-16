@@ -24,39 +24,24 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker
+
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 
 /**
- * This [Exception] is thrown when there was an issue communicating with the API.
+ * This interface is used to access data on the tracker endpoint.
  *
  * @author Niall Scott
  */
-class ApiException : Exception {
+interface TrackerEndpoint {
 
     /**
-     * Default constructor.
-     */
-    constructor() : super()
-
-    /**
-     * Constructor that specifies a message.
+     * Creates a new [TrackerRequest] to obtain live times.
      *
-     * @param message Exception message.
+     * @param stopCodes The stop codes to request.
+     * @param numberOfDepartures The number of departures per service to retrieve.
+     * @return An object used to perform the actual request.
      */
-    constructor(message: String) : super(message)
-
-    /**
-     * Constructor that specifies a cause [Throwable].
-     *
-     * @param throwable The cause [Throwable].
-     */
-    constructor(throwable: Throwable) : super(throwable)
-
-    /**
-     * Constructor that specifies a message and a cause [Throwable].
-     *
-     * @param message Exception message.
-     * @param throwable The cause [Throwable].
-     */
-    constructor(message: String, throwable: Throwable) : super(message, throwable)
+    fun createLiveTimesRequest(stopCodes: Array<String>, numberOfDepartures: Int)
+            : TrackerRequest<LiveTimes>
 }
