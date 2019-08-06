@@ -37,11 +37,26 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Proxi
 interface AlertsDao {
 
     /**
+     * Add a new [OnAlertsChangedListener] to be informed when the alerts data has been changed.
+     *
+     * @param listener The listener to add.
+     */
+    fun addOnAlertsChangedListener(listener: OnAlertsChangedListener)
+
+    /**
+     * Remove a [OnAlertsChangedListener] so it is no longer informed that alerts have been changed.
+     *
+     * @param listener The listener to remove.
+     */
+    fun removeOnAlertsChangedListener(listener: OnAlertsChangedListener)
+
+    /**
      * Add a new arrival alert to the database.
      *
      * @param arrivalAlert The alert to add.
+     * @return The ID of the new added arrival alert.
      */
-    fun addArrivalAlert(arrivalAlert: ArrivalAlert)
+    fun addArrivalAlert(arrivalAlert: ArrivalAlert): Long
 
     /**
      * Add a new proximity alert to the database.
@@ -63,4 +78,37 @@ interface AlertsDao {
      * @param id The ID of the proximity alert to remove.
      */
     fun removeProximityAlert(id: Int)
+
+    /**
+     * Get all the arrival alerts.
+     *
+     * @return All the arrival alerts.
+     */
+    fun getAllArrivalAlerts(): List<ArrivalAlert>?
+
+    /**
+     * Get all the stop codes that have arrival alerts against them.
+     *
+     * @return A [List] of stop codes with arrival alerts.
+     */
+    fun getAllArrivalAlertStopCodes(): List<String>?
+
+    /**
+     * Get the number of current arrival alerts.
+     *
+     * @return The number of current arrival alerts.
+     */
+    fun getArrivalAlertCount(): Int
+
+    /**
+     * This interface should be implemented to listen for changes to alerts. Call
+     * [addOnAlertsChangedListener] to register the listener.
+     */
+    interface OnAlertsChangedListener {
+
+        /**
+         * This is called when the alerts have changed.
+         */
+        fun onAlertsChanged()
+    }
 }

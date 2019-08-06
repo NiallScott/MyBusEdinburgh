@@ -287,13 +287,17 @@ public class SettingsProviderTests {
         c.close();
 
         c = resolver.query(SettingsContract.Favourites.CONTENT_URI,
-                new String[] { SettingsContract.Favourites.STOP_NAME },
+                new String[] {
+                        SettingsContract.Favourites.STOP_NAME,
+                        SettingsContract.Favourites._COUNT
+                },
                 SettingsContract.Favourites.STOP_CODE + " = ?",
                 new String[] { "323456" }, null);
         assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("C", c.getString(0));
+        assertEquals(1, c.getInt(1));
         assertNotificationUri(SettingsContract.Favourites.CONTENT_URI, c);
         c.close();
     }
@@ -319,7 +323,10 @@ public class SettingsProviderTests {
         c.close();
 
         c = resolver.query(SettingsContract.Alerts.CONTENT_URI,
-                new String[] { SettingsContract.Alerts.STOP_CODE },
+                new String[] {
+                        SettingsContract.Alerts.STOP_CODE,
+                        SettingsContract.Alerts._COUNT
+                },
                 SettingsContract.Alerts.TYPE + " = ?",
                 new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY) },
                 null);
@@ -327,6 +334,7 @@ public class SettingsProviderTests {
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(0));
+        assertEquals(1, c.getInt(1));
         assertNotificationUri(SettingsContract.Alerts.CONTENT_URI, c);
         c.close();
     }
@@ -358,13 +366,17 @@ public class SettingsProviderTests {
 
         c = resolver.query(
                 ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1),
-                new String[] { SettingsContract.Favourites.STOP_NAME },
+                new String[] {
+                        SettingsContract.Favourites.STOP_NAME,
+                        SettingsContract.Favourites._COUNT
+                },
                 SettingsContract.Favourites.STOP_CODE + " = ?",
                 new String[] { "323456" }, null);
         assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("B", c.getString(0));
+        assertEquals(1, c.getInt(1));
         c.close();
     }
 
@@ -395,13 +407,17 @@ public class SettingsProviderTests {
 
         c = resolver.query(
                 ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1),
-                new String[] { SettingsContract.Alerts.STOP_CODE },
+                new String[] {
+                        SettingsContract.Alerts.STOP_CODE,
+                        SettingsContract.Alerts._COUNT
+                },
                 SettingsContract.Alerts.TYPE + " = ?",
                 new String[] { String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_TIME) }, null);
         assertNotNull(c);
         assertEquals(1, c.getCount());
         assertTrue(c.moveToNext());
         assertEquals("123456", c.getString(0));
+        assertEquals(1, c.getInt(1));
         c.close();
     }
 

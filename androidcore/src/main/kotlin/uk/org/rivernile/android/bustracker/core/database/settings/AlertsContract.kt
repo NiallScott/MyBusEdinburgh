@@ -63,6 +63,11 @@ internal class AlertsContract @Inject constructor(
         const val ID = TableContract.ID
 
         /**
+         * Expose [TableContract.COUNT]
+         */
+        const val COUNT = TableContract.COUNT
+
+        /**
          * The type of alert. Column name.
          *
          * Type: INTEGER (one of [.ALERTS_TYPE_PROXIMITY] or [.ALERTS_TYPE_TIME])

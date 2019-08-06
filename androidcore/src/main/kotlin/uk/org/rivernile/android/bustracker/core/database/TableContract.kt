@@ -45,6 +45,11 @@ internal interface TableContract : BaseColumns {
         const val ID = BaseColumns._ID
 
         /**
+         * Expose [BaseColumns._COUNT]
+         */
+        const val COUNT = BaseColumns._COUNT
+
+        /**
          * This forms the first part of the type [String] for a result set containing a single
          * entry.
          */

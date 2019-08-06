@@ -26,8 +26,12 @@
 
 package uk.org.rivernile.android.bustracker.core.database.settings.daos
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.Looper
 import uk.org.rivernile.android.bustracker.core.database.settings.AlertsContract
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
@@ -43,7 +47,33 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Proxi
 internal class AndroidAlertsDao(private val context: Context,
                                 private val contract: AlertsContract): AlertsDao {
 
-    override fun addArrivalAlert(arrivalAlert: ArrivalAlert) {
+    private val listeners = mutableListOf<AlertsDao.OnAlertsChangedListener>()
+    private val observer = Observer()
+
+    @Synchronized
+    override fun addOnAlertsChangedListener(listener: AlertsDao.OnAlertsChangedListener) {
+        listeners.apply {
+            add(listener)
+
+            if (size == 1) {
+                context.contentResolver.registerContentObserver(contract.getContentUri(), true,
+                        observer)
+            }
+        }
+    }
+
+    @Synchronized
+    override fun removeOnAlertsChangedListener(listener: AlertsDao.OnAlertsChangedListener) {
+        listeners.apply {
+            remove(listener)
+
+            if (isEmpty()) {
+                context.contentResolver.unregisterContentObserver(observer)
+            }
+        }
+    }
+
+    override fun addArrivalAlert(arrivalAlert: ArrivalAlert): Long {
         val values = ContentValues().apply {
             put(AlertsContract.TYPE, AlertsContract.ALERTS_TYPE_TIME)
             put(AlertsContract.TIME_ADDED, arrivalAlert.timeAdded)
@@ -52,7 +82,9 @@ internal class AndroidAlertsDao(private val context: Context,
             put(AlertsContract.TIME_TRIGGER, arrivalAlert.timeTrigger)
         }
 
-        context.contentResolver.insert(contract.getContentUri(), values)
+        val uri = context.contentResolver.insert(contract.getContentUri(), values)
+
+        return ContentUris.parseId(uri)
     }
 
     override fun addProximityAlert(proximityAlert: ProximityAlert) {
@@ -76,5 +108,114 @@ internal class AndroidAlertsDao(private val context: Context,
         context.contentResolver.delete(contract.getContentUri(),
                 "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
                 arrayOf(id.toString(), AlertsContract.ALERTS_TYPE_PROXIMITY.toString()))
+    }
+
+    override fun getAllArrivalAlerts() = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(
+                    AlertsContract.ID,
+                    AlertsContract.TIME_ADDED,
+                    AlertsContract.STOP_CODE,
+                    AlertsContract.SERVICE_NAMES,
+                    AlertsContract.TIME_TRIGGER),
+            "${AlertsContract.TYPE} = ?",
+            arrayOf(
+                    AlertsContract.ALERTS_TYPE_TIME.toString()),
+            null)?.use {
+        val count = it.count
+
+        if (count > 0) {
+            val result = ArrayList<ArrivalAlert>(count)
+            val idColumn = it.getColumnIndex(AlertsContract.ID)
+            val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
+            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+            val serviceNamesColumn = it.getColumnIndex(AlertsContract.SERVICE_NAMES)
+            val timeTriggerColumn = it.getColumnIndex(AlertsContract.TIME_TRIGGER)
+
+            while (it.moveToNext()) {
+                val id = it.getInt(idColumn)
+                val timeAdded = it.getLong(timeAddedColumn)
+                val stopCode = it.getString(stopCodeColumn)
+                val serviceNames = it.getString(serviceNamesColumn)
+                        .split(",")
+                        .map { name -> name.trim() }
+                val timeTrigger = it.getInt(timeTriggerColumn)
+                val arrivalAlert = ArrivalAlert(
+                        id,
+                        timeAdded,
+                        stopCode,
+                        serviceNames,
+                        timeTrigger)
+                result.add(arrivalAlert)
+            }
+
+            result
+        } else {
+            null
+        }
+    }
+
+    override fun getAllArrivalAlertStopCodes() = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(
+                    AlertsContract.STOP_CODE),
+            "${AlertsContract.TYPE} = ?",
+            arrayOf(
+                    AlertsContract.ALERTS_TYPE_TIME.toString()),
+            null)?.use {
+        val count = it.count
+
+        if (count > 0) {
+            val result = ArrayList<String>(count)
+            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+
+            while (it.moveToNext()) {
+                result.add(it.getString(stopCodeColumn))
+            }
+
+            result
+        } else {
+            null
+        }
+    }
+
+    override fun getArrivalAlertCount() = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(
+                    AlertsContract.COUNT),
+            "${AlertsContract.TYPE} = ?",
+            arrayOf(
+                    AlertsContract.ALERTS_TYPE_TIME.toString()),
+            null)?.use {
+        // Fill the Cursor window.
+        it.count
+
+        if (it.moveToFirst()) {
+            val countColumn = it.getColumnIndex(AlertsContract.COUNT)
+            it.getInt(countColumn)
+        } else {
+            0
+        }
+    } ?: 0
+
+    /**
+     * For all of the currently registers listeners, dispatch an alert change to them.
+     */
+    private fun dispatchOnAlertsChangedListeners() {
+        listeners.forEach { listener ->
+            listener.onAlertsChanged()
+        }
+    }
+
+    /**
+     * This inner class is used as the [ContentObserver] for observing changes to alerts.
+     */
+    private inner class Observer : ContentObserver(Handler(Looper.getMainLooper())) {
+
+        override fun deliverSelfNotifications() = true
+
+        override fun onChange(selfChange: Boolean) {
+            dispatchOnAlertsChangedListeners()
+        }
     }
 }

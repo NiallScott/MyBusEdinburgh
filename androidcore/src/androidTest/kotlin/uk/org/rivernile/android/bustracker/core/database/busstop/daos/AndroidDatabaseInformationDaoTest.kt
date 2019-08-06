@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
+import android.content.ContentProvider
 import android.content.ContentResolver
 import android.content.Context
 import android.database.Cursor
@@ -38,6 +39,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -82,7 +84,7 @@ class AndroidDatabaseInformationDaoTest {
 
     @Test
     fun checkGetTopologyIdSendsThroughCorrectParametersForQuery() {
-        val mockContentProvider = object : MockContentProvider() {
+        object : MockContentProvider() {
             override fun query(uri: Uri,
                                projection: Array<String>?,
                                selection: String?,
@@ -98,16 +100,14 @@ class AndroidDatabaseInformationDaoTest {
 
                 return null
             }
-        }
-
-        mockContentResolver.addProvider(TEST_AUTHORITY, mockContentProvider)
+        }.also { addMockProvider(it) }
 
         databaseInformationDao.getTopologyId()
     }
 
     @Test
     fun getTopologyIdReturnsNullCursorWhenContentProviderQueryReturnsNull() {
-        val mockContentProvider = object : MockContentProvider() {
+        object : MockContentProvider() {
             override fun query(uri: Uri,
                                projection: Array<String>?,
                                selection: String?,
@@ -115,9 +115,7 @@ class AndroidDatabaseInformationDaoTest {
                                sortOrder: String?): Cursor? {
                 return null
             }
-        }
-
-        mockContentResolver.addProvider(TEST_AUTHORITY, mockContentProvider)
+        }.also { addMockProvider(it) }
 
         val result = databaseInformationDao.getTopologyId()
 
@@ -126,45 +124,46 @@ class AndroidDatabaseInformationDaoTest {
 
     @Test
     fun getTopologyIdReturnsNullWhenAnEmptyCursorIsReturned() {
-        val mockContentProvider = object : MockContentProvider() {
+        val columns = arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
+        val cursor = MatrixCursor(columns)
+        object : MockContentProvider() {
             override fun query(uri: Uri,
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
                                sortOrder: String?): Cursor? {
-                val columns = arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
-
-                return MatrixCursor(columns)
+                return cursor
             }
-        }
-
-        mockContentResolver.addProvider(TEST_AUTHORITY, mockContentProvider)
+        }.also { addMockProvider(it) }
 
         val result = databaseInformationDao.getTopologyId()
 
         assertNull(result)
+        assertTrue(cursor.isClosed)
     }
 
     @Test
     fun getTopologyIdReturnsTopologyIdWhenPopulatedCursorIsReturned() {
-        val mockContentProvider = object : MockContentProvider() {
+        val columns = arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
+        val cursor = MatrixCursor(columns)
+        cursor.addRow(arrayOf("testTopoId"))
+        object : MockContentProvider() {
             override fun query(uri: Uri,
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
                                sortOrder: String?): Cursor? {
-                val columns = arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
-                val cursor = MatrixCursor(columns)
-                cursor.addRow(arrayOf("testTopoId"))
-
                 return cursor
             }
-        }
-
-        mockContentResolver.addProvider(TEST_AUTHORITY, mockContentProvider)
+        }.also { addMockProvider(it) }
 
         val result = databaseInformationDao.getTopologyId()
 
         assertEquals("testTopoId", result)
+        assertTrue(cursor.isClosed)
+    }
+
+    private fun addMockProvider(provider: ContentProvider) {
+        mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
 }

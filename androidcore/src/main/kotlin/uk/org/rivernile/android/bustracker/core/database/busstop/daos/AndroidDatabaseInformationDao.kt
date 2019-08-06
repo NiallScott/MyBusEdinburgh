@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
-import android.annotation.SuppressLint
 import android.content.Context
 import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
 
@@ -41,13 +40,12 @@ internal class AndroidDatabaseInformationDao(private val context: Context,
                                              private val contract: DatabaseInformationContract)
     : DatabaseInformationDao {
 
-    @SuppressLint("Recycle") // Stops the Cursor close warning, even though we close it.
     override fun getTopologyId() = context.contentResolver.query(
             contract.getContentUri(),
             arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID),
             null,
             null,
-            null)?.let {
+            null)?.use {
         // Fill the Cursor window.
         it.count
 
@@ -56,8 +54,6 @@ internal class AndroidDatabaseInformationDao(private val context: Context,
         } else {
             null
         }
-
-        it.close()
 
         result
     }

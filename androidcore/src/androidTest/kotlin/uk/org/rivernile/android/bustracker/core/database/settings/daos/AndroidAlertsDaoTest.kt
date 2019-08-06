@@ -27,8 +27,11 @@
 package uk.org.rivernile.android.bustracker.core.database.settings.daos
 
 import android.content.ContentProvider
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
+import android.database.MatrixCursor
 import android.net.Uri
 import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
@@ -36,6 +39,8 @@ import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -94,17 +99,18 @@ class AndroidAlertsDaoTest {
                 "123456",
                 listOf("1", "2", "3"),
                 5)
-        val mockContentProvider = object : MockContentProvider() {
+       object : MockContentProvider() {
             override fun insert(uri: Uri, values: ContentValues): Uri? {
                 assertEquals(contentUri, uri)
                 assertEquals(expected, values)
 
-                return null
+                return ContentUris.withAppendedId(uri, 1)
             }
-        }
-        addMockProvider(mockContentProvider)
+        }.also { addMockProvider(it) }
 
-        alertsDao.addArrivalAlert(alert)
+        val result = alertsDao.addArrivalAlert(alert)
+
+        assertEquals(1, result)
     }
 
     @Test
@@ -121,17 +127,18 @@ class AndroidAlertsDaoTest {
                 "123456",
                 listOf("1"),
                 5)
-        val mockContentProvider = object : MockContentProvider() {
+        object : MockContentProvider() {
             override fun insert(uri: Uri, values: ContentValues): Uri? {
                 assertEquals(contentUri, uri)
                 assertEquals(expected, values)
 
-                return null
+                return ContentUris.withAppendedId(uri, 1)
             }
-        }
-        addMockProvider(mockContentProvider)
+        }.also { addMockProvider(it) }
 
-        alertsDao.addArrivalAlert(alert)
+        val result = alertsDao.addArrivalAlert(alert)
+
+        assertEquals(1, result)
     }
 
     @Test
@@ -146,23 +153,22 @@ class AndroidAlertsDaoTest {
                 123L,
                 "123456",
                 10)
-        val mockContentProvider = object : MockContentProvider() {
+        object : MockContentProvider() {
             override fun insert(uri: Uri, values: ContentValues): Uri? {
                 assertEquals(contentUri, uri)
                 assertEquals(expected, values)
 
                 return null
             }
-        }
-        addMockProvider(mockContentProvider)
+        }.also { addMockProvider(it) }
 
         alertsDao.addProximityAlert(alert)
     }
 
     @Test
-    fun removeArrivalAlertSendsThroughCorrectParamtersForDelete() {
+    fun removeArrivalAlertSendsThroughCorrectParametersForDelete() {
         val expectedSelectionArgs = arrayOf("1", AlertsContract.ALERTS_TYPE_TIME.toString())
-        val mockContentProvider = object : MockContentProvider() {
+        object : MockContentProvider() {
             override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
                 assertEquals(contentUri, uri)
                 assertEquals("${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?", selection)
@@ -170,16 +176,15 @@ class AndroidAlertsDaoTest {
 
                 return 0
             }
-        }
-        addMockProvider(mockContentProvider)
+        }.also { addMockProvider(it) }
 
         alertsDao.removeArrivalAlert(1)
     }
 
     @Test
-    fun removeProximityAlertSendsThroughCorrectParamtersForDelete() {
+    fun removeProximityAlertSendsThroughCorrectParametersForDelete() {
         val expectedSelectionArgs = arrayOf("5", AlertsContract.ALERTS_TYPE_PROXIMITY.toString())
-        val mockContentProvider = object : MockContentProvider() {
+        object : MockContentProvider() {
             override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
                 assertEquals(contentUri, uri)
                 assertEquals("${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?", selection)
@@ -187,13 +192,412 @@ class AndroidAlertsDaoTest {
 
                 return 0
             }
-        }
-        addMockProvider(mockContentProvider)
+        }.also { addMockProvider(it) }
 
         alertsDao.removeProximityAlert(5)
+    }
+
+    @Test
+    fun getAllArrivalAlertsWithNullResultIsHandledCorrectly() {
+        val expectedProjection = getExpectedProjectionForArrivalAlert()
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlerts()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getAllArrivalAlertsWithEmptyResultIsHandledCorrectly() {
+        val expectedProjection = getExpectedProjectionForArrivalAlert()
+        val cursor = MatrixCursor(arrayOf(
+                AlertsContract.ID,
+                AlertsContract.TIME_ADDED,
+                AlertsContract.STOP_CODE,
+                AlertsContract.SERVICE_NAMES,
+                AlertsContract.TIME_TRIGGER))
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlerts()
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getAllArrivalAlertsWithSingleItemAndSingleServiceIsHandledCorrectly() {
+        val expectedProjection = getExpectedProjectionForArrivalAlert()
+        val cursor = MatrixCursor(arrayOf(
+                AlertsContract.ID,
+                AlertsContract.TIME_ADDED,
+                AlertsContract.STOP_CODE,
+                AlertsContract.SERVICE_NAMES,
+                AlertsContract.TIME_TRIGGER))
+        cursor.addRow(arrayOf(1, 123L, "123456", "1", 5))
+        val expectedItem = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
+        val expected = listOf(expectedItem)
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlerts()
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getAllArrivalAlertsWithSingleItemAndMultipleServicesIsHandledCorrectly() {
+        val expectedProjection = getExpectedProjectionForArrivalAlert()
+        val cursor = MatrixCursor(arrayOf(
+                AlertsContract.ID,
+                AlertsContract.TIME_ADDED,
+                AlertsContract.STOP_CODE,
+                AlertsContract.SERVICE_NAMES,
+                AlertsContract.TIME_TRIGGER))
+        cursor.addRow(arrayOf(1, 123L, "123456", "1,2,3", 5))
+        val expectedItem = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
+        val expected = listOf(expectedItem)
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlerts()
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getAllArrivalAlertsWithSingleItemAndMultipleServicesWithSpacesIsHandledCorrectly() {
+        val expectedProjection = getExpectedProjectionForArrivalAlert()
+        val cursor = MatrixCursor(arrayOf(
+                AlertsContract.ID,
+                AlertsContract.TIME_ADDED,
+                AlertsContract.STOP_CODE,
+                AlertsContract.SERVICE_NAMES,
+                AlertsContract.TIME_TRIGGER))
+        cursor.addRow(arrayOf(1, 123L, "123456", "1 , 2 , 3", 5))
+        val expectedItem = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
+        val expected = listOf(expectedItem)
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlerts()
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getAllArrivalAlertsWithMultipleItemsIsHandledCorrectly() {
+        val expectedProjection = getExpectedProjectionForArrivalAlert()
+        val cursor = MatrixCursor(arrayOf(
+                AlertsContract.ID,
+                AlertsContract.TIME_ADDED,
+                AlertsContract.STOP_CODE,
+                AlertsContract.SERVICE_NAMES,
+                AlertsContract.TIME_TRIGGER))
+        cursor.addRow(arrayOf(1, 123L, "123456", "1,2,3", 5))
+        cursor.addRow(arrayOf(2, 124L, "987654", "10", 15))
+        cursor.addRow(arrayOf(3, 125L, "246802", "101,202,303", 3))
+        val expectedItem1 = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
+        val expectedItem2 = ArrivalAlert(2, 124L, "987654", listOf("10"), 15)
+        val expectedItem3 = ArrivalAlert(3, 125L, "246802", listOf("101", "202", "303"), 3)
+        val expected = listOf(expectedItem1, expectedItem2, expectedItem3)
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlerts()
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getAllArrivalAlertStopCodesWithNullResultIsHandledCorrectly() {
+        val expectedProjection = arrayOf(AlertsContract.STOP_CODE)
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlertStopCodes()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getAllArrivalAlertStopCodesWithEmptyResultIsHandledCorrectly() {
+        val expectedProjection = arrayOf(AlertsContract.STOP_CODE)
+        val cursor = MatrixCursor(arrayOf(AlertsContract.STOP_CODE))
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlertStopCodes()
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getAllArrivalAlertStopCodesWithSingleItemIsHandledCorrectly() {
+        val expectedProjection = arrayOf(AlertsContract.STOP_CODE)
+        val cursor = MatrixCursor(arrayOf(AlertsContract.STOP_CODE))
+        cursor.addRow(arrayOf("123456"))
+        val expected = listOf("123456")
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlertStopCodes()
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getAllArrivalAlertStopCodesWithMultipleItemsIsHandledCorrectly() {
+        val expectedProjection = arrayOf(AlertsContract.STOP_CODE)
+        val cursor = MatrixCursor(arrayOf(AlertsContract.STOP_CODE))
+        cursor.addRow(arrayOf("123456"))
+        cursor.addRow(arrayOf("987654"))
+        cursor.addRow(arrayOf("246802"))
+        val expected = listOf("123456", "987654", "246802")
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getAllArrivalAlertStopCodes()
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getArrivalAlertCountReturnsZeroWhenCursorIsNull() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getArrivalAlertCount()
+
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun getArrivalAlertCountReturnsZeroWhenCursorIsEmpty() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        val cursor = MatrixCursor(arrayOf(AlertsContract.COUNT))
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getArrivalAlertCount()
+
+        assertEquals(0, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getArrivalAlertCountReturnsValueWhenCursorIsPopulated() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        val cursor = MatrixCursor(arrayOf(AlertsContract.COUNT))
+        cursor.addRow(arrayOf(5))
+        object : MockContentProvider() {
+            override fun query(uri: Uri,
+                               projection: Array<String>?,
+                               selection: String?,
+                               selectionArgs: Array<String>?,
+                               sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also { addMockProvider(it) }
+
+        val result = alertsDao.getArrivalAlertCount()
+
+        assertEquals(5, result)
+        assertTrue(cursor.isClosed)
     }
 
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
+
+    private fun getExpectedProjectionForArrivalAlert() = arrayOf(
+            AlertsContract.ID,
+            AlertsContract.TIME_ADDED,
+            AlertsContract.STOP_CODE,
+            AlertsContract.SERVICE_NAMES,
+            AlertsContract.TIME_TRIGGER)
 }

@@ -107,6 +107,7 @@ public class SettingsProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
+        normaliseProjection(projection);
         final Cursor c = openHelper.getReadableDatabase()
                 .query(table, projection, selection,selectionArgs, null, null, sortOrder);
         c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -215,5 +216,25 @@ public class SettingsProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri, null, false);
 
         return count;
+    }
+
+    /**
+     * Normalise the projection parameter, if it exists, to replace elements for compatiblity with
+     * SQLite and/or the schema.
+     *
+     * @param projection The projection to normalise.
+     */
+    private void normaliseProjection(@Nullable final String[] projection) {
+        if (projection != null) {
+            final int length = projection.length;
+
+            for (int i = 0; i < length; i++) {
+                final String item = projection[i];
+
+                if (SettingsContract.Alerts._COUNT.equals(item)) {
+                    projection[i] = "COUNT(*) AS " + SettingsContract.Alerts._COUNT;
+                }
+            }
+        }
     }
 }
