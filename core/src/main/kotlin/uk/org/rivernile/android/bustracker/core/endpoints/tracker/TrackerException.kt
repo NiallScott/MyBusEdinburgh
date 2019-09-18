@@ -31,7 +31,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker
  *
  * @author Niall Scott
  */
-class TrackerException : Exception {
+open class TrackerException : Exception {
 
     /**
      * Default constructor.

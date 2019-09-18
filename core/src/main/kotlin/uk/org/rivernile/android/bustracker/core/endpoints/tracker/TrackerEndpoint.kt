@@ -38,6 +38,16 @@ interface TrackerEndpoint {
     /**
      * Creates a new [TrackerRequest] to obtain live times.
      *
+     * @param stopCode The stop code to request.
+     * @param numberOfDepartures The number of departures per service to retrieve.
+     * @return An object used to perform the actual request.
+     */
+    fun createLiveTimesRequest(stopCode: String, numberOfDepartures: Int)
+            : TrackerRequest<LiveTimes>
+
+    /**
+     * Creates a new [TrackerRequest] to obtain live times.
+     *
      * @param stopCodes The stop codes to request.
      * @param numberOfDepartures The number of departures per service to retrieve.
      * @return An object used to perform the actual request.

@@ -24,31 +24,33 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+import javax.inject.Inject
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This class is used by the Edinburgh mapper classes to fix service names to be properly user
+ * displayable, if required.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class
-])
-internal class FlavourModule {
+internal class ServiceNameFixer @Inject constructor() {
+
+    companion object {
+
+        private const val SERVICE_TRAM = "TRAM"
+    }
 
     /**
-     * Provide a [CleanUpTask] instance.
+     * Given a service name, fix it if required. If it does not require fixing, the same service
+     * name will be returned.
      *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
+     * @param serviceName The service name to fix.
+     * @return The fixed service name, or the input if it did not require fixing.
      */
-    @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
+    fun correctServiceName(serviceName: String?) = when (serviceName) {
+        "50" -> SERVICE_TRAM
+        "T50" -> SERVICE_TRAM
+        else -> serviceName
+    }
 }

@@ -63,6 +63,7 @@ android {
 
             // URLs
             buildConfigField("String", "API_BASE_URL", "\"http://edinb.us/api/\"")
+            buildConfigField("String", "TRACKER_BASE_URL", "\"http://ws.mybustracker.co.uk/\"")
 
             // API keys
             buildConfigField("String", "API_KEY", "\"${getApiKey()}\"")
@@ -111,6 +112,9 @@ dependencies {
     // Retrofit
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
     api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+
+    // City APIs
+    edinburghApi 'uk.org.rivernile.edinburghbustrackerapi:api:1.2.0'
 
     // Test dependencies
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"

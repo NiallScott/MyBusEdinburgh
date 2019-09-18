@@ -24,31 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
+import java.util.Locale
+import javax.inject.Inject
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This class is used to calculate departure times.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class
-])
-internal class FlavourModule {
+internal class DepartureTimeCalculator @Inject constructor() {
 
     /**
-     * Provide a [CleanUpTask] instance.
+     * Given the number of minutes until departure, calculate the time of departure, represented as
+     * a [Date] object.
      *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
+     * @param minutes The number of minutes until departure.
+     * @return The time of departure, represented as a [Date] object.
      */
-    @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
+    fun calculateDepartureTime(minutes: Int): Date = GregorianCalendar(Locale.UK).let {
+        it.add(Calendar.MINUTE, minutes)
+        it.time
+    }
 }

@@ -24,31 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
-
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This [Exception] should be thrown when there is a problem with dealing with the request on the
+ * remote server, for example, when the HTTP server returns a 5xx status code.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class
-])
-internal class FlavourModule {
+class ServerErrorException : TrackerException {
 
     /**
-     * Provide a [CleanUpTask] instance.
-     *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
+     * Create a new `ServerErrorException` with a default message.
      */
-    @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
+    constructor() : super("There was a problem dealing with the request on the remote server.")
+
+    /**
+     * Create a new `ServerErrorException` with the given `detailMessage`.
+     *
+     * @param detailMessage The message to set in the [Exception].
+     */
+    constructor(detailMessage: String) : super(detailMessage)
 }

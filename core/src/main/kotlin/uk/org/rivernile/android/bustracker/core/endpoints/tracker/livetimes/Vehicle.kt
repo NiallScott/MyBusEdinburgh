@@ -34,6 +34,8 @@ import java.util.Date
  *
  * @property destination The destination of the vehicle.
  * @property departureTime The expected time of departure of the vehicle from the departure point.
+ * @property departureMinutes At the instant the data was loaded, how many minutes are left until
+ * the vehicle's departure?
  * @property terminus The terminus of the vehicle, if known.
  * @property journeyId An ID that represents the journey of the vehicle, if known.
  * @property isEstimatedTime `true` if the time is an estimate` or `false` if the vehicle is being
@@ -44,8 +46,9 @@ import java.util.Date
  * @property isPartRoute `true` if the vehicle is only travelling along part of its published route.
  * @author Niall Scott
  */
-data class Vehicle(val destination: String,
+data class Vehicle(val destination: String?,
                    val departureTime: Date,
+                   val departureMinutes: Int,
                    val terminus: String?,
                    val journeyId: String?,
                    val isEstimatedTime: Boolean,

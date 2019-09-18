@@ -34,7 +34,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.converter.gson.GsonConverterFactory
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
@@ -70,26 +69,21 @@ internal class HttpModule {
     }
 
     /**
-     * Provide a minimally configured [OkHttpClient.Builder] instance to be used to construct
-     * [OkHttpClient] instances elsewhere.
+     * Provide a minimally configured [OkHttpClient] instance. When used elsewhere, call
+     * [OkHttpClient.newBuilder] to build upon the existing instance. This allows the thread and
+     * connection pools to be shared between the instances, thus improving performance.
      *
-     * @return A [OkHttpClient.Builder] to be used to construct [OkHttpClient] instances.
+     * @param httpLoggingInterceptor The logging interceptor. Will be `null` on non-debug builds.
+     * @return An [OkHttpClient] instance.
      */
     @Provides
-    fun provideOkhttpClientBuilder(): OkHttpClient.Builder = OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .followRedirects(false)
+    @Singleton
+    fun provideOkhttpClient(httpLoggingInterceptor: HttpLoggingInterceptor?): OkHttpClient {
+        val builder = OkHttpClient.Builder()
+        httpLoggingInterceptor?.let { builder.addNetworkInterceptor(it) }
 
-    /**
-     * Provide a minimally configured [OkHttpClient] instance.
-     *
-     * @param builder The [OkHttpClient.Builder] to base the instance on.
-     * @return A [OkHttpClient] instance.
-     */
-    @Provides
-    fun provideOkhttpClient(builder: OkHttpClient.Builder): OkHttpClient = builder.build()
+        return builder.build()
+    }
 
     /**
      * Provide a [GsonConverterFactory] instance which uses the app-wide [Gson] instance.

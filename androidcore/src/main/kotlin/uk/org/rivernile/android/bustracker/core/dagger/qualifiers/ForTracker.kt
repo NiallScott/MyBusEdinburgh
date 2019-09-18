@@ -24,31 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.dagger.qualifiers
 
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This annotation defines a Dagger qualifier for tracker dependencies.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class
-])
-internal class FlavourModule {
-
-    /**
-     * Provide a [CleanUpTask] instance.
-     *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
-     */
-    @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForTracker

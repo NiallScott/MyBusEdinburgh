@@ -24,31 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.alerts
 
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This is used to dispatch user notifications for when an app alert has been triggered.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class
-])
-internal class FlavourModule {
+interface AlertNotificationDispatcher {
 
     /**
-     * Provide a [CleanUpTask] instance.
+     * Dispatch a new time alert notification to show to the user.
      *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
+     * @param arrivalAlert The [ArrivalAlert] that caused the notification.
+     * @param qualifyingServices What services caused the notification to be fired.
      */
-    @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
+    fun dispatchTimeAlertNotification(arrivalAlert: ArrivalAlert, qualifyingServices: List<Service>)
 }

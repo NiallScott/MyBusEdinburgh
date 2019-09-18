@@ -26,29 +26,27 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import android.app.NotificationManager
 import dagger.Module
 import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
+import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This Dagger module provides dependencies for dealing with alerts.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class
-])
-internal class FlavourModule {
+@Module
+internal class AlertsModule {
 
     /**
-     * Provide a [CleanUpTask] instance.
+     * Provide an implementation for [AlertNotificationDispatcher].
      *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
+     * @param notificationManager The Android [NotificationManager].
+     * @return The implementation for [AlertNotificationDispatcher].
      */
     @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
+    fun provideAlertNotificationDispatcher(notificationManager: NotificationManager)
+            : AlertNotificationDispatcher = AndroidAlertNotificationDispatcher(notificationManager)
 }

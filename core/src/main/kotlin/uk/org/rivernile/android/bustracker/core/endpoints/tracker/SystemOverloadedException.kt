@@ -24,31 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
-
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This [Exception] should be thrown when the server reports that it is overloaded (or some other
+ * rate limiting is implemented).
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class
-])
-internal class FlavourModule {
+class SystemOverloadedException : TrackerException {
 
     /**
-     * Provide a [CleanUpTask] instance.
-     *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
+     * Create a new `SystemOverloadedException` with a default message.
      */
-    @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
+    constructor() : super("The remote server is overloaded.")
+
+    /**
+     * Create a new `SystemOverloadedException` with the given `detailMessage`.
+     *
+     * @param detailMessage The message to set in the [Exception].
+     */
+    constructor(detailMessage: String) : super(detailMessage)
 }

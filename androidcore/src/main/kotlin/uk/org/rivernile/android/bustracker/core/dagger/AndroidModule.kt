@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.app.Application
+import android.app.NotificationManager
 import android.app.job.JobScheduler
 import android.content.Context
 import android.content.SharedPreferences
@@ -73,4 +74,15 @@ internal class AndroidModule {
     @Singleton
     fun provideSharedPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
+
+    /**
+     * Provide the [NotificationManager].
+     *
+     * @param context The application [Context].
+     * @return The [NotificationManager] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideNotificationManager(context: Context): NotificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 }

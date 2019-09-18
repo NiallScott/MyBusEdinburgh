@@ -24,31 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.alerts
 
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+import android.app.NotificationManager
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This is the Android-specific implementation of [AlertNotificationDispatcher].
  *
+ * @param notificationManager The [NotificationManager].
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class
-])
-internal class FlavourModule {
+internal class AndroidAlertNotificationDispatcher(
+        private val notificationManager: NotificationManager) : AlertNotificationDispatcher {
 
-    /**
-     * Provide a [CleanUpTask] instance.
-     *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
-     */
-    @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
+    override fun dispatchTimeAlertNotification(arrivalAlert: ArrivalAlert,
+                                               qualifyingServices: List<Service>) {
+        TODO("not implemented")
+    }
 }

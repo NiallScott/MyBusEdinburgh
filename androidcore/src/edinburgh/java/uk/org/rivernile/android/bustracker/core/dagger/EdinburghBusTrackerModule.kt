@@ -32,42 +32,49 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
-import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForApi
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiServiceFactory
-import uk.org.rivernile.android.bustracker.core.endpoints.api.JsonApiEndpoint
+import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForTracker
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
+import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
+import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
- * This Dagger module provides dependencies for the API.
+ * This [Module] provides dependencies for the Edinburgh Bus Tracker API.
  *
  * @author Niall Scott
  */
 @Module
-internal class ApiModule {
+internal class EdinburghBusTrackerModule {
 
     /**
-     * Provide the [ApiEndpoint] implementation.
+     * Provide the [TrackerEndpoint] instance.
      *
-     * @param apiServiceFactory An [ApiServiceFactory] instance.
-     * @param apiKeyGenerator An [ApiKeyGenerator] instance.
-     * @return The [ApiEndpoint] implementation.
+     * @param api The [EdinburghBusTrackerApi] instance.
+     * @param apiKeyGenerator An implementation to generate API keys for this service.
+     * @param liveTimesMapper Used to map responses to our model objects.
+     * @param errorMapper Used to map errors.
      */
     @Provides
     @Singleton
-    fun provideApiEndpoint(apiServiceFactory: ApiServiceFactory,
-                           apiKeyGenerator: ApiKeyGenerator): ApiEndpoint =
-            JsonApiEndpoint(apiServiceFactory, apiKeyGenerator, BuildConfig.SCHEMA_NAME)
+    fun provideTrackerEndpoint(api: EdinburghBusTrackerApi,
+                               apiKeyGenerator: ApiKeyGenerator,
+                               liveTimesMapper: LiveTimesMapper,
+                               errorMapper: ErrorMapper): TrackerEndpoint =
+            EdinburghTrackerEndpoint(api, apiKeyGenerator, liveTimesMapper, errorMapper)
 
     /**
-     * Provide the [ApiKeyGenerator] implementation.
+     * Provide the [EdinburghBusTrackerApi] instance.
      *
-     * @return The [ApiKeyGenerator] implementation.
+     * @param retrofit The [Retrofit] instance to create the [EdinburghBusTrackerApi] instance from.
+     * @return A new [EdinburghBusTrackerApi] instance.
      */
     @Provides
-    fun provideApiKeyGenerator() = ApiKeyGenerator(BuildConfig.API_KEY)
+    fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghBusTrackerApi =
+            retrofit.create(EdinburghBusTrackerApi::class.java)
 
     /**
      * Provide the [Retrofit] instance for the API.
@@ -77,11 +84,11 @@ internal class ApiModule {
      * @return The [Retrofit] instance.
      */
     @Provides
-    @ForApi
-    fun provideRetrofit(@ForApi okHttpClient: OkHttpClient,
+    @ForTracker
+    fun provideRetrofit(@ForTracker okHttpClient: OkHttpClient,
                         gsonConverterFactory: GsonConverterFactory): Retrofit =
             Retrofit.Builder()
-                    .baseUrl(BuildConfig.API_BASE_URL)
+                    .baseUrl(BuildConfig.TRACKER_BASE_URL)
                     .client(okHttpClient)
                     .addConverterFactory(gsonConverterFactory)
                     .build()
@@ -93,7 +100,7 @@ internal class ApiModule {
      * @return The [OkHttpClient] instance for the API.
      */
     @Provides
-    @ForApi
+    @ForTracker
     fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
             okHttpClient.newBuilder()
                     .connectTimeout(30, TimeUnit.SECONDS)
@@ -101,4 +108,13 @@ internal class ApiModule {
                     .writeTimeout(30, TimeUnit.SECONDS)
                     .followRedirects(false)
                     .build()
+
+    /**
+     * Provide an [ApiKeyGenerator] instance.
+     *
+     * @return An [ApiKeyGenerator] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideApiKeyGenerator() = ApiKeyGenerator(BuildConfig.API_KEY)
 }

@@ -43,11 +43,12 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Module(includes = [
+    AlertsModule::class,
     AndroidModule::class,
-    DatabaseModule::class,
-    HttpModule::class,
     ApiModule::class,
+    DatabaseModule::class,
     FlavourModule::class,
+    HttpModule::class,
     ServiceModule::class
 ])
 class CoreModule {
@@ -74,7 +75,7 @@ class CoreModule {
      * Provide the [AndroidPreferenceManager]. This is a special case for exposing the real
      * implementation within this module.
      *
-     * @param preferences The Android [SharedPreferences] for this [AndroidPreferenceManager].
+     * @param sharedPreferences The Android [SharedPreferences] for this [AndroidPreferenceManager].
      * @return The [AndroidPreferenceManager].
      */
     @Provides
