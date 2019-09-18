@@ -146,7 +146,7 @@ class TimeAlertRunnerTest {
             runnable.run()
         }.whenever(executorService).execute(any())
         whenever(alertsDao.getArrivalAlertCount())
-                .thenReturn(0)
+                .thenReturn(1, 0)
 
         runner.start()
         argumentCaptor<AlertsDao.OnAlertsChangedListener> {
