@@ -25,17 +25,14 @@
 
 package uk.org.rivernile.android.bustracker
 
-import android.app.Activity
 import android.app.Application
-import android.app.Service
 import android.app.backup.BackupManager
 import android.content.Context
 import android.content.SharedPreferences
 import com.bugsense.trace.BugSenseHandler
 import com.squareup.picasso.Picasso
 import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
-import dagger.android.HasServiceInjector
+import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
@@ -57,13 +54,11 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-abstract class BusApplication : Application(), HasActivityInjector, HasServiceInjector,
+abstract class BusApplication : Application(), HasAndroidInjector,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Inject
-    lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
-    @Inject
-    lateinit var dispatchingServiceInjector: DispatchingAndroidInjector<Service>
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
     @Inject
     lateinit var startUpTask: StartUpTask
     @Inject
@@ -88,9 +83,7 @@ abstract class BusApplication : Application(), HasActivityInjector, HasServiceIn
         startUpTask.performStartUpTasks()
     }
 
-    override fun activityInjector() = dispatchingActivityInjector
-
-    override fun serviceInjector() = dispatchingServiceInjector
+    override fun androidInjector() = dispatchingAndroidInjector
 
     override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
         BackupManager.dataChanged(packageName)

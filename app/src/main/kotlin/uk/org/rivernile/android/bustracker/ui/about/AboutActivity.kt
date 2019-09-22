@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2019 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,10 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
-import dagger.android.support.HasSupportFragmentInjector
+import dagger.android.HasAndroidInjector
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject
 
@@ -39,7 +38,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class AboutActivity : AppCompatActivity(), HasSupportFragmentInjector, AboutFragment.Callbacks {
+class AboutActivity : AppCompatActivity(), HasAndroidInjector, AboutFragment.Callbacks {
 
     companion object {
 
@@ -48,7 +47,7 @@ class AboutActivity : AppCompatActivity(), HasSupportFragmentInjector, AboutFrag
     }
 
     @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Fragment>
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -58,7 +57,7 @@ class AboutActivity : AppCompatActivity(), HasSupportFragmentInjector, AboutFrag
         setContentView(R.layout.about)
     }
 
-    override fun supportFragmentInjector() = dispatchingAndroidInjector
+    override fun androidInjector() = dispatchingAndroidInjector
 
     override fun onShowCredits() {
         CreditsDialogFragment().show(supportFragmentManager, DIALOG_CREDITS)
