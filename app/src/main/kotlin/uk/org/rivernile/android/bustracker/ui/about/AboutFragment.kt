@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.AndroidSupportInjection
@@ -72,7 +71,7 @@ class AboutFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         AndroidSupportInjection.inject(this)
-        val viewModel = ViewModelProviders.of(this, viewModelFactory)
+        val viewModel = ViewModelProvider(this, viewModelFactory)
                 .get(AboutViewModel::class.java)
 
         adapter = AboutAdapter(requireContext())
