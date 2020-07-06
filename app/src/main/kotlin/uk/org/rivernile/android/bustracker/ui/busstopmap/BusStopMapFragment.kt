@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,6 @@ import android.app.Activity
 import android.app.PendingIntent
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -172,7 +171,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
+        viewModel = ViewModelProvider(this, viewModelFactory)
                 .get(BusStopMapViewModel::class.java)
 
         viewModel.serviceNames.observe(this, Observer {
@@ -577,7 +576,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
                 viewModel.selectedServices,
                 getString(R.string.busstopmapfragment_service_chooser_title)).also {
             it.setTargetFragment(this, 0)
-            it.show(requireFragmentManager(), DIALOG_SERVICES_CHOOSER)
+            it.show(childFragmentManager, DIALOG_SERVICES_CHOOSER)
         }
     }
 
@@ -587,7 +586,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     private fun showMapTypeSelection() {
         MapTypeBottomSheetDialogFragment.newInstance(toMapType()).also {
             it.setTargetFragment(this, 0)
-            it.show(requireFragmentManager(), DIALOG_MAP_TYPE_BOTTOM_SHEET)
+            it.show(childFragmentManager, DIALOG_MAP_TYPE_BOTTOM_SHEET)
         }
     }
 

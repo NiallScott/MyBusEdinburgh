@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -114,8 +114,8 @@ dependencies {
 
     // Android support libraries
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
 
