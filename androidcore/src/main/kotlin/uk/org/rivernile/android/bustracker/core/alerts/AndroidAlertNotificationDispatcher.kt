@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,21 +26,126 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
-import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import uk.org.rivernile.android.bustracker.androidcore.R
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
+import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
+import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
+import javax.inject.Inject
 
 /**
  * This is the Android-specific implementation of [AlertNotificationDispatcher].
  *
- * @param notificationManager The [NotificationManager].
+ * @param context The application [Context].
+ * @param notificationManager The [NotificationManagerCompat].
+ * @param busStopsDao The DAO to access bus stop information.
+ * @param deeplinkIntentFactory An implementation which creates [Intent]s for deeplinking.
+ * @param textFormattingUtils Utility class for formatting text of stop name.
  * @author Niall Scott
  */
-internal class AndroidAlertNotificationDispatcher(
-        private val notificationManager: NotificationManager) : AlertNotificationDispatcher {
+internal class AndroidAlertNotificationDispatcher @Inject constructor(
+        private val context: Context,
+        private val notificationManager: NotificationManagerCompat,
+        private val busStopsDao: BusStopsDao,
+        private val deeplinkIntentFactory: DeeplinkIntentFactory,
+        private val textFormattingUtils: TextFormattingUtils) : AlertNotificationDispatcher {
+
+    companion object {
+
+        private const val NOTIFICATION_ID_ALERT = 2
+
+        private const val TIMEOUT_ALERT_MILLIS = 1800000L // 30 minutes
+    }
 
     override fun dispatchTimeAlertNotification(arrivalAlert: ArrivalAlert,
                                                qualifyingServices: List<Service>) {
-        TODO("not implemented")
+        val title = context.getString(R.string.arrival_alert_notification_title)
+        val summary = createAlertSummaryString(arrivalAlert, qualifyingServices)
+        val pendingIntent = createAlertPendingIntent(arrivalAlert.stopCode)
+
+        NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_ARRIVAL_ALERTS)
+                .apply {
+                    setSmallIcon(R.drawable.ic_directions_bus_black)
+                    setContentTitle(title)
+                    setContentText(summary)
+                    setTicker(summary)
+                    setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                    priority = NotificationCompat.PRIORITY_HIGH
+                    setCategory(NotificationCompat.CATEGORY_ALARM)
+                    setContentIntent(pendingIntent)
+                    setAutoCancel(true)
+                    setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+                }
+                .let {
+                    notificationManager.notify(NOTIFICATION_ID_ALERT, it.build())
+                }
     }
+
+    /**
+     * Create the summary [String] that is shown to the user detailing the alert.
+     *
+     * @param arrivalAlert The [ArrivalAlert] that caused the notification.
+     * @param qualifyingServices What services caused the notification to be fired.
+     * @return The summary [String] shown to the user.
+     */
+    private fun createAlertSummaryString(
+            arrivalAlert: ArrivalAlert,
+            qualifyingServices: List<Service>): String {
+        val serviceListing = qualifyingServices.joinToString()
+        val numberOfMinutes = getAlertNumberOfMinutesString(arrivalAlert.timeTrigger)
+        val displayableStopName = getDisplayableStopName(arrivalAlert.stopCode)
+
+        return context.resources.getQuantityString(
+                R.plurals.arrival_alert_notification_services,
+                qualifyingServices.size,
+                serviceListing,
+                numberOfMinutes,
+                displayableStopName)
+    }
+
+    /**
+     * Get a formatted [String] to display to the user of the number of minutes until arrival.
+     *
+     * @param minutes The number of minutes time trigger.
+     * @return Human readable number of minutes until arrival.
+     */
+    private fun getAlertNumberOfMinutesString(minutes: Int) = if (minutes < 2) {
+        context.getString(R.string.arrival_alert_notification_time_now)
+    } else {
+        context.resources.getQuantityString(
+                R.plurals.arrival_alert_notifications_time_plural, minutes, minutes)
+    }
+
+    /**
+     * Get the stop name to display.
+     *
+     * @param stopCode The stop code.
+     * @return The stop name to display.
+     */
+    private fun getDisplayableStopName(stopCode: String): String {
+        val stopName = busStopsDao.getNameForStop(stopCode)
+
+        return textFormattingUtils.formatBusStopNameWithStopCode(stopCode, stopName)
+    }
+
+    /**
+     * Create a [PendingIntent] - the action which is performed when the user clicks on the
+     * notification.
+     *
+     * @param stopCode The stop code.
+     * @return A [PendingIntent] which is executed when the user clicks on the notification.
+     */
+    private fun createAlertPendingIntent(stopCode: String) =
+            deeplinkIntentFactory.createShowBusTimesIntent(stopCode)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .let {
+                        PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_ONE_SHOT)
+                    }
 }

@@ -24,35 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
-
-import dagger.Module
-import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService
-import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService
+package uk.org.rivernile.android.bustracker.core.notifications
 
 /**
- * This [Module] is used to inject [android.app.Service] instances in this application.
+ * This interface allows notification channels to be interacted with safely depending on what
+ * platform version we're running on.
  *
  * @author Niall Scott
  */
-@Suppress("unused")
-@Module
-internal abstract class ServiceModule {
+interface AppNotificationChannels {
+
+    companion object {
+
+        /**
+         * This is the [String] constant for the foreground tasks notification channel.
+         */
+        const val CHANNEL_FOREGROUND_TASKS = "foregroundTasks"
+        /**
+         * This is the [String] constant for the arrival alerts notification channel.
+         */
+        const val CHANNEL_ARRIVAL_ALERTS = "arrivalAlerts"
+    }
 
     /**
-     * Presents an instance of [ArrivalAlertRunnerService] as an item to be injected.
-     *
-     * @return An instance of [ArrivalAlertRunnerService] to be injected.
+     * Create the application's notification channels.
      */
-    @ContributesAndroidInjector
-    abstract fun contributeArrivalAlertRunnerService(): ArrivalAlertRunnerService
-
-    /**
-     * Presents an instance of [DatabaseUpdateJobService] as an item to be injected.
-     *
-     * @return An instance of [DatabaseUpdateJobService] to be injected.
-     */
-    @ContributesAndroidInjector
-    abstract fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
+    fun createNotificationChannels()
 }

@@ -24,35 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
-
-import dagger.Module
-import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService
-import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService
+package uk.org.rivernile.android.bustracker.core.notifications
 
 /**
- * This [Module] is used to inject [android.app.Service] instances in this application.
+ * This is a legacy implementation of [AppNotificationChannels]. As notification channels appear
+ * from API level 26, this implementation is just a stub.
  *
  * @author Niall Scott
  */
-@Suppress("unused")
-@Module
-internal abstract class ServiceModule {
+internal class LegacyAppNotificationChannels : AppNotificationChannels {
 
-    /**
-     * Presents an instance of [ArrivalAlertRunnerService] as an item to be injected.
-     *
-     * @return An instance of [ArrivalAlertRunnerService] to be injected.
-     */
-    @ContributesAndroidInjector
-    abstract fun contributeArrivalAlertRunnerService(): ArrivalAlertRunnerService
-
-    /**
-     * Presents an instance of [DatabaseUpdateJobService] as an item to be injected.
-     *
-     * @return An instance of [DatabaseUpdateJobService] to be injected.
-     */
-    @ContributesAndroidInjector
-    abstract fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
+    override fun createNotificationChannels() {
+        // This is deliberately empty - notification channels appear in Android 8.0 (API 26).
+    }
 }

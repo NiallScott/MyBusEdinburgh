@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.deeplinking
 
-import dagger.Module
-import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService
-import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService
+import android.content.Intent
 
 /**
- * This [Module] is used to inject [android.app.Service] instances in this application.
+ * This class is used to create [Intent]s used for deeplinking in to various parts of the app, e.g.
+ * from notifications.
  *
  * @author Niall Scott
  */
-@Suppress("unused")
-@Module
-internal abstract class ServiceModule {
+interface DeeplinkIntentFactory {
 
     /**
-     * Presents an instance of [ArrivalAlertRunnerService] as an item to be injected.
+     * Create an [Intent] used for deeplinking the user in to the bus times display for a bus stop.
      *
-     * @return An instance of [ArrivalAlertRunnerService] to be injected.
+     * @param stopCode The stop code to show times for.
+     * @return The [Intent] to launch the bus times display.
      */
-    @ContributesAndroidInjector
-    abstract fun contributeArrivalAlertRunnerService(): ArrivalAlertRunnerService
-
-    /**
-     * Presents an instance of [DatabaseUpdateJobService] as an item to be injected.
-     *
-     * @return An instance of [DatabaseUpdateJobService] to be injected.
-     */
-    @ContributesAndroidInjector
-    abstract fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
+    fun createShowBusTimesIntent(stopCode: String): Intent
 }

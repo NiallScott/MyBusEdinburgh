@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,12 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
+import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.concurrency.NewThreadExecutor
 import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForStartUpTask
+import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
+import uk.org.rivernile.android.bustracker.core.notifications.LegacyAppNotificationChannels
+import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import java.util.concurrent.Executor
@@ -93,4 +99,21 @@ class CoreModule {
     @Singleton
     internal fun providePreferenceManager(androidPreferenceManager: AndroidPreferenceManager)
             : PreferenceManager = androidPreferenceManager
+
+    /**
+     * Provide the [AppNotificationChannels] instance for dealing with notification channels.
+     *
+     * @param context The application [Context].
+     * @param notificationManager The system [NotificationManagerCompat].
+     * @return An [AppNotificationChannels] instance.
+     */
+    @Provides
+    fun provideAppNotificationChannels(context: Context,
+            notificationManager: NotificationManagerCompat): AppNotificationChannels {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            V26AppNotificationChannels(context, notificationManager)
+        } else {
+            LegacyAppNotificationChannels()
+        }
+    }
 }

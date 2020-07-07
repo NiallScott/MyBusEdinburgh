@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.startup
 
 import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForStartUpTask
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
+import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -37,6 +38,7 @@ import javax.inject.Inject
  *
  * The task is begun in [performStartUpTasks] and this is executed on another thread.
  *
+ * @param appNotificationChannels Implementation to set up notification channels.
  * @param busStopDatabaseUpdateJobScheduler Implementation to schedule updates to the bus stop
  * database.
  * @param cleanUpTask Implementation to perform clean up of app data - usually to remove data from
@@ -45,6 +47,7 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class StartUpTask @Inject internal constructor(
+        private val appNotificationChannels: AppNotificationChannels,
         private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseJobScheduler,
         private val cleanUpTask: CleanUpTask?,
         @ForStartUpTask private val executor: Executor) {
@@ -61,6 +64,7 @@ class StartUpTask @Inject internal constructor(
      * Runs the app startup tasks. This is run on a background thread.
      */
     private fun performStartUpTasksInternal() {
+        appNotificationChannels.createNotificationChannels()
         busStopDatabaseUpdateJobScheduler.scheduleUpdateBusStopDatabaseJob()
         cleanUpTask?.performCleanUp()
     }

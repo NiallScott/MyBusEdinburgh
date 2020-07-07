@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,6 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
+import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.testutils.CurrentThreadExecutor
 
 /**
@@ -44,6 +45,8 @@ import uk.org.rivernile.android.bustracker.core.testutils.CurrentThreadExecutor
 class StartUpTaskTest {
 
     @Mock
+    internal lateinit var appNotificationChannels: AppNotificationChannels
+    @Mock
     internal lateinit var busStopDatabaseJobScheduler: UpdateBusStopDatabaseJobScheduler
     @Mock
     lateinit var cleanUpTask: CleanUpTask
@@ -51,10 +54,16 @@ class StartUpTaskTest {
 
     @Test
     fun performsStartUpTasks() {
-        val startUpTask = StartUpTask(busStopDatabaseJobScheduler, cleanUpTask, executor)
+        val startUpTask = StartUpTask(
+                appNotificationChannels,
+                busStopDatabaseJobScheduler,
+                cleanUpTask,
+                executor)
 
         startUpTask.performStartUpTasks()
 
+        verify(appNotificationChannels)
+                .createNotificationChannels()
         verify(busStopDatabaseJobScheduler)
                 .scheduleUpdateBusStopDatabaseJob()
         verify(cleanUpTask)
@@ -63,7 +72,11 @@ class StartUpTaskTest {
 
     @Test
     fun doesNotThrowNullPointerExceptionWhenNoCleanUpTaskIsSupplied() {
-        val startUpTask = StartUpTask(busStopDatabaseJobScheduler, null, executor)
+        val startUpTask = StartUpTask(
+                appNotificationChannels,
+                busStopDatabaseJobScheduler,
+                null,
+                executor)
 
         startUpTask.performStartUpTasks()
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,10 +27,10 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.app.Application
-import android.app.NotificationManager
 import android.app.job.JobScheduler
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.app.NotificationManagerCompat
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
@@ -76,13 +76,13 @@ internal class AndroidModule {
             context.getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
 
     /**
-     * Provide the [NotificationManager].
+     * Provide the [NotificationManagerCompat].
      *
      * @param context The application [Context].
-     * @return The [NotificationManager] instance.
+     * @return The [NotificationManagerCompat] instance.
      */
     @Provides
     @Singleton
-    fun provideNotificationManager(context: Context): NotificationManager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    fun provideNotificationManagerCompat(context: Context): NotificationManagerCompat =
+            NotificationManagerCompat.from(context)
 }

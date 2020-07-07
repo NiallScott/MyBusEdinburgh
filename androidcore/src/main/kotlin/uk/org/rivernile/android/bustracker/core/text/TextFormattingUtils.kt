@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,33 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.text
 
-import dagger.Module
-import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService
-import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService
+import android.content.Context
+import uk.org.rivernile.android.bustracker.androidcore.R
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import javax.inject.Inject
 
 /**
- * This [Module] is used to inject [android.app.Service] instances in this application.
+ * This class contains methods which provide common ways for formatting text in the app.
  *
+ * @param context The application [Context].
  * @author Niall Scott
  */
-@Suppress("unused")
-@Module
-internal abstract class ServiceModule {
+class TextFormattingUtils @Inject internal constructor(
+        private val context: Context) {
 
     /**
-     * Presents an instance of [ArrivalAlertRunnerService] as an item to be injected.
+     * Format a bus stop name [String] containing the stop code.
      *
-     * @return An instance of [ArrivalAlertRunnerService] to be injected.
+     * @param stopCode The stop code.
+     * @param stopName The stop name data.
+     * @return The formatted stop name, containing the stop code.
      */
-    @ContributesAndroidInjector
-    abstract fun contributeArrivalAlertRunnerService(): ArrivalAlertRunnerService
-
-    /**
-     * Presents an instance of [DatabaseUpdateJobService] as an item to be injected.
-     *
-     * @return An instance of [DatabaseUpdateJobService] to be injected.
-     */
-    @ContributesAndroidInjector
-    abstract fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
+    fun formatBusStopNameWithStopCode(stopCode: String, stopName: StopName?) =
+            stopName?.let {
+                it.locality?.let { locality ->
+                    context.getString(R.string.busstop_locality, it.name, locality, stopCode)
+                } ?: context.getString(R.string.busstop, it.name, stopCode)
+            } ?: stopCode
 }

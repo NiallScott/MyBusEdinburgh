@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,22 +27,26 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
 import android.content.Context
-import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 
 /**
- * This is an Android concrete implementation of the [DatabaseInformationDao].
+ * This is an Android concrete implementation of the [BusStopsDao].
  *
  * @param context The application [Context].
  * @param contract The database contract, so we know how to talk to it.
  * @author Niall Scott
  */
-internal class AndroidDatabaseInformationDao(private val context: Context,
-                                             private val contract: DatabaseInformationContract)
-    : DatabaseInformationDao {
+internal class AndroidBusStopsDao(
+        private val context: Context,
+        private val contract: BusStopsContract)
+    : BusStopsDao {
 
-    override fun getTopologyId() = context.contentResolver.query(
+    override fun getNameForStop(stopCode: String) = context.contentResolver.query(
             contract.getContentUri(),
-            arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID),
+            arrayOf(
+                    BusStopsContract.STOP_NAME,
+                    BusStopsContract.LOCALITY),
             null,
             null,
             null)?.use {
@@ -50,7 +54,10 @@ internal class AndroidDatabaseInformationDao(private val context: Context,
         it.count
 
         if (it.moveToFirst()) {
-            it.getString(it.getColumnIndex(DatabaseInformationContract.CURRENT_TOPOLOGY_ID))
+            it.getString(it.getColumnIndex(BusStopsContract.STOP_NAME))?.let { name ->
+                val locality = it.getString(it.getColumnIndex(BusStopsContract.LOCALITY))
+                StopName(name, locality)
+            }
         } else {
             null
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,12 +27,15 @@ package uk.org.rivernile.android.bustracker.dagger
 
 import android.content.Context
 import com.google.android.gms.common.GoogleApiAvailability
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapDataModule
 import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
+import uk.org.rivernile.android.bustracker.deeplinking.AppDeeplinkIntentFactory
 import javax.inject.Singleton
 
 /**
@@ -41,9 +44,10 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Module(includes = [
-    ViewModelModule::class,
     AboutDataModule::class,
-    BusStopMapDataModule::class
+    ApplicationModule.Bindings::class,
+    BusStopMapDataModule::class,
+    ViewModelModule::class
 ])
 class ApplicationModule {
 
@@ -67,4 +71,13 @@ class ApplicationModule {
     @Provides
     @Singleton
     fun provideGoogleApiAvailability(): GoogleApiAvailability = GoogleApiAvailability.getInstance()
+
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindDeeplinkIntentFactory(appDeeplinkIntentFactory: AppDeeplinkIntentFactory)
+                : DeeplinkIntentFactory
+    }
 }

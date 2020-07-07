@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -62,6 +62,8 @@ class TimeAlertRunnerTest {
     lateinit var alertsDao: AlertsDao
     @Mock
     lateinit var executorService: ScheduledExecutorService
+    @Mock
+    lateinit var stopListener: () -> Unit
 
     private lateinit var runner: TimeAlertRunner
 
@@ -72,7 +74,7 @@ class TimeAlertRunnerTest {
 
     @Test
     fun startingRunnerRegistersCallbackListenerWithDao() {
-        runner.start()
+        runner.start(null)
 
         verify(alertsDao)
                 .addOnAlertsChangedListener(any())
@@ -80,7 +82,7 @@ class TimeAlertRunnerTest {
 
     @Test
     fun startingRunnerSchedulesPollingWithCheckTimesTask() {
-        runner.start()
+        runner.start(null)
 
         verify(executorService)
                 .scheduleWithFixedDelay(any(), eq(0L), eq(CHECK_TIMES_INTERVAL_SECS),
@@ -89,7 +91,7 @@ class TimeAlertRunnerTest {
 
     @Test
     fun stopRunnerRemovesCallbackListenerWithDao() {
-        runner.start()
+        runner.start(null)
         runner.stop()
 
         verify(alertsDao)
@@ -98,7 +100,7 @@ class TimeAlertRunnerTest {
 
     @Test
     fun stopRunnerShutsDownExecutorService() {
-        runner.start()
+        runner.start(null)
         runner.stop()
 
         verify(executorService)
@@ -106,10 +108,19 @@ class TimeAlertRunnerTest {
     }
 
     @Test
-    fun runnerCanOnlyBeStartedOnce() {
-        runner.start()
+    fun stopRunnerCallsStopListener() {
+        runner.start(stopListener)
         runner.stop()
-        runner.start()
+
+        verify(stopListener)
+                .invoke()
+    }
+
+    @Test
+    fun runnerCanOnlyBeStartedOnce() {
+        runner.start(null)
+        runner.stop()
+        runner.start(null)
 
         verify(alertsDao, times(1))
                 .addOnAlertsChangedListener(any())
@@ -126,7 +137,7 @@ class TimeAlertRunnerTest {
         whenever(alertsDao.getArrivalAlertCount())
                 .thenReturn(1)
 
-        runner.start()
+        runner.start(null)
         argumentCaptor<AlertsDao.OnAlertsChangedListener> {
             verify(alertsDao)
                     .addOnAlertsChangedListener(capture())
@@ -148,7 +159,7 @@ class TimeAlertRunnerTest {
         whenever(alertsDao.getArrivalAlertCount())
                 .thenReturn(1, 0)
 
-        runner.start()
+        runner.start(stopListener)
         argumentCaptor<AlertsDao.OnAlertsChangedListener> {
             verify(alertsDao)
                     .addOnAlertsChangedListener(capture())
@@ -159,5 +170,7 @@ class TimeAlertRunnerTest {
                 .removeOnAlertsChangedListener(any())
         verify(executorService)
                 .shutdownNow()
+        verify(stopListener)
+                .invoke()
     }
 }

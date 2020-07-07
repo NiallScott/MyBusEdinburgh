@@ -24,35 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.di
 
-import dagger.Module
-import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService
-import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This [Module] is used to inject [android.app.Service] instances in this application.
+ * This annotation defines a Dagger qualifier for arrival alert dependencies.
  *
  * @author Niall Scott
  */
-@Suppress("unused")
-@Module
-internal abstract class ServiceModule {
-
-    /**
-     * Presents an instance of [ArrivalAlertRunnerService] as an item to be injected.
-     *
-     * @return An instance of [ArrivalAlertRunnerService] to be injected.
-     */
-    @ContributesAndroidInjector
-    abstract fun contributeArrivalAlertRunnerService(): ArrivalAlertRunnerService
-
-    /**
-     * Presents an instance of [DatabaseUpdateJobService] as an item to be injected.
-     *
-     * @return An instance of [DatabaseUpdateJobService] to be injected.
-     */
-    @ContributesAndroidInjector
-    abstract fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForArrivalAlerts

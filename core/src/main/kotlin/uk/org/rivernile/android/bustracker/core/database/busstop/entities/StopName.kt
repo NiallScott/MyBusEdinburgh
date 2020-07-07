@@ -24,37 +24,15 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
-
-import dagger.Binds
-import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
-import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
+package uk.org.rivernile.android.bustracker.core.database.busstop.entities
 
 /**
- * This Dagger module provides dependencies for dealing with alerts.
+ * This class describes a stop name. A stop name is the combination of its name and its locality.
  *
+ * @property name The name of the stop.
+ * @property locality The locality, i.e. the name of the local area, of the stop. This is optional.
  * @author Niall Scott
  */
-@Module(includes = [ AlertsModule.Bindings::class ])
-internal class AlertsModule {
-
-    @Provides
-    @ForArrivalAlerts
-    fun provideArrivalAlertExecutorService(): ScheduledExecutorService =
-            Executors.newSingleThreadScheduledExecutor()
-
-    @Module
-    interface Bindings {
-
-        @Suppress("unused")
-        @Binds
-        fun bindAlertNotificationDispatcher(
-                androidAlertNotificationDispatcher: AndroidAlertNotificationDispatcher)
-                : AlertNotificationDispatcher
-    }
-}
+data class StopName(
+        val name: String,
+        val locality: String?)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -45,7 +46,7 @@ import javax.inject.Inject
 class TimeAlertRunner @Inject internal constructor(
         private val checkTimesTask: CheckTimesTask,
         private val alertsDao: AlertsDao,
-        private val executorService: ScheduledExecutorService) {
+        @ForArrivalAlerts private val executorService: ScheduledExecutorService) {
 
     companion object {
 
@@ -53,28 +54,33 @@ class TimeAlertRunner @Inject internal constructor(
     }
 
     private val hasBeenStarted = AtomicBoolean(false)
+    private val hasBeenStopped = AtomicBoolean(false)
+    private var onStopListener: (() -> Unit)? = null
 
     /**
      * Start this runner. If the runner has been started before, calling this method has no effect.
      */
-    fun start() {
-        if (!hasBeenStarted.compareAndSet(false, true)) {
-            return
+    fun start(onStopListener: (() -> Unit)?) {
+        if (!hasBeenStopped.get() && hasBeenStarted.compareAndSet(false, true)) {
+            this.onStopListener = onStopListener
+            alertsDao.addOnAlertsChangedListener(alertsChangedListener)
+            // Perform customary check on the alert count.
+            executeAlertCountCheck()
+            executorService.scheduleWithFixedDelay(checkTimesTask::checkTimes, 0L,
+                    CHECK_TIMES_INTERVAL_SECS, TimeUnit.SECONDS)
         }
-
-        alertsDao.addOnAlertsChangedListener(alertsChangedListener)
-        // Perform customary check on the alert count.
-        executeAlertCountCheck()
-        executorService.scheduleWithFixedDelay(checkTimesTask::checkTimes, 0L,
-                CHECK_TIMES_INTERVAL_SECS, TimeUnit.SECONDS)
     }
 
     /**
      * Stop this runner.
      */
     fun stop() {
-        alertsDao.removeOnAlertsChangedListener(alertsChangedListener)
-        stopRunner()
+        if (hasBeenStopped.compareAndSet(false, true)) {
+            alertsDao.removeOnAlertsChangedListener(alertsChangedListener)
+            stopRunner()
+            onStopListener?.invoke()
+            onStopListener = null
+        }
     }
 
     /**

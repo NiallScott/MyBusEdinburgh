@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.daos
+package uk.org.rivernile.android.bustracker.deeplinking
 
 import android.content.Context
-import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
+import android.content.Intent
+import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
+import javax.inject.Inject
 
 /**
- * This is an Android concrete implementation of the [DatabaseInformationDao].
+ * The app specific implementation of [DeeplinkIntentFactory].
  *
  * @param context The application [Context].
- * @param contract The database contract, so we know how to talk to it.
  * @author Niall Scott
  */
-internal class AndroidDatabaseInformationDao(private val context: Context,
-                                             private val contract: DatabaseInformationContract)
-    : DatabaseInformationDao {
+class AppDeeplinkIntentFactory @Inject constructor(
+        private val context: Context) : DeeplinkIntentFactory {
 
-    override fun getTopologyId() = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID),
-            null,
-            null,
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
-
-        if (it.moveToFirst()) {
-            it.getString(it.getColumnIndex(DatabaseInformationContract.CURRENT_TOPOLOGY_ID))
-        } else {
-            null
-        }
-    }
+    override fun createShowBusTimesIntent(stopCode: String) =
+            Intent(context, DisplayStopDataActivity::class.java)
+                    .setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
+                    .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
 }
