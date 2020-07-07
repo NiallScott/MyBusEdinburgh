@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 import retrofit2.Call
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NetworkException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerRequest
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import java.io.IOException
@@ -58,7 +58,7 @@ internal class SingleLiveTimesRequest(private val call: Call<BusTimes>,
             throw errorMapper.mapHttpStatusCode(response.code())
         }
     } catch (e: IOException) {
-        throw TrackerException(e)
+        throw NetworkException(e)
     }
 
     override fun cancel() {

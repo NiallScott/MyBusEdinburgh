@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,12 +31,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker
  *
  * @author Niall Scott
  */
-open class TrackerException : Exception {
-
-    /**
-     * Default constructor.
-     */
-    constructor() : super()
+sealed class TrackerException : Exception {
 
     /**
      * Constructor that specifies a message.
@@ -51,12 +46,83 @@ open class TrackerException : Exception {
      * @param throwable The cause [Throwable].
      */
     constructor(throwable: Throwable) : super(throwable)
+}
+
+/**
+ * This [TrackerException] is thrown when there is no connectivity to the internet.
+ *
+ * @author Niall Scott
+ */
+class NoConnectivityException : TrackerException("No connectivity to the internet")
+
+/**
+ * This [TrackerException] is thrown when there is a networking issue.
+ *
+ * @param throwable The causing [Throwable].
+ * @author Niall Scott
+ */
+class NetworkException(throwable: Throwable) : TrackerException(throwable)
+
+/**
+ * This [TrackerException] should be thrown when there is a problem with dealing with the request on
+ * the remote server, for example, when the HTTP server returns a 5xx status code.
+ *
+ * @author Niall Scott
+ */
+sealed class ServerErrorException(detailMessage: String) : TrackerException(detailMessage)
+
+/**
+ * This [Exception] is used when there was a server-side error, but we don't handle it.
+ *
+ * @author Niall Scott
+ */
+class UnrecognisedServerErrorException : ServerErrorException {
 
     /**
-     * Constructor that specifies a message and a cause [Throwable].
-     *
-     * @param message Exception message.
-     * @param throwable The cause [Throwable].
+     * Create a new `UnrecognisedServerErrorException` with a default message.
      */
-    constructor(message: String, throwable: Throwable) : super(message, throwable)
+    constructor() : super("An unrecognised error occurred on the server.")
+
+    /**
+     * Create a new `UnrecognisedServerErrorException` with the given `detailMessage`.
+     *
+     * @param detailMessage The message to set in the [Exception].
+     */
+    constructor(detailMessage: String) : super(detailMessage)
 }
+
+/**
+ * This [ServerErrorException] should be thrown when there is a problem authenticating with the
+ * remote server, for example, if an API key is required and it is rejected.
+ *
+ * @author Niall Scott
+ */
+class AuthenticationException : ServerErrorException {
+
+    /**
+     * Create a new `AuthenticationException` with a default message.
+     */
+    constructor() : super("There was a problem authenticating with the remote server.")
+
+    /**
+     * Create a new `AuthenticationException` with the given `detailMessage`.
+     *
+     * @param detailMessage The message to set in the [Exception].
+     */
+    constructor(detailMessage: String) : super(detailMessage)
+}
+
+/**
+ * This [Exception] should be thrown when the remote server is down for maintenance.
+ *
+ * @author Niall Scott
+ */
+class MaintenanceException : ServerErrorException("The remote server is down for maintenance.")
+
+/**
+ * This [Exception] should be thrown when the server reports that it is overloaded (or some other
+ * rate limiting is implemented).
+ *
+ * @author Niall Scott
+ */
+class SystemOverloadedException : ServerErrorException("The remote server is overloaded.")

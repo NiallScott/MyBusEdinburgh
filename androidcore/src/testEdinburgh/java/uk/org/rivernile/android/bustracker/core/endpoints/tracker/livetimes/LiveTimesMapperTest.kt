@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.UnrecognisedServerErrorException
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTime
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
@@ -84,7 +85,7 @@ internal class LiveTimesMapperTest {
     @Test(expected = TrackerException::class)
     fun mapToLiveTimesThrowsExceptionWhenErrorIsFoundInData() {
         whenever(errorMapper.extractError(busTimes))
-                .thenReturn(TrackerException())
+                .thenReturn(UnrecognisedServerErrorException())
 
         liveTimesMapper.mapToLiveTimes(busTimes)
     }

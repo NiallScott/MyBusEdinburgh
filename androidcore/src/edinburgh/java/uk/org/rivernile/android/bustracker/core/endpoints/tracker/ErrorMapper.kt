@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,14 +49,14 @@ internal class ErrorMapper @Inject constructor() {
             FaultCode.INVALID_APP_KEY ->
                 AuthenticationException("The API key was not accepted by the server.")
             FaultCode.INVALID_PARAMETER ->
-                ServerErrorException()
+                UnrecognisedServerErrorException("INVALID_PARAMETER")
             FaultCode.PROCESSING_ERROR ->
-                ServerErrorException()
+                UnrecognisedServerErrorException("PROCESSING_ERROR")
             FaultCode.SYSTEM_MAINTENANCE ->
                 MaintenanceException()
             FaultCode.SYSTEM_OVERLOADED ->
                 SystemOverloadedException()
-            null -> TrackerException("An unknown error occurred.")
+            null -> UnrecognisedServerErrorException("Fault code = $it")
         }
     }
 
@@ -69,7 +69,6 @@ internal class ErrorMapper @Inject constructor() {
     fun mapHttpStatusCode(statusCode: Int) = when (statusCode) {
         HttpURLConnection.HTTP_UNAUTHORIZED -> AuthenticationException()
         HttpURLConnection.HTTP_FORBIDDEN -> AuthenticationException()
-        in 500..599 -> ServerErrorException("Server error: $statusCode")
-        else -> TrackerException("An unknown error occurred.")
+        else -> UnrecognisedServerErrorException("Server error: $statusCode")
     }
 }

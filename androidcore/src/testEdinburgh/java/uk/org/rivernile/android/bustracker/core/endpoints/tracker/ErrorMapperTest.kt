@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -75,7 +75,7 @@ class ErrorMapperTest {
         val result = errorMapper.extractError(busTimes)
 
         assertNotNull(result)
-        assertEquals(TrackerException::class.java, result?.javaClass)
+        assertEquals(UnrecognisedServerErrorException::class.java, result?.javaClass)
     }
 
     @Test
@@ -97,7 +97,7 @@ class ErrorMapperTest {
         val result = errorMapper.extractError(busTimes)
 
         assertNotNull(result)
-        assertEquals(ServerErrorException::class.java, result?.javaClass)
+        assertEquals(UnrecognisedServerErrorException::class.java, result?.javaClass)
     }
 
     @Test
@@ -108,7 +108,7 @@ class ErrorMapperTest {
         val result = errorMapper.extractError(busTimes)
 
         assertNotNull(result)
-        assertEquals(ServerErrorException::class.java, result?.javaClass)
+        assertEquals(UnrecognisedServerErrorException::class.java, result?.javaClass)
     }
 
     @Test
@@ -151,27 +151,27 @@ class ErrorMapperTest {
     fun http500StatusCodeMapsToServerErrorException() {
         val result = errorMapper.mapHttpStatusCode(500)
 
-        assertEquals(ServerErrorException::class.java, result.javaClass)
+        assertEquals(UnrecognisedServerErrorException::class.java, result.javaClass)
     }
 
     @Test
     fun http599StatusCodeMapsToServerErrorException() {
         val result = errorMapper.mapHttpStatusCode(599)
 
-        assertEquals(ServerErrorException::class.java, result.javaClass)
+        assertEquals(UnrecognisedServerErrorException::class.java, result.javaClass)
     }
 
     @Test
     fun randomStatusCodeMapsToGenericTrackerException() {
         val result = errorMapper.mapHttpStatusCode(499)
 
-        assertEquals(TrackerException::class.java, result.javaClass)
+        assertEquals(UnrecognisedServerErrorException::class.java, result.javaClass)
     }
 
     @Test
     fun randomStatusCode2MapsToGenericTrackerException() {
         val result = errorMapper.mapHttpStatusCode(600)
 
-        assertEquals(TrackerException::class.java, result.javaClass)
+        assertEquals(UnrecognisedServerErrorException::class.java, result.javaClass)
     }
 }

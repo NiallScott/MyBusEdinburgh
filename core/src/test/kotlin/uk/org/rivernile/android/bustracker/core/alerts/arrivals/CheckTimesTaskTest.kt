@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,8 +40,8 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatch
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerRequest
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.UnrecognisedServerErrorException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
@@ -126,7 +126,7 @@ class CheckTimesTaskTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         whenever(trackerRequest.performRequest())
-                .thenThrow(TrackerException::class.java)
+                .thenThrow(UnrecognisedServerErrorException::class.java)
 
         checkTimesTask.checkTimes()
     }
