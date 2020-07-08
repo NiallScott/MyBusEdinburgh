@@ -24,30 +24,29 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.deeplinking
+package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
-import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
-import uk.org.rivernile.android.bustracker.ui.main.MainActivity
+import dagger.android.AndroidInjection
+import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import javax.inject.Inject
 
 /**
- * The app specific implementation of [DeeplinkIntentFactory].
+ * This [BroadcastReceiver] is called when the user has tapped 'Remove' on the arrival alert
+ * notification.
  *
- * @param context The application [Context].
  * @author Niall Scott
  */
-class AppDeeplinkIntentFactory @Inject constructor(
-        private val context: Context) : DeeplinkIntentFactory {
+class RemoveArrivalAlertBroadcastReceiver : BroadcastReceiver() {
 
-    override fun createShowBusTimesIntent(stopCode: String) =
-            Intent(context, DisplayStopDataActivity::class.java)
-                    .setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
-                    .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+    @Inject
+    lateinit var alertManager: AlertManager
 
-    override fun createManageAlertsIntent() =
-            Intent(MainActivity.ACTION_MANAGE_ALERTS)
-                    .setPackage(context.packageName)
+    override fun onReceive(context: Context, intent: Intent) {
+        AndroidInjection.inject(this, context)
+
+        alertManager.removeArrivalAlert()
+    }
 }

@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
@@ -23,30 +21,21 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
-    <uses-permission
-        android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission
-        android:name="android.permission.FOREGROUND_SERVICE" />
+package uk.org.rivernile.android.bustracker.core.di
 
-    <application>
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService"
-            android:exported="false" />
-
-        <receiver
-            android:name="uk.org.rivernile.android.bustracker.core.alerts.arrivals.RemoveArrivalAlertBroadcastReceiver"
-            android:exported="false" />
-    </application>
-</manifest>
+/**
+ * This annotation defines a Dagger qualifier for short background task dependencies.
+ *
+ * @author Niall Scott
+ */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForShortBackgroundTasks

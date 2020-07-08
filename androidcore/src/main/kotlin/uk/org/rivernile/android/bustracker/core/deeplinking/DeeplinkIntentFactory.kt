@@ -43,4 +43,11 @@ interface DeeplinkIntentFactory {
      * @return The [Intent] to launch the bus times display.
      */
     fun createShowBusTimesIntent(stopCode: String): Intent
+
+    /**
+     * Create an [Intent] used for deeplinking the user in to managing their alerts.
+     *
+     * @return The [Intent] which deeplinks the user in to managing their alerts.
+     */
+    fun createManageAlertsIntent(): Intent
 }

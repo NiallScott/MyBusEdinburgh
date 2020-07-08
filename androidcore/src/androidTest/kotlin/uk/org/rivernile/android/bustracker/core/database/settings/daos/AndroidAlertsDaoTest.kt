@@ -182,6 +182,22 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
+    fun removeAllArrivalAlertsSendThroughCorrectParametersForDelete() {
+        val expectedSelectionArgs = arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString())
+        object : MockContentProvider() {
+            override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
+                assertEquals(contentUri, uri)
+                assertEquals("${AlertsContract.TYPE} = ?", selection)
+                assertArrayEquals(expectedSelectionArgs, selectionArgs)
+
+                return 0
+            }
+        }.also { addMockProvider(it) }
+
+        alertsDao.removeAllArrivalAlerts()
+    }
+
+    @Test
     fun removeProximityAlertSendsThroughCorrectParametersForDelete() {
         val expectedSelectionArgs = arrayOf("5", AlertsContract.ALERTS_TYPE_PROXIMITY.toString())
         object : MockContentProvider() {

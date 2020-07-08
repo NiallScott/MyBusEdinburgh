@@ -60,9 +60,11 @@ import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity;
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.android.bustracker.ui.favourites.AddEditFavouriteStopDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.main.sections.AlertManagerSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
+import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.android.bustracker.ui.favourites.DeleteFavouriteDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment;
@@ -86,6 +88,9 @@ public class MainActivity extends AppCompatActivity
         ServicesChooserDialogFragment.Callbacks, InstallBarcodeScannerDialogFragment.Callbacks,
         TurnOnGpsDialogFragment.Callbacks, BusStopMapFragment.Callbacks,
         HasAndroidInjector {
+
+    public static final String ACTION_MANAGE_ALERTS = BuildConfig.APPLICATION_ID +
+            ".ACTION_MANAGE_ALERTS";
     
     private static final String BARCODE_APP_PACKAGE =
             "market://details?id=com.google.zxing.client.android";
@@ -142,7 +147,9 @@ public class MainActivity extends AppCompatActivity
         drawer.addDrawerListener(drawerToggle);
         
         if (savedInstanceState == null) {
-            showSection(FavouritesSection.getInstance());
+            if (!handleIntent(getIntent())) {
+                showSection(FavouritesSection.getInstance());
+            }
         }
     }
 
@@ -162,14 +169,22 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onConfigurationChanged(final Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull final Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         
         drawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
+    protected void onNewIntent(final Intent intent) {
+        super.onNewIntent(intent);
+
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull final MenuItem item) {
         return drawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
@@ -396,5 +411,23 @@ public class MainActivity extends AppCompatActivity
         if (drawer != null) {
             drawer.setMenuVisibility(isDrawerOpen);
         }
+    }
+
+    /**
+     * Handle an {@link Intent} sent in to this {@link android.app.Activity}.
+     *
+     * @param intent The {@link Intent} to handle.
+     * @return {@code true} if the {@link Intent} was handled here, otherwise {@code false}.
+     */
+    private boolean handleIntent(@NonNull final Intent intent) {
+        final String action = intent.getAction();
+
+        if (ACTION_MANAGE_ALERTS.equals(action)) {
+            showSection(AlertManagerSection.getInstance());
+
+            return true;
+        }
+
+        return false;
     }
 }

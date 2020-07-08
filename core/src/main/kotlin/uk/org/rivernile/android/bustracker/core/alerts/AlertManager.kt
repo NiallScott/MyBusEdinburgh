@@ -24,30 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.deeplinking
+package uk.org.rivernile.android.bustracker.core.alerts
 
-import android.content.Context
-import android.content.Intent
-import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
-import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
-import uk.org.rivernile.android.bustracker.ui.main.MainActivity
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
+import java.util.concurrent.Executor
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * The app specific implementation of [DeeplinkIntentFactory].
+ * This is the Alert Manager, where user-added alerts are controlled from.
  *
- * @param context The application [Context].
+ * @param alertsDao The DAO to access user alerts.
+ * @param backgroundExecutor An [Executor] to execute background tasks on.
  * @author Niall Scott
  */
-class AppDeeplinkIntentFactory @Inject constructor(
-        private val context: Context) : DeeplinkIntentFactory {
+@Singleton
+class AlertManager @Inject internal constructor(
+        private val alertsDao: AlertsDao,
+        @ForShortBackgroundTasks private val backgroundExecutor: Executor) {
 
-    override fun createShowBusTimesIntent(stopCode: String) =
-            Intent(context, DisplayStopDataActivity::class.java)
-                    .setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
-                    .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
-
-    override fun createManageAlertsIntent() =
-            Intent(MainActivity.ACTION_MANAGE_ALERTS)
-                    .setPackage(context.packageName)
+    /**
+     * Remove an arrival alert.
+     */
+    fun removeArrivalAlert() {
+        backgroundExecutor.execute {
+            alertsDao.removeAllArrivalAlerts()
+        }
+    }
 }

@@ -24,30 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.deeplinking
+package uk.org.rivernile.android.bustracker.core.dagger
 
-import android.content.Context
-import android.content.Intent
-import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
-import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
-import uk.org.rivernile.android.bustracker.ui.main.MainActivity
-import javax.inject.Inject
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.RemoveArrivalAlertBroadcastReceiver
 
 /**
- * The app specific implementation of [DeeplinkIntentFactory].
+ * This Dagger [Module] is used to define injection contributions for broadcast receivers defined in
+ * this module.
  *
- * @param context The application [Context].
  * @author Niall Scott
  */
-class AppDeeplinkIntentFactory @Inject constructor(
-        private val context: Context) : DeeplinkIntentFactory {
+@Module
+internal interface BroadcastReceivers {
 
-    override fun createShowBusTimesIntent(stopCode: String) =
-            Intent(context, DisplayStopDataActivity::class.java)
-                    .setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
-                    .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
-
-    override fun createManageAlertsIntent() =
-            Intent(MainActivity.ACTION_MANAGE_ALERTS)
-                    .setPackage(context.packageName)
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeRemoveArrivalAlertBroadcastReceiver(): RemoveArrivalAlertBroadcastReceiver
 }

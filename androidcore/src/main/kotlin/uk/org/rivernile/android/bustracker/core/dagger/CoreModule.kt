@@ -36,6 +36,7 @@ import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.concurrency.NewThreadExecutor
 import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForStartUpTask
+import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.V29ConnectivityChecker
@@ -45,6 +46,7 @@ import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotification
 import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import javax.inject.Singleton
 
 /**
@@ -56,6 +58,7 @@ import javax.inject.Singleton
     AlertsModule::class,
     AndroidModule::class,
     ApiModule::class,
+    BroadcastReceivers::class,
     DatabaseModule::class,
     FlavourModule::class,
     HttpModule::class,
@@ -136,4 +139,14 @@ class CoreModule {
             LegacyConnectivityChecker(connectivityManager)
         }
     }
+
+    /**
+     * Provide an [Executor] for performing short background tasks on.
+     *
+     * @return An [Executor] for performing short background tasks on.
+     */
+    @Provides
+    @Singleton
+    @ForShortBackgroundTasks
+    internal fun provideShortBackgroundTasksExecutor(): Executor = Executors.newCachedThreadPool()
 }

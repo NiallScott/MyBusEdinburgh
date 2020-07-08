@@ -27,12 +27,14 @@
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
 import android.app.Notification
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import dagger.android.AndroidInjection
 import uk.org.rivernile.android.bustracker.androidcore.R
+import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import javax.inject.Inject
 
@@ -50,6 +52,8 @@ class ArrivalAlertRunnerService : Service() {
 
     @Inject
     lateinit var timeAlertRunner: TimeAlertRunner
+    @Inject
+    lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
 
     override fun onCreate() {
         AndroidInjection.inject(this)
@@ -86,7 +90,46 @@ class ArrivalAlertRunnerService : Service() {
                         setSmallIcon(R.drawable.ic_directions_bus_black)
                         setContentTitle(
                                 getString(R.string.arrival_foreground_service_notification_title))
-
+                        setContentIntent(createNotificationActionPendingIntent())
+                        addAction(createRemoveNotificationAction())
                     }
                     .build()
+
+    /**
+     * Create the [PendingIntent] which will be called when the user taps on the notification.
+     *
+     * @return The [PendingIntent] called when the user taps on the notification.
+     */
+    private fun createNotificationActionPendingIntent() =
+            deeplinkIntentFactory.createManageAlertsIntent()
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .let {
+                        PendingIntent.getActivity(this, 0, it, 0)
+                    }
+
+    /**
+     * Create a [NotificationCompat.Action] which allows the user to remove a current arrival time
+     * check.
+     *
+     * @return A [NotificationCompat.Action] which allows the user to remove a current arrival time
+     * check.
+     */
+    private fun createRemoveNotificationAction() =
+            NotificationCompat.Action.Builder(
+                    R.drawable.ic_action_delete,
+                    getString(R.string.remove),
+                    createRemoveActionButtonPendingIntent())
+                    .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_DELETE)
+                    .build()
+
+    /**
+     * Create a [PendingIntent] which is called when the user wishes to remove the in-progress
+     * arrival alert check.
+     */
+    private fun createRemoveActionButtonPendingIntent() =
+            Intent(this, RemoveArrivalAlertBroadcastReceiver::class.java)
+                    .let {
+                        PendingIntent.getBroadcast(this, 0, it, 0)
+                    }
 }

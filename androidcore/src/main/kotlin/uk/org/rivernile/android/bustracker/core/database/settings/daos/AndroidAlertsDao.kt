@@ -104,6 +104,13 @@ internal class AndroidAlertsDao(private val context: Context,
                 arrayOf(id.toString(), AlertsContract.ALERTS_TYPE_TIME.toString()))
     }
 
+    override fun removeAllArrivalAlerts() {
+        context.contentResolver.delete(
+                contract.getContentUri(),
+                "${AlertsContract.TYPE} = ?",
+                arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()))
+    }
+
     override fun removeProximityAlert(id: Int) {
         context.contentResolver.delete(contract.getContentUri(),
                 "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
