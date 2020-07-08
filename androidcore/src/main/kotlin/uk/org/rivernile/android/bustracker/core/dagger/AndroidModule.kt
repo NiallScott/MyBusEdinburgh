@@ -30,6 +30,7 @@ import android.app.Application
 import android.app.job.JobScheduler
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
 import androidx.core.app.NotificationManagerCompat
 import dagger.Module
 import dagger.Provides
@@ -85,4 +86,15 @@ internal class AndroidModule {
     @Singleton
     fun provideNotificationManagerCompat(context: Context): NotificationManagerCompat =
             NotificationManagerCompat.from(context)
+
+    /**
+     * Provide the [ConnectivityManager].
+     *
+     * @param context The application [Context].
+     * @return The [ConnectivityManager] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideConnectivityManager(context: Context): ConnectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 }

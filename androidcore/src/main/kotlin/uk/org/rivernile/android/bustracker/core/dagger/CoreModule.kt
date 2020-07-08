@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.ConnectivityManager
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
@@ -35,6 +36,9 @@ import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.concurrency.NewThreadExecutor
 import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForStartUpTask
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.networking.V29ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.LegacyAppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotificationChannels
@@ -108,12 +112,28 @@ class CoreModule {
      * @return An [AppNotificationChannels] instance.
      */
     @Provides
-    fun provideAppNotificationChannels(context: Context,
+    internal fun provideAppNotificationChannels(context: Context,
             notificationManager: NotificationManagerCompat): AppNotificationChannels {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             V26AppNotificationChannels(context, notificationManager)
         } else {
             LegacyAppNotificationChannels()
+        }
+    }
+
+    /**
+     * Provide a [ConnectivityChecker] instance.
+     *
+     * @param connectivityManager The system [ConnectivityManager].
+     * @return A [ConnectivityChecker] instance.
+     */
+    @Provides
+    internal fun provideConnectivityChecker(
+            connectivityManager: ConnectivityManager): ConnectivityChecker {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            V29ConnectivityChecker(connectivityManager)
+        } else {
+            LegacyConnectivityChecker(connectivityManager)
         }
     }
 }

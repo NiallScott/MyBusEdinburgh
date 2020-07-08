@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,6 +37,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrack
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 import java.util.concurrent.TimeUnit
@@ -57,14 +58,18 @@ internal class EdinburghBusTrackerModule {
      * @param apiKeyGenerator An implementation to generate API keys for this service.
      * @param liveTimesMapper Used to map responses to our model objects.
      * @param errorMapper Used to map errors.
+     * @param connectivityChecker The [ConnectivityChecker] instance.
      */
     @Provides
     @Singleton
-    fun provideTrackerEndpoint(api: EdinburghBusTrackerApi,
-                               apiKeyGenerator: ApiKeyGenerator,
-                               liveTimesMapper: LiveTimesMapper,
-                               errorMapper: ErrorMapper): TrackerEndpoint =
-            EdinburghTrackerEndpoint(api, apiKeyGenerator, liveTimesMapper, errorMapper)
+    fun provideTrackerEndpoint(
+            api: EdinburghBusTrackerApi,
+            apiKeyGenerator: ApiKeyGenerator,
+            liveTimesMapper: LiveTimesMapper,
+            errorMapper: ErrorMapper,
+            connectivityChecker: ConnectivityChecker): TrackerEndpoint =
+            EdinburghTrackerEndpoint(api, apiKeyGenerator, liveTimesMapper, errorMapper,
+                    connectivityChecker)
 
     /**
      * Provide the [EdinburghBusTrackerApi] instance.

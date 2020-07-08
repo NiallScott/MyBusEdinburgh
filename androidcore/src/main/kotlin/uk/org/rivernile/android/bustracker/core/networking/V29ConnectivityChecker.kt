@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,19 +21,30 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
-    <uses-permission
-        android:name="android.permission.ACCESS_NETWORK_STATE" />
+package uk.org.rivernile.android.bustracker.core.networking
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
+import androidx.annotation.RequiresApi
+
+/**
+ * This is the implementation of [ConnectivityChecker] available from API level 29 onwards.
+ *
+ * @param connectivityManager The Android [ConnectivityManager].
+ * @author Niall Scott
+ */
+@RequiresApi(Build.VERSION_CODES.Q)
+internal class V29ConnectivityChecker(
+        private val connectivityManager: ConnectivityManager) : ConnectivityChecker {
+
+    override fun hasInternetConnectivity(): Boolean {
+        return connectivityManager.activeNetwork?.let { network ->
+            connectivityManager.getNetworkCapabilities(network)
+                    ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        } ?: false
+    }
+}

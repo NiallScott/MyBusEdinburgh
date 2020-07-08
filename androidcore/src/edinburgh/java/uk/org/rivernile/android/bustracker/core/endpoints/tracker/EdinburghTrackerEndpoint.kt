@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.SingleLiveTimesRequest
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 
@@ -39,19 +40,21 @@ import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
  * @param apiKeyGenerator An implementation to generate API keys for the API.
  * @param liveTimesMapper An implementation used to map the API objects to our model objects.
  * @param errorMapper An implementation used to map errors.
+ * @param connectivityChecker An implementation of [ConnectivityChecker].
  * @author Niall Scott
  */
-internal class EdinburghTrackerEndpoint(private val api: EdinburghBusTrackerApi,
-                                        private val apiKeyGenerator: ApiKeyGenerator,
-                                        private val liveTimesMapper: LiveTimesMapper,
-                                        private val errorMapper: ErrorMapper)
-    : TrackerEndpoint {
+internal class EdinburghTrackerEndpoint(
+        private val api: EdinburghBusTrackerApi,
+        private val apiKeyGenerator: ApiKeyGenerator,
+        private val liveTimesMapper: LiveTimesMapper,
+        private val errorMapper: ErrorMapper,
+        private val connectivityChecker: ConnectivityChecker): TrackerEndpoint {
 
     override fun createLiveTimesRequest(stopCode: String, numberOfDepartures: Int)
             : TrackerRequest<LiveTimes> {
         val call = api.getBusTimes(apiKeyGenerator.hashedApiKey, numberOfDepartures, stopCode)
 
-        return SingleLiveTimesRequest(call, liveTimesMapper, errorMapper)
+        return SingleLiveTimesRequest(call, liveTimesMapper, errorMapper, connectivityChecker)
     }
 
     override fun createLiveTimesRequest(stopCodes: Array<String>, numberOfDepartures: Int)
@@ -66,6 +69,6 @@ internal class EdinburghTrackerEndpoint(private val api: EdinburghBusTrackerApi,
                 newStopCodes[3],
                 newStopCodes[4])
 
-        return SingleLiveTimesRequest(call, liveTimesMapper, errorMapper)
+        return SingleLiveTimesRequest(call, liveTimesMapper, errorMapper, connectivityChecker)
     }
 }

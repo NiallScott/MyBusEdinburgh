@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,19 +21,24 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uk.org.rivernile.android.bustracker.androidcore">
+ *
+ */
 
-    <uses-permission
-        android:name="android.permission.INTERNET" />
-    <uses-permission
-        android:name="android.permission.ACCESS_NETWORK_STATE" />
+package uk.org.rivernile.android.bustracker.core.networking
 
-    <application>
-        <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
-</manifest>
+import android.net.ConnectivityManager
+
+/**
+ * This is the legacy implementation of the [ConnectivityChecker]. It provides the way to detect the
+ * presence of connectivity up until API level 29, where a new API became available.
+ *
+ * @param connectivityManager The Android [ConnectivityManager].
+ * @author Niall Scott
+ */
+internal class LegacyConnectivityChecker(
+        private val connectivityManager: ConnectivityManager) : ConnectivityChecker {
+
+    @Suppress("DEPRECATION")
+    override fun hasInternetConnectivity() =
+            connectivityManager.activeNetworkInfo?.isConnected ?: false
+}

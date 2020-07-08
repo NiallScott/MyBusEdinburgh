@@ -29,7 +29,9 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 import retrofit2.Call
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NetworkException
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NoConnectivityException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerRequest
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import java.io.IOException
 
@@ -40,25 +42,31 @@ import java.io.IOException
  * @param call The Retrofit call to the endpoint.
  * @param liveTimesMapper Used to map the response body to [LiveTimes].
  * @param errorMapper Used to map HTTP status code errors.
+ * @param connectivityChecker Used to check network connectivity.
  * @author Niall Scott
  */
-internal class SingleLiveTimesRequest(private val call: Call<BusTimes>,
-                                      private val liveTimesMapper: LiveTimesMapper,
-                                      private val errorMapper: ErrorMapper)
-    : TrackerRequest<LiveTimes> {
+internal class SingleLiveTimesRequest(
+        private val call: Call<BusTimes>,
+        private val liveTimesMapper: LiveTimesMapper,
+        private val errorMapper: ErrorMapper,
+        private val connectivityChecker: ConnectivityChecker) : TrackerRequest<LiveTimes> {
 
-    override fun performRequest() = try {
-        val response = call.execute()
+    override fun performRequest() = if (connectivityChecker.hasInternetConnectivity()) {
+        try {
+            val response = call.execute()
 
-        if (response.isSuccessful) {
-            response.body()?.let {
-                liveTimesMapper.mapToLiveTimes(it)
-            } ?: liveTimesMapper.emptyLiveTimes()
-        } else {
-            throw errorMapper.mapHttpStatusCode(response.code())
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    liveTimesMapper.mapToLiveTimes(it)
+                } ?: liveTimesMapper.emptyLiveTimes()
+            } else {
+                throw errorMapper.mapHttpStatusCode(response.code())
+            }
+        } catch (e: IOException) {
+            throw NetworkException(e)
         }
-    } catch (e: IOException) {
-        throw NetworkException(e)
+    } else {
+        throw NoConnectivityException()
     }
 
     override fun cancel() {
