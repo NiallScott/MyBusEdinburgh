@@ -30,6 +30,8 @@ import com.google.android.gms.common.GoogleApiAvailability
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.alerts.AlertManagerImpl
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapDataModule
@@ -73,7 +75,11 @@ class ApplicationModule {
     fun provideGoogleApiAvailability(): GoogleApiAvailability = GoogleApiAvailability.getInstance()
 
     @Module
-    interface Bindings {
+    internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindAlertManager(alertManagerImpl: AlertManagerImpl): AlertManager
 
         @Suppress("unused")
         @Binds

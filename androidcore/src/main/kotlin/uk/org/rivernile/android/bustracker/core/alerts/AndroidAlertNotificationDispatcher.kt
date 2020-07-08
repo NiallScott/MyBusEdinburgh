@@ -98,7 +98,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
     private fun createAlertSummaryString(
             arrivalAlert: ArrivalAlert,
             qualifyingServices: List<Service>): String {
-        val serviceListing = qualifyingServices.joinToString()
+        val serviceListing = qualifyingServices.joinToString { it.serviceName }
         val numberOfMinutes = getAlertNumberOfMinutesString(arrivalAlert.timeTrigger)
         val displayableStopName = getDisplayableStopName(arrivalAlert.stopCode)
 

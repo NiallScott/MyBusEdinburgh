@@ -245,13 +245,6 @@
                 android:pathPrefix="/search_suggest_query"
                 android:readPermission="android.permission.GLOBAL_SEARCH" />
         </provider>
-        
-        <!-- TimeAlertService, which checks bus times periodically when the user
-             has set an alert for bus times. -->
-        <service
-            android:name="uk.org.rivernile.android.bustracker.alerts.TimeAlertService"
-            android:icon="@drawable/appicon"
-            android:exported="false" />
 
         <!-- ProximityAlertService, which is invoked when the device is within a given proximity of
              a user selected bus stop. -->

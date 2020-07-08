@@ -63,6 +63,8 @@ abstract class BusApplication : Application(), HasAndroidInjector,
     lateinit var startUpTask: StartUpTask
     @Inject
     lateinit var preferenceManager: PreferenceManager
+    @Inject
+    lateinit var alertManager: AlertManager
 
     override fun onCreate() {
         super.onCreate()
@@ -103,13 +105,6 @@ abstract class BusApplication : Application(), HasAndroidInjector,
      * @return The TwitterEndpoint instance for this application.
      */
     abstract fun getTwitterEndpoint(): TwitterEndpoint
-
-    /**
-     * Get an instance of the [AlertManager].
-     *
-     * @return An instance of the [AlertManager].
-     */
-    abstract fun getAlertManager(): AlertManager
 
     /**
      * Get an instance of [Picasso] for image loading.

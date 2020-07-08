@@ -47,8 +47,8 @@ internal class AndroidBusStopsDao(
             arrayOf(
                     BusStopsContract.STOP_NAME,
                     BusStopsContract.LOCALITY),
-            null,
-            null,
+            "${BusStopsContract.STOP_CODE} = ?",
+            arrayOf(stopCode),
             null)?.use {
         // Fill the Cursor window.
         it.count

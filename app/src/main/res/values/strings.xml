@@ -685,17 +685,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="databaseservice_title">Stop database updater</string>
     
     <!--
-    ********************
-    * TimeAlertService *
-    ********************
-    -->
-    <string name="timeservice_notification_title">Bus arrival alert</string>
-    <plurals name="timeservice_notification_summary">
-        <item quantity="one">Service %1$s is due at %3$s</item> <!-- %1$s = service name. %3$s = bus stop name and code. -->
-        <item quantity="other">Service %1$s is %2$d minutes or less from %3$s</item> <!-- %1$s = service name. %2$d = number of minutes. %3$s = bus stop name and code. -->
-    </plurals>
-    
-    <!--
     *******************
     *******************
     ** List Adapters **

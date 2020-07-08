@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,8 +29,6 @@ import com.jakewharton.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
 import uk.org.rivernile.android.bustracker.BusApplication;
-import uk.org.rivernile.android.bustracker.alerts.AlertManager;
-import uk.org.rivernile.android.bustracker.alerts.AlertManagerImpl;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpTwitterEndpoint;
@@ -51,7 +49,6 @@ public class MyBusEdinburghApplication extends BusApplication {
     private EdinburghUrlBuilder urlBuilder;
     private BusTrackerEndpoint busTrackerEndpoint;
     private TwitterEndpoint twitterEndpoint;
-    private AlertManager alertManager;
     private Picasso picasso;
 
     @Override
@@ -72,15 +69,6 @@ public class MyBusEdinburghApplication extends BusApplication {
         }
         
         return twitterEndpoint;
-    }
-
-    @Override
-    public synchronized AlertManager getAlertManager() {
-        if (alertManager == null) {
-            alertManager = new AlertManagerImpl(this);
-        }
-
-        return alertManager;
     }
 
     @Override

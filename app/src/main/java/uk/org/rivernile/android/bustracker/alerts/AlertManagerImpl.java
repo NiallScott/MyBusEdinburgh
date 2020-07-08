@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,17 +25,21 @@
 
 package uk.org.rivernile.android.bustracker.alerts;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.SystemClock;
+import android.os.Build;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddProximityAlertTask;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddTimeAlertTask;
@@ -47,21 +51,24 @@ import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteAllTi
  * 
  * @author Niall Scott
  */
+@Singleton
 public class AlertManagerImpl implements AlertManager {
     
     private final Context context;
     private final LocationManager locMan;
-    private final AlarmManager alMan;
     
     /**
      * Create a new instance of {@link AlertManagerImpl}.
      * 
      * @param context The {@link android.app.Application} {@link Context}.
+     * @param locationManager The Android {@link LocationManager}.
      */
-    public AlertManagerImpl(@NonNull final Context context) {
+    @Inject
+    AlertManagerImpl(
+            @NonNull final Context context,
+            @NonNull final LocationManager locationManager) {
         this.context = context;
-        locMan = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        alMan = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        locMan = locationManager;
     }
 
     @Override
@@ -92,35 +99,23 @@ public class AlertManagerImpl implements AlertManager {
             @IntRange(from = 0) final int timeTrigger) {
         // Make sure any other time alerts do not exist.
         removeTimeAlert();
-        
-        // The intent to send to the service which monitors the bus times.
-        final Intent intent = new Intent(context, TimeAlertService.class);
-        intent.putExtra(TimeAlertService.ARG_STOPCODE, stopCode);
-        intent.putExtra(TimeAlertService.ARG_SERVICES, services);
-        intent.putExtra(TimeAlertService.ARG_TIME_TRIGGER, timeTrigger);
-        intent.putExtra(TimeAlertService.ARG_TIME_SET, SystemClock.elapsedRealtime());
-        
-        final PendingIntent pi = PendingIntent.getService(context, 0, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        // Make sure existing alarms are cancelled.
-        alMan.cancel(pi);
+
         // Add a new time alert to the database.
         AddTimeAlertTask.start(context, stopCode, services, timeTrigger);
-        // Set the alarm.
-        alMan.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + 60000, pi);
+        final Intent intent = new Intent(context, ArrivalAlertRunnerService.class);
+
+        // TODO: this style shouldn't make it to the re-implementation of this class.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
     }
     
     @Override
     public void removeTimeAlert() {
         // Remove all time alerts from the database.
         DeleteAllTimeAlertsTask.start(context);
-        final Intent intent = new Intent(context, TimeAlertService.class);
-        final PendingIntent pi = PendingIntent.getService(context, 0, intent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        // Cancel any pending checks with the AlarmManager.
-        alMan.cancel(pi);
-        // Make sure the PendingIntent is cancelled and invalid too.
-        pi.cancel();
     }
 
     /**

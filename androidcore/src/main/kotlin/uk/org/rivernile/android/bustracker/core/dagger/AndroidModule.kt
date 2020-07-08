@@ -30,6 +30,7 @@ import android.app.Application
 import android.app.job.JobScheduler
 import android.content.Context
 import android.content.SharedPreferences
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import androidx.core.app.NotificationManagerCompat
 import dagger.Module
@@ -97,4 +98,15 @@ internal class AndroidModule {
     @Singleton
     fun provideConnectivityManager(context: Context): ConnectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    /**
+     * Provide the [LocationManager].
+     *
+     * @param context The application [Context].
+     * @return The [LocationManager] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideLocationManager(context: Context): LocationManager =
+            context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 }
