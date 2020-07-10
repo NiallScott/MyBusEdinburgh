@@ -26,7 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -42,7 +44,18 @@ import javax.inject.Singleton
 @Singleton
 class AlertManager @Inject internal constructor(
         private val alertsDao: AlertsDao,
+        private val arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher,
         @ForShortBackgroundTasks private val backgroundExecutor: Executor) {
+
+    fun addArrivalAlert(arrivalAlert: ArrivalAlert) {
+        backgroundExecutor.execute {
+            // As we currently only allow one arrival alert at a time, the newly added alert
+            // overwrites any existing alerts. This may change going forwards.
+            alertsDao.removeAllArrivalAlerts()
+            alertsDao.addArrivalAlert(arrivalAlert)
+            arrivalAlertTaskLauncher.launchArrivalAlertTask()
+        }
+    }
 
     /**
      * Remove an arrival alert.
@@ -50,6 +63,15 @@ class AlertManager @Inject internal constructor(
     fun removeArrivalAlert() {
         backgroundExecutor.execute {
             alertsDao.removeAllArrivalAlerts()
+        }
+    }
+
+    /**
+     * Ensure that tasks required to fulfil alerts are running.
+     */
+    fun ensureTasksRunningIfAlertsExists() {
+        if (alertsDao.getArrivalAlertCount() > 0) {
+            arrivalAlertTaskLauncher.launchArrivalAlertTask()
         }
     }
 }

@@ -24,27 +24,34 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.startup
 
-import dagger.Module
-import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.RemoveArrivalAlertBroadcastReceiver
-import uk.org.rivernile.android.bustracker.core.startup.DeviceBootBroadcastReceiver
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import dagger.android.AndroidInjection
+import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
+import java.util.concurrent.Executor
+import javax.inject.Inject
 
 /**
- * This Dagger [Module] is used to define injection contributions for broadcast receivers defined in
- * this module.
+ * This [BroadcastReceiver] is called when the device is booted.
  *
  * @author Niall Scott
  */
-@Module
-internal interface BroadcastReceivers {
+class DeviceBootBroadcastReceiver : BroadcastReceiver() {
 
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeDeviceBootBroadcastReceiver(): DeviceBootBroadcastReceiver
+    @Inject
+    lateinit var alertManager: AlertManager
+    @Inject
+    @ForShortBackgroundTasks
+    lateinit var backgroundExecutor: Executor
 
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeRemoveArrivalAlertBroadcastReceiver(): RemoveArrivalAlertBroadcastReceiver
+    override fun onReceive(context: Context, intent: Intent) {
+        if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
+            AndroidInjection.inject(this, context)
+            backgroundExecutor.execute(alertManager::ensureTasksRunningIfAlertsExists)
+        }
+    }
 }

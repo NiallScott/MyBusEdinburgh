@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.concurrency
-
-import java.util.concurrent.Executor
+package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
 /**
- * This [Executor] takes a [Runnable] and executes it on a new thread. This should only be used for
- * short-lived tasks that run on a new [Thread].
+ * This is used to launch the task to check if arrival alert criteria has been met.
  *
  * @author Niall Scott
  */
-class NewThreadExecutor : Executor {
+interface ArrivalAlertTaskLauncher {
 
-    override fun execute(command: Runnable) {
-        Thread(command).run()
-    }
+    /**
+     * Launch the task to check if arrival alert criteria has been met.
+     */
+    fun launchArrivalAlertTask()
 }

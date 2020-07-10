@@ -26,8 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.startup
 
-import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForStartUpTask
+import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
+import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -43,6 +44,7 @@ import javax.inject.Inject
  * database.
  * @param cleanUpTask Implementation to perform clean up of app data - usually to remove data from
  * old installations of the app.
+ * @param alertManager The [AlertManager] - for controlling user set alerts.
  * @param executor The [Executor] to run the start-up task on.
  * @author Niall Scott
  */
@@ -50,7 +52,8 @@ class StartUpTask @Inject internal constructor(
         private val appNotificationChannels: AppNotificationChannels,
         private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseJobScheduler,
         private val cleanUpTask: CleanUpTask?,
-        @ForStartUpTask private val executor: Executor) {
+        private val alertManager: AlertManager,
+        @ForShortBackgroundTasks private val executor: Executor) {
 
     /**
      * Run the app startup tasks. The tasks will be executed on a background thread so that the UI
@@ -67,5 +70,6 @@ class StartUpTask @Inject internal constructor(
         appNotificationChannels.createNotificationChannels()
         busStopDatabaseUpdateJobScheduler.scheduleUpdateBusStopDatabaseJob()
         cleanUpTask?.performCleanUp()
+        alertManager.ensureTasksRunningIfAlertsExists()
     }
 }

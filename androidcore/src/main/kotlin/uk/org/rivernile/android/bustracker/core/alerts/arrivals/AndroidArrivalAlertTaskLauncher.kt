@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger.qualifiers
+package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
-import javax.inject.Qualifier
-import kotlin.annotation.MustBeDocumented
-import kotlin.annotation.Retention
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.ContextCompat
+import javax.inject.Inject
 
 /**
- * This annotation defines a Dagger qualifier for the start-up task.
+ * This is the Android specific implementation of [ArrivalAlertTaskLauncher].
  *
+ * @param context The application [Context].
  * @author Niall Scott
  */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ForStartUpTask
+internal class AndroidArrivalAlertTaskLauncher @Inject constructor(
+        private val context: Context) : ArrivalAlertTaskLauncher {
+
+    override fun launchArrivalAlertTask() {
+        Intent(context, ArrivalAlertRunnerService::class.java).let {
+            ContextCompat.startForegroundService(context, it)
+        }
+    }
+}

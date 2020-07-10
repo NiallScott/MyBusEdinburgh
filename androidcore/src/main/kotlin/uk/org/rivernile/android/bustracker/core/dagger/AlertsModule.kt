@@ -31,6 +31,8 @@ import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.AndroidArrivalAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -56,5 +58,11 @@ internal class AlertsModule {
         fun bindAlertNotificationDispatcher(
                 androidAlertNotificationDispatcher: AndroidAlertNotificationDispatcher)
                 : AlertNotificationDispatcher
+
+        @Suppress("unused")
+        @Binds
+        fun bindArrivalAlertTaskLauncher(
+                androidArrivalAlertTaskLauncher: AndroidArrivalAlertTaskLauncher)
+                : ArrivalAlertTaskLauncher
     }
 }

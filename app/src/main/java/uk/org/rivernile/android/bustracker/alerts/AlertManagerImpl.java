@@ -31,7 +31,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Build;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -39,6 +38,7 @@ import javax.inject.Singleton;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
+import androidx.core.content.ContextCompat;
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddProximityAlertTask;
@@ -103,13 +103,7 @@ public class AlertManagerImpl implements AlertManager {
         // Add a new time alert to the database.
         AddTimeAlertTask.start(context, stopCode, services, timeTrigger);
         final Intent intent = new Intent(context, ArrivalAlertRunnerService.class);
-
-        // TODO: this style shouldn't make it to the re-implementation of this class.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent);
-        } else {
-            context.startService(intent);
-        }
+        ContextCompat.startForegroundService(context, intent);
     }
     
     @Override

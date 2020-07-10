@@ -34,8 +34,6 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.concurrency.NewThreadExecutor
-import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForStartUpTask
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
@@ -74,15 +72,6 @@ class CoreModule {
     @Provides
     @Singleton
     internal fun provideGson() = Gson()
-
-    /**
-     * Provide the [Executor] to run the start-up tasks on.
-     *
-     * @return The [Executor] to run the start-up tasks on,
-     */
-    @Provides
-    @ForStartUpTask
-    internal fun provideStartUpTaskExecutor(): Executor = NewThreadExecutor()
 
     /**
      * Provide the [AndroidPreferenceManager]. This is a special case for exposing the real

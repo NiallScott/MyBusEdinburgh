@@ -26,12 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.core.startup
 
-import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.inOrder
 
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.testutils.CurrentThreadExecutor
@@ -50,6 +51,8 @@ class StartUpTaskTest {
     internal lateinit var busStopDatabaseJobScheduler: UpdateBusStopDatabaseJobScheduler
     @Mock
     lateinit var cleanUpTask: CleanUpTask
+    @Mock
+    lateinit var alertManager: AlertManager
     private val executor = CurrentThreadExecutor()
 
     @Test
@@ -58,16 +61,21 @@ class StartUpTaskTest {
                 appNotificationChannels,
                 busStopDatabaseJobScheduler,
                 cleanUpTask,
+                alertManager,
                 executor)
 
         startUpTask.performStartUpTasks()
 
-        verify(appNotificationChannels)
-                .createNotificationChannels()
-        verify(busStopDatabaseJobScheduler)
-                .scheduleUpdateBusStopDatabaseJob()
-        verify(cleanUpTask)
-                .performCleanUp()
+        inOrder(appNotificationChannels, busStopDatabaseJobScheduler, cleanUpTask, alertManager) {
+            verify(appNotificationChannels)
+                    .createNotificationChannels()
+            verify(busStopDatabaseJobScheduler)
+                    .scheduleUpdateBusStopDatabaseJob()
+            verify(cleanUpTask)
+                    .performCleanUp()
+            verify(alertManager)
+                    .ensureTasksRunningIfAlertsExists()
+        }
     }
 
     @Test
@@ -76,6 +84,7 @@ class StartUpTaskTest {
                 appNotificationChannels,
                 busStopDatabaseJobScheduler,
                 null,
+                alertManager,
                 executor)
 
         startUpTask.performStartUpTasks()
