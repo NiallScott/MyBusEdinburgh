@@ -294,7 +294,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item quantity="one">When any of services %1$s are due at %2$s</item>
         <item quantity="other">When any of services %1$s are within %3$d minutes of %2$s</item>
     </plurals>
-    <string name="alertmanager_time_blurb">This alert is removed after 1 hour or if the device is restarted</string>
+    <string name="alertmanager_time_blurb">This alert is removed after 1 hour</string>
     <string name="alertmanager_snackbar_remove_proximity">Proximity alert removed</string>
     <string name="alertmanager_snackbar_remove_time">Time alert removed</string>
 
@@ -544,8 +544,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for TimeLimitationsDialogFragment *
     *********************************************
     -->
-    <string name="timelimitationsdialog_title">Time alert limitations</string>
-    <string name="timelimitationsdialog_message">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Google Play Store.\n\nThis feature should be used as a guide only.\n\nAn attempt will be made to fetch bus times once per minute until the above criteria is met or the time spent checking exceeds 1 hour. However, your device may prevent this from happening (e.g. lack of data access, device is sleeping).\n\nIf your device restarts, this alert will be automatically cancelled but you may re-add it again.\n\nBe warned, this feature may use a lot of battery power.</string>
+    <string name="timelimitationsdialog_title">Arrival alert limitations</string>
+    <string name="timelimitationsdialog_message">
+        This feature should be used as a guide only and you should not depend upon it.\n\nAn
+        attempt will be made to fetch bus times once per minute, for at most 1 hour, until the
+        alert criteria is met. However, your device may prevent this from happening, for example,
+        lack of internet access or the device is sleeping.\n\nThis feature may use more battery
+        power than normal.
+    </string>
     
     <!--
     ***************************************
