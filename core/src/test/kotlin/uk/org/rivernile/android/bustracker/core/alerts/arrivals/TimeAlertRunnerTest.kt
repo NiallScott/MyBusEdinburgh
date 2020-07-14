@@ -57,13 +57,13 @@ class TimeAlertRunnerTest {
     }
 
     @Mock
-    lateinit var checkTimesTask: CheckTimesTask
+    private lateinit var checkTimesTask: CheckTimesTask
     @Mock
-    lateinit var alertsDao: AlertsDao
+    private lateinit var alertsDao: AlertsDao
     @Mock
-    lateinit var executorService: ScheduledExecutorService
+    private lateinit var executorService: ScheduledExecutorService
     @Mock
-    lateinit var stopListener: () -> Unit
+    private lateinit var stopListener: () -> Unit
 
     private lateinit var runner: TimeAlertRunner
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,7 +55,7 @@ import javax.inject.Inject
  * alerts.
  * @author Niall Scott
  */
-class CheckTimesTask @Inject internal constructor(
+internal class CheckTimesTask @Inject constructor(
         private val alertsDao: AlertsDao,
         private val trackerEndpoint: TrackerEndpoint,
         private val alertNotificationDispatcher: AlertNotificationDispatcher) {

@@ -26,11 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.di.ForProximityAlerts
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -39,23 +37,14 @@ import javax.inject.Inject
  * This implementation runs the tracking of proximity alerts.
  *
  * @param alertsDao Used to access the alerts data store.
- * @param busStopsDao Used to access the bus stop data store.
- * @param geofencingManager Used to set and remove geofences.
- * @param timeUtils Used to obtain timestamps.
+ * @param proximityAlertTracker Proximity alerts to begin or stop tracking are managed through this.
  * @param backgroundExecutor Used to run tasks in the background.
  * @author Niall Scott
  */
 class ManageProximityAlertsRunner @Inject internal constructor(
         private val alertsDao: AlertsDao,
-        private val busStopsDao: BusStopsDao,
-        private val geofencingManager: GeofencingManager,
-        private val timeUtils: TimeUtils,
+        private val proximityAlertTracker: ProximityAlertTracker,
         @ForProximityAlerts private val backgroundExecutor: ExecutorService) {
-
-    companion object {
-
-        private const val MAX_DURATION_MILLIS = 3600000L
-    }
 
     private val hasBeenStarted = AtomicBoolean(false)
     private val hasBeenStopped = AtomicBoolean(false)
@@ -128,27 +117,10 @@ class ManageProximityAlertsRunner @Inject internal constructor(
         trackedAlerts.keys.removeAll(toRemove)
         trackedAlerts.putAll(toAdd)
 
-        toAdd.values.forEach(this::trackProximityAlert)
-        toRemove.forEach(geofencingManager::removeGeofence)
+        toAdd.values.forEach(proximityAlertTracker::trackProximityAlert)
+        toRemove.forEach(proximityAlertTracker::removeProximityAlert)
 
         trackedAlerts.ifEmpty { stop() }
-    }
-
-    /**
-     * Given a newly detected [ProximityAlert], track it by adding it to the [GeofencingManager].
-     *
-     * @param alert The alert to track.
-     */
-    private fun trackProximityAlert(alert: ProximityAlert) {
-        busStopsDao.getLocationForStop(alert.stopCode)?.let {
-            val duration = (alert.timeAdded + MAX_DURATION_MILLIS) -
-                    timeUtils.getCurrentTimeMillis()
-
-            if (duration > 0) {
-                geofencingManager.addGeofence(alert.id, it.latitude, it.longitude,
-                        alert.distanceFrom.toFloat(), duration)
-            }
-        }
     }
 
     private val alertsChangedListener = object : AlertsDao.OnAlertsChangedListener {

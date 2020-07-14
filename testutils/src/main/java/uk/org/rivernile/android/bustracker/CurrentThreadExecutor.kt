@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,34 +24,18 @@
  *
  */
 
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
+package uk.org.rivernile.android.bustracker
 
-jar {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+import java.util.concurrent.Executor
 
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        androidTest.java.srcDirs += 'src/androidTest/kotlin'
-        test.java.srcDirs += 'src/test/kotlin'
+/**
+ * This is used in testing to run [Executor]s on the current thread, as an abstraction.
+ *
+ * @author Niall Scott
+ */
+class CurrentThreadExecutor : Executor {
+
+    override fun execute(command: Runnable) {
+        command.run()
     }
-}
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    // Kotlin
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
-
-    // Java dependency injection annotations
-    api 'javax.inject:javax.inject:1'
-
-    // Okhttp
-    api "com.squareup.okhttp3:okhttp:$okhttpVersion"
-
-    testImplementation project(':testutils')
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
 }
