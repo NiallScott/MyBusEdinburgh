@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,34 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.notifications
+package uk.org.rivernile.android.bustracker.core.permission
 
 /**
- * This interface allows notification channels to be interacted with safely depending on what
- * platform version we're running on.
+ * This is used to check permissions granted to us within the environment we run within.
  *
  * @author Niall Scott
  */
-interface AppNotificationChannels {
-
-    companion object {
-
-        /**
-         * This is the [String] constant for the foreground tasks notification channel.
-         */
-        const val CHANNEL_FOREGROUND_TASKS = "foregroundTasks"
-        /**
-         * This is the [String] constant for the arrival alerts notification channel.
-         */
-        const val CHANNEL_ARRIVAL_ALERTS = "arrivalAlerts"
-        /**
-         * This is the [String] constant for the proximity alerts notification channel.
-         */
-        const val CHANNEL_PROXIMITY_ALERTS = "proximityAlerts"
-    }
+interface PermissionChecker {
 
     /**
-     * Create the application's notification channels.
+     * Do we have access to the location permission?
+     *
+     * @return `true` if we have access to the location permission, otherwise `false`.
      */
-    fun createNotificationChannels()
+    fun checkLocationPermission(): Boolean
 }

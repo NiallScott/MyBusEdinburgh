@@ -24,34 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.notifications
+package uk.org.rivernile.android.bustracker.core.di
+
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This interface allows notification channels to be interacted with safely depending on what
- * platform version we're running on.
+ * This annotation defines a Dagger qualifier for proximity alert dependencies.
  *
  * @author Niall Scott
  */
-interface AppNotificationChannels {
-
-    companion object {
-
-        /**
-         * This is the [String] constant for the foreground tasks notification channel.
-         */
-        const val CHANNEL_FOREGROUND_TASKS = "foregroundTasks"
-        /**
-         * This is the [String] constant for the arrival alerts notification channel.
-         */
-        const val CHANNEL_ARRIVAL_ALERTS = "arrivalAlerts"
-        /**
-         * This is the [String] constant for the proximity alerts notification channel.
-         */
-        const val CHANNEL_PROXIMITY_ALERTS = "proximityAlerts"
-    }
-
-    /**
-     * Create the application's notification channels.
-     */
-    fun createNotificationChannels()
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForProximityAlerts

@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 
 /**
@@ -42,4 +43,12 @@ interface BusStopsDao {
      * @return The name of the stop, or `null` if the name is not known or the stop cannot be found.
      */
     fun getNameForStop(stopCode: String): StopName?
+
+    /**
+     * Given a stop code, get the latitude and longitude for this stop.
+     *
+     * @param stopCode The stop to get the location for.
+     * @return The location of the stop, or `null` if the stop is not found.
+     */
+    fun getLocationForStop(stopCode: String): StopLocation?
 }

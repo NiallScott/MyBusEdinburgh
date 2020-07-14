@@ -32,6 +32,7 @@ import android.net.ConnectivityManager
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
@@ -41,6 +42,8 @@ import uk.org.rivernile.android.bustracker.core.networking.V29ConnectivityChecke
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.LegacyAppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotificationChannels
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
+import uk.org.rivernile.android.bustracker.core.permission.PermissionChecker
 import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import java.util.concurrent.Executor
@@ -57,6 +60,7 @@ import javax.inject.Singleton
     AndroidModule::class,
     ApiModule::class,
     BroadcastReceivers::class,
+    CoreModule.Bindings::class,
     DatabaseModule::class,
     FlavourModule::class,
     HttpModule::class,
@@ -138,4 +142,16 @@ class CoreModule {
     @Singleton
     @ForShortBackgroundTasks
     internal fun provideShortBackgroundTasksExecutor(): Executor = Executors.newCachedThreadPool()
+
+    /**
+     * An internal module for declaring type bindings.
+     */
+    @Module
+    internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindPermissionChecker(androidPermissionChecker: AndroidPermissionChecker)
+                : PermissionChecker
+    }
 }

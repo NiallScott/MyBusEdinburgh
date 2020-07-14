@@ -50,7 +50,8 @@ internal class V26AppNotificationChannels(
 
     override fun createNotificationChannels() {
         listOf(createForegroundTasksNotificationChannel(),
-                createArrivalAlertNotificationChannel())
+                createArrivalAlertNotificationChannel(),
+                createProximityAlertNotificationChannel())
                 .let(notificationManager::createNotificationChannels)
     }
 
@@ -82,6 +83,25 @@ internal class V26AppNotificationChannels(
         val description = context.getString(R.string.notification_channel_arrival_alert_description)
 
         return NotificationChannel(AppNotificationChannels.CHANNEL_ARRIVAL_ALERTS, name,
+                NotificationManager.IMPORTANCE_HIGH).apply {
+            setDescription(description)
+            enableLights(true)
+            enableVibration(true)
+            setShowBadge(true)
+        }
+    }
+
+    /**
+     * Create the required [NotificationChannel] for proximity alerts.
+     *
+     * @return The [NotificationChannel] for proximity alerts.
+     */
+    private fun createProximityAlertNotificationChannel(): NotificationChannel {
+        val name = context.getString(R.string.notification_channel_proximity_alert_name)
+        val description = context.getString(
+                R.string.notification_channel_proximity_alert_description)
+
+        return NotificationChannel(AppNotificationChannels.CHANNEL_PROXIMITY_ALERTS, name,
                 NotificationManager.IMPORTANCE_HIGH).apply {
             setDescription(description)
             enableLights(true)

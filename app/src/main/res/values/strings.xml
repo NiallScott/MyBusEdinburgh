@@ -657,23 +657,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     *******************************************
     -->
     <string name="twitterupdates_menu_refresh">Refresh</string>
-
-    <!--
-    ************************
-    ************************
-    ** BroadcastReceivers **
-    ************************
-    ************************
-    -->
-    
-    <!--
-    **************************
-    * ProximityAlertReceiver *
-    **************************
-    -->
-    <string name="proxreceiver_notification_title">Approaching %s</string> <!-- %s = bus stop name and code. -->
-    <string name="proxreceiver_notification_summary">You have entered within a %1$dm radius of %2$s.</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
-    <string name="proxreceiver_notification_ticker">You are approaching %s.</string> <!-- %s = bus stop name and code. -->
     
     <!--
     **************

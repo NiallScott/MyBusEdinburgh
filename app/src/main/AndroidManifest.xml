@@ -30,11 +30,7 @@
     package="uk.org.rivernile.edinburghbustracker.android">
     
     <!-- Request the required permissions. -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Tell the Google Play Store that this app uses location features, but
          app does not require that devices have them. -->
@@ -251,12 +247,5 @@
                 android:pathPrefix="/search_suggest_query"
                 android:readPermission="android.permission.GLOBAL_SEARCH" />
         </provider>
-
-        <!-- ProximityAlertService, which is invoked when the device is within a given proximity of
-             a user selected bus stop. -->
-        <service
-            android:name="uk.org.rivernile.android.bustracker.alerts.ProximityAlertService"
-            android:icon="@drawable/appicon"
-            android:exported="false" />
     </application>
 </manifest>

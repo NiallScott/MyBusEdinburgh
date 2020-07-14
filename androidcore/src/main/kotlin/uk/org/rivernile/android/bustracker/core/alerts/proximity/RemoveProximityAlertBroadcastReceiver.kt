@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,34 +24,29 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.notifications
+package uk.org.rivernile.android.bustracker.core.alerts.proximity
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import dagger.android.AndroidInjection
+import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import javax.inject.Inject
 
 /**
- * This interface allows notification channels to be interacted with safely depending on what
- * platform version we're running on.
+ * This [BroadcastReceiver] is called when the user has tapped 'Remove' on the proximity alert
+ * notification.
  *
  * @author Niall Scott
  */
-interface AppNotificationChannels {
+class RemoveProximityAlertBroadcastReceiver : BroadcastReceiver() {
 
-    companion object {
+    @Inject
+    lateinit var alertManager: AlertManager
 
-        /**
-         * This is the [String] constant for the foreground tasks notification channel.
-         */
-        const val CHANNEL_FOREGROUND_TASKS = "foregroundTasks"
-        /**
-         * This is the [String] constant for the arrival alerts notification channel.
-         */
-        const val CHANNEL_ARRIVAL_ALERTS = "arrivalAlerts"
-        /**
-         * This is the [String] constant for the proximity alerts notification channel.
-         */
-        const val CHANNEL_PROXIMITY_ALERTS = "proximityAlerts"
+    override fun onReceive(context: Context, intent: Intent) {
+        AndroidInjection.inject(this, context)
+
+        alertManager.removeProximityAlert()
     }
-
-    /**
-     * Create the application's notification channels.
-     */
-    fun createNotificationChannels()
 }

@@ -27,8 +27,10 @@
 package uk.org.rivernile.android.bustracker.core.alerts
 
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -38,6 +40,8 @@ import javax.inject.Singleton
  * This is the Alert Manager, where user-added alerts are controlled from.
  *
  * @param alertsDao The DAO to access user alerts.
+ * @param arrivalAlertTaskLauncher Used to launch the arrival alert checker task.
+ * @param proximityAlertTaskLauncher Used to launch the proximity alert checker task.
  * @param backgroundExecutor An [Executor] to execute background tasks on.
  * @author Niall Scott
  */
@@ -45,8 +49,14 @@ import javax.inject.Singleton
 class AlertManager @Inject internal constructor(
         private val alertsDao: AlertsDao,
         private val arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher,
+        private val proximityAlertTaskLauncher: ProximityAlertTaskLauncher,
         @ForShortBackgroundTasks private val backgroundExecutor: Executor) {
 
+    /**
+     * Add a new arrival alert to be tracked.
+     *
+     * @param arrivalAlert The new [ArrivalAlert] to add.
+     */
     fun addArrivalAlert(arrivalAlert: ArrivalAlert) {
         backgroundExecutor.execute {
             // As we currently only allow one arrival alert at a time, the newly added alert
@@ -67,11 +77,39 @@ class AlertManager @Inject internal constructor(
     }
 
     /**
+     * Add a new proximity alert to be tracked.
+     *
+     * @param proximityAlert The new [ProximityAlert] to add.
+     */
+    fun addProximityAlert(proximityAlert: ProximityAlert) {
+        backgroundExecutor.execute {
+            // As we currently only allow one proximity alert at a time, the newly added alert
+            // overwrites any existing alert. This may change going forwards.
+            alertsDao.removeAllProximityAlerts()
+            alertsDao.addProximityAlert(proximityAlert)
+            proximityAlertTaskLauncher.launchProximityAlertTask()
+        }
+    }
+
+    /**
+     * Remove a proximity alert.
+     */
+    fun removeProximityAlert() {
+        backgroundExecutor.execute {
+            alertsDao.removeAllProximityAlerts()
+        }
+    }
+
+    /**
      * Ensure that tasks required to fulfil alerts are running.
      */
     fun ensureTasksRunningIfAlertsExists() {
         if (alertsDao.getArrivalAlertCount() > 0) {
             arrivalAlertTaskLauncher.launchArrivalAlertTask()
+        }
+
+        if (alertsDao.getProximityAlertCount() > 0) {
+            proximityAlertTaskLauncher.launchProximityAlertTask()
         }
     }
 }

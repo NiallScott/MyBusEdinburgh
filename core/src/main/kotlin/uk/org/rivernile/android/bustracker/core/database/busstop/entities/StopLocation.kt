@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,34 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.notifications
+package uk.org.rivernile.android.bustracker.core.database.busstop.entities
 
 /**
- * This interface allows notification channels to be interacted with safely depending on what
- * platform version we're running on.
+ * This class describes a stop location, which is its latitude and longitude.
  *
+ * @property stopCode The code of the stop.
+ * @property latitude The latitude of the stop.
+ * @property longitude The longitude of the stop.
  * @author Niall Scott
  */
-interface AppNotificationChannels {
-
-    companion object {
-
-        /**
-         * This is the [String] constant for the foreground tasks notification channel.
-         */
-        const val CHANNEL_FOREGROUND_TASKS = "foregroundTasks"
-        /**
-         * This is the [String] constant for the arrival alerts notification channel.
-         */
-        const val CHANNEL_ARRIVAL_ALERTS = "arrivalAlerts"
-        /**
-         * This is the [String] constant for the proximity alerts notification channel.
-         */
-        const val CHANNEL_PROXIMITY_ALERTS = "proximityAlerts"
-    }
-
-    /**
-     * Create the application's notification channels.
-     */
-    fun createNotificationChannels()
-}
+data class StopLocation(
+        val stopCode: String,
+        val latitude: Double,
+        val longitude: Double)

@@ -84,6 +84,13 @@ class TimeAlertRunner @Inject internal constructor(
     }
 
     /**
+     * Java finalizer.
+     */
+    protected fun finalize() {
+        stop()
+    }
+
+    /**
      * Perform a check of the arrival alert count. If there are no active alerts, we will stop
      * ourselves.
      */

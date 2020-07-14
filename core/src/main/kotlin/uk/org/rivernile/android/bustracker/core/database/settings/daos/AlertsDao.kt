@@ -85,6 +85,19 @@ interface AlertsDao {
     fun removeProximityAlert(id: Int)
 
     /**
+     * Remove all proximity alerts.
+     */
+    fun removeAllProximityAlerts()
+
+    /**
+     * Get an active proximity alert.
+     *
+     * @param id The ID of the proximity alert.
+     * @return The [ProximityAlert], or `null` if it doesn't exist.
+     */
+    fun getProximityAlert(id: Int): ProximityAlert?
+
+    /**
      * Get all the arrival alerts.
      *
      * @return All the arrival alerts.
@@ -104,6 +117,20 @@ interface AlertsDao {
      * @return The number of current arrival alerts.
      */
     fun getArrivalAlertCount(): Int
+
+    /**
+     * Get all the proximity alerts.
+     *
+     * @return All the proximity alerts.
+     */
+    fun getAllProximityAlerts(): List<ProximityAlert>?
+
+    /**
+     * Get the number of current proximity alerts.
+     *
+     * @return The number of current proximity alerts.
+     */
+    fun getProximityAlertCount(): Int
 
     /**
      * This interface should be implemented to listen for changes to alerts. Call

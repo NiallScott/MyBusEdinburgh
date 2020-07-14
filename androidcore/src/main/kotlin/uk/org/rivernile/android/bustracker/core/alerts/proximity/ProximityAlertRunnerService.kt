@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.alerts.arrivals
+package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
 import android.app.Notification
 import android.app.PendingIntent
@@ -39,19 +39,19 @@ import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationCha
 import javax.inject.Inject
 
 /**
- * This is an Android [Service] which runs the arrival alert checker.
+ * This is an Android [Service] which runs the proximity alert checker.
  *
  * @author Niall Scott
  */
-class ArrivalAlertRunnerService : Service() {
+class ProximityAlertRunnerService : Service() {
 
     companion object {
 
-        private const val FOREGROUND_NOTIFICATION_ID = 100
+        private const val FOREGROUND_NOTIFICATION_ID = 101
     }
 
     @Inject
-    lateinit var timeAlertRunner: TimeAlertRunner
+    lateinit var manageProximityAlertsRunner: ManageProximityAlertsRunner
     @Inject
     lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
 
@@ -63,7 +63,7 @@ class ArrivalAlertRunnerService : Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
-        timeAlertRunner.start(this::stopSelf)
+        manageProximityAlertsRunner.start(this::stopSelf)
 
         return START_STICKY
     }
@@ -71,7 +71,7 @@ class ArrivalAlertRunnerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
 
-        timeAlertRunner.stop()
+        manageProximityAlertsRunner.stop()
     }
 
     override fun onBind(intent: Intent): IBinder? = null
@@ -82,14 +82,14 @@ class ArrivalAlertRunnerService : Service() {
      *
      * @return The [Notification] shown to the user while the foreground service is running.
      */
-    private fun createForegroundNotification(): Notification =
+    private fun createForegroundNotification() =
             NotificationCompat.Builder(this, AppNotificationChannels.CHANNEL_FOREGROUND_TASKS)
                     .apply {
                         priority = NotificationCompat.PRIORITY_LOW
                         setCategory(NotificationCompat.CATEGORY_SERVICE)
                         setSmallIcon(R.drawable.ic_directions_bus_black)
                         setContentTitle(
-                                getString(R.string.arrival_foreground_service_notification_title))
+                                getString(R.string.proximity_foreground_service_notification_title))
                         setContentIntent(createNotificationActionPendingIntent())
                         addAction(createRemoveNotificationAction())
                     }
@@ -110,11 +110,11 @@ class ArrivalAlertRunnerService : Service() {
                     }
 
     /**
-     * Create a [NotificationCompat.Action] which allows the user to remove a current arrival time
-     * check.
+     * Create a [NotificationCompat.Action] which allows the user to remove a current proximity
+     * alert.
      *
-     * @return A [NotificationCompat.Action] which allows the user to remove a current arrival time
-     * check.
+     * @return A [NotificationCompat.Action] which allows the user to remove a current proximity
+     * alert.
      */
     private fun createRemoveNotificationAction() =
             NotificationCompat.Action.Builder(
@@ -124,12 +124,13 @@ class ArrivalAlertRunnerService : Service() {
                     .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_DELETE)
                     .build()
 
+
     /**
      * Create a [PendingIntent] which is called when the user wishes to remove the in-progress
-     * arrival alert check.
+     * proximity alert.
      */
     private fun createRemoveActionButtonPendingIntent() =
-            Intent(this, RemoveArrivalAlertBroadcastReceiver::class.java)
+            Intent(this, RemoveProximityAlertBroadcastReceiver::class.java)
                     .let {
                         PendingIntent.getBroadcast(this, FOREGROUND_NOTIFICATION_ID, it,
                                 PendingIntent.FLAG_UPDATE_CURRENT)

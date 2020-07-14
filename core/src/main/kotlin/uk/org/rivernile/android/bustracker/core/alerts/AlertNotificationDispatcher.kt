@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.alerts
 
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 
 /**
@@ -43,4 +44,11 @@ interface AlertNotificationDispatcher {
      * @param qualifyingServices What services caused the notification to be fired.
      */
     fun dispatchTimeAlertNotification(arrivalAlert: ArrivalAlert, qualifyingServices: List<Service>)
+
+    /**
+     * Dispatch a new proximity alert notification to show to the user.
+     *
+     * @param proximityAlert The [ProximityAlert] that caused the notification.
+     */
+    fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert)
 }

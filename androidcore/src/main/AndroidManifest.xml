@@ -33,9 +33,15 @@
     <uses-permission
         android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission
         android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission
+        android:name="android.permission.VIBRATE" />
 
     <application>
 
@@ -45,6 +51,11 @@
 
         <service
             android:name="uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService"
+            android:exported="false" />
+
+        <service
+            android:name="uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRunnerService"
+            android:foregroundServiceType="location"
             android:exported="false" />
 
         <receiver
@@ -58,6 +69,14 @@
 
         <receiver
             android:name="uk.org.rivernile.android.bustracker.core.alerts.arrivals.RemoveArrivalAlertBroadcastReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name="uk.org.rivernile.android.bustracker.core.alerts.proximity.RemoveProximityAlertBroadcastReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name="uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidAreaEnteredBroadcastReceiver"
             android:exported="false" />
     </application>
 </manifest>

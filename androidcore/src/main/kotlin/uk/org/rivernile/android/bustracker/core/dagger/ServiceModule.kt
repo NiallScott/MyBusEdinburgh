@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRunnerService
 import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService
 
 /**
@@ -55,4 +56,12 @@ internal abstract class ServiceModule {
      */
     @ContributesAndroidInjector
     abstract fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
+
+    /**
+     * Presents an instance of [ProximityAlertRunnerService] as an item to be injected.
+     *
+     * @return An instance of [ProximityAlertRunnerService] to be injected.
+     */
+    @ContributesAndroidInjector
+    abstract fun contributeProximityAlertRunnerService(): ProximityAlertRunnerService
 }

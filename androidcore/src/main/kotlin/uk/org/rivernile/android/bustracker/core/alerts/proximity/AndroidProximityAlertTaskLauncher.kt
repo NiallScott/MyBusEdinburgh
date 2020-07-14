@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,34 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.notifications
+package uk.org.rivernile.android.bustracker.core.alerts.proximity
+
+import android.content.Context
+import android.content.Intent
+import androidx.core.content.ContextCompat
+import javax.inject.Inject
 
 /**
- * This interface allows notification channels to be interacted with safely depending on what
- * platform version we're running on.
+ * This is the Android specific implementation of [ProximityAlertTaskLauncher].
  *
+ * @param context The application [Context].
  * @author Niall Scott
  */
-interface AppNotificationChannels {
+internal class AndroidProximityAlertTaskLauncher @Inject constructor(
+        private val context: Context) : ProximityAlertTaskLauncher {
 
-    companion object {
-
-        /**
-         * This is the [String] constant for the foreground tasks notification channel.
-         */
-        const val CHANNEL_FOREGROUND_TASKS = "foregroundTasks"
-        /**
-         * This is the [String] constant for the arrival alerts notification channel.
-         */
-        const val CHANNEL_ARRIVAL_ALERTS = "arrivalAlerts"
-        /**
-         * This is the [String] constant for the proximity alerts notification channel.
-         */
-        const val CHANNEL_PROXIMITY_ALERTS = "proximityAlerts"
+    override fun launchProximityAlertTask() {
+        Intent(context, ProximityAlertRunnerService::class.java).let {
+            ContextCompat.startForegroundService(context, it)
+        }
     }
-
-    /**
-     * Create the application's notification channels.
-     */
-    fun createNotificationChannels()
 }

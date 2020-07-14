@@ -117,6 +117,44 @@ internal class AndroidAlertsDao(private val context: Context,
                 arrayOf(id.toString(), AlertsContract.ALERTS_TYPE_PROXIMITY.toString()))
     }
 
+    override fun removeAllProximityAlerts() {
+        context.contentResolver.delete(contract.getContentUri(),
+                "${AlertsContract.TYPE} = ?",
+                arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString()))
+    }
+
+    override fun getProximityAlert(id: Int) = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(
+                    AlertsContract.ID,
+                    AlertsContract.TIME_ADDED,
+                    AlertsContract.STOP_CODE,
+                    AlertsContract.DISTANCE_FROM),
+            "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
+            arrayOf(
+                    id.toString(),
+                    AlertsContract.ALERTS_TYPE_PROXIMITY.toString()
+            ),
+            null)?.use {
+        // Fill Cursor window.
+        it.count
+
+        if (it.moveToFirst()) {
+            val idColumn = it.getColumnIndex(AlertsContract.ID)
+            val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
+            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+            val distanceFromColumn = it.getColumnIndex(AlertsContract.DISTANCE_FROM)
+
+            ProximityAlert(
+                    it.getInt(idColumn),
+                    it.getLong(timeAddedColumn),
+                    it.getString(stopCodeColumn),
+                    it.getInt(distanceFromColumn))
+        } else {
+            null
+        }
+    }
+
     override fun getAllArrivalAlerts() = context.contentResolver.query(
             contract.getContentUri(),
             arrayOf(
@@ -193,6 +231,64 @@ internal class AndroidAlertsDao(private val context: Context,
             "${AlertsContract.TYPE} = ?",
             arrayOf(
                     AlertsContract.ALERTS_TYPE_TIME.toString()),
+            null)?.use {
+        // Fill the Cursor window.
+        it.count
+
+        if (it.moveToFirst()) {
+            val countColumn = it.getColumnIndex(AlertsContract.COUNT)
+            it.getInt(countColumn)
+        } else {
+            0
+        }
+    } ?: 0
+
+    override fun getAllProximityAlerts() = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(
+                    AlertsContract.ID,
+                    AlertsContract.TIME_ADDED,
+                    AlertsContract.STOP_CODE,
+                    AlertsContract.DISTANCE_FROM),
+            "${AlertsContract.TYPE} = ?",
+            arrayOf(
+                    AlertsContract.ALERTS_TYPE_PROXIMITY.toString()),
+            null)?.use {
+        val count = it.count
+
+        if (count > 0) {
+            val result = ArrayList<ProximityAlert>(count)
+            val idColumn = it.getColumnIndex(AlertsContract.ID)
+            val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
+            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+            val distanceFromColumn = it.getColumnIndex(AlertsContract.DISTANCE_FROM)
+
+            while (it.moveToNext()) {
+                val id = it.getInt(idColumn)
+                val timeAdded = it.getLong(timeAddedColumn)
+                val stopCode = it.getString(stopCodeColumn)
+                val distanceFrom = it.getInt(distanceFromColumn)
+                val proximityAlert = ProximityAlert(
+                        id,
+                        timeAdded,
+                        stopCode,
+                        distanceFrom)
+                result.add(proximityAlert)
+            }
+
+            result
+        } else {
+            null
+        }
+    }
+
+    override fun getProximityAlertCount() = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(
+                    AlertsContract.COUNT),
+            "${AlertsContract.TYPE} = ?",
+            arrayOf(
+                    AlertsContract.ALERTS_TYPE_PROXIMITY.toString()),
             null)?.use {
         // Fill the Cursor window.
         it.count

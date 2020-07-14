@@ -33,7 +33,13 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatch
 import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.AndroidArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.AndroidProximityAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.GeofencingManager
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidGeofencingManager
 import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
+import uk.org.rivernile.android.bustracker.core.di.ForProximityAlerts
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 
@@ -50,6 +56,11 @@ internal class AlertsModule {
     fun provideArrivalAlertExecutorService(): ScheduledExecutorService =
             Executors.newSingleThreadScheduledExecutor()
 
+    @Provides
+    @ForProximityAlerts
+    fun provideProximityAlertExecutorService(): ExecutorService =
+            Executors.newSingleThreadExecutor()
+
     @Module
     interface Bindings {
 
@@ -64,5 +75,16 @@ internal class AlertsModule {
         fun bindArrivalAlertTaskLauncher(
                 androidArrivalAlertTaskLauncher: AndroidArrivalAlertTaskLauncher)
                 : ArrivalAlertTaskLauncher
+
+        @Suppress("unused")
+        @Binds
+        fun bindProximityAlertTaskLauncher(
+                androidProximityAlertTaskLauncher: AndroidProximityAlertTaskLauncher)
+                : ProximityAlertTaskLauncher
+
+        @Suppress("unused")
+        @Binds
+        fun bindGeofencingManager(androidGeofencingManager: AndroidGeofencingManager)
+                : GeofencingManager
     }
 }

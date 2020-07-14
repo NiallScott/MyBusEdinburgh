@@ -34,6 +34,7 @@ import androidx.core.app.NotificationManagerCompat
 import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
@@ -60,6 +61,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
     companion object {
 
         private const val NOTIFICATION_ID_ALERT = 2
+        private const val NOTIFICATION_ID_PROXIMITY = 3
 
         private const val TIMEOUT_ALERT_MILLIS = 1800000L // 30 minutes
     }
@@ -85,6 +87,30 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                 }
                 .let {
                     notificationManager.notify(NOTIFICATION_ID_ALERT, it.build())
+                }
+    }
+
+    override fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert) {
+        val stopName = getDisplayableStopName(proximityAlert.stopCode)
+        val title = context.getString(R.string.proximity_alert_notification_title, stopName)
+        val ticker = context.getString(R.string.proximity_alert_notification_ticker, stopName)
+        val summary = context.getString(R.string.proximity_alert_notification_summary,
+                proximityAlert.distanceFrom, stopName)
+
+        NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_PROXIMITY_ALERTS)
+                .apply {
+                    setSmallIcon(R.drawable.ic_directions_bus_black)
+                    setContentTitle(title)
+                    setContentText(summary)
+                    setTicker(ticker)
+                    setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                    priority = NotificationCompat.PRIORITY_HIGH
+                    setCategory(NotificationCompat.CATEGORY_NAVIGATION)
+                    setAutoCancel(true)
+                    setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+                }
+                .let {
+                    notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())
                 }
     }
 

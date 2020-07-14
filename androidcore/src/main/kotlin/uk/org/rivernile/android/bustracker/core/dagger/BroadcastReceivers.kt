@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.RemoveArrivalAlertBroadcastReceiver
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.RemoveProximityAlertBroadcastReceiver
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidAreaEnteredBroadcastReceiver
 import uk.org.rivernile.android.bustracker.core.startup.DeviceBootBroadcastReceiver
 
 /**
@@ -47,4 +49,12 @@ internal interface BroadcastReceivers {
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeRemoveArrivalAlertBroadcastReceiver(): RemoveArrivalAlertBroadcastReceiver
+
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeRemoveProximityAlertBroadcastReceiver(): RemoveProximityAlertBroadcastReceiver
+
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeAndroidAreaEnteredBroadcastReceiver(): AndroidAreaEnteredBroadcastReceiver
 }

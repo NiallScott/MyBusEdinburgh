@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
 import android.content.Context
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 
 /**
@@ -58,6 +59,30 @@ internal class AndroidBusStopsDao(
                 val locality = it.getString(it.getColumnIndex(BusStopsContract.LOCALITY))
                 StopName(name, locality)
             }
+        } else {
+            null
+        }
+    }
+
+    override fun getLocationForStop(stopCode: String) = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(
+                    BusStopsContract.LATITUDE,
+                    BusStopsContract.LONGITUDE),
+            "${BusStopsContract.STOP_CODE} = ?",
+            arrayOf(stopCode),
+            null)?.use {
+        // Fill the Cursor window.
+        it.count
+
+        if (it.moveToFirst()) {
+            val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
+            val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+
+            StopLocation(
+                    stopCode,
+                    it.getDouble(latitudeColumn),
+                    it.getDouble(longitudeColumn))
         } else {
             null
         }

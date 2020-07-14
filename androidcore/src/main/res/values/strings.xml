@@ -63,6 +63,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="notification_channel_foreground_description">A notification may appear when the app is performing some tasks, such as checking arrival times and your proximity to a stop</string>
     <string name="notification_channel_arrival_alert_name">Arrival alerts</string>
     <string name="notification_channel_arrival_alert_description">These notifications appear when your set arrival alerts are triggered</string>
+    <string name="notification_channel_proximity_alert_name">Proximity alerts</string>
+    <string name="notification_channel_proximity_alert_description">These notifications appear when your set proximity alerts are triggered</string>
 
     <!--
     *******************************************
@@ -86,4 +88,20 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item quantity="one">in %d minute</item> <!-- %d = number of minutes -->
         <item quantity="other">in %d minutes or less</item> <!-- %d = number of minutes -->
     </plurals>
+
+    <!--
+    *********************************************
+    * Proximity foreground Service notification *
+    *********************************************
+    -->
+    <string name="proximity_foreground_service_notification_title">Checking proximity…</string>
+
+    <!--
+    ********************************
+    * Proximity alert notification *
+    ********************************
+    -->
+    <string name="proximity_alert_notification_title">Approaching %s</string> <!-- %s = bus stop name and code. -->
+    <string name="proximity_alert_notification_summary">You have entered within a %1$dm radius of %2$s</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
+    <string name="proximity_alert_notification_ticker">You are approaching %s</string> <!-- %s = bus stop name and code. -->
 </resources>
