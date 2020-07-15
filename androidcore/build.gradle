@@ -42,7 +42,7 @@ android {
         targetSdkVersion androidTargetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "uk.org.rivernile.android.bustracker.core.CoreTestRunner"
     }
 
     buildTypes {
@@ -117,11 +117,14 @@ dependencies {
     edinburghApi 'uk.org.rivernile.edinburghbustrackerapi:api:1.2.0'
 
     // Test dependencies
+    androidTestImplementation project(':testutils')
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     androidTestImplementation "androidx.test:core:$androidTestCoreVersion"
     androidTestImplementation "androidx.test:runner:$androidTestCoreVersion"
     androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
     androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
+    kaptAndroidTest "com.google.dagger:dagger-compiler:$daggerVersion"
+    kaptAndroidTest "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     testImplementation project(':testutils')
     testImplementation "junit:junit:$junitVersion"
