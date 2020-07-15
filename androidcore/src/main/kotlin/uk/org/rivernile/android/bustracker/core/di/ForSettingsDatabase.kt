@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger.qualifiers
+package uk.org.rivernile.android.bustracker.core.di
 
 import javax.inject.Qualifier
 import kotlin.annotation.MustBeDocumented
 import kotlin.annotation.Retention
 
 /**
- * This annotation defines a Dagger qualifier for bus stop database dependencies.
+ * This annotation defines a Dagger qualifier for settings database dependencies.
  *
  * @author Niall Scott
  */
 @Qualifier
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
-annotation class ForBusStopDatabase
+annotation class ForSettingsDatabase

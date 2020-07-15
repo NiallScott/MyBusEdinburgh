@@ -29,7 +29,7 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import android.content.Context
 import dagger.Module
 import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.di.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository

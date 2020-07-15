@@ -32,7 +32,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
-import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForTracker
+import uk.org.rivernile.android.bustracker.core.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint

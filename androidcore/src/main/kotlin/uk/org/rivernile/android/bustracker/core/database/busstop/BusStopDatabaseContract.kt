@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.net.Uri
-import uk.org.rivernile.android.bustracker.core.dagger.qualifiers.ForBusStopDatabase
+import uk.org.rivernile.android.bustracker.core.di.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.utils.OpenForTesting
 import javax.inject.Inject
 import javax.inject.Singleton
