@@ -29,7 +29,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
 ext {
-    architectureComponentsVersion = '2.1.0'
+    architectureComponentsVersion = '2.2.0'
     googlePlayServicesVersion = '17.0.0'
 
     espressoVersion = '3.0.2'
@@ -150,5 +150,5 @@ dependencies {
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "androidx.arch.core:core-testing:$architectureComponentsVersion"
+    testImplementation 'androidx.arch.core:core-testing:2.1.0'
 }
