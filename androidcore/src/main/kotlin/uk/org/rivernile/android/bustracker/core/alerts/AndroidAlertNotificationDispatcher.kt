@@ -60,7 +60,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
 
     companion object {
 
-        private const val NOTIFICATION_ID_ALERT = 2
+        private const val NOTIFICATION_ID_ARRIVAL = 2
         private const val NOTIFICATION_ID_PROXIMITY = 3
 
         private const val TIMEOUT_ALERT_MILLIS = 1800000L // 30 minutes
@@ -70,7 +70,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                                                qualifyingServices: List<Service>) {
         val title = context.getString(R.string.arrival_alert_notification_title)
         val summary = createAlertSummaryString(arrivalAlert, qualifyingServices)
-        val pendingIntent = createAlertPendingIntent(arrivalAlert.stopCode)
+        val pendingIntent = createArrivalAlertPendingIntent(arrivalAlert.stopCode)
 
         NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_ARRIVAL_ALERTS)
                 .apply {
@@ -86,7 +86,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
                 }
                 .let {
-                    notificationManager.notify(NOTIFICATION_ID_ALERT, it.build())
+                    notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
                 }
     }
 
@@ -96,6 +96,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
         val ticker = context.getString(R.string.proximity_alert_notification_ticker, stopName)
         val summary = context.getString(R.string.proximity_alert_notification_summary,
                 proximityAlert.distanceFrom, stopName)
+        val pendingIntent = createProximityAlertPendingIntent(proximityAlert.stopCode)
 
         NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_PROXIMITY_ALERTS)
                 .apply {
@@ -106,6 +107,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     setStyle(NotificationCompat.BigTextStyle().bigText(summary))
                     priority = NotificationCompat.PRIORITY_HIGH
                     setCategory(NotificationCompat.CATEGORY_NAVIGATION)
+                    setContentIntent(pendingIntent)
                     setAutoCancel(true)
                     setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
                 }
@@ -162,16 +164,33 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
     }
 
     /**
-     * Create a [PendingIntent] - the action which is performed when the user clicks on the
-     * notification.
+     * Create a [PendingIntent] for a fired arrival alert - the action which is performed when the
+     * user clicks on the notification.
      *
      * @param stopCode The stop code.
      * @return A [PendingIntent] which is executed when the user clicks on the notification.
      */
-    private fun createAlertPendingIntent(stopCode: String) =
+    private fun createArrivalAlertPendingIntent(stopCode: String) =
             deeplinkIntentFactory.createShowBusTimesIntent(stopCode)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     .let {
-                        PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_ONE_SHOT)
+                        PendingIntent.getActivity(context, NOTIFICATION_ID_ARRIVAL, it,
+                                PendingIntent.FLAG_ONE_SHOT)
+                    }
+
+    /**
+     * Create a [PendingIntent] for a fired proximity alert - the action which is performed when the
+     * user clicks on the notification.
+     *
+     * @param stopCode The stop code.
+     * @return A [PendingIntent] which is executed when the user clicks on the notification.
+     */
+    private fun createProximityAlertPendingIntent(stopCode: String) =
+            (deeplinkIntentFactory.createShowStopOnMapIntent(stopCode)
+                    ?: deeplinkIntentFactory.createShowBusTimesIntent(stopCode))
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .let {
+                        PendingIntent.getActivity(context, NOTIFICATION_ID_PROXIMITY, it,
+                                PendingIntent.FLAG_ONE_SHOT)
                     }
 }

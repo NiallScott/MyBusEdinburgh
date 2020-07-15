@@ -24,39 +24,28 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.deeplinking
+package uk.org.rivernile.android.bustracker.dagger
 
-import android.content.Intent
+import com.google.android.gms.common.GoogleApiAvailability
+import dagger.Module
+import dagger.Provides
+import javax.inject.Singleton
 
 /**
- * This class is used to create [Intent]s used for deeplinking in to various parts of the app, e.g.
- * from notifications.
+ * This [Module] provides Google Play Services dependencies.
  *
  * @author Niall Scott
  */
-interface DeeplinkIntentFactory {
+@Module
+class PlayServicesModule {
 
     /**
-     * Create an [Intent] used for deeplinking the user in to the bus times display for a bus stop.
+     * Provide an instance of [GoogleApiAvailability].
      *
-     * @param stopCode The stop code to show times for.
-     * @return The [Intent] to launch the bus times display.
+     * @return An instance of [GoogleApiAvailability].
      */
-    fun createShowBusTimesIntent(stopCode: String): Intent
-
-    /**
-     * Create an [Intent] used for deeplinking the user in to the stop map with the given `stopCode`
-     * as the selected item.
-     *
-     * @param stopCode The stop code to center the map upon.
-     * @return The [Intent] to launch the map, or `null` if the map is not available.
-     */
-    fun createShowStopOnMapIntent(stopCode: String): Intent?
-
-    /**
-     * Create an [Intent] used for deeplinking the user in to managing their alerts.
-     *
-     * @return The [Intent] which deeplinks the user in to managing their alerts.
-     */
-    fun createManageAlertsIntent(): Intent
+    @Provides
+    @Singleton
+    fun provideGoogleApiAvailability(): GoogleApiAvailability =
+            GoogleApiAvailability.getInstance()
 }

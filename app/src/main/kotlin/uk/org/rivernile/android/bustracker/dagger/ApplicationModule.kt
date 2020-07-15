@@ -26,18 +26,19 @@
 package uk.org.rivernile.android.bustracker.dagger
 
 import android.content.Context
-import com.google.android.gms.common.GoogleApiAvailability
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.alerts.AlertManagerImpl
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
+import uk.org.rivernile.android.bustracker.core.features.StopMapFeatureAvailabilityProvider
 import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapDataModule
 import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
 import uk.org.rivernile.android.bustracker.deeplinking.AppDeeplinkIntentFactory
+import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilityProvider
 import javax.inject.Singleton
 
 /**
@@ -49,6 +50,7 @@ import javax.inject.Singleton
     AboutDataModule::class,
     ApplicationModule.Bindings::class,
     BusStopMapDataModule::class,
+    PlayServicesModule::class,
     ViewModelModule::class
 ])
 class ApplicationModule {
@@ -65,15 +67,6 @@ class ApplicationModule {
         return AndroidPlatformDataSource(context)
     }
 
-    /**
-     * Provide a [GoogleApiAvailability] instance to Dagger.
-     *
-     * @return A [GoogleApiAvailability] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideGoogleApiAvailability(): GoogleApiAvailability = GoogleApiAvailability.getInstance()
-
     @Module
     internal interface Bindings {
 
@@ -85,5 +78,11 @@ class ApplicationModule {
         @Binds
         fun bindDeeplinkIntentFactory(appDeeplinkIntentFactory: AppDeeplinkIntentFactory)
                 : DeeplinkIntentFactory
+
+        @Suppress("unused")
+        @Binds
+        fun bindStopMapFeatureAvailabilityProvider(
+                appStopMapFeatureAvailabilityProvider: AppStopMapFeatureAvailabilityProvider)
+                : StopMapFeatureAvailabilityProvider
     }
 }

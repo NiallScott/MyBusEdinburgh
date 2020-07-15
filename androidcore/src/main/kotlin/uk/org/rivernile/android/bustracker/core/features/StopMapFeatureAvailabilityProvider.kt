@@ -24,39 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.deeplinking
-
-import android.content.Intent
+package uk.org.rivernile.android.bustracker.core.features
 
 /**
- * This class is used to create [Intent]s used for deeplinking in to various parts of the app, e.g.
- * from notifications.
+ * This is an interface, to be implemented by the app, which provides whether the stop map feature
+ * is available or not.
  *
  * @author Niall Scott
  */
-interface DeeplinkIntentFactory {
+interface StopMapFeatureAvailabilityProvider {
 
     /**
-     * Create an [Intent] used for deeplinking the user in to the bus times display for a bus stop.
+     * Is the stop map feature available?
      *
-     * @param stopCode The stop code to show times for.
-     * @return The [Intent] to launch the bus times display.
+     * @return `true` if the stop map feature is available, `false` if not.
      */
-    fun createShowBusTimesIntent(stopCode: String): Intent
-
-    /**
-     * Create an [Intent] used for deeplinking the user in to the stop map with the given `stopCode`
-     * as the selected item.
-     *
-     * @param stopCode The stop code to center the map upon.
-     * @return The [Intent] to launch the map, or `null` if the map is not available.
-     */
-    fun createShowStopOnMapIntent(stopCode: String): Intent?
-
-    /**
-     * Create an [Intent] used for deeplinking the user in to managing their alerts.
-     *
-     * @return The [Intent] which deeplinks the user in to managing their alerts.
-     */
-    fun createManageAlertsIntent(): Intent
+    fun isStopMapFeatureAvailable(): Boolean
 }

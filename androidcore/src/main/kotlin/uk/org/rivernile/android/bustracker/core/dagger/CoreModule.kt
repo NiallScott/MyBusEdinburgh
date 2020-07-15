@@ -36,6 +36,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
+import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
+import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.V29ConnectivityChecker
@@ -153,5 +155,10 @@ class CoreModule {
         @Binds
         fun bindPermissionChecker(androidPermissionChecker: AndroidPermissionChecker)
                 : PermissionChecker
+
+        @Suppress("unused")
+        @Binds
+        fun bindFeatureRepository(androidFeatureRepository: AndroidFeatureRepository)
+                : FeatureRepository
     }
 }

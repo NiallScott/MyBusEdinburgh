@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.deeplinking
 import android.content.Context
 import android.content.Intent
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
+import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.main.MainActivity
 import javax.inject.Inject
@@ -37,15 +39,26 @@ import javax.inject.Inject
  * The app specific implementation of [DeeplinkIntentFactory].
  *
  * @param context The application [Context].
+ * @param featureRepository Used to determine if specific features are available.
  * @author Niall Scott
  */
 class AppDeeplinkIntentFactory @Inject constructor(
-        private val context: Context) : DeeplinkIntentFactory {
+        private val context: Context,
+        private val featureRepository: FeatureRepository) : DeeplinkIntentFactory {
 
     override fun createShowBusTimesIntent(stopCode: String) =
             Intent(context, DisplayStopDataActivity::class.java)
                     .setAction(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
                     .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+
+    override fun createShowStopOnMapIntent(stopCode: String): Intent? {
+        return if (featureRepository.hasStopMapUiFeature()) {
+            Intent(context, BusStopMapActivity::class.java)
+                    .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
+        } else {
+            null
+        }
+    }
 
     override fun createManageAlertsIntent() =
             Intent(MainActivity.ACTION_MANAGE_ALERTS)
