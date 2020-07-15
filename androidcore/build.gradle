@@ -107,7 +107,7 @@ dependencies {
     api 'com.google.code.gson:gson:2.8.6'
 
     // Okhttp
-    api "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+    debugImplementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
 
     // Retrofit
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"

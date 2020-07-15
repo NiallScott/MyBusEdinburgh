@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,49 +26,44 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
-import com.google.gson.Gson
+import android.util.Log
 import dagger.Module
 import dagger.Provides
 import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import retrofit2.converter.gson.GsonConverterFactory
+import okhttp3.logging.HttpLoggingInterceptor
 import uk.org.rivernile.android.bustracker.core.di.ForHttpLogging
 import javax.inject.Singleton
 
 /**
- * This Dagger module defines standard HTTP dependencies across the project.
+ * This is a Dagger [Module] which supplies HTTP logging dependencies.
+ *
+ * This is the debug version of this class. The release version does not do HTTP logging.
  *
  * @author Niall Scott
  */
-@Module(includes = [ HttpLoggingModule::class ])
-internal class HttpModule {
+@Module
+internal class HttpLoggingModule {
 
-    /**
-     * Provide a minimally configured [OkHttpClient] instance. When used elsewhere, call
-     * [OkHttpClient.newBuilder] to build upon the existing instance. This allows the thread and
-     * connection pools to be shared between the instances, thus improving performance.
-     *
-     * @param httpLoggingInterceptor The logging interceptor. Will be `null` on non-debug builds.
-     * @return An [OkHttpClient] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideOkhttpClient(
-            @ForHttpLogging httpLoggingInterceptor: Interceptor?): OkHttpClient {
-        val builder = OkHttpClient.Builder()
-        httpLoggingInterceptor?.let(builder::addNetworkInterceptor)
+    companion object {
 
-        return builder.build()
+        /**
+         * The log tag to use for [HttpLoggingInterceptor].
+         */
+        private const val HTTP_LOG_TAG = "MyBusHttp"
     }
 
     /**
-     * Provide a [GsonConverterFactory] instance which uses the app-wide [Gson] instance.
+     * As this is in debug mode, provide the [HttpLoggingInterceptor] as an [Interceptor].
      *
-     * @param gson The app-wide Gson instance.
-     * @return A [GsonConverterFactory] instance.
+     * @return A configured [HttpLoggingInterceptor].
      */
     @Provides
     @Singleton
-    fun provideGsonConverterFactory(gson: Gson): GsonConverterFactory =
-            GsonConverterFactory.create(gson)
+    @ForHttpLogging
+    fun provideLoggingInterceptor(): Interceptor? =
+            HttpLoggingInterceptor { message ->
+                Log.v(HTTP_LOG_TAG, message)
+            }.apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
 }
