@@ -32,10 +32,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import uk.org.rivernile.android.bustracker.CurrentThreadExecutor
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
-import uk.org.rivernile.android.bustracker.core.testutils.CurrentThreadExecutor
 
 /**
  * Tests for [StartUpTask].
