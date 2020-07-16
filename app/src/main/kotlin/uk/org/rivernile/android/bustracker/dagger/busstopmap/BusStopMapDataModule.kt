@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,12 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.dagger.busstopmap
 
-import android.content.Context
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.AndroidBusStopMapLiveDataFactory
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapLiveDataFactory
-import uk.org.rivernile.android.bustracker.utils.Strings
 
 /**
  * This Dagger [Module] provides classes related to providing data for the bus stop map.
@@ -39,17 +37,11 @@ import uk.org.rivernile.android.bustracker.utils.Strings
  * @author Niall Scott
  */
 @Module
-class BusStopMapDataModule {
+interface BusStopMapDataModule {
 
-    /**
-     * Provide an instance of [BusStopMapLiveDataFactory].
-     *
-     * @param context A [Context] instance.
-     * @param strings A [Strings] instance.
-     */
-    @Provides
-    fun providesBusStopMapLiveDataFactory(context: Context, strings: Strings)
-            : BusStopMapLiveDataFactory {
-        return AndroidBusStopMapLiveDataFactory(context, strings)
-    }
+    @Suppress("unused")
+    @Binds
+    fun bindBusStopMapLiveDataFactory(
+            androidBusStopMapLiveDataFactory: AndroidBusStopMapLiveDataFactory)
+            : BusStopMapLiveDataFactory
 }

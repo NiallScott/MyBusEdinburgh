@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.data.platform
 import android.content.Context
 import android.content.pm.PackageManager
 import uk.org.rivernile.edinburghbustracker.android.R
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This is an Android specific implementation of [PlatformDataSource].
@@ -36,7 +38,9 @@ import uk.org.rivernile.edinburghbustracker.android.R
  * @property context A [Context] instance.
  * @author Niall Scott
  */
-class AndroidPlatformDataSource(private val context: Context) : PlatformDataSource {
+@Singleton
+class AndroidPlatformDataSource @Inject constructor(
+        private val context: Context) : PlatformDataSource {
 
     override fun getAppVersionString(): String = try {
         context.packageManager.getPackageInfo(context.packageName, 0).let {

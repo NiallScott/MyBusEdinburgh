@@ -25,10 +25,8 @@
 
 package uk.org.rivernile.android.bustracker.dagger
 
-import android.content.Context
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import uk.org.rivernile.android.bustracker.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.alerts.AlertManagerImpl
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
@@ -39,7 +37,6 @@ import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSour
 import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
 import uk.org.rivernile.android.bustracker.deeplinking.AppDeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilityProvider
-import javax.inject.Singleton
 
 /**
  * The main application [Module].
@@ -48,41 +45,29 @@ import javax.inject.Singleton
  */
 @Module(includes = [
     AboutDataModule::class,
-    ApplicationModule.Bindings::class,
     BusStopMapDataModule::class,
     PlayServicesModule::class,
     ViewModelModule::class
 ])
-class ApplicationModule {
+interface ApplicationModule {
 
-    /**
-     * Provide a [PlatformDataSource] to Dagger.
-     *
-     * @param context A [Context] instance.
-     * @return A [PlatformDataSource].
-     */
-    @Provides
-    @Singleton
-    fun providePlatformDataSource(context: Context): PlatformDataSource {
-        return AndroidPlatformDataSource(context)
-    }
+    @Suppress("unused")
+    @Binds
+    fun bindAlertManager(alertManagerImpl: AlertManagerImpl): AlertManager
 
-    @Module
-    internal interface Bindings {
+    @Suppress("unused")
+    @Binds
+    fun bindDeeplinkIntentFactory(appDeeplinkIntentFactory: AppDeeplinkIntentFactory)
+            : DeeplinkIntentFactory
 
-        @Suppress("unused")
-        @Binds
-        fun bindAlertManager(alertManagerImpl: AlertManagerImpl): AlertManager
+    @Suppress("unused")
+    @Binds
+    fun bindPlatformDataSource(androidPlatformDataSource: AndroidPlatformDataSource)
+            : PlatformDataSource
 
-        @Suppress("unused")
-        @Binds
-        fun bindDeeplinkIntentFactory(appDeeplinkIntentFactory: AppDeeplinkIntentFactory)
-                : DeeplinkIntentFactory
-
-        @Suppress("unused")
-        @Binds
-        fun bindStopMapFeatureAvailabilityProvider(
-                appStopMapFeatureAvailabilityProvider: AppStopMapFeatureAvailabilityProvider)
-                : StopMapFeatureAvailabilityProvider
-    }
+    @Suppress("unused")
+    @Binds
+    fun bindStopMapFeatureAvailabilityProvider(
+            appStopMapFeatureAvailabilityProvider: AppStopMapFeatureAvailabilityProvider)
+            : StopMapFeatureAvailabilityProvider
 }

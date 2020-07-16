@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,7 @@ import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
  * @author Niall Scott
  */
 @Module
-abstract class ViewModelModule {
+interface ViewModelModule {
 
     /**
      * Inject an [AboutViewModel] when requested.
@@ -47,10 +47,11 @@ abstract class ViewModelModule {
      * @param viewModel An [AboutViewModel] instance.
      * @return The [ViewModel] instance.
      */
+    @Suppress("unused")
     @Binds
     @IntoMap
     @ViewModelKey(AboutViewModel::class)
-    abstract fun bindAboutViewModel(viewModel: AboutViewModel): ViewModel
+    fun bindAboutViewModel(viewModel: AboutViewModel): ViewModel
 
     /**
      * Inject a [BusStopMapViewModel] when requested.
@@ -58,10 +59,11 @@ abstract class ViewModelModule {
      * @param viewModel A [BusStopMapViewModel] instance.
      * @return The [ViewModel] instance.
      */
+    @Suppress("unused")
     @Binds
     @IntoMap
     @ViewModelKey(BusStopMapViewModel::class)
-    abstract fun bindBusStopMapViewModel(viewModel: BusStopMapViewModel): ViewModel
+    fun bindBusStopMapViewModel(viewModel: BusStopMapViewModel): ViewModel
 
     /**
      * Inject a [ViewModelFactory] when requested.
@@ -69,6 +71,7 @@ abstract class ViewModelModule {
      * @param viewModelFactory An [ViewModelFactory] instance.
      * @return The [ViewModelProvider.Factory] instance.
      */
+    @Suppress("unused")
     @Binds
-    abstract fun bindViewModelFactory(viewModelFactory: ViewModelFactory): ViewModelProvider.Factory
+    fun bindViewModelFactory(viewModelFactory: ViewModelFactory): ViewModelProvider.Factory
 }

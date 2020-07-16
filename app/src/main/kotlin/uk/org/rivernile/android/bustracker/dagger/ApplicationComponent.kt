@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,25 +55,18 @@ interface ApplicationComponent {
     fun inject(application: BusApplication)
 
     /**
-     * @see [Component.Builder].
+     * @see [Component.Factory].
      */
-    @Component.Builder
-    interface Builder {
+    @Component.Factory
+    interface Factory {
 
         /**
-         * Bind the [Application] instance to the instance provided.
+         * Create a new [ApplicationComponent].
          *
-         * @param application The [Application] instance.
-         * @return This [Builder] instance.
+         * @param application The Android [Application] instance.
+         * @return A new instance of [ApplicationComponent].
          */
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        /**
-         * Build the [ApplicationComponent].
-         *
-         * @return A new instance of the [ApplicationComponent].
-         */
-        fun build(): ApplicationComponent
+        fun newApplicationComponent(
+                @BindsInstance application: Application): ApplicationComponent
     }
 }

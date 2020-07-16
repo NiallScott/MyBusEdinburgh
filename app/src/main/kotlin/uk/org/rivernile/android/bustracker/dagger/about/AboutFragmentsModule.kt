@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,19 +30,20 @@ import dagger.android.ContributesAndroidInjector
 import uk.org.rivernile.android.bustracker.ui.about.AboutFragment
 
 /**
- * This [Module] is used to inject [android.support.v4.app.Fragment]s owned by
+ * This [Module] is used to inject [androidx.fragment.app.Fragment]s owned by
  * [uk.org.rivernile.android.bustracker.ui.about.AboutActivity].
  *
  * @author Niall Scott
  */
 @Module
-abstract class AboutFragmentsModule {
+interface AboutFragmentsModule {
 
     /**
      * Presents [AboutFragment] as an item to be injected.
      *
      * @return An instance of the [AboutFragment] to be injected.
      */
+    @Suppress("unused")
     @ContributesAndroidInjector
-    abstract fun contributeAboutFragment(): AboutFragment
+    fun contributeAboutFragment(): AboutFragment
 }

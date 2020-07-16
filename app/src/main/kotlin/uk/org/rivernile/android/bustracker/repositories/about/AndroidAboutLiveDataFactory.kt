@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.repositories.about
 
 import android.content.Context
+import javax.inject.Inject
 
 /**
  * An Android specific implementation of [AboutLiveDataFactory].
@@ -34,7 +35,8 @@ import android.content.Context
  * @author Niall Scott
  * @param context A [Context] instance.
  */
-class AndroidAboutLiveDataFactory(private val context: Context) : AboutLiveDataFactory {
+class AndroidAboutLiveDataFactory @Inject constructor(
+        private val context: Context) : AboutLiveDataFactory {
 
     override fun createDatabaseLiveData() = AboutDatabaseLiveData(context)
 }

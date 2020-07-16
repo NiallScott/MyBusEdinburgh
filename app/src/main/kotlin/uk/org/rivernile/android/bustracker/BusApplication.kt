@@ -69,9 +69,8 @@ abstract class BusApplication : Application(), HasAndroidInjector,
     override fun onCreate() {
         super.onCreate()
 
-        DaggerApplicationComponent.builder()
-                .application(this)
-                .build()
+        DaggerApplicationComponent.factory()
+                .newApplicationComponent(this)
                 .inject(this)
 
         // Register the BugSense handler.

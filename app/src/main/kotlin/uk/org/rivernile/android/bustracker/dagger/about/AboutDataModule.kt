@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,9 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.dagger.about
 
-import android.content.Context
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import uk.org.rivernile.android.bustracker.repositories.about.AboutLiveDataFactory
 import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDataFactory
 
@@ -38,18 +37,10 @@ import uk.org.rivernile.android.bustracker.repositories.about.AndroidAboutLiveDa
  * @author Niall Scott
  */
 @Module
-class AboutDataModule {
+interface AboutDataModule {
 
-    /**
-     * Provide a factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     *
-     * @param context The application instance.
-     * @return A factory which creates any necessary [android.arch.lifecycle.LiveData] instances for
-     * the 'about' section.
-     */
-    @Provides
-    fun providesAboutLiveDataFactory(context: Context): AboutLiveDataFactory {
-        return AndroidAboutLiveDataFactory(context)
-    }
+    @Suppress("unused")
+    @Binds
+    fun bindAboutLiveDataFactory(androidAboutLiveDataFactory: AndroidAboutLiveDataFactory)
+            : AboutLiveDataFactory
 }

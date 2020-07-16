@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import android.content.Context
 import com.google.android.gms.maps.model.PolylineOptions
 import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 import uk.org.rivernile.android.bustracker.utils.Strings
+import javax.inject.Inject
 
 /**
  * An Android specific implementation of [BusStopMapLiveDataFactory].
@@ -38,9 +39,9 @@ import uk.org.rivernile.android.bustracker.utils.Strings
  * @param context A [Context] instance.
  * @param strings A [Strings] instance.
  */
-class AndroidBusStopMapLiveDataFactory constructor(private val context: Context,
-                                                   private val strings: Strings)
-    : BusStopMapLiveDataFactory {
+class AndroidBusStopMapLiveDataFactory @Inject constructor(
+        private val context: Context,
+        private val strings: Strings): BusStopMapLiveDataFactory {
 
     override fun createServiceNamesLiveData(): ClearableLiveData<Array<String>> =
             ServiceNamesLiveData(context)

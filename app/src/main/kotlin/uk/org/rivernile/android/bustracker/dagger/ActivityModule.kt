@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,29 +39,32 @@ import uk.org.rivernile.android.bustracker.ui.main.MainActivity
  * @author Niall Scott
  */
 @Module
-abstract class ActivityModule {
+interface ActivityModule {
 
     /**
      * Presents an instance of [MainActivity] as an item to be injected.
      *
      * @return An instance of [MainActivity] to be injected.
      */
+    @Suppress("unused")
     @ContributesAndroidInjector(modules = [BusStopMapFragmentsModule::class])
-    abstract fun contributeMainActivity(): MainActivity
+    fun contributeMainActivity(): MainActivity
 
     /**
      * Presents an instance of [AboutActivity] as an item to be injected.
      *
      * @return An instance of [AboutActivity] to be injected.
      */
+    @Suppress("unused")
     @ContributesAndroidInjector(modules = [AboutFragmentsModule::class])
-    abstract fun contributeAboutActivity(): AboutActivity
+    fun contributeAboutActivity(): AboutActivity
 
     /**
      * Presents an instance of [BusStopMapActivity] as an item to be injected.
      *
      * @return An instance of [BusStopMapActivity] to be injected.
      */
+    @Suppress("unused")
     @ContributesAndroidInjector(modules = [BusStopMapFragmentsModule::class])
-    abstract fun contributeBusStopMapActivity(): BusStopMapActivity
+    fun contributeBusStopMapActivity(): BusStopMapActivity
 }
