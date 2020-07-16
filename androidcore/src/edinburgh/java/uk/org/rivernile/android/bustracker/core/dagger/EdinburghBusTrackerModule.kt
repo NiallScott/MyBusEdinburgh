@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -34,10 +35,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
 import uk.org.rivernile.android.bustracker.core.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
-import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 import java.util.concurrent.TimeUnit
@@ -48,28 +46,8 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module
+@Module(includes = [ EdinburghBusTrackerModule.Bindings::class ])
 internal class EdinburghBusTrackerModule {
-
-    /**
-     * Provide the [TrackerEndpoint] instance.
-     *
-     * @param api The [EdinburghBusTrackerApi] instance.
-     * @param apiKeyGenerator An implementation to generate API keys for this service.
-     * @param liveTimesMapper Used to map responses to our model objects.
-     * @param errorMapper Used to map errors.
-     * @param connectivityChecker The [ConnectivityChecker] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideTrackerEndpoint(
-            api: EdinburghBusTrackerApi,
-            apiKeyGenerator: ApiKeyGenerator,
-            liveTimesMapper: LiveTimesMapper,
-            errorMapper: ErrorMapper,
-            connectivityChecker: ConnectivityChecker): TrackerEndpoint =
-            EdinburghTrackerEndpoint(api, apiKeyGenerator, liveTimesMapper, errorMapper,
-                    connectivityChecker)
 
     /**
      * Provide the [EdinburghBusTrackerApi] instance.
@@ -122,4 +100,15 @@ internal class EdinburghBusTrackerModule {
     @Provides
     @Singleton
     fun provideApiKeyGenerator() = ApiKeyGenerator(BuildConfig.API_KEY)
+
+    /**
+     * This interface contains Dagger bindings for pre-provided types.
+     */
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindTrackerEndpoint(edinburghTrackerEndpoint: EdinburghTrackerEndpoint): TrackerEndpoint
+    }
 }

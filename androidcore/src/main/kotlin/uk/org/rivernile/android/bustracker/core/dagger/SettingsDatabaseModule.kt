@@ -27,10 +27,10 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.content.Context
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.di.ForSettingsDatabase
-import uk.org.rivernile.android.bustracker.core.database.settings.AlertsContract
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidAlertsDao
 import javax.inject.Singleton
@@ -40,7 +40,7 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module
+@Module(includes = [ SettingsDatabaseModule.Bindings::class ])
 internal class SettingsDatabaseModule {
 
     /**
@@ -55,15 +55,13 @@ internal class SettingsDatabaseModule {
     fun provideAuthority(context: Context) = "${context.packageName}.provider.settings"
 
     /**
-     * Provide the [AlertsDao].
-     *
-     * @param context The application [Context].
-     * @param contract The table contract for the alerts table.
-     * @return The [AlertsDao].
+     * This interface contains Dagger bindings for pre-provided types.
      */
-    @Provides
-    @Singleton
-    fun provideAlertsDao(context: Context,
-                         contract: AlertsContract): AlertsDao =
-            AndroidAlertsDao(context, contract)
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindAlertsDao(androidAlertsDao: AndroidAlertsDao): AlertsDao
+    }
 }

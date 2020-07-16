@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This class represents an Android-specific implementation of the bus stop database repository.
@@ -36,10 +38,10 @@ import java.io.File
  * @param contract The contract for the bus stop database.
  * @author Niall Scott
  */
-internal class AndroidBusStopDatabaseRepository(
+@Singleton
+internal class AndroidBusStopDatabaseRepository @Inject constructor(
         private val context: Context,
-        private val contract: BusStopDatabaseContract)
-    : BusStopDatabaseRepository {
+        private val contract: BusStopDatabaseContract): BusStopDatabaseRepository {
 
     override fun replaceDatabase(newDatabase: File) {
         context.contentResolver.call(contract.getContentUri(),

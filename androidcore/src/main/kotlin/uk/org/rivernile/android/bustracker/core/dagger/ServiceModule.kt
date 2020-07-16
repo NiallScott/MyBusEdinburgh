@@ -37,31 +37,33 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJ
  *
  * @author Niall Scott
  */
-@Suppress("unused")
 @Module
-internal abstract class ServiceModule {
+internal interface ServiceModule {
 
     /**
      * Presents an instance of [ArrivalAlertRunnerService] as an item to be injected.
      *
      * @return An instance of [ArrivalAlertRunnerService] to be injected.
      */
+    @Suppress("unused")
     @ContributesAndroidInjector
-    abstract fun contributeArrivalAlertRunnerService(): ArrivalAlertRunnerService
+    fun contributeArrivalAlertRunnerService(): ArrivalAlertRunnerService
 
     /**
      * Presents an instance of [DatabaseUpdateJobService] as an item to be injected.
      *
      * @return An instance of [DatabaseUpdateJobService] to be injected.
      */
+    @Suppress("unused")
     @ContributesAndroidInjector
-    abstract fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
+    fun contributeDatabaseUpdateJobService(): DatabaseUpdateJobService
 
     /**
      * Presents an instance of [ProximityAlertRunnerService] as an item to be injected.
      *
      * @return An instance of [ProximityAlertRunnerService] to be injected.
      */
+    @Suppress("unused")
     @ContributesAndroidInjector
-    abstract fun contributeProximityAlertRunnerService(): ProximityAlertRunnerService
+    fun contributeProximityAlertRunnerService(): ProximityAlertRunnerService
 }

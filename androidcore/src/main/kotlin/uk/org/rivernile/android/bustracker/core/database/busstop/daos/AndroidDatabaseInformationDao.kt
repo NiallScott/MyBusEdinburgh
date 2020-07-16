@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
 import android.content.Context
 import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This is an Android concrete implementation of the [DatabaseInformationDao].
@@ -36,9 +38,10 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInforma
  * @param contract The database contract, so we know how to talk to it.
  * @author Niall Scott
  */
-internal class AndroidDatabaseInformationDao(private val context: Context,
-                                             private val contract: DatabaseInformationContract)
-    : DatabaseInformationDao {
+@Singleton
+internal class AndroidDatabaseInformationDao @Inject constructor(
+        private val context: Context,
+        private val contract: DatabaseInformationContract): DatabaseInformationDao {
 
     override fun getTopologyId() = context.contentResolver.query(
             contract.getContentUri(),

@@ -27,14 +27,12 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.content.Context
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.di.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabaseRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
-import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidBusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidDatabaseInformationDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
@@ -46,7 +44,7 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module
+@Module(includes = [ BusStopDatabaseModule.Bindings::class ])
 internal class BusStopDatabaseModule {
 
     /**
@@ -61,43 +59,25 @@ internal class BusStopDatabaseModule {
     fun provideAuthority(context: Context) = "${context.packageName}.provider.busstop"
 
     /**
-     * Provide the [BusStopDatabaseRepository].
-     *
-     * @param context The application [Context].
-     * @param contract The contract for talking to the database.
-     * @return The [BusStopDatabaseRepository].
+     * This interface contains Dagger bindings for pre-provided types.
      */
-    @Provides
-    @Singleton
-    fun provideBusStopDatabaseRepository(context: Context,
-                                         contract: BusStopDatabaseContract)
-            : BusStopDatabaseRepository {
-        return AndroidBusStopDatabaseRepository(context, contract)
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindBusStopDatabaseRepository(
+                androidBusStopDatabaseRepository: AndroidBusStopDatabaseRepository)
+                : BusStopDatabaseRepository
+
+        @Suppress("unused")
+        @Binds
+        fun bindDatabaseInformationDao(
+                androidDatabaseInformationDao: AndroidDatabaseInformationDao)
+                : DatabaseInformationDao
+
+        @Suppress("unused")
+        @Binds
+        fun bindBusStopsDao(androidBusStopsDao: AndroidBusStopsDao): BusStopsDao
     }
-
-    /**
-     * Provide the [DatabaseInformationDao].
-     *
-     * @param context The application [Context].
-     * @param contract The table contract for the database information table.
-     * @return The [DatabaseInformationDao].
-     */
-    @Provides
-    @Singleton
-    fun provideDatabaseInformationDao(context: Context,
-                                      contract: DatabaseInformationContract)
-            : DatabaseInformationDao = AndroidDatabaseInformationDao(context, contract)
-
-    /**
-     * Provide the [BusStopsDao].
-     *
-     * @param context The application [Context].
-     * @param contract The table contract for the bus stops table.
-     * @return The [BusStopsDao].
-     */
-    @Provides
-    @Singleton
-    fun provideBusStopsDao(context: Context,
-                           contract: BusStopsContract): BusStopsDao =
-            AndroidBusStopsDao(context, contract)
 }

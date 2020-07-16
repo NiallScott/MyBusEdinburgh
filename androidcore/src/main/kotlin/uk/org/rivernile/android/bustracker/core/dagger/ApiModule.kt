@@ -57,8 +57,9 @@ internal class ApiModule {
      */
     @Provides
     @Singleton
-    fun provideApiEndpoint(apiServiceFactory: ApiServiceFactory,
-                           apiKeyGenerator: ApiKeyGenerator): ApiEndpoint =
+    fun provideApiEndpoint(
+            apiServiceFactory: ApiServiceFactory,
+            apiKeyGenerator: ApiKeyGenerator): ApiEndpoint =
             JsonApiEndpoint(apiServiceFactory, apiKeyGenerator, BuildConfig.SCHEMA_NAME)
 
     /**
@@ -78,8 +79,9 @@ internal class ApiModule {
      */
     @Provides
     @ForApi
-    fun provideRetrofit(@ForApi okHttpClient: OkHttpClient,
-                        gsonConverterFactory: GsonConverterFactory): Retrofit =
+    fun provideRetrofit(
+            @ForApi okHttpClient: OkHttpClient,
+            gsonConverterFactory: GsonConverterFactory): Retrofit =
             Retrofit.Builder()
                     .baseUrl(BuildConfig.API_BASE_URL)
                     .client(okHttpClient)

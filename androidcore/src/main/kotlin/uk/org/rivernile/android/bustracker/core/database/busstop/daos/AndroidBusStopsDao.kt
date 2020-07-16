@@ -30,6 +30,8 @@ import android.content.Context
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This is an Android concrete implementation of the [BusStopsDao].
@@ -38,10 +40,10 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopNa
  * @param contract The database contract, so we know how to talk to it.
  * @author Niall Scott
  */
-internal class AndroidBusStopsDao(
+@Singleton
+internal class AndroidBusStopsDao @Inject constructor(
         private val context: Context,
-        private val contract: BusStopsContract)
-    : BusStopsDao {
+        private val contract: BusStopsContract): BusStopsDao {
 
     override fun getNameForStop(stopCode: String) = context.contentResolver.query(
             contract.getContentUri(),

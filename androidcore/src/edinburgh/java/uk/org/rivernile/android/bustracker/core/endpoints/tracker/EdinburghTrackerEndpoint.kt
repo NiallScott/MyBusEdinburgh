@@ -32,6 +32,8 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Sing
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This class is the Edinburgh-specific implementation of a [TrackerEndpoint].
@@ -43,7 +45,8 @@ import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
  * @param connectivityChecker An implementation of [ConnectivityChecker].
  * @author Niall Scott
  */
-internal class EdinburghTrackerEndpoint(
+@Singleton
+internal class EdinburghTrackerEndpoint @Inject constructor(
         private val api: EdinburghBusTrackerApi,
         private val apiKeyGenerator: ApiKeyGenerator,
         private val liveTimesMapper: LiveTimesMapper,

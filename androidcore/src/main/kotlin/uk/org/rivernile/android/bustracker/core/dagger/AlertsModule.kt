@@ -61,6 +61,9 @@ internal class AlertsModule {
     fun provideProximityAlertExecutorService(): ExecutorService =
             Executors.newSingleThreadExecutor()
 
+    /**
+     * This interface contains Dagger bindings for pre-provided types.
+     */
     @Module
     interface Bindings {
 

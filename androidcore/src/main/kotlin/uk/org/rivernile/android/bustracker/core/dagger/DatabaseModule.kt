@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
-import android.content.Context
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
 import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import javax.inject.Singleton
 
 /**
- * This is a Dagger module for database dependencies.
+ * This is a Dagger [Module] for database dependencies.
  *
  * @author Niall Scott
  */
@@ -42,15 +40,9 @@ import javax.inject.Singleton
     BusStopDatabaseModule::class,
     SettingsDatabaseModule::class
 ])
-internal class DatabaseModule {
+internal interface DatabaseModule {
 
-    /**
-     * Provide a [DatabaseUtils] instance.
-     *
-     * @param context The application [Context].
-     * @return A [DatabaseUtils] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideDatabaseUtils(context: Context): DatabaseUtils = AndroidDatabaseUtils(context)
+    @Suppress("unused")
+    @Binds
+    fun bindDatabaseUtils(androidDatabaseUtils: AndroidDatabaseUtils): DatabaseUtils
 }

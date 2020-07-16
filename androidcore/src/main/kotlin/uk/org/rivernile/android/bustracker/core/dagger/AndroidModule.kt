@@ -33,6 +33,7 @@ import android.content.SharedPreferences
 import android.location.LocationManager
 import android.net.ConnectivityManager
 import androidx.core.app.NotificationManagerCompat
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
@@ -43,50 +44,8 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module
+@Module(includes = [ AndroidModule.Bindings::class ])
 internal class AndroidModule {
-
-    /**
-     * Provide the [Application] [Context] to Dagger.
-     *
-     * @param application The [Application] instance.
-     * @return The [Application] [Context].
-     */
-    @Provides
-    fun provideApplicationContext(application: Application): Context = application
-
-    /**
-     * Provide the [JobScheduler].
-     *
-     * @param context The application [Context].
-     * @return The [JobScheduler] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideJobScheduler(context: Context): JobScheduler =
-            context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-
-    /**
-     * Provide the [SharedPreferences].
-     *
-     * @param context The application [Context].
-     * @return The [SharedPreferences] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideSharedPreferences(context: Context): SharedPreferences =
-            context.getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
-
-    /**
-     * Provide the [NotificationManagerCompat].
-     *
-     * @param context The application [Context].
-     * @return The [NotificationManagerCompat] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideNotificationManagerCompat(context: Context): NotificationManagerCompat =
-            NotificationManagerCompat.from(context)
 
     /**
      * Provide the [ConnectivityManager].
@@ -100,6 +59,17 @@ internal class AndroidModule {
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     /**
+     * Provide the [JobScheduler].
+     *
+     * @param context The application [Context].
+     * @return The [JobScheduler] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideJobScheduler(context: Context): JobScheduler =
+            context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+
+    /**
      * Provide the [LocationManager].
      *
      * @param context The application [Context].
@@ -109,4 +79,37 @@ internal class AndroidModule {
     @Singleton
     fun provideLocationManager(context: Context): LocationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    /**
+     * Provide the [NotificationManagerCompat].
+     *
+     * @param context The application [Context].
+     * @return The [NotificationManagerCompat] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideNotificationManagerCompat(context: Context): NotificationManagerCompat =
+            NotificationManagerCompat.from(context)
+
+    /**
+     * Provide the [SharedPreferences].
+     *
+     * @param context The application [Context].
+     * @return The [SharedPreferences] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(context: Context): SharedPreferences =
+            context.getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
+
+    /**
+     * This interface contains Dagger bindings for pre-provided types.
+     */
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindContext(application: Application): Context
+    }
 }

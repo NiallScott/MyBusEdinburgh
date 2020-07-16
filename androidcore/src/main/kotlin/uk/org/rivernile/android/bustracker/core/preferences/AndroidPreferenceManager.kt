@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,13 +28,17 @@ package uk.org.rivernile.android.bustracker.core.preferences
 
 import android.content.SharedPreferences
 import java.lang.NumberFormatException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This is the Android-specific implementation of [PreferenceManager].
  *
  * @author Niall Scott
  */
-internal class AndroidPreferenceManager(private val preferences: SharedPreferences)
+@Singleton
+internal class AndroidPreferenceManager @Inject constructor(
+        private val preferences: SharedPreferences)
     : PreferenceManager, SharedPreferences.OnSharedPreferenceChangeListener {
 
     companion object {

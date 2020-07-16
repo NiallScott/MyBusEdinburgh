@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,9 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
 import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
 
@@ -40,15 +39,9 @@ import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
 @Module(includes = [
     EdinburghBusTrackerModule::class
 ])
-internal class FlavourModule {
+internal interface FlavourModule {
 
-    /**
-     * Provide a [CleanUpTask] instance.
-     *
-     * @param databaseUtils Database utilities.
-     * @return [CleanUpTask].
-     */
-    @Provides
-    fun provideCleanUpTask(databaseUtils: DatabaseUtils): CleanUpTask =
-            EdinburghCleanUpTask(databaseUtils)
+    @Suppress("unused")
+    @Binds
+    fun bindCleanUpTask(edinburghCleanUpTask: EdinburghCleanUpTask): CleanUpTask
 }

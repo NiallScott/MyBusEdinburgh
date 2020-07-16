@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,9 +36,10 @@ import javax.net.SocketFactory
  * @property schemaType The schema type.
  * @author Niall Scott
  */
-internal class JsonApiEndpoint(private val apiServiceFactory: ApiServiceFactory,
-                               private val apiKeyGenerator: ApiKeyGenerator,
-                               private val schemaType: String) : ApiEndpoint {
+internal class JsonApiEndpoint(
+        private val apiServiceFactory: ApiServiceFactory,
+        private val apiKeyGenerator: ApiKeyGenerator,
+        private val schemaType: String) : ApiEndpoint {
 
     override fun createDatabaseVersionRequest(socketFactory: SocketFactory?)
             : ApiRequest<DatabaseVersion> {

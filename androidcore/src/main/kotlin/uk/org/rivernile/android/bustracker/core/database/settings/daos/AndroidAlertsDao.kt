@@ -35,6 +35,8 @@ import android.os.Looper
 import uk.org.rivernile.android.bustracker.core.database.settings.AlertsContract
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This is an Android-specific implementation of [AlertsDao] which uses a
@@ -44,8 +46,10 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Proxi
  * @param contract The contract for talking with the alerts table.
  * @author Niall Scott
  */
-internal class AndroidAlertsDao(private val context: Context,
-                                private val contract: AlertsContract): AlertsDao {
+@Singleton
+internal class AndroidAlertsDao @Inject constructor(
+        private val context: Context,
+        private val contract: AlertsContract): AlertsDao {
 
     private val listeners = mutableListOf<AlertsDao.OnAlertsChangedListener>()
     private val observer = Observer()

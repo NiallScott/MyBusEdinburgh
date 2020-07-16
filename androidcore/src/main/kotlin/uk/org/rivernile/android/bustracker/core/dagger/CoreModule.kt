@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
@@ -50,6 +49,7 @@ import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceMan
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -80,29 +80,6 @@ class CoreModule {
     internal fun provideGson() = Gson()
 
     /**
-     * Provide the [AndroidPreferenceManager]. This is a special case for exposing the real
-     * implementation within this module.
-     *
-     * @param sharedPreferences The Android [SharedPreferences] for this [AndroidPreferenceManager].
-     * @return The [AndroidPreferenceManager].
-     */
-    @Provides
-    @Singleton
-    internal fun provideAndroidPreferenceManager(sharedPreferences: SharedPreferences) =
-            AndroidPreferenceManager(sharedPreferences)
-
-    /**
-     * Provide the [PreferenceManager].
-     *
-     * @param androidPreferenceManager The [AndroidPreferenceManager].
-     * @return The [PreferenceManager].
-     */
-    @Provides
-    @Singleton
-    internal fun providePreferenceManager(androidPreferenceManager: AndroidPreferenceManager)
-            : PreferenceManager = androidPreferenceManager
-
-    /**
      * Provide the [AppNotificationChannels] instance for dealing with notification channels.
      *
      * @param context The application [Context].
@@ -110,10 +87,11 @@ class CoreModule {
      * @return An [AppNotificationChannels] instance.
      */
     @Provides
-    internal fun provideAppNotificationChannels(context: Context,
-            notificationManager: NotificationManagerCompat): AppNotificationChannels {
+    internal fun provideAppNotificationChannels(
+            context: Context,
+            notificationManager: Provider<NotificationManagerCompat>): AppNotificationChannels {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            V26AppNotificationChannels(context, notificationManager)
+            V26AppNotificationChannels(context, notificationManager.get())
         } else {
             LegacyAppNotificationChannels()
         }
@@ -153,12 +131,17 @@ class CoreModule {
 
         @Suppress("unused")
         @Binds
+        fun bindFeatureRepository(androidFeatureRepository: AndroidFeatureRepository)
+                : FeatureRepository
+
+        @Suppress("unused")
+        @Binds
         fun bindPermissionChecker(androidPermissionChecker: AndroidPermissionChecker)
                 : PermissionChecker
 
         @Suppress("unused")
         @Binds
-        fun bindFeatureRepository(androidFeatureRepository: AndroidFeatureRepository)
-                : FeatureRepository
+        fun bindPreferenceManager(androidPreferenceManager: AndroidPreferenceManager)
+                : PreferenceManager
     }
 }
