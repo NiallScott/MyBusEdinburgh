@@ -25,28 +25,17 @@
 
 package uk.org.rivernile.android.bustracker.ui.settings;
 
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import javax.inject.Inject;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.loader.app.LoaderManager;
-import androidx.core.content.ContextCompat;
-import androidx.loader.content.Loader;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import dagger.android.AndroidInjection;
 import dagger.android.AndroidInjector;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.HasAndroidInjector;
-import uk.org.rivernile.android.bustracker.database.settings.SettingsDatabase;
-import uk.org.rivernile.android.bustracker.database.settings.loaders.BackupFavouritesLoader;
-import uk.org.rivernile.android.bustracker.database.settings.loaders.RestoreFavouritesLoader;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -55,213 +44,22 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  *
  * @author Niall Scott
  */
-public class SettingsActivity extends AppCompatActivity implements SettingsFragment.Callbacks,
-        LoaderManager.LoaderCallbacks<Integer>, HasAndroidInjector {
-
-    private static final int PERMISSION_REQUEST_BACKUP = 1;
-    private static final int PERMISSION_REQUEST_RESTORE = 2;
-
-    private static final int LOADER_BACKUP_FAVOURITES = 1;
-    private static final int LOADER_RESTORE_FAVOURITES = 2;
+public class SettingsActivity extends AppCompatActivity implements HasAndroidInjector {
 
     @Inject
     DispatchingAndroidInjector<Object> dispatchingAndroidInjector;
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
         AndroidInjection.inject(this);
 
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.settings);
-        final LoaderManager loaderManager = getSupportLoaderManager();
-
-        if (loaderManager.getLoader(LOADER_BACKUP_FAVOURITES) != null) {
-            // Reconnect to the Loader to get its result.
-            loaderManager.initLoader(LOADER_BACKUP_FAVOURITES, null, this);
-        }
-
-        if (loaderManager.getLoader(LOADER_RESTORE_FAVOURITES) != null) {
-            // Reconnect to the Loader to get its result.
-            loaderManager.initLoader(LOADER_RESTORE_FAVOURITES, null, this);
-        }
-    }
-
-    @NonNull
-    @Override
-    public Loader<Integer> onCreateLoader(final int id, final Bundle args) {
-        switch (id) {
-            case LOADER_BACKUP_FAVOURITES:
-                return new BackupFavouritesLoader(this);
-            case LOADER_RESTORE_FAVOURITES:
-                return new RestoreFavouritesLoader(this);
-            default:
-                return null;
-        }
-    }
-
-    @Override
-    public void onLoadFinished(final Loader<Integer> loader, final Integer data) {
-        switch (loader.getId()) {
-            case LOADER_BACKUP_FAVOURITES:
-                handleBackupResult(data);
-                break;
-            case LOADER_RESTORE_FAVOURITES:
-                handleRestoreResult(data);
-                break;
-        }
-    }
-
-    @Override
-    public void onLoaderReset(@NonNull final Loader<Integer> loader) {
-        // Nothing to do here.
-    }
-
-    @Override
-    public void onBackupFavourites() {
-        if (checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                PERMISSION_REQUEST_BACKUP)) {
-            performBackup();
-        }
-    }
-
-    @Override
-    public void onRestoreFavourites() {
-        if (checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE,
-                PERMISSION_REQUEST_RESTORE)) {
-            performRestore();
-        }
-    }
-
-    @TargetApi(23)
-    @Override
-    public void onRequestPermissionsResult(final int requestCode,
-            @NonNull final String[] permissions, @NonNull final int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_BACKUP:
-                if (grantResults.length > 0 && grantResults[0] ==
-                        PackageManager.PERMISSION_GRANTED) {
-                    performBackup();
-                } else {
-                    Toast.makeText(this, R.string.preference_backup_permission_denied,
-                            Toast.LENGTH_SHORT).show();
-                }
-
-                break;
-            case PERMISSION_REQUEST_RESTORE:
-                if (grantResults.length > 0 && grantResults[0] ==
-                        PackageManager.PERMISSION_GRANTED) {
-                    performRestore();
-                } else {
-                    Toast.makeText(this, R.string.preference_restore_permission_denied,
-                            Toast.LENGTH_SHORT).show();
-                }
-
-                break;
-        }
     }
 
     @Override
     public AndroidInjector<Object> androidInjector() {
         return dispatchingAndroidInjector;
-    }
-
-    /**
-     * Check if a permission has been granted. If it has not, it will attempt to request the
-     * permission.
-     *
-     * @param permission The permission to request.
-     * @param request The request code of the permission request.
-     * @return {@code true} if the permission has already been granted, {@code false} if the
-     * permission hasn't been granted yet. Note: {@code false} means that this method will go on to
-     * asynchronously request the permission - it may come back soon.
-     */
-    private boolean checkPermission(@NonNull final String permission, final int request) {
-        if (ContextCompat.checkSelfPermission(this, permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] { permission }, request);
-
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Perform the backup of the user's favourite stops.
-     */
-    private void performBackup() {
-        getSupportLoaderManager().restartLoader(LOADER_BACKUP_FAVOURITES, null, this);
-    }
-
-    /**
-     * Perform the restore of the user's favourite stops.
-     */
-    private void performRestore() {
-        getSupportLoaderManager().restartLoader(LOADER_RESTORE_FAVOURITES, null, this);
-    }
-
-    /**
-     * Handle the result of an operation to backup the user's saved favourite stops.
-     *
-     * @param result A number representing the result of the backup operation.
-     */
-    private void handleBackupResult(@SettingsDatabase.BackupRestoreResult final int result) {
-        getSupportLoaderManager().destroyLoader(LOADER_BACKUP_FAVOURITES);
-
-        final int text;
-
-        switch (result) {
-            case SettingsDatabase.BACKUP_RESTORE_SUCCESS:
-                text = R.string.preference_backup_success;
-                break;
-            case SettingsDatabase.ERROR_BACKUP_RESTORE_EXTERNAL_STORAGE:
-                text = R.string.preferences_backup_restore_error_media;
-                break;
-            case SettingsDatabase.ERROR_BACKUP_UNABLE_TO_WRITE:
-                text = R.string.preferences_backup_error_write;
-                break;
-            default:
-                text = 0;
-        }
-
-        if (text != 0) {
-            Toast.makeText(this, text, Toast.LENGTH_LONG).show();
-        }
-    }
-
-    /**
-     * Handle the result of an operation to restore the user's backup of saved favourite stops.
-     *
-     * @param result A number representing the result of the restore operation.
-     */
-    private void handleRestoreResult(@SettingsDatabase.BackupRestoreResult final int result) {
-        getSupportLoaderManager().destroyLoader(LOADER_RESTORE_FAVOURITES);
-
-        final int text;
-
-        switch (result) {
-            case SettingsDatabase.BACKUP_RESTORE_SUCCESS:
-                text = R.string.preference_restore_success;
-                break;
-            case SettingsDatabase.ERROR_BACKUP_RESTORE_EXTERNAL_STORAGE:
-                text = R.string.preferences_backup_restore_error_media;
-                break;
-            case SettingsDatabase.ERROR_RESTORE_FILE_DOES_NOT_EXIST:
-                text = R.string.preferences_restore_error_no_file;
-                break;
-            case SettingsDatabase.ERROR_RESTORE_UNABLE_TO_READ:
-                text = R.string.preferences_restore_error_unable_read;
-                break;
-            case SettingsDatabase.ERROR_RESTORE_DATA_MALFORMED:
-                text = R.string.preferences_restore_error_data_malformed;
-                break;
-            default:
-                text = 0;
-        }
-
-        if (text != 0) {
-            Toast.makeText(this, text, Toast.LENGTH_LONG).show();
-        }
     }
 }

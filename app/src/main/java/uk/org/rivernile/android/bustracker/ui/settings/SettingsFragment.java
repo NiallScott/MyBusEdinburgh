@@ -25,7 +25,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.settings;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -55,22 +54,9 @@ public class SettingsFragment extends PreferenceFragment
     @Inject
     PreferenceManager preferenceManager;
 
-    private Callbacks callbacks;
     private SharedPreferences sp;
     private ListPreference numberOfDeparturesPref;
     private String[] numberOfDeparturesStrings;
-
-    @Override
-    public void onAttach(final Context context) {
-        super.onAttach(context);
-
-        try {
-            callbacks = (Callbacks) context;
-        } catch (ClassCastException e) {
-            throw new IllegalStateException(context.getClass().getName() + " does not implement " +
-                    Callbacks.class.getName());
-        }
-    }
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
@@ -84,26 +70,10 @@ public class SettingsFragment extends PreferenceFragment
         numberOfDeparturesStrings = getResources()
                 .getStringArray(R.array.preferences_num_departures_entries);
 
-        final GenericDialogPreference backupDialog = (GenericDialogPreference)
-                findPreference(PreferenceManager.PREF_BACKUP_FAVOURITES);
-        final GenericDialogPreference restoreDialog = (GenericDialogPreference)
-                findPreference(PreferenceManager.PREF_RESTORE_FAVOURITES);
         final GenericDialogPreference clearSearchHistoryDialog = (GenericDialogPreference)
                 findPreference(PreferenceManager.PREF_CLEAR_MAP_SEARCH_HISTORY);
         numberOfDeparturesPref = (ListPreference)
                 findPreference(PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE);
-
-        backupDialog.setOnClickListener((dialog, which) -> {
-            if (which == DialogInterface.BUTTON_POSITIVE) {
-                callbacks.onBackupFavourites();
-            }
-        });
-
-        restoreDialog.setOnClickListener((dialog, which) -> {
-            if (which == DialogInterface.BUTTON_POSITIVE) {
-                callbacks.onRestoreFavourites();
-            }
-        });
 
         clearSearchHistoryDialog.setOnClickListener((dialog, which) -> {
             if (which == DialogInterface.BUTTON_POSITIVE) {
@@ -145,22 +115,5 @@ public class SettingsFragment extends PreferenceFragment
     private void populateNumberOfDeparturesSummary() {
         final int val = preferenceManager.getBusTimesNumberOfDeparturesToShowPerService();
         numberOfDeparturesPref.setSummary(numberOfDeparturesStrings[val - 1]);
-    }
-
-    /**
-     * Any {@link android.app.Activity} which hosts this {@link PreferenceFragment} must implement
-     * this interface.
-     */
-    interface Callbacks {
-
-        /**
-         * This is called when the user wishes to backup their favourites.
-         */
-        void onBackupFavourites();
-
-        /**
-         * This is called when the user wishes to restore their favourites.
-         */
-        void onRestoreFavourites();
     }
 }

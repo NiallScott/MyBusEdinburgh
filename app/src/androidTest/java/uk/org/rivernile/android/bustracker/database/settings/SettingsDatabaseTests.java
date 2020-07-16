@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,6 +25,7 @@
 
 package uk.org.rivernile.android.bustracker.database.settings;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -39,11 +40,6 @@ import android.test.mock.MockContext;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.util.Arrays;
-
-import androidx.test.core.app.ApplicationProvider;
 
 /**
  * Tests for {@link SettingsDatabase}.
@@ -118,7 +114,7 @@ public class SettingsDatabaseTests {
             public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
                 assertEquals(SettingsContract.Favourites.CONTENT_URI, uri);
                 assertEquals(SettingsContract.Favourites.STOP_CODE + " = ?", selection);
-                assertTrue(Arrays.equals(new String[] { "123456" }, selectionArgs));
+                assertArrayEquals(new String[] { "123456" }, selectionArgs);
 
                 return 1;
             }
@@ -187,11 +183,9 @@ public class SettingsDatabaseTests {
             public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
                 assertEquals(SettingsContract.Alerts.CONTENT_URI, uri);
                 assertEquals(SettingsContract.Alerts.TYPE + " = ?", selection);
-                assertTrue(Arrays.equals(
-                        new String[] {
-                                String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY)
-                        },
-                        selectionArgs));
+                assertArrayEquals(new String[] {
+                        String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY)
+                }, selectionArgs);
 
                 return 1;
             }
@@ -211,41 +205,15 @@ public class SettingsDatabaseTests {
             public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
                 assertEquals(SettingsContract.Alerts.CONTENT_URI, uri);
                 assertEquals(SettingsContract.Alerts.TYPE + " = ?", selection);
-                assertTrue(Arrays.equals(
-                        new String[] {
-                                String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_TIME)
-                        },
-                        selectionArgs));
+                assertArrayEquals(new String[] {
+                        String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_TIME)
+                }, selectionArgs);
 
                 return 1;
             }
         });
 
         SettingsDatabase.deleteAllTimeAlerts(mockContext);
-    }
-
-    /**
-     * Test that trying to backup the favourite stops to an invalid location returns
-     * {@link SettingsDatabase#ERROR_BACKUP_UNABLE_TO_WRITE}.
-     */
-    @Test
-    public void testBackupFavouritesToInvalidLocation() {
-        final File out = new File("/settings.backup");
-        assertEquals(SettingsDatabase.ERROR_BACKUP_UNABLE_TO_WRITE,
-                SettingsDatabase.backupFavourites(ApplicationProvider.getApplicationContext(),
-                        out));
-    }
-
-    /**
-     * Test that trying to restore the favourite stops from an invalid location returns
-     * {@link SettingsDatabase#ERROR_RESTORE_FILE_DOES_NOT_EXIST}.
-     */
-    @Test
-    public void testRestoreFavouritesFromInvalidLocation() {
-        final File in = new File("/settings.backup");
-        assertEquals(SettingsDatabase.ERROR_RESTORE_FILE_DOES_NOT_EXIST,
-                SettingsDatabase.restoreFavourites(ApplicationProvider.getApplicationContext(),
-                        in));
     }
 
     /**

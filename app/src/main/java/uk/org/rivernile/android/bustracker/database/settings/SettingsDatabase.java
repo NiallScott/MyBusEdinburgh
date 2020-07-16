@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,8 +30,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
-import androidx.annotation.IntDef;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -47,8 +45,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 import uk.org.rivernile.android.fetchutils.fetchers.FileFetcher;
 import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamReader;
@@ -61,37 +57,12 @@ import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamRea
  */
 public final class SettingsDatabase {
 
-    /**
-     * Defines a backup or restore result, to ensure the correct error codes are checked for.
-     */
-    @IntDef({BACKUP_RESTORE_SUCCESS, ERROR_BACKUP_RESTORE_EXTERNAL_STORAGE,
-            ERROR_BACKUP_UNABLE_TO_WRITE, ERROR_RESTORE_FILE_DOES_NOT_EXIST,
-            ERROR_RESTORE_UNABLE_TO_READ, ERROR_RESTORE_DATA_MALFORMED})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface BackupRestoreResult { }
-
-    /** The backup or restore was successful. */
-    public static final int BACKUP_RESTORE_SUCCESS = 0;
-    /** The external storage could not be accessed to read or write the backup to or from. */
-    public static final int ERROR_BACKUP_RESTORE_EXTERNAL_STORAGE = 1;
-    /** The backup was unable to write to the backup file. */
-    public static final int ERROR_BACKUP_UNABLE_TO_WRITE = 2;
-    /** The file to restore the backup from does not exist. */
-    public static final int ERROR_RESTORE_FILE_DOES_NOT_EXIST = 3;
-    /** Unable to read from the backup file. */
-    public static final int ERROR_RESTORE_UNABLE_TO_READ = 4;
-    /** The data in the backup file is malformed. */
-    public static final int ERROR_RESTORE_DATA_MALFORMED = 5;
-
     private static final String BACKUP_DB_VERSION = "dbVersion";
     private static final String BACKUP_SCHEMA_VERSION = "jsonSchemaVersion";
     private static final String BACKUP_CREATE_TIME = "createTime";
     private static final String BACKUP_FAVOURITE_STOPS = "favouriteStops";
     private static final String BACKUP_STOPCODE = "stopCode";
     private static final String BACKUP_STOPNAME = "stopName";
-
-    private static final String BACKUP_DIRECTORY = "/mybusedinburgh/";
-    private static final String BACKUP_FILE_NAME = "settings.backup";
 
     /**
      * Add a new favourite stop to the database.
@@ -237,122 +208,20 @@ public final class SettingsDatabase {
     }
 
     /**
-     * Is there an active proximity alert?
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The stop code to check proximity alerts for.
-     * @return {@code true} if there is a proximity alert set, {@code false} if there is no alert
-     * set or it could not be determined if there is an alert set.
-     */
-    @WorkerThread
-    public static boolean isActiveProximityAlert(@NonNull final Context context,
-            @NonNull final String stopCode) {
-        return isActiveAlert(context, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY, stopCode);
-    }
-
-    /**
-     * Is there an active time alert?
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The stop code to check time alerts for.
-     * @return {@code true} if there is a time alert set, {@code false} if there is no alert set
-     * or it could not be determined if there is an alert set.
-     */
-    @WorkerThread
-    public static boolean isActiveTimeAlert(@NonNull final Context context,
-            @NonNull final String stopCode) {
-        return isActiveAlert(context, SettingsContract.Alerts.ALERTS_TYPE_TIME, stopCode);
-    }
-
-    /**
-     * Is there an active alert for the alert type?
-     *
-     * @param context A {@link Context} instance.
-     * @param alertType Either {@link SettingsContract.Alerts#ALERTS_TYPE_PROXIMITY} or
-     * {@link SettingsContract.Alerts#ALERTS_TYPE_TIME}.
-     * @param stopCode The stop code to check alerts for.
-     * @return {@code true} if there is an alert set for the alert type, {@code false} if there is
-     * no alert set or it could not be determined if there is an alert set.
-     */
-    @WorkerThread
-    private static boolean isActiveAlert(@NonNull final Context context, final int alertType,
-            @NonNull final String stopCode) {
-        final Cursor cursor = context.getContentResolver().query(
-                SettingsContract.Alerts.CONTENT_URI,
-                new String[] { SettingsContract.Alerts.STOP_CODE },
-                SettingsContract.Alerts.TYPE + " = ? AND " + SettingsContract.Alerts.STOP_CODE +
-                        " = ?",
-                new String[] {
-                        String.valueOf(alertType),
-                        stopCode
-                }, null);
-
-        final boolean result;
-
-        if (cursor != null) {
-            result = cursor.getCount() > 0;
-            cursor.close();
-        } else {
-            result = false;
-        }
-
-        return result;
-    }
-
-    /**
      * Backup the user's favourite stops in to the supplied {@link File}.
      *
      * @param context A {@link Context} instance.
      * @param file The {@link File} to backup the user's favourite stops to.
-     * @return The result of the backup. See {@link BackupRestoreResult}.
      */
     @WorkerThread
-    @BackupRestoreResult
-    public static int backupFavourites(@NonNull final Context context, @NonNull final File file) {
-        BufferedOutputStream out = null;
-        int result;
-
-        try {
-            out = new BufferedOutputStream(new FileOutputStream(file));
+    public static void backupFavourites(@NonNull final Context context, @NonNull final File file) {
+        try (final BufferedOutputStream out =
+                new BufferedOutputStream(new FileOutputStream(file))) {
             out.write(serialiseFavourites(context).toString().getBytes());
             out.flush();
-            result = BACKUP_RESTORE_SUCCESS;
-        } catch (IOException e) {
-            result = ERROR_BACKUP_UNABLE_TO_WRITE;
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    // Already in an error state and could not close even told to. Nothing else can
-                    // be done.
-                }
-            }
+        } catch (IOException ignored) {
+            // Do nothing.
         }
-
-        return result;
-    }
-
-    /**
-     * Back up the user's favourite stops to external storage.
-     *
-     * @param context A {@link Context} instance.
-     * @return The result of the backup. See {@link BackupRestoreResult}.
-     */
-    @WorkerThread
-    @BackupRestoreResult
-    public static int userBackupFavourites(@NonNull final Context context) {
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            return ERROR_BACKUP_RESTORE_EXTERNAL_STORAGE;
-        }
-
-        final File out = new File(Environment.getExternalStorageDirectory(), BACKUP_DIRECTORY);
-
-        if (!out.exists() && !out.mkdirs()) {
-            return ERROR_BACKUP_UNABLE_TO_WRITE;
-        }
-
-        return backupFavourites(context, new File(out, BACKUP_FILE_NAME));
     }
 
     /**
@@ -360,52 +229,18 @@ public final class SettingsDatabase {
      *
      * @param context A {@link Context} instance.
      * @param file The {@link File} containing the user's backed up favourite stops.
-     * @return The result of the restore. See {@link BackupRestoreResult}.
      */
     @WorkerThread
-    @BackupRestoreResult
-    public static int restoreFavourites(@NonNull final Context context, @NonNull final File file) {
-        if (!file.exists()) {
-            return ERROR_RESTORE_FILE_DOES_NOT_EXIST;
-        }
-
+    public static void restoreFavourites(@NonNull final Context context, @NonNull final File file) {
         final FileFetcher fetcher = new FileFetcher(file);
         final JSONFetcherStreamReader reader = new JSONFetcherStreamReader();
-        int result;
 
         try {
             fetcher.executeFetcher(reader);
             deserialiseFavourites(context, reader.getJSONObject());
-            result = BACKUP_RESTORE_SUCCESS;
-        } catch (IOException e) {
-            result = ERROR_RESTORE_UNABLE_TO_READ;
-        } catch (JSONException e) {
-            result = ERROR_RESTORE_DATA_MALFORMED;
+        } catch (IOException | JSONException ignored) {
+            // Ignored.
         }
-
-        return result;
-    }
-
-    /**
-     * Restore the user's favourite stops from external storage.
-     *
-     * @param context A {@link Context} instance.
-     * @return The result of the restore. See {@link BackupRestoreResult}.
-     */
-    @WorkerThread
-    @BackupRestoreResult
-    public static int userRestoreFavourites(@NonNull final Context context) {
-        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            return ERROR_BACKUP_RESTORE_EXTERNAL_STORAGE;
-        }
-
-        final File in = new File(Environment.getExternalStorageDirectory(),
-                BACKUP_DIRECTORY + BACKUP_FILE_NAME);
-        if (!in.exists() || !in.canRead()) {
-            return ERROR_RESTORE_UNABLE_TO_READ;
-        }
-
-        return restoreFavourites(context, in);
     }
 
     /**
