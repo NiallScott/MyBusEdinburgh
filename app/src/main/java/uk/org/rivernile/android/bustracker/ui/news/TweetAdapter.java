@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,6 @@ import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.List;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.utils.CircleTransform;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -70,17 +69,20 @@ class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
      *
      * @param context A {@link Context} instance from the hosting {@link android.app.Activity}.
      */
-    TweetAdapter(@NonNull final Context context) {
+    TweetAdapter(
+            @NonNull final Context context,
+            @NonNull final Picasso picasso) {
         this.context = context;
         inflater = LayoutInflater.from(context);
-        picasso = ((BusApplication) context.getApplicationContext()).getPicasso();
+        this.picasso = picasso;
         avatarSize = context.getResources().getDimensionPixelSize(R.dimen.news_avatar_size);
         circleTransform = new CircleTransform();
         setHasStableIds(true);
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         return new ViewHolder(inflater.inflate(R.layout.tweet_item, parent, false));
     }
 

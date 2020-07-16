@@ -134,10 +134,7 @@ dependencies {
     implementation 'uk.org.rivernile.android.fetchutils:fetchutils-library:1.1.1'
 
     // Picasso
-    implementation 'com.squareup.picasso:picasso:2.5.2'
-
-    // Okhttp
-    implementation 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.1.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
     // Test dependencies
     androidTestImplementation "androidx.test:core:$androidTestCoreVersion"

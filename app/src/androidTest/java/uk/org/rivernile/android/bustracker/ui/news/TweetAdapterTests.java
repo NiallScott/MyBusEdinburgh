@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,9 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.text.TextUtils;
+
+import com.squareup.picasso.Picasso;
+
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.recyclerview.widget.RecyclerView;
@@ -60,7 +63,7 @@ public class TweetAdapterTests {
     public void setUp() {
         final Context context = ApplicationProvider.getApplicationContext();
         context.setTheme(R.style.MyBusEdinburgh);
-        adapter = new TweetAdapter(context);
+        adapter = new TweetAdapter(context, Picasso.get());
     }
 
     @After

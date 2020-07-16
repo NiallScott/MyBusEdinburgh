@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2010 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,16 +36,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.fetchutils.loaders.Result;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -62,6 +67,9 @@ import uk.org.rivernile.android.bustracker.parser.twitter.TwitterUpdatesLoader;
 public class TwitterUpdatesFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Result<List<Tweet>, TwitterException>>,
         TweetAdapter.OnItemClickListener {
+
+    @Inject
+    Picasso picasso;
     
     private TweetAdapter adapter;
 
@@ -73,9 +81,11 @@ public class TwitterUpdatesFragment extends Fragment
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
+
         super.onCreate(savedInstanceState);
         
-        adapter = new TweetAdapter(getActivity());
+        adapter = new TweetAdapter(requireActivity(), picasso);
         adapter.setOnItemClickListener(this);
     }
 
@@ -89,7 +99,7 @@ public class TwitterUpdatesFragment extends Fragment
         txtError = v.findViewById(R.id.txtError);
 
         recyclerView.setHasFixedSize(true);
-        recyclerView.addItemDecoration(new NewsItemDecoration(getActivity(),
+        recyclerView.addItemDecoration(new NewsItemDecoration(requireActivity(),
                 getResources().getDimensionPixelSize(R.dimen.news_divider_inset_start)));
         recyclerView.setAdapter(adapter);
         
@@ -100,7 +110,7 @@ public class TwitterUpdatesFragment extends Fragment
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
-        getActivity().setTitle(R.string.twitterupdates_title);
+        requireActivity().setTitle(R.string.twitterupdates_title);
         
         // Tell the underlying Activity that it should create an options menu for this Fragment.
         setHasOptionsMenu(true);
@@ -110,7 +120,7 @@ public class TwitterUpdatesFragment extends Fragment
     }
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull final Menu menu, final MenuInflater inflater) {
         // Inflate the options menu.
         inflater.inflate(R.menu.twitterupdates_option_menu, menu);
         
@@ -118,7 +128,7 @@ public class TwitterUpdatesFragment extends Fragment
     }
 
     @Override
-    public void onPrepareOptionsMenu(final Menu menu) {
+    public void onPrepareOptionsMenu(@NonNull final Menu menu) {
         super.onPrepareOptionsMenu(menu);
         
         setRefreshActionItemAsLoading(progress.getVisibility() == View.VISIBLE);
@@ -126,24 +136,25 @@ public class TwitterUpdatesFragment extends Fragment
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.twitterupdates_option_menu_refresh:
-                // Fetch the data.
-                loadTweets(true);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.twitterupdates_option_menu_refresh) {
+            // Fetch the data.
+            loadTweets(true);
+
+            return true;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
+    @NonNull
     @Override
     public Loader<Result<List<Tweet>, TwitterException>> onCreateLoader(
             final int id, final Bundle args) {
-        return new TwitterUpdatesLoader(getActivity());
+        return new TwitterUpdatesLoader(requireActivity());
     }
 
     @Override
-    public void onLoadFinished(final Loader<Result<List<Tweet>, TwitterException>> loader,
+    public void onLoadFinished(@NonNull final Loader<Result<List<Tweet>, TwitterException>> loader,
                                final Result<List<Tweet>, TwitterException> result) {
         if (isAdded()) {
             if(result.isError()) {
@@ -155,7 +166,7 @@ public class TwitterUpdatesFragment extends Fragment
     }
 
     @Override
-    public void onLoaderReset(final Loader<Result<List<Tweet>, TwitterException>> loader) {
+    public void onLoaderReset(@NonNull final Loader<Result<List<Tweet>, TwitterException>> loader) {
         // Nothing to do here.
     }
 
@@ -198,11 +209,10 @@ public class TwitterUpdatesFragment extends Fragment
         if (refreshItem != null) {
             if (loading) {
                 refreshItem.setEnabled(false);
-                MenuItemCompat.setActionView(refreshItem,
-                        R.layout.actionbar_indeterminate_progress);
+                refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 refreshItem.setEnabled(true);
-                MenuItemCompat.setActionView(refreshItem, null);
+                refreshItem.setActionView(null);
             }
         }
     }

@@ -29,6 +29,7 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import uk.org.rivernile.android.bustracker.dagger.about.AboutFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.news.NewsFragmentsModule
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.main.MainActivity
@@ -47,7 +48,10 @@ interface ActivityModule {
      * @return An instance of [MainActivity] to be injected.
      */
     @Suppress("unused")
-    @ContributesAndroidInjector(modules = [BusStopMapFragmentsModule::class])
+    @ContributesAndroidInjector(modules = [
+        BusStopMapFragmentsModule::class,
+        NewsFragmentsModule::class
+    ])
     fun contributeMainActivity(): MainActivity
 
     /**

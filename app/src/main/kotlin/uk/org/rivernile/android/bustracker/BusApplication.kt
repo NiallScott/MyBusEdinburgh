@@ -30,7 +30,6 @@ import android.app.backup.BackupManager
 import android.content.Context
 import android.content.SharedPreferences
 import com.bugsense.trace.BugSenseHandler
-import com.squareup.picasso.Picasso
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.alerts.AlertManager
@@ -104,11 +103,4 @@ abstract class BusApplication : Application(), HasAndroidInjector,
      * @return The TwitterEndpoint instance for this application.
      */
     abstract fun getTwitterEndpoint(): TwitterEndpoint
-
-    /**
-     * Get an instance of [Picasso] for image loading.
-     *
-     * @return An instance of [Picasso].
-     */
-    abstract fun getPicasso(): Picasso
 }

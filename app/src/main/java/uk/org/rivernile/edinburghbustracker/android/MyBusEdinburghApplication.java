@@ -25,9 +25,6 @@
 
 package uk.org.rivernile.edinburghbustracker.android;
 
-import com.jakewharton.picasso.OkHttp3Downloader;
-import com.squareup.picasso.Picasso;
-
 import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint;
@@ -49,7 +46,6 @@ public class MyBusEdinburghApplication extends BusApplication {
     private EdinburghUrlBuilder urlBuilder;
     private BusTrackerEndpoint busTrackerEndpoint;
     private TwitterEndpoint twitterEndpoint;
-    private Picasso picasso;
 
     @Override
     public synchronized BusTrackerEndpoint getBusTrackerEndpoint() {
@@ -70,18 +66,6 @@ public class MyBusEdinburghApplication extends BusApplication {
         
         return twitterEndpoint;
     }
-
-    @Override
-    public Picasso getPicasso() {
-        if (picasso == null) {
-            picasso = new Picasso.Builder(this)
-                    .downloader(new OkHttp3Downloader(this))
-                    .build();
-        }
-
-        return picasso;
-    }
-
     /**
      * Get an instance of the {@link UrlBuilder}.
      * 
