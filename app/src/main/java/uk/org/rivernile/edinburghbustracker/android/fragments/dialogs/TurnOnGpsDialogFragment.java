@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,11 +34,14 @@ import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
+
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import dagger.android.support.AndroidSupportInjection;
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager;
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -54,9 +57,11 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
     
     /** The Intent to use to show the GPS settings Activity. */
     public static final Intent TURN_ON_GPS_INTENT;
+
+    @Inject
+    PreferenceManager preferenceManager;
     
     private Callbacks callbacks;
-    private PreferenceManager preferenceManager;
     
     static {
         // TODO: sort deprecation.
@@ -65,7 +70,7 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onAttach(final Context context) {
+    public void onAttach(@NonNull final Context context) {
         super.onAttach(context);
         
         try {
@@ -78,16 +83,15 @@ public class TurnOnGpsDialogFragment extends DialogFragment {
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
+
         super.onCreate(savedInstanceState);
-        
-        preferenceManager = ((BusApplication) getContext().getApplicationContext())
-                .getPreferenceManager();
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final Activity activity = getActivity();
+        final Activity activity = requireActivity();
         final LayoutInflater inflater = LayoutInflater.from(activity);
         
         final View v = inflater.inflate(R.layout.turn_on_gps, null);

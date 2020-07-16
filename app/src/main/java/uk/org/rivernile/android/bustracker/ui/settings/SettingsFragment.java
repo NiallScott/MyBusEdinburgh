@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,9 @@ import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.provider.SearchRecentSuggestions;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 import uk.org.rivernile.android.bustracker.database.search.SearchSuggestionsProvider;
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager;
 import uk.org.rivernile.android.utils.GenericDialogPreference;
@@ -50,9 +52,11 @@ import uk.org.rivernile.edinburghbustracker.android.R;
 public class SettingsFragment extends PreferenceFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    @Inject
+    PreferenceManager preferenceManager;
+
     private Callbacks callbacks;
     private SharedPreferences sp;
-    private PreferenceManager preferenceManager;
     private ListPreference numberOfDeparturesPref;
     private String[] numberOfDeparturesStrings;
 
@@ -70,13 +74,13 @@ public class SettingsFragment extends PreferenceFragment
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         getPreferenceManager().setSharedPreferencesName(PreferenceManager.PREF_FILE);
         addPreferencesFromResource(R.xml.preferences);
         sp = getPreferenceScreen().getSharedPreferences();
-        preferenceManager = ((BusApplication) getActivity().getApplicationContext())
-                .getPreferenceManager();
         numberOfDeparturesStrings = getResources()
                 .getStringArray(R.array.preferences_num_departures_entries);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,11 +27,14 @@ package uk.org.rivernile.android.bustracker.ui.alerts.proximity;
 
 import android.app.Dialog;
 import android.os.Bundle;
+
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.appcompat.app.AlertDialog;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import dagger.android.support.AndroidSupportInjection;
 import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -42,21 +45,23 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 public class DeleteProximityAlertDialogFragment extends DialogFragment {
-    
-    private AlertManager alertMan;
+
+    @Inject
+    AlertManager alertMan;
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         setCancelable(true);
-        alertMan = ((BusApplication) getActivity().getApplication()).getAlertManager();
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        return new AlertDialog.Builder(getContext())
+        return new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.deleteproxdialog_title)
                 .setPositiveButton(R.string.okay, (dialog, id) -> alertMan.removeProximityAlert())
                 .setNegativeButton(R.string.cancel, null)

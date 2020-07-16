@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,37 +21,25 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.endpoints;
+package uk.org.rivernile.android.bustracker.dagger.settings
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import androidx.test.core.app.ApplicationProvider;
-import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragment
 
 /**
- * Tests for {@link HttpBusTrackerEndpoint}.
- * 
+ * This [Module] contributes [androidx.fragment.app.Fragment]s for
+ * [uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity].
+ *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner.class)
-public class HttpBusTrackerEndpointTests {
+@Module
+interface SettingsFragmentsModule {
 
-    @Mock
-    private BusParser parser;
-    @Mock
-    private UrlBuilder urlBuilder;
-    
-    /**
-     * Test that no exceptions are thrown if the constructor is passed a non-{@code null}
-     * {@code urlBuilder}.
-     */
-    @Test
-    public void testConstructorWithNonNullUrlBuilder() {
-        new HttpBusTrackerEndpoint(ApplicationProvider.getApplicationContext(), parser, urlBuilder);
-    }
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeSettingsFragment(): SettingsFragment
 }

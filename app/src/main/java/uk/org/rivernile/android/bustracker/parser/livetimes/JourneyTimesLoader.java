@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@ import android.content.Context;
 import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import android.text.TextUtils;
-import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.fetchutils.loaders.support.SimpleAsyncTaskLoader;
 
@@ -52,10 +51,14 @@ public class JourneyTimesLoader extends SimpleAsyncTaskLoader<LiveTimesResult<Jo
      * thrown if they are not supplied.
      * 
      * @param context A {@link Context} instance.
+     * @param endpoint The {@link BusTrackerEndpoint} to use.
      * @param stopCode The {@code stopCode} that the service is departing from.
      * @param journeyId A unique ID for the journey to return.
      */
-    public JourneyTimesLoader(@NonNull final Context context, @NonNull final String stopCode,
+    public JourneyTimesLoader(
+            @NonNull final Context context,
+            @NonNull final BusTrackerEndpoint endpoint,
+            @NonNull final String stopCode,
             @NonNull final String journeyId) {
         super(context);
         
@@ -66,8 +69,8 @@ public class JourneyTimesLoader extends SimpleAsyncTaskLoader<LiveTimesResult<Jo
         if (TextUtils.isEmpty(journeyId)) {
             throw new IllegalArgumentException("The journeyId should not be null or empty.");
         }
-        
-        endpoint = ((BusApplication) context.getApplicationContext()).getBusTrackerEndpoint();
+
+        this.endpoint = endpoint;
         this.stopCode = stopCode;
         this.journeyId = journeyId;
     }

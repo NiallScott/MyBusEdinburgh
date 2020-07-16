@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,6 +33,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import org.json.JSONException;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveTimesException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
@@ -45,7 +49,13 @@ import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamRea
  * 
  * @author Niall Scott
  */
+@Singleton
 public final class EdinburghParser implements BusParser {
+
+    @Inject
+    EdinburghParser() {
+        // Constructor declared to allow direct injection.
+    }
     
     @NonNull
     @Override
@@ -56,9 +66,7 @@ public final class EdinburghParser implements BusParser {
             fetcher.executeFetcher(reader);
 
             return BusTimesParser.parseBusTimes(reader.getJSONObject());
-        } catch (IOException e) {
-            throw new LiveTimesException(e);
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             throw new LiveTimesException(e);
         }
     }
@@ -72,9 +80,7 @@ public final class EdinburghParser implements BusParser {
             fetcher.executeFetcher(reader);
 
             return JourneyTimesParser.parseJourneyTimes(reader.getJSONObject());
-        } catch (IOException e) {
-            throw new LiveTimesException(e);
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             throw new LiveTimesException(e);
         }
     }

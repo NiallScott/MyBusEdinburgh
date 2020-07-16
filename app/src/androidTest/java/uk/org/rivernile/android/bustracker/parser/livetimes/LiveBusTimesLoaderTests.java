@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,23 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 import androidx.test.core.app.ApplicationProvider;
+import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Tests for {@link LiveBusTimesLoader}.
  *
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner.class)
 public class LiveBusTimesLoaderTests {
+
+    @Mock
+    private BusTrackerEndpoint endpoint;
 
     /**
      * Test that the constructor for {@link LiveBusTimesLoader} throws an
@@ -42,7 +50,11 @@ public class LiveBusTimesLoaderTests {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyStopCodes() {
-        new LiveBusTimesLoader(ApplicationProvider.getApplicationContext(), new String[] { }, 1);
+        new LiveBusTimesLoader(
+                ApplicationProvider.getApplicationContext(),
+                endpoint,
+                new String[] { },
+                1);
     }
 
     /**
@@ -51,8 +63,11 @@ public class LiveBusTimesLoaderTests {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithZeroDepartures() {
-        new LiveBusTimesLoader(ApplicationProvider.getApplicationContext(),
-                new String[] { "123456" }, 0);
+        new LiveBusTimesLoader(
+                ApplicationProvider.getApplicationContext(),
+                endpoint,
+                new String[] { "123456" },
+                0);
     }
 
     /**
@@ -61,7 +76,10 @@ public class LiveBusTimesLoaderTests {
      */
     @Test
     public void testConstructorSuccess() {
-        new LiveBusTimesLoader(ApplicationProvider.getApplicationContext(),
-                new String[] { "123456" }, 1);
+        new LiveBusTimesLoader(
+                ApplicationProvider.getApplicationContext(),
+                endpoint,
+                new String[] { "123456" },
+                1);
     }
 }

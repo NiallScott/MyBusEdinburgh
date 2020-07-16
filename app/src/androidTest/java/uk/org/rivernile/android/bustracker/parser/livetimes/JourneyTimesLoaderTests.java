@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,23 @@
 package uk.org.rivernile.android.bustracker.parser.livetimes;
 
 import androidx.test.core.app.ApplicationProvider;
+import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Tests for {@link JourneyTimesLoader}.
  *
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner.class)
 public class JourneyTimesLoaderTests {
+
+    @Mock
+    private BusTrackerEndpoint endpoint;
 
     /**
      * Test that the constructor for {@link JourneyTimesLoader} throws an
@@ -42,7 +50,11 @@ public class JourneyTimesLoaderTests {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyStopCode() {
-        new JourneyTimesLoader(ApplicationProvider.getApplicationContext(), "", "abc123");
+        new JourneyTimesLoader(
+                ApplicationProvider.getApplicationContext(),
+                endpoint,
+                "",
+                "abc123");
     }
 
     /**
@@ -51,7 +63,11 @@ public class JourneyTimesLoaderTests {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testConstructorWithEmptyJourneyId() {
-        new JourneyTimesLoader(ApplicationProvider.getApplicationContext(), "123456", "");
+        new JourneyTimesLoader(
+                ApplicationProvider.getApplicationContext(),
+                endpoint,
+                "123456",
+                "");
     }
 
     /**
@@ -60,6 +76,10 @@ public class JourneyTimesLoaderTests {
      */
     @Test
     public void testConstructorSuccess() {
-        new JourneyTimesLoader(ApplicationProvider.getApplicationContext(), "123456", "abc123");
+        new JourneyTimesLoader(
+                ApplicationProvider.getApplicationContext(),
+                endpoint,
+                "123456",
+                "abc123");
     }
 }

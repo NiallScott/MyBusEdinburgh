@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ import androidx.annotation.NonNull;
 
 import java.util.List;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.fetchutils.loaders.Result;
 import uk.org.rivernile.android.fetchutils.loaders.support.SimpleAsyncTaskLoader;
 
@@ -45,23 +45,25 @@ import uk.org.rivernile.android.fetchutils.loaders.support.SimpleAsyncTaskLoader
 public class TwitterUpdatesLoader
         extends SimpleAsyncTaskLoader<Result<List<Tweet>, TwitterException>> {
     
-    private final BusApplication app;
-    
+    private final TwitterEndpoint twitterEndpoint;
+
     /**
      * Create a new {@code TwitterUpdatesLoader}.
-     * 
+     *
      * @param context A {@link Context} object.
      */
-    public TwitterUpdatesLoader(@NonNull final Context context) {
+    public TwitterUpdatesLoader(
+            @NonNull final Context context,
+            @NonNull final TwitterEndpoint twitterEndpoint) {
         super(context);
-        
-        app = (BusApplication) context.getApplicationContext();
+
+        this.twitterEndpoint = twitterEndpoint;
     }
 
     @Override
     public Result<List<Tweet>, TwitterException> loadInBackground() {
         try {
-            return new Result<>(app.getTwitterEndpoint().getTweets());
+            return new Result<>(twitterEndpoint.getTweets());
         } catch (TwitterException e) {
             return new Result<>(e);
         }

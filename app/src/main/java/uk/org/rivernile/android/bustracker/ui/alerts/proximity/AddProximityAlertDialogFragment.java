@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2017 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,6 +45,9 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -53,7 +56,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import dagger.android.support.AndroidSupportInjection;
 import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
@@ -76,8 +79,10 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
     private static final int PERMISSION_REQUEST_LOCATION = 1;
 
-    private AlertManager alertManager;
-    private LocationManager locManager;
+    @Inject
+    AlertManager alertManager;
+    @Inject
+    LocationManager locManager;
 
     private String stopCode;
     private boolean hasLocationFeature;
@@ -114,17 +119,14 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         setCancelable(true);
         stopCode = getArguments().getString(ARG_STOPCODE);
 
-        final Context context = getContext();
-        final BusApplication app = (BusApplication) context.getApplicationContext();
-        alertManager = app.getAlertManager();
-        locManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-
-        hasLocationFeature = context.getPackageManager()
+        hasLocationFeature = requireContext().getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_LOCATION);
 
         locationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
@@ -134,7 +136,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final Context context = getContext();
+        final Context context = requireContext();
         final LayoutInflater inflater = LayoutInflater.from(context);
         final View v = inflater.inflate(R.layout.addproxalert, null, false);
 
@@ -185,7 +187,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
         if (hasLocationFeature) {
             checkLocationPermission();
-            getContext().registerReceiver(locationProviderChangedReceiver,
+            requireContext().registerReceiver(locationProviderChangedReceiver,
                     new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
             handleLocationProvidersChange();
         }
@@ -198,7 +200,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         super.onStop();
 
         if (hasLocationFeature) {
-            getContext().unregisterReceiver(locationProviderChangedReceiver);
+            requireContext().unregisterReceiver(locationProviderChangedReceiver);
         }
     }
 
@@ -208,11 +210,12 @@ public class AddProximityAlertDialogFragment extends DialogFragment
         checkLocationPermission();
     }
 
+    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LOADER_BUS_STOP:
-                return new BusStopLoader(getContext(), stopCode,
+                return new BusStopLoader(requireContext(), stopCode,
                         new String[] {
                                 BusStopContract.BusStops.STOP_NAME,
                                 BusStopContract.BusStops.LOCALITY
@@ -224,19 +227,15 @@ public class AddProximityAlertDialogFragment extends DialogFragment
 
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
-        switch (loader.getId()) {
-            case LOADER_BUS_STOP:
-                handleBusStopLoaded(data);
-                break;
+        if (loader.getId() == LOADER_BUS_STOP) {
+            handleBusStopLoaded(data);
         }
     }
 
     @Override
     public void onLoaderReset(final Loader<Cursor> loader) {
-        switch (loader.getId()) {
-            case LOADER_BUS_STOP:
-                handleBusStopLoaded(null);
-                break;
+        if (loader.getId() == LOADER_BUS_STOP) {
+            handleBusStopLoaded(null);
         }
     }
 
@@ -255,7 +254,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
      * Check to see if the app has been granted location permissions by the user.
      */
     private void checkLocationPermission() {
-        hasLocationPermission = ContextCompat.checkSelfPermission(getContext(),
+        hasLocationPermission = ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         updatePositiveButtonEnabledState();
 
@@ -334,7 +333,8 @@ public class AddProximityAlertDialogFragment extends DialogFragment
      */
     private void handleLocationProvidersChange() {
         final boolean hasLocationSettings =
-                locationSettingsIntent.resolveActivity(getContext().getPackageManager()) != null;
+                locationSettingsIntent.resolveActivity(
+                        requireContext().getPackageManager()) != null;
         final boolean gpsEnabled = locManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         final boolean networkEnabled = locManager.isProviderEnabled(
                 LocationManager.NETWORK_PROVIDER);
@@ -355,7 +355,7 @@ public class AddProximityAlertDialogFragment extends DialogFragment
      */
     private void handleLimitationsButtonClick() {
         ProximityLimitationsDialogFragment.newInstance()
-                .show(getFragmentManager(), DIALOG_PROX_ALERT_LIMITATIONS);
+                .show(getParentFragmentManager(), DIALOG_PROX_ALERT_LIMITATIONS);
     }
 
     /**

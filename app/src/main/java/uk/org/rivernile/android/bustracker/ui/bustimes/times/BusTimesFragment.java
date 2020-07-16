@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,6 @@ import android.os.SystemClock;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -62,8 +61,11 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.ServiceColoursLoader;
+import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.bustracker.parser.livetimes.AuthenticationException;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusService;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusStop;
@@ -99,9 +101,14 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     private static final int AUTO_REFRESH_PERIOD = 60000; // 60 seconds.
     private static final int LAST_REFRESH_PERIOD = 5000; // 5 seconds.
 
+    @Inject
+    BusTrackerEndpoint busTrackerEndpoint;
+    @Inject
+    PreferenceManager preferenceManager;
+    @Inject
+    ConnectivityManager connectivityManager;
+
     private final Handler handler = new Handler();
-    private ConnectivityManager connectivityManager;
-    private PreferenceManager preferenceManager;
     private BusTimesAdapter adapter;
 
     private String stopCode;
@@ -141,14 +148,12 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         stopCode = getArguments().getString(ARG_STOP_CODE);
-        connectivityManager = (ConnectivityManager) getContext()
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        preferenceManager = ((BusApplication) getContext().getApplicationContext())
-                .getPreferenceManager();
-        adapter = new BusTimesAdapter(getContext());
+        adapter = new BusTimesAdapter(requireContext());
         adapter.setSortByTime(preferenceManager.isBusTimesSortedByTime());
         adapter.setShowNightServices(preferenceManager.isBusTimesShowingNightServices());
 
@@ -205,7 +210,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     public void onStart() {
         super.onStart();
 
-        getContext().registerReceiver(connectivityReceiver,
+        requireContext().registerReceiver(connectivityReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         handler.post(lastRefreshRunnable);
         setUpAutoRefresh();
@@ -215,13 +220,13 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     public void onStop() {
         super.onStop();
 
-        getContext().unregisterReceiver(connectivityReceiver);
+        requireContext().unregisterReceiver(connectivityReceiver);
         handler.removeCallbacks(lastRefreshRunnable);
         handler.removeCallbacks(autoRefreshRunnable);
     }
 
     @Override
-    public void onSaveInstanceState(final Bundle outState) {
+    public void onSaveInstanceState(@NonNull final Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putLong(STATE_LAST_REFRESH, lastRefresh);
@@ -230,7 +235,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull final Menu menu, final MenuInflater inflater) {
         inflater.inflate(R.menu.bustimes_option_menu, menu);
 
         menuItemRefresh = menu.findItem(R.id.bustimes_option_menu_refresh);
@@ -239,7 +244,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onPrepareOptionsMenu(final Menu menu) {
+    public void onPrepareOptionsMenu(@NonNull final Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
         configureRefreshActionItem();
@@ -264,14 +269,18 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         }
     }
 
+    @NonNull
     @Override
     public Loader onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LOADER_BUS_TIMES:
-                return new LiveBusTimesLoader(getContext(), new String[] { stopCode },
+                return new LiveBusTimesLoader(
+                        requireContext(),
+                        busTrackerEndpoint,
+                        new String[] { stopCode },
                         numberOfDepartures);
             case LOADER_SERVICE_COLOURS:
-                return new ServiceColoursLoader(getContext(), null);
+                return new ServiceColoursLoader(requireContext(), null);
             default:
                 return null;
         }
@@ -293,7 +302,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onLoaderReset(final Loader loader) {
+    public void onLoaderReset(@NonNull final Loader loader) {
         // Nothing to do here.
     }
 
@@ -570,11 +579,10 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         if (menuItemRefresh != null) {
             if (busTimesLoading) {
                 menuItemRefresh.setEnabled(false);
-                MenuItemCompat.setActionView(menuItemRefresh,
-                        R.layout.actionbar_indeterminate_progress);
+                menuItemRefresh.setActionView(R.layout.actionbar_indeterminate_progress);
             } else {
                 menuItemRefresh.setEnabled(true);
-                MenuItemCompat.setActionView(menuItemRefresh, null);
+                menuItemRefresh.setActionView(null);
             }
         }
     }
@@ -678,10 +686,5 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
         }
     };
 
-    private final Runnable autoRefreshRunnable = new Runnable() {
-        @Override
-        public void run() {
-            loadBusTimes(true);
-        }
-    };
+    private final Runnable autoRefreshRunnable = () -> loadBusTimes(true);
 }

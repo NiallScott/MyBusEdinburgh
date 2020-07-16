@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,10 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterException;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParser;
@@ -39,6 +43,7 @@ import uk.org.rivernile.android.fetchutils.fetchers.HttpFetcher;
  * 
  * @author Niall Scott
  */
+@Singleton
 public class HttpTwitterEndpoint extends TwitterEndpoint {
 
     private final Context context;
@@ -46,11 +51,15 @@ public class HttpTwitterEndpoint extends TwitterEndpoint {
     
     /**
      * Create a new {@code HttpTwitterEndpoint}.
-     * 
+     *
+     * @param context The application {@link Context}.
      * @param parser The parser to use to parse the data.
      * @param urlBuilder The {@link UrlBuilder} to use.
      */
-    public HttpTwitterEndpoint(@NonNull final Context context, @NonNull final TwitterParser parser,
+    @Inject
+    HttpTwitterEndpoint(
+            @NonNull final Context context,
+            @NonNull final TwitterParser parser,
             @NonNull final UrlBuilder urlBuilder) {
         super(parser);
 

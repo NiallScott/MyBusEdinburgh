@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,6 +46,12 @@ import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.tabs.TabLayout;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasAndroidInjector;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.FavouriteStopsLoader;
@@ -70,7 +76,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  */
 public class DisplayStopDataActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<Cursor>, AppBarLayout.OnOffsetChangedListener,
-        StopDetailsFragment.Callbacks {
+        StopDetailsFragment.Callbacks, HasAndroidInjector {
 
     public static final String ACTION_VIEW_STOP_DATA =
             BuildConfig.APPLICATION_ID + ".ACTION_VIEW_STOP_DATA";
@@ -89,6 +95,9 @@ public class DisplayStopDataActivity extends AppCompatActivity
     private static final String DIALOG_REMOVE_PROX_ALERT = "removeProxAlert";
     private static final String DIALOG_REMOVE_TIME_ALERT = "removeTimeAlert";
 
+    @Inject
+    DispatchingAndroidInjector<Object> dispatchingAndroidInjector;
+
     private Cursor favouriteCursor;
     private Cursor proxCursor;
     private Cursor timeCursor;
@@ -105,6 +114,8 @@ public class DisplayStopDataActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.displaystopdata);
@@ -264,6 +275,11 @@ public class DisplayStopDataActivity extends AppCompatActivity
         final Intent intent = new Intent(this, BusStopMapActivity.class);
         intent.putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode);
         startActivity(intent);
+    }
+
+    @Override
+    public AndroidInjector<Object> androidInjector() {
+        return dispatchingAndroidInjector;
     }
 
     /**

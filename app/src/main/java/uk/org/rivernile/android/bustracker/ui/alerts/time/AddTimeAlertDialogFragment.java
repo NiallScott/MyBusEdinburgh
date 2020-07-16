@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2017 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,6 +37,9 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -44,7 +47,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import dagger.android.support.AndroidSupportInjection;
 import uk.org.rivernile.android.bustracker.alerts.AlertManager;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
@@ -74,7 +77,8 @@ public class AddTimeAlertDialogFragment extends DialogFragment
     private static final String DIALOG_SELECT_SERVICES = "selectServicesDialog";
     private static final String DIALOG_TIME_ALERT_LIMITATIONS = "timeLimitationsDialog";
 
-    private AlertManager alertManager;
+    @Inject
+    AlertManager alertManager;
 
     private String stopCode;
     private String[] services;
@@ -130,6 +134,8 @@ public class AddTimeAlertDialogFragment extends DialogFragment
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         setCancelable(true);
@@ -138,8 +144,6 @@ public class AddTimeAlertDialogFragment extends DialogFragment
         selectedServices = savedInstanceState != null
                 ? savedInstanceState.getStringArray(STATE_SELECTED_SERVICES)
                 : args.getStringArray(ARG_DEFAULT_SERVICES);
-
-        alertManager = ((BusApplication) getContext().getApplicationContext()).getAlertManager();
     }
 
     @NonNull
@@ -162,7 +166,7 @@ public class AddTimeAlertDialogFragment extends DialogFragment
 
         populateServices();
 
-        return new AlertDialog.Builder(context)
+        return new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.addtimealertdialog_title)
                 .setPositiveButton(R.string.addtimealertdialog_button_add,
                         (dialog, which) -> handlePositiveButtonClick())
@@ -188,23 +192,24 @@ public class AddTimeAlertDialogFragment extends DialogFragment
     }
 
     @Override
-    public void onSaveInstanceState(final Bundle outState) {
+    public void onSaveInstanceState(@NonNull final Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putStringArray(STATE_SELECTED_SERVICES, selectedServices);
     }
 
+    @NonNull
     @Override
     public Loader onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LOADER_BUS_STOP:
-                return new BusStopLoader(getContext(), stopCode,
+                return new BusStopLoader(requireContext(), stopCode,
                         new String[] {
                                 BusStopContract.BusStops.STOP_NAME,
                                 BusStopContract.BusStops.LOCALITY
                         });
             case LOADER_SERVICES:
-                return new BusStopServiceNamesLoader(getContext(), stopCode);
+                return new BusStopServiceNamesLoader(requireContext(), stopCode);
             default:
                 return null;
         }
@@ -226,10 +231,8 @@ public class AddTimeAlertDialogFragment extends DialogFragment
 
     @Override
     public void onLoaderReset(final Loader loader) {
-        switch (loader.getId()) {
-            case LOADER_BUS_STOP:
-                handleBusStopLoaded(null);
-                break;
+        if (loader.getId() == LOADER_BUS_STOP) {
+            handleBusStopLoaded(null);
         }
     }
 
@@ -339,7 +342,7 @@ public class AddTimeAlertDialogFragment extends DialogFragment
                 ServicesChooserDialogFragment.newInstance(services,selectedServices,
                         getString(R.string.addtimealertdialog_services_chooser_dialog_title));
         fragment.setTargetFragment(this, 0);
-        fragment.show(getFragmentManager(), DIALOG_SELECT_SERVICES);
+        fragment.show(getParentFragmentManager(), DIALOG_SELECT_SERVICES);
     }
 
     /**
@@ -347,7 +350,7 @@ public class AddTimeAlertDialogFragment extends DialogFragment
      */
     private void handleLimitationsButtonClick() {
         TimeLimitationsDialogFragment.newInstance()
-                .show(getFragmentManager(), DIALOG_TIME_ALERT_LIMITATIONS);
+                .show(getParentFragmentManager(), DIALOG_TIME_ALERT_LIMITATIONS);
     }
 
     /**

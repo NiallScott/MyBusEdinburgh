@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,18 +30,24 @@ import static org.junit.Assert.assertSame;
 import androidx.annotation.NonNull;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
 import uk.org.rivernile.android.bustracker.parser.livetimes.Journey;
 import uk.org.rivernile.android.bustracker.parser.livetimes.LiveBusTimes;
-import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghParser;
 
 /**
  * Tests for {@link BusTrackerEndpoint}.
  * 
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner.class)
 public class BusTrackerEndpointTests {
+
+    @Mock
+    private BusParser parser;
 
     /**
      * Test that {@link BusTrackerEndpoint#getParser()} returns the same {@link BusParser} object
@@ -49,7 +55,6 @@ public class BusTrackerEndpointTests {
      */
     @Test
     public void testNotNullConstructor() {
-        final EdinburghParser parser = new EdinburghParser();
         final MockBusTrackerEndpoint endpoint = new MockBusTrackerEndpoint(parser);
         
         assertSame(parser, endpoint.getParser());

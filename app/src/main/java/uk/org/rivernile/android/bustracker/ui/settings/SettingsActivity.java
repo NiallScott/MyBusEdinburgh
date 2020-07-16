@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,9 @@ import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
+
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.loader.app.LoaderManager;
@@ -37,6 +40,10 @@ import androidx.core.content.ContextCompat;
 import androidx.loader.content.Loader;
 import androidx.appcompat.app.AppCompatActivity;
 
+import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasAndroidInjector;
 import uk.org.rivernile.android.bustracker.database.settings.SettingsDatabase;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.BackupFavouritesLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.RestoreFavouritesLoader;
@@ -49,7 +56,7 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 public class SettingsActivity extends AppCompatActivity implements SettingsFragment.Callbacks,
-        LoaderManager.LoaderCallbacks<Integer> {
+        LoaderManager.LoaderCallbacks<Integer>, HasAndroidInjector {
 
     private static final int PERMISSION_REQUEST_BACKUP = 1;
     private static final int PERMISSION_REQUEST_RESTORE = 2;
@@ -57,8 +64,13 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
     private static final int LOADER_BACKUP_FAVOURITES = 1;
     private static final int LOADER_RESTORE_FAVOURITES = 2;
 
+    @Inject
+    DispatchingAndroidInjector<Object> dispatchingAndroidInjector;
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.settings);
@@ -75,6 +87,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
         }
     }
 
+    @NonNull
     @Override
     public Loader<Integer> onCreateLoader(final int id, final Bundle args) {
         switch (id) {
@@ -100,7 +113,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
     }
 
     @Override
-    public void onLoaderReset(final Loader<Integer> loader) {
+    public void onLoaderReset(@NonNull final Loader<Integer> loader) {
         // Nothing to do here.
     }
 
@@ -146,6 +159,11 @@ public class SettingsActivity extends AppCompatActivity implements SettingsFragm
 
                 break;
         }
+    }
+
+    @Override
+    public AndroidInjector<Object> androidInjector() {
+        return dispatchingAndroidInjector;
     }
 
     /**

@@ -51,6 +51,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
+import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint;
 import uk.org.rivernile.android.fetchutils.fetchers.UrlMismatchException;
 import uk.org.rivernile.android.fetchutils.loaders.Result;
 import uk.org.rivernile.edinburghbustracker.android.R;
@@ -68,6 +69,8 @@ public class TwitterUpdatesFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Result<List<Tweet>, TwitterException>>,
         TweetAdapter.OnItemClickListener {
 
+    @Inject
+    TwitterEndpoint twitterEndpoint;
     @Inject
     Picasso picasso;
     
@@ -150,7 +153,7 @@ public class TwitterUpdatesFragment extends Fragment
     @Override
     public Loader<Result<List<Tweet>, TwitterException>> onCreateLoader(
             final int id, final Bundle args) {
-        return new TwitterUpdatesLoader(requireActivity());
+        return new TwitterUpdatesLoader(requireActivity(), twitterEndpoint);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,10 @@
 package uk.org.rivernile.android.bustracker.endpoints;
 
 import android.content.Context;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import androidx.annotation.NonNull;
 
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser;
@@ -39,6 +43,7 @@ import uk.org.rivernile.android.fetchutils.fetchers.HttpFetcher;
  * 
  * @author Niall Scott
  */
+@Singleton
 public class HttpBusTrackerEndpoint extends BusTrackerEndpoint {
 
     private final Context context;
@@ -52,7 +57,10 @@ public class HttpBusTrackerEndpoint extends BusTrackerEndpoint {
      * @param urlBuilder A {@link UrlBuilder} instance, used to construct URLs for contacting
      * remote resources.
      */
-    public HttpBusTrackerEndpoint(@NonNull final Context context, @NonNull final BusParser parser,
+    @Inject
+    HttpBusTrackerEndpoint(
+            @NonNull final Context context,
+            @NonNull final BusParser parser,
             @NonNull final UrlBuilder urlBuilder) {
         super(parser);
 

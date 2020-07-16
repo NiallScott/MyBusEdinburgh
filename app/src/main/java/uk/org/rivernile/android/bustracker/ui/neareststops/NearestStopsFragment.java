@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,7 +56,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.AllServiceNamesLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasFavouriteStopLoader;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.HasProximityAlertLoader;
@@ -94,6 +96,11 @@ public class NearestStopsFragment extends Fragment
     private static final String STATE_CHOSEN_SERVICES = "chosenServices";
     private static final String STATE_SELECTED_STOP = "chosenStop";
 
+    @Inject
+    PreferenceManager preferenceManager;
+    @Inject
+    LocationManager locMan;
+
     private static final int PERMISSION_REQUEST_LOCATION = 1;
     
     private static final int REQUEST_PERIOD = 10000;
@@ -106,8 +113,6 @@ public class NearestStopsFragment extends Fragment
     private static final int LOADER_HAS_TIME_ALERT = 5;
     
     private Callbacks callbacks;
-    private LocationManager locMan;
-    private PreferenceManager preferenceManager;
     
     private NearestStopsAdapter adapter;
     private ActionMode actionMode;
@@ -133,7 +138,7 @@ public class NearestStopsFragment extends Fragment
     private MenuItem amMenuItemShowOnMap;
 
     @Override
-    public void onAttach(final Context context) {
+    public void onAttach(@NonNull final Context context) {
         super.onAttach(context);
         
         try {
@@ -146,6 +151,8 @@ public class NearestStopsFragment extends Fragment
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
@@ -153,15 +160,11 @@ public class NearestStopsFragment extends Fragment
             selectedStop = savedInstanceState.getParcelable(STATE_SELECTED_STOP);
         }
         
-        final Activity activity = getActivity();
-        // Get references to required resources.
-        locMan = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
-        preferenceManager = ((BusApplication) getContext().getApplicationContext())
-                .getPreferenceManager();
+        final Activity activity = requireActivity();
         adapter = new NearestStopsAdapter(activity);
         adapter.setOnItemClickedListener(this);
 
-        if (LocationUtils.checkLocationPermission(getContext())) {
+        if (LocationUtils.checkLocationPermission(requireContext())) {
             // Initialise the lastLocation to the best known location.
             lastLocation = LocationUtils.getBestInitialLocation(locMan);
         }
@@ -190,7 +193,7 @@ public class NearestStopsFragment extends Fragment
     public void onActivityCreated(final Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         
-        getActivity().setTitle(R.string.neareststops_title);
+        requireActivity().setTitle(R.string.neareststops_title);
 
         // Force an update to initially show data.
         doUpdate(true);
@@ -206,7 +209,7 @@ public class NearestStopsFragment extends Fragment
             // the user has not asked for this dialog to not be shown, when the system has the GPS
             // feature, the GPS provider is disabled and there is a GPS resolution Activity.
             if (!preferenceManager.isGpsPromptDisabled() &&
-                    getActivity().getPackageManager()
+                    requireActivity().getPackageManager()
                             .hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS) &&
                     !locMan.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
                     hasGpsSettingActivty()) {
@@ -220,7 +223,7 @@ public class NearestStopsFragment extends Fragment
     public void onStart() {
         super.onStart();
 
-        if (LocationUtils.checkLocationPermission(getContext())) {
+        if (LocationUtils.checkLocationPermission(requireContext())) {
             startLocationUpdates();
         } else {
             showPermissionRequiredError();
@@ -238,7 +241,7 @@ public class NearestStopsFragment extends Fragment
     }
 
     @Override
-    public void onSaveInstanceState(final Bundle outState) {
+    public void onSaveInstanceState(@NonNull final Bundle outState) {
         super.onSaveInstanceState(outState);
         
         outState.putStringArray(STATE_CHOSEN_SERVICES, chosenServices);
@@ -246,14 +249,14 @@ public class NearestStopsFragment extends Fragment
     }
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull final Menu menu, final MenuInflater inflater) {
         // Inflate the menu.
         inflater.inflate(R.menu.neareststops_option_menu, menu);
         menuItemFilter = menu.findItem(R.id.neareststops_option_menu_filter);
     }
 
     @Override
-    public void onPrepareOptionsMenu(final Menu menu) {
+    public void onPrepareOptionsMenu(@NonNull final Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
         updateFilterMenuItem();
@@ -261,38 +264,38 @@ public class NearestStopsFragment extends Fragment
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.neareststops_option_menu_filter:
-                if (services != null && services.length > 0) {
-                    callbacks.onShowServicesChooser(services, chosenServices,
-                            getString(R.string.neareststops_service_chooser_title));
-                }
+        if (item.getItemId() == R.id.neareststops_option_menu_filter) {
+            if (services != null && services.length > 0) {
+                callbacks.onShowServicesChooser(services, chosenServices,
+                        getString(R.string.neareststops_service_chooser_title));
+            }
 
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            return true;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
+    @NonNull
     @Override
     public Loader onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LOADER_NEAREST_STOPS:
-                return new NearestStopsLoader(getActivity(), lastLocation.getLatitude(),
+                return new NearestStopsLoader(requireActivity(), lastLocation.getLatitude(),
                         lastLocation.getLongitude(), chosenServices);
             case LOADER_SERVICES:
-                return new AllServiceNamesLoader(getContext());
+                return new AllServiceNamesLoader(requireContext());
             case LOADER_HAS_FAVOURITE_STOP:
                 return selectedStop != null
-                        ? new HasFavouriteStopLoader(getActivity(), selectedStop.getStopCode())
+                        ? new HasFavouriteStopLoader(requireActivity(), selectedStop.getStopCode())
                         : null;
             case LOADER_HAS_PROXIMITY_ALERT:
                 return selectedStop != null
-                        ? new HasProximityAlertLoader(getActivity(), selectedStop.getStopCode())
+                        ? new HasProximityAlertLoader(requireActivity(), selectedStop.getStopCode())
                         : null;
             case LOADER_HAS_TIME_ALERT:
                 return selectedStop != null
-                        ? new HasTimeAlertLoader(getActivity(), selectedStop.getStopCode())
+                        ? new HasTimeAlertLoader(requireActivity(), selectedStop.getStopCode())
                         : null;
             default:
                 return null;
@@ -533,7 +536,7 @@ public class NearestStopsFragment extends Fragment
     private void updateFilterMenuItem() {
         if (menuItemFilter != null) {
             menuItemFilter.setEnabled(services != null && services.length > 0 &&
-                    LocationUtils.checkLocationPermission(getContext()));
+                    LocationUtils.checkLocationPermission(requireContext()));
         }
     }
 
@@ -659,9 +662,9 @@ public class NearestStopsFragment extends Fragment
      * turn on the GPS location provider, {@code false} if not.
      */
     private boolean hasGpsSettingActivty() {
-        final List<ResolveInfo> packages = getActivity().getPackageManager()
+        final List<ResolveInfo> packages = requireActivity().getPackageManager()
                 .queryIntentActivities(TurnOnGpsDialogFragment.TURN_ON_GPS_INTENT, 0);
-        return packages != null && !packages.isEmpty();
+        return !packages.isEmpty();
     }
 
     private final ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
@@ -708,7 +711,7 @@ public class NearestStopsFragment extends Fragment
 
             // If the Google Play Services is not available, then don't show the option to show the
             // stop on the map.
-            if (!MapsUtils.isGoogleMapsAvailable(getActivity())) {
+            if (!MapsUtils.isGoogleMapsAvailable(requireActivity())) {
                 amMenuItemShowOnMap.setVisible(false);
             }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,10 @@ package uk.org.rivernile.edinburghbustracker.android.utils;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import java.util.Random;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder;
 import uk.org.rivernile.edinburghbustracker.android.ApiKey;
 
@@ -37,6 +41,7 @@ import uk.org.rivernile.edinburghbustracker.android.ApiKey;
  * 
  * @author Niall Scott
  */
+@Singleton
 public class EdinburghUrlBuilder implements UrlBuilder {
     
     private static final Random RANDOM = new Random(System.currentTimeMillis());
@@ -44,6 +49,11 @@ public class EdinburghUrlBuilder implements UrlBuilder {
     protected static final String SCHEME_HTTP = "http";
     protected static final String BUSTRACKER_HOST = "www.mybustracker.co.uk";
     protected static final String DB_SERVER_HOST = "edinb.us";
+
+    @Inject
+    EdinburghUrlBuilder() {
+        // Declared to allow for direct constructor injection.
+    }
 
     @NonNull
     @Override

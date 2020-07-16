@@ -28,11 +28,17 @@ package uk.org.rivernile.android.bustracker.dagger
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import uk.org.rivernile.android.bustracker.dagger.about.AboutFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.alerts.AlertFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.displaystopdata.DisplayStopDataFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.main.MainFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.news.NewsFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.settings.SettingsFragmentsModule
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.main.MainActivity
+import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 
 /**
  * This [Module] is used to inject [android.app.Activity] instance in this application.
@@ -49,7 +55,9 @@ interface ActivityModule {
      */
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
+        AlertFragmentsModule::class,
         BusStopMapFragmentsModule::class,
+        MainFragmentsModule::class,
         NewsFragmentsModule::class
     ])
     fun contributeMainActivity(): MainActivity
@@ -60,8 +68,29 @@ interface ActivityModule {
      * @return An instance of [AboutActivity] to be injected.
      */
     @Suppress("unused")
-    @ContributesAndroidInjector(modules = [AboutFragmentsModule::class])
+    @ContributesAndroidInjector(modules = [ AboutFragmentsModule::class ])
     fun contributeAboutActivity(): AboutActivity
+
+    /**
+     * Presents an instance of [SettingsActivity] as an item to be injected.
+     *
+     * @return An instance of [SettingsActivity] to be injected.
+     */
+    @Suppress("unused")
+    @ContributesAndroidInjector(modules = [ SettingsFragmentsModule::class ])
+    fun contributeSettingsActivity(): SettingsActivity
+
+    /**
+     * Presents an instance of [DisplayStopDataActivity] as an item to be injected.
+     *
+     * @return An instance of [DisplayStopDataActivity] to be injected.
+     */
+    @Suppress("unused")
+    @ContributesAndroidInjector(modules = [
+        AlertFragmentsModule::class,
+        DisplayStopDataFragmentsModule::class
+    ])
+    fun contributeDisplayStopDataActivity(): DisplayStopDataActivity
 
     /**
      * Presents an instance of [BusStopMapActivity] as an item to be injected.
@@ -69,6 +98,6 @@ interface ActivityModule {
      * @return An instance of [BusStopMapActivity] to be injected.
      */
     @Suppress("unused")
-    @ContributesAndroidInjector(modules = [BusStopMapFragmentsModule::class])
+    @ContributesAndroidInjector(modules = [ BusStopMapFragmentsModule::class ])
     fun contributeBusStopMapActivity(): BusStopMapActivity
 }

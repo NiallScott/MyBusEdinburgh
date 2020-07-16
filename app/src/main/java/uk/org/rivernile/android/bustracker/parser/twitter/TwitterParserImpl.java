@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,6 +40,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import uk.org.rivernile.android.fetchutils.fetchers.Fetcher;
 import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamReader;
 import uk.org.rivernile.android.utils.JSONUtils;
@@ -50,6 +53,7 @@ import uk.org.rivernile.android.utils.JSONUtils;
  * 
  * @author Niall Scott
  */
+@Singleton
 public class TwitterParserImpl implements TwitterParser {
     
     @SuppressLint({"SimpleDateFormat"})
@@ -57,6 +61,11 @@ public class TwitterParserImpl implements TwitterParser {
             new SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZZ yyyy", Locale.ENGLISH);
     
     private static final String TWITTER_BASE_URL = "https://twitter.com/";
+
+    @Inject
+    TwitterParserImpl() {
+        // Constructor defined to allow direct injection.
+    }
 
     @NonNull
     @Override
@@ -67,9 +76,7 @@ public class TwitterParserImpl implements TwitterParser {
             fetcher.executeFetcher(reader);
             
             return parseJsonArray(reader.getJSONArray());
-        } catch (IOException e) {
-            throw new TwitterException(e);
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             throw new TwitterException(e);
         }
     }
@@ -80,11 +87,9 @@ public class TwitterParserImpl implements TwitterParser {
      * @param jTweets The {@link JSONArray} of tweet objects.
      * @return A {@link List} of {@link Tweet} objects. The {@link List} is unmodifiable. The
      * {@link List} may be empty if there were no tweets or there was problems parsing the tweets.
-     * @throws JSONException When there was a problem parsing the JSON response.
      */
     @NonNull
-    private static List<Tweet> parseJsonArray(@NonNull final JSONArray jTweets)
-            throws JSONException {
+    private static List<Tweet> parseJsonArray(@NonNull final JSONArray jTweets) {
         final int size = jTweets.length();
 
         if (size > 0) {
@@ -147,9 +152,7 @@ public class TwitterParserImpl implements TwitterParser {
             }
 
             return builder.build();
-        } catch (JSONException e) {
-            return null;
-        } catch (IllegalArgumentException e) {
+        } catch (JSONException | IllegalArgumentException e) {
             return null;
         }
     }

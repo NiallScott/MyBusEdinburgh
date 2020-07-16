@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,17 +32,23 @@ import androidx.annotation.NonNull;
 import java.util.List;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import uk.org.rivernile.android.bustracker.parser.twitter.Tweet;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParser;
-import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
 
 /**
  * Tests for {@link TwitterEndpoint}.
  * 
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TwitterEndpointTests {
+
+    @Mock
+    private TwitterParser parser;
     
     /**
      * Test that {@link TwitterEndpoint#getParser()} returns the same {@link TwitterParser}
@@ -50,7 +56,6 @@ public class TwitterEndpointTests {
      */
     @Test
     public void testNotNullConstructor() {
-        final TwitterParserImpl parser = new TwitterParserImpl();
         final MockTwitterEndpoint endpoint = new MockTwitterEndpoint(parser);
         
         assertSame(parser, endpoint.getParser());

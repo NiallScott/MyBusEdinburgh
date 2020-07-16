@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,6 +46,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.android.support.AndroidSupportInjection;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopLoader;
 import uk.org.rivernile.android.utils.LocationUtils;
@@ -72,8 +75,10 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     private static final int LOCATION_REQUEST_PERIOD = 10000;
     private static final float LOCATION_MIN_DISTANCE = 10.0f;
 
+    @Inject
+    LocationManager locationManager;
+
     private Callbacks callbacks;
-    private LocationManager locationManager;
     private StopDetailsAdapter adapter;
     private String stopCode;
     private boolean isStarted;
@@ -100,7 +105,7 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
-    public void onAttach(final Context context) {
+    public void onAttach(@NonNull final Context context) {
         super.onAttach(context);
 
         try {
@@ -113,6 +118,8 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onCreate(@Nullable final Bundle savedInstanceState) {
+        AndroidSupportInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState != null) {
@@ -121,8 +128,7 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
         }
 
         stopCode = getArguments().getString(ARG_STOP_CODE);
-        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-        adapter = new StopDetailsAdapter(getContext());
+        adapter = new StopDetailsAdapter(requireContext());
         adapter.setOnItemClickedListener(this);
     }
 
@@ -169,7 +175,7 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
     }
 
     @Override
-    public void onSaveInstanceState(final Bundle outState) {
+    public void onSaveInstanceState(@NonNull final Bundle outState) {
         super.onSaveInstanceState(outState);
 
         outState.putBoolean(STATE_ASKED_LOCATION_PERMISSION, hasAskedForLocationPermission);
@@ -200,18 +206,19 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
         adapter.onLocationPermissionChanged();
     }
 
+    @NonNull
     @Override
     public Loader onCreateLoader(final int id, final Bundle args) {
         switch (id) {
             case LOADER_BUS_STOP:
-                return new BusStopLoader(getContext(), stopCode,
+                return new BusStopLoader(requireContext(), stopCode,
                         new String[] {
                                 BusStopContract.BusStops.LATITUDE,
                                 BusStopContract.BusStops.LONGITUDE,
                                 BusStopContract.BusStops.ORIENTATION
                         });
             case LOADER_SERVICES:
-                return new BusStopServiceDetailsLoader(getContext(), stopCode);
+                return new BusStopServiceDetailsLoader(requireContext(), stopCode);
             default:
                 return null;
         }
@@ -234,10 +241,8 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onLoaderReset(final Loader loader) {
-        switch (loader.getId()) {
-            case LOADER_BUS_STOP:
-                handleBusStopLoaded(null);
-                break;
+        if (loader.getId() == LOADER_BUS_STOP) {
+            handleBusStopLoaded(null);
         }
     }
 
@@ -275,7 +280,7 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
      * Start listening for location updates.
      */
     private void startLocationUpdates() {
-        if (LocationUtils.checkLocationPermission(getContext())) {
+        if (LocationUtils.checkLocationPermission(requireContext())) {
             if (!isListeningForLocationUpdates) {
                 isListeningForLocationUpdates = true;
                 adapter.setDeviceLocation(LocationUtils.getBestInitialLocation(locationManager));
@@ -318,7 +323,8 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
      * Stops a location provider in the {@link LocationManager}.
      */
     private void stopLocationUpdates() {
-        if (isListeningForLocationUpdates && LocationUtils.checkLocationPermission(getContext())) {
+        if (isListeningForLocationUpdates &&
+                LocationUtils.checkLocationPermission(requireContext())) {
             locationManager.removeUpdates(this);
         }
 

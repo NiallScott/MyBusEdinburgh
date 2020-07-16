@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,33 +25,26 @@
 
 package uk.org.rivernile.android.bustracker.endpoints;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import androidx.test.core.app.ApplicationProvider;
 import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParser;
-import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl;
-import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder;
 
 /**
  * Tests for {@link HttpTwitterEndpoint}.
  * 
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner.class)
 public class HttpTwitterEndpointTests {
-    
+
+    @Mock
     private TwitterParser parser;
-
-    @Before
-    public void setUp() {
-        parser = new TwitterParserImpl();
-    }
-
-    @After
-    public void tearDown() {
-        parser = null;
-    }
+    @Mock
+    private UrlBuilder urlBuilder;
 
     /**
      * Test that no exceptions are thrown if the constructor is passed a non-{@code null}
@@ -59,7 +52,6 @@ public class HttpTwitterEndpointTests {
      */
     @Test
     public void testConstructorWithNonNullUrlBuilder() {
-        new HttpTwitterEndpoint(ApplicationProvider.getApplicationContext(), parser,
-                new EdinburghUrlBuilder());
+        new HttpTwitterEndpoint(ApplicationProvider.getApplicationContext(), parser, urlBuilder);
     }
 }

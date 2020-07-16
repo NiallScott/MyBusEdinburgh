@@ -32,11 +32,8 @@ import android.content.SharedPreferences
 import com.bugsense.trace.BugSenseHandler
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
-import uk.org.rivernile.android.bustracker.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
-import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint
-import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.edinburghbustracker.android.ApiKey
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
@@ -53,17 +50,13 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-abstract class BusApplication : Application(), HasAndroidInjector,
+class BusApplication : Application(), HasAndroidInjector,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
     @Inject
     lateinit var startUpTask: StartUpTask
-    @Inject
-    lateinit var preferenceManager: PreferenceManager
-    @Inject
-    lateinit var alertManager: AlertManager
 
     override fun onCreate() {
         super.onCreate()
@@ -88,19 +81,4 @@ abstract class BusApplication : Application(), HasAndroidInjector,
     override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
         BackupManager.dataChanged(packageName)
     }
-
-    /**
-     * Get the bus tracker endpoint.
-     *
-     * @return The BusTrackerEndpoint instance for this application.
-     */
-    abstract fun getBusTrackerEndpoint(): BusTrackerEndpoint
-
-    /**
-     * Get the Twitter endpoint, used for loading a list of Tweets to show the
-     * user updates.
-     *
-     * @return The TwitterEndpoint instance for this application.
-     */
-    abstract fun getTwitterEndpoint(): TwitterEndpoint
 }

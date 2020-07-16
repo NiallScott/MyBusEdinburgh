@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@ import android.content.Context;
 import android.os.SystemClock;
 import androidx.annotation.NonNull;
 
-import uk.org.rivernile.android.bustracker.BusApplication;
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint;
 import uk.org.rivernile.android.fetchutils.loaders.support.SimpleAsyncTaskLoader;
 
@@ -52,10 +51,14 @@ public class LiveBusTimesLoader extends SimpleAsyncTaskLoader<LiveTimesResult<Li
      * thrown if they are not supplied.
      * 
      * @param context A {@link Context} instance.
+     * @param endpoint The {@link BusTrackerEndpoint}.
      * @param stopCodes A {@link String} array of bus stop codes to load.
      * @param numberOfDepartures The number of departures for each service to load.
      */
-    public LiveBusTimesLoader(@NonNull final Context context, @NonNull final String[] stopCodes,
+    public LiveBusTimesLoader(
+            @NonNull final Context context,
+            @NonNull final BusTrackerEndpoint endpoint,
+            @NonNull final String[] stopCodes,
             final int numberOfDepartures) {
         super(context);
         
@@ -67,7 +70,7 @@ public class LiveBusTimesLoader extends SimpleAsyncTaskLoader<LiveTimesResult<Li
             throw new IllegalArgumentException("The number of departures must be greater than 0.");
         }
         
-        endpoint = ((BusApplication) context.getApplicationContext()).getBusTrackerEndpoint();
+        this.endpoint = endpoint;
         this.stopCodes = stopCodes;
         this.numberOfDepartures = numberOfDepartures;
     }
