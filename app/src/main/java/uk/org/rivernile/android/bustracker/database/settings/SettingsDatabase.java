@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.database.settings;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
@@ -37,18 +36,6 @@ import androidx.annotation.Size;
 import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import uk.org.rivernile.android.fetchutils.fetchers.FileFetcher;
-import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamReader;
-
 /**
  * This class contains static methods to aid in dealing with the settings database and provides
  * consistency.
@@ -56,13 +43,6 @@ import uk.org.rivernile.android.fetchutils.fetchers.readers.JSONFetcherStreamRea
  * @author Niall Scott
  */
 public final class SettingsDatabase {
-
-    private static final String BACKUP_DB_VERSION = "dbVersion";
-    private static final String BACKUP_SCHEMA_VERSION = "jsonSchemaVersion";
-    private static final String BACKUP_CREATE_TIME = "createTime";
-    private static final String BACKUP_FAVOURITE_STOPS = "favouriteStops";
-    private static final String BACKUP_STOPCODE = "stopCode";
-    private static final String BACKUP_STOPNAME = "stopName";
 
     /**
      * Add a new favourite stop to the database.
@@ -205,112 +185,6 @@ public final class SettingsDatabase {
     private static int deleteAllAlertsOfType(@NonNull final Context context, final int alertType) {
         return context.getContentResolver().delete(SettingsContract.Alerts.CONTENT_URI,
                 SettingsContract.Alerts.TYPE + " = ?", new String[] { String.valueOf(alertType) });
-    }
-
-    /**
-     * Backup the user's favourite stops in to the supplied {@link File}.
-     *
-     * @param context A {@link Context} instance.
-     * @param file The {@link File} to backup the user's favourite stops to.
-     */
-    @WorkerThread
-    public static void backupFavourites(@NonNull final Context context, @NonNull final File file) {
-        try (final BufferedOutputStream out =
-                new BufferedOutputStream(new FileOutputStream(file))) {
-            out.write(serialiseFavourites(context).toString().getBytes());
-            out.flush();
-        } catch (IOException ignored) {
-            // Do nothing.
-        }
-    }
-
-    /**
-     * Restore the user's favourite stops from the supplied {@link File}.
-     *
-     * @param context A {@link Context} instance.
-     * @param file The {@link File} containing the user's backed up favourite stops.
-     */
-    @WorkerThread
-    public static void restoreFavourites(@NonNull final Context context, @NonNull final File file) {
-        final FileFetcher fetcher = new FileFetcher(file);
-        final JSONFetcherStreamReader reader = new JSONFetcherStreamReader();
-
-        try {
-            fetcher.executeFetcher(reader);
-            deserialiseFavourites(context, reader.getJSONObject());
-        } catch (IOException | JSONException ignored) {
-            // Ignored.
-        }
-    }
-
-    /**
-     * Serialise the favourite stops table in to a JSON document.
-     *
-     * @param context A {@link Context} instance.
-     * @return A root {@link JSONObject} for the document, containing the serialised favourite
-     * stops.
-     */
-    @WorkerThread
-    @NonNull
-    private static JSONObject serialiseFavourites(@NonNull final Context context) {
-        final JSONObject joRoot = new JSONObject();
-        final JSONArray jaFavouriteStops = new JSONArray();
-
-        try {
-            joRoot.put(BACKUP_DB_VERSION, SettingsContract.DB_VERSION);
-            joRoot.put(BACKUP_SCHEMA_VERSION, 1);
-            joRoot.put(BACKUP_CREATE_TIME, System.currentTimeMillis());
-            joRoot.put(BACKUP_FAVOURITE_STOPS, jaFavouriteStops);
-
-            final Cursor c = context.getContentResolver().query(
-                    SettingsContract.Favourites.CONTENT_URI, null, null, null, null);
-
-            if (c != null) {
-                final int stopCodeColumn = c.getColumnIndex(SettingsContract.Favourites.STOP_CODE);
-                final int stopNameColumn = c.getColumnIndex(SettingsContract.Favourites.STOP_NAME);
-
-                while (c.moveToNext()) {
-                    final JSONObject joStop = new JSONObject();
-                    joStop.put(BACKUP_STOPCODE, c.getString(stopCodeColumn));
-                    joStop.put(BACKUP_STOPNAME, c.getString(stopNameColumn));
-                    jaFavouriteStops.put(joStop);
-                }
-
-                c.close();
-            }
-        } catch (JSONException ignored) {
-            // This will never happen, but unfortunately JSONObject forces us to catch the
-            // Exception.
-        }
-
-        return joRoot;
-    }
-
-    /**
-     * Deserialise the user's backed up favourite stops from the JSON document and populate them in
-     * the database. Prior to adding the new items in the database, the favourites table will be
-     * cleared out.
-     *
-     * @param context A {@link Context} instance.
-     * @param joRoot The root {@link JSONObject} of the document.
-     * @throws JSONException When the {@link JSONObject} has an unexpected structure.
-     */
-    @WorkerThread
-    private static void deserialiseFavourites(@NonNull final Context context,
-            @NonNull final JSONObject joRoot) throws JSONException {
-        final JSONArray jaFavouriteStops = joRoot.getJSONArray(BACKUP_FAVOURITE_STOPS);
-        context.getContentResolver().delete(SettingsContract.Favourites.CONTENT_URI, null, null);
-        final int len = jaFavouriteStops.length();
-
-        for (int i = 0; i < len; i++) {
-            try {
-                final JSONObject joStop = jaFavouriteStops.getJSONObject(i);
-                addFavouriteStop(context, joStop.getString(BACKUP_STOPCODE),
-                        joStop.getString(BACKUP_STOPNAME));
-            } catch (JSONException ignored) {
-                // Ignored. Progress on to next loop iteration.
-            }
-        }
     }
 
     /**

@@ -48,7 +48,6 @@
         android:icon="@drawable/appicon"
         android:hardwareAccelerated="true"
         android:theme="@style/MyBusEdinburgh"
-        android:backupAgent="SettingsBackupAgent"
         android:allowBackup="true"
         android:fullBackupContent="@xml/autobackup"
         android:fullBackupOnly="true"

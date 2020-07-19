@@ -43,7 +43,8 @@
     <uses-permission
         android:name="android.permission.VIBRATE" />
 
-    <application>
+    <application
+        android:backupAgent="uk.org.rivernile.android.bustracker.core.backup.BusTrackerBackupAgent">
 
         <service
             android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
