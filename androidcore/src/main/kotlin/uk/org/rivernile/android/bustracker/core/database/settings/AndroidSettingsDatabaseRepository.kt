@@ -24,45 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.database.settings
 
-import android.app.Application
-import dagger.BindsInstance
-import dagger.Component
-import dagger.android.AndroidInjectionModule
-import uk.org.rivernile.android.bustracker.core.TestApplication
+import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This is a Dagger [Component] used for testing.
+ * This class represents an Android-specific implementation of the settings database repository.
  *
  * @author Niall Scott
  */
 @Singleton
-@Component(modules = [
-    AndroidInjectionModule::class,
-    BroadcastReceiversModule::class,
-    FakeAlertsModule::class,
-    FakeBusStopDatabaseModule::class,
-    FakeCoreModule::class,
-    FakeSettingsDatabaseModule::class
-])
-interface CoreTestApplicationComponent {
+internal class AndroidSettingsDatabaseRepository @Inject constructor()
+    : SettingsDatabaseRepository {
 
-    fun inject(application: TestApplication)
-
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        fun alertsModule(module: FakeAlertsModule): Builder
-
-        fun coreModule(module: FakeCoreModule): Builder
-
-        fun settingsDatabaseModule(module: FakeSettingsDatabaseModule): Builder
-
-        fun build(): CoreTestApplicationComponent
-    }
+    override fun getDatabaseVersion() = SettingsDatabaseContract.DATABASE_VERSION
 }

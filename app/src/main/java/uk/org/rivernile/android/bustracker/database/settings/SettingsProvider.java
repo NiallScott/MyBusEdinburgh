@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,8 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -156,6 +158,48 @@ public class SettingsProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri, null, false);
 
         return result;
+    }
+
+    @Override
+    public synchronized int bulkInsert(
+            @NonNull final Uri uri,
+            @NonNull final ContentValues[] values) {
+        String table;
+
+        switch (uriMatcher.match(uri)) {
+            case FAVOURITES:
+                table = SettingsContract.Favourites.TABLE_NAME;
+                break;
+            case ALERTS:
+                table = SettingsContract.Alerts.TABLE_NAME;
+                break;
+            case FAVOURITES_ID:
+            case ALERTS_ID:
+                throw new IllegalArgumentException("Insert not supported on URI " + uri);
+            default:
+                throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+
+        final SQLiteDatabase database = openHelper.getWritableDatabase();
+        int insertCount = 0;
+
+        for (ContentValues cv : values) {
+            try {
+                final long rowId = database.insertOrThrow(table, null, cv);
+
+                if (rowId >= 0) {
+                    insertCount++;
+                }
+            } catch (SQLException ignored) {
+                // Do nothing.
+            }
+        }
+
+        if (insertCount >= 0) {
+            getContext().getContentResolver().notifyChange(uri, null, false);
+        }
+
+        return insertCount;
     }
 
     @Override

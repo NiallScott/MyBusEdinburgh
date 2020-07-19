@@ -26,43 +26,34 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
-import android.app.Application
-import dagger.BindsInstance
-import dagger.Component
-import dagger.android.AndroidInjectionModule
-import uk.org.rivernile.android.bustracker.core.TestApplication
-import javax.inject.Singleton
+import android.app.backup.BackupAgent
+import dagger.android.HasAndroidInjector
 
 /**
- * This is a Dagger [Component] used for testing.
+ * Inject an instance (or subclass of) [BackupAgent].
  *
+ * [BackupAgent] has a documented special case whereby it may be created under a different
+ * [android.app.Application] instance than what we expect, thus not allowing us to perform
+ * injection. Therefore, unlike other injection methods that try-and-otherwise-fail, this
+ * injection occurs as a best-try.
+ *
+ * @param backupAgent The [BackupAgent] to inject.
  * @author Niall Scott
  */
-@Singleton
-@Component(modules = [
-    AndroidInjectionModule::class,
-    BroadcastReceiversModule::class,
-    FakeAlertsModule::class,
-    FakeBusStopDatabaseModule::class,
-    FakeCoreModule::class,
-    FakeSettingsDatabaseModule::class
-])
-interface CoreTestApplicationComponent {
+fun inject(backupAgent: BackupAgent) {
+    val application = backupAgent.applicationContext
 
-    fun inject(application: TestApplication)
+    (application as? HasAndroidInjector)
+            ?.let { inject(backupAgent, it) }
+}
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        fun alertsModule(module: FakeAlertsModule): Builder
-
-        fun coreModule(module: FakeCoreModule): Builder
-
-        fun settingsDatabaseModule(module: FakeSettingsDatabaseModule): Builder
-
-        fun build(): CoreTestApplicationComponent
-    }
+/**
+ * Given a `target`, inject it with the [HasAndroidInjector].
+ *
+ * @param target The target to inject.
+ * @param hasAndroidInjector The class which performs the injection.
+ */
+private fun inject(target: Any, hasAndroidInjector: HasAndroidInjector) {
+    hasAndroidInjector.androidInjector()
+            .inject(target)
 }

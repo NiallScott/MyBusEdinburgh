@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -140,6 +140,21 @@ public class SettingsProviderTests {
     }
 
     /**
+     * Test that {@link SettingsProvider#bulkInsert(Uri, ContentValues[])} throws an
+     * {@link IllegalArgumentException} when an invalid {@link Uri} has been supplied.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBulkInsertWithInvalidUri() {
+        final ContentValues cv = new ContentValues();
+        cv.put("a", "1");
+        cv.put("b", "2");
+        final ContentValues[] cvArray = new ContentValues[] { cv };
+        providerRule.getResolver()
+                .bulkInsert(Uri.parse("content://" + SettingsContract.AUTHORITY + "/invalid"),
+                        cvArray);
+    }
+
+    /**
      * Test that {@link SettingsProvider#insert(Uri, ContentValues)} throws an
      * {@link IllegalArgumentException} when a favourites {@link Uri} has been specified that
      * includes a specific item ID.
@@ -151,6 +166,21 @@ public class SettingsProviderTests {
         cv.put(SettingsContract.Favourites.STOP_NAME, "Name");
         providerRule.getResolver().insert(
                 ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1), cv);
+    }
+
+    /**
+     * Test that {@link SettingsProvider#bulkInsert(Uri, ContentValues[])} throws an
+     * {@link IllegalArgumentException} when a favourites {@link Uri} has been specified that
+     * includes a specific item ID.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBulkInsertWithFavouritesId() {
+        final ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Favourites.STOP_CODE, "123456");
+        cv.put(SettingsContract.Favourites.STOP_NAME, "Name");
+        final ContentValues[] cvArray = new ContentValues[] { cv };
+        providerRule.getResolver().bulkInsert(
+                ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1), cvArray);
     }
 
     /**
@@ -167,6 +197,23 @@ public class SettingsProviderTests {
         cv.put(SettingsContract.Alerts.DISTANCE_FROM, 1);
         providerRule.getResolver().insert(
                 ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), cv);
+    }
+
+    /**
+     * Test that {@link SettingsProvider#bulkInsert(Uri, ContentValues[])} throws an
+     * {@link IllegalArgumentException} when an alerts {@link Uri} has been specified that
+     * includes a specific item ID.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testBulkInsertWithAlertsId() {
+        final ContentValues cv = new ContentValues();
+        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
+        cv.put(SettingsContract.Alerts.TIME_ADDED, 1234567890L);
+        cv.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv.put(SettingsContract.Alerts.DISTANCE_FROM, 1);
+        final ContentValues[] cvArray = new ContentValues[] { cv };
+        providerRule.getResolver().bulkInsert(
+                ContentUris.withAppendedId(SettingsContract.Alerts.CONTENT_URI, 1), cvArray);
     }
 
     /**
@@ -452,6 +499,48 @@ public class SettingsProviderTests {
     }
 
     /**
+     * Test {@link SettingsProvider#bulkInsert(Uri, ContentValues[])} with favourites.
+     */
+    @Test
+    public void testBulkInsertFavourites() {
+        final ContentResolver resolver = providerRule.getResolver();
+        Cursor c = resolver.query(SettingsContract.Favourites.CONTENT_URI, null, null, null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
+        c.close();
+
+        final ContentValues cv1 = new ContentValues();
+        cv1.put(SettingsContract.Favourites.STOP_CODE, "100001");
+        cv1.put(SettingsContract.Favourites.STOP_NAME, "Test stop 1");
+        final ContentValues cv2 = new ContentValues();
+        cv2.put(SettingsContract.Favourites.STOP_CODE, "100002");
+        cv2.put(SettingsContract.Favourites.STOP_NAME, "Test stop 2");
+        final ContentValues[] cvArray = new ContentValues[] { cv1, cv2 };
+        final int numberInserted = resolver
+                .bulkInsert(SettingsContract.Favourites.CONTENT_URI, cvArray);
+        assertEquals(2, numberInserted);
+
+        c = resolver.query(
+                SettingsContract.Favourites.CONTENT_URI,
+                new String[] {
+                        SettingsContract.Favourites.STOP_CODE,
+                        SettingsContract.Favourites.STOP_NAME
+                },
+                null,
+                null,
+                null);
+        assertNotNull(c);
+        assertEquals(2, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals("100001", c.getString(0));
+        assertEquals("Test stop 1", c.getString(1));
+        assertTrue(c.moveToNext());
+        assertEquals("100002", c.getString(0));
+        assertEquals("Test stop 2", c.getString(1));
+        c.close();
+    }
+
+    /**
      * Test {@link SettingsProvider#insert(Uri, ContentValues)} with alerts.
      */
     @Test
@@ -483,6 +572,65 @@ public class SettingsProviderTests {
         assertEquals(10, c.getInt(4));
         assertTrue(c.isNull(5));
         assertTrue(c.isNull(6));
+        c.close();
+    }
+
+    /**
+     * Test {@link SettingsProvider#bulkInsert(Uri, ContentValues[])} with alerts.
+     */
+    @Test
+    public void testBulkInsertAlerts() {
+        final ContentResolver resolver = providerRule.getResolver();
+        Cursor c = resolver.query(SettingsContract.Alerts.CONTENT_URI, null, null, null, null);
+        assertNotNull(c);
+        assertEquals(0, c.getCount());
+        c.close();
+
+        final ContentValues cv1 = new ContentValues();
+        cv1.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
+        cv1.put(SettingsContract.Alerts.TIME_ADDED, currentTime);
+        cv1.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv1.put(SettingsContract.Alerts.DISTANCE_FROM, 10);
+        final ContentValues cv2 = new ContentValues();
+        cv2.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_TIME);
+        cv2.put(SettingsContract.Alerts.TIME_ADDED, currentTime);
+        cv2.put(SettingsContract.Alerts.STOP_CODE, "123456");
+        cv2.put(SettingsContract.Alerts.SERVICE_NAMES, "1,2,3");
+        cv2.put(SettingsContract.Alerts.TIME_TRIGGER, 5);
+        final ContentValues[] cvArray = new ContentValues[] { cv1, cv2 };
+        final int numberInserted = resolver.bulkInsert(SettingsContract.Alerts.CONTENT_URI,
+                cvArray);
+        assertEquals(2, numberInserted);
+
+        c = resolver.query(
+                SettingsContract.Alerts.CONTENT_URI,
+                new String[] {
+                        SettingsContract.Alerts.TYPE,
+                        SettingsContract.Alerts.TIME_ADDED,
+                        SettingsContract.Alerts.STOP_CODE,
+                        SettingsContract.Alerts.DISTANCE_FROM,
+                        SettingsContract.Alerts.SERVICE_NAMES,
+                        SettingsContract.Alerts.TIME_TRIGGER
+                },
+                null,
+                null,
+                null);
+        assertNotNull(c);
+        assertEquals(2, c.getCount());
+        assertTrue(c.moveToNext());
+        assertEquals(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY, c.getInt(0));
+        assertEquals(currentTime, c.getLong(1));
+        assertEquals("123456", c.getString(2));
+        assertEquals(10, c.getInt(3));
+        assertTrue(c.isNull(4));
+        assertTrue(c.isNull(5));
+        assertTrue(c.moveToNext());
+        assertEquals(SettingsContract.Alerts.ALERTS_TYPE_TIME, c.getInt(0));
+        assertEquals(currentTime, c.getLong(1));
+        assertEquals("123456", c.getString(2));
+        assertTrue(c.isNull(3));
+        assertEquals("1,2,3", c.getString(4));
+        assertEquals(5, c.getInt(5));
         c.close();
     }
 

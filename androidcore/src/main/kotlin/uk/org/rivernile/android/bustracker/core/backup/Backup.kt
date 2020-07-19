@@ -24,45 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.backup
 
-import android.app.Application
-import dagger.BindsInstance
-import dagger.Component
-import dagger.android.AndroidInjectionModule
-import uk.org.rivernile.android.bustracker.core.TestApplication
-import javax.inject.Singleton
+import com.google.gson.annotations.SerializedName
 
 /**
- * This is a Dagger [Component] used for testing.
+ * This defines the root of the JSON backup object.
  *
+ * @property dbVersion The version of the database schema.
+ * @property backupSchemaVersion The schema of the backup output.
+ * @property createTime The UNIX timestamp, in milliseconds, when the backup was created.
+ * @property favouriteStops A [List] of [BackupFavouriteStop]s to backup.
  * @author Niall Scott
  */
-@Singleton
-@Component(modules = [
-    AndroidInjectionModule::class,
-    BroadcastReceiversModule::class,
-    FakeAlertsModule::class,
-    FakeBusStopDatabaseModule::class,
-    FakeCoreModule::class,
-    FakeSettingsDatabaseModule::class
-])
-interface CoreTestApplicationComponent {
-
-    fun inject(application: TestApplication)
-
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        fun alertsModule(module: FakeAlertsModule): Builder
-
-        fun coreModule(module: FakeCoreModule): Builder
-
-        fun settingsDatabaseModule(module: FakeSettingsDatabaseModule): Builder
-
-        fun build(): CoreTestApplicationComponent
-    }
-}
+internal data class Backup(
+        @SerializedName("dbVersion")
+        val dbVersion: Int,
+        @SerializedName("jsonSchemaVersion")
+        val backupSchemaVersion: Int = 1,
+        @SerializedName("createTime")
+        val createTime: Long,
+        @SerializedName("favouriteStops")
+        val favouriteStops: List<BackupFavouriteStop>?)

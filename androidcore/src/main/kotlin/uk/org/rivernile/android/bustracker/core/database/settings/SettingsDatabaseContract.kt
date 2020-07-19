@@ -24,45 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
-
-import android.app.Application
-import dagger.BindsInstance
-import dagger.Component
-import dagger.android.AndroidInjectionModule
-import uk.org.rivernile.android.bustracker.core.TestApplication
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.core.database.settings
 
 /**
- * This is a Dagger [Component] used for testing.
+ * This class defines the contract for the settings database as a whole entity. It does not
+ * define the contract for individual tables within this database - these are defined in the
+ * other contract classes.
  *
  * @author Niall Scott
  */
-@Singleton
-@Component(modules = [
-    AndroidInjectionModule::class,
-    BroadcastReceiversModule::class,
-    FakeAlertsModule::class,
-    FakeBusStopDatabaseModule::class,
-    FakeCoreModule::class,
-    FakeSettingsDatabaseModule::class
-])
-interface CoreTestApplicationComponent {
+internal class SettingsDatabaseContract private constructor() {
 
-    fun inject(application: TestApplication)
+    companion object {
 
-    @Component.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        fun alertsModule(module: FakeAlertsModule): Builder
-
-        fun coreModule(module: FakeCoreModule): Builder
-
-        fun settingsDatabaseModule(module: FakeSettingsDatabaseModule): Builder
-
-        fun build(): CoreTestApplicationComponent
+        /**
+         * The version of the database.
+         */
+        const val DATABASE_VERSION = 3
     }
 }

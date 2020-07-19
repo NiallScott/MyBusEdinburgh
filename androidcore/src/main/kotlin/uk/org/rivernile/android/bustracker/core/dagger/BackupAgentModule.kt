@@ -28,33 +28,17 @@ package uk.org.rivernile.android.bustracker.core.dagger
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.RemoveArrivalAlertBroadcastReceiver
-import uk.org.rivernile.android.bustracker.core.alerts.proximity.RemoveProximityAlertBroadcastReceiver
-import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidAreaEnteredBroadcastReceiver
-import uk.org.rivernile.android.bustracker.core.startup.DeviceBootBroadcastReceiver
+import uk.org.rivernile.android.bustracker.core.backup.BusTrackerBackupAgent
 
 /**
- * This Dagger [Module] is used to define injection contributions for broadcast receivers defined in
- * this module.
+ * This [Module] defines Android backup components which should be dependency injected.
  *
  * @author Niall Scott
  */
 @Module
-internal interface BroadcastReceivers {
+internal interface BackupAgentModule {
 
     @Suppress("unused")
     @ContributesAndroidInjector
-    fun contributeDeviceBootBroadcastReceiver(): DeviceBootBroadcastReceiver
-
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeRemoveArrivalAlertBroadcastReceiver(): RemoveArrivalAlertBroadcastReceiver
-
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeRemoveProximityAlertBroadcastReceiver(): RemoveProximityAlertBroadcastReceiver
-
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeAndroidAreaEnteredBroadcastReceiver(): AndroidAreaEnteredBroadcastReceiver
+    fun contributeBusTrackerBackupAgent(): BusTrackerBackupAgent
 }

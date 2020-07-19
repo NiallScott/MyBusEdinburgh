@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,10 +38,6 @@ interface PreferenceManager {
         /** The name of the preferences file. */
         const val PREF_FILE = "preferences"
 
-        /** The preference for backing up favourites. */
-        const val PREF_BACKUP_FAVOURITES = "pref_backup_favourites"
-        /** The preference for restoring favourites. */
-        const val PREF_RESTORE_FAVOURITES = "pref_restore_favourites"
         /** The Preference for clearing the map search history. */
         const val PREF_CLEAR_MAP_SEARCH_HISTORY = "pref_clear_search_history"
 

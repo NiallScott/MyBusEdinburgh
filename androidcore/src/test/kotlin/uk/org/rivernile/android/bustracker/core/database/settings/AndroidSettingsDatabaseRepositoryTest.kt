@@ -24,45 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.database.settings
 
-import android.app.Application
-import dagger.BindsInstance
-import dagger.Component
-import dagger.android.AndroidInjectionModule
-import uk.org.rivernile.android.bustracker.core.TestApplication
-import javax.inject.Singleton
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
 
 /**
- * This is a Dagger [Component] used for testing.
+ * Tests for [AndroidSettingsDatabaseRepository].
  *
  * @author Niall Scott
  */
-@Singleton
-@Component(modules = [
-    AndroidInjectionModule::class,
-    BroadcastReceiversModule::class,
-    FakeAlertsModule::class,
-    FakeBusStopDatabaseModule::class,
-    FakeCoreModule::class,
-    FakeSettingsDatabaseModule::class
-])
-interface CoreTestApplicationComponent {
+class AndroidSettingsDatabaseRepositoryTest {
 
-    fun inject(application: TestApplication)
+    private lateinit var repository: AndroidSettingsDatabaseRepository
 
-    @Component.Builder
-    interface Builder {
+    @Before
+    fun setUp() {
+        repository = AndroidSettingsDatabaseRepository()
+    }
 
-        @BindsInstance
-        fun application(application: Application): Builder
+    @Test
+    fun getDatabaseVersionReturnsDatabaseVersion() {
+        val result = repository.getDatabaseVersion()
 
-        fun alertsModule(module: FakeAlertsModule): Builder
-
-        fun coreModule(module: FakeCoreModule): Builder
-
-        fun settingsDatabaseModule(module: FakeSettingsDatabaseModule): Builder
-
-        fun build(): CoreTestApplicationComponent
+        assertEquals(SettingsDatabaseContract.DATABASE_VERSION, result)
     }
 }

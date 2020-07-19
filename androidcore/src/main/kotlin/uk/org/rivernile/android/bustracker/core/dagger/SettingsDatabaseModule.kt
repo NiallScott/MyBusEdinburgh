@@ -30,9 +30,13 @@ import android.content.Context
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.database.settings.AndroidSettingsDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.database.settings.SettingsDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.di.ForSettingsDatabase
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidAlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidFavouritesDao
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.FavouritesDao
 import javax.inject.Singleton
 
 /**
@@ -62,6 +66,16 @@ internal class SettingsDatabaseModule {
 
         @Suppress("unused")
         @Binds
+        fun bindSettingsDatabaseRepository(
+                androidSettingsDatabaseRepository: AndroidSettingsDatabaseRepository)
+                : SettingsDatabaseRepository
+
+        @Suppress("unused")
+        @Binds
         fun bindAlertsDao(androidAlertsDao: AndroidAlertsDao): AlertsDao
+
+        @Suppress("unused")
+        @Binds
+        fun bindFavouritesDao(androidFavouritesDao: AndroidFavouritesDao): FavouritesDao
     }
 }
