@@ -34,6 +34,8 @@ import com.google.gson.Gson
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
+import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -129,6 +131,10 @@ class CoreModule {
      */
     @Module
     internal interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindBackupInvoker(androidBackupInvoker: AndroidBackupInvoker): BackupInvoker
 
         @Suppress("unused")
         @Binds

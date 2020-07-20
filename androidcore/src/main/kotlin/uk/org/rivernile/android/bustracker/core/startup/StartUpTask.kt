@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.startup
 
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.backup.BackupObserver
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
@@ -50,6 +51,7 @@ import javax.inject.Inject
  */
 class StartUpTask @Inject internal constructor(
         private val appNotificationChannels: AppNotificationChannels,
+        private val backupObserver: BackupObserver,
         private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseJobScheduler,
         private val cleanUpTask: CleanUpTask?,
         private val alertManager: AlertManager,
@@ -68,6 +70,7 @@ class StartUpTask @Inject internal constructor(
      */
     private fun performStartUpTasksInternal() {
         appNotificationChannels.createNotificationChannels()
+        backupObserver.beginObserving()
         busStopDatabaseUpdateJobScheduler.scheduleUpdateBusStopDatabaseJob()
         cleanUpTask?.performCleanUp()
         alertManager.ensureTasksRunningIfAlertsExists()

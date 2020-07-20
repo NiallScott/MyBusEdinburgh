@@ -34,6 +34,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.CurrentThreadExecutor
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.backup.BackupObserver
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 
@@ -46,19 +47,22 @@ import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationCha
 class StartUpTaskTest {
 
     @Mock
-    internal lateinit var appNotificationChannels: AppNotificationChannels
+    private lateinit var appNotificationChannels: AppNotificationChannels
     @Mock
-    internal lateinit var busStopDatabaseJobScheduler: UpdateBusStopDatabaseJobScheduler
+    private lateinit var backupObserver: BackupObserver
     @Mock
-    lateinit var cleanUpTask: CleanUpTask
+    private lateinit var busStopDatabaseJobScheduler: UpdateBusStopDatabaseJobScheduler
     @Mock
-    lateinit var alertManager: AlertManager
+    private lateinit var cleanUpTask: CleanUpTask
+    @Mock
+    private lateinit var alertManager: AlertManager
     private val executor = CurrentThreadExecutor()
 
     @Test
     fun performsStartUpTasks() {
         val startUpTask = StartUpTask(
                 appNotificationChannels,
+                backupObserver,
                 busStopDatabaseJobScheduler,
                 cleanUpTask,
                 alertManager,
@@ -66,9 +70,12 @@ class StartUpTaskTest {
 
         startUpTask.performStartUpTasks()
 
-        inOrder(appNotificationChannels, busStopDatabaseJobScheduler, cleanUpTask, alertManager) {
+        inOrder(appNotificationChannels, backupObserver, busStopDatabaseJobScheduler, cleanUpTask,
+                alertManager) {
             verify(appNotificationChannels)
                     .createNotificationChannels()
+            verify(backupObserver)
+                    .beginObserving()
             verify(busStopDatabaseJobScheduler)
                     .scheduleUpdateBusStopDatabaseJob()
             verify(cleanUpTask)
@@ -82,6 +89,7 @@ class StartUpTaskTest {
     fun doesNotThrowNullPointerExceptionWhenNoCleanUpTaskIsSupplied() {
         val startUpTask = StartUpTask(
                 appNotificationChannels,
+                backupObserver,
                 busStopDatabaseJobScheduler,
                 null,
                 alertManager,

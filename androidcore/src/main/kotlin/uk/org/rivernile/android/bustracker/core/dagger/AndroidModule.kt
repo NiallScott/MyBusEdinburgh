@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.app.Application
+import android.app.backup.BackupManager
 import android.app.job.JobScheduler
 import android.content.Context
 import android.content.SharedPreferences
@@ -46,6 +47,16 @@ import javax.inject.Singleton
  */
 @Module(includes = [ AndroidModule.Bindings::class ])
 internal class AndroidModule {
+
+    /**
+     * Provide the [BackupManager].
+     *
+     * @param context The application [Context].
+     * @return The [BackupManager].
+     */
+    @Provides
+    @Singleton
+    fun provideBackupManager(context: Context) = BackupManager(context)
 
     /**
      * Provide the [ConnectivityManager].

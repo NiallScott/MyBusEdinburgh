@@ -34,12 +34,12 @@ import javax.inject.Singleton
 /**
  * This is the Android-specific implementation of [PreferenceManager].
  *
+ * @param preferences The Android [SharedPreferences] instance.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidPreferenceManager @Inject constructor(
-        private val preferences: SharedPreferences)
-    : PreferenceManager, SharedPreferences.OnSharedPreferenceChangeListener {
+        private val preferences: SharedPreferences) : PreferenceManager {
 
     companion object {
 
@@ -74,14 +74,28 @@ internal class AndroidPreferenceManager @Inject constructor(
         private const val DEFAULT_MAP_LAST_TYPE = 1
     }
 
-    /**
-     * Set this property to receive callbacks when the database update Wi-Fi only preference has
-     * been changed.
-     */
-    internal var wifiOnlyChangedListener: (() -> Unit)? = null
+    private val listeners = mutableListOf<PreferenceListener>()
 
-    init {
-        preferences.registerOnSharedPreferenceChangeListener(this)
+    override fun addOnPreferenceChangedListener(listener: PreferenceListener) {
+        synchronized(listeners) {
+            listeners.add(listener)
+
+            if (listeners.size == 1) {
+                preferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
+            }
+        }
+    }
+
+    override fun removeOnPreferenceChangedListener(listener: OnPreferenceChangedListener) {
+        synchronized(listeners) {
+            listeners.removeAll {
+                it.listener === listener
+            }
+
+            listeners.ifEmpty {
+                preferences.unregisterOnSharedPreferenceChangeListener(sharedPreferencesListener)
+            }
+        }
     }
 
     override fun isBusStopDatabaseUpdateWifiOnly(): Boolean =
@@ -194,9 +208,37 @@ internal class AndroidPreferenceManager @Inject constructor(
                 .apply()
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        if (key == PREF_BUS_STOP_DATABASE_WIFI_ONLY) {
-            wifiOnlyChangedListener?.invoke()
+    /**
+     * Handle a preference being changed. This will cause listeners to be fired if any match.
+     *
+     * @param key The [String] key which changed.
+     */
+    private fun handlePreferenceChanged(key: String) {
+        val preferenceKey = mapToPreferenceKey(key)
+        listeners.forEach {
+            val listeningKeys = it.keys
+
+            if (listeningKeys == null ||
+                    listeningKeys.isEmpty() ||
+                    listeningKeys.contains(preferenceKey)) {
+                it.listener.onPreferenceChanged(preferenceKey)
+            }
         }
+    }
+
+    /**
+     * Given a [String] preference key, map it to a [PreferenceKey] enum.
+     *
+     * @param key The [String] preference key.
+     * @return The [PreferenceKey] enum instance.
+     */
+    private fun mapToPreferenceKey(key: String) = when (key) {
+        PREF_BUS_STOP_DATABASE_WIFI_ONLY -> PreferenceKey.DATABASE_UPDATE_WIFI_ONLY
+        else -> null
+    }
+
+    private val sharedPreferencesListener =
+            SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        handlePreferenceChanged(key)
     }
 }

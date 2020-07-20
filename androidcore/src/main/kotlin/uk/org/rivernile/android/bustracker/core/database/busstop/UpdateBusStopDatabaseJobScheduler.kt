@@ -33,6 +33,9 @@ import android.content.Context
 import uk.org.rivernile.android.bustracker.core.job.setPrefetchCompat
 import uk.org.rivernile.android.bustracker.core.job.setRequiresBatteryNotLowCompat
 import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.OnPreferenceChangedListener
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceKey
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceListener
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -56,8 +59,16 @@ internal class UpdateBusStopDatabaseJobScheduler @Inject constructor(
         private const val JOB_PERIOD = 43200000L // 12 hours
     }
 
+    private val preferenceChangedListener = object : OnPreferenceChangedListener {
+        override fun onPreferenceChanged(preference: PreferenceKey?) {
+            scheduleJob()
+        }
+    }
+
     init {
-        preferenceManager.wifiOnlyChangedListener = this::scheduleJob
+        PreferenceListener(preferenceChangedListener,
+                setOf(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY))
+                .let(preferenceManager::addOnPreferenceChangedListener)
     }
 
     /**

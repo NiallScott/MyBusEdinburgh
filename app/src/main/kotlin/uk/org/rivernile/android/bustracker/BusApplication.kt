@@ -26,23 +26,18 @@
 package uk.org.rivernile.android.bustracker
 
 import android.app.Application
-import android.app.backup.BackupManager
-import android.content.Context
-import android.content.SharedPreferences
 import com.bugsense.trace.BugSenseHandler
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.edinburghbustracker.android.ApiKey
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import javax.inject.Inject
 
 /**
  * This code is the very first code that will be executed when the application is started. It is
- * used to register the BugSense handler, put a listener on the [SharedPreferences] for Google
- * Backup, and check for bus stop database updates.
+ * used to register the BugSense handler and check for bus stop database updates.
  *
  * The Android developer documentation discourages the usage of this class, but as it is
  * unpredictable where the user will enter the application the code is put here as this class is
@@ -50,8 +45,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class BusApplication : Application(), HasAndroidInjector,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+class BusApplication : Application(), HasAndroidInjector {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
@@ -70,15 +64,8 @@ class BusApplication : Application(), HasAndroidInjector,
             BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY)
         }
 
-        getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
-                .registerOnSharedPreferenceChangeListener(this)
-
         startUpTask.performStartUpTasks()
     }
 
     override fun androidInjector() = dispatchingAndroidInjector
-
-    override fun onSharedPreferenceChanged(sp: SharedPreferences, key: String) {
-        BackupManager.dataChanged(packageName)
-    }
 }

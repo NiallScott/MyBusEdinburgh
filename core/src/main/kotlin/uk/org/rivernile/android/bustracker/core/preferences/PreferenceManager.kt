@@ -47,6 +47,21 @@ interface PreferenceManager {
     }
 
     /**
+     * Add a new [OnPreferenceChangedListener]. This goes via a [PreferenceListener] object so that
+     * further listening properties are specified.
+     *
+     * @param listener The listener to add.
+     */
+    fun addOnPreferenceChangedListener(listener: PreferenceListener)
+
+    /**
+     * Remove a [OnPreferenceChangedListener].
+     *
+     * @param listener The listener to remove.
+     */
+    fun removeOnPreferenceChangedListener(listener: OnPreferenceChangedListener)
+
+    /**
      * Should the bus stop database only be updated over Wi-Fi?
      *
      * @return `true` if the bus stop database should only be updated over Wi-Fi, `false` if not.
