@@ -37,6 +37,7 @@ import androidx.core.app.NotificationManagerCompat
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.di.ForNoBackup
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import javax.inject.Singleton
 
@@ -112,6 +113,18 @@ internal class AndroidModule {
     @Singleton
     fun provideSharedPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
+
+    /**
+     * Provide the no-backup [SharedPreferences].
+     *
+     * @param context The application [Context].
+     * @return The no-backup [SharedPreferences] instance.
+     */
+    @Provides
+    @Singleton
+    @ForNoBackup
+    fun provideNoBackupSharedPreferences(context: Context): SharedPreferences =
+            context.getSharedPreferences("no-backup", Context.MODE_PRIVATE)
 
     /**
      * This interface contains Dagger bindings for pre-provided types.

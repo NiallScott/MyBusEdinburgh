@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.preferences
 
 import android.content.SharedPreferences
+import uk.org.rivernile.android.bustracker.core.di.ForNoBackup
 import java.lang.NumberFormatException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,11 +36,13 @@ import javax.inject.Singleton
  * This is the Android-specific implementation of [PreferenceManager].
  *
  * @param preferences The Android [SharedPreferences] instance.
+ * @param noBackupPreferences Where preferences that shouldn't be backed up are stored.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidPreferenceManager @Inject constructor(
-        private val preferences: SharedPreferences) : PreferenceManager {
+        private val preferences: SharedPreferences,
+        @ForNoBackup private val noBackupPreferences: SharedPreferences) : PreferenceManager {
 
     companion object {
 
@@ -99,7 +102,7 @@ internal class AndroidPreferenceManager @Inject constructor(
     }
 
     override fun isBusStopDatabaseUpdateWifiOnly(): Boolean =
-        preferences.getBoolean(PREF_BUS_STOP_DATABASE_WIFI_ONLY, DEFAULT_WIFI_ONLY)
+            preferences.getBoolean(PREF_BUS_STOP_DATABASE_WIFI_ONLY, DEFAULT_WIFI_ONLY)
 
     override fun isNotificationWithSound(): Boolean =
             preferences.getBoolean(PREF_ALERT_SOUND, DEFAULT_ALERT_SOUND)
@@ -200,10 +203,10 @@ internal class AndroidPreferenceManager @Inject constructor(
     }
 
     override fun getBusStopDatabaseUpdateLastCheckTimestamp(): Long =
-            preferences.getLong(PREF_DATABASE_UPDATE_LAST_CHECK, 0L)
+            noBackupPreferences.getLong(PREF_DATABASE_UPDATE_LAST_CHECK, 0L)
 
     override fun setBusStopDatabaseUpdateLastCheckTimestamp(timestamp: Long) {
-        preferences.edit()
+        noBackupPreferences.edit()
                 .putLong(PREF_DATABASE_UPDATE_LAST_CHECK, timestamp)
                 .apply()
     }
