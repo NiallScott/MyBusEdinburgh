@@ -31,7 +31,8 @@
     <!-- General -->
     <PreferenceCategory
         android:title="@string/preferences_category_general">
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="pref_bus_stop_database_wifi_only"
             android:title="@string/preferences_checkbox_general_databaseupdatewifi"
             android:summary="@string/preferences_checkbox_general_databaseupdatewifi_summary"
@@ -41,16 +42,19 @@
     <!-- Alerts -->
     <PreferenceCategory
         android:title="@string/preferences_category_alerts">
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="pref_alertsound_state"
             android:title="@string/preferences_checkbox_alerts_sound"
             android:defaultValue="true" />
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="pref_alertvibrate_state"
             android:title="@string/preferences_checkbox_alerts_vibrate"
             android:summary="@string/preferences_checkbox_alerts_vibrate_summary"
             android:defaultValue="true" />
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="pref_alertled_state"
             android:title="@string/preferences_checkbox_alerts_led"
             android:summary="@string/preferences_checkbox_alerts_led_summary"
@@ -60,20 +64,24 @@
     <!-- Bus Times Display -->
     <PreferenceCategory
         android:title="@string/preferences_category_bustimes">
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="pref_autorefresh_state"
             android:title="@string/preferences_checkbox_bustimes_autorefresh"
             android:summaryOn="@string/preferences_checkbox_bustimes_autorefresh_ticked"
             android:summaryOff="@string/preferences_checkbox_bustimes_autorefresh_unticked"
             android:defaultValue="false" />
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="pref_nightservices_state"
             android:title="@string/preferences_checkbox_bustimes_nightbus"
             android:defaultValue="true" />
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="pref_servicessorting_state"
             android:title="@string/preferences_checkbox_bustimes_sorting"
             android:defaultValue="false" />
+
         <ListPreference
             android:key="pref_numberOfShownDeparturesPerService"
             android:title="@string/preferences_list_bustimes_numdepartures"
@@ -86,28 +94,32 @@
     <!-- Bus Stop Map -->
     <PreferenceCategory
         android:title="@string/preferences_category_map">
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="pref_map_zoom_buttons_state"
             android:title="@string/preferences_checkbox_map_zoom_buttons"
             android:defaultValue="true" />
-        <uk.org.rivernile.android.utils.GenericDialogPreference
-            android:key="pref_clear_search_history"
-            android:title="@string/preferences_dialog_map_clearsearchhistory"
-            android:summary="@string/preferences_dialog_map_clearsearchhistory_summary"
-            android:dialogTitle="@string/preferences_dialog_map_clearsearchhistory"
-            android:dialogMessage="@string/preferences_dialog_map_clearsearchhistory_message"
-            android:positiveButtonText="@string/yes"
-            android:negativeButtonText="@string/no" />
     </PreferenceCategory>
     
     <!-- Nearest Stops Display -->
     <PreferenceCategory
         android:title="@string/preferences_category_neareststops">
-        <CheckBoxPreference
+
+        <SwitchPreferenceCompat
             android:key="neareststops_gps_prompt_disable"
             android:title="@string/preferences_checkbox_neareststops_gpsdisabled"
             android:summaryOn="@string/preferences_checkbox_neareststops_gpsdisabled_ticked"
             android:summaryOff="@string/preferences_checkbox_neareststops_gpsdisabled_unticked"
             android:defaultValue="false" />
+    </PreferenceCategory>
+
+    <!-- Privacy -->
+    <PreferenceCategory
+        android:title="@string/preference_category_privacy">
+
+        <Preference
+            android:key="pref_clear_search_history"
+            android:title="@string/preferences_dialog_privacy_clearsearchhistory"
+            android:persistent="false" />
     </PreferenceCategory>
 </PreferenceScreen>

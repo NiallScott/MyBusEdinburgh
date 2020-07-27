@@ -40,6 +40,6 @@ import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragment
 interface SettingsFragmentsModule {
 
     @Suppress("unused")
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [ SettingsDialogFragmentsModule::class ])
     fun contributeSettingsFragment(): SettingsFragment
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,45 +21,36 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.ui.settings;
+package uk.org.rivernile.android.bustracker.ui.settings
 
-import android.os.Bundle;
-
-import javax.inject.Inject;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
-import dagger.android.AndroidInjection;
-import dagger.android.AndroidInjector;
-import dagger.android.DispatchingAndroidInjector;
-import dagger.android.HasAndroidInjector;
-import uk.org.rivernile.edinburghbustracker.android.R;
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import dagger.android.AndroidInjection
+import dagger.android.DispatchingAndroidInjector
+import dagger.android.HasAndroidInjector
+import uk.org.rivernile.edinburghbustracker.android.R
+import javax.inject.Inject
 
 /**
- * This {@link android.app.Activity} is used to host a {@link SettingsFragment} to allow the user to
- * change application preferences.
+ * This [AppCompatActivity] is used to host a [SettingsFragment].
  *
  * @author Niall Scott
  */
-public class SettingsActivity extends AppCompatActivity implements HasAndroidInjector {
+class SettingsActivity : AppCompatActivity(), HasAndroidInjector {
 
     @Inject
-    DispatchingAndroidInjector<Object> dispatchingAndroidInjector;
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
-    @Override
-    protected void onCreate(@Nullable final Bundle savedInstanceState) {
-        AndroidInjection.inject(this);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
 
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.settings);
+        setContentView(R.layout.settings)
     }
 
-    @Override
-    public AndroidInjector<Object> androidInjector() {
-        return dispatchingAndroidInjector;
-    }
+    override fun androidInjector() = dispatchingAndroidInjector
 }

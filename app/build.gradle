@@ -118,6 +118,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
+    implementation 'androidx.preference:preference:1.1.1'
 
     // Android Architecture Components
     implementation "androidx.lifecycle:lifecycle-extensions:$architectureComponentsVersion"

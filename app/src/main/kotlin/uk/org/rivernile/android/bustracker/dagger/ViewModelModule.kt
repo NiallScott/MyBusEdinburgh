@@ -32,6 +32,8 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import uk.org.rivernile.android.bustracker.ui.about.AboutViewModel
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
+import uk.org.rivernile.android.bustracker.ui.settings.ClearSearchHistoryDialogFragmentViewModel
+import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragmentViewModel
 
 /**
  * This [Module] is used for injecting classes with [ViewModel] instances
@@ -52,6 +54,31 @@ interface ViewModelModule {
     @IntoMap
     @ViewModelKey(AboutViewModel::class)
     fun bindAboutViewModel(viewModel: AboutViewModel): ViewModel
+
+    /**
+     * Inject an [SettingsFragmentViewModel] when requested.
+     *
+     * @param viewModel An [SettingsFragmentViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(SettingsFragmentViewModel::class)
+    fun bindSettingsFragmentViewModel(viewModel: SettingsFragmentViewModel): ViewModel
+
+    /**
+     * Inject an [ClearSearchHistoryDialogFragmentViewModel] when requested.
+     *
+     * @param viewModel An [ClearSearchHistoryDialogFragmentViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(ClearSearchHistoryDialogFragmentViewModel::class)
+    fun bindClearSearchHistoryDialogFragmentViewModel(
+            viewModel: ClearSearchHistoryDialogFragmentViewModel): ViewModel
 
     /**
      * Inject a [BusStopMapViewModel] when requested.

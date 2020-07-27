@@ -39,7 +39,7 @@ interface PreferenceManager {
         const val PREF_FILE = "preferences"
 
         /** The Preference for clearing the map search history. */
-        const val PREF_CLEAR_MAP_SEARCH_HISTORY = "pref_clear_search_history"
+        const val PREF_CLEAR_SEARCH_HISTORY = "pref_clear_search_history"
 
         /** The Preference for number of shown departures per service. */
         const val PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE =

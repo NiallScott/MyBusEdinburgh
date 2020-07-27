@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -191,14 +191,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <string name="preferences_category_map">Map</string>
     <string name="preferences_checkbox_map_zoom_buttons">Zoom buttons</string>
-    <string name="preferences_dialog_map_clearsearchhistory">Clear search history</string>
-    <string name="preferences_dialog_map_clearsearchhistory_summary">Remove all previous search terms from the map search facility</string>
-    <string name="preferences_dialog_map_clearsearchhistory_message">Are you sure you want to clear your map search history?</string>
     
     <string name="preferences_category_neareststops">Nearest Stops Display</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled">Disable GPS prompt</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">Untick to show a prompt when GPS is disabled</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">Tick to not show a prompt when GPS is disabled</string>
+
+    <string name="preference_category_privacy">Privacy</string>
+    <string name="preferences_dialog_privacy_clearsearchhistory">Clear search history</string>
     
     <string-array name="preferences_num_departures_entries">
         <item>1 departure</item>
@@ -431,6 +431,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addtimealertdialog_button_add">Add</string>
     <string name="addtimealertdialog_button_limitations">Show limitations</string>
     <string name="addtimealertdialog_services_chooser_dialog_title">Select service(s)</string>
+
+    <!--
+    ************************************************
+    * Strings for ClearSearchHistoryDialogFragment *
+    ************************************************
+    -->
+    <string name="clearsearchhistorydialog_title">Clear search history</string>
+    <string name="clearsearchhistorydialog_body">Are you sure you want to clear your search history?</string>
 
     <!--
     *************************************

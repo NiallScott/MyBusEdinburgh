@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,12 +21,25 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<androidx.fragment.app.FragmentContainerView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragmentSettings"
-    android:name="uk.org.rivernile.android.bustracker.ui.settings.SettingsFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity" />
+ *
+ */
+
+package uk.org.rivernile.android.bustracker.dagger.settings
+
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.ui.settings.ClearSearchHistoryDialogFragment
+
+/**
+ * This [Module] contributes [androidx.fragment.app.DialogFragment]s for
+ * [uk.org.rivernile.android.bustracker.ui.settings.SettingsFragment].
+ *
+ * @author Niall Scott
+ */
+@Module
+interface SettingsDialogFragmentsModule {
+
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeClearSearchHistoryDialogFragment(): ClearSearchHistoryDialogFragment
+}
