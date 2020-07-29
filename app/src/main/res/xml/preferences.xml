@@ -36,7 +36,8 @@
         <SwitchPreferenceCompat
             android:key="pref_bus_stop_database_wifi_only"
             android:title="@string/preferences_checkbox_general_databaseupdatewifi"
-            android:summary="@string/preferences_checkbox_general_databaseupdatewifi_summary"
+            android:summaryOn="@string/preferences_checkbox_general_databaseupdatewifi_summary_ticked"
+            android:summaryOff="@string/preferences_checkbox_general_databaseupdatewifi_summary_unticked"
             android:defaultValue="false" />
     </PreferenceCategory>
     
