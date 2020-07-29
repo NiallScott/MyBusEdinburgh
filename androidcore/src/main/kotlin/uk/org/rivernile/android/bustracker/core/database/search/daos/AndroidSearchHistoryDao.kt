@@ -24,32 +24,28 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.search
+package uk.org.rivernile.android.bustracker.core.database.search.daos
 
-import android.content.SearchRecentSuggestionsProvider
-import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
+import android.provider.SearchRecentSuggestions
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This class defines the contract for the search database, where recent searches are held to be
- * provided in future searches as suggestions.
+ * This is an Android-specific implementation of [SearchHistoryDao].
  *
- * It does not define the contract for individual tables within this database - these are infact
- * defined within the Android platform.
- *
+ * @param recentSuggestions An instance of the utility class in the Android platform to manage the
+ * user's recent search history.
  * @author Niall Scott
  */
 @Singleton
-internal class SearchDatabaseContract @Inject constructor(
-        @ForSearchDatabase val authority: String) {
+internal class AndroidSearchHistoryDao @Inject constructor(
+        private val recentSuggestions: SearchRecentSuggestions) : SearchHistoryDao {
 
-    companion object {
+    override fun addSearchTerm(searchTerm: String) {
+        recentSuggestions.saveRecentQuery(searchTerm, null)
+    }
 
-        /**
-         * The database mode.
-         */
-        const val MODE = SearchRecentSuggestionsProvider.DATABASE_MODE_QUERIES or
-                SearchRecentSuggestionsProvider.DATABASE_MODE_2LINES
+    override fun clearSearchHistory() {
+        recentSuggestions.clearHistory()
     }
 }

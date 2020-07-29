@@ -24,32 +24,47 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.search
+package uk.org.rivernile.android.bustracker.core.database.search.daos
 
-import android.content.SearchRecentSuggestionsProvider
-import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
-import javax.inject.Inject
-import javax.inject.Singleton
+import android.provider.SearchRecentSuggestions
+import com.nhaarman.mockitokotlin2.verify
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnitRunner
 
 /**
- * This class defines the contract for the search database, where recent searches are held to be
- * provided in future searches as suggestions.
- *
- * It does not define the contract for individual tables within this database - these are infact
- * defined within the Android platform.
+ * Tests for [AndroidSearchHistoryDao].
  *
  * @author Niall Scott
  */
-@Singleton
-internal class SearchDatabaseContract @Inject constructor(
-        @ForSearchDatabase val authority: String) {
+@RunWith(MockitoJUnitRunner::class)
+class AndroidSearchHistoryDaoTest {
 
-    companion object {
+    @Mock
+    private lateinit var recentSuggestions: SearchRecentSuggestions
 
-        /**
-         * The database mode.
-         */
-        const val MODE = SearchRecentSuggestionsProvider.DATABASE_MODE_QUERIES or
-                SearchRecentSuggestionsProvider.DATABASE_MODE_2LINES
+    private lateinit var searchHistoryDao: AndroidSearchHistoryDao
+
+    @Before
+    fun setUp() {
+        searchHistoryDao = AndroidSearchHistoryDao(recentSuggestions)
+    }
+
+    @Test
+    fun addSearchTermAddsTermToRecentSuggestions() {
+        searchHistoryDao.addSearchTerm("test")
+
+        verify(recentSuggestions)
+                .saveRecentQuery("test", null)
+    }
+
+    @Test
+    fun clearSearchHistoryClearsHistoryOnRecentSuggestions() {
+        searchHistoryDao.clearSearchHistory()
+
+        verify(recentSuggestions)
+                .clearHistory()
     }
 }

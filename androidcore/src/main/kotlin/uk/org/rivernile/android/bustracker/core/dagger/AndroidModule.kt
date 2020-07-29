@@ -33,11 +33,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.location.LocationManager
 import android.net.ConnectivityManager
+import android.provider.SearchRecentSuggestions
 import androidx.core.app.NotificationManagerCompat
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.database.search.SearchDatabaseContract
 import uk.org.rivernile.android.bustracker.core.di.ForNoBackup
+import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import javax.inject.Singleton
 
@@ -125,6 +128,21 @@ internal class AndroidModule {
     @ForNoBackup
     fun provideNoBackupSharedPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("no-backup", Context.MODE_PRIVATE)
+
+    /**
+     * Provide the [SearchRecentSuggestions] implementation, provided by the Android platform,
+     * which manages the user's recent search items.
+     *
+     * @param context The application [Context].
+     * @param authority The authority of the search database.
+     * @return The [SearchRecentSuggestions] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideSearchRecentSuggestions(
+            context: Context,
+            @ForSearchDatabase authority: String) =
+            SearchRecentSuggestions(context, authority, SearchDatabaseContract.MODE)
 
     /**
      * This interface contains Dagger bindings for pre-provided types.

@@ -27,8 +27,11 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.content.Context
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.database.search.daos.AndroidSearchHistoryDao
+import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
 import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
 import javax.inject.Singleton
 
@@ -37,11 +40,21 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module
+@Module(includes = [
+    SearchDatabaseModule.Bindings::class
+])
 internal class SearchDatabaseModule {
 
     @Provides
     @Singleton
     @ForSearchDatabase
     fun provideAuthority(context: Context) = "${context.packageName}.SearchSuggestionsProvider"
+
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindSearchHistoryDao(androidSearchHistoryDao: AndroidSearchHistoryDao): SearchHistoryDao
+    }
 }

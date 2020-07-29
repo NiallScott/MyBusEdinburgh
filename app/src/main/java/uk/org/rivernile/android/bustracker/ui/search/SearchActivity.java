@@ -33,9 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,7 +56,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
-import uk.org.rivernile.android.bustracker.core.database.search.SearchDatabaseContract;
+import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopSearchLoader;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
@@ -97,9 +95,8 @@ public class SearchActivity extends AppCompatActivity
     private static final String URI_QUERY_PARAMETER_STOP_CODE = "busStopCode";
 
     @Inject
-    SearchDatabaseContract searchDatabaseContract;
+    SearchHistoryDao searchHistoryDao;
 
-    private SearchRecentSuggestions recentSuggestions;
     private SearchAdapter adapter;
 
     private SearchView searchView;
@@ -143,9 +140,6 @@ public class SearchActivity extends AppCompatActivity
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
 
-        recentSuggestions = new SearchRecentSuggestions(this, searchDatabaseContract.getAuthority(),
-                SearchDatabaseContract.MODE);
-
         showEmptySearchTermError();
         handleIntent(getIntent());
     }
@@ -172,31 +166,28 @@ public class SearchActivity extends AppCompatActivity
     public boolean onPrepareOptionsMenu(final Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            menuItemScan.setVisible(getPackageManager()
-                    .hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY));
-        } else {
-            menuItemScan.setVisible(getPackageManager()
-                    .hasSystemFeature(PackageManager.FEATURE_CAMERA));
-        }
+        menuItemScan.setVisible(getPackageManager()
+                .hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY));
 
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.search_option_menu_scan:
-                handleQrCodeButtonClicked();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.search_option_menu_scan) {
+            handleQrCodeButtonClicked();
+
+            return true;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode,
             final Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == REQUEST_CODE_SCAN_QR && resultCode == RESULT_OK) {
             // The data is delivered as an Intent, so if it's null the scan has not been successful,
             // despite the resultCode.
@@ -225,35 +216,31 @@ public class SearchActivity extends AppCompatActivity
         }
     }
 
+    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
-        switch (id) {
-            case LOADER_SEARCH:
-                final String searchTerm =
-                        args != null ? args.getString(LOADER_ARG_SEARCH_TERM) : null;
+        if (id == LOADER_SEARCH) {
+            final String searchTerm =
+                    args != null ? args.getString(LOADER_ARG_SEARCH_TERM) : null;
 
-                return !TextUtils.isEmpty(searchTerm) ?
-                        new BusStopSearchLoader(this, searchTerm) : null;
-            default:
-                return null;
+            return !TextUtils.isEmpty(searchTerm) ?
+                    new BusStopSearchLoader(this, searchTerm) : null;
         }
+
+        return null;
     }
 
     @Override
     public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
-        switch (loader.getId()) {
-            case LOADER_SEARCH:
-                handleSearchResultsLoaded(data);
-                break;
+        if (loader.getId() == LOADER_SEARCH) {
+            handleSearchResultsLoaded(data);
         }
     }
 
     @Override
     public void onLoaderReset(final Loader<Cursor> loader) {
-        switch (loader.getId()) {
-            case LOADER_SEARCH:
-                handleSearchResultsLoaded(null);
-                break;
+        if (loader.getId() == LOADER_SEARCH) {
+            handleSearchResultsLoaded(null);
         }
     }
 
@@ -316,7 +303,10 @@ public class SearchActivity extends AppCompatActivity
         if (loader != null && searchLoader.getSearchTerm().equals(searchTerm)) {
             loaderManager.initLoader(LOADER_SEARCH, loaderArgs, this);
         } else {
-            recentSuggestions.saveRecentQuery(searchTerm, null);
+            if (searchTerm != null) {
+                searchHistoryDao.addSearchTerm(searchTerm);
+            }
+
             loaderManager.restartLoader(LOADER_SEARCH, loaderArgs, this);
         }
     }
@@ -393,7 +383,7 @@ public class SearchActivity extends AppCompatActivity
         intent.putExtra(BARCODE_EXTRA_QR_CODE_MODE, true);
         final List<ResolveInfo> packages = getPackageManager().queryIntentActivities(intent, 0);
 
-        if (packages != null && !packages.isEmpty()) {
+        if (!packages.isEmpty()) {
             try {
                 startActivityForResult(intent, REQUEST_CODE_SCAN_QR);
             } catch (ActivityNotFoundException e) {
