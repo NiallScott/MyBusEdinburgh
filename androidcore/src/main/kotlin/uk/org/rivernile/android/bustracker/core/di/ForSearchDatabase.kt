@@ -24,26 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.di
 
-import dagger.Binds
-import dagger.Module
-import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This is a Dagger [Module] for database dependencies.
+ * This annotation defines a Dagger qualifier for settings database dependencies.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    BusStopDatabaseModule::class,
-    SearchDatabaseModule::class,
-    SettingsDatabaseModule::class
-])
-internal interface DatabaseModule {
-
-    @Suppress("unused")
-    @Binds
-    fun bindDatabaseUtils(androidDatabaseUtils: AndroidDatabaseUtils): DatabaseUtils
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForSearchDatabase

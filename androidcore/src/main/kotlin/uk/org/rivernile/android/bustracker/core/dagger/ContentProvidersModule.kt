@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,24 +26,20 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
-import dagger.Binds
 import dagger.Module
-import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.core.database.search.SearchSuggestionsProvider
 
 /**
- * This is a Dagger [Module] for database dependencies.
+ * This Dagger [Module] is used to define injection contributions for content providers defined in
+ * this module.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    BusStopDatabaseModule::class,
-    SearchDatabaseModule::class,
-    SettingsDatabaseModule::class
-])
-internal interface DatabaseModule {
+@Module
+internal interface ContentProvidersModule {
 
     @Suppress("unused")
-    @Binds
-    fun bindDatabaseUtils(androidDatabaseUtils: AndroidDatabaseUtils): DatabaseUtils
+    @ContributesAndroidInjector
+    fun contributeSearchSuggestionsProvider(): SearchSuggestionsProvider
 }

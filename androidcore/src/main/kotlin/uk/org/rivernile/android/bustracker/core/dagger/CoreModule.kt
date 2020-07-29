@@ -65,6 +65,7 @@ import javax.inject.Singleton
     ApiModule::class,
     BackupAgentModule::class,
     BroadcastReceiversModule::class,
+    ContentProvidersModule::class,
     CoreModule.Bindings::class,
     DatabaseModule::class,
     FlavourModule::class,

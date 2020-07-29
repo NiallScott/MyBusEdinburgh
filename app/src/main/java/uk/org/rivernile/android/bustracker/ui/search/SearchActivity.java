@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,9 +55,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+import uk.org.rivernile.android.bustracker.core.database.search.SearchDatabaseContract;
 import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
 import uk.org.rivernile.android.bustracker.database.busstop.loaders.BusStopSearchLoader;
-import uk.org.rivernile.android.bustracker.database.search.SearchSuggestionsProvider;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
@@ -93,6 +96,9 @@ public class SearchActivity extends AppCompatActivity
 
     private static final String URI_QUERY_PARAMETER_STOP_CODE = "busStopCode";
 
+    @Inject
+    SearchDatabaseContract searchDatabaseContract;
+
     private SearchRecentSuggestions recentSuggestions;
     private SearchAdapter adapter;
 
@@ -105,6 +111,8 @@ public class SearchActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(@Nullable final Bundle savedInstanceState) {
+        AndroidInjection.inject(this);
+
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.search);
@@ -135,8 +143,8 @@ public class SearchActivity extends AppCompatActivity
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(adapter);
 
-        recentSuggestions = new SearchRecentSuggestions(this, SearchSuggestionsProvider.AUTHORITY,
-                SearchSuggestionsProvider.MODE);
+        recentSuggestions = new SearchRecentSuggestions(this, searchDatabaseContract.getAuthority(),
+                SearchDatabaseContract.MODE);
 
         showEmptySearchTermError();
         handleIntent(getIntent());

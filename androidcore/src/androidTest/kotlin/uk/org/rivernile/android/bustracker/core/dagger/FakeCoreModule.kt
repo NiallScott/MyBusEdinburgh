@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import android.app.Application
+import android.content.Context
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
@@ -40,7 +43,9 @@ import javax.inject.Singleton
  * [Executors.newCachedThreadPool].
  * @author Niall Scott
  */
-@Module
+@Module(includes = [
+    FakeCoreModule.Bindings::class
+])
 class FakeCoreModule(
         private val backgroundExecutor: Executor = Executors.newCachedThreadPool()) {
 
@@ -48,4 +53,12 @@ class FakeCoreModule(
     @Singleton
     @ForShortBackgroundTasks
     fun provideBackgroundExecutor() = backgroundExecutor
+
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindApplicationContext(application: Application): Context
+    }
 }

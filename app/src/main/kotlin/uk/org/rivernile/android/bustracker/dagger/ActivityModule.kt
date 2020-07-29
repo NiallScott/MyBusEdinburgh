@@ -38,6 +38,7 @@ import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.main.MainActivity
+import uk.org.rivernile.android.bustracker.ui.search.SearchActivity
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 
 /**
@@ -100,4 +101,13 @@ interface ActivityModule {
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [ BusStopMapFragmentsModule::class ])
     fun contributeBusStopMapActivity(): BusStopMapActivity
+
+    /**
+     * Presents an instance of [SearchActivity] as an item to be injected.
+     *
+     * @return An instance of [SearchActivity] to be injected.
+     */
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeSearchActivity(): SearchActivity
 }

@@ -231,17 +231,5 @@
             android:name="uk.org.rivernile.android.bustracker.database.busstop.BusStopProvider"
             android:authorities="${applicationId}.provider.busstop"
             android:exported="false" />
-
-        <!-- SearchSuggestionsProvider, to provide previous search history items when typing in a
-             search term. -->
-        <provider
-            android:name="uk.org.rivernile.android.bustracker.database.search.SearchSuggestionsProvider"
-            android:authorities="${applicationId}.SearchSuggestionsProvider"
-            android:permission="${applicationId}.SearchSuggestionsProvider.SEARCH_SUGGESTIONS"
-            android:exported="true">
-            <path-permission
-                android:pathPrefix="/search_suggest_query"
-                android:readPermission="android.permission.GLOBAL_SEARCH" />
-        </provider>
     </application>
 </manifest>

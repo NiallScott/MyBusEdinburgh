@@ -42,9 +42,11 @@ import javax.inject.Singleton
 @Component(modules = [
     AndroidInjectionModule::class,
     BroadcastReceiversModule::class,
+    ContentProvidersModule::class,
     FakeAlertsModule::class,
     FakeBusStopDatabaseModule::class,
     FakeCoreModule::class,
+    FakeSearchDatabaseModule::class,
     FakeSettingsDatabaseModule::class
 ])
 interface CoreTestApplicationComponent {
@@ -60,6 +62,8 @@ interface CoreTestApplicationComponent {
         fun alertsModule(module: FakeAlertsModule): Builder
 
         fun coreModule(module: FakeCoreModule): Builder
+
+        fun searchDatabaseModule(module: FakeSearchDatabaseModule): Builder
 
         fun settingsDatabaseModule(module: FakeSettingsDatabaseModule): Builder
 

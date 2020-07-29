@@ -30,6 +30,7 @@ import androidx.test.core.app.ApplicationProvider
 import uk.org.rivernile.android.bustracker.core.dagger.DaggerCoreTestApplicationComponent
 import uk.org.rivernile.android.bustracker.core.dagger.FakeAlertsModule
 import uk.org.rivernile.android.bustracker.core.dagger.FakeCoreModule
+import uk.org.rivernile.android.bustracker.core.dagger.FakeSearchDatabaseModule
 import uk.org.rivernile.android.bustracker.core.dagger.FakeSettingsDatabaseModule
 
 /**
@@ -46,12 +47,14 @@ fun assistInject(
         application: TestApplication,
         alertsModule: FakeAlertsModule = FakeAlertsModule(),
         coreModule: FakeCoreModule = FakeCoreModule(),
+        searchDatabaseModule: FakeSearchDatabaseModule = FakeSearchDatabaseModule(),
         settingsDatabaseModule: FakeSettingsDatabaseModule = FakeSettingsDatabaseModule()) {
     DaggerCoreTestApplicationComponent
             .builder()
             .application(application)
             .alertsModule(alertsModule)
             .coreModule(coreModule)
+            .searchDatabaseModule(searchDatabaseModule)
             .settingsDatabaseModule(settingsDatabaseModule)
             .build()
             .inject(application)

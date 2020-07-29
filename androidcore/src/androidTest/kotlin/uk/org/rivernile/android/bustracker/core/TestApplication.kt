@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core
 
 import android.app.Application
+import android.content.Context
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import javax.inject.Inject
@@ -40,6 +41,12 @@ class TestApplication : Application(), HasAndroidInjector {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+
+        assistInject(this)
+    }
 
     override fun androidInjector() = dispatchingAndroidInjector
 }

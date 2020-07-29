@@ -26,6 +26,7 @@
 package uk.org.rivernile.android.bustracker
 
 import android.app.Application
+import android.content.Context
 import com.bugsense.trace.BugSenseHandler
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -52,12 +53,16 @@ class BusApplication : Application(), HasAndroidInjector {
     @Inject
     lateinit var startUpTask: StartUpTask
 
-    override fun onCreate() {
-        super.onCreate()
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
 
         DaggerApplicationComponent.factory()
                 .newApplicationComponent(this)
                 .inject(this)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
 
         // Register the BugSense handler.
         if (BuildConfig.BUGSENSE_ENABLED) {

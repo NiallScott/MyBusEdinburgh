@@ -101,6 +101,13 @@ android {
     }
 
     useLibrary 'android.test.mock'
+
+    afterEvaluate {
+        applicationVariants.all { variant ->
+            variant.resValue 'string', 'search_authority',
+                    "${variant.applicationId}.SearchSuggestionsProvider"
+        }
+    }
 }
 
 allOpen {

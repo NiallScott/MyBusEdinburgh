@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,26 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.database.search
 
-import dagger.Binds
-import dagger.Module
-import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
+import android.content.SearchRecentSuggestionsProvider
+import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * This is a Dagger [Module] for database dependencies.
+ * This class defines the contract for the search database, where recent searches are held to be
+ * provided in future searches as suggestions.
+ *
+ * It does not define the contract for individual tables within this database - these are infact
+ * defined within the Android platform.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    BusStopDatabaseModule::class,
-    SearchDatabaseModule::class,
-    SettingsDatabaseModule::class
-])
-internal interface DatabaseModule {
+@Singleton
+class SearchDatabaseContract @Inject constructor(
+        @ForSearchDatabase val authority: String) {
 
-    @Suppress("unused")
-    @Binds
-    fun bindDatabaseUtils(androidDatabaseUtils: AndroidDatabaseUtils): DatabaseUtils
+    companion object {
+
+        /**
+         * The database mode.
+         */
+        const val MODE = SearchRecentSuggestionsProvider.DATABASE_MODE_QUERIES or
+                SearchRecentSuggestionsProvider.DATABASE_MODE_2LINES
+    }
 }

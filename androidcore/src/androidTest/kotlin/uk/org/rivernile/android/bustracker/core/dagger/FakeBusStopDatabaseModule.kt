@@ -30,6 +30,7 @@ import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.FakeBusStopsDao
+import uk.org.rivernile.android.bustracker.core.di.ForBusStopDatabase
 import javax.inject.Singleton
 
 /**
@@ -40,7 +41,13 @@ import javax.inject.Singleton
  */
 @Module
 class FakeBusStopDatabaseModule(
+        private val authority: String = "test.provider.busstop",
         private val busStopsDao: BusStopsDao = FakeBusStopsDao()) {
+
+    @Singleton
+    @Provides
+    @ForBusStopDatabase
+    fun provideAuthority() = authority
 
     @Singleton
     @Provides
