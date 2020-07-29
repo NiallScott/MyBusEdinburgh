@@ -46,6 +46,8 @@ import javax.inject.Inject
  *
  * @param context The application [Context].
  * @param notificationManager The [NotificationManagerCompat].
+ * @param notificationPreferences An implementation of [NotificationPreferences]. This may be `null`
+ * when no implementation is available.
  * @param busStopsDao The DAO to access bus stop information.
  * @param deeplinkIntentFactory An implementation which creates [Intent]s for deeplinking.
  * @param textFormattingUtils Utility class for formatting text of stop name.
@@ -54,6 +56,7 @@ import javax.inject.Inject
 internal class AndroidAlertNotificationDispatcher @Inject constructor(
         private val context: Context,
         private val notificationManager: NotificationManagerCompat,
+        private val notificationPreferences: NotificationPreferences?,
         private val busStopsDao: BusStopsDao,
         private val deeplinkIntentFactory: DeeplinkIntentFactory,
         private val textFormattingUtils: TextFormattingUtils) : AlertNotificationDispatcher {
@@ -84,6 +87,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     setContentIntent(pendingIntent)
                     setAutoCancel(true)
                     setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+                    notificationPreferences?.applyNotificationPreferences(this)
                 }
                 .let {
                     notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
@@ -110,6 +114,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     setContentIntent(pendingIntent)
                     setAutoCancel(true)
                     setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+                    notificationPreferences?.applyNotificationPreferences(this)
                 }
                 .let {
                     notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())

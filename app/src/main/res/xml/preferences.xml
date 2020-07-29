@@ -26,7 +26,8 @@
  */ -->
 
 <PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     
     <!-- General -->
     <PreferenceCategory
@@ -39,26 +40,48 @@
             android:defaultValue="false" />
     </PreferenceCategory>
     
-    <!-- Alerts -->
+    <!-- Notifications -->
     <PreferenceCategory
-        android:title="@string/preferences_category_alerts">
+        android:title="@string/preferences_category_notifications">
 
         <SwitchPreferenceCompat
             android:key="pref_alertsound_state"
-            android:title="@string/preferences_checkbox_alerts_sound"
-            android:defaultValue="true" />
+            android:title="@string/preferences_checkbox_notifications_sound"
+            android:defaultValue="true"
+            android:persistent="@bool/preferences_legacy_notifications"
+            app:isPreferenceVisible="@bool/preferences_legacy_notifications" />
 
         <SwitchPreferenceCompat
             android:key="pref_alertvibrate_state"
-            android:title="@string/preferences_checkbox_alerts_vibrate"
-            android:summary="@string/preferences_checkbox_alerts_vibrate_summary"
-            android:defaultValue="true" />
+            android:title="@string/preferences_checkbox_notifications_vibrate"
+            android:summary="@string/preferences_checkbox_notifications_vibrate_summary"
+            android:defaultValue="true"
+            android:persistent="@bool/preferences_legacy_notifications"
+            app:isPreferenceVisible="@bool/preferences_legacy_notifications" />
 
         <SwitchPreferenceCompat
             android:key="pref_alertled_state"
-            android:title="@string/preferences_checkbox_alerts_led"
-            android:summary="@string/preferences_checkbox_alerts_led_summary"
-            android:defaultValue="true" />
+            android:title="@string/preferences_checkbox_notifications_led"
+            android:summary="@string/preferences_checkbox_notifications_led_summary"
+            android:defaultValue="true"
+            android:persistent="@bool/preferences_legacy_notifications"
+            app:isPreferenceVisible="@bool/preferences_legacy_notifications" />
+
+        <Preference
+            android:key="pref_system_notification_settings"
+            android:title="@string/preferences_preference_notification_settings"
+            android:persistent="false"
+            app:isPreferenceVisible="@bool/preferences_notification_channels">
+
+            <intent
+                android:action="android.settings.APP_NOTIFICATION_SETTINGS">
+
+                <!--suppress AndroidElementNotAllowed -->
+                <extra
+                    android:name="android.provider.extra.APP_PACKAGE"
+                    android:value="@string/package_name" />
+            </intent>
+        </Preference>
     </PreferenceCategory>
     
     <!-- Bus Times Display -->

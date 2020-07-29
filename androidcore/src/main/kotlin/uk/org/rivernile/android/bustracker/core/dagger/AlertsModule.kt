@@ -26,11 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import android.os.Build
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
+import uk.org.rivernile.android.bustracker.core.alerts.LegacyNotificationPreferences
+import uk.org.rivernile.android.bustracker.core.alerts.NotificationPreferences
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.AndroidArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.AndroidProximityAlertTaskLauncher
@@ -39,9 +42,11 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertT
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidGeofencingManager
 import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
 import uk.org.rivernile.android.bustracker.core.di.ForProximityAlerts
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
+import javax.inject.Provider
 
 /**
  * This Dagger module provides dependencies for dealing with alerts.
@@ -60,6 +65,15 @@ internal class AlertsModule {
     @ForProximityAlerts
     fun provideProximityAlertExecutorService(): ExecutorService =
             Executors.newSingleThreadExecutor()
+
+    @Provides
+    fun provideNotificationPreferences(
+            preferenceManager: Provider<PreferenceManager>): NotificationPreferences? =
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                LegacyNotificationPreferences(preferenceManager.get())
+            } else {
+                null
+            }
 
     /**
      * This interface contains Dagger bindings for pre-provided types.

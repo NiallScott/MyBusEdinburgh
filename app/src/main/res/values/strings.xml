@@ -173,12 +173,13 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_general_databaseupdatewifi">Updates via Wi-Fi only</string>
     <string name="preferences_checkbox_general_databaseupdatewifi_summary">To reduce network provider data charges, don\'t update the stop database over mobile networks</string>
     
-    <string name="preferences_category_alerts">Alerts</string>
-    <string name="preferences_checkbox_alerts_sound">Use sound</string>
-    <string name="preferences_checkbox_alerts_vibrate">Use vibration</string>
-    <string name="preferences_checkbox_alerts_vibrate_summary">If the device supports vibration</string>
-    <string name="preferences_checkbox_alerts_led">Flash device LED</string>
-    <string name="preferences_checkbox_alerts_led_summary">If the device supports it</string>
+    <string name="preferences_category_notifications">Notifications</string>
+    <string name="preferences_checkbox_notifications_sound">Use sound</string>
+    <string name="preferences_checkbox_notifications_vibrate">Use vibration</string>
+    <string name="preferences_checkbox_notifications_vibrate_summary">If the device supports vibration</string>
+    <string name="preferences_checkbox_notifications_led">Flash device LED</string>
+    <string name="preferences_checkbox_notifications_led_summary">If the device supports it</string>
+    <string name="preferences_preference_notification_settings">Notification settings</string>
 
     <string name="preferences_category_bustimes">Bus Times Display</string>
     <string name="preferences_checkbox_bustimes_autorefresh">Auto refresh</string>

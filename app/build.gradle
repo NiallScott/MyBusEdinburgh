@@ -104,6 +104,7 @@ android {
 
     afterEvaluate {
         applicationVariants.all { variant ->
+            variant.resValue 'string', 'package_name', variant.applicationId
             variant.resValue 'string', 'search_authority',
                     "${variant.applicationId}.SearchSuggestionsProvider"
         }
