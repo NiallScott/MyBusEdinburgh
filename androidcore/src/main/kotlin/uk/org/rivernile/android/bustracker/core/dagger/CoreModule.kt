@@ -70,7 +70,8 @@ import javax.inject.Singleton
     DatabaseModule::class,
     FlavourModule::class,
     HttpModule::class,
-    ServiceModule::class
+    ServiceModule::class,
+    TwitterModule::class
 ])
 class CoreModule {
 

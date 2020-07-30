@@ -47,8 +47,14 @@ dependencies {
     // Java dependency injection annotations
     api 'javax.inject:javax.inject:1'
 
+    // Gson
+    api 'com.google.code.gson:gson:2.8.6'
+
     // Okhttp
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
+
+    // Retrofit
+    api "com.squareup.retrofit2:retrofit:$retrofitVersion"
 
     testImplementation project(':testutils')
     testImplementation "junit:junit:$junitVersion"

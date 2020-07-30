@@ -49,6 +49,16 @@ import javax.inject.Singleton
 internal class ApiModule {
 
     /**
+     * Provide the API app name, used to identify this app on the API server.
+     *
+     * @return The API app name.
+     */
+    @Provides
+    @Singleton
+    @ForApi
+    fun provideApiAppName() = BuildConfig.API_APP_NAME
+
+    /**
      * Provide the [ApiEndpoint] implementation.
      *
      * @param apiServiceFactory An [ApiServiceFactory] instance.

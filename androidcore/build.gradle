@@ -29,10 +29,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
-ext {
-    retrofitVersion = '2.9.0'
-}
-
 android {
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
@@ -42,7 +38,7 @@ android {
         targetSdkVersion androidTargetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "uk.org.rivernile.android.bustracker.core.CoreTestRunner"
+        testInstrumentationRunner 'uk.org.rivernile.android.bustracker.core.CoreTestRunner'
     }
 
     buildTypes {
@@ -55,21 +51,22 @@ android {
         }
     }
 
-    flavorDimensions "city"
+    flavorDimensions 'city'
 
     productFlavors {
         edinburgh {
-            dimension "city"
+            dimension 'city'
 
             // URLs
-            buildConfigField("String", "API_BASE_URL", "\"http://edinb.us/api/\"")
-            buildConfigField("String", "TRACKER_BASE_URL", "\"http://ws.mybustracker.co.uk/\"")
+            buildConfigField('String', 'API_BASE_URL', '\"http://edinb.us/api/\"')
+            buildConfigField('String', 'TRACKER_BASE_URL', '\"http://ws.mybustracker.co.uk/\"')
 
             // API keys
-            buildConfigField("String", "API_KEY", "\"${getApiKey()}\"")
+            buildConfigField('String', 'API_KEY', "\"${getApiKey()}\"")
 
             // Other
-            buildConfigField("String", "SCHEMA_NAME", "\"MBE_10\"")
+            buildConfigField('String', 'SCHEMA_NAME', '\"MBE_10\"')
+            buildConfigField('String', 'API_APP_NAME', '\"MBE\"')
         }
     }
 
@@ -103,14 +100,10 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
-    // Gson
-    api 'com.google.code.gson:gson:2.8.6'
-
     // Okhttp
     debugImplementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
 
     // Retrofit
-    api "com.squareup.retrofit2:retrofit:$retrofitVersion"
     api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
     // City APIs
@@ -138,10 +131,10 @@ private static def getApiKey() {
     final Properties properties = new Properties()
 
     try {
-        properties.load(new FileInputStream("local.properties"))
+        properties.load(new FileInputStream('local.properties'))
     } catch (IOException ignored) {
         // Do nothing. This is probably happening on the CI server.
     }
 
-    return properties.getProperty("apiKey", "invalid")
+    return properties.getProperty('apiKey', 'invalid')
 }

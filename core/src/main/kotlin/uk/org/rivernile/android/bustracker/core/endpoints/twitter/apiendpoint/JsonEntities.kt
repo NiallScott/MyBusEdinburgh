@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,44 +21,19 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-buildscript {
-    ext {
-        androidCompileSdkVersion = 29
-        androidMinSdkVersion = 21
-        androidTargetSdkVersion = 29
-        androidBuildToolsVersion = '29.0.3'
+package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-        kotlinVersion = '1.3.72'
-        daggerVersion = '2.28.1'
-        okhttpVersion = '3.14.9'
-        retrofitVersion = '2.9.0'
-        junitVersion = '4.13'
-        androidTestCoreVersion = '1.2.0'
-        mockitoVersion = '2.28.2'
-        mockitoKotlinVersion = '2.2.0'
-    }
+import com.google.gson.annotations.SerializedName
 
-    repositories {
-        google()
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
+/**
+ * This class describes the entities object from the Twitter API.
+ *
+ * @property urls A [List] of [JsonUrlEntity], which may optionally be present.
+ * @author Niall Scott
+ */
+internal data class JsonEntities(
+        @SerializedName("urls")
+        val urls: List<JsonUrlEntity>?)
