@@ -31,6 +31,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="actionModeBackground">@color/colorContextualActionBarBackground</item>
         <item name="actionBarStyle">@style/AppActionBar</item>
+        <item name="contentViewStyle">@style/Widget.AndroidCore.ContentView</item>
     </style>
 
     <style name="MyBusEdinburgh.NoActionBar">

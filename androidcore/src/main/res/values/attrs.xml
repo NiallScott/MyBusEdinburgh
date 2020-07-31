@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2020 Niall 'Rivernile' Scott
+  ~
+  ~ This software is provided 'as-is', without any express or implied
+  ~ warranty.  In no event will the authors or contributors be held liable for
+  ~ any damages arising from the use of this software.
+  ~
+  ~ The aforementioned copyright holder(s) hereby grant you a
+  ~ non-transferrable right to use this software for any purpose (including
+  ~ commercial applications), and to modify it and redistribute it, subject to
+  ~ the following conditions:
+  ~
+  ~  1. This notice may not be removed or altered from any file it appears in.
+  ~
+  ~  2. Any modifications made to this software, except those defined in
+  ~     clause 3 of this agreement, must be released under this license, and
+  ~     the source code of any modifications must be made available on a
+  ~     publically accessible (and locateable) website, or sent to the
+  ~     original author of this software.
+  ~
+  ~  3. Software modifications that do not alter the functionality of the
+  ~     software but are simply adaptations to a specific environment are
+  ~     exempt from clause 2.
+  ~
+  -->
+
+<resources>
+
+    <declare-styleable name="ThemeAttributes">
+        <attr name="contentViewStyle" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ContentView">
+        <attr name="contentLayout" />
+        <attr name="progressView" format="reference" />
+        <attr name="contentView" format="reference" />
+        <attr name="errorView" format="reference" />
+    </declare-styleable>
+
+    <!-- This exposes the enumeration of states for ContentView to XML. -->
+    <attr name="contentLayout">
+        <!-- Show the progress layout. -->
+        <enum name="progress" value="0" />
+        <!-- Show the content layout. -->
+        <enum name="content" value="1" />
+        <!-- Show the error layout. -->
+        <enum name="error" value="2" />
+    </attr>
+</resources>
