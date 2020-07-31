@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,18 @@
  *
  */
 
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
+package uk.org.rivernile.android.bustracker.core.di
 
-jar {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    api "junit:junit:$junitVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-}
+/**
+ * This annotation defines a Dagger qualifier for the IO Kotlin coroutine dispatcher.
+ *
+ * @author Niall Scott
+ */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForIoDispatcher

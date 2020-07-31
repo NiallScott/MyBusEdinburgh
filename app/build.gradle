@@ -29,7 +29,6 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
 ext {
-    architectureComponentsVersion = '2.2.0'
     googlePlayServicesVersion = '17.0.0'
 
     espressoVersion = '3.0.2'
@@ -120,7 +119,7 @@ dependencies {
 
     implementation project(':androidcore')
 
-    // Android support libraries
+    // AndroidX and support libraries
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
@@ -129,7 +128,8 @@ dependencies {
     implementation 'androidx.preference:preference:1.1.1'
 
     // Android Architecture Components
-    implementation "androidx.lifecycle:lifecycle-extensions:$architectureComponentsVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$architectureComponentsVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$architectureComponentsVersion"
     implementation "androidx.lifecycle:lifecycle-common-java8:$architectureComponentsVersion"
 
     // Google Play Services
@@ -157,5 +157,5 @@ dependencies {
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation 'androidx.arch.core:core-testing:2.1.0'
+    testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
 }

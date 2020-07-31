@@ -24,18 +24,35 @@
  *
  */
 
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
+package uk.org.rivernile.android.bustracker.core.twitter
 
-jar {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterException
 
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+/**
+ * This class encapsulates a result from the [TwitterRepository].
+ *
+ * @param T The type of data returned in the success condition.
+ * @author Niall Scott
+ */
+sealed class Result<out T> {
 
-    api "junit:junit:$junitVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    /**
+     * This represents a request currently in progress.
+     */
+    object InProgress : Result<Nothing>()
+
+    /**
+     * This represents a request which was successful.
+     *
+     * @param T The type of data returned.
+     * @property result The success data.
+     */
+    data class Success<out T>(val result: T) : Result<T>()
+
+    /**
+     * This represents a request which failed.
+     *
+     * @property exception The [TwitterException] which caused the failure.
+     */
+    data class Error(val exception: TwitterException) : Result<Nothing>()
 }

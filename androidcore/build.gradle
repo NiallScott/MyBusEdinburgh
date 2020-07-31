@@ -81,6 +81,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    packagingOptions {
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+    }
+
     useLibrary 'android.test.mock'
 }
 
@@ -93,6 +98,14 @@ dependencies {
 
     // Our core module
     api project(':core')
+
+    // Kotlin
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+
+    // Android Architecture Components
+    api "androidx.lifecycle:lifecycle-livedata:$architectureComponentsVersion"
+    api "androidx.lifecycle:lifecycle-livedata-ktx:$architectureComponentsVersion"
 
     // Dagger 2
     api "com.google.dagger:dagger-android:$daggerVersion"
@@ -120,9 +133,9 @@ dependencies {
     kaptAndroidTest "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     testImplementation project(':testutils')
-    testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
 }
 
 private static def getApiKey() {

@@ -34,8 +34,11 @@ import com.google.gson.Gson
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
 import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -127,6 +130,16 @@ class CoreModule {
     @Singleton
     @ForShortBackgroundTasks
     internal fun provideShortBackgroundTasksExecutor(): Executor = Executors.newCachedThreadPool()
+
+    /**
+     * Provide a [CoroutineDispatcher] for performing IO operations on.
+     *
+     * @return A [CoroutineDispatcher] for performing IO operations on.
+     */
+    @Provides
+    @Singleton
+    @ForIoDispatcher
+    internal fun provideCoroutineIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
     /**
      * An internal module for declaring type bindings.
