@@ -41,7 +41,7 @@ class TweetsMapper @Inject constructor() {
 
     companion object {
 
-        private const val TWITTER_BASE_URL = "https://twitter.com/"
+        private const val TWITTER_BASE_URL = "https://twitter.com"
     }
 
     private val dateFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss ZZZZZ yyyy", Locale.ENGLISH)
@@ -55,6 +55,7 @@ class TweetsMapper @Inject constructor() {
      */
     fun mapTweets(jsonTweets: List<JsonTweet>?) =
             jsonTweets?.mapNotNull(this::mapToTweet)
+                    ?.ifEmpty { null }
 
     /**
      * Map a single [JsonTweet] in to a [Tweet]. If parsing fails, due to required data not being
