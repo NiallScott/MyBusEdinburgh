@@ -35,8 +35,8 @@ import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
 import uk.org.rivernile.android.bustracker.core.di.ForApi
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiServiceFactory
-import uk.org.rivernile.android.bustracker.core.endpoints.api.JsonApiEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.api.json.ApiServiceFactory
+import uk.org.rivernile.android.bustracker.core.endpoints.api.json.JsonApiEndpoint
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 

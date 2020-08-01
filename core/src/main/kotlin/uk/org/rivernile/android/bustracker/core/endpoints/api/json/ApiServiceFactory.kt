@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -40,7 +40,7 @@ import javax.net.SocketFactory
  * @param okHttpClient The base [OkHttpClient] instance to use for the [ApiService] instance.
  * @author Niall Scott
  */
-internal class ApiServiceFactory @Inject constructor(
+class ApiServiceFactory @Inject constructor(
         @ForApi private val retrofit: Retrofit,
         @ForApi private val okHttpClient: OkHttpClient) {
 

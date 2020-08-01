@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,8 @@ package uk.org.rivernile.android.bustracker.core.endpoints.api
  * @property checksum A checksum to use to verify the consistency of the database file.
  * @author Niall Scott
  */
-data class DatabaseVersion(val schemaVersion: String,
-                           val topologyId: String,
-                           val databaseUrl: String,
-                           val checksum: String)
+data class DatabaseVersion(
+        val schemaVersion: String,
+        val topologyId: String,
+        val databaseUrl: String,
+        val checksum: String)

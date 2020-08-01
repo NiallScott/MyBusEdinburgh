@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
 import retrofit2.Call
 import retrofit2.http.GET
@@ -35,7 +35,7 @@ import retrofit2.http.Query
  *
  * @author Niall Scott
  */
-internal interface ApiService {
+interface ApiService {
 
     /**
      * Get the database version.
@@ -45,6 +45,7 @@ internal interface ApiService {
      * @return A Retrofit [Call] object.
      */
     @GET("DatabaseVersion")
-    fun getDatabaseVersion(@Query("key") apiKey: String,
-                           @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+    fun getDatabaseVersion(
+            @Query("key") apiKey: String,
+            @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
 }

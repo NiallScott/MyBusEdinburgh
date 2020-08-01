@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,8 +24,12 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
+import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
+import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiRequest
+import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import javax.net.SocketFactory
 
 /**
@@ -36,7 +40,7 @@ import javax.net.SocketFactory
  * @property schemaType The schema type.
  * @author Niall Scott
  */
-internal class JsonApiEndpoint(
+class JsonApiEndpoint(
         private val apiServiceFactory: ApiServiceFactory,
         private val apiKeyGenerator: ApiKeyGenerator,
         private val schemaType: String) : ApiEndpoint {

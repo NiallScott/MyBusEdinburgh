@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
 import com.google.gson.annotations.SerializedName
 
@@ -37,11 +37,12 @@ import com.google.gson.annotations.SerializedName
  * @property checksum A checksum to use to verify the consistency of the database file.
  * @author Niall Scott
  */
-internal data class JsonDatabaseVersion(@SerializedName("db_schema_version")
-                                        val schemaVersion: String,
-                                        @SerializedName("topo_id")
-                                        val topologyId: String,
-                                        @SerializedName("db_url")
-                                        val databaseUrl: String,
-                                        @SerializedName("checksum")
-                                        val checksum: String)
+data class JsonDatabaseVersion(
+        @SerializedName("db_schema_version")
+        val schemaVersion: String,
+        @SerializedName("topo_id")
+        val topologyId: String,
+        @SerializedName("db_url")
+        val databaseUrl: String,
+        @SerializedName("checksum")
+        val checksum: String)
