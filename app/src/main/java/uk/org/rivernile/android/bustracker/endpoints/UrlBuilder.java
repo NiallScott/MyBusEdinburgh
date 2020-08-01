@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -70,12 +70,4 @@ public interface UrlBuilder {
      */
     @NonNull
     Uri getJourneyTimesUrl(@NonNull String stopCode, @NonNull String journeyId);
-    
-    /**
-     * Get a {@link Uri} instance which represents a URL for getting Twitter updates.
-     * 
-     * @return A {@link Uri} instance which represents a URL for getting Twitter updates.
-     */
-    @NonNull
-    Uri getTwitterUpdatesUrl();
 }

@@ -48,7 +48,6 @@ public class EdinburghUrlBuilder implements UrlBuilder {
     
     protected static final String SCHEME_HTTP = "http";
     protected static final String BUSTRACKER_HOST = "www.mybustracker.co.uk";
-    protected static final String DB_SERVER_HOST = "edinb.us";
 
     @Inject
     EdinburghUrlBuilder() {
@@ -99,15 +98,6 @@ public class EdinburghUrlBuilder implements UrlBuilder {
                 .appendQueryParameter("journeyId", journeyId)
                 .build();
     }
-
-    @NonNull
-    @Override
-    public Uri getTwitterUpdatesUrl() {
-        return getDbServerBuilder()
-                .appendPath("TwitterStatuses")
-                .appendQueryParameter("appName", "MBE")
-                .build();
-    }
     
     /**
      * Get a {@link Uri.Builder} which represents a URL on the bus tracker API server. The
@@ -120,21 +110,6 @@ public class EdinburghUrlBuilder implements UrlBuilder {
         return new Uri.Builder().scheme(SCHEME_HTTP)
                 .authority(BUSTRACKER_HOST).path("ws.php")
                 .appendQueryParameter("module", "json")
-                .appendQueryParameter("key", ApiKey.getHashedKey())
-                .appendQueryParameter("random", String.valueOf(RANDOM.nextInt()));
-    }
-    
-    /**
-     * Get a {@link Uri.Builder} which represents a URL on the database server. The specific
-     * request builds upon this builder.
-     * 
-     * @return A {@link Uri.Builder} configured for a URL on the database server.
-     */
-    @NonNull
-    private static Uri.Builder getDbServerBuilder() {
-        return new Uri.Builder().scheme(SCHEME_HTTP)
-                .authority(DB_SERVER_HOST)
-                .appendPath("api")
                 .appendQueryParameter("key", ApiKey.getHashedKey())
                 .appendQueryParameter("random", String.valueOf(RANDOM.nextInt()));
     }

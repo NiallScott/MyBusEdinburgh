@@ -32,6 +32,7 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import uk.org.rivernile.android.bustracker.ui.about.AboutViewModel
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
+import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.ClearSearchHistoryDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragmentViewModel
 
@@ -91,6 +92,18 @@ interface ViewModelModule {
     @IntoMap
     @ViewModelKey(BusStopMapViewModel::class)
     fun bindBusStopMapViewModel(viewModel: BusStopMapViewModel): ViewModel
+
+    /**
+     * Inject a [TwitterUpdatesFragmentViewModel] when request.
+     *
+     * @param viewModel A [TwitterUpdatesFragmentViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(TwitterUpdatesFragmentViewModel::class)
+    fun bindTwitterUpdatesFragmentViewModel(viewModel: TwitterUpdatesFragmentViewModel): ViewModel
 
     /**
      * Inject a [ViewModelFactory] when requested.

@@ -30,12 +30,8 @@ import dagger.Binds
 import dagger.Module
 import uk.org.rivernile.android.bustracker.endpoints.BusTrackerEndpoint
 import uk.org.rivernile.android.bustracker.endpoints.HttpBusTrackerEndpoint
-import uk.org.rivernile.android.bustracker.endpoints.HttpTwitterEndpoint
-import uk.org.rivernile.android.bustracker.endpoints.TwitterEndpoint
 import uk.org.rivernile.android.bustracker.endpoints.UrlBuilder
 import uk.org.rivernile.android.bustracker.parser.livetimes.BusParser
-import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParser
-import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParserImpl
 import uk.org.rivernile.edinburghbustracker.android.parser.livetimes.EdinburghParser
 import uk.org.rivernile.edinburghbustracker.android.utils.EdinburghUrlBuilder
 
@@ -60,12 +56,4 @@ interface LegacyModule {
     @Suppress("unused")
     @Binds
     fun bindBusTrackerEndpoint(httpBusTrackerEndpoint: HttpBusTrackerEndpoint): BusTrackerEndpoint
-
-    @Suppress("unused")
-    @Binds
-    fun bindTwitterParser(twitterParserImpl: TwitterParserImpl): TwitterParser
-
-    @Suppress("unused")
-    @Binds
-    fun bindTwitterEndpoint(httpTwitterEndpoint: HttpTwitterEndpoint): TwitterEndpoint
 }

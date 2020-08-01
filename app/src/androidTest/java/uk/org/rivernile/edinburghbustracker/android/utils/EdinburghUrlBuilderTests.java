@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -146,19 +146,6 @@ public class EdinburghUrlBuilderTests {
         assertEquals("123456", uri.getQueryParameter("stopId"));
         assertEquals("7890", uri.getQueryParameter("journeyId"));
     }
-    
-    /**
-     * Test that the URL for getting Twitter updates from the database server is correctly
-     * constructed.
-     */
-    @Test
-    public void testGetTwitterUpdatesUrl() {
-        final Uri uri = builder.getTwitterUpdatesUrl();
-
-        checkDatabaseServerUri(uri);
-        assertEquals("/api/TwitterStatuses", uri.getPath());
-        assertEquals("MBE", uri.getQueryParameter("appName"));
-    }
 
     /**
      * Common checks for tests on bus tracker URLs.
@@ -170,18 +157,6 @@ public class EdinburghUrlBuilderTests {
         assertEquals(EdinburghUrlBuilder.BUSTRACKER_HOST, uri.getHost());
         assertEquals("/ws.php", uri.getPath());
         assertEquals("json", uri.getQueryParameter("module"));
-        assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
-        assertNotNull(uri.getQueryParameter("random"));
-    }
-
-    /**
-     * Common checks for tests on database server URLs.
-     *
-     * @param uri The {@link Uri} to check.
-     */
-    private static void checkDatabaseServerUri(@NonNull final Uri uri) {
-        assertEquals(EdinburghUrlBuilder.SCHEME_HTTP, uri.getScheme());
-        assertEquals(EdinburghUrlBuilder.DB_SERVER_HOST, uri.getHost());
         assertEquals(ApiKey.getHashedKey(), uri.getQueryParameter("key"));
         assertNotNull(uri.getQueryParameter("random"));
     }

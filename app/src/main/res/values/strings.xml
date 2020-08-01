@@ -363,9 +363,11 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     **************************************
     -->
     <string name="twitterupdates_title">Travel updates</string>
-    <string name="twitterupdates_err_nodata">There are currently no news or update items to display.</string>
-    <string name="twitterupdates_err_load">There was a problem loading the data. Try again soon.</string>
-    <string name="twitterupdates_err_urlmismatch">Please sign on to the network through your web browser and try again.</string>
+    <string name="twitterupdates_err_no_connectivity">No internet connectivity</string>
+    <string name="twitterupdates_err_nodata">There are currently no items to display</string>
+    <string name="twitterupdates_err_connection">There was a connectivity issue while trying to load the data</string>
+    <string name="twitterupdates_err_server">There was a server issue while trying to load the data</string>
+    <string name="twitterupdates_err_no_activity_for_click">Failed to open</string>
     
     <!--
     **********************

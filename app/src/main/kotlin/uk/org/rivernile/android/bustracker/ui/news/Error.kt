@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,37 +21,32 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.endpoints;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import androidx.test.core.app.ApplicationProvider;
-import uk.org.rivernile.android.bustracker.parser.twitter.TwitterParser;
+package uk.org.rivernile.android.bustracker.ui.news
 
 /**
- * Tests for {@link HttpTwitterEndpoint}.
- * 
+ * This enum encapsulates the possible error states.
+ *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner.class)
-public class HttpTwitterEndpointTests {
-
-    @Mock
-    private TwitterParser parser;
-    @Mock
-    private UrlBuilder urlBuilder;
+enum class Error {
 
     /**
-     * Test that no exceptions are thrown if the constructor is passed a non-{@code null}
-     * {@code urlBuilder}.
+     * When there is no connectivity to the internet.
      */
-    @Test
-    public void testConstructorWithNonNullUrlBuilder() {
-        new HttpTwitterEndpoint(ApplicationProvider.getApplicationContext(), parser, urlBuilder);
-    }
+    NO_CONNECTIVITY,
+    /**
+     * When a successful response was received, but it contained no data.
+     */
+    NO_DATA,
+    /**
+     * When there was a communication error over the network.
+     */
+    COMMUNICATION,
+    /**
+     * When the server returned an error.
+     */
+    SERVER
 }
