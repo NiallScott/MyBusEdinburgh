@@ -39,6 +39,7 @@ import kotlinx.coroutines.Dispatchers
 import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
 import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -130,6 +131,16 @@ class CoreModule {
     @Singleton
     @ForShortBackgroundTasks
     internal fun provideShortBackgroundTasksExecutor(): Executor = Executors.newCachedThreadPool()
+
+    /**
+     * Provide a [CoroutineDispatcher] for performing operations on the main thread.
+     *
+     * @return A [CoroutineDispatcher] for performing operations on the main thread.
+     */
+    @Provides
+    @Singleton
+    @ForMainDispatcher
+    internal fun provideCoroutineMainDispatcher(): CoroutineDispatcher = Dispatchers.Main.immediate
 
     /**
      * Provide a [CoroutineDispatcher] for performing IO operations on.

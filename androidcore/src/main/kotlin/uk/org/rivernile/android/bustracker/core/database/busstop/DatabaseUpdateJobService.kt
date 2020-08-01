@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,10 +28,19 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.app.job.JobParameters
 import android.app.job.JobService
-import android.os.AsyncTask
 import dagger.android.AndroidInjection
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
 import uk.org.rivernile.android.bustracker.core.job.getNetworkCompat
 import javax.inject.Inject
+import javax.net.SocketFactory
 
 /**
  * This is the [JobService] for running the database update job. This class is minimal - the work
@@ -43,8 +52,16 @@ class DatabaseUpdateJobService : JobService() {
 
     @Inject
     lateinit var updateChecker: DatabaseUpdateChecker
+    @Inject
+    @ForMainDispatcher
+    lateinit var mainDispatcher: CoroutineDispatcher
+    @Inject
+    @ForIoDispatcher
+    lateinit var ioDispatcher: CoroutineDispatcher
 
-    private var updateTask: UpdateTask? = null
+    private val jobServiceScope by lazy {
+        CoroutineScope(mainDispatcher + SupervisorJob())
+    }
 
     override fun onCreate() {
         AndroidInjection.inject(this)
@@ -53,61 +70,37 @@ class DatabaseUpdateJobService : JobService() {
     }
 
     override fun onStartJob(params: JobParameters): Boolean {
-        val network = params.getNetworkCompat()
-        val socketFactory = network?.socketFactory
-        val updateSession = updateChecker.createNewSession(socketFactory)
-        updateTask = UpdateTask(params, updateSession, this::handleResult).apply {
-            executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, null)
+        jobServiceScope.launch {
+            val socketFactory = params.getNetworkCompat()?.socketFactory
+            val taskResult = performUpdateTask(socketFactory)
+            jobFinished(params, !taskResult)
         }
 
         return true
     }
 
     override fun onStopJob(params: JobParameters): Boolean {
-        updateTask?.cancel()
-        updateTask = null
+        jobServiceScope.cancel()
 
         return true
     }
 
     /**
-     * Handle the result from the execution of the [UpdateTask].
+     * Perform the update task on a background thread as a coroutine.
      *
-     * @param params The parameters for this job.
-     * @param result `true` if execution was successful, otherwise `false`.
+     * @param socketFactory An optional [SocketFactory], if one was specified to be used by the
+     * platform in the [JobParameters].
+     * @return `true` if the job was successful, otherwise `false`.
      */
-    private fun handleResult(params: JobParameters, result: Boolean) {
-        jobFinished(params, !result)
-        updateTask = null
-    }
+    private suspend fun performUpdateTask(
+            socketFactory: SocketFactory?) = withContext(ioDispatcher) {
+        val updateSession = updateChecker.createNewSession(socketFactory)
 
-    /**
-     * This is an [AsyncTask] to run the update process.
-     *
-     * @param jobParameters The parameters the job was started with.
-     * @param updateSession An [DatabaseUpdateCheckerSession] instance to run the update check.
-     * @param resultHandler A handler for processing the result of this task.
-     */
-    private class UpdateTask(
-            private val jobParameters: JobParameters,
-            private val updateSession: DatabaseUpdateCheckerSession,
-            private val resultHandler: (JobParameters, Boolean) -> Unit)
-        : AsyncTask<Unit, Unit, Boolean>() {
-
-        override fun doInBackground(vararg params: Unit?): Boolean {
-            return updateSession.checkForDatabaseUpdates()
-        }
-
-        override fun onPostExecute(result: Boolean) {
-            resultHandler(jobParameters, result)
-        }
-
-        /**
-         * Cancel the execution of this task.
-         */
-        fun cancel() {
-            cancel(false)
+        try {
+            updateSession.checkForDatabaseUpdates()
+        } catch (e: CancellationException) {
             updateSession.cancel()
+            throw e
         }
     }
 }
