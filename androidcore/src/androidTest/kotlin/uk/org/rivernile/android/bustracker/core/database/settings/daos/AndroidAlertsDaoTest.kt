@@ -49,6 +49,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.settings.AlertsContract
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import kotlin.test.assertFalse
 
 /**
  * Tests for [AndroidAlertsDao].
@@ -877,6 +878,246 @@ class AndroidAlertsDaoTest {
         val result = alertsDao.getProximityAlertCount()
 
         assertEquals(5, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun hasArrivalAlertReturnsFalseWhenCursorIsNull() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString(), "123456"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this::addMockProvider)
+
+        val result = alertsDao.hasArrivalAlert("123456")
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun hasArrivalAlertReturnsFalseWhenCursorIsEmpty() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString(), "123456"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = alertsDao.hasArrivalAlert("123456")
+
+        assertFalse(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun hasArrivalAlertReturnsFalseWhenCursorReturnsCountOfZero() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf(0))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString(), "123456"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = alertsDao.hasArrivalAlert("123456")
+
+        assertFalse(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun hasArrivalAlertReturnsFalseWhenCursorReturnsCountOfGreaterThanZero() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf(1))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString(), "123456"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = alertsDao.hasArrivalAlert("123456")
+
+        assertTrue(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun hasProximityAlertReturnsFalseWhenCursorIsNull() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString(), "123456"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this::addMockProvider)
+
+        val result = alertsDao.hasProximityAlert("123456")
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun hasProximityAlertReturnsFalseWhenCursorIsEmpty() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString(), "123456"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = alertsDao.hasProximityAlert("123456")
+
+        assertFalse(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun hasProximityAlertReturnsFalseWhenCursorReturnsCountOfZero() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf(0))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString(), "123456"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = alertsDao.hasProximityAlert("123456")
+
+        assertFalse(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun hasProximityAlertReturnsFalseWhenCursorReturnsCountOfGreaterThanZero() {
+        val expectedProjection = arrayOf(AlertsContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf(1))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString(), "123456"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = alertsDao.hasProximityAlert("123456")
+
+        assertTrue(result)
         assertTrue(cursor.isClosed)
     }
 

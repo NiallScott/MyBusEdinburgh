@@ -53,6 +53,11 @@ internal class FavouritesContract @Inject constructor(
         const val ID = TableContract.ID
 
         /**
+         * Expose [TableContract.COUNT]
+         */
+        const val COUNT = TableContract.COUNT
+
+        /**
          * The unique stop code of the favourite stop. Column name.
          *
          * Type: STRING

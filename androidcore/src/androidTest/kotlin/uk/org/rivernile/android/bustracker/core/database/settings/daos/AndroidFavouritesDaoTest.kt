@@ -38,6 +38,7 @@ import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -81,6 +82,114 @@ class AndroidFavouritesDaoTest {
 
         whenever(contract.getContentUri())
                 .thenReturn(contentUri)
+    }
+
+    @Test
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsNull() {
+        val expectedProjection = arrayOf(FavouritesContract.COUNT)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this::addMockProvider)
+
+        val result = favouritesDao.isStopAddedAsFavourite("123456")
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsEmpty() {
+        val expectedProjection = arrayOf(FavouritesContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = favouritesDao.isStopAddedAsFavourite("123456")
+
+        assertFalse(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorReturnsCountOfZeroForStopCode() {
+        val expectedProjection = arrayOf(FavouritesContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf(0))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = favouritesDao.isStopAddedAsFavourite("123456")
+
+        assertFalse(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun isStopAddedAsFavouriteReturnsTrueWhenCursorReturnsCountOfGreaterThanZeroForStopCode() {
+        val expectedProjection = arrayOf(FavouritesContract.COUNT)
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf(1))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = favouritesDao.isStopAddedAsFavourite("123456")
+
+        assertTrue(result)
+        assertTrue(cursor.isClosed)
     }
 
     @Test

@@ -52,6 +52,14 @@ interface FavouritesDao {
     fun removeOnFavouritesChangedListener(listener: OnFavouritesChangedListener)
 
     /**
+     * Is the given `stopCode` added as a favourite stop?
+     *
+     * @param stopCode The `stopCode` to check.
+     * @return `true` if the stop is added as a favourite, otherwise `false`.
+     */
+    fun isStopAddedAsFavourite(stopCode: String): Boolean
+
+    /**
      * Add [FavouriteStop]s.
      *
      * @param favouriteStops The favourite stops to add.

@@ -78,6 +78,18 @@ internal class AndroidFavouritesDao @Inject constructor(
         }
     }
 
+    override fun isStopAddedAsFavourite(stopCode: String) = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(FavouritesContract.COUNT),
+            "${FavouritesContract.STOP_CODE} = ?",
+            arrayOf(stopCode),
+            null)?.use {
+        // Fill Cursor window.
+        it.count
+
+        return it.moveToFirst() && it.getInt(it.getColumnIndex(FavouritesContract.COUNT)) > 0
+    } ?: false
+
     override fun addFavouriteStops(favouriteStops: List<FavouriteStop>) =
             favouriteStops.map(this::mapToContentValues)
                     .toTypedArray()

@@ -103,10 +103,6 @@ dependencies {
     // Our core module
     api project(':core')
 
-    // Kotlin
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-
     // Android Architecture Components
     api "androidx.lifecycle:lifecycle-livedata:$architectureComponentsVersion"
     api "androidx.lifecycle:lifecycle-livedata-ktx:$architectureComponentsVersion"

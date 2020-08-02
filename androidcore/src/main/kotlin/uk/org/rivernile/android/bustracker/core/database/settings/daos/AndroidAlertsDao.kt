@@ -305,6 +305,34 @@ internal class AndroidAlertsDao @Inject constructor(
         }
     } ?: 0
 
+    override fun hasArrivalAlert(stopCode: String) = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(AlertsContract.COUNT),
+            "${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+            arrayOf(
+                    AlertsContract.ALERTS_TYPE_TIME.toString(),
+                    stopCode),
+            null)?.use {
+        // Fill the Cursor window.
+        it.count
+
+        return it.moveToFirst() && it.getInt(it.getColumnIndex(AlertsContract.COUNT)) > 0
+    }?: false
+
+    override fun hasProximityAlert(stopCode: String) = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(AlertsContract.COUNT),
+            "${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+            arrayOf(
+                    AlertsContract.ALERTS_TYPE_PROXIMITY.toString(),
+                    stopCode),
+            null)?.use {
+        // Fill the Cursor window.
+        it.count
+
+        return it.moveToFirst() && it.getInt(it.getColumnIndex(AlertsContract.COUNT)) > 0
+    }?: false
+
     /**
      * For all of the currently registers listeners, dispatch an alert change to them.
      */
