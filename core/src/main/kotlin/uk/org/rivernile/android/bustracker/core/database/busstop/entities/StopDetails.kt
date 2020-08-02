@@ -24,30 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.daos
-
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+package uk.org.rivernile.android.bustracker.core.database.busstop.entities
 
 /**
- * A fake implementation of [BusStopsDao].
+ * This class describes stop details for a single stop.
  *
+ * @property stopCode The stop code.
+ * @property stopName The name details for the stop.
+ * @property latitude The latitude of the stop.
+ * @property longitude The longitude of the stop.
  * @author Niall Scott
  */
-class FakeBusStopsDao : BusStopsDao {
-
-    override fun addOnBusStopsChangedListener(listener: BusStopsDao.OnBusStopsChangedListener) {
-
-    }
-
-    override fun removeOnBusStopsChangedListener(listener: BusStopsDao.OnBusStopsChangedListener) {
-
-    }
-
-    override fun getNameForStop(stopCode: String): StopName? = null
-
-    override fun getLocationForStop(stopCode: String): StopLocation? = null
-
-    override fun getStopDetails(stopCode: String): StopDetails? = null
-}
+data class StopDetails(
+        val stopCode: String,
+        val stopName: StopName,
+        val latitude: Double,
+        val longitude: Double)

@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 
@@ -35,6 +36,21 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopNa
  * @author Niall Scott
  */
 interface BusStopsDao {
+
+    /**
+     * Add a new [OnBusStopsChangedListener] to be informed when the bus stop data has changed.
+     *
+     * @param listener The listener to add.
+     */
+    fun addOnBusStopsChangedListener(listener: OnBusStopsChangedListener)
+
+    /**
+     * Remove a [OnBusStopsChangedListener] so it is no longer informed that bus stop data has
+     * changed.
+     *
+     * @param listener The listener to remove.
+     */
+    fun removeOnBusStopsChangedListener(listener: OnBusStopsChangedListener)
 
     /**
      * Given a stop code, get the name for this stop.
@@ -51,4 +67,24 @@ interface BusStopsDao {
      * @return The location of the stop, or `null` if the stop is not found.
      */
     fun getLocationForStop(stopCode: String): StopLocation?
+
+    /**
+     * Given a stop code, get the details for the stop.
+     *
+     * @param stopCode The stop to get the details for.
+     * @return The details for the given stop, or `null` if the stop is not found.
+     */
+    fun getStopDetails(stopCode: String): StopDetails?
+
+    /**
+     * This interface should be implemented to listen for changes to bus stops. Call
+     * [addOnBusStopsChangedListener] to register the listener.
+     */
+    interface OnBusStopsChangedListener {
+
+        /**
+         * This is called when bus stop data has changed.
+         */
+        fun onBusStopsChanged()
+    }
 }

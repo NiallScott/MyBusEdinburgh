@@ -27,7 +27,11 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
 import android.content.Context
+import android.database.ContentObserver
+import android.os.Handler
+import android.os.Looper
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import javax.inject.Inject
@@ -44,6 +48,34 @@ import javax.inject.Singleton
 internal class AndroidBusStopsDao @Inject constructor(
         private val context: Context,
         private val contract: BusStopsContract): BusStopsDao {
+
+    private val listeners = mutableListOf<BusStopsDao.OnBusStopsChangedListener>()
+    private val observer = Observer()
+
+    override fun addOnBusStopsChangedListener(listener: BusStopsDao.OnBusStopsChangedListener) {
+        synchronized(listeners) {
+            listeners.apply {
+                add(listener)
+
+                if (size == 1) {
+                    context.contentResolver.registerContentObserver(contract.getContentUri(), true,
+                            observer)
+                }
+            }
+        }
+    }
+
+    override fun removeOnBusStopsChangedListener(listener: BusStopsDao.OnBusStopsChangedListener) {
+        synchronized(listeners) {
+            listeners.apply {
+                remove(listener)
+
+                if (isEmpty()) {
+                    context.contentResolver.unregisterContentObserver(observer)
+                }
+            }
+        }
+    }
 
     override fun getNameForStop(stopCode: String) = context.contentResolver.query(
             contract.getContentUri(),
@@ -87,6 +119,60 @@ internal class AndroidBusStopsDao @Inject constructor(
                     it.getDouble(longitudeColumn))
         } else {
             null
+        }
+    }
+
+    override fun getStopDetails(stopCode: String) = context.contentResolver.query(
+            contract.getContentUri(),
+            arrayOf(
+                    BusStopsContract.STOP_NAME,
+                    BusStopsContract.LOCALITY,
+                    BusStopsContract.LATITUDE,
+                    BusStopsContract.LONGITUDE),
+            "${BusStopsContract.STOP_CODE} = ?",
+            arrayOf(stopCode),
+            null)?.use {
+        // Fill the Cursor window.
+        it.count
+
+        if (it.moveToFirst()) {
+            val stopNameColumn = it.getColumnIndex(BusStopsContract.STOP_NAME)
+            val localityColumn = it.getColumnIndex(BusStopsContract.LOCALITY)
+            val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
+            val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+
+            StopDetails(
+                    stopCode,
+                    StopName(
+                            it.getString(stopNameColumn),
+                            it.getString(localityColumn)),
+                    it.getDouble(latitudeColumn),
+                    it.getDouble(longitudeColumn))
+        } else {
+            null
+        }
+    }
+
+    /**
+     * For all of the currently registers listeners, dispatch an alert change to them.
+     */
+    private fun dispatchOnBusStopsChangedListeners() {
+        synchronized(listeners) {
+            listeners.forEach { listener ->
+                listener.onBusStopsChanged()
+            }
+        }
+    }
+
+    /**
+     * This inner class is used as the [ContentObserver] for observing changes to alerts.
+     */
+    private inner class Observer : ContentObserver(Handler(Looper.getMainLooper())) {
+
+        override fun deliverSelfNotifications() = true
+
+        override fun onChange(selfChange: Boolean) {
+            dispatchOnBusStopsChangedListeners()
         }
     }
 }

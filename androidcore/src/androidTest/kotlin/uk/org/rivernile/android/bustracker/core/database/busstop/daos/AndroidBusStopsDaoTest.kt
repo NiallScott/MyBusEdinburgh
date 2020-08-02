@@ -43,6 +43,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import kotlin.test.assertNull
@@ -310,6 +311,93 @@ class AndroidBusStopsDaoTest {
         assertTrue(cursor.isClosed)
     }
 
+    @Test
+    fun getStopDetailsWithNullCursorReturnsNull() {
+        val expectedProjection = getExpectedProjectionForStopDetails()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this::addMockProvider)
+
+        val result = busStopsDao.getStopDetails("123456")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getStopDetailsWithEmptyCursorReturnsNull() {
+        val expectedProjection = getExpectedProjectionForStopDetails()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+
+        val result = busStopsDao.getStopDetails("123456")
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopDetailsWithNonEmptyCursorReturnsStopDetails() {
+        val expectedProjection = getExpectedProjectionForStopDetails()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("Stop name", "Locality", 1.2, 3.4))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this::addMockProvider)
+        val expected = StopDetails(
+                "123456",
+                StopName(
+                        "Stop name",
+                        "Locality"),
+                1.2,
+                3.4)
+
+        val result = busStopsDao.getStopDetails("123456")
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
@@ -319,6 +407,12 @@ class AndroidBusStopsDaoTest {
             BusStopsContract.LOCALITY)
 
     private fun getExpectedProjectionForStopLocation() = arrayOf(
+            BusStopsContract.LATITUDE,
+            BusStopsContract.LONGITUDE)
+
+    private fun getExpectedProjectionForStopDetails() = arrayOf(
+            BusStopsContract.STOP_NAME,
+            BusStopsContract.LOCALITY,
             BusStopsContract.LATITUDE,
             BusStopsContract.LONGITUDE)
 }
