@@ -45,6 +45,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="busstop" translatable="false">%1$s (%2$s)</string>
     <string name="busstop_locality" translatable="false">%1$s, %2$s (%3$s)</string>
+    <string name="busstop_name_only_with_locality" translatable="false">%1$s, %2$s</string>
 
     <!--
     *******************

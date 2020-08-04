@@ -41,6 +41,19 @@ class TextFormattingUtils @Inject internal constructor(
         private val context: Context) {
 
     /**
+     * Format a bus stop name [String] without including the stop code.
+     *
+     * @param stopName The stop name data.
+     * @return The formatted stop name, excluding the stop code.
+     */
+    fun formatBusStopName(stopName: StopName) =
+            stopName.locality
+                    ?.ifEmpty { null }
+                    ?.let {
+                context.getString(R.string.busstop_name_only_with_locality, stopName.name, it)
+            } ?: stopName.name
+
+    /**
      * Format a bus stop name [String] containing the stop code.
      *
      * @param stopCode The stop code.
@@ -49,7 +62,9 @@ class TextFormattingUtils @Inject internal constructor(
      */
     fun formatBusStopNameWithStopCode(stopCode: String, stopName: StopName?) =
             stopName?.let {
-                it.locality?.let { locality ->
+                it.locality
+                        ?.ifEmpty { null }
+                        ?.let { locality ->
                     context.getString(R.string.busstop_locality, it.name, locality, stopCode)
                 } ?: context.getString(R.string.busstop, it.name, stopCode)
             } ?: stopCode

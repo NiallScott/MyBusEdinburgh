@@ -32,6 +32,7 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import uk.org.rivernile.android.bustracker.ui.about.AboutViewModel
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivityViewModel
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.ClearSearchHistoryDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragmentViewModel
@@ -43,6 +44,19 @@ import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragmentViewModel
  */
 @Module
 interface ViewModelModule {
+
+    /**
+     * Inject a [DisplayStopDataActivityViewModel] when requested.
+     *
+     * @param viewModel A [DisplayStopDataActivityViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(DisplayStopDataActivityViewModel::class)
+    fun bindDisplayStopDataActivityViewModel(
+            viewModel: DisplayStopDataActivityViewModel): ViewModel
 
     /**
      * Inject an [AboutViewModel] when requested.
