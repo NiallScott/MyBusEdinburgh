@@ -95,7 +95,7 @@ public class StopDetailsFragment extends Fragment implements LoaderManager.Loade
      * @return A new instance of this {@link Fragment}.
      */
     @NonNull
-    public static StopDetailsFragment newInstance(@NonNull final String stopCode) {
+    public static StopDetailsFragment newInstance(@Nullable final String stopCode) {
         final StopDetailsFragment fragment = new StopDetailsFragment();
         final Bundle args = new Bundle();
         args.putString(ARG_STOP_CODE, stopCode);

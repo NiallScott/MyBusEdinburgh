@@ -140,7 +140,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         viewPager.apply {
             pageMargin = resources.getDimensionPixelSize(R.dimen.padding_default)
             adapter = StopDataPagerAdapter(this@DisplayStopDataActivity, supportFragmentManager,
-                    viewModel.stopCode!!) // TODO: eliminate double-bang.
+                    viewModel.stopCode)
         }.let(tabLayout::setupWithViewPager)
 
         appBarLayout.addOnOffsetChangedListener(appBarOffsetChangedListener)

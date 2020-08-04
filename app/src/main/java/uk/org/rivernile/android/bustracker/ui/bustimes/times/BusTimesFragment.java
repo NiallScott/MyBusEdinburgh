@@ -137,7 +137,7 @@ public class BusTimesFragment extends Fragment implements LoaderManager.LoaderCa
      * @return A new instance of this {@link Fragment}.
      */
     @NonNull
-    public static BusTimesFragment newInstance(@NonNull final String stopCode) {
+    public static BusTimesFragment newInstance(@Nullable final String stopCode) {
         final BusTimesFragment fragment = new BusTimesFragment();
         final Bundle args = new Bundle();
         args.putString(ARG_STOP_CODE, stopCode);
