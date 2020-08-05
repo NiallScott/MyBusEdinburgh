@@ -145,6 +145,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
         appBarLayout.addOnOffsetChangedListener(appBarOffsetChangedListener)
 
+        viewModel.distinctStopCodeLiveData.observe(this, Observer(this::handleStopCode))
         viewModel.busStopDetails.observe(this, Observer(this::handleBusStop))
         viewModel.isFavouriteLiveData.observe(this, Observer(this::configureFavouriteMenuItem))
         viewModel.hasArrivalAlertLiveData.observe(this,
@@ -216,35 +217,34 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     override fun androidInjector() = dispatchingAndroidInjector
 
     /**
+     * Handle a change to the stop code. This sets any UI which displays the stop code.
+     *
+     * @param stopCode The stop code this instance is displaying.
+     */
+    private fun handleStopCode(stopCode: String?) {
+        (stopCode?.ifEmpty { null }?.let {
+            stopCode
+        } ?: getString(R.string.displaystopdata_error_stop_code_missing))
+                .let {
+                    txtStopCode.text = it
+                    supportActionBar?.subtitle = it
+                }
+    }
+
+    /**
      * Handle the bus stop data being loaded. It also caters for the case when the details are
      * `null`, when the stop isn't known.
      *
      * @param details The stop details.
      */
     private fun handleBusStop(details: StopDetails?) {
-        details?.also {
-            val stopCode = it.stopCode
-            val nameToDisplay = textFormattingUtils.formatBusStopName(it.stopName)
-
-            txtStopName.text = nameToDisplay
-            txtStopCode.text = stopCode
-
-            supportActionBar?.apply {
-                title = nameToDisplay
-                subtitle = stopCode
-            }
-        } ?: run {
-            val stopCode = viewModel.stopCode
-            val nameToDisplay = getString(R.string.displaystopdata_unknown_stop_name)
-
-            txtStopName.text = nameToDisplay
-            txtStopCode.text = stopCode
-
-            supportActionBar?.apply {
-                title = nameToDisplay
-                subtitle = stopCode
-            }
-        }
+        (details?.let {
+            textFormattingUtils.formatBusStopName(it.stopName)
+        } ?: getString(R.string.displaystopdata_error_unknown_stop_name))
+                .let {
+                    txtStopName.text = it
+                    supportActionBar?.title = it
+                }
 
         configureStreetViewMenuItem(details)
     }
@@ -255,20 +255,20 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param isFavourite Is the stop added as a favourite?
      */
     private fun configureFavouriteMenuItem(isFavourite: Boolean?) {
-        isFavourite?.let {
-            favouriteMenuItem?.let { menuItem ->
-                menuItem.isEnabled = true
+        favouriteMenuItem?.apply {
+            // Is enabled when we know either way the stop is a favourite or not.
+            isEnabled = isFavourite != null
 
-                if (it) {
-                    menuItem.setTitle(R.string.displaystopdata_menu_favourite_rem)
-                            .setIcon(R.drawable.ic_action_star)
-                } else {
-                    menuItem.setTitle(R.string.displaystopdata_menu_favourite_add)
-                            .setIcon(R.drawable.ic_action_star_border)
-                }
+            if (isFavourite == true) {
+                // Only in the case when the stop is a favourite should the removal view be shown.
+                setTitle(R.string.displaystopdata_menu_favourite_rem)
+                setIcon(R.drawable.ic_action_star)
+            } else {
+                // This is either false or null - show the addition case. This will be disabled when
+                // null.
+                setTitle(R.string.displaystopdata_menu_favourite_add)
+                setIcon(R.drawable.ic_action_star_border)
             }
-        } ?: run {
-            favouriteMenuItem?.isEnabled = false
         }
     }
 
@@ -279,20 +279,16 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param isArrivalAlert Is the stop added as an arrival alert?
      */
     private fun configureArrivalAlertMenuItem(isArrivalAlert: Boolean?) {
-        isArrivalAlert?.let {
-            arrivalAlertMenuItem?.let { menuItem ->
-                menuItem.isEnabled = true
+        arrivalAlertMenuItem?.apply {
+            isEnabled = isArrivalAlert != null
 
-                if (it) {
-                    menuItem.setTitle(R.string.displaystopdata_menu_time_rem)
-                            .setIcon(R.drawable.ic_action_alarm_off)
-                } else {
-                    menuItem.setTitle(R.string.displaystopdata_menu_time_add)
-                            .setIcon(R.drawable.ic_action_alarm_add)
-                }
+            if (isArrivalAlert == true) {
+                setTitle(R.string.displaystopdata_menu_time_rem)
+                setIcon(R.drawable.ic_action_alarm_off)
+            } else {
+                setTitle(R.string.displaystopdata_menu_time_add)
+                setIcon(R.drawable.ic_action_alarm_add)
             }
-        } ?: run {
-            arrivalAlertMenuItem?.isEnabled = false
         }
     }
 
@@ -303,20 +299,16 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param isProximityAlert Is the stop added as a proximity alert?
      */
     private fun configureProximityAlertMenuItem(isProximityAlert: Boolean?) {
-        isProximityAlert?.let {
-            proximityAlertMenuItem?.let { menuItem ->
-                menuItem.isEnabled = true
+        proximityAlertMenuItem?.apply {
+            isEnabled = isProximityAlert != null
 
-                if (it) {
-                    menuItem.setTitle(R.string.displaystopdata_menu_prox_rem)
-                            .setIcon(R.drawable.ic_action_location_off)
-                } else {
-                    menuItem.setTitle(R.string.displaystopdata_menu_prox_add)
-                            .setIcon(R.drawable.ic_action_location_on)
-                }
+            if (isProximityAlert == true) {
+                setTitle(R.string.displaystopdata_menu_prox_rem)
+                setIcon(R.drawable.ic_action_location_off)
+            } else {
+                setTitle(R.string.displaystopdata_menu_prox_add)
+                setIcon(R.drawable.ic_action_location_on)
             }
-        } ?: run {
-            proximityAlertMenuItem?.isEnabled = false
         }
     }
 

@@ -31,6 +31,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -55,8 +56,13 @@ class DisplayStopDataActivityViewModel @Inject constructor(
         private val favouritesRepository: FavouritesRepository,
         private val alertsRepository: AlertsRepository) : ViewModel() {
 
-    private val stopCodeLiveData = MutableLiveData<String>()
-    private val distinctStopCodeLiveData = stopCodeLiveData.distinctUntilChanged()
+    private val stopCodeLiveData = MutableLiveData<String?>()
+    /**
+     * This exposes the stop code as a [LiveData]. It is distinct as it only delivers stop code
+     * changes when an actual change occurs. If an update is made to the stop code that is identical
+     * to the previously held code, this won't be delivered in this [LiveData].
+     */
+    val distinctStopCodeLiveData = stopCodeLiveData.distinctUntilChanged()
 
     /**
      * This [LiveData] contains [StopDetails] for the given [stopCode].
@@ -129,11 +135,15 @@ class DisplayStopDataActivityViewModel @Inject constructor(
      * This is called when the favourite menu item has been clicked.
      */
     fun onFavouriteMenuItemClicked() {
-        stopCode?.let {
-            if (isFavouriteLiveData.value == true) {
-                showRemoveFavourite.value = it
-            } else {
-                showAddFavourite.value = it
+        // Ignore stop code null or empty.
+        stopCode?.ifEmpty { null }?.let { sc ->
+            // Ignore when isFavourite is null.
+            isFavouriteLiveData.value?.let {
+                if (it) {
+                    showRemoveFavourite.value = sc
+                } else {
+                    showAddFavourite.value = sc
+                }
             }
         }
     }
@@ -142,11 +152,13 @@ class DisplayStopDataActivityViewModel @Inject constructor(
      * This is called when the arrival alert menu item has been clicked.
      */
     fun onArrivalAlertMenuItemClicked() {
-        stopCode?.let {
-            if (hasArrivalAlertLiveData.value == true) {
-                showRemoveArrivalAlert.value = it
-            } else {
-                showAddArrivalAlert.value = it
+        stopCode?.ifEmpty { null }?.let { sc ->
+            hasArrivalAlertLiveData.value?.let {
+                if (it) {
+                    showRemoveArrivalAlert.value = sc
+                } else {
+                    showAddArrivalAlert.value = sc
+                }
             }
         }
     }
@@ -155,11 +167,13 @@ class DisplayStopDataActivityViewModel @Inject constructor(
      * This is called when the proximity alert menu item has been clicked.
      */
     fun onProximityAlertMenuItemClicked() {
-        stopCode?.let {
-            if (hasProximityAlertLiveData.value == true) {
-                showRemoveProximityAlert.value = it
-            } else {
-                showAddProximityAlert.value = it
+        stopCode?.ifEmpty { null }?.let { sc ->
+            hasProximityAlertLiveData.value?.let {
+                if (it) {
+                    showRemoveProximityAlert.value = sc
+                } else {
+                    showAddProximityAlert.value = sc
+                }
             }
         }
     }
@@ -188,40 +202,52 @@ class DisplayStopDataActivityViewModel @Inject constructor(
 
     /**
      * Load whether the stop is added as a favourite or not. If the stop code is set as `null`, then
-     * `false` will be set.
+     * `null` will be set.
      *
      * @param stopCode The stop code to load.
      * @return A [LiveData] which contains the favourite status of the stop.
      */
-    private fun loadIsFavourite(stopCode: String?): LiveData<Boolean> = stopCode?.let {
-        favouritesRepository.isStopAddedAsFavouriteFlow(it)
-                .distinctUntilChanged()
-                .asLiveData()
-    } ?: MutableLiveData(false)
+    private fun loadIsFavourite(stopCode: String?): LiveData<Boolean?> =
+            stopCode?.ifEmpty { null }?.let {
+                liveData<Boolean?> {
+                    emit(null) // null while loading.
+                    emitSource(favouritesRepository.isStopAddedAsFavouriteFlow(it)
+                            .distinctUntilChanged()
+                            .asLiveData())
+                }
+            } ?: MutableLiveData<Boolean?>(null)
 
     /**
      * Load whether the stop is added as an arrival alert or not. If the stop code is set as `null`,
-     * then `false` will be set.
+     * then `null` will be set.
      *
      * @param stopCode The stop code to load.
      * @return A [LiveData] which contains the arrival alert status of the stop.
      */
-    private fun loadHasArrivalAlert(stopCode: String?): LiveData<Boolean> = stopCode?.let {
-        alertsRepository.hasArrivalAlertFlow(it)
-                .distinctUntilChanged()
-                .asLiveData()
-    } ?: MutableLiveData(false)
+    private fun loadHasArrivalAlert(stopCode: String?): LiveData<Boolean?> =
+            stopCode?.ifEmpty { null }?.let {
+                liveData<Boolean?> {
+                    emit(null) // null while loading.
+                    emitSource(alertsRepository.hasArrivalAlertFlow(it)
+                            .distinctUntilChanged()
+                            .asLiveData())
+                }
+            } ?: MutableLiveData<Boolean?>(null)
 
     /**
      * Load whether the stop is added as a proximity alert or not. If the stop code is set as
-     * `null`, then `false` will be set.
+     * `null`, then `null` will be set.
      *
      * @param stopCode The stop code to load.
      * @return A [LiveData] which contains the proximity alert status of the stop.
      */
-    private fun loadHasProximityAlert(stopCode: String?): LiveData<Boolean> = stopCode?.let {
-        alertsRepository.hasProximityAlertFlow(it)
-                .distinctUntilChanged()
-                .asLiveData()
-    } ?: MutableLiveData(false)
+    private fun loadHasProximityAlert(stopCode: String?): LiveData<Boolean?> =
+            stopCode?.ifEmpty { null }?.let {
+                liveData<Boolean?> {
+                    emit(null) // null while loading.
+                    emitSource(alertsRepository.hasProximityAlertFlow(it)
+                            .distinctUntilChanged()
+                            .asLiveData())
+                }
+            } ?: MutableLiveData<Boolean?>(null)
 }

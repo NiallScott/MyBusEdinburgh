@@ -135,7 +135,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_title">Live departures</string>
     <string name="displaystopdata_tab_times">Times</string>
     <string name="displaystopdata_tab_details">Details</string>
-    <string name="displaystopdata_unknown_stop_name">Unknown stop name</string>
+    <string name="displaystopdata_error_unknown_stop_name">Unknown stop name</string>
+    <string name="displaystopdata_error_stop_code_missing">Unknown stop code</string>
     <string name="displaystopdata_error_street_view_missing">Street View not installed</string>
 
     <!--
