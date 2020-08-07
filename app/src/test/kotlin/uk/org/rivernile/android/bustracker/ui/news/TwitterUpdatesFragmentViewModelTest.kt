@@ -27,12 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.news
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import com.nhaarman.mockitokotlin2.inOrder
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,6 +44,8 @@ import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.UnrecognisedServerErrorException
 import uk.org.rivernile.android.bustracker.core.twitter.Result
 import uk.org.rivernile.android.bustracker.core.twitter.TwitterRepository
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
 import java.io.IOException
 
 /**
@@ -53,9 +53,13 @@ import java.io.IOException
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class TwitterUpdatesFragmentViewModelTest {
 
+    @Rule
+    @JvmField
+    val coroutineRule = MainCoroutineRule()
     @Rule
     @JvmField
     val rule = InstantTaskExecutorRule()
@@ -63,8 +67,7 @@ class TwitterUpdatesFragmentViewModelTest {
     @Mock
     private lateinit var twitterRepository: TwitterRepository
 
-    @Mock
-    private lateinit var uiStateObserver: Observer<UiState>
+    private val uiStateObserver = LiveDataTestObserver<UiState>()
     private val tweets = listOf(mock<Tweet>())
 
     private lateinit var viewModel: TwitterUpdatesFragmentViewModel
@@ -76,192 +79,184 @@ class TwitterUpdatesFragmentViewModelTest {
 
     @Test
     fun initialStateBeginsLoadingTweets() {
-        val latestTweetsLiveData = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow = flow { emit(
+                Result.InProgress) }
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData)
+                .thenReturn(flow)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
 
-        verify(uiStateObserver)
-                .onChanged(UiState.ShowEmptyProgress)
+        uiStateObserver.assertValues(UiState.ShowEmptyProgress)
     }
 
     @Test
     fun errorAfterInitialStateShowsEmptyErrorState() {
-        val latestTweetsLiveData = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow = flow {
+            emit(Result.InProgress)
+            emit(Result.Error(NoConnectivityException()))
+        }
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData)
+                .thenReturn(flow)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        latestTweetsLiveData.value = Result.Error(NoConnectivityException())
 
-        inOrder(uiStateObserver) {
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyError(Error.NO_CONNECTIVITY))
-        }
+        uiStateObserver.assertValues(
+                UiState.ShowEmptyProgress,
+                UiState.ShowEmptyError(Error.NO_CONNECTIVITY))
     }
 
     @Test
     fun nullSuccessAfterInitialStateShowsEmptyErrorState() {
-        val latestTweetsLiveData = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow = flow {
+            emit(Result.InProgress)
+            emit(Result.Success(null))
+        }
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData)
+                .thenReturn(flow)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        latestTweetsLiveData.value = Result.Success(null)
 
-        inOrder(uiStateObserver) {
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyError(Error.NO_DATA))
-        }
+        uiStateObserver.assertValues(
+                UiState.ShowEmptyProgress,
+                UiState.ShowEmptyError(Error.NO_DATA))
     }
 
     @Test
     fun emptySuccessAfterInitialStateShowsEmptyErrorState() {
-        val latestTweetsLiveData = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow = flow<Result<List<Tweet>>> {
+            emit(Result.InProgress)
+            emit(Result.Success(emptyList()))
+        }
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData)
+                .thenReturn(flow)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        latestTweetsLiveData.value = Result.Success(null)
 
-        inOrder(uiStateObserver) {
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyError(Error.NO_DATA))
-        }
+        uiStateObserver.assertValues(
+                UiState.ShowEmptyProgress,
+                UiState.ShowEmptyError(Error.NO_DATA))
     }
 
     @Test
     fun nonEmptySuccessAfterInitialStateShowsContentState() {
-        val latestTweetsLiveData = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow = flow {
+            emit(Result.InProgress)
+            emit(Result.Success(tweets))
+        }
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData)
+                .thenReturn(flow)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        latestTweetsLiveData.value = Result.Success(tweets)
 
-        inOrder(uiStateObserver) {
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowContent(tweets))
-        }
+        uiStateObserver.assertValues(
+                UiState.ShowEmptyProgress,
+                UiState.ShowContent(tweets))
     }
 
     @Test
     fun successiveErrorsAfterInitialStateContinuesToShowEmptyErrorState() {
-        val latestTweetsLiveData1 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
-        val latestTweetsLiveData2 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
-        val latestTweetsLiveData3 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
-        val latestTweetsLiveData4 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow1 = flow {
+            emit(Result.InProgress)
+            emit(Result.Error(NoConnectivityException()))
+        }
+        val flow2 = flow {
+            emit(Result.InProgress)
+            emit(Result.Error(NetworkException(IOException())))
+        }
+        val flow3 = flow {
+            emit(Result.InProgress)
+            emit(Result.Error(UnrecognisedServerErrorException()))
+        }
+        val flow4 = flow {
+            emit(Result.InProgress)
+            emit(Result.Error(AuthenticationException()))
+        }
+
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData1, latestTweetsLiveData2, latestTweetsLiveData3,
-                        latestTweetsLiveData4)
+                .thenReturn(flow1, flow2, flow3, flow4)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        latestTweetsLiveData1.value = Result.Error(NoConnectivityException())
         viewModel.onRefreshMenuItemClicked()
-        latestTweetsLiveData2.value = Result.Error(NetworkException(IOException()))
         viewModel.onSwipeToRefresh()
-        latestTweetsLiveData3.value = Result.Error(UnrecognisedServerErrorException())
         viewModel.onRefreshMenuItemClicked()
-        latestTweetsLiveData4.value = Result.Error(AuthenticationException())
 
-        inOrder(uiStateObserver) {
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyError(Error.NO_CONNECTIVITY))
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyError(Error.COMMUNICATION))
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyError(Error.SERVER))
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyError(Error.SERVER))
-        }
+        uiStateObserver.assertValues(
+                UiState.ShowEmptyProgress,
+                UiState.ShowEmptyError(Error.NO_CONNECTIVITY),
+                UiState.ShowEmptyProgress,
+                UiState.ShowEmptyError(Error.COMMUNICATION),
+                UiState.ShowEmptyProgress,
+                UiState.ShowEmptyError(Error.SERVER),
+                UiState.ShowEmptyProgress,
+                UiState.ShowEmptyError(Error.SERVER))
     }
 
     @Test
     fun errorAfterContentShownShowsRefreshErrorState() {
-        val latestTweetsLiveData1 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
-        val latestTweetsLiveData2 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow1 = flow {
+            emit(Result.InProgress)
+            emit(Result.Success(tweets))
+        }
+        val flow2 = flow {
+            emit(Result.InProgress)
+            emit(Result.Error(NoConnectivityException()))
+        }
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData1, latestTweetsLiveData2)
+                .thenReturn(flow1, flow2)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        latestTweetsLiveData1.value = Result.Success(tweets)
         viewModel.onRefreshMenuItemClicked()
-        latestTweetsLiveData2.value = Result.Error(NoConnectivityException())
 
-        inOrder(uiStateObserver) {
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowContent(tweets))
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowPopulatedProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowRefreshError(Error.NO_CONNECTIVITY))
-        }
+        uiStateObserver.assertValues(
+                UiState.ShowEmptyProgress,
+                UiState.ShowContent(tweets),
+                UiState.ShowPopulatedProgress,
+                UiState.ShowRefreshError(Error.NO_CONNECTIVITY))
     }
 
     @Test
     fun noDataErrorAfterContentShownContinuesToShowContentAndDisplaysError() {
-        val latestTweetsLiveData1 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
-        val latestTweetsLiveData2 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow1 = flow {
+            emit(Result.InProgress)
+            emit(Result.Success(tweets))
+        }
+        val flow2 = flow {
+            emit(Result.InProgress)
+            emit(Result.Success(null))
+        }
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData1, latestTweetsLiveData2)
+                .thenReturn(flow1, flow2)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        latestTweetsLiveData1.value = Result.Success(tweets)
         viewModel.onRefreshMenuItemClicked()
-        latestTweetsLiveData2.value = Result.Success(null)
 
-        inOrder(uiStateObserver) {
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowContent(tweets))
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowPopulatedProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowRefreshError(Error.NO_DATA))
-        }
+        uiStateObserver.assertValues(
+                UiState.ShowEmptyProgress,
+                UiState.ShowContent(tweets),
+                UiState.ShowPopulatedProgress,
+                UiState.ShowRefreshError(Error.NO_DATA))
     }
 
     @Test
     fun successAfterSuccessContinuesToShowSuccess() {
-        val latestTweetsLiveData1 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
-        val latestTweetsLiveData2 = MutableLiveData<Result<List<Tweet>?>>(Result.InProgress)
+        val flow1 = flow {
+            emit(Result.InProgress)
+            emit(Result.Success(tweets))
+        }
+        val flow2 = flow {
+            emit(Result.InProgress)
+            emit(Result.Success(tweets))
+        }
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(latestTweetsLiveData1, latestTweetsLiveData2)
+                .thenReturn(flow1, flow2)
 
         viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        latestTweetsLiveData1.value = Result.Success(tweets)
         viewModel.onRefreshMenuItemClicked()
-        latestTweetsLiveData2.value = Result.Success(tweets)
 
-        inOrder(uiStateObserver) {
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowEmptyProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowContent(tweets))
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowPopulatedProgress)
-            verify(uiStateObserver)
-                    .onChanged(UiState.ShowContent(tweets))
-        }
+        uiStateObserver.assertValues(
+                UiState.ShowEmptyProgress,
+                UiState.ShowContent(tweets),
+                UiState.ShowPopulatedProgress,
+                UiState.ShowContent(tweets))
     }
 }

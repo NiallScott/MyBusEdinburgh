@@ -26,9 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.twitter
 
-import androidx.lifecycle.liveData
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
@@ -43,21 +44,19 @@ import javax.inject.Inject
  * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
-class TwitterRepository @Inject constructor(
+class TwitterRepository @Inject internal constructor(
         private val twitterEndpoint: TwitterEndpoint,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
-     * Get a [androidx.lifecycle.LiveData] object which contains the [Result] of loading the latest
-     * [Tweet]s.
+     * Get a [Flow] object which contains the [Result] of loading the latest [Tweet]s.
      *
      * This instance will have loading events propagated to it, including the in-progress state,
      * success state and the error states.
      *
-     * @return A [androidx.lifecycle.LiveData] object containing the [Result] of loading the latest
-     * [Tweet]s.
+     * @return A [Flow] object containing the [Result] of loading the latest [Tweet]s.
      */
-    fun getLatestTweets() = liveData {
+    fun getLatestTweets(): Flow<Result<List<Tweet>?>> = flow {
         emit(Result.InProgress)
         emit(fetchLatestTweets())
     }

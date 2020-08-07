@@ -26,8 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.twitter
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
@@ -45,6 +43,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterRequest
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
  * Tests for [TwitterRepository].
@@ -58,17 +57,12 @@ class TwitterRepositoryTest {
     @Rule
     @JvmField
     val coroutineRule = MainCoroutineRule()
-    @Rule
-    @JvmField
-    val liveDataTaskExecutor = InstantTaskExecutorRule()
 
     @Mock
     private lateinit var twitterEndpoint: TwitterEndpoint
 
     @Mock
     private lateinit var latestTweetsRequest: TwitterRequest<List<Tweet>?>
-    @Mock
-    private lateinit var latestTweetsObserver: Observer<Result<List<Tweet>?>>
 
     private lateinit var repository: TwitterRepository
 
@@ -81,22 +75,17 @@ class TwitterRepositoryTest {
     }
 
     @Test
-    fun getLatestTweetsSetsInitialStateToInProgress() = coroutineRule.runBlockingTest {
-        repository.getLatestTweets().observeForever(latestTweetsObserver)
-
-        verify(latestTweetsObserver)
-                .onChanged(Result.InProgress)
-    }
-
-    @Test
     fun getLatestTweetsWithNullListOfTweetsReturnsSuccess() = coroutineRule.runBlockingTest {
         whenever(latestTweetsRequest.performRequest())
                 .thenReturn(null)
 
-        repository.getLatestTweets().observeForever(latestTweetsObserver)
+        val observer = repository.getLatestTweets().test(this)
+        observer.finish()
 
-        verify(latestTweetsObserver)
-                .onChanged(Result.Success(null))
+        observer.assertValues(
+                Result.InProgress,
+                Result.Success(
+                        null))
     }
 
     @Test
@@ -104,10 +93,13 @@ class TwitterRepositoryTest {
         whenever(latestTweetsRequest.performRequest())
                 .thenReturn(emptyList())
 
-        repository.getLatestTweets().observeForever(latestTweetsObserver)
+        val observer = repository.getLatestTweets().test(this)
+        observer.finish()
 
-        verify(latestTweetsObserver)
-                .onChanged(Result.Success(emptyList()))
+        observer.assertValues(
+                Result.InProgress,
+                Result.Success(
+                        emptyList()))
     }
 
     @Test
@@ -117,10 +109,13 @@ class TwitterRepositoryTest {
         whenever(latestTweetsRequest.performRequest())
                 .thenReturn(result)
 
-        repository.getLatestTweets().observeForever(latestTweetsObserver)
+        val observer = repository.getLatestTweets().test(this)
+        observer.finish()
 
-        verify(latestTweetsObserver)
-                .onChanged(Result.Success(result))
+        observer.assertValues(
+                Result.InProgress,
+                Result.Success(
+                        result))
     }
 
     @Test
@@ -129,10 +124,13 @@ class TwitterRepositoryTest {
         whenever(latestTweetsRequest.performRequest())
                 .thenThrow(exception)
 
-        repository.getLatestTweets().observeForever(latestTweetsObserver)
+        val observer = repository.getLatestTweets().test(this)
+        observer.finish()
 
-        verify(latestTweetsObserver)
-                .onChanged(Result.Error(exception))
+        observer.assertValues(
+                Result.InProgress,
+                Result.Error(
+                        exception))
     }
 
     @Test
@@ -140,7 +138,8 @@ class TwitterRepositoryTest {
         whenever(latestTweetsRequest.performRequest())
                 .thenThrow(CancellationException::class.java)
 
-        repository.getLatestTweets().observeForever(latestTweetsObserver)
+        val observer = repository.getLatestTweets().test(this)
+        observer.finish()
 
         verify(latestTweetsRequest)
                 .cancel()
