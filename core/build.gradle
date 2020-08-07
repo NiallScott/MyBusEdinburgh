@@ -33,7 +33,6 @@ jar {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
-        androidTest.java.srcDirs += 'src/androidTest/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
     }
 }
@@ -58,6 +57,7 @@ dependencies {
     // Retrofit
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
 
+    // Testing
     testImplementation project(':testutils')
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"

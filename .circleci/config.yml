@@ -9,17 +9,17 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum "core/build.gradle" }}-{{ checksum "androidcore/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum "core/build.gradle" }}-{{ checksum "androidcore/build.gradle" }}-{{ checksum "edinburgh/build.gradle" }}
       - run:
           name: Download Dependencies
           command: ./gradlew androidDependencies
       - save_cache:
           paths:
             - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum "core/build.gradle" }}-{{ checksum "androidcore/build.gradle" }}
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum "core/build.gradle" }}-{{ checksum "androidcore/build.gradle" }}-{{ checksum "edinburgh/build.gradle" }}
       - run:
           name: Run Tests
-          command: ./gradlew clean :core:test :androidcore:testEdinburghDebugUnitTest :app:testEdinburghDebugUnitTest
+          command: ./gradlew clean :core:test :edinburgh:test :androidcore:testEdinburghDebugUnitTest :app:testEdinburghDebugUnitTest
       - run:
           name: Save test results
           command: |

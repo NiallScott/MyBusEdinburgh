@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,8 @@ package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
  * @property isDisrupted `true` if there is a current disruption affecting this stop.
  * @author Niall Scott
  */
-data class Stop(val stopCode: String,
-                val stopName: String?,
-                val services: List<Service>,
-                val isDisrupted: Boolean)
+data class Stop(
+        val stopCode: String,
+        val stopName: String?,
+        val services: List<Service>,
+        val isDisrupted: Boolean)

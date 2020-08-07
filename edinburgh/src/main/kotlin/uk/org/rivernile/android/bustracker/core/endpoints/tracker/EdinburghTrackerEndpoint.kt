@@ -46,7 +46,7 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Singleton
-internal class EdinburghTrackerEndpoint @Inject constructor(
+class EdinburghTrackerEndpoint @Inject internal constructor(
         private val api: EdinburghBusTrackerApi,
         private val apiKeyGenerator: ApiKeyGenerator,
         private val liveTimesMapper: LiveTimesMapper,

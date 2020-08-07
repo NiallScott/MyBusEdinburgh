@@ -103,6 +103,9 @@ dependencies {
     // Our core module
     api project(':core')
 
+    // City implementations
+    edinburghApi project(':edinburgh')
+
     // Android Architecture Components
     api "androidx.lifecycle:lifecycle-livedata:$architectureComponentsVersion"
     api "androidx.lifecycle:lifecycle-livedata-ktx:$architectureComponentsVersion"
@@ -118,9 +121,6 @@ dependencies {
 
     // Retrofit
     api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
-
-    // City APIs
-    edinburghApi 'uk.org.rivernile.edinburghbustrackerapi:api:1.2.0'
 
     // Test dependencies
     androidTestImplementation project(':testutils')

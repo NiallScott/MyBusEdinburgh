@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,16 +46,17 @@ import java.util.Date
  * @property isPartRoute `true` if the vehicle is only travelling along part of its published route.
  * @author Niall Scott
  */
-data class Vehicle(val destination: String?,
-                   val departureTime: Date,
-                   val departureMinutes: Int,
-                   val terminus: String?,
-                   val journeyId: String?,
-                   val isEstimatedTime: Boolean,
-                   val isDelayed: Boolean,
-                   val isDiverted: Boolean,
-                   val isTerminus: Boolean,
-                   val isPartRoute: Boolean): Comparable<Vehicle> {
+data class Vehicle(
+        val destination: String?,
+        val departureTime: Date,
+        val departureMinutes: Int,
+        val terminus: String?,
+        val journeyId: String?,
+        val isEstimatedTime: Boolean,
+        val isDelayed: Boolean,
+        val isDiverted: Boolean,
+        val isTerminus: Boolean,
+        val isPartRoute: Boolean): Comparable<Vehicle> {
 
     override fun compareTo(other: Vehicle) = departureTime.compareTo(other.departureTime)
 }
