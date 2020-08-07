@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.news
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.AuthenticationException
@@ -52,7 +53,7 @@ class TwitterUpdatesFragmentViewModel @Inject constructor(
 
     private val refreshTweets = MutableLiveData(Unit)
     private val loadTweets = refreshTweets.switchMap {
-        twitterRepository.getLatestTweets()
+        twitterRepository.getLatestTweets().asLiveData()
     }
 
     /**
