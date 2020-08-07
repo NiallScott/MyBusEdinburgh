@@ -194,11 +194,12 @@ class DisplayStopDataActivityViewModel @Inject constructor(
      * @param stopCode The stop code to load.
      * @return A [LiveData] which contains the details for the stop.
      */
-    private fun loadBusStopDetails(stopCode: String?): LiveData<StopDetails?> = stopCode?.let {
-        busStopsRepository.getBusStopDetailsFlow(it)
-                .distinctUntilChanged()
-                .asLiveData()
-    } ?: MutableLiveData<StopDetails?>(null)
+    private fun loadBusStopDetails(stopCode: String?): LiveData<StopDetails?> =
+            stopCode?.ifEmpty { null }?.let {
+                busStopsRepository.getBusStopDetailsFlow(it)
+                        .distinctUntilChanged()
+                        .asLiveData()
+            } ?: MutableLiveData<StopDetails?>(null)
 
     /**
      * Load whether the stop is added as a favourite or not. If the stop code is set as `null`, then
