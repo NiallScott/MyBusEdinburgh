@@ -84,8 +84,7 @@ class TwitterRepositoryTest {
 
         observer.assertValues(
                 Result.InProgress,
-                Result.Success(
-                        null))
+                Result.Success(null))
     }
 
     @Test
@@ -98,8 +97,7 @@ class TwitterRepositoryTest {
 
         observer.assertValues(
                 Result.InProgress,
-                Result.Success(
-                        emptyList()))
+                Result.Success(emptyList()))
     }
 
     @Test
@@ -114,8 +112,7 @@ class TwitterRepositoryTest {
 
         observer.assertValues(
                 Result.InProgress,
-                Result.Success(
-                        result))
+                Result.Success(result))
     }
 
     @Test
@@ -129,8 +126,7 @@ class TwitterRepositoryTest {
 
         observer.assertValues(
                 Result.InProgress,
-                Result.Error(
-                        exception))
+                Result.Error(exception))
     }
 
     @Test

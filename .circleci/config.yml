@@ -33,6 +33,9 @@ jobs:
           path: core/build/reports
           destination: core-reports
       - store_artifacts:
+          path: edinburgh/build/reports
+          destination: edinburgh-reports
+      - store_artifacts:
           path: androidcore/build/reports
           destination: androidcore-reports
       - store_test_results:

@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.twitter
+package uk.org.rivernile.android.bustracker.core.livetimes
 
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -32,47 +32,51 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterException
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import javax.inject.Inject
 
 /**
- * This repository is used to access Tweets.
+ * This repository is used to access live times.
  *
- * @param twitterEndpoint The endpoint to receive [Tweet]s from.
+ * @param trackerEndpoint The endpoint to receive [LiveTimes] from.
  * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
-class TwitterRepository @Inject internal constructor(
-        private val twitterEndpoint: TwitterEndpoint,
+class LiveTimesRepository @Inject internal constructor(
+        private val trackerEndpoint: TrackerEndpoint,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
-     * Get a [Flow] object which contains the [Result] of loading the latest [Tweet]s.
+     * Get a [Flow] object which contains the [Result] of loading [LiveTimes].
      *
-     * This instance will have loading events propagated to it, including the in-progress state,
-     * success state and the error states.
-     *
-     * @return A [Flow] object containing the [Result] of loading the latest [Tweet]s.
+     * @param stopCode The stop code to load [LiveTimes] for.
+     * @param numberOfDepartures The number of departures per services to obtain.
+     * @return A [Flow] object containing the [Result] of loading [LiveTimes].
      */
-    fun getLatestTweets(): Flow<Result<List<Tweet>?>> = flow {
+    fun getLiveTimesFlow(stopCode: String, numberOfDepartures: Int)
+            : Flow<Result<LiveTimes>> = flow {
         emit(Result.InProgress)
-        emit(fetchLatestTweets())
+        emit(fetchLiveTimes(stopCode, numberOfDepartures))
     }
 
     /**
-     * This suspending function, executed on the IO [CoroutineDispatcher], fetches the latest
-     * [Tweet]s and returns the appropriate [Result] object.
+     * This suspending function, executed on the IO [CoroutineDispatcher], fetches the live times
+     * for the given stop code and returns the appropriate [Result] object.
      *
+     * @param stopCode The stop code to load [LiveTimes] for.
+     * @param numberOfDepartures The number of departures per services to obtain.
      * @return A [Result] object encapsulating the result of the request.
      */
-    private suspend fun fetchLatestTweets(): Result<List<Tweet>?> = withContext(ioDispatcher) {
-        val request = twitterEndpoint.createLatestTweetsRequest()
+    private suspend fun fetchLiveTimes(
+            stopCode: String,
+            numberOfDepartures: Int): Result<LiveTimes> = withContext(ioDispatcher) {
+        val request = trackerEndpoint.createLiveTimesRequest(stopCode, numberOfDepartures)
 
         try {
             Result.Success(request.performRequest())
-        } catch (e: TwitterException) {
+        } catch (e: TrackerException) {
             Result.Error(e)
         } catch (e: CancellationException) {
             request.cancel()
