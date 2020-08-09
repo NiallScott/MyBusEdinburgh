@@ -27,79 +27,45 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.net.Uri
-import uk.org.rivernile.android.bustracker.core.di.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.TableContract
+import uk.org.rivernile.android.bustracker.core.di.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.utils.OpenForTesting
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This class represents a [TableContract] for the bus stops table in the bus stop database.
+ * This class represents a [TableContract] for the services table in the bus stop database.
  *
  * @param authority The authority of the bus stop database [android.content.ContentProvider].
  * @author Niall Scott
  */
 @Singleton
 @OpenForTesting
-internal class BusStopsContract @Inject constructor(
-        @ForBusStopDatabase authority: String)
-    : TableContract {
+internal class ServicesContract @Inject constructor(
+        @ForBusStopDatabase authority: String): TableContract {
 
     companion object {
 
         /**
-         * The unique code of the bus stop. Column name.
+         * The name of the service. Column name.
          *
          * Type: STRING
          */
-        const val STOP_CODE = "stopCode"
-
+        const val NAME = "name"
         /**
-         * The name of the bus stop. Column name.
+         * The description of the service. Column name.
          *
          * Type: STRING
          */
-        const val STOP_NAME = "stopName"
-
+        const val DESCRIPTION = "desc"
         /**
-         * The latitude of the bus stop. Column name.
-         *
-         * Type: DOUBLE
-         */
-        const val LATITUDE = "x"
-
-        /**
-         * The longitude of the bus stop. Column name.
-         *
-         * Type: DOUBLE
-         */
-        const val LONGITUDE = "y"
-
-        /**
-         * The orientation of the bus stop, expressed between 0 and 7, where 0 is north and 7 is
-         * north-west, and the rest of the numbers are filled in clockwise. Column name.
-         *
-         * Type: INTEGER
-         */
-        const val ORIENTATION = "orientation"
-
-        /**
-         * The locality of the bus stop - for example, the name of the local area in the city.
-         * Column name.
+         * The colour of the service, expressed in hex, with a preceding `#`.
          *
          * Type: STRING
          */
-        const val LOCALITY = "locality"
+        const val COLOUR = "hex_colour"
 
-        /**
-         * The listing of services as a comma separated list, suitable for displaying to users.
-         * Column name.
-         *
-         * Type: STRING
-         */
-        const val SERVICE_LISTING = "serviceListing"
-
-        private const val TABLE_NAME = "view_bus_stops"
+        private const val TABLE_NAME = "view_services"
     }
 
     private val typeSingle = "${TableContract.SUBTYPE_SINGLE}/vnd.$authority.$TABLE_NAME"

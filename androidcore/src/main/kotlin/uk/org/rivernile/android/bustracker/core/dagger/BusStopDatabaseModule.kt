@@ -35,8 +35,10 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopD
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidBusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidDatabaseInformationDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidServicesDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServicesDao
 import javax.inject.Singleton
 
 /**
@@ -79,5 +81,9 @@ internal class BusStopDatabaseModule {
         @Suppress("unused")
         @Binds
         fun bindBusStopsDao(androidBusStopsDao: AndroidBusStopsDao): BusStopsDao
+
+        @Suppress("unused")
+        @Binds
+        fun bindServicesDao(androidServicesDao: AndroidServicesDao): ServicesDao
     }
 }
