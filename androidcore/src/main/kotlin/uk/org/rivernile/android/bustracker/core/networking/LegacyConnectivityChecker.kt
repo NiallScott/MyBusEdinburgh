@@ -26,19 +26,71 @@
 
 package uk.org.rivernile.android.bustracker.core.networking
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.net.ConnectivityManager
 
 /**
  * This is the legacy implementation of the [ConnectivityChecker]. It provides the way to detect the
  * presence of connectivity up until API level 29, where a new API became available.
  *
+ * @param context The application [Context].
  * @param connectivityManager The Android [ConnectivityManager].
  * @author Niall Scott
  */
 internal class LegacyConnectivityChecker(
+        private val context: Context,
         private val connectivityManager: ConnectivityManager) : ConnectivityChecker {
+
+    private val listeners = mutableListOf<ConnectivityChecker.OnConnectivityChangedListener>()
+
+    @Suppress("DEPRECATION")
+    override fun addOnConnectivityChangedListener(
+            listener: ConnectivityChecker.OnConnectivityChangedListener) {
+        synchronized(listeners) {
+            listeners += listener
+
+            if (listeners.size == 1) {
+                context.registerReceiver(connectivityReceiver,
+                        IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+            }
+        }
+    }
+
+    override fun removeOnConnectivityChangedListener(
+            listener: ConnectivityChecker.OnConnectivityChangedListener) {
+        synchronized(listeners) {
+            listeners -= listener
+
+            if (listeners.isEmpty()) {
+                context.unregisterReceiver(connectivityReceiver)
+            }
+        }
+    }
 
     @Suppress("DEPRECATION")
     override fun hasInternetConnectivity() =
             connectivityManager.activeNetworkInfo?.isConnected ?: false
+
+    /**
+     * This is called to dispatch a connectivity changed event to the listeners.
+     */
+    private fun dispatchConnectivityChangedEvent() {
+        synchronized(listeners) {
+            listeners.forEach {
+                it.onConnectivityChanged()
+            }
+        }
+    }
+
+    private val connectivityReceiver = object : BroadcastReceiver() {
+        @Suppress("DEPRECATION")
+        override fun onReceive(context: Context, intent: Intent) {
+            if (ConnectivityManager.CONNECTIVITY_ACTION == intent.action) {
+                dispatchConnectivityChangedEvent()
+            }
+        }
+    }
 }

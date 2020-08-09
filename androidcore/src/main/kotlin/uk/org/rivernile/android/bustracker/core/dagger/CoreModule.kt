@@ -38,6 +38,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
 import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
@@ -114,11 +115,12 @@ class CoreModule {
      */
     @Provides
     internal fun provideConnectivityChecker(
+            context: Provider<Context>,
             connectivityManager: ConnectivityManager): ConnectivityChecker {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             V29ConnectivityChecker(connectivityManager)
         } else {
-            LegacyConnectivityChecker(connectivityManager)
+            LegacyConnectivityChecker(context.get(), connectivityManager)
         }
     }
 
@@ -141,6 +143,18 @@ class CoreModule {
     @Singleton
     @ForMainDispatcher
     internal fun provideCoroutineMainDispatcher(): CoroutineDispatcher = Dispatchers.Main.immediate
+
+    /**
+     * Provide a [CoroutineDispatcher] for performing operations on the default dispatcher. See
+     * [Dispatchers.Default].
+     *
+     * @return A [CoroutineDispatcher] for performing operations on the default dispatcher.
+     * @see Dispatchers.Default
+     */
+    @Provides
+    @Singleton
+    @ForDefaultDispatcher
+    internal fun provideCoroutineDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
     /**
      * Provide a [CoroutineDispatcher] for performing IO operations on.

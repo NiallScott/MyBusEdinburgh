@@ -34,9 +34,35 @@ package uk.org.rivernile.android.bustracker.core.networking
 interface ConnectivityChecker {
 
     /**
+     * Add a new [OnConnectivityChangedListener], to be informed when the device connectivity has
+     * changed.
+     *
+     * @param listener The listener to add.
+     */
+    fun addOnConnectivityChangedListener(listener: OnConnectivityChangedListener)
+
+    /**
+     * Remove a [OnConnectivityChangedListener].
+     *
+     * @param listener The listener to remove.
+     */
+    fun removeOnConnectivityChangedListener(listener: OnConnectivityChangedListener)
+
+    /**
      * Is there a route out to the internet that the app can use to make network calls?
      *
      * @return `true` if there is a route to the internet, `false` if not.
      */
     fun hasInternetConnectivity(): Boolean
+
+    /**
+     * Implement this interface to be informed when device connectivity has changed.
+     */
+    interface OnConnectivityChangedListener {
+
+        /**
+         * This is called when device connectivity has changed.
+         */
+        fun onConnectivityChanged()
+    }
 }
