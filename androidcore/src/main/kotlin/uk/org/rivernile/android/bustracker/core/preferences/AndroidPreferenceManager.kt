@@ -237,6 +237,11 @@ internal class AndroidPreferenceManager @Inject constructor(
      */
     private fun mapToPreferenceKey(key: String) = when (key) {
         PREF_BUS_STOP_DATABASE_WIFI_ONLY -> PreferenceKey.DATABASE_UPDATE_WIFI_ONLY
+        PREF_AUTO_REFRESH -> PreferenceKey.LIVE_TIMES_AUTO_REFRESH_ENABLED
+        PREF_SHOW_NIGHT_BUSES -> PreferenceKey.LIVE_TIMES_SHOW_NIGHT_SERVICES
+        PREF_SERVICE_SORTING -> PreferenceKey.LIVE_TIMES_SORT_BY_TIME
+        PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE ->
+            PreferenceKey.LIVE_TIMES_NUMBER_OF_DEPARTURES
         else -> null
     }
 

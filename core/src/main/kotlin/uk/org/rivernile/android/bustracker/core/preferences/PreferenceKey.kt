@@ -37,5 +37,22 @@ enum class PreferenceKey {
      * Key for the preference that specifies if the stop database update should occur over Wi-Fi
      * only.
      */
-    DATABASE_UPDATE_WIFI_ONLY
+    DATABASE_UPDATE_WIFI_ONLY,
+    /**
+     * Key for the preference that specifies if auto refresh is enabled by default.
+     */
+    LIVE_TIMES_AUTO_REFRESH_ENABLED,
+    /**
+     * Key for the preference that specifies if night services should be shown.
+     */
+    LIVE_TIMES_SHOW_NIGHT_SERVICES,
+    /**
+     * Key for the preference that specifies if the times should be shown in time order.
+     */
+    LIVE_TIMES_SORT_BY_TIME,
+    /**
+     * Key for the preference that specifies the number of departures that should be shown per
+     * service.
+     */
+    LIVE_TIMES_NUMBER_OF_DEPARTURES
 }
