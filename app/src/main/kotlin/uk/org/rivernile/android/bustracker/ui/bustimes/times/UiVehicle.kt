@@ -24,38 +24,24 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
+package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
+import java.util.Date
 
 /**
- * This class encapsulates a result from the [LiveTimesRepository].
+ * This represents a departure/live time for a service.
  *
- * @param T The type of data returned in the success condition.
+ * @property destination Where this departure is heading to.
+ * @property isDiverted Is this departure diverted via another stop?
+ * @property departureTime The time the departure is expected to occur.
+ * @property departureTime The expected number of minutes until departure.
+ * @property isEstimatedTime Is the time an estimate or a real-time prediction?
  * @author Niall Scott
  */
-sealed class Result<out T> {
-
-    /**
-     * This represents a request currently in progress.
-     */
-    object InProgress : Result<Nothing>()
-
-    /**
-     * This represents a request which was successful.
-     *
-     * @param T The type of data returned.
-     * @property result The success data.
-     */
-    data class Success<out T>(val result: T) : Result<T>()
-
-    /**
-     * This represents a request which failed.
-     *
-     * @property receiveTime The time, in milliseconds since UNIX epoch, the error was received at.
-     * @property exception The [TrackerException] which caused the failure.
-     */
-    data class Error(
-            val receiveTime: Long,
-            val exception: TrackerException) : Result<Nothing>()
-}
+data class UiVehicle(
+        val destination: String?,
+        val isDiverted: Boolean,
+        val departureTime: Date,
+        val departureMinutes: Int,
+        val isEstimatedTime: Boolean
+)

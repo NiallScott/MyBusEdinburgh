@@ -24,38 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
-
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
+package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 /**
- * This class encapsulates a result from the [LiveTimesRepository].
+ * This is the representation of a service for displaying on the UI.
  *
- * @param T The type of data returned in the success condition.
+ * @property serviceName The name of the service.
+ * @property serviceColour The colour to tint the service elements as. If `null`, then a default
+ * colour should be used instead.
+ * @property vehicles The departures for this service.
  * @author Niall Scott
  */
-sealed class Result<out T> {
-
-    /**
-     * This represents a request currently in progress.
-     */
-    object InProgress : Result<Nothing>()
-
-    /**
-     * This represents a request which was successful.
-     *
-     * @param T The type of data returned.
-     * @property result The success data.
-     */
-    data class Success<out T>(val result: T) : Result<T>()
-
-    /**
-     * This represents a request which failed.
-     *
-     * @property receiveTime The time, in milliseconds since UNIX epoch, the error was received at.
-     * @property exception The [TrackerException] which caused the failure.
-     */
-    data class Error(
-            val receiveTime: Long,
-            val exception: TrackerException) : Result<Nothing>()
-}
+data class UiService(
+        val serviceName: String,
+        val serviceColour: Int?,
+        val vehicles: List<UiVehicle>)

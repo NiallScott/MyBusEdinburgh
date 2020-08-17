@@ -24,38 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
-
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
+package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 /**
- * This class encapsulates a result from the [LiveTimesRepository].
+ * This class encapsulates the result of loading [UiVehicle]s, for the purpose of displaying on the
+ * UI.
  *
- * @param T The type of data returned in the success condition.
  * @author Niall Scott
  */
-sealed class Result<out T> {
+sealed class UiResult {
 
     /**
      * This represents a request currently in progress.
      */
-    object InProgress : Result<Nothing>()
+    object InProgress : UiResult()
 
     /**
-     * This represents a request which was successful.
+     * This represents a successfully completed request.
      *
-     * @param T The type of data returned.
-     * @property result The success data.
+     * @param receiveTime The time the data was received on the device at, for the purposes of
+     * working out the age of the data.
+     * @param stop The stop details. Live times are found in here.
      */
-    data class Success<out T>(val result: T) : Result<T>()
+    data class Success(
+            val receiveTime: Long,
+            val stop: UiStop) : UiResult()
 
     /**
-     * This represents a request which failed.
+     * This represents a request which completed with an error.
      *
-     * @property receiveTime The time, in milliseconds since UNIX epoch, the error was received at.
-     * @property exception The [TrackerException] which caused the failure.
+     * @param receiveTime The time the data was received on the device at, for the purposes of
+     * working out the age of the data.
+     * @param error The error to display to the user.
      */
     data class Error(
             val receiveTime: Long,
-            val exception: TrackerException) : Result<Nothing>()
+            val error: ErrorType) : UiResult()
 }

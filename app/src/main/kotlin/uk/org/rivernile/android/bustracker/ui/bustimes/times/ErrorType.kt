@@ -24,38 +24,48 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.livetimes
-
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
+package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 /**
- * This class encapsulates a result from the [LiveTimesRepository].
+ * This enumerates the different type of errors we may display in the UI.
  *
- * @param T The type of data returned in the success condition.
  * @author Niall Scott
  */
-sealed class Result<out T> {
+enum class ErrorType {
 
     /**
-     * This represents a request currently in progress.
+     * There is no internet connectivity available.
      */
-    object InProgress : Result<Nothing>()
-
+    NO_CONNECTIVITY,
     /**
-     * This represents a request which was successful.
-     *
-     * @param T The type of data returned.
-     * @property result The success data.
+     * There was an error in the network link while attempting communication with the endpoint.
      */
-    data class Success<out T>(val result: T) : Result<T>()
-
+    COMMUNICATION,
     /**
-     * This represents a request which failed.
-     *
-     * @property receiveTime The time, in milliseconds since UNIX epoch, the error was received at.
-     * @property exception The [TrackerException] which caused the failure.
+     * Unable to resolve the DNS hostname of the endpoint.
      */
-    data class Error(
-            val receiveTime: Long,
-            val exception: TrackerException) : Result<Nothing>()
+    UNKNOWN_HOST,
+    /**
+     * There was an error reported by the server that we don't explicitly handle.
+     */
+    SERVER_ERROR,
+    /**
+     * The server returned no data to us, or yielded a response that is not useful to us.
+     */
+    NO_DATA,
+    /**
+     * There was an issue authenticating with the remote endpoint. In most systems, this means the
+     * API key is not correct.
+     */
+    AUTHENTICATION,
+    /**
+     * The endpoint reports to us that it is currently overloaded. A retry attempt should be
+     * attempted later.
+     */
+    SYSTEM_OVERLOADED,
+    /**
+     * The endpoint reports to us that it is currently down for maintenance. A retry attempt should
+     * be attempted later.
+     */
+    DOWN_FOR_MAINTENANCE
 }

@@ -35,17 +35,20 @@ import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
 
 /**
  * This repository is used to access live times.
  *
  * @param trackerEndpoint The endpoint to receive [LiveTimes] from.
+ * @param timeUtils Used to obtain a UNIX timestamp.
  * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
 class LiveTimesRepository @Inject internal constructor(
         private val trackerEndpoint: TrackerEndpoint,
+        private val timeUtils: TimeUtils,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
@@ -77,7 +80,7 @@ class LiveTimesRepository @Inject internal constructor(
         try {
             Result.Success(request.performRequest())
         } catch (e: TrackerException) {
-            Result.Error(e)
+            Result.Error(timeUtils.getCurrentTimeMillis(), e)
         } catch (e: CancellationException) {
             request.cancel()
             throw e

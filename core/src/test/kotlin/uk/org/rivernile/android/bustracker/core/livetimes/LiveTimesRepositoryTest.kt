@@ -42,6 +42,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NoConnectivity
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -64,13 +65,15 @@ class LiveTimesRepositoryTest {
     @Mock
     private lateinit var trackerRequest: TrackerRequest<LiveTimes>
     @Mock
+    private lateinit var timeUtils: TimeUtils
+    @Mock
     private lateinit var liveTimes: LiveTimes
 
     private lateinit var repository: LiveTimesRepository
 
     @Before
     fun setUp() {
-        repository = LiveTimesRepository(trackerEndpoint, coroutineRule.testDispatcher)
+        repository = LiveTimesRepository(trackerEndpoint, timeUtils, coroutineRule.testDispatcher)
 
         whenever(trackerEndpoint.createLiveTimesRequest(any<String>(), any()))
                 .thenReturn(trackerRequest)
@@ -92,13 +95,15 @@ class LiveTimesRepositoryTest {
         val exception = NoConnectivityException()
         whenever(trackerRequest.performRequest())
                 .thenThrow(exception)
+        whenever(timeUtils.getCurrentTimeMillis())
+                .thenReturn(123L)
 
         val observer = repository.getLiveTimesFlow("123456", 4).test(this)
         observer.finish()
 
         observer.assertValues(
                 Result.InProgress,
-                Result.Error(exception))
+                Result.Error(123L, exception))
     }
 
     @Test
