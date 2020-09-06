@@ -93,7 +93,7 @@ class TweetViewHolder(
      * Handle the avatar being clicked.
      */
     private fun handleAvatarClick() {
-        currentItem?.let { it ->
+        currentItem?.let {
             clickListenerRef.get()?.invoke(it)
         }
     }

@@ -24,23 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.viewmodel
 
-import java.util.Date
+import android.os.Bundle
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.savedstate.SavedStateRegistryOwner
 
 /**
- * This represents a departure/live time for a service.
+ * This is a [AbstractSavedStateViewModelFactory], used to construct [ViewModel]s with a
+ * [SavedStateHandle].
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
+ * @param V The type of the [ViewModel].
+ * @param viewModelFactory The factory which creates the [ViewModel].
+ * @param owner The owning component which will provide the saved state.
+ * @param defaultArgs Any defaults which should be used. Defaults to `null`.
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+class GenericSavedStateViewModelFactory<out V : ViewModel>(
+        private val viewModelFactory: ViewModelSavedStateFactory<V>,
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle? = null) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(
+            key: String,
+            modelClass: Class<T>,
+            handle: SavedStateHandle) = viewModelFactory.create(handle) as T
+}

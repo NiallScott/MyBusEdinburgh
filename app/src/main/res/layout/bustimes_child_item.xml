@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,30 +31,27 @@
     android:layout_height="wrap_content"
     android:paddingTop="@dimen/padding_default"
     android:paddingBottom="@dimen/padding_default"
-    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
     android:paddingStart="?attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?attr/listPreferredItemPaddingRight"
     android:paddingEnd="?attr/listPreferredItemPaddingRight"
     android:minHeight="?listPreferredItemHeight"
     android:orientation="horizontal"
     android:gravity="center_vertical">
+
     <TextView
         android:id="@+id/txtDestination"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginLeft="@dimen/display_stop_data_child_destination_margin"
         android:layout_marginStart="@dimen/display_stop_data_child_destination_margin"
         android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
         android:maxLines="1"
         tools:text="York Place" />
+
     <TextView
         android:id="@+id/txtTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/padding_double"
         android:layout_marginStart="@dimen/padding_double"
-        android:layout_marginRight="@dimen/display_stop_data_child_time_margin"
         android:layout_marginEnd="@dimen/display_stop_data_child_time_margin"
         android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
         android:maxLines="1"

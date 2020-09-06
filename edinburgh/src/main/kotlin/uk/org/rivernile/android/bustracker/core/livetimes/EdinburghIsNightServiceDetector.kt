@@ -24,23 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.core.livetimes
 
-import java.util.Date
+import javax.inject.Inject
 
 /**
- * This represents a departure/live time for a service.
+ * This is an Edinburgh-specific implementation of [IsNightServiceDetector].
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+class EdinburghIsNightServiceDetector @Inject internal constructor() : IsNightServiceDetector {
+
+    override fun isNightService(serviceName: String) = serviceName.startsWith('N', true)
+}

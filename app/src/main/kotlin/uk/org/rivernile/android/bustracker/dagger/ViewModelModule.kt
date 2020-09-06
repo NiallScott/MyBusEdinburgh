@@ -30,6 +30,7 @@ import androidx.lifecycle.ViewModelProvider
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.about.AboutViewModel
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivityViewModel
@@ -51,6 +52,7 @@ interface ViewModelModule {
      * @param viewModel A [DisplayStopDataActivityViewModel] instance.
      * @return The [ViewModel] instance.
      */
+    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @Binds
     @IntoMap

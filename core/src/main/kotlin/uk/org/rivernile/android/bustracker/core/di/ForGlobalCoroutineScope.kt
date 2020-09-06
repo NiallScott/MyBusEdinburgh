@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.core.di
 
-import java.util.Date
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This represents a departure/live time for a service.
+ * This annotation defines a Dagger qualifier for the global Kotlin coroutine scope.
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForGlobalCoroutineScope

@@ -24,23 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.viewmodel
 
-import java.util.Date
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 
 /**
- * This represents a departure/live time for a service.
+ * This interface defines a way to build [ViewModel]s which make use of [SavedStateHandle]. Each
+ * [ViewModel] which uses this feature should have a [ViewModelSavedStateFactory] which builds it.
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
+ * @param T The type of the [ViewModel].
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+interface ViewModelSavedStateFactory<T : ViewModel> {
+
+    /**
+     * Create a new [ViewModel] with the given [SavedStateHandle].
+     *
+     * @param handle Used in the [ViewModel] to access saved state data.
+     * @return The newly created [ViewModel].
+     */
+    fun create(handle: SavedStateHandle): T
+}

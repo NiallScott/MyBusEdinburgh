@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,45 +31,45 @@
     android:layout_height="wrap_content"
     android:paddingTop="@dimen/padding_default"
     android:paddingBottom="@dimen/padding_default"
-    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
     android:paddingStart="?attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?attr/listPreferredItemPaddingRight"
     android:paddingEnd="?attr/listPreferredItemPaddingRight"
     android:minHeight="?listPreferredItemHeight"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="?selectableItemBackground"
-    android:clickable="true">
-    <androidx.appcompat.widget.AppCompatTextView
+    android:clickable="true"
+    android:focusable="true">
+
+    <TextView
         style="@style/ServiceName"
         android:id="@+id/txtServiceName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="TRAM" />
+
     <TextView
         android:id="@+id/txtDestination"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginLeft="@dimen/padding_double"
         android:layout_marginStart="@dimen/padding_double"
         android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
         android:maxLines="1"
         tools:text="York Place" />
+
     <TextView
         android:id="@+id/txtTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/padding_double"
         android:layout_marginStart="@dimen/padding_double"
         android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
         android:maxLines="1"
         tools:text="DUE" />
+
     <ImageView
         android:id="@+id/imgArrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/padding_default"
         android:layout_marginStart="@dimen/padding_default"
         android:src="@drawable/ic_expandable_list_arrow"
         android:contentDescription="@null" />

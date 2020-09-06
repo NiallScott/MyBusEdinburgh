@@ -26,8 +26,12 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import com.davekoelle.alphanum.AlphanumComparator
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.livetimes.EdinburghIsNightServiceDetector
+import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
 import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
 import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
 
@@ -37,11 +41,25 @@ import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
  * @author Niall Scott
  */
 @Module(includes = [
-    EdinburghBusTrackerModule::class
+    EdinburghBusTrackerModule::class,
+    FlavourModule.Bindings::class
 ])
-internal interface FlavourModule {
+internal class FlavourModule {
 
-    @Suppress("unused")
-    @Binds
-    fun bindCleanUpTask(edinburghCleanUpTask: EdinburghCleanUpTask): CleanUpTask
+    @Provides
+    fun provideServiceComparator(): Comparator<String> = AlphanumComparator<String>()
+
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindCleanUpTask(edinburghCleanUpTask: EdinburghCleanUpTask): CleanUpTask
+
+        @Suppress("unused")
+        @Binds
+        fun bindIsNightServiceDetector(
+                edinburghIsNightServiceDetector: EdinburghIsNightServiceDetector)
+                : IsNightServiceDetector
+    }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * The Alphanum Algorithm is an improved sorting algorithm for strings
  * containing numbers.  Instead of sorting numbers in ASCII order like
  * a standard sort, this algorithm sorts numbers in numeric order.
@@ -32,13 +32,10 @@ import java.util.Comparator;
  * This class has been modified by Niall Scott for better code formatting and
  * other enhancements.
  */
-public class AlphanumComparator implements Comparator {
+public class AlphanumComparator<T> implements Comparator<T> {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public int compare(final Object o1, final Object o2) {
+    public int compare(final T o1, final T o2) {
         // Get the Strings by calling toString() on the passed in objects.
         final String s1 = o1.toString();
         final String s2 = o2.toString();
@@ -50,7 +47,7 @@ public class AlphanumComparator implements Comparator {
         final int s2Length = s2.length();
 
         // Keep looping until the end of either String is reached.
-        while(thisMarker < s1Length && thatMarker < s2Length) {
+        while (thisMarker < s1Length && thatMarker < s2Length) {
             final String thisChunk = getChunk(s1, thisMarker);
             thisMarker += thisChunk.length();
 
@@ -59,23 +56,30 @@ public class AlphanumComparator implements Comparator {
 
             // If both chunks contain numeric characters, sort them numerically.
             int result;
-            if(Character.isDigit(thisChunk.charAt(0)) &&
+
+            if (Character.isDigit(thisChunk.charAt(0)) &&
                     Character.isDigit(thatChunk.charAt(0))) {
                 // Simple chunk comparison by length.
                 final int thisChunkLength = thisChunk.length();
                 result = thisChunkLength - thatChunk.length();
+
                 // If equal, the first different number counts.
-                if(result == 0) {
-                    for(int i = 0; i < thisChunkLength; i++) {
+                if (result == 0) {
+                    for (int i = 0; i < thisChunkLength; i++) {
                         result = thisChunk.charAt(i) - thatChunk.charAt(i);
-                        if(result != 0) return result;
+
+                        if (result != 0) {
+                            return result;
+                        }
                     }
                 }
             } else {
                 result = thisChunk.compareTo(thatChunk);
             }
 
-            if(result != 0) return result;
+            if (result != 0) {
+                return result;
+            }
         }
 
         return s1Length - s2Length;
@@ -89,32 +93,42 @@ public class AlphanumComparator implements Comparator {
      * @return A chunk of digits or non-digits.
      */
     private static String getChunk(final String s, int marker) {
-        if(s == null) throw new IllegalArgumentException("String is null.");
+        if (s == null) {
+            throw new IllegalArgumentException("String is null.");
+        }
         
         // Cache the character array to avoid repeated calls to String.charAt()
         final char[] chars = s.toCharArray();
         final int len = chars.length;
-        if(marker < 0 || marker > (len - 1))
+
+        if (marker < 0 || marker > (len - 1)) {
             throw new IllegalArgumentException("marker is invalid.");
+        }
         
         final StringBuilder chunk = new StringBuilder();
         // The first character will always appear in the chunk.
         chunk.append(chars[marker]);
         marker++;
         
-        if(Character.isDigit(chars[marker - 1])) {
+        if (Character.isDigit(chars[marker - 1])) {
             // If first character is a digit, keep appending characters until we
             // encounter a non-digit.
-            while(marker < len) {
-                if(!Character.isDigit(chars[marker])) break;
+            while (marker < len) {
+                if (!Character.isDigit(chars[marker])) {
+                    break;
+                }
+
                 chunk.append(chars[marker]);
                 marker++;
             }
         } else {
             // If first character is a non-digit, keep appending character until
             // we encounter a digit.
-            while(marker < len) {
-                if(Character.isDigit(chars[marker])) break;
+            while (marker < len) {
+                if (Character.isDigit(chars[marker])) {
+                    break;
+                }
+
                 chunk.append(chars[marker]);
                 marker++;
             }

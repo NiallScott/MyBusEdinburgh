@@ -24,23 +24,38 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.core.livetimes
 
-import java.util.Date
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
 
 /**
- * This represents a departure/live time for a service.
+ * Tests for [EdinburghIsNightServiceDetector].
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+class EdinburghIsNightServiceDetectorTest {
+
+    private lateinit var detector: EdinburghIsNightServiceDetector
+
+    @Before
+    fun setUp() {
+        detector = EdinburghIsNightServiceDetector()
+    }
+
+    @Test
+    fun isNightServiceReturnsFalseWhenServiceNameDoesNotBeginWithN() {
+        val result = detector.isNightService("123")
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun isNightServiceReturnsTrueWhenServiceNameBeginsWithN() {
+        val result = detector.isNightService("N123")
+
+        assertTrue(result)
+    }
+}

@@ -24,23 +24,51 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.livedata
 
-import java.util.Date
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
 
 /**
- * This represents a departure/live time for a service.
+ * Tests for [DistinctLiveData].
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+class DistinctLiveDataTest {
+
+    @Rule
+    @JvmField
+    val rule = InstantTaskExecutorRule()
+
+    private val observer = LiveDataTestObserver<String>()
+
+    private lateinit var liveData: DistinctLiveData<String>
+
+    @Before
+    fun setUp() {
+        liveData = DistinctLiveData()
+    }
+
+    @Test
+    fun distinctLiveDataOnlyEmitsChangedItems() {
+        liveData.observeForever(observer)
+        liveData.setValue("one")
+        liveData.setValue("two")
+        liveData.setValue("two")
+        liveData.setValue("three")
+        liveData.setValue("four")
+        liveData.setValue("four")
+        liveData.setValue("four")
+        liveData.setValue("five")
+
+        observer.assertValues(
+                "one",
+                "two",
+                "three",
+                "four",
+                "five")
+    }
+}

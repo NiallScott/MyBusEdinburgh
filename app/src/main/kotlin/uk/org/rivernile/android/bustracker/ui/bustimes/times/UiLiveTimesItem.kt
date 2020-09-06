@@ -26,21 +26,25 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import java.util.Date
-
 /**
- * This represents a departure/live time for a service.
+ * This describes a single row shown in the live times listing.
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
+ * @property serviceName The name of the service.
+ * @property serviceColour The colour of the service.
+ * @property vehicle The specific vehicle this data is for, where the live time is located.
+ * @property position The position of this item within its service grouping.
+ * @property expanded Is this item part of an expanded grouping?
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+data class UiLiveTimesItem(
+        val serviceName: String,
+        val serviceColour: Int?,
+        val vehicle: UiVehicle,
+        val position: Int,
+        val expanded: Boolean) {
+
+    /**
+     * Is this item a parent item? That is, is it the first item within a service grouping?
+     */
+    val isParent = position == 0
+}

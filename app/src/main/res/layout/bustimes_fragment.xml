@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,16 +31,23 @@
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <FrameLayout
+
+    <uk.org.rivernile.android.bustracker.core.widget.ContentView
+        android:id="@+id/contentView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:progressView="@id/progress"
+        app:contentView="@id/layoutContent"
+        app:errorView="@id/layoutError"
+        app:contentLayout="progress"
+        tools:contentLayout="content">
+
         <LinearLayout
             android:id="@+id/layoutContent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:orientation="vertical">
+
             <TextView
                 android:id="@+id/txtLastRefresh"
                 android:theme="@style/ThemeOverlay.AppCompat.Dark"
@@ -49,17 +56,17 @@
                 android:minHeight="@dimen/bus_times_fragment_last_refresh_min_height"
                 android:paddingTop="@dimen/padding_default"
                 android:paddingBottom="@dimen/padding_default"
-                android:paddingLeft="@dimen/padding_double"
                 android:paddingStart="@dimen/padding_double"
-                android:paddingRight="@dimen/padding_double"
                 android:paddingEnd="@dimen/padding_double"
+                android:drawablePadding="@dimen/padding_double"
                 android:background="@color/bus_times_fragment_last_refresh_background"
                 android:elevation="@dimen/bus_times_fragment_last_refresh_elevation"
                 android:gravity="center_vertical"
                 android:textAppearance="@style/TextAppearance.Design.Snackbar.Message"
                 tools:text="Last refreshed less than a minute ago" />
+
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@android:id/list"
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -70,9 +77,11 @@
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
         </LinearLayout>
+
         <include
             layout="@layout/indeterminate_progress" />
+
         <include
             layout="@layout/error_with_resolve_button" />
-    </FrameLayout>
+    </uk.org.rivernile.android.bustracker.core.widget.ContentView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

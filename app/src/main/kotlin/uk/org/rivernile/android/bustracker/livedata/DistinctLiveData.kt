@@ -24,23 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.livedata
 
-import java.util.Date
+import androidx.lifecycle.MutableLiveData
 
 /**
- * This represents a departure/live time for a service.
+ * A [MutableLiveData] whereby the value is checked in [setValue] against the previously set value
+ * for distinctness, and will only set the value (which causes an observer emission) if the value
+ * is distinct.
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
+ * Distinctness is determined from the value's [equals] implementation.
+ *
+ * @param T The type of data the [MutableLiveData] contains.
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+class DistinctLiveData<T> : MutableLiveData<T>() {
+
+    override fun setValue(value: T) {
+        if (value != this.value) {
+            super.setValue(value)
+        }
+    }
+}

@@ -26,21 +26,23 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import java.util.Date
-
 /**
- * This represents a departure/live time for a service.
+ * This enumerates the different UI states.
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+enum class UiState {
+
+    /**
+     * Show the progress layout.
+     */
+    PROGRESS,
+    /**
+     * Show the content layout.
+     */
+    CONTENT,
+    /**
+     * Show the error layout.
+     */
+    ERROR
+}

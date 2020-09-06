@@ -62,7 +62,8 @@ class PreferenceRepositoryTest {
 
     @Before
     fun setUp() {
-        repository = PreferenceRepository(preferenceManager, coroutineRule.testDispatcher)
+        repository = PreferenceRepository(preferenceManager, coroutineRule,
+                coroutineRule.testDispatcher)
     }
 
     @Test
@@ -206,5 +207,27 @@ class PreferenceRepositoryTest {
         observer.assertValues(1, 2, 3)
         verify(preferenceManager)
                 .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
+    fun toggleSortByTimeTogglesFalseToTrue() = coroutineRule.runBlockingTest {
+        whenever(preferenceManager.isBusTimesSortedByTime())
+                .thenReturn(false)
+
+        repository.toggleSortByTime()
+
+        verify(preferenceManager)
+                .setBusTimesSortedByTime(true)
+    }
+
+    @Test
+    fun toggleSortByTimeTogglesTrueToFalse() = coroutineRule.runBlockingTest {
+        whenever(preferenceManager.isBusTimesSortedByTime())
+                .thenReturn(true)
+
+        repository.toggleSortByTime()
+
+        verify(preferenceManager)
+                .setBusTimesSortedByTime(false)
     }
 }

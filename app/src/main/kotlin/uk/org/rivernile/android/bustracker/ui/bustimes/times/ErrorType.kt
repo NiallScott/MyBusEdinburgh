@@ -34,6 +34,10 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 enum class ErrorType {
 
     /**
+     * No stop code has been provided.
+     */
+    NO_STOP_CODE,
+    /**
      * There is no internet connectivity available.
      */
     NO_CONNECTIVITY,

@@ -26,21 +26,39 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import java.util.Date
-
 /**
- * This represents a departure/live time for a service.
+ * This class encapsulates the result of transforming a loading or loaded [UiResult]. This is
+ * required because the data goes through transformation for display purposes before being exposed
+ * to the UI.
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+sealed class UiTransformedResult {
+
+    /**
+     * This represents a request currently in progress.
+     */
+    object InProgress : UiTransformedResult()
+
+    /**
+     * This represents a successfully completed request.
+     *
+     * @param receiveTime The time the data was received on the device at, for the purposes of
+     * working out the age of the data.
+     * @param items The items (live departures) to display.
+     */
+    data class Success(
+            val receiveTime: Long,
+            val items: List<UiLiveTimesItem>) : UiTransformedResult()
+
+    /**
+     * This represents a request which completed with an error.
+     *
+     * @param receiveTime The time the data was received on the device at, for the purposes of
+     * working out the age of the data.
+     * @param error The error to display to the user.
+     */
+    data class Error(
+            val receiveTime: Long,
+            val error: ErrorType) : UiTransformedResult()
+}

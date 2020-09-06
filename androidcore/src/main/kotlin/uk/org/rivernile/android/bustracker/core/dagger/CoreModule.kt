@@ -35,10 +35,13 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
 import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
@@ -133,6 +136,16 @@ class CoreModule {
     @Singleton
     @ForShortBackgroundTasks
     internal fun provideShortBackgroundTasksExecutor(): Executor = Executors.newCachedThreadPool()
+
+    /**
+     * Provide the [GlobalScope] as a [CoroutineScope].
+     *
+     * @return The [GlobalScope] as a [CoroutineScope].
+     */
+    @Provides
+    @Singleton
+    @ForGlobalCoroutineScope
+    internal fun provideGlobalCoroutineScope(): CoroutineScope = GlobalScope
 
     /**
      * Provide a [CoroutineDispatcher] for performing operations on the main thread.

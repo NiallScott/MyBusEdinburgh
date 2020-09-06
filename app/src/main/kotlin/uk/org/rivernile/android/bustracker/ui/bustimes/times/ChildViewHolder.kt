@@ -26,21 +26,33 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import java.util.Date
+import android.view.View
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
- * This represents a departure/live time for a service.
+ * This [RecyclerView.ViewHolder] shows a child live times item. A child item is one where the
+ * service name is not displayed because it belongs to a parent further up the list which does.
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
+ * @param itemView The root [View] of this [RecyclerView.ViewHolder].
+ * @param populator An implementation used to populate the fields.
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+class ChildViewHolder(
+        itemView: View,
+        private val populator: ViewHolderFieldPopulator) : RecyclerView.ViewHolder(itemView) {
+
+    private val txtDestination: TextView = itemView.findViewById(R.id.txtDestination)
+    private val txtTime: TextView = itemView.findViewById(R.id.txtTime)
+
+    /**
+     * Populate this [RecyclerView.ViewHolder] with the given [UiLiveTimesItem] data.
+     *
+     * @param item The data to use to populate this item.
+     */
+    fun populate(item: UiLiveTimesItem?) {
+        populator.populateDestination(txtDestination, item)
+        populator.populateTime(txtTime, item)
+    }
+}

@@ -24,23 +24,35 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
+package uk.org.rivernile.android.bustracker.utils
 
-import java.util.Date
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Test
 
 /**
- * This represents a departure/live time for a service.
+ * Tests for [Event].
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+class EventTest {
+
+    @Test
+    fun getContentIfNotHandledFirstCallReturnsValue() {
+        val event = Event("test")
+
+        val result = event.getContentIfNotHandled()
+
+        assertEquals("test", result)
+    }
+
+    @Test
+    fun getContentIfNotHandledSecondCallReturnsNull() {
+        val event = Event("test")
+
+        event.getContentIfNotHandled()
+        val result = event.getContentIfNotHandled()
+
+        assertNull(result)
+    }
+}

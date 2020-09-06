@@ -24,23 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
-
-import java.util.Date
+package uk.org.rivernile.android.bustracker.utils
 
 /**
- * This represents a departure/live time for a service.
+ * This is used as a wrapper around events which are only consumed by their first receiver, and will
+ * yield `null` for all further uses.
  *
- * @property destination Where this departure is heading to.
- * @property isDiverted Is this departure diverted via another stop?
- * @property departureTime The time the departure is expected to occur.
- * @property departureMinutes The expected number of minutes until departure.
- * @property isEstimatedTime Is the time an estimate or a real-time prediction?
+ * @param T The type of data this event contains.
+ * @param content The event content.
  * @author Niall Scott
  */
-data class UiVehicle(
-        val destination: String?,
-        val isDiverted: Boolean,
-        val departureTime: Date,
-        val departureMinutes: Int,
-        val isEstimatedTime: Boolean)
+class Event<out T>(private val content: T) {
+
+    private var hasBeenHandled = false
+
+    /**
+     * Get the content of this event. If this event has not been handled, a non-`null` value will
+     * be returned, otherwise `null` will be returned.
+     *
+     * @return The content of this event, or `null` if it has already been handled.
+     */
+    fun getContentIfNotHandled(): T? = if (hasBeenHandled) {
+        null
+    } else {
+        hasBeenHandled = true
+        content
+    }
+}

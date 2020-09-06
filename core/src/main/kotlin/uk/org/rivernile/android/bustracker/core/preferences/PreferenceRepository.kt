@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.preferences
 
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
@@ -35,18 +36,21 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
 import javax.inject.Inject
 
 /**
  * This repository is used to access application preference data.
  *
  * @param preferenceManager Used to access the preference backing store.
+ * @param globalCoroutineScope The global [CoroutineScope].
  * @param defaultDispatcher The [CoroutineDispatcher] to perform processing operations on.
  * @author Niall Scott
  */
 @ExperimentalCoroutinesApi
 class PreferenceRepository @Inject constructor(
         private val preferenceManager: PreferenceManager,
+        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
     /**
@@ -94,6 +98,15 @@ class PreferenceRepository @Inject constructor(
     fun getLiveTimesNumberOfDeparturesFlow(): Flow<Int> {
         return getPreferenceFlow(PreferenceKey.LIVE_TIMES_NUMBER_OF_DEPARTURES) {
             preferenceManager.getBusTimesNumberOfDeparturesToShowPerService()
+        }
+    }
+
+    /**
+     * Toggle the sort by time preference.
+     */
+    fun toggleSortByTime() {
+        globalCoroutineScope.launch(defaultDispatcher) {
+            preferenceManager.setBusTimesSortedByTime(!preferenceManager.isBusTimesSortedByTime())
         }
     }
 
