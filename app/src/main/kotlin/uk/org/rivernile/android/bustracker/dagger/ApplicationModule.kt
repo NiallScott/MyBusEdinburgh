@@ -46,7 +46,6 @@ import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilit
 @Module(includes = [
     AboutDataModule::class,
     BusStopMapDataModule::class,
-    LegacyModule::class,
     ThirdPartyModule::class,
     ViewModelModule::class
 ])

@@ -27,13 +27,10 @@ package uk.org.rivernile.android.bustracker
 
 import android.app.Application
 import android.content.Context
-import com.bugsense.trace.BugSenseHandler
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
-import uk.org.rivernile.edinburghbustracker.android.ApiKey
-import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import javax.inject.Inject
 
 /**
@@ -63,11 +60,6 @@ class BusApplication : Application(), HasAndroidInjector {
 
     override fun onCreate() {
         super.onCreate()
-
-        // Register the BugSense handler.
-        if (BuildConfig.BUGSENSE_ENABLED) {
-            BugSenseHandler.initAndStartSession(this, ApiKey.BUGSENSE_KEY)
-        }
 
         startUpTask.performStartUpTasks()
     }

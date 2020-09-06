@@ -43,29 +43,12 @@ android {
         minSdkVersion androidMinSdkVersion
         targetSdkVersion androidTargetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        // Populate the build config with API keys which are stored in local.properties so that
-        // ApiKey.java can pick them up.
-        final Properties properties = new Properties()
-
-        try {
-            properties.load(new FileInputStream("local.properties"))
-        } catch (IOException ignored) {
-            // Do nothing. This is probably happening on the CI server.
-        }
-
-        buildConfigField("String", "API_KEY",
-                "\"" + properties.getProperty("apiKey", "invalid") + "\"")
-        buildConfigField("String", "BUGSENSE_KEY",
-                "\"" + properties.getProperty("bugsenseKey", "invalid") + "\"")
-        buildConfigField("boolean", "BUGSENSE_ENABLED", "false")
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField("boolean", "BUGSENSE_ENABLED", "true")
         }
         debug {
             testCoverageEnabled true
