@@ -78,11 +78,17 @@ class LiveTimesAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = getItem(position)
+        onBindViewHolder(holder, position, emptyList())
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int,
+            payloads: List<Any>) {
+        val oldItem = payloads.firstOrNull() as UiLiveTimesItem?
+        val newItem = getItem(position)
 
         when (holder) {
-            is ParentViewHolder -> holder.populate(item)
-            is ChildViewHolder -> holder.populate(item)
+            is ParentViewHolder -> holder.populate(oldItem, newItem)
+            is ChildViewHolder -> holder.populate(newItem)
         }
     }
 
@@ -112,5 +118,7 @@ class LiveTimesAdapter(
 
         override fun areContentsTheSame(oldItem: UiLiveTimesItem, newItem: UiLiveTimesItem) =
                 oldItem == newItem
+
+        override fun getChangePayload(oldItem: UiLiveTimesItem, newItem: UiLiveTimesItem) = oldItem
     }
 }

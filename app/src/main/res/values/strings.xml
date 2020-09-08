@@ -684,4 +684,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ****************
     -->
     <string name="tweetadapter_info_format" tools:ignore="MissingTranslation">%1$s - %2$s</string> <!-- %1$s = display name. %2$s = date and time String. No need to translate this String. -->
+
+    <!--
+    ******************
+    ******************
+    ** Custom Views **
+    ******************
+    ******************
+    -->
+    <string name="expandcollapseindicator_contentdescription_collapsed">Collapsed</string>
+    <string name="expandcollapseindicator_contentdescription_expanded">Expanded</string>
 </resources>

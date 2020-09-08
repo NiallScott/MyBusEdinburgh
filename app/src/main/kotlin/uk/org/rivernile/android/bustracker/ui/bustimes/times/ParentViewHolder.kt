@@ -28,10 +28,10 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import android.content.res.ColorStateList
 import android.view.View
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import uk.org.rivernile.android.bustracker.widget.ExpandCollapseIndicator
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
@@ -52,16 +52,10 @@ class ParentViewHolder(
         private val clickListener: OnParentClickedListener)
     : RecyclerView.ViewHolder(itemView) {
 
-    companion object {
-
-        private const val COLLAPSED_DEGREES = 0f
-        private const val EXPANDED_DEGREES = 180f
-    }
-
     private val txtServiceName: TextView = itemView.findViewById(R.id.txtServiceName)
     private val txtDestination: TextView = itemView.findViewById(R.id.txtDestination)
     private val txtTime: TextView = itemView.findViewById(R.id.txtTime)
-    private val imgArrow: ImageView = itemView.findViewById(R.id.imgArrow)
+    private val imgArrow: ExpandCollapseIndicator = itemView.findViewById(R.id.imgArrow)
 
     private val defaultBackground = ContextCompat.getColor(itemView.context, R.color.colorAccent)
 
@@ -76,24 +70,70 @@ class ParentViewHolder(
     /**
      * Populate this [RecyclerView.ViewHolder] with the given [UiLiveTimesItem] data.
      *
-     * @param item The data to use to populate this item.
+     * @param oldItem The old item, used for comparison.
+     * @param newItem The data to use to populate this item.
      */
-    fun populate(item: UiLiveTimesItem?) {
-        this.item = item
-        populator.populateDestination(txtDestination, item)
-        populator.populateTime(txtTime, item)
+    fun populate(oldItem: UiLiveTimesItem?, newItem: UiLiveTimesItem?) {
+        this.item = newItem
+        populateServiceName(newItem)
+        populateServiceBackground(oldItem, newItem)
+        populator.populateDestination(txtDestination, newItem)
+        populator.populateTime(txtTime, newItem)
+        populateExpandCollapseIndicator(oldItem, newItem)
+    }
 
-        item?.let {
-            txtServiceName.text = it.serviceName
-            val backgroundColour = it.serviceColour ?:defaultBackground
-            txtServiceName.backgroundTintList = ColorStateList.valueOf(backgroundColour)
+    /**
+     * Populate the service name.
+     *
+     * @param item The name is obtained from here. If [item] is `null`, then the text will be set
+     * to `null`.
+     */
+    private fun populateServiceName(item: UiLiveTimesItem?) {
+        txtServiceName.text = item?.serviceName
+    }
 
-            imgArrow.rotation = if (it.expanded) EXPANDED_DEGREES else COLLAPSED_DEGREES
+    /**
+     * Populate the service text background with the service colour.
+     *
+     * @param oldItem The old item, used to decide if the item should be updated.
+     * @param newItem The new item containing the service colour to populate.
+     */
+    private fun populateServiceBackground(oldItem: UiLiveTimesItem?, newItem: UiLiveTimesItem?) {
+        newItem?.also {
+            if (oldItem == null || oldItem.serviceColour != it.serviceColour) {
+                val backgroundColour = it.serviceColour ?: defaultBackground
+                txtServiceName.backgroundTintList = ColorStateList.valueOf(backgroundColour)
+            }
         } ?: run {
-            txtServiceName.text = null
             txtServiceName.backgroundTintList = ColorStateList.valueOf(defaultBackground)
-            imgArrow.rotation = COLLAPSED_DEGREES
         }
+    }
+
+    /**
+     * Populate the expand/collapse indicator with the correct status.
+     *
+     * @param oldItem Used to set the indicator to this state prior to running the animation.
+     * @param newItem Contains the new expand state.
+     */
+    private fun populateExpandCollapseIndicator(
+            oldItem: UiLiveTimesItem?,
+            newItem: UiLiveTimesItem?) {
+        newItem?.also {
+            val oldState = oldItem?.expanded ?: it.expanded
+            val newState = it.expanded
+
+            if (oldState) {
+                imgArrow.expand(false)
+            } else {
+                imgArrow.collapse(false)
+            }
+
+            if (newState) {
+                imgArrow.expand(true)
+            } else {
+                imgArrow.collapse(true)
+            }
+        } ?: imgArrow.collapse(false)
     }
 
     /**
