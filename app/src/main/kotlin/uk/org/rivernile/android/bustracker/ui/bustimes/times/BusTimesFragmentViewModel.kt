@@ -38,7 +38,12 @@ import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.livedata.DistinctLiveData
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
@@ -69,7 +74,7 @@ class BusTimesFragmentViewModel(
         private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
         private val preferenceRepository: PreferenceRepository,
         connectivityRepository: ConnectivityRepository,
-        @ForDefaultDispatcher defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     /**
      * This [LiveData] exposes whether the device currently has connectivity or not.
@@ -99,15 +104,22 @@ class BusTimesFragmentViewModel(
 
     /**
      * This is used as the refresh trigger, which causes the upstream [Flow]s to load new live times
-     * from the endpoint. This is exposed as a [LiveData] for ease.
+     * from the endpoint.
      */
-    private val refreshTrigger = MutableLiveData(Unit)
+    private val refreshTriggerChannel = Channel<Unit>(Channel.CONFLATED).apply {
+        offer(Unit)
+    }
 
     /**
      * This is the [LiveData] which contains the result from loading live times.
      */
-    private val liveTimes = createLiveTimesFlow()
-            .asLiveData(context = viewModelScope.coroutineContext + defaultDispatcher)
+    private val liveTimes = MutableLiveData<UiTransformedResult>().apply {
+        viewModelScope.launch {
+            createLiveTimesFlow().collect {
+                value = it
+            }
+        }
+    }
 
     /**
      * Show loading progress to the user. If there is no stop code, this will emit `null`.
@@ -221,7 +233,7 @@ class BusTimesFragmentViewModel(
      * This is called when the refresh menu item has been clicked by the user.
      */
     fun onRefreshMenuItemClicked() {
-        refreshTrigger.value = Unit
+        refreshLiveTimes()
     }
 
     /**
@@ -242,7 +254,7 @@ class BusTimesFragmentViewModel(
      * This is called when the user performs the swipe to refresh action.
      */
     fun onSwipeToRefresh() {
-        refreshTrigger.value = Unit
+        refreshLiveTimes()
     }
 
     /**
@@ -255,6 +267,13 @@ class BusTimesFragmentViewModel(
     }
 
     /**
+     * This causes the live times to be refreshed from the endpoint.
+     */
+    private fun refreshLiveTimes() {
+        refreshTriggerChannel.offer(Unit)
+    }
+
+    /**
      * Create a [Flow] which produces the [UiTransformedResult], containing states of either
      * progress, error or success. This merges together the [Flow]s of loading the live times, and
      * the necessary transformations on the loaded live times.
@@ -264,11 +283,12 @@ class BusTimesFragmentViewModel(
     private fun createLiveTimesFlow(): Flow<UiTransformedResult> {
         val liveTimesFlow = liveTimesLoader.loadLiveTimesFlow(
                 distinctStopCodeLiveData.asFlow(),
-                refreshTrigger.asFlow())
+                refreshTriggerChannel.consumeAsFlow())
 
         return liveTimesTransform.getLiveTimesTransformFlow(
                 liveTimesFlow,
                 expandedServicesTracker.expandedServicesLiveData.asFlow())
+                .flowOn(defaultDispatcher)
     }
 
     /**
