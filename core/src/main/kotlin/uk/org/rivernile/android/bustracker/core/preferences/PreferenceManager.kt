@@ -97,6 +97,13 @@ interface PreferenceManager {
     fun isBusTimesAutoRefreshEnabled(): Boolean
 
     /**
+     * Set whether auto-refresh should be enabled or not.
+     *
+     * @param autoRefresh `true` if auto-refresh should be enabled, otherwise `false`.
+     */
+    fun setBusTimesAutoRefreshEnabled(autoRefresh: Boolean)
+
+    /**
      * Should the bus times display show night services?
      *
      * @return `true` if the bus times display should show night services, `false` if not.

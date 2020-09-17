@@ -116,6 +116,12 @@ internal class AndroidPreferenceManager @Inject constructor(
     override fun isBusTimesAutoRefreshEnabled(): Boolean =
             preferences.getBoolean(PREF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
 
+    override fun setBusTimesAutoRefreshEnabled(autoRefresh: Boolean) {
+        preferences.edit()
+                .putBoolean(PREF_AUTO_REFRESH, autoRefresh)
+                .apply()
+    }
+
     override fun isBusTimesShowingNightServices(): Boolean =
             preferences.getBoolean(PREF_SHOW_NIGHT_BUSES, DEFAULT_SHOW_NIGHT_BUSES)
 

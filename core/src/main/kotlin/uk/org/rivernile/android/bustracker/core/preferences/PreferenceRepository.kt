@@ -111,6 +111,16 @@ class PreferenceRepository @Inject constructor(
     }
 
     /**
+     * Toggle the auto-refresh preference.
+     */
+    fun toggleAutoRefresh() {
+        globalCoroutineScope.launch(defaultDispatcher) {
+            preferenceManager.setBusTimesAutoRefreshEnabled(
+                    !preferenceManager.isBusTimesAutoRefreshEnabled())
+        }
+    }
+
+    /**
      * Get a [Flow] which returns the preference value obtained from [block], and identified by the
      * supplied [key], which is observed for changes. Changes will cause further emissions.
      *

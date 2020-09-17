@@ -129,6 +129,8 @@ class BusTimesFragment : Fragment() {
                 Observer(this::handleConnectivityChange))
         viewModel.isSortedByTimeLiveData.observe(viewLifecycle,
                 Observer(this::setSortedByTimeActionItemState))
+        viewModel.isAutoRefreshLiveData.observe(viewLifecycle,
+                Observer(this::setAutoRefreshActionItemState))
         viewModel.showProgressLiveData.observe(viewLifecycle, Observer(this::handleShowProgress))
         viewModel.errorLiveData.observe(viewLifecycle, Observer(this::handleError))
         viewModel.liveTimesLiveData.observe(viewLifecycle, Observer(adapter::submitList))
@@ -152,6 +154,7 @@ class BusTimesFragment : Fragment() {
 
         setRefreshActionItemLoadingState(viewModel.showProgressLiveData.value)
         setSortedByTimeActionItemState(viewModel.isSortedByTimeLiveData.value)
+        setAutoRefreshActionItemState(viewModel.isAutoRefreshLiveData.value)
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -296,7 +299,7 @@ class BusTimesFragment : Fragment() {
     /**
      * Update the state of the sorted by time/service [MenuItem].
      *
-     * @param isSortedByTime THe current sort by time/service state. `null` means the [MenuItem]
+     * @param isSortedByTime The current sort by time/service state. `null` means the [MenuItem]
      * will be disabled.
      */
     private fun setSortedByTimeActionItemState(isSortedByTime: Boolean?) {
@@ -309,6 +312,24 @@ class BusTimesFragment : Fragment() {
             } else {
                 setTitle(R.string.bustimes_menu_sort_times)
                         .setIcon(R.drawable.ic_action_time)
+            }
+        }
+    }
+
+    /**
+     * Update the state of the auto refresh [MenuItem].
+     *
+     * @param autoRefreshEnabled The current auto refresh state. `null` means the [MenuItem] will be
+     * disabled.
+     */
+    private fun setAutoRefreshActionItemState(autoRefreshEnabled: Boolean?) {
+        menuItemAutoRefresh?.apply {
+            isEnabled = autoRefreshEnabled != null
+
+            if (autoRefreshEnabled == true) {
+                setTitle(R.string.bustimes_menu_turnautorefreshoff)
+            } else {
+                setTitle(R.string.bustimes_menu_turnautorefreshon)
             }
         }
     }

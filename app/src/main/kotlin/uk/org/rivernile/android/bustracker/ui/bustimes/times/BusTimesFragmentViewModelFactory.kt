@@ -32,6 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
 import javax.inject.Inject
 
@@ -45,6 +46,7 @@ import javax.inject.Inject
  * @param lastRefreshTimeCalculator Used to calculate the amount of time since the last refresh.
  * @param connectivityRepository Used to determine device connectivity.
  * @param preferenceRepository This contains the user's preferences.
+ * @param timeUtils An implementation to provide timestamps.
  * @param defaultDispatcher The dispatcher to use to execute background processing on.
  * @author Niall Scott
  */
@@ -55,6 +57,7 @@ class BusTimesFragmentViewModelFactory @Inject constructor(
         private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
         private val connectivityRepository: ConnectivityRepository,
         private val preferenceRepository: PreferenceRepository,
+        private val timeUtils: TimeUtils,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModelSavedStateFactory<BusTimesFragmentViewModel> {
 
@@ -68,6 +71,7 @@ class BusTimesFragmentViewModelFactory @Inject constructor(
                 lastRefreshTimeCalculator,
                 preferenceRepository,
                 connectivityRepository,
+                timeUtils,
                 defaultDispatcher)
     }
 }

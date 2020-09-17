@@ -230,4 +230,26 @@ class PreferenceRepositoryTest {
         verify(preferenceManager)
                 .setBusTimesSortedByTime(false)
     }
+
+    @Test
+    fun toggleAutoRefreshTogglesFalseToTrue() = coroutineRule.runBlockingTest {
+        whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
+                .thenReturn(false)
+
+        repository.toggleAutoRefresh()
+
+        verify(preferenceManager)
+                .setBusTimesAutoRefreshEnabled(true)
+    }
+
+    @Test
+    fun toggleAutoRefreshTogglesTrueToFalse() = coroutineRule.runBlockingTest {
+        whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
+                .thenReturn(true)
+
+        repository.toggleAutoRefresh()
+
+        verify(preferenceManager)
+                .setBusTimesAutoRefreshEnabled(false)
+    }
 }

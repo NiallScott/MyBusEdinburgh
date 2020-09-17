@@ -33,21 +33,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.liveData
 import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.livedata.DistinctLiveData
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.utils.Event
 
 /**
@@ -63,6 +67,7 @@ import uk.org.rivernile.android.bustracker.utils.Event
  * @param preferenceRepository This contains the user's preferences.
  * @param connectivityRepository This informs us about the device's connectivity status. This status
  * is shown to the user.
+ * @param timeUtils An implementation to provide timestamps.
  * @param defaultDispatcher Computation is run on this [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -74,7 +79,13 @@ class BusTimesFragmentViewModel(
         private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
         private val preferenceRepository: PreferenceRepository,
         connectivityRepository: ConnectivityRepository,
+        private val timeUtils: TimeUtils,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+
+    companion object {
+
+        private const val AUTO_REFRESH_INTERVAL_MILLIS = 60000L
+    }
 
     /**
      * This [LiveData] exposes whether the device currently has connectivity or not.
@@ -103,6 +114,24 @@ class BusTimesFragmentViewModel(
     }
 
     /**
+     * This [LiveData] exposes whether auto refresh is enabled or not. This is based on the user
+     * preference from [PreferenceRepository].
+     *
+     * If there is no set stop code, this will return `null`.
+     */
+    val isAutoRefreshLiveData = distinctStopCodeLiveData.switchMap {
+        if (it?.isNotEmpty() == true) {
+            preferenceRepository.isLiveTimesAutoRefreshEnabledFlow()
+                    .onEach { enabled ->
+                        handleAutoRefreshPreferenceChanged(enabled)
+                    }
+                    .asLiveData(viewModelScope.coroutineContext)
+        } else {
+            MutableLiveData<Boolean>(null)
+        }
+    }
+
+    /**
      * This is used as the refresh trigger, which causes the upstream [Flow]s to load new live times
      * from the endpoint.
      */
@@ -111,7 +140,11 @@ class BusTimesFragmentViewModel(
     }
 
     /**
-     * This is the [LiveData] which contains the result from loading live times.
+     * This is the [LiveData] which contains the result from loading live times. This does not use
+     * a [liveData] builder as this would terminate the live times [Flow] when observers are removed
+     * from the [LiveData]. Instead, it launches loading of live times in [viewModelScope] which
+     * cancels when this [ViewModel] is cleared. This prevents the live times being reloaded every
+     * time the app is brought back in to the foreground.
      */
     private val liveTimes = MutableLiveData<UiTransformedResult>().apply {
         viewModelScope.launch {
@@ -122,12 +155,23 @@ class BusTimesFragmentViewModel(
     }
 
     /**
+     * This [LiveData] is a proxy to [liveTimes], in order to be able to provide a [liveData]
+     * builder where the auto-refresh can be performed.
+     */
+    private val liveTimesProxy = liveTimes.switchMap {
+        liveData(viewModelScope.coroutineContext) {
+            emit(it)
+            performAutoRefreshDelay(it)
+        }
+    }
+
+    /**
      * Show loading progress to the user. If there is no stop code, this will emit `null`.
      * Otherwise, it will emit the progress state of the loading live times.
      */
     val showProgressLiveData = distinctStopCodeLiveData.switchMap { stopCode ->
         if (stopCode?.isNotEmpty() == true) {
-            liveTimes.map {
+            liveTimesProxy.map {
                 it is UiTransformedResult.InProgress
             }
         } else {
@@ -142,7 +186,7 @@ class BusTimesFragmentViewModel(
      * last successful load is shown and progress and errors are shown in different ways.
      */
     private val lastSuccess = MediatorLiveData<UiTransformedResult.Success>().apply {
-        addSource(liveTimes) {
+        addSource(liveTimesProxy) {
             if (it is UiTransformedResult.Success) {
                 value = it
             }
@@ -154,7 +198,7 @@ class BusTimesFragmentViewModel(
      * state is successful but there is no data, this will generate an [ErrorType.NO_DATA].
      */
     val errorLiveData: LiveData<ErrorType?> = MediatorLiveData<ErrorType?>().apply {
-        addSource(liveTimes) {
+        addSource(liveTimesProxy) {
             when (it) {
                 is UiTransformedResult.Success -> {
                     value = if (it.items.isEmpty()) {
@@ -247,7 +291,7 @@ class BusTimesFragmentViewModel(
      * This is called when the auto refresh menu item has been clicked by the user.
      */
     fun onAutoRefreshMenuItemClicked() {
-
+        preferenceRepository.toggleAutoRefresh()
     }
 
     /**
@@ -310,5 +354,67 @@ class BusTimesFragmentViewModel(
         } ?: error?.let {
             UiState.ERROR
         } ?: UiState.PROGRESS
+    }
+
+    /**
+     * Handle the auto-refresh preference being changed. If this preference has been changed to the
+     * enabled state, the time of the last refresh, as reported by [liveTimesProxy], will be
+     * inspected and if this is older than [AUTO_REFRESH_INTERVAL_MILLIS], a refresh will occur.
+     *
+     * @param enabled `true` if auto-refresh has been enabled, otherwise `false`.
+     */
+    private fun handleAutoRefreshPreferenceChanged(enabled: Boolean) {
+        if (enabled) {
+            liveTimesProxy.value?.let {
+                getDelayUntilNextRefresh(it)?.let { delayMillis ->
+                    if (delayMillis <= 0) {
+                        refreshTriggerChannel.offer(Unit)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Perform the auto-refresh delay, and only issue the refresh request if auto-refresh is
+     * enabled once the delay has expired. The auto-refresh period is defined as
+     * [AUTO_REFRESH_INTERVAL_MILLIS], therefore the next refresh will happen at the time of the
+     * last refresh + [AUTO_REFRESH_INTERVAL_MILLIS]. This method uses the amount of time between
+     * now and the calculated timestamp to calculate the length of delay. If the calculated delay
+     * is less than `0`, that is, the next refresh time is in the past, the next refresh happens
+     * immediately.
+     *
+     * @param result The last loaded [UiTransformedResult], used to calculate when the next refresh
+     * time should be.
+     */
+    private suspend fun performAutoRefreshDelay(result: UiTransformedResult) {
+        getDelayUntilNextRefresh(result)?.let {
+            delay(it)
+
+            if (isAutoRefreshLiveData.value == true) {
+                refreshTriggerChannel.send(Unit)
+            }
+        }
+    }
+
+    /**
+     * Get the amount of time in milliseconds until the next refresh should occur (if auto-refresh
+     * is enabled). A negative or `0` value means a refresh should occur immediately. A positive
+     * value means there should be a delay until the next refresh happens. A `null` value means no
+     * refresh or delay should happen.
+     *
+     * @param result The last loaded [UiTransformedResult], used to calculate when the next refresh
+     * time should be.
+     * @return The number of milliseconds until the next refresh, or `null` if a refresh should not
+     * occur.
+     */
+    private fun getDelayUntilNextRefresh(result: UiTransformedResult): Long? {
+        return when (result) {
+            is UiTransformedResult.Success -> result.receiveTime
+            is UiTransformedResult.Error -> result.receiveTime
+            else -> null
+        }?.let {
+            it + AUTO_REFRESH_INTERVAL_MILLIS - timeUtils.getCurrentTimeMillis()
+        }
     }
 }
