@@ -79,8 +79,9 @@ class TwitterUpdatesFragmentViewModelTest {
 
     @Test
     fun initialStateBeginsLoadingTweets() {
-        val flow = flow { emit(
-                Result.InProgress) }
+        val flow = flow {
+            emit(Result.InProgress)
+        }
         whenever(twitterRepository.getLatestTweets())
                 .thenReturn(flow)
 

@@ -35,8 +35,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.observe
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.bustimes_fragment.contentView
@@ -82,7 +82,9 @@ class BusTimesFragment : Fragment() {
     @Inject
     lateinit var viewHolderFieldPopulator: ViewHolderFieldPopulator
 
-    private lateinit var viewModel: BusTimesFragmentViewModel
+    private val viewModel: BusTimesFragmentViewModel by viewModels {
+        GenericSavedStateViewModelFactory(viewModelFactory, this)
+    }
     private lateinit var adapter: LiveTimesAdapter
 
     private var errorSnackbar: Snackbar? = null
@@ -96,9 +98,6 @@ class BusTimesFragment : Fragment() {
 
         super.onCreate(savedInstanceState)
 
-        val savedStateViewModelFactory = GenericSavedStateViewModelFactory(viewModelFactory, this)
-        viewModel = ViewModelProvider(this, savedStateViewModelFactory)
-                .get(BusTimesFragmentViewModel::class.java)
         viewModel.stopCode = arguments?.getString(EXTRA_STOP_CODE)
 
         adapter = LiveTimesAdapter(requireContext(), viewHolderFieldPopulator,
@@ -125,20 +124,16 @@ class BusTimesFragment : Fragment() {
         }
 
         val viewLifecycle = viewLifecycleOwner
-        viewModel.hasConnectivityLiveData.observe(viewLifecycle,
-                Observer(this::handleConnectivityChange))
+        viewModel.hasConnectivityLiveData.observe(viewLifecycle, this::handleConnectivityChange)
         viewModel.isSortedByTimeLiveData.observe(viewLifecycle,
-                Observer(this::setSortedByTimeActionItemState))
-        viewModel.isAutoRefreshLiveData.observe(viewLifecycle,
-                Observer(this::setAutoRefreshActionItemState))
-        viewModel.showProgressLiveData.observe(viewLifecycle, Observer(this::handleShowProgress))
-        viewModel.errorLiveData.observe(viewLifecycle, Observer(this::handleError))
-        viewModel.liveTimesLiveData.observe(viewLifecycle, Observer(adapter::submitList))
-        viewModel.uiStateLiveState.observe(viewLifecycle, Observer(this::handleUiStateChanged))
-        viewModel.errorWithContentLiveData.observe(viewLifecycleOwner,
-                Observer(this::handleErrorWithContent))
-        viewModel.lastRefreshLiveData.observe(viewLifecycle,
-                Observer(this::handleLastRefreshUpdated))
+                this::setSortedByTimeActionItemState)
+        viewModel.isAutoRefreshLiveData.observe(viewLifecycle, this::setAutoRefreshActionItemState)
+        viewModel.showProgressLiveData.observe(viewLifecycle, this::handleShowProgress)
+        viewModel.errorLiveData.observe(viewLifecycle, this::handleError)
+        viewModel.liveTimesLiveData.observe(viewLifecycle, adapter::submitList)
+        viewModel.uiStateLiveState.observe(viewLifecycle, this::handleUiStateChanged)
+        viewModel.errorWithContentLiveData.observe(viewLifecycle, this::handleErrorWithContent)
+        viewModel.lastRefreshLiveData.observe(viewLifecycle, this::handleLastRefreshUpdated)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

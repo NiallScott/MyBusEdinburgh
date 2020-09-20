@@ -33,9 +33,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import com.google.android.material.appbar.AppBarLayout
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
@@ -106,7 +107,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private lateinit var viewModel: DisplayStopDataActivityViewModel
+    private val viewModel: DisplayStopDataActivityViewModel by viewModels { viewModelFactory }
 
     private var favouriteMenuItem: MenuItem? = null
     private var arrivalAlertMenuItem: MenuItem? = null
@@ -119,9 +120,6 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.displaystopdata)
-
-        viewModel = ViewModelProvider(this, viewModelFactory)
-                .get(DisplayStopDataActivityViewModel::class.java)
 
         intent.let {
             viewModel.stopCode = if (Intent.ACTION_VIEW == it.action) {
@@ -145,24 +143,22 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
         appBarLayout.addOnOffsetChangedListener(appBarOffsetChangedListener)
 
-        viewModel.distinctStopCodeLiveData.observe(this, Observer(this::handleStopCode))
-        viewModel.busStopDetails.observe(this, Observer(this::handleBusStop))
-        viewModel.isFavouriteLiveData.observe(this, Observer(this::configureFavouriteMenuItem))
-        viewModel.hasArrivalAlertLiveData.observe(this,
-                Observer(this::configureArrivalAlertMenuItem))
-        viewModel.hasProximityAlertLiveData.observe(this,
-                Observer(this::configureProximityAlertMenuItem))
-        viewModel.showAddFavouriteLiveData.observe(this, Observer(this::showAddFavourite))
-        viewModel.showRemoveFavouriteLiveData.observe(this, Observer(this::showRemoveFavourite))
-        viewModel.showAddArrivalAlertLiveData.observe(this, Observer(this::showAddArrivalAlert))
-        viewModel.showRemoveArrivalAlertLiveData.observe(this, Observer {
+        viewModel.distinctStopCodeLiveData.observe(this, this::handleStopCode)
+        viewModel.busStopDetails.observe(this, this::handleBusStop)
+        viewModel.isFavouriteLiveData.observe(this, this::configureFavouriteMenuItem)
+        viewModel.hasArrivalAlertLiveData.observe(this, this::configureArrivalAlertMenuItem)
+        viewModel.hasProximityAlertLiveData.observe(this, this::configureProximityAlertMenuItem)
+        viewModel.showAddFavouriteLiveData.observe(this, this::showAddFavourite)
+        viewModel.showRemoveFavouriteLiveData.observe(this, this::showRemoveFavourite)
+        viewModel.showAddArrivalAlertLiveData.observe(this, this::showAddArrivalAlert)
+        viewModel.showRemoveArrivalAlertLiveData.observe(this) {
             showRemoveArrivalAlert()
-        })
-        viewModel.showAddProximityAlertLiveData.observe(this, Observer(this::showAddProximityAlert))
-        viewModel.showRemoveProximityAlertLiveData.observe(this, Observer {
+        }
+        viewModel.showAddProximityAlertLiveData.observe(this, this::showAddProximityAlert)
+        viewModel.showRemoveProximityAlertLiveData.observe(this) {
             showRemoveProximityAlert()
-        })
-        viewModel.showStreetViewLiveData.observe(this, Observer(this::showStreetView))
+        }
+        viewModel.showStreetViewLiveData.observe(this, this::showStreetView)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
