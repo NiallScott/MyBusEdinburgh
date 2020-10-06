@@ -40,6 +40,11 @@ import org.junit.Assert.assertTrue
  */
 class LiveDataTestObserver<T> : Observer<T> {
 
+    /**
+     * This is the [List] of observed values.
+     */
+    val observedValues: List<T> get() = values
+
     private val values = mutableListOf<T>()
 
     override fun onChanged(t: T) {

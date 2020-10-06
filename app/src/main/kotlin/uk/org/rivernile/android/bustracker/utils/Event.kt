@@ -50,4 +50,11 @@ class Event<out T>(private val content: T) {
         hasBeenHandled = true
         content
     }
+
+    /**
+     * Peek at the content of this [Event] without handling it.
+     *
+     * @return The content of this [Event].
+     */
+    fun peek() = content
 }

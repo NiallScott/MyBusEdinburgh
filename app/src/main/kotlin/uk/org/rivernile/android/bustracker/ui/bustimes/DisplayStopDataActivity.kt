@@ -36,7 +36,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import com.google.android.material.appbar.AppBarLayout
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector

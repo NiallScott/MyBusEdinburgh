@@ -32,7 +32,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
 import javax.inject.Inject
 
@@ -40,24 +39,21 @@ import javax.inject.Inject
  * This [ViewModelSavedStateFactory] creates a [BusTimesFragmentViewModel] with the ability to use
  * [SavedStateHandle].
  *
- * @param liveTimesLoader This is used to load live times.
- * @param liveTimesTransform This is used to transform the result of loading live times in to a form
- * consumable by the UI.
+ * @param liveTimesFlowFactory Used to construct the flow of live times.
  * @param lastRefreshTimeCalculator Used to calculate the amount of time since the last refresh.
  * @param connectivityRepository Used to determine device connectivity.
+ * @param autoRefreshController Used to control the auto-refresh functionality.
  * @param preferenceRepository This contains the user's preferences.
- * @param timeUtils An implementation to provide timestamps.
  * @param defaultDispatcher The dispatcher to use to execute background processing on.
  * @author Niall Scott
  */
 @ExperimentalCoroutinesApi
 class BusTimesFragmentViewModelFactory @Inject constructor(
-        private val liveTimesLoader: LiveTimesLoader,
-        private val liveTimesTransform: LiveTimesTransform,
+        private val liveTimesFlowFactory: LiveTimesFlowFactory,
         private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
         private val connectivityRepository: ConnectivityRepository,
+        private val autoRefreshController: AutoRefreshController,
         private val preferenceRepository: PreferenceRepository,
-        private val timeUtils: TimeUtils,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModelSavedStateFactory<BusTimesFragmentViewModel> {
 
@@ -66,12 +62,11 @@ class BusTimesFragmentViewModelFactory @Inject constructor(
 
         return BusTimesFragmentViewModel(
                 expandedServicesTracker,
-                liveTimesLoader,
-                liveTimesTransform,
+                liveTimesFlowFactory,
                 lastRefreshTimeCalculator,
+                autoRefreshController,
                 preferenceRepository,
                 connectivityRepository,
-                timeUtils,
                 defaultDispatcher)
     }
 }

@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.coroutines
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -40,8 +41,7 @@ import org.junit.Assert.assertTrue
  * @param scope The [CoroutineScope] to execute the [Flow] under.
  * @return A [FlowTestObserver] for the given [Flow].
  */
-fun <T> Flow<T>.test(scope: CoroutineScope): FlowTestObserver<T> =
-        FlowTestObserver(scope, this)
+fun <T> Flow<T>.test(scope: CoroutineScope): FlowTestObserver<T> = FlowTestObserver(scope, this)
 
 /**
  * This is used to aid in the testing of [Flow] objects.
@@ -53,14 +53,33 @@ fun <T> Flow<T>.test(scope: CoroutineScope): FlowTestObserver<T> =
  * @param flow The [Flow] that is being tested.
  */
 class FlowTestObserver<T>(
-        scope: CoroutineScope,
-        flow: Flow<T>) {
+        private val scope: CoroutineScope,
+        flow: Flow<T>? = null) {
 
     private val values = mutableListOf<T>()
 
-    private val job = scope.launch {
-        flow.collect {
-            values.add(it)
+    private var job: Job? = null
+
+    init {
+        flow?.let {
+            observeFlow(it)
+        }
+    }
+
+    /**
+     * Allows for the late observation of a [Flow] when the [Flow] instance was not available at the
+     * time of instantiating this class.
+     *
+     * If a [Flow] is already being observed when this method is called, an [IllegalStateException]
+     * will be thrown.
+     *
+     * @param flow The [Flow] to observe.
+     */
+    fun observe(flow: Flow<T>) {
+        if (job == null) {
+            observeFlow(flow)
+        } else {
+            throw IllegalStateException("Already observing a Flow.")
         }
     }
 
@@ -86,6 +105,19 @@ class FlowTestObserver<T>(
      * Finish the flow.
      */
     fun finish() {
-        job.cancel()
+        job?.cancel()
+    }
+
+    /**
+     * Observe a given [Flow].
+     *
+     * @param flow The [Flow] to observe.
+     */
+    private fun observeFlow(flow: Flow<T>) {
+        job = scope.launch {
+            flow.collect {
+                values.add(it)
+            }
+        }
     }
 }

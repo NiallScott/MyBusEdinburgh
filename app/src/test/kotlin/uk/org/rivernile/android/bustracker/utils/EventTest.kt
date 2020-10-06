@@ -55,4 +55,21 @@ class EventTest {
 
         assertNull(result)
     }
+
+    @Test
+    fun peekReturnsCurrentlySetData() {
+        val event = Event("test")
+
+        assertEquals("test", event.peek())
+    }
+
+    @Test
+    fun peekDoesNotHandleEvent() {
+        val event = Event("test")
+
+        event.peek()
+        val result = event.getContentIfNotHandled()
+
+        assertEquals("test", result)
+    }
 }

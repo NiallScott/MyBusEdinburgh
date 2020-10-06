@@ -39,8 +39,7 @@ import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
  */
 class DistinctLiveDataTest {
 
-    @Rule
-    @JvmField
+    @get:Rule
     val rule = InstantTaskExecutorRule()
 
     private val observer = LiveDataTestObserver<String>()

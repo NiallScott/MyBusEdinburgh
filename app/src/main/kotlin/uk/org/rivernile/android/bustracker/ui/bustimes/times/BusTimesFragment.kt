@@ -36,7 +36,6 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.observe
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
 import kotlinx.android.synthetic.main.bustimes_fragment.contentView
@@ -131,7 +130,7 @@ class BusTimesFragment : Fragment() {
         viewModel.showProgressLiveData.observe(viewLifecycle, this::handleShowProgress)
         viewModel.errorLiveData.observe(viewLifecycle, this::handleError)
         viewModel.liveTimesLiveData.observe(viewLifecycle, adapter::submitList)
-        viewModel.uiStateLiveState.observe(viewLifecycle, this::handleUiStateChanged)
+        viewModel.uiStateLiveData.observe(viewLifecycle, this::handleUiStateChanged)
         viewModel.errorWithContentLiveData.observe(viewLifecycle, this::handleErrorWithContent)
         viewModel.lastRefreshLiveData.observe(viewLifecycle, this::handleLastRefreshUpdated)
     }
@@ -223,8 +222,9 @@ class BusTimesFragment : Fragment() {
      * @param event The [Event] containing the error information.
      */
     private fun handleErrorWithContent(event: Event<ErrorType>?) {
+        dismissErrorSnackbar()
+
         event?.getContentIfNotHandled()?.let {
-            dismissErrorSnackbar()
             errorSnackbar = Snackbar.make(layoutContent, mapErrorToStringResource(it),
                     Snackbar.LENGTH_LONG).apply {
                 addCallback(object : Snackbar.Callback() {

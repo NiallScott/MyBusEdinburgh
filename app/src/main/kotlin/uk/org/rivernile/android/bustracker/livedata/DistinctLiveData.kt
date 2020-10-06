@@ -38,7 +38,11 @@ import androidx.lifecycle.MutableLiveData
  * @param T The type of data the [MutableLiveData] contains.
  * @author Niall Scott
  */
-class DistinctLiveData<T> : MutableLiveData<T>() {
+class DistinctLiveData<T> : MutableLiveData<T> {
+
+    constructor() : super()
+
+    constructor(defaultValue: T) : super(defaultValue)
 
     override fun setValue(value: T) {
         if (value != this.value) {
