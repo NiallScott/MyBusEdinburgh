@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,8 +41,7 @@ import org.junit.Test
 @LargeTest
 class AboutActivityTest {
 
-    @Rule
-    @JvmField
+    @get:Rule
     val activityRule = ActivityTestRule(AboutActivity::class.java)
 
     @Test

@@ -45,8 +45,7 @@ class ExpandedServicesTrackerTest {
         private const val STATE_KEY_EXPANDED_SERVICES = "expandedServices"
     }
 
-    @Rule
-    @JvmField
+    @get:Rule
     val rule = InstantTaskExecutorRule()
 
     private val expandedServicesObserver = LiveDataTestObserver<Set<String>>()

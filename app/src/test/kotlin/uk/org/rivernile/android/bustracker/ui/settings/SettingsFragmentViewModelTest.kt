@@ -48,8 +48,7 @@ import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 @RunWith(MockitoJUnitRunner::class)
 class SettingsFragmentViewModelTest {
 
-    @Rule
-    @JvmField
+    @get:Rule
     val liveDataTaskExecutor = InstantTaskExecutorRule()
 
     @Mock

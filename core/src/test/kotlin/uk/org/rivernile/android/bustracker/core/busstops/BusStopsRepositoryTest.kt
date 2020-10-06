@@ -53,8 +53,7 @@ import uk.org.rivernile.android.bustracker.coroutines.test
 @RunWith(MockitoJUnitRunner::class)
 class BusStopsRepositoryTest {
 
-    @Rule
-    @JvmField
+    @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     @Mock

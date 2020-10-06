@@ -58,8 +58,7 @@ import uk.org.rivernile.android.bustracker.coroutines.test
 @RunWith(MockitoJUnitRunner::class)
 class LiveTimesRetrieverTest {
 
-    @Rule
-    @JvmField
+    @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     @Mock

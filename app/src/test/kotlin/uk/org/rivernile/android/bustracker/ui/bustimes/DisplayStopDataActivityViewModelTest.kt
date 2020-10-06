@@ -55,11 +55,9 @@ import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
 @RunWith(MockitoJUnitRunner::class)
 class DisplayStopDataActivityViewModelTest {
 
-    @Rule
-    @JvmField
+    @get:Rule
     val coroutineRule = MainCoroutineRule()
-    @Rule
-    @JvmField
+    @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @Mock

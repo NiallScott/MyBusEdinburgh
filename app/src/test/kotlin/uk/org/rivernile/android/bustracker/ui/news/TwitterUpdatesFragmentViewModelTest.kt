@@ -57,11 +57,9 @@ import java.io.IOException
 @RunWith(MockitoJUnitRunner::class)
 class TwitterUpdatesFragmentViewModelTest {
 
-    @Rule
-    @JvmField
+    @get:Rule
     val coroutineRule = MainCoroutineRule()
-    @Rule
-    @JvmField
+    @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @Mock

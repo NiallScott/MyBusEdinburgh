@@ -53,8 +53,7 @@ class LastRefreshTimeCalculatorTest {
         private const val MORE_THAN_ONE_HOUR_MILLIS = 7200000L
     }
 
-    @Rule
-    @JvmField
+    @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     @Mock
