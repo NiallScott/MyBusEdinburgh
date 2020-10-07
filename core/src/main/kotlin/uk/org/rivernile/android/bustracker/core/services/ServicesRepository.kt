@@ -42,11 +42,15 @@ import javax.inject.Inject
  * This repository is used to access services data.
  *
  * @param servicesDao The DAO to access the services data store.
+ * @param serviceColourOverride An implementation which may override the loaded service colours with
+ * a hard-wired implementation. The actual implementation will most likely be defined per product
+ * flavour.
  * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
 class ServicesRepository @Inject internal constructor(
         private val servicesDao: ServicesDao,
+        private val serviceColourOverride: ServiceColourOverride?,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
@@ -87,6 +91,13 @@ class ServicesRepository @Inject internal constructor(
     private suspend fun getAndSendColoursForServices(
             channel: SendChannel<Map<String, Int>?>,
             services: Array<String>?) = withContext(ioDispatcher) {
-        channel.send(servicesDao.getColoursForServices(services))
+        val serviceColoursFromDao = servicesDao.getColoursForServices(services)
+        val serviceColours = if (serviceColourOverride != null) {
+            serviceColourOverride.overrideServiceColours(services, serviceColoursFromDao)
+        } else {
+            serviceColoursFromDao
+        }
+
+        channel.send(serviceColours)
     }
 }

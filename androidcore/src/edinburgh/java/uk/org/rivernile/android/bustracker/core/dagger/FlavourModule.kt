@@ -32,6 +32,8 @@ import dagger.Module
 import dagger.Provides
 import uk.org.rivernile.android.bustracker.core.livetimes.EdinburghIsNightServiceDetector
 import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
+import uk.org.rivernile.android.bustracker.core.services.EdinburghServiceColourOverride
+import uk.org.rivernile.android.bustracker.core.services.ServiceColourOverride
 import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
 import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
 
@@ -47,7 +49,7 @@ import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
 internal class FlavourModule {
 
     @Provides
-    fun provideServiceComparator(): Comparator<String> = AlphanumComparator<String>()
+    fun provideServiceComparator(): Comparator<String> = AlphanumComparator()
 
     @Module
     interface Bindings {
@@ -61,5 +63,11 @@ internal class FlavourModule {
         fun bindIsNightServiceDetector(
                 edinburghIsNightServiceDetector: EdinburghIsNightServiceDetector)
                 : IsNightServiceDetector
+
+        @Suppress("unused")
+        @Binds
+        fun bindServiceColourOverride(
+                edinburghServiceColourOverride: EdinburghServiceColourOverride)
+                : ServiceColourOverride
     }
 }

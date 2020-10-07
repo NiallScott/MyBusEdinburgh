@@ -32,7 +32,6 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,23 +55,20 @@ class ServicesRepositoryTest {
 
     @Mock
     private lateinit var servicesDao: ServicesDao
-
-    private lateinit var repository: ServicesRepository
-
-    @Before
-    fun setUp() {
-        repository = ServicesRepository(servicesDao, coroutineRule.testDispatcher)
-    }
+    @Mock
+    private lateinit var serviceColourOverride: ServiceColourOverride
 
     @Test
-    fun getColoursForServicesFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun getColoursForServicesFlowGetsInitialValueWhenServiceColourOverrideIsNull() =
+            coroutineRule.runBlockingTest {
         val serviceColours = mapOf(
                 "1" to 0x000000,
                 "2" to 0xFFFFFF)
-        whenever(servicesDao.getColoursForServices(null))
+        whenever(servicesDao.getColoursForServices(arrayOf("1", "2")))
                 .thenReturn(serviceColours)
+        val repository = ServicesRepository(servicesDao, null, coroutineRule.testDispatcher)
 
-        val observer = repository.getColoursForServicesFlow(null).test(this)
+        val observer = repository.getColoursForServicesFlow(arrayOf("1", "2")).test(this)
         observer.finish()
 
         observer.assertValues(serviceColours)
@@ -81,7 +77,36 @@ class ServicesRepositoryTest {
     }
 
     @Test
-    fun getColoursForServicesFlowResponseToChanges() = coroutineRule.runBlockingTest {
+    fun getColoursForServicesFlowGetsInitialValueWhenServiceColourOverrideIsNotNull() =
+            coroutineRule.runBlockingTest {
+        val initialServiceColours = mapOf(
+                "1" to 0x000000,
+                "2" to 0xFFFFFF)
+        val overriddenServiceColours = mapOf(
+                "1" to 0x000000,
+                "2" to 0xFFFFFF,
+                "3" to 0x0000FF)
+        whenever(servicesDao.getColoursForServices(arrayOf("1", "2", "3")))
+                .thenReturn(initialServiceColours)
+        whenever(serviceColourOverride.overrideServiceColours(arrayOf("1", "2", "3"),
+                initialServiceColours))
+                .thenReturn(overriddenServiceColours)
+        val repository = ServicesRepository(
+                servicesDao,
+                serviceColourOverride,
+                coroutineRule.testDispatcher)
+
+        val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3")).test(this)
+        observer.finish()
+
+        observer.assertValues(overriddenServiceColours)
+        verify(servicesDao)
+                .removeOnServicesChangedListener(any())
+    }
+
+    @Test
+    fun getColoursForServicesFlowResponseToChangesWhenServiceColourOverrideIsNull() =
+            coroutineRule.runBlockingTest {
         doAnswer {
             it.getArgument<ServicesDao.OnServicesChangedListener>(0).let { listener ->
                 listener.onServicesChanged()
@@ -96,13 +121,65 @@ class ServicesRepositoryTest {
                 "4" to 0x00FF00)
         val serviceColours3 = mapOf(
                 "5" to 0x0000FF)
-        whenever(servicesDao.getColoursForServices(null))
+        whenever(servicesDao.getColoursForServices(arrayOf("1", "2", "3", "4", "5")))
                 .thenReturn(serviceColours1, serviceColours2, serviceColours3)
+        val repository = ServicesRepository(
+                servicesDao,
+                null,
+                coroutineRule.testDispatcher)
 
-        val observer = repository.getColoursForServicesFlow(null).test(this)
+        val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3", "4", "5"))
+                .test(this)
         observer.finish()
 
         observer.assertValues(serviceColours1, serviceColours2, serviceColours3)
+        verify(servicesDao)
+                .removeOnServicesChangedListener(any())
+    }
+
+    @Test
+    fun getColoursForServicesFlowResponseToChangesWhenServiceColourOverrideIsNotNull() =
+            coroutineRule.runBlockingTest {
+        doAnswer {
+            it.getArgument<ServicesDao.OnServicesChangedListener>(0).let { listener ->
+                listener.onServicesChanged()
+                listener.onServicesChanged()
+            }
+        }.whenever(servicesDao).addOnServicesChangedListener(any())
+        val daoServiceColours1 = mapOf(
+                "1" to 0x000000,
+                "2" to 0xFFFFFF)
+        val daoServiceColours2 = mapOf(
+                "3" to 0xFF0000,
+                "4" to 0x00FF00)
+        val overriddenServiceColours2 = mapOf(
+                "1" to 0x000002,
+                "2" to 0xFFFFF2,
+                "3" to 0xFF0000,
+                "4" to 0x00FF00)
+        val daoServiceColours3 = mapOf(
+                "5" to 0x0000FF)
+        whenever(servicesDao.getColoursForServices(arrayOf("1", "2", "3", "4", "5")))
+                .thenReturn(daoServiceColours1, daoServiceColours2, daoServiceColours3)
+        whenever(serviceColourOverride.overrideServiceColours(arrayOf("1", "2", "3", "4", "5"),
+                daoServiceColours1))
+                .thenReturn(daoServiceColours1)
+        whenever(serviceColourOverride.overrideServiceColours(arrayOf("1", "2", "3", "4", "5"),
+                daoServiceColours2))
+                .thenReturn(overriddenServiceColours2)
+        whenever(serviceColourOverride.overrideServiceColours(arrayOf("1", "2", "3", "4", "5"),
+                daoServiceColours3))
+                .thenReturn(null)
+        val repository = ServicesRepository(
+                servicesDao,
+                serviceColourOverride,
+                coroutineRule.testDispatcher)
+
+        val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3", "4", "5"))
+                .test(this)
+        observer.finish()
+
+        observer.assertValues(daoServiceColours1, overriddenServiceColours2, null)
         verify(servicesDao)
                 .removeOnServicesChangedListener(any())
     }
