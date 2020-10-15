@@ -133,6 +133,7 @@ class BusTimesFragment : Fragment() {
         viewModel.uiStateLiveData.observe(viewLifecycle, this::handleUiStateChanged)
         viewModel.errorWithContentLiveData.observe(viewLifecycle, this::handleErrorWithContent)
         viewModel.lastRefreshLiveData.observe(viewLifecycle, this::handleLastRefreshUpdated)
+        viewModel.refreshLiveData.observe(viewLifecycle) { /* Nothing in here. */  }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

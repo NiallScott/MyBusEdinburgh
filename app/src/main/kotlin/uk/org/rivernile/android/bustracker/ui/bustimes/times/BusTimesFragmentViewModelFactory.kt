@@ -42,7 +42,7 @@ import javax.inject.Inject
  * @param liveTimesFlowFactory Used to construct the flow of live times.
  * @param lastRefreshTimeCalculator Used to calculate the amount of time since the last refresh.
  * @param connectivityRepository Used to determine device connectivity.
- * @param autoRefreshController Used to control the auto-refresh functionality.
+ * @param refreshController Used to control refresh and auto-refresh.
  * @param preferenceRepository This contains the user's preferences.
  * @param defaultDispatcher The dispatcher to use to execute background processing on.
  * @author Niall Scott
@@ -52,7 +52,7 @@ class BusTimesFragmentViewModelFactory @Inject constructor(
         private val liveTimesFlowFactory: LiveTimesFlowFactory,
         private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
         private val connectivityRepository: ConnectivityRepository,
-        private val autoRefreshController: AutoRefreshController,
+        private val refreshController: RefreshController,
         private val preferenceRepository: PreferenceRepository,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModelSavedStateFactory<BusTimesFragmentViewModel> {
@@ -64,7 +64,7 @@ class BusTimesFragmentViewModelFactory @Inject constructor(
                 expandedServicesTracker,
                 liveTimesFlowFactory,
                 lastRefreshTimeCalculator,
-                autoRefreshController,
+                refreshController,
                 preferenceRepository,
                 connectivityRepository,
                 defaultDispatcher)

@@ -39,12 +39,12 @@ import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.livedata.DistinctLiveData
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
@@ -58,7 +58,7 @@ import uk.org.rivernile.android.bustracker.utils.Event
  * @param liveTimesFlowFactory Used to construct the flow of live times.
  * @param lastRefreshTimeCalculator This is used to calculate the amount of time since the last
  * refresh on a continual basis for the purpose of showing this to the user.
- * @param autoRefreshController This is used to control the auto-refresh functionality.
+ * @param refreshController This is used to control refreshing data.
  * @param preferenceRepository This contains the user's preferences.
  * @param connectivityRepository This informs us about the device's connectivity status. This status
  * is shown to the user.
@@ -70,7 +70,7 @@ class BusTimesFragmentViewModel(
         private val expandedServicesTracker: ExpandedServicesTracker,
         private val liveTimesFlowFactory: LiveTimesFlowFactory,
         private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
-        private val autoRefreshController: AutoRefreshController,
+        private val refreshController: RefreshController,
         private val preferenceRepository: PreferenceRepository,
         connectivityRepository: ConnectivityRepository,
         private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
@@ -84,6 +84,18 @@ class BusTimesFragmentViewModel(
                 .distinctUntilChanged() // Prevent unnecessary processing
                 .asLiveData(viewModelScope.coroutineContext)
     }
+
+    /**
+     * This [LiveData] is used not to provide any data, but as a convenient way to know when the
+     * lifecycle is in an active state, to control the dispatching of refresh requests. It should
+     * really have been implemented with a proper lifecycle object, but [LiveData] already does
+     * this, and correctly - so therefore we use [LiveData] instead.
+     *
+     * The UI should register against this [LiveData], but not expect any data to be emitted from
+     * it.
+     */
+    val refreshLiveData: LiveData<Nothing> get() = refresh
+    private val refresh = RefreshLiveData(refreshController)
 
     /**
      * This exposes the stop code as a [LiveData]. It is distinct as it only delivers stop code
@@ -121,20 +133,12 @@ class BusTimesFragmentViewModel(
                     .distinctUntilChanged() // Prevent unnecessary processing
                     .transformLatest { enabled ->
                         emit(enabled)
-                        handleAutoRefreshPreferenceChange(enabled)
+                        refreshController.onAutoRefreshPreferenceChanged(liveTimes.value, enabled)
                     }
                     .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
         } else {
             MutableLiveData<Boolean>(null)
         }
-    }
-
-    /**
-     * This is used as the refresh trigger, which causes the upstream [Flow]s to load new live times
-     * from the endpoint.
-     */
-    private val refreshTriggerChannel = Channel<Unit>(Channel.CONFLATED).apply {
-        offer(Unit)
     }
 
     /**
@@ -198,6 +202,7 @@ class BusTimesFragmentViewModel(
                     }
                 }
                 is UiTransformedResult.Error -> value = it.error
+                else -> { /* Suppress exhaustive warning. */ }
             }
         }
     }
@@ -323,7 +328,9 @@ class BusTimesFragmentViewModel(
      * This causes the live times to be refreshed from the endpoint.
      */
     private fun refreshLiveTimes() {
-        refreshTriggerChannel.offer(Unit)
+        viewModelScope.launch {
+            refreshController.requestRefresh()
+        }
     }
 
     /**
@@ -336,10 +343,12 @@ class BusTimesFragmentViewModel(
         return liveTimesFlowFactory.createLiveTimesFlow(
                 distinctStopCodeLiveData.asFlow(),
                 expandedServicesTracker.expandedServicesLiveData.asFlow(),
-                refreshTriggerChannel.consumeAsFlow())
+                refreshController.refreshTriggerReceiveChannel.consumeAsFlow())
                 .transformLatest {
                     emit(it) // Emit first so that the value is immediately available.
-                    handleUiTransformedResultForAutoRefresh(it)
+                    refreshController.performAutoRefreshDelay(it) {
+                        isAutoRefreshLiveData.value == true
+                    }
                 }
     }
 
@@ -368,38 +377,5 @@ class BusTimesFragmentViewModel(
         } ?: error?.let {
             UiState.ERROR
         } ?: if (isInProgress == true) UiState.PROGRESS else null
-    }
-
-    /**
-     * Handle the auto-fresh preference value changing. This will consult [AutoRefreshController]
-     * to determine if a refresh should be carried out and if so, trigger the refresh.
-     *
-     * @param enabled Is auto-refresh enabled?
-     */
-    private suspend fun handleAutoRefreshPreferenceChange(enabled: Boolean) {
-        val shouldCauseRefresh = autoRefreshController.shouldCauseRefresh(liveTimes.value, enabled)
-
-        if (shouldCauseRefresh) {
-            refreshTriggerChannel.send(Unit)
-        }
-    }
-
-    /**
-     * Upon a new [UiTransformedResult] state becoming available, evaluate whether an auto-fresh
-     * should be performed or not after the auto-refresh delay.
-     *
-     * This method suspends, to allow for the auto-refresh delay (implemented in
-     * [AutoRefreshController]) to be performed. At the end of the delay (or in some cases,
-     * immediately), the return value of the [AutoRefreshController] is evaluated as well as the
-     * current state of [isAutoRefreshLiveData]. If both conditions match, a refresh request is
-     * sent.
-     *
-     * @param result The [UiTransformedResult] to evaluate for auto-refresh.
-     */
-    private suspend fun handleUiTransformedResultForAutoRefresh(result: UiTransformedResult) {
-        if (autoRefreshController.performAutoRefreshDelay(result) &&
-                isAutoRefreshLiveData.value == true) {
-            refreshTriggerChannel.send(Unit)
-        }
     }
 }

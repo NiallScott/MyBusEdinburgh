@@ -26,17 +26,20 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 /**
- * This class contains business logic for controlling the auto-refresh functionality.
+ * This class contains business logic for controlling the refresh and auto-refresh functionality.
  *
  * @param timeUtils Used to provide timestamps.
  * @author Niall Scott
  */
-class AutoRefreshController @Inject constructor(
+class RefreshController @Inject constructor(
         private val timeUtils: TimeUtils) {
 
     companion object {
@@ -45,49 +48,93 @@ class AutoRefreshController @Inject constructor(
     }
 
     /**
-     * Should a refresh be triggered now? If this preference has been changed to the enabled
-     * state, the time of the last refresh, as reported by [result], will be inspected and if
-     * this is older than [AUTO_REFRESH_INTERVAL_MILLIS], this method will return `true`.
+     * This [ReceiveChannel] is used to trigger refreshes. Consumers will receive a new [Unit] when
+     * a refresh is requested.
+     */
+    val refreshTriggerReceiveChannel: ReceiveChannel<Unit> get() = refreshTriggerChannel
+    private val refreshTriggerChannel = Channel<Unit>(Channel.CONFLATED)
+
+    // Initially set to true to cause the initial load.
+    private var pendingRefresh = AtomicBoolean(true)
+
+    private var isActive = false
+
+    /**
+     * Set the active state of this controller. Refreshes will not occur while in an inactive state.
+     * This is based on the UI lifecycle, to prevent new refresh requests occurring while the UI is
+     * not visible. If a refresh request is made while in the inactive state, it will be recorded
+     * and then the refresh will be requested when next in the active state.
+     *
+     * @param isActive For refreshing purposes, are we active?
+     */
+    fun setActiveState(isActive: Boolean) {
+        this.isActive = isActive
+
+        if (isActive && pendingRefresh.compareAndSet(true, false)) {
+            refreshTriggerChannel.offer(Unit)
+        }
+    }
+
+    /**
+     * This suspend function requests that the live times are refreshed.
+     *
+     * If this object is in an active state, the refresh request will occur immediately. If
+     * inactive, the request will occur when this object is next active.
+     */
+    suspend fun requestRefresh() {
+        if (isActive) {
+            refreshTriggerChannel.send(Unit)
+        } else {
+            pendingRefresh.set(true)
+        }
+    }
+
+    /**
+     * This should be called when the auto-refresh preference has been changed. It will determine
+     * from [result] and [enabled] whether a refresh should take place now, and if so, it will
+     * request the refresh.
      *
      * @param result The currently available [UiTransformedResult].
-     * @param enabled `true` if auto-refresh has been enabled, otherwise `false`.
-     * @return `true` if a refresh should occur now, otherwise `false`.
+     * @param enabled `true` if auto-refresh is enabled, otherwise `false`.
      */
-    fun shouldCauseRefresh(result: UiTransformedResult?, enabled: Boolean): Boolean {
+    suspend fun onAutoRefreshPreferenceChanged(result: UiTransformedResult?, enabled: Boolean) {
         if (enabled) {
             result?.let {
                 getDelayUntilNextRefresh(it)?.let { delayMillis ->
                     if (delayMillis <= 0) {
-                        return true
+                        requestRefresh()
                     }
                 }
             }
         }
-
-        return false
     }
 
     /**
      * Perform the auto-refresh delay if the current [result] is not
-     * [UiTransformedResult.InProgress], and then return `true` if this was the case, otherwise
-     * return `false`.
+     * [UiTransformedResult.InProgress], and after the delay, execute the [predicate] to determine
+     * if a refresh should be performed.
      *
      * The auto-refresh period is defined as [AUTO_REFRESH_INTERVAL_MILLIS], therefore the next
      * refresh will happen at the time of the last refresh + [AUTO_REFRESH_INTERVAL_MILLIS]. This
      * method uses the amount of time between now and the calculated timestamp to calculate the
      * length of delay. If the calculated delay is less than `0`, that is, the next refresh time
-     * is in the past, the next refresh should happen immediately.
+     * is in the past, the next refresh should happen immediately (if the [predicate] allows).
      *
      * @param result The last loaded [UiTransformedResult], used to calculate when the next refresh
      * time should be.
-     * @return `true` if the [result] state allows for a auto-refresh, otherwise `false`.
+     * @param predicate This [predicate] is executed at the end of the auto-refresh delay period to
+     * determine if a refresh should be performed or not.
      */
-    suspend fun performAutoRefreshDelay(result: UiTransformedResult): Boolean {
-        return getDelayUntilNextRefresh(result)?.let {
+    suspend fun performAutoRefreshDelay(
+            result: UiTransformedResult,
+            predicate: () -> Boolean) {
+        getDelayUntilNextRefresh(result)?.let {
             delay(it)
 
-            true
-        } ?: false
+            if (predicate()) {
+                requestRefresh()
+            }
+        }
     }
 
     /**
