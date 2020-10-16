@@ -107,7 +107,6 @@ dependencies {
     edinburghApi project(':edinburgh')
 
     // Android Architecture Components
-    api "androidx.lifecycle:lifecycle-livedata:$architectureComponentsVersion"
     api "androidx.lifecycle:lifecycle-livedata-ktx:$architectureComponentsVersion"
 
     // Dagger 2

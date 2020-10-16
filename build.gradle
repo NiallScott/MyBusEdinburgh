@@ -33,17 +33,30 @@ buildscript {
         // Dependency versions
         kotlinVersion = '1.4.10'
         kotlinCoroutinesVersion = '1.3.9'
+        androidXCoreVersion = '1.3.2'
+        androidXActivityVersion = '1.1.0'
+        anroidXFragmentVersion = '1.2.5'
+        appCompatVersion = '1.2.0'
+        materialVersion = '1.2.1'
+        recyclerViewVersion = '1.1.0'
+        cardViewVersion = '1.0.0'
+        percentLayoutVersion = '1.0.0'
+        androidXPreferenceVersion = '1.1.1'
         architectureComponentsVersion = '2.2.0'
-        daggerVersion = '2.28.1'
+        daggerVersion = '2.29.1'
         okhttpVersion = '3.14.9'
         retrofitVersion = '2.9.0'
+        gsonVersion = '2.8.6'
+        picassoVersion = '2.71828'
 
         // Testing dependency versions
-        junitVersion = '4.13'
+        junitVersion = '4.13.1'
         androidTestCoreVersion = '1.3.0'
         mockitoVersion = '2.28.2'
         mockitoKotlinVersion = '2.2.0'
         androidXCoreTesting = '2.1.0'
+        hamcrestVersion = '1.3'
+        espressoVersion = '3.3.0'
     }
 
     repositories {
@@ -52,7 +65,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:4.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
     }

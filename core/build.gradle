@@ -49,7 +49,7 @@ dependencies {
     api 'javax.inject:javax.inject:1'
 
     // Gson
-    api 'com.google.code.gson:gson:2.8.6'
+    api "com.google.code.gson:gson:$gsonVersion"
 
     // Okhttp
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
