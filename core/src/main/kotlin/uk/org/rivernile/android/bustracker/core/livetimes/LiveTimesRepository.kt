@@ -26,10 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.livetimes
 
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
@@ -37,6 +37,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerExcepti
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
+import kotlin.coroutines.resume
 
 /**
  * This repository is used to access live times.
@@ -74,16 +75,21 @@ class LiveTimesRepository @Inject internal constructor(
      */
     private suspend fun fetchLiveTimes(
             stopCode: String,
-            numberOfDepartures: Int): Result<LiveTimes> = withContext(ioDispatcher) {
+            numberOfDepartures: Int): Result<LiveTimes> {
         val request = trackerEndpoint.createLiveTimesRequest(stopCode, numberOfDepartures)
 
-        try {
-            Result.Success(request.performRequest())
-        } catch (e: TrackerException) {
-            Result.Error(timeUtils.getCurrentTimeMillis(), e)
-        } catch (e: CancellationException) {
-            request.cancel()
-            throw e
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    request.cancel()
+                }
+
+                try {
+                    continuation.resume(Result.Success(request.performRequest()))
+                } catch (e: TrackerException) {
+                    continuation.resume(Result.Error(timeUtils.getCurrentTimeMillis(), e))
+                }
+            }
         }
     }
 }
