@@ -210,7 +210,7 @@ class DisplayStopDataActivityViewModel @Inject constructor(
      */
     private fun loadIsFavourite(stopCode: String?): LiveData<Boolean?> =
             stopCode?.ifEmpty { null }?.let {
-                liveData<Boolean?> {
+                liveData {
                     emit(null) // null while loading.
                     emitSource(favouritesRepository.isStopAddedAsFavouriteFlow(it)
                             .distinctUntilChanged()
@@ -227,7 +227,7 @@ class DisplayStopDataActivityViewModel @Inject constructor(
      */
     private fun loadHasArrivalAlert(stopCode: String?): LiveData<Boolean?> =
             stopCode?.ifEmpty { null }?.let {
-                liveData<Boolean?> {
+                liveData {
                     emit(null) // null while loading.
                     emitSource(alertsRepository.hasArrivalAlertFlow(it)
                             .distinctUntilChanged()
@@ -244,7 +244,7 @@ class DisplayStopDataActivityViewModel @Inject constructor(
      */
     private fun loadHasProximityAlert(stopCode: String?): LiveData<Boolean?> =
             stopCode?.ifEmpty { null }?.let {
-                liveData<Boolean?> {
+                liveData {
                     emit(null) // null while loading.
                     emitSource(alertsRepository.hasProximityAlertFlow(it)
                             .distinctUntilChanged()
