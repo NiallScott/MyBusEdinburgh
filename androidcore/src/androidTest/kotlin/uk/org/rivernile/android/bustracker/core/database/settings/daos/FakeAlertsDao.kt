@@ -82,7 +82,7 @@ class FakeAlertsDao : AlertsDao {
 
     override fun getProximityAlertCount() = 0
 
-    override fun hasArrivalAlert(stopCode: String) = false
+    override suspend fun hasArrivalAlert(stopCode: String) = false
 
-    override fun hasProximityAlert(stopCode: String) = false
+    override suspend fun hasProximityAlert(stopCode: String) = false
 }

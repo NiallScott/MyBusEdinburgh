@@ -65,8 +65,7 @@ class AlertsRepositoryTest {
     fun setUp() {
         repository = AlertsRepository(
                 alertManager,
-                alertsDao,
-                coroutineRule.testDispatcher)
+                alertsDao)
     }
 
     @Test

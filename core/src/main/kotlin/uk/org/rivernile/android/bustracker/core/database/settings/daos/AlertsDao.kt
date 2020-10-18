@@ -145,7 +145,7 @@ interface AlertsDao {
      * @param stopCode The stop code to check.
      * @return `true` if the given `stopCode` has an arrival alert set, otherwise `false`.
      */
-    fun hasArrivalAlert(stopCode: String): Boolean
+    suspend fun hasArrivalAlert(stopCode: String): Boolean
 
     /**
      * Does the given `stopCode` have a proximity alert set?
@@ -153,7 +153,7 @@ interface AlertsDao {
      * @param stopCode The stop code to check.
      * @return `true` if the given `stopCode` has a proximity alert set, otherwise `false`.
      */
-    fun hasProximityAlert(stopCode: String): Boolean
+    suspend fun hasProximityAlert(stopCode: String): Boolean
 
     /**
      * This interface should be implemented to listen for changes to alerts. Call

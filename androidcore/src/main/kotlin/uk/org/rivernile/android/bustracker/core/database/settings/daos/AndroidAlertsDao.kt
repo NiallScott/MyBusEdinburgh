@@ -340,33 +340,67 @@ internal class AndroidAlertsDao @Inject constructor(
         }
     } ?: 0
 
-    override fun hasArrivalAlert(stopCode: String) = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(AlertsContract.COUNT),
-            "${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
-            arrayOf(
-                    AlertsContract.ALERTS_TYPE_TIME.toString(),
-                    stopCode),
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
+    override suspend fun hasArrivalAlert(stopCode: String): Boolean {
+        val cancellationSignal = CancellationSignal()
 
-        return it.moveToFirst() && it.getInt(it.getColumnIndex(AlertsContract.COUNT)) > 0
-    }?: false
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
 
-    override fun hasProximityAlert(stopCode: String) = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(AlertsContract.COUNT),
-            "${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
-            arrayOf(
-                    AlertsContract.ALERTS_TYPE_PROXIMITY.toString(),
-                    stopCode),
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(AlertsContract.COUNT),
+                        "${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        arrayOf(
+                                AlertsContract.ALERTS_TYPE_TIME.toString(),
+                                stopCode),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
 
-        return it.moveToFirst() && it.getInt(it.getColumnIndex(AlertsContract.COUNT)) > 0
-    }?: false
+                            it.moveToFirst() && it.getInt(
+                                    it.getColumnIndex(AlertsContract.COUNT)) > 0
+                        } ?: false
+
+                continuation.resume(result)
+            }
+        }
+    }
+
+    override suspend fun hasProximityAlert(stopCode: String): Boolean {
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(AlertsContract.COUNT),
+                        "${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
+                        arrayOf(
+                                AlertsContract.ALERTS_TYPE_PROXIMITY.toString(),
+                                stopCode),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
+
+                            it.moveToFirst() && it.getInt(
+                                    it.getColumnIndex(AlertsContract.COUNT)) > 0
+                        } ?: false
+
+                continuation.resume(result)
+            }
+        }
+    }
 
     /**
      * For all of the currently registers listeners, dispatch an alert change to them.

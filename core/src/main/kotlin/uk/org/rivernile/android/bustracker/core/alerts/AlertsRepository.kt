@@ -26,16 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,14 +41,12 @@ import javax.inject.Singleton
  *
  * @param alertManager The [AlertManager] implementation.
  * @param alertsDao The DAO to access the alerts data store.
- * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
 @Singleton
 class AlertsRepository @Inject internal constructor(
         private val alertManager: AlertManager,
-        private val alertsDao: AlertsDao,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+        private val alertsDao: AlertsDao) {
 
     /**
      * Get a [Flow] which returns whether the given `stopCode` has an arrival alert set or not, and
@@ -121,7 +116,7 @@ class AlertsRepository @Inject internal constructor(
      */
     private suspend fun getAndSendHasArrivalAlertSet(
             channel: SendChannel<Boolean>,
-            stopCode: String) = withContext(ioDispatcher) {
+            stopCode: String) {
         channel.send(alertsDao.hasArrivalAlert(stopCode))
     }
 
@@ -134,7 +129,7 @@ class AlertsRepository @Inject internal constructor(
      */
     private suspend fun getAndSendHasProximityAlertSet(
             channel: SendChannel<Boolean>,
-            stopCode: String) = withContext(ioDispatcher) {
+            stopCode: String) {
         channel.send(alertsDao.hasProximityAlert(stopCode))
     }
 }
