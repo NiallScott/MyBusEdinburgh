@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,6 +35,7 @@ import androidx.annotation.Size;
  * be alerted when a bus service is within a specified number of minutes from a bus stop.
  *
  * @author Niall Scott
+ * @deprecated This is currently being re-written.
  */
 public interface AlertManager {
 
@@ -53,11 +54,6 @@ public interface AlertManager {
      */
     void addProximityAlert(@NonNull @Size(min = 1) String stopCode,
             @IntRange(from = 1) int distance);
-
-    /**
-     * Remove any active proximity alerts.
-     */
-    void removeProximityAlert();
 
     /**
      * Add a new time alert. A time alert is fired when any of the services specified by

@@ -119,11 +119,10 @@ class ProximityAlertRunnerService : Service() {
     private fun createRemoveNotificationAction() =
             NotificationCompat.Action.Builder(
                     R.drawable.ic_action_delete,
-                    getString(R.string.remove),
+                    getString(R.string.remove_all),
                     createRemoveActionButtonPendingIntent())
                     .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_DELETE)
                     .build()
-
 
     /**
      * Create a [PendingIntent] which is called when the user wishes to remove the in-progress

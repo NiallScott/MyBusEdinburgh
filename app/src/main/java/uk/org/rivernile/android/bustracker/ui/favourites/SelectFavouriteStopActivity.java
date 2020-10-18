@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -80,7 +80,7 @@ public class SelectFavouriteStopActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowConfirmDeleteProximityAlert() {
+    public void onShowConfirmDeleteProximityAlert(@NonNull final String stopCode) {
         // Not required here.
     }
 

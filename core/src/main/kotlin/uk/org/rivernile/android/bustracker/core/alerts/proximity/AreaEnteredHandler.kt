@@ -28,8 +28,6 @@ package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
-import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /**
@@ -38,33 +36,19 @@ import javax.inject.Inject
  * @param alertsDao The DAO to access set alerts.
  * @param geofencingManager The geofencing implementation used.
  * @param notificationDispatcher Used to dispatch the notification to the user.
- * @param backgroundExecutor An [Executor] to perform work in the background.
  * @author Niall Scott
  */
 class AreaEnteredHandler @Inject internal constructor(
         private val alertsDao: AlertsDao,
         private val geofencingManager: GeofencingManager,
-        private val notificationDispatcher: AlertNotificationDispatcher,
-        @ForShortBackgroundTasks private val backgroundExecutor: Executor) {
+        private val notificationDispatcher: AlertNotificationDispatcher) {
 
     /**
      * Handle the area being entered.
      *
      * @param alertId The ID of the alert which triggered this method being called.
      */
-    fun handleAreaEntered(alertId: Int) {
-        backgroundExecutor.execute {
-            handleAreaEnteredInternal(alertId)
-        }
-    }
-
-    /**
-     * The internal implementation of handling the area being entered. This method is executed on a
-     * background thread.
-     *
-     * @param alertId The ID of the alert which triggered this method being called.
-     */
-    private fun handleAreaEnteredInternal(alertId: Int) {
+    suspend fun handleAreaEntered(alertId: Int) {
         alertsDao.getProximityAlert(alertId)
                 ?.let(notificationDispatcher::dispatchProximityAlertNotification)
         geofencingManager.removeGeofence(alertId)

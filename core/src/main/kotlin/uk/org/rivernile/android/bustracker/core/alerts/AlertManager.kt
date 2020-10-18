@@ -83,21 +83,25 @@ class AlertManager @Inject internal constructor(
      */
     fun addProximityAlert(proximityAlert: ProximityAlert) {
         backgroundExecutor.execute {
-            // As we currently only allow one proximity alert at a time, the newly added alert
-            // overwrites any existing alert. This may change going forwards.
-            alertsDao.removeAllProximityAlerts()
             alertsDao.addProximityAlert(proximityAlert)
             proximityAlertTaskLauncher.launchProximityAlertTask()
         }
     }
 
     /**
-     * Remove a proximity alert.
+     * Remove all proximity alerts for the given stop code.
+     *
+     * @param stopCode The stop code to remove proximity alerts for.
      */
-    fun removeProximityAlert() {
-        backgroundExecutor.execute {
-            alertsDao.removeAllProximityAlerts()
-        }
+    suspend fun removeProximityAlert(stopCode: String) {
+        alertsDao.removeProximityAlert(stopCode)
+    }
+
+    /**
+     * Remove all current proximity alerts.
+     */
+    suspend fun removeAllProximityAlerts() {
+        alertsDao.removeAllProximityAlerts()
     }
 
     /**

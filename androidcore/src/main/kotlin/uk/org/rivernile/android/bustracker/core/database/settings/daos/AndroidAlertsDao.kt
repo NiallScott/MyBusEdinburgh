@@ -30,13 +30,19 @@ import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.database.ContentObserver
+import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.settings.AlertsContract
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
 
 /**
  * This is an Android-specific implementation of [AlertsDao] which uses a
@@ -49,7 +55,8 @@ import javax.inject.Singleton
 @Singleton
 internal class AndroidAlertsDao @Inject constructor(
         private val context: Context,
-        private val contract: AlertsContract): AlertsDao {
+        private val contract: AlertsContract,
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): AlertsDao {
 
     private val listeners = mutableListOf<AlertsDao.OnAlertsChangedListener>()
     private val observer = Observer()
@@ -115,47 +122,75 @@ internal class AndroidAlertsDao @Inject constructor(
                 arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()))
     }
 
-    override fun removeProximityAlert(id: Int) {
-        context.contentResolver.delete(contract.getContentUri(),
-                "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
-                arrayOf(id.toString(), AlertsContract.ALERTS_TYPE_PROXIMITY.toString()))
+    override suspend fun removeProximityAlert(id: Int) {
+        withContext(ioDispatcher) {
+            context.contentResolver.delete(contract.getContentUri(),
+                    "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
+                    arrayOf(id.toString(), AlertsContract.ALERTS_TYPE_PROXIMITY.toString()))
+        }
     }
 
-    override fun removeAllProximityAlerts() {
-        context.contentResolver.delete(contract.getContentUri(),
-                "${AlertsContract.TYPE} = ?",
-                arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString()))
+    override suspend fun removeProximityAlert(stopCode: String) {
+        withContext(ioDispatcher) {
+            context.contentResolver.delete(contract.getContentUri(),
+                    "${AlertsContract.STOP_CODE} = ? AND ${AlertsContract.TYPE} = ?",
+                    arrayOf(stopCode, AlertsContract.ALERTS_TYPE_PROXIMITY.toString()))
+        }
     }
 
-    override fun getProximityAlert(id: Int) = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    AlertsContract.ID,
-                    AlertsContract.TIME_ADDED,
-                    AlertsContract.STOP_CODE,
-                    AlertsContract.DISTANCE_FROM),
-            "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
-            arrayOf(
-                    id.toString(),
-                    AlertsContract.ALERTS_TYPE_PROXIMITY.toString()
-            ),
-            null)?.use {
-        // Fill Cursor window.
-        it.count
+    override suspend fun removeAllProximityAlerts() {
+        withContext(ioDispatcher) {
+            context.contentResolver.delete(contract.getContentUri(),
+                    "${AlertsContract.TYPE} = ?",
+                    arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString()))
+        }
+    }
 
-        if (it.moveToFirst()) {
-            val idColumn = it.getColumnIndex(AlertsContract.ID)
-            val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
-            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
-            val distanceFromColumn = it.getColumnIndex(AlertsContract.DISTANCE_FROM)
+    override suspend fun getProximityAlert(id: Int): ProximityAlert? {
+        val cancellationSignal = CancellationSignal()
 
-            ProximityAlert(
-                    it.getInt(idColumn),
-                    it.getLong(timeAddedColumn),
-                    it.getString(stopCodeColumn),
-                    it.getInt(distanceFromColumn))
-        } else {
-            null
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                AlertsContract.ID,
+                                AlertsContract.TIME_ADDED,
+                                AlertsContract.STOP_CODE,
+                                AlertsContract.DISTANCE_FROM),
+                        "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
+                        arrayOf(
+                                id.toString(),
+                                AlertsContract.ALERTS_TYPE_PROXIMITY.toString()),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill Cursor window.
+                            it.count
+
+                            if (it.moveToFirst()) {
+                                val idColumn = it.getColumnIndex(AlertsContract.ID)
+                                val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
+                                val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+                                val distanceFromColumn =
+                                        it.getColumnIndex(AlertsContract.DISTANCE_FROM)
+
+                                ProximityAlert(
+                                        it.getInt(idColumn),
+                                        it.getLong(timeAddedColumn),
+                                        it.getString(stopCodeColumn),
+                                        it.getInt(distanceFromColumn))
+                            } else {
+                                null
+                            }
+                        }
+
+                continuation.resume(result)
+            }
         }
     }
 

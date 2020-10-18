@@ -31,6 +31,12 @@ import android.content.Context
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
 import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -47,12 +53,25 @@ import javax.inject.Singleton
     FakeCoreModule.Bindings::class
 ])
 class FakeCoreModule(
-        private val backgroundExecutor: Executor = Executors.newCachedThreadPool()) {
+        private val backgroundExecutor: Executor = Executors.newCachedThreadPool(),
+        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope = GlobalScope,
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher =
+                Dispatchers.Default) {
 
     @Provides
     @Singleton
     @ForShortBackgroundTasks
     fun provideBackgroundExecutor() = backgroundExecutor
+
+    @Provides
+    @Singleton
+    @ForGlobalCoroutineScope
+    fun provideGlobalCoroutineScope() = globalCoroutineScope
+
+    @Provides
+    @Singleton
+    @ForDefaultDispatcher
+    fun provideDefaultDispatcher() = defaultDispatcher
 
     @Module
     interface Bindings {

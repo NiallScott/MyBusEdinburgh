@@ -37,11 +37,14 @@ import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -49,6 +52,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.settings.AlertsContract
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import kotlin.test.assertFalse
 
 /**
@@ -56,6 +60,7 @@ import kotlin.test.assertFalse
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AndroidAlertsDaoTest {
 
@@ -63,6 +68,9 @@ class AndroidAlertsDaoTest {
 
         private const val TEST_AUTHORITY = "test.authority"
     }
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     internal lateinit var contract: AlertsContract
@@ -80,7 +88,10 @@ class AndroidAlertsDaoTest {
             override fun getContentResolver() = mockContentResolver
         }
 
-        alertsDao = AndroidAlertsDao(mockContext, contract)
+        alertsDao = AndroidAlertsDao(
+                mockContext,
+                contract,
+                coroutineRule.testDispatcher)
 
         whenever(contract.getContentUri())
                 .thenReturn(contentUri)
@@ -199,7 +210,8 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun removeProximityAlertSendsThroughCorrectParametersForDelete() {
+    fun removeProximityAlertByIdSendsThroughCorrectParametersForDelete() =
+            coroutineRule.runBlockingTest {
         val expectedSelectionArgs = arrayOf("5", AlertsContract.ALERTS_TYPE_PROXIMITY.toString())
         object : MockContentProvider() {
             override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
@@ -209,13 +221,34 @@ class AndroidAlertsDaoTest {
 
                 return 0
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         alertsDao.removeProximityAlert(5)
     }
 
     @Test
-    fun removeAllProximityAlertsSendsThroughCorrectParametersForDelete() {
+    fun removeProximityAlertByStopCodeSendsThroughCorrectParametersForDelete() =
+            coroutineRule.runBlockingTest {
+        val expectedSelectionArgs = arrayOf(
+                "123456",
+                AlertsContract.ALERTS_TYPE_PROXIMITY.toString())
+        object : MockContentProvider() {
+            override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
+                assertEquals(contentUri, uri)
+                assertEquals("${AlertsContract.STOP_CODE} = ? AND ${AlertsContract.TYPE} = ?",
+                        selection)
+                assertArrayEquals(expectedSelectionArgs, selectionArgs)
+
+                return 0
+            }
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
+
+        alertsDao.removeProximityAlert("123456")
+    }
+
+    @Test
+    fun removeAllProximityAlertsSendsThroughCorrectParametersForDelete() =
+            coroutineRule.runBlockingTest {
         val expectedSelectionArgs = arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString())
         object : MockContentProvider() {
             override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
@@ -225,19 +258,20 @@ class AndroidAlertsDaoTest {
 
                 return 0
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         alertsDao.removeAllProximityAlerts()
     }
 
     @Test
-    fun getProximityAlertWithNullResultIsHandledCorrectly() {
+    fun getProximityAlertWithNullResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForProximityAlert()
         val expectedSelectionArgs = arrayOf(
                 10.toString(),
                 AlertsContract.ALERTS_TYPE_PROXIMITY.toString())
         object : MockContentProvider() {
-            override fun query(uri: Uri,
+            override fun query(
+                    uri: Uri,
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
@@ -250,7 +284,7 @@ class AndroidAlertsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getProximityAlert(10)
 
@@ -258,7 +292,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getProximityAlertWithEmptyResultIsHandledCorrectly() {
+    fun getProximityAlertWithEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForProximityAlert()
         val expectedSelectionArgs = arrayOf(
                 10.toString(),
@@ -278,7 +312,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getProximityAlert(10)
 
@@ -287,7 +321,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getProximityAlertWithNonEmptyResultIsHandledCorrectly() {
+    fun getProximityAlertWithNonEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForProximityAlert()
         val expectedSelectionArgs = arrayOf(
                 10.toString(),
@@ -309,7 +343,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getProximityAlert(10)
 

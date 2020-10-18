@@ -39,13 +39,13 @@ import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunn
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRunnerService;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddProximityAlertTask;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddTimeAlertTask;
-import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteAllProximityAlertsTask;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteAllTimeAlertsTask;
 
 /**
  * This is a concrete implementation of {@link AlertManager}.
  * 
  * @author Niall Scott
+ * @deprecated This is currently being re-written.
  */
 @Singleton
 public class AlertManagerImpl implements AlertManager {
@@ -65,18 +65,9 @@ public class AlertManagerImpl implements AlertManager {
     @Override
     public void addProximityAlert(@NonNull final String stopCode,
             @IntRange(from = 1) final int distance) {
-        // Remove any other existing proximity alerts.
-        removeProximityAlert();
-
         AddProximityAlertTask.start(context, stopCode, distance);
         final Intent intent = new Intent(context, ProximityAlertRunnerService.class);
         ContextCompat.startForegroundService(context, intent);
-    }
-
-    @Override
-    public void removeProximityAlert() {
-        // Remove the alert from the database.
-        DeleteAllProximityAlertsTask.start(context);
     }
 
     @Override

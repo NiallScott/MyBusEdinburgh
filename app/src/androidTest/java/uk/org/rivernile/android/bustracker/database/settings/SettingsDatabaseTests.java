@@ -173,28 +173,6 @@ public class SettingsDatabaseTests {
     }
 
     /**
-     * Test that deleting all proximity alerts passes the data through correctly to the
-     * {@link android.content.ContentProvider}.
-     */
-    @Test
-    public void testDeleteAllProximityAlerts() {
-        mockContentResolver.addProvider(SettingsContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public int delete(final Uri uri, final String selection, final String[] selectionArgs) {
-                assertEquals(SettingsContract.Alerts.CONTENT_URI, uri);
-                assertEquals(SettingsContract.Alerts.TYPE + " = ?", selection);
-                assertArrayEquals(new String[] {
-                        String.valueOf(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY)
-                }, selectionArgs);
-
-                return 1;
-            }
-        });
-
-        SettingsDatabase.deleteAllProximityAlerts(mockContext);
-    }
-
-    /**
      * Test that deleting all time alerts passes the data through correctly to the
      * {@link android.content.ContentProvider}.
      */

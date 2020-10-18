@@ -32,7 +32,10 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -47,14 +50,19 @@ import uk.org.rivernile.android.bustracker.core.dagger.FakeSettingsDatabaseModul
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.getApplication
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [AndroidAreaEnteredBroadcastReceiver].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AndroidAreaEnteredBroadcastReceiverTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var alertsDao: AlertsDao
@@ -71,7 +79,10 @@ class AndroidAreaEnteredBroadcastReceiverTest {
         val alertsModule = FakeAlertsModule(
                 geofencingManager = geofencingManager,
                 alertNotificationDispatcher = notificationDispatcher)
-        val coreModule = FakeCoreModule(currentThreadExecutor)
+        val coreModule = FakeCoreModule(
+                backgroundExecutor = currentThreadExecutor,
+                globalCoroutineScope = coroutineRule,
+                defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
 
         assistInject(
@@ -84,14 +95,15 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithoutAlertIdDoesNotShowNotification() {
+    fun invokingBroadcastReceiverWithoutAlertIdDoesNotShowNotification() =
+            coroutineRule.runBlockingTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
 
         receiver.onReceive(context, intent)
 
         verify(alertsDao, never())
-                .removeProximityAlert(any())
+                .removeProximityAlert(any<Int>())
         verify(geofencingManager, never())
                 .removeGeofence(any())
         verify(notificationDispatcher, never())
@@ -99,7 +111,8 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithInvalidAlertIdDoesNotShowNotification() {
+    fun invokingBroadcastReceiverWithInvalidAlertIdDoesNotShowNotification() =
+            coroutineRule.runBlockingTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                 .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, -1)
@@ -108,7 +121,7 @@ class AndroidAreaEnteredBroadcastReceiverTest {
         receiver.onReceive(context, intent)
 
         verify(alertsDao, never())
-                .removeProximityAlert(any())
+                .removeProximityAlert(any<Int>())
         verify(geofencingManager, never())
                 .removeGeofence(any())
         verify(notificationDispatcher, never())
@@ -116,7 +129,8 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithNotEnteringProximityDoesNotShowNotification() {
+    fun invokingBroadcastReceiverWithNotEnteringProximityDoesNotShowNotification() =
+            coroutineRule.runBlockingTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                 .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, 1)
@@ -125,7 +139,7 @@ class AndroidAreaEnteredBroadcastReceiverTest {
         receiver.onReceive(context, intent)
 
         verify(alertsDao, never())
-                .removeProximityAlert(any())
+                .removeProximityAlert(any<Int>())
         verify(geofencingManager, never())
                 .removeGeofence(any())
         verify(notificationDispatcher, never())
@@ -133,7 +147,8 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithAlertMissingFromDatabaseDoesNotShowNotification() {
+    fun invokingBroadcastReceiverWithAlertMissingFromDatabaseDoesNotShowNotification() =
+            coroutineRule.runBlockingTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                 .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, 1)
@@ -152,7 +167,8 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverAndCriteriaSatisfiedShowsNotification() {
+    fun invokingBroadcastReceiverAndCriteriaSatisfiedShowsNotification() =
+            coroutineRule.runBlockingTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                 .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, 1)

@@ -42,12 +42,14 @@ import javax.inject.Singleton
 /**
  * This repository is used to access alerts data.
  *
+ * @param alertManager The [AlertManager] implementation.
  * @param alertsDao The DAO to access the alerts data store.
  * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
 @Singleton
 class AlertsRepository @Inject internal constructor(
+        private val alertManager: AlertManager,
         private val alertsDao: AlertsDao,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
@@ -99,6 +101,15 @@ class AlertsRepository @Inject internal constructor(
         awaitClose {
             alertsDao.removeOnAlertsChangedListener(listener)
         }
+    }
+
+    /**
+     * Remove any set proximity alerts for the given stop code.
+     *
+     * @param stopCode The stop code to remove proximity alerts for.
+     */
+    suspend fun removeProximityAlert(stopCode: String) {
+        alertManager.removeProximityAlert(stopCode)
     }
 
     /**

@@ -24,42 +24,46 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.alerts.proximity
+package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import dagger.android.AndroidInjection
+import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
 import javax.inject.Inject
 
 /**
- * This [BroadcastReceiver] is called when the user has tapped 'Remove' on the proximity alert
- * notification.
+ * This is the [ViewModel] for [DeleteProximityAlertDialogFragment].
  *
+ * @param alertsRepository The [AlertsRepository], used to interface with the lower-level
+ * architecture layers to handle alerts.
+ * @param globalCoroutineScope The global [CoroutineScope].
+ * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-class RemoveProximityAlertBroadcastReceiver : BroadcastReceiver() {
+class DeleteProximityAlertDialogFragmentViewModel @Inject constructor(
+        private val alertsRepository: AlertsRepository,
+        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
-    @Inject
-    lateinit var alertManager: AlertManager
-    @Inject
-    @ForGlobalCoroutineScope
-    lateinit var globalCoroutineScope: CoroutineScope
-    @Inject
-    @ForDefaultDispatcher
-    lateinit var defaultDispatcher: CoroutineDispatcher
+    /**
+     * This property contains the stop code for which the proximity alert should be deleted.
+     */
+    var stopCode: String? = null
 
-    override fun onReceive(context: Context, intent: Intent) {
-        AndroidInjection.inject(this, context)
-
-        globalCoroutineScope.launch(defaultDispatcher) {
-            alertManager.removeAllProximityAlerts()
+    /**
+     * This is called when the user has confirmed they wish to delete the proximity alert.
+     */
+    fun onUserConfirmDeletion() {
+        stopCode?.ifEmpty { null }?.let {
+            // Uses the global CoroutineScope as the Dialog dismisses immediately, and we need
+            // this task to finish. Fire and forget is fine here.
+            globalCoroutineScope.launch(defaultDispatcher) {
+                alertsRepository.removeProximityAlert(it)
+            }
         }
     }
 }

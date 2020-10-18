@@ -32,7 +32,10 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -43,14 +46,19 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertT
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [AlertManager].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AlertManagerTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var alertsDao: AlertsDao
@@ -78,8 +86,6 @@ class AlertManagerTest {
                 .execute(any())
         inOrder(alertsDao, arrivalAlertTaskLauncher) {
             verify(alertsDao)
-                    .removeAllArrivalAlerts()
-            verify(alertsDao)
                     .addArrivalAlert(arrivalAlert)
             verify(arrivalAlertTaskLauncher)
                     .launchArrivalAlertTask()
@@ -106,8 +112,6 @@ class AlertManagerTest {
                 .execute(any())
         inOrder(alertsDao, proximityAlertTaskLauncher) {
             verify(alertsDao)
-                    .removeAllProximityAlerts()
-            verify(alertsDao)
                     .addProximityAlert(proximityAlert)
             verify(proximityAlertTaskLauncher)
                     .launchProximityAlertTask()
@@ -115,11 +119,17 @@ class AlertManagerTest {
     }
 
     @Test
-    fun removeProximityAlertRemovesProximityAlert() {
-        alertManager.removeProximityAlert()
+    fun removeProximityAlertRemovesProximityAlert() = coroutineRule.runBlockingTest {
+        alertManager.removeProximityAlert("123456")
 
-        verify(backgroundExecutor)
-                .execute(any())
+        verify(alertsDao)
+                .removeProximityAlert("123456")
+    }
+
+    @Test
+    fun removeAllProximityAlertsRemovesAllProximityAlerts() = coroutineRule.runBlockingTest {
+        alertManager.removeAllProximityAlerts()
+
         verify(alertsDao)
                 .removeAllProximityAlerts()
     }

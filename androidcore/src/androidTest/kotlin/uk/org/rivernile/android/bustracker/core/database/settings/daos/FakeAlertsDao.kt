@@ -58,15 +58,19 @@ class FakeAlertsDao : AlertsDao {
 
     }
 
-    override fun removeProximityAlert(id: Int) {
+    override suspend fun removeProximityAlert(id: Int) {
 
     }
 
-    override fun removeAllProximityAlerts() {
+    override suspend fun removeProximityAlert(stopCode: String) {
 
     }
 
-    override fun getProximityAlert(id: Int): ProximityAlert? = null
+    override suspend fun removeAllProximityAlerts() {
+
+    }
+
+    override suspend fun getProximityAlert(id: Int): ProximityAlert? = null
 
     override fun getAllArrivalAlerts(): List<ArrivalAlert>? = null
 

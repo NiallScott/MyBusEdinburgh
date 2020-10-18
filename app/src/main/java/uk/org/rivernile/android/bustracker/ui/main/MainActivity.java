@@ -245,8 +245,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowConfirmDeleteProximityAlert() {
-        new DeleteProximityAlertDialogFragment()
+    public void onShowConfirmDeleteProximityAlert(@NonNull final String stopCode) {
+        DeleteProximityAlertDialogFragment.newInstance(stopCode)
                 .show(getSupportFragmentManager(), DIALOG_DELETE_PROX_ALERT);
     }
 

@@ -82,12 +82,19 @@ interface AlertsDao {
      *
      * @param id The ID of the proximity alert to remove.
      */
-    fun removeProximityAlert(id: Int)
+    suspend fun removeProximityAlert(id: Int)
+
+    /**
+     * Remove a proximity alert by stop code.
+     *
+     * @param stopCode The stop code to remove the proximity alert for.
+     */
+    suspend fun removeProximityAlert(stopCode: String)
 
     /**
      * Remove all proximity alerts.
      */
-    fun removeAllProximityAlerts()
+    suspend fun removeAllProximityAlerts()
 
     /**
      * Get an active proximity alert.
@@ -95,7 +102,7 @@ interface AlertsDao {
      * @param id The ID of the proximity alert.
      * @return The [ProximityAlert], or `null` if it doesn't exist.
      */
-    fun getProximityAlert(id: Int): ProximityAlert?
+    suspend fun getProximityAlert(id: Int): ProximityAlert?
 
     /**
      * Get all the arrival alerts.

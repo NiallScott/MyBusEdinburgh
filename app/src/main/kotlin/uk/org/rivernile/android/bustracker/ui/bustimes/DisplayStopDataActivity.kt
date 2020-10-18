@@ -154,9 +154,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             showRemoveArrivalAlert()
         }
         viewModel.showAddProximityAlertLiveData.observe(this, this::showAddProximityAlert)
-        viewModel.showRemoveProximityAlertLiveData.observe(this) {
-            showRemoveProximityAlert()
-        }
+        viewModel.showRemoveProximityAlertLiveData.observe(this, this::showRemoveProximityAlert)
         viewModel.showStreetViewLiveData.observe(this, this::showStreetView)
     }
 
@@ -388,9 +386,11 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
     /**
      * Show the 'Remove proximity alert' UI.
+     *
+     * @param stopCode The stop code to remove the proximity alert for.
      */
-    private fun showRemoveProximityAlert() {
-        DeleteProximityAlertDialogFragment()
+    private fun showRemoveProximityAlert(stopCode: String) {
+        DeleteProximityAlertDialogFragment.newInstance(stopCode)
                 .show(supportFragmentManager, DIALOG_REMOVE_PROX_ALERT)
     }
 

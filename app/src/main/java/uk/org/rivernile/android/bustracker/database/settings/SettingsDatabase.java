@@ -149,18 +149,6 @@ public final class SettingsDatabase {
     }
 
     /**
-     * Delete all proximity alerts from the database.
-     *
-     * @param context A {@link Context} instance.
-     * @return The number of rows deleted, as defined by
-     * {@link android.content.ContentResolver#delete(Uri, String, String[])}.
-     */
-    @WorkerThread
-    public static int deleteAllProximityAlerts(@NonNull final Context context) {
-        return deleteAllAlertsOfType(context, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
-    }
-
-    /**
      * Delete all time alerts from the database.
      *
      * @param context A {@link Context} instance.

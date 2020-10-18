@@ -747,7 +747,7 @@ public class NearestStopsFragment extends Fragment
                     // See if this stop exists as a proximity alert.
                     if (cursorProxAlert != null) {
                         if (cursorProxAlert.getCount() > 0) {
-                            callbacks.onShowConfirmDeleteProximityAlert();
+                            callbacks.onShowConfirmDeleteProximityAlert(stopCode);
                         } else {
                             callbacks.onShowAddProximityAlert(stopCode);
                         }

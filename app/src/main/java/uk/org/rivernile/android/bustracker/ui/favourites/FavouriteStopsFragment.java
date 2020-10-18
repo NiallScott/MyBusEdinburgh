@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -549,7 +549,7 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
                     // See if this stop exists as a proximity alert.
                     if (cursorProxAlert != null) {
                         if (cursorProxAlert.getCount() > 0) {
-                            callbacks.onShowConfirmDeleteProximityAlert();
+                            callbacks.onShowConfirmDeleteProximityAlert(selectedStopCode);
                         } else {
                             callbacks.onShowAddProximityAlert(selectedStopCode);
                         }

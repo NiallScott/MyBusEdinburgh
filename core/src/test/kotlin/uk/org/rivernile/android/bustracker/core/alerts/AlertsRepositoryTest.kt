@@ -55,13 +55,18 @@ class AlertsRepositoryTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
+    private lateinit var alertManager: AlertManager
+    @Mock
     private lateinit var alertsDao: AlertsDao
 
     private lateinit var repository: AlertsRepository
 
     @Before
     fun setUp() {
-        repository = AlertsRepository(alertsDao, coroutineRule.testDispatcher)
+        repository = AlertsRepository(
+                alertManager,
+                alertsDao,
+                coroutineRule.testDispatcher)
     }
 
     @Test
@@ -124,5 +129,13 @@ class AlertsRepositoryTest {
         observer.assertValues(false, true, false)
         verify(alertsDao)
                 .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun removeProximityAlertCallsAlertManager() = coroutineRule.runBlockingTest {
+        repository.removeProximityAlert("123456")
+
+        verify(alertManager)
+                .removeProximityAlert("123456")
     }
 }

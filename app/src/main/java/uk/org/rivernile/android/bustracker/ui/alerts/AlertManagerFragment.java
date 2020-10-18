@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -159,7 +159,11 @@ public class AlertManagerFragment extends Fragment
 
     @Override
     public void onRemoveProximityAlertClicked(@NonNull final Cursor cursor) {
-        callbacks.onShowConfirmDeleteProximityAlert();
+        final int stopCodeColumn = cursor.getColumnIndex(SettingsContract.Alerts.STOP_CODE);
+
+        if (stopCodeColumn >= 0) {
+            callbacks.onShowConfirmDeleteProximityAlert(cursor.getString(stopCodeColumn));
+        }
     }
 
     @Override

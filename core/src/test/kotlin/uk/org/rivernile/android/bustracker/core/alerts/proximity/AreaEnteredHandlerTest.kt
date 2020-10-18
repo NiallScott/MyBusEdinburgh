@@ -28,26 +28,32 @@ package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.CurrentThreadExecutor
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [AreaEnteredHandler].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AreaEnteredHandlerTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var alertsDao: AlertsDao
@@ -55,42 +61,38 @@ class AreaEnteredHandlerTest {
     private lateinit var geofencingManager: GeofencingManager
     @Mock
     private lateinit var notificationDispatcher: AlertNotificationDispatcher
-    private val backgroundExecutor = spy(CurrentThreadExecutor())
 
     private lateinit var handler: AreaEnteredHandler
 
     @Before
     fun setUp() {
-        handler = AreaEnteredHandler(alertsDao, geofencingManager, notificationDispatcher,
-                backgroundExecutor)
+        handler = AreaEnteredHandler(
+                alertsDao,
+                geofencingManager,
+                notificationDispatcher)
     }
 
     @Test
-    fun handleAreaEnteredRemovesGeofence() {
+    fun handleAreaEnteredRemovesGeofence() = coroutineRule.runBlockingTest {
         handler.handleAreaEntered(1)
 
-        verify(backgroundExecutor)
-                .execute(any())
         verify(geofencingManager)
                 .removeGeofence(1)
     }
 
     @Test
-    fun handleAreaEnteredRemovesAlertFromDao() {
+    fun handleAreaEnteredRemovesAlertFromDao() = coroutineRule.runBlockingTest {
         handler.handleAreaEntered(1)
 
-        verify(backgroundExecutor)
-                .execute(any())
         verify(alertsDao)
                 .removeProximityAlert(1)
     }
 
     @Test
-    fun handleAreaEnteredDoesNotDispatchNotificationWhenAlertDoesNotExist() {
+    fun handleAreaEnteredDoesNotDispatchNotificationWhenAlertDoesNotExist() =
+            coroutineRule.runBlockingTest {
         handler.handleAreaEntered(1)
 
-        verify(backgroundExecutor)
-                .execute(any())
         verify(alertsDao)
                 .getProximityAlert(1)
         verify(notificationDispatcher, never())
@@ -98,15 +100,14 @@ class AreaEnteredHandlerTest {
     }
 
     @Test
-    fun handleAreaEnteredDispatchesNotificationWhenAlertDoesExist() {
+    fun handleAreaEnteredDispatchesNotificationWhenAlertDoesExist() =
+            coroutineRule.runBlockingTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
         whenever(alertsDao.getProximityAlert(1))
                 .thenReturn(proximityAlert)
 
         handler.handleAreaEntered(1)
 
-        verify(backgroundExecutor)
-                .execute(any())
         verify(notificationDispatcher)
                 .dispatchProximityAlertNotification(proximityAlert)
     }

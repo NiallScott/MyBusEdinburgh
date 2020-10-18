@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,6 +25,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.callbacks;
 
+import androidx.annotation.NonNull;
+
 /**
  * This listener is used to send callbacks from Fragments to Activities to
  * confirm with the user that they wish to delete the active proximity alert.
@@ -36,6 +38,8 @@ public interface OnShowConfirmDeleteProximityAlertListener {
     /**
      * This is called when it should be confirmed with the user that they want
      * to delete the proximity alert.
+     *
+     * @param stopCode The stop code to remove the proximity alert for.
      */
-    public void onShowConfirmDeleteProximityAlert();
+    void onShowConfirmDeleteProximityAlert(@NonNull String stopCode);
 }
