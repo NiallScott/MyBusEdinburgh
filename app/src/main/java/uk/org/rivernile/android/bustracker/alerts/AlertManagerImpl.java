@@ -39,7 +39,6 @@ import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunn
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRunnerService;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddProximityAlertTask;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddTimeAlertTask;
-import uk.org.rivernile.android.bustracker.database.settings.loaders.DeleteAllTimeAlertsTask;
 
 /**
  * This is a concrete implementation of {@link AlertManager}.
@@ -73,18 +72,9 @@ public class AlertManagerImpl implements AlertManager {
     @Override
     public void addTimeAlert(@NonNull final String stopCode, @NonNull final String[] services,
             @IntRange(from = 0) final int timeTrigger) {
-        // Make sure any other time alerts do not exist.
-        removeTimeAlert();
-
         // Add a new time alert to the database.
         AddTimeAlertTask.start(context, stopCode, services, timeTrigger);
         final Intent intent = new Intent(context, ArrivalAlertRunnerService.class);
         ContextCompat.startForegroundService(context, intent);
-    }
-    
-    @Override
-    public void removeTimeAlert() {
-        // Remove all time alerts from the database.
-        DeleteAllTimeAlertsTask.start(context);
     }
 }

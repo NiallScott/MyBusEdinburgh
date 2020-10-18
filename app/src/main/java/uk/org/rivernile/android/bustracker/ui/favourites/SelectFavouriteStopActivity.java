@@ -85,7 +85,7 @@ public class SelectFavouriteStopActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowConfirmDeleteTimeAlert() {
+    public void onShowConfirmDeleteTimeAlert(@NonNull final String stopCode) {
         // Not required here.
     }
 

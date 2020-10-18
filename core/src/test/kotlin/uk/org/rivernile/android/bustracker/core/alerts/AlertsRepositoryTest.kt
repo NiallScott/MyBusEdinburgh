@@ -131,6 +131,14 @@ class AlertsRepositoryTest {
     }
 
     @Test
+    fun removeArrivalAlertCallsAlertManager() = coroutineRule.runBlockingTest {
+        repository.removeArrivalAlert("123456")
+
+        verify(alertManager)
+                .removeArrivalAlert("123456")
+    }
+
+    @Test
     fun removeProximityAlertCallsAlertManager() = coroutineRule.runBlockingTest {
         repository.removeProximityAlert("123456")
 

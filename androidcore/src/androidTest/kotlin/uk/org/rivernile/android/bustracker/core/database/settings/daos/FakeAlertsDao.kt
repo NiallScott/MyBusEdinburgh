@@ -50,11 +50,15 @@ class FakeAlertsDao : AlertsDao {
 
     }
 
-    override fun removeArrivalAlert(id: Int) {
+    override suspend fun removeArrivalAlert(id: Int) {
 
     }
 
-    override fun removeAllArrivalAlerts() {
+    override suspend fun removeArrivalAlert(stopCode: String) {
+
+    }
+
+    override suspend fun removeAllArrivalAlerts() {
 
     }
 

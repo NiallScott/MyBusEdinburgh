@@ -29,7 +29,10 @@ package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -40,14 +43,19 @@ import uk.org.rivernile.android.bustracker.core.dagger.FakeCoreModule
 import uk.org.rivernile.android.bustracker.core.dagger.FakeSettingsDatabaseModule
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.getApplication
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [RemoveArrivalAlertBroadcastReceiver].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class RemoveArrivalAlertBroadcastReceiverTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var alertsDao: AlertsDao
@@ -57,7 +65,10 @@ class RemoveArrivalAlertBroadcastReceiverTest {
 
     @Before
     fun setUp() {
-        val coreModule = FakeCoreModule(currentThreadExecutor)
+        val coreModule = FakeCoreModule(
+                backgroundExecutor = currentThreadExecutor,
+                globalCoroutineScope = coroutineRule,
+                defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
 
         assistInject(
@@ -69,7 +80,7 @@ class RemoveArrivalAlertBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverRemovesArrivalAlert() {
+    fun invokingBroadcastReceiverRemovesArrivalAlert() = coroutineRule.runBlockingTest {
         receiver.onReceive(ApplicationProvider.getApplicationContext(), createIntent())
 
         verify(alertsDao)

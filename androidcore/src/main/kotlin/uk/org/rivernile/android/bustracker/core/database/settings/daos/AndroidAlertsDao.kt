@@ -109,17 +109,35 @@ internal class AndroidAlertsDao @Inject constructor(
         context.contentResolver.insert(contract.getContentUri(), values)
     }
 
-    override fun removeArrivalAlert(id: Int) {
-        context.contentResolver.delete(contract.getContentUri(),
-                "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
-                arrayOf(id.toString(), AlertsContract.ALERTS_TYPE_TIME.toString()))
+    override suspend fun removeArrivalAlert(id: Int) {
+        withContext(ioDispatcher) {
+            context.contentResolver.delete(
+                    contract.getContentUri(),
+                    "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
+                    arrayOf(
+                            id.toString(),
+                            AlertsContract.ALERTS_TYPE_TIME.toString()))
+        }
     }
 
-    override fun removeAllArrivalAlerts() {
-        context.contentResolver.delete(
-                contract.getContentUri(),
-                "${AlertsContract.TYPE} = ?",
-                arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()))
+    override suspend fun removeArrivalAlert(stopCode: String) {
+        withContext(ioDispatcher) {
+            context.contentResolver.delete(
+                    contract.getContentUri(),
+                    "${AlertsContract.STOP_CODE} = ? AND ${AlertsContract.TYPE} = ?",
+                    arrayOf(
+                            stopCode,
+                            AlertsContract.ALERTS_TYPE_TIME.toString()))
+        }
+    }
+
+    override suspend fun removeAllArrivalAlerts() {
+        withContext(ioDispatcher) {
+            context.contentResolver.delete(
+                    contract.getContentUri(),
+                    "${AlertsContract.TYPE} = ?",
+                    arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()))
+        }
     }
 
     override suspend fun removeProximityAlert(id: Int) {

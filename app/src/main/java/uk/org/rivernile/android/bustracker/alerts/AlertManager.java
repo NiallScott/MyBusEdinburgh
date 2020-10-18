@@ -68,9 +68,4 @@ public interface AlertManager {
      */
     void addTimeAlert(@NonNull @Size(min = 1) String stopCode,
             @NonNull @Size(min = 1) String[] services, @IntRange(from = 0) int timeTrigger);
-
-    /**
-     * Remove any active time alert.
-     */
-    void removeTimeAlert();
 }

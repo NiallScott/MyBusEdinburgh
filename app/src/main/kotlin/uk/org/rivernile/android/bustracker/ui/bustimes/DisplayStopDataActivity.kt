@@ -150,9 +150,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         viewModel.showAddFavouriteLiveData.observe(this, this::showAddFavourite)
         viewModel.showRemoveFavouriteLiveData.observe(this, this::showRemoveFavourite)
         viewModel.showAddArrivalAlertLiveData.observe(this, this::showAddArrivalAlert)
-        viewModel.showRemoveArrivalAlertLiveData.observe(this) {
-            showRemoveArrivalAlert()
-        }
+        viewModel.showRemoveArrivalAlertLiveData.observe(this, this::showRemoveArrivalAlert)
         viewModel.showAddProximityAlertLiveData.observe(this, this::showAddProximityAlert)
         viewModel.showRemoveProximityAlertLiveData.observe(this, this::showRemoveProximityAlert)
         viewModel.showStreetViewLiveData.observe(this, this::showStreetView)
@@ -368,9 +366,11 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
     /**
      * Show the 'Remove arrival alert' UI.
+     *
+     * @param stopCode The stop code to remove the arrival alert for.
      */
-    private fun showRemoveArrivalAlert() {
-        DeleteTimeAlertDialogFragment()
+    private fun showRemoveArrivalAlert(stopCode: String) {
+        DeleteTimeAlertDialogFragment.newInstance(stopCode)
                 .show(supportFragmentManager, DIALOG_REMOVE_ARRIVAL_ALERT)
     }
 

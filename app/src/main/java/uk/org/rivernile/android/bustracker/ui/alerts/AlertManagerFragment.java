@@ -168,7 +168,11 @@ public class AlertManagerFragment extends Fragment
 
     @Override
     public void onRemoveTimeAlertClicked(@NonNull final Cursor cursor) {
-        callbacks.onShowConfirmDeleteTimeAlert();
+        final int stopCodeColumn = cursor.getColumnIndex(SettingsContract.Alerts.STOP_CODE);
+
+        if (stopCodeColumn >= 0) {
+            callbacks.onShowConfirmDeleteTimeAlert(cursor.getString(stopCodeColumn));
+        }
     }
 
     /**

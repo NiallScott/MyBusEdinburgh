@@ -31,7 +31,10 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -46,6 +49,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Live
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import java.util.Date
 
 /**
@@ -53,8 +57,12 @@ import java.util.Date
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class CheckTimesTaskTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     lateinit var alertsDao: AlertsDao
@@ -132,7 +140,7 @@ class CheckTimesTaskTest {
     }
 
     @Test
-    fun nullArrivalAlertsDoesNotCauseNotifications() {
+    fun nullArrivalAlertsDoesNotCauseNotifications() = coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         givenArrivalAlerts(null)
@@ -142,11 +150,11 @@ class CheckTimesTaskTest {
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
         verify(alertsDao, never())
-                .removeArrivalAlert(any())
+                .removeArrivalAlert(any<Int>())
     }
 
     @Test
-    fun emptyArrivalAlertsDoesNotCauseNotifications() {
+    fun emptyArrivalAlertsDoesNotCauseNotifications() = coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         givenArrivalAlerts(emptyList())
@@ -156,11 +164,12 @@ class CheckTimesTaskTest {
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
         verify(alertsDao, never())
-                .removeArrivalAlert(any())
+                .removeArrivalAlert(any<Int>())
     }
 
     @Test
-    fun singleServiceForSingleStopThatDoesNotMeetTimeTriggerDoesNotCauseNotification() {
+    fun singleServiceForSingleStopThatDoesNotMeetTimeTriggerDoesNotCauseNotification() =
+            coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         val arrivalAlerts = listOf(ArrivalAlert(1, 123L, "123456", listOf("1"), 5))
@@ -177,11 +186,12 @@ class CheckTimesTaskTest {
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
         verify(alertsDao, never())
-                .removeArrivalAlert(any())
+                .removeArrivalAlert(any<Int>())
     }
 
     @Test
-    fun singleServiceForSingleStopThatEqualsTimeTriggerCausesNotification() {
+    fun singleServiceForSingleStopThatEqualsTimeTriggerCausesNotification() =
+            coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
@@ -202,7 +212,8 @@ class CheckTimesTaskTest {
     }
 
     @Test
-    fun singleServiceForSingleStopThatIsLessThanTimeTriggerCausesNotification() {
+    fun singleServiceForSingleStopThatIsLessThanTimeTriggerCausesNotification() =
+            coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
@@ -223,7 +234,7 @@ class CheckTimesTaskTest {
     }
 
     @Test
-    fun stopNotFoundInArrivalAlertsDoesNotCauseNotification() {
+    fun stopNotFoundInArrivalAlertsDoesNotCauseNotification() = coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("987654"))
         val arrivalAlerts = listOf(ArrivalAlert(1, 123L, "987654", listOf("1"), 5))
@@ -240,11 +251,12 @@ class CheckTimesTaskTest {
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
         verify(alertsDao, never())
-                .removeArrivalAlert(any())
+                .removeArrivalAlert(any<Int>())
     }
 
     @Test
-    fun multipleServicesForSingleStopThatDoesNotMeetTimeTriggerDoesNotCauseNotification() {
+    fun multipleServicesForSingleStopThatDoesNotMeetTimeTriggerDoesNotCauseNotification() =
+            coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         val arrivalAlerts = listOf(ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5))
@@ -263,11 +275,12 @@ class CheckTimesTaskTest {
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
         verify(alertsDao, never())
-                .removeArrivalAlert(any())
+                .removeArrivalAlert(any<Int>())
     }
 
     @Test
-    fun singleServiceForSingleStopThatSatisfiesTimeTriggerCausesNotification() {
+    fun singleServiceForSingleStopThatSatisfiesTimeTriggerCausesNotification() =
+            coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
@@ -292,7 +305,8 @@ class CheckTimesTaskTest {
     }
 
     @Test
-    fun multipleServicesForSingleStopThatSatisfiesTimeTriggerCausesNotifications() {
+    fun multipleServicesForSingleStopThatSatisfiesTimeTriggerCausesNotifications() =
+            coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123456"))
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
@@ -317,7 +331,8 @@ class CheckTimesTaskTest {
     }
 
     @Test
-    fun multipleStopsWithMultipleCombinationsYieldsExpectedResults() {
+    fun multipleStopsWithMultipleCombinationsYieldsExpectedResults() =
+            coroutineRule.runBlockingTest {
         givenTrackerEndpointCreatesRequest()
         givenArrivalAlertStopCodes(listOf("123", "456", "789"))
         val arrivalAlert1 = ArrivalAlert(1, 123L, "123", listOf("1", "2", "3"), 10)

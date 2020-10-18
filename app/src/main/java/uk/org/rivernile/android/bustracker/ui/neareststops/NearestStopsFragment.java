@@ -759,7 +759,7 @@ public class NearestStopsFragment extends Fragment
                     // See if this stop exists as a time alert.
                     if (cursorTimeAlert != null) {
                         if (cursorTimeAlert.getCount() > 0) {
-                            callbacks.onShowConfirmDeleteTimeAlert();
+                            callbacks.onShowConfirmDeleteTimeAlert(stopCode);
                         } else {
                             callbacks.onShowAddTimeAlert(stopCode, null);
                         }

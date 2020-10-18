@@ -149,33 +149,6 @@ public final class SettingsDatabase {
     }
 
     /**
-     * Delete all time alerts from the database.
-     *
-     * @param context A {@link Context} instance.
-     * @return The number of rows deleted, as defined by
-     * {@link android.content.ContentResolver#delete(Uri, String, String[])}.
-     */
-    @WorkerThread
-    public static int deleteAllTimeAlerts(@NonNull final Context context) {
-        return deleteAllAlertsOfType(context, SettingsContract.Alerts.ALERTS_TYPE_TIME);
-    }
-
-    /**
-     * Delete all alerts of a given type from the database.
-     *
-     * @param context A {@link Context} instance.
-     * @param alertType Either {@link SettingsContract.Alerts#ALERTS_TYPE_PROXIMITY} or
-     * {@link SettingsContract.Alerts#ALERTS_TYPE_TIME}.
-     * @return The number of rows deleted, as defined by
-     * {@link android.content.ContentResolver#delete(Uri, String, String[])}.
-     */
-    @WorkerThread
-    private static int deleteAllAlertsOfType(@NonNull final Context context, final int alertType) {
-        return context.getContentResolver().delete(SettingsContract.Alerts.CONTENT_URI,
-                SettingsContract.Alerts.TYPE + " = ?", new String[] { String.valueOf(alertType) });
-    }
-
-    /**
      * Pack a {@link String} array of services in to a single {@link String} that can be written in
      * to a column in the database.
      *

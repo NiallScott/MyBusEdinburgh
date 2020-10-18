@@ -119,7 +119,7 @@ class ArrivalAlertRunnerService : Service() {
     private fun createRemoveNotificationAction() =
             NotificationCompat.Action.Builder(
                     R.drawable.ic_action_delete,
-                    getString(R.string.remove),
+                    getString(R.string.remove_all),
                     createRemoveActionButtonPendingIntent())
                     .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_DELETE)
                     .build()

@@ -178,7 +178,8 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun removeArrivalAlertSendsThroughCorrectParametersForDelete() {
+    fun removeArrivalAlertByIdSendsThroughCorrectParametersForDelete() =
+            coroutineRule.runBlockingTest {
         val expectedSelectionArgs = arrayOf("1", AlertsContract.ALERTS_TYPE_TIME.toString())
         object : MockContentProvider() {
             override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
@@ -188,13 +189,32 @@ class AndroidAlertsDaoTest {
 
                 return 0
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         alertsDao.removeArrivalAlert(1)
     }
 
     @Test
-    fun removeAllArrivalAlertsSendThroughCorrectParametersForDelete() {
+    fun removeArrivalAlertByStopCodeSendsThroughCorrectParametersForDelete() =
+            coroutineRule.runBlockingTest {
+        val expectedSelectionArgs = arrayOf("123456", AlertsContract.ALERTS_TYPE_TIME.toString())
+        object : MockContentProvider() {
+            override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
+                assertEquals(contentUri, uri)
+                assertEquals("${AlertsContract.STOP_CODE} = ? AND ${AlertsContract.TYPE} = ?",
+                        selection)
+                assertArrayEquals(expectedSelectionArgs, selectionArgs)
+
+                return 0
+            }
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
+
+        alertsDao.removeArrivalAlert("123456")
+    }
+
+    @Test
+    fun removeAllArrivalAlertsSendThroughCorrectParametersForDelete() =
+            coroutineRule.runBlockingTest {
         val expectedSelectionArgs = arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString())
         object : MockContentProvider() {
             override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
@@ -204,7 +224,7 @@ class AndroidAlertsDaoTest {
 
                 return 0
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         alertsDao.removeAllArrivalAlerts()
     }

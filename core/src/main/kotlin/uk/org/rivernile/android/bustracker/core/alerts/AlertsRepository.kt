@@ -99,6 +99,15 @@ class AlertsRepository @Inject internal constructor(
     }
 
     /**
+     * Remove any set arrival alerts for the given stop code.
+     *
+     * @param stopCode The stop code to remove arrival alerts for.
+     */
+    suspend fun removeArrivalAlert(stopCode: String) {
+        alertManager.removeArrivalAlert(stopCode)
+    }
+
+    /**
      * Remove any set proximity alerts for the given stop code.
      *
      * @param stopCode The stop code to remove proximity alerts for.

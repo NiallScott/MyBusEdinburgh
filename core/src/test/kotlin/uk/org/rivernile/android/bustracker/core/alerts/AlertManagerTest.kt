@@ -93,11 +93,17 @@ class AlertManagerTest {
     }
 
     @Test
-    fun removeArrivalAlertRemovesArrivalAlert() {
-        alertManager.removeArrivalAlert()
+    fun removeArrivalAlertRemovesArrivalAlert() = coroutineRule.runBlockingTest {
+        alertManager.removeArrivalAlert("123456")
 
-        verify(backgroundExecutor)
-                .execute(any())
+        verify(alertsDao)
+                .removeArrivalAlert("123456")
+    }
+
+    @Test
+    fun removeAllArrivalAlertsRemovesAllArrivalAlerts() = coroutineRule.runBlockingTest {
+        alertManager.removeAllArrivalAlerts()
+
         verify(alertsDao)
                 .removeAllArrivalAlerts()
     }

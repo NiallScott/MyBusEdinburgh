@@ -251,8 +251,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowConfirmDeleteTimeAlert() {
-        new DeleteTimeAlertDialogFragment()
+    public void onShowConfirmDeleteTimeAlert(@NonNull final String stopCode) {
+        DeleteTimeAlertDialogFragment.newInstance(stopCode)
                 .show(getSupportFragmentManager(), DIALOG_DELETE_TIME_ALERT);
     }
 

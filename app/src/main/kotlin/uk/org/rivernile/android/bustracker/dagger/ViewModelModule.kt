@@ -33,6 +33,7 @@ import dagger.multibindings.IntoMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.about.AboutViewModel
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragmentViewModel
+import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivityViewModel
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragmentViewModel
@@ -134,6 +135,19 @@ interface ViewModelModule {
     @ViewModelKey(DeleteProximityAlertDialogFragmentViewModel::class)
     fun bindDeleteProximityAlertDialogFragmentViewModel(
             viewModel: DeleteProximityAlertDialogFragmentViewModel): ViewModel
+
+    /**
+     * Inject a [DeleteTimeAlertDialogFragmentViewModel] when requested.
+     *
+     * @param viewModel A [DeleteTimeAlertDialogFragmentViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(DeleteTimeAlertDialogFragmentViewModel::class)
+    fun bindDeleteTimeAlertDialogFragmentViewModel(
+            viewModel: DeleteTimeAlertDialogFragmentViewModel): ViewModel
 
     /**
      * Inject a [ViewModelFactory] when requested.

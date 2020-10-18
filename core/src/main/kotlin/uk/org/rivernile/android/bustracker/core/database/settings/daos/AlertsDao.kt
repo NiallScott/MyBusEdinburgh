@@ -70,12 +70,19 @@ interface AlertsDao {
      *
      * @param id The ID of the arrival alert to remove.
      */
-    fun removeArrivalAlert(id: Int)
+    suspend fun removeArrivalAlert(id: Int)
+
+    /**
+     * Remove an arrival alert by stop code.
+     *
+     * @param stopCode The stop code to remove the arrival alert for.
+     */
+    suspend fun removeArrivalAlert(stopCode: String)
 
     /**
      * Remove all arrival alerts.
      */
-    fun removeAllArrivalAlerts()
+    suspend fun removeAllArrivalAlerts()
 
     /**
      * Remove a proximity alert.

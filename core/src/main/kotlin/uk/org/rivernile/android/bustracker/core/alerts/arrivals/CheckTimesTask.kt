@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
+import kotlinx.coroutines.runBlocking
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
@@ -133,7 +134,10 @@ internal class CheckTimesTask @Inject constructor(
         if (qualifyingServices.isNotEmpty()) {
             alertNotificationDispatcher.dispatchTimeAlertNotification(arrivalAlert,
                     qualifyingServices)
-            alertsDao.removeArrivalAlert(arrivalAlert.id)
+            // TODO: re-write this in coroutines.
+            runBlocking {
+                alertsDao.removeArrivalAlert(arrivalAlert.id)
+            }
         }
     }
 

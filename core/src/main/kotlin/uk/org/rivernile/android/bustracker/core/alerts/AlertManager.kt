@@ -61,19 +61,25 @@ class AlertManager @Inject internal constructor(
         backgroundExecutor.execute {
             // As we currently only allow one arrival alert at a time, the newly added alert
             // overwrites any existing alerts. This may change going forwards.
-            alertsDao.removeAllArrivalAlerts()
             alertsDao.addArrivalAlert(arrivalAlert)
             arrivalAlertTaskLauncher.launchArrivalAlertTask()
         }
     }
 
     /**
+     * Remove all arrival alerts for the given stop code.
+     *
+     * @param stopCode The stop code to remove arrival alerts for.
+     */
+    suspend fun removeArrivalAlert(stopCode: String) {
+        alertsDao.removeArrivalAlert(stopCode)
+    }
+
+    /**
      * Remove an arrival alert.
      */
-    fun removeArrivalAlert() {
-        backgroundExecutor.execute {
-            alertsDao.removeAllArrivalAlerts()
-        }
+    suspend fun removeAllArrivalAlerts() {
+        alertsDao.removeAllArrivalAlerts()
     }
 
     /**
