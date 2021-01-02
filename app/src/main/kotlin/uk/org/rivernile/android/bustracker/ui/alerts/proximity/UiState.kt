@@ -24,27 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
-
-import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import javax.inject.Inject
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 
 /**
- * The Android-specific implementation of [FeatureRepository].
+ * This is the enumeration of possible top-level UI states for
+ * [AddProximityAlertDialogFragmentViewModel].
  *
- * @param stopMapFeatureAvailabilityProvider An implementation which tells us if the stop map
- * feature is available.
- * @param locationRepository Used to obtain location service information.
  * @author Niall Scott
  */
-@Singleton
-internal class AndroidFeatureRepository @Inject constructor(
-        private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
-        private val locationRepository: LocationRepository) : FeatureRepository {
+enum class UiState {
 
-    override fun hasStopMapUiFeature() =
-            stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()
-
-    override fun hasProximityAlertFeature() = locationRepository.hasLocationFeature
+    /**
+     * The device does not have any location service features.
+     */
+    ERROR_NO_LOCATION_FEATURE,
+    /**
+     * The device location services are disabled. This needs to be rectified by the user before
+     * continuing.
+     */
+    ERROR_LOCATION_DISABLED,
+    /**
+     * The user needs to grant us location permission before we can continue.
+     */
+    ERROR_PERMISSION_UNGRANTED,
+    /**
+     * The user has fully denied us the location permission and this can only be rectified from
+     * system settings.
+     */
+    ERROR_PERMISSION_DENIED,
+    /**
+     * Show progress while stop details are loading.
+     */
+    PROGRESS,
+    /**
+     * Show the regular content view.
+     */
+    CONTENT
 }

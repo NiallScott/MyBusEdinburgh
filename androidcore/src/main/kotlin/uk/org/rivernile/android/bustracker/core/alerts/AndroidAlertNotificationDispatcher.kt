@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import kotlinx.coroutines.runBlocking
 import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
@@ -163,7 +164,10 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      * @return The stop name to display.
      */
     private fun getDisplayableStopName(stopCode: String): String {
-        val stopName = busStopsDao.getNameForStop(stopCode)
+        // TODO: re-write properly with coroutines.
+        val stopName = runBlocking {
+            busStopsDao.getNameForStop(stopCode)
+        }
 
         return textFormattingUtils.formatBusStopNameWithStopCode(stopCode, stopName)
     }

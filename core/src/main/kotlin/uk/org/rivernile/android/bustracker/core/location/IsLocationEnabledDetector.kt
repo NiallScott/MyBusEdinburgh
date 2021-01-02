@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.core.location
 
-import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
 
 /**
- * The Android-specific implementation of [FeatureRepository].
+ * Detect whether the device has location-aware services enabled or not.
  *
- * @param stopMapFeatureAvailabilityProvider An implementation which tells us if the stop map
- * feature is available.
- * @param locationRepository Used to obtain location service information.
  * @author Niall Scott
  */
-@Singleton
-internal class AndroidFeatureRepository @Inject constructor(
-        private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
-        private val locationRepository: LocationRepository) : FeatureRepository {
+interface IsLocationEnabledDetector {
 
-    override fun hasStopMapUiFeature() =
-            stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()
-
-    override fun hasProximityAlertFeature() = locationRepository.hasLocationFeature
+    /**
+     * Get a [Flow] which dispatches whether the location-aware services are enabled or not.
+     *
+     * @return A [Flow] which dispatches whether the location-aware services are enabled or not.
+     */
+    fun getIsLocationEnabledFlow(): Flow<Boolean>
 }

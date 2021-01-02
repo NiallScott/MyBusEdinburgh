@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,4 +39,11 @@ interface FeatureRepository {
      * @return `true` if the stop map UI feature is available, `false` if not.
      */
     fun hasStopMapUiFeature(): Boolean
+
+    /**
+     * Is the proximity alert feature available?
+     *
+     * @return `true` if the proximity alert feature is available, `false` if not.
+     */
+    fun hasProximityAlertFeature(): Boolean
 }

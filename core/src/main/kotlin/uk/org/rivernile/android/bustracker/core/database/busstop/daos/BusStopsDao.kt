@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -58,7 +58,7 @@ interface BusStopsDao {
      * @param stopCode The stop to get the name for.
      * @return The name of the stop, or `null` if the name is not known or the stop cannot be found.
      */
-    fun getNameForStop(stopCode: String): StopName?
+    suspend fun getNameForStop(stopCode: String): StopName?
 
     /**
      * Given a stop code, get the latitude and longitude for this stop.
@@ -66,7 +66,7 @@ interface BusStopsDao {
      * @param stopCode The stop to get the location for.
      * @return The location of the stop, or `null` if the stop is not found.
      */
-    fun getLocationForStop(stopCode: String): StopLocation?
+    suspend fun getLocationForStop(stopCode: String): StopLocation?
 
     /**
      * Given a stop code, get the details for the stop.
@@ -74,7 +74,7 @@ interface BusStopsDao {
      * @param stopCode The stop to get the details for.
      * @return The details for the given stop, or `null` if the stop is not found.
      */
-    fun getStopDetails(stopCode: String): StopDetails?
+    suspend fun getStopDetails(stopCode: String): StopDetails?
 
     /**
      * This interface should be implemented to listen for changes to bus stops. Call

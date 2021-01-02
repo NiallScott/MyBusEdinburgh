@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,27 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
-
-import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import javax.inject.Inject
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.core.permission
 
 /**
- * The Android-specific implementation of [FeatureRepository].
+ * This enumeration encapsulates the permission states.
  *
- * @param stopMapFeatureAvailabilityProvider An implementation which tells us if the stop map
- * feature is available.
- * @param locationRepository Used to obtain location service information.
  * @author Niall Scott
  */
-@Singleton
-internal class AndroidFeatureRepository @Inject constructor(
-        private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
-        private val locationRepository: LocationRepository) : FeatureRepository {
+enum class PermissionState {
 
-    override fun hasStopMapUiFeature() =
-            stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()
-
-    override fun hasProximityAlertFeature() = locationRepository.hasLocationFeature
+    /**
+     * The permission has been granted to the app and we're free to use the capabilities it enables.
+     */
+    GRANTED,
+    /**
+     * The permission has not yet been granted to us.
+     */
+    UNGRANTED,
+    /**
+     * The user has denied the permission to us and we're unable to ask the user for the permission
+     * again using the normal method. The only way for the user to now grant it is in the system
+     * settings.
+     */
+    DENIED
 }

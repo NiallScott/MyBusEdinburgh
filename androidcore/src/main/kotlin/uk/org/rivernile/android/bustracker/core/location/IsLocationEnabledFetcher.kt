@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
-
-import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import javax.inject.Inject
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.core.location
 
 /**
- * The Android-specific implementation of [FeatureRepository].
+ * Because of changes in Android used to detect the current location enabled setting, this provides
+ * an abstraction whereby different implementations can be supplied depending on what platform
+ * version we are running on.
  *
- * @param stopMapFeatureAvailabilityProvider An implementation which tells us if the stop map
- * feature is available.
- * @param locationRepository Used to obtain location service information.
  * @author Niall Scott
  */
-@Singleton
-internal class AndroidFeatureRepository @Inject constructor(
-        private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
-        private val locationRepository: LocationRepository) : FeatureRepository {
+internal interface IsLocationEnabledFetcher {
 
-    override fun hasStopMapUiFeature() =
-            stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()
-
-    override fun hasProximityAlertFeature() = locationRepository.hasLocationFeature
+    /**
+     * Get the current location enabled setting.
+     *
+     * @return The current location enabled setting.
+     */
+    suspend fun isLocationEnabled(): Boolean
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,24 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.core.location
 
-import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import javax.inject.Inject
-import javax.inject.Singleton
+import android.location.LocationManager
+import android.os.Build
+import androidx.annotation.RequiresApi
 
 /**
- * The Android-specific implementation of [FeatureRepository].
+ * This is the [Build.VERSION_CODES.P] and above implementation of [IsLocationEnabledFetcher].
  *
- * @param stopMapFeatureAvailabilityProvider An implementation which tells us if the stop map
- * feature is available.
- * @param locationRepository Used to obtain location service information.
+ * [LocationManager.isLocationEnabled] was introduced in [Build.VERSION_CODES.P], which is now the
+ * preferred way to get the location enabled state.
+ *
+ * @param locationManager The platform [LocationManager].
  * @author Niall Scott
  */
-@Singleton
-internal class AndroidFeatureRepository @Inject constructor(
-        private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
-        private val locationRepository: LocationRepository) : FeatureRepository {
+@RequiresApi(Build.VERSION_CODES.P)
+internal class V28IsLocationEnabledFetcher(
+        private val locationManager: LocationManager) : IsLocationEnabledFetcher {
 
-    override fun hasStopMapUiFeature() =
-            stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()
-
-    override fun hasProximityAlertFeature() = locationRepository.hasLocationFeature
+    override suspend fun isLocationEnabled() = locationManager.isLocationEnabled
 }

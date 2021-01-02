@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,9 +35,12 @@ import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -46,6 +49,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContrac
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -54,6 +58,7 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AndroidBusStopsDaoTest {
 
@@ -61,6 +66,9 @@ class AndroidBusStopsDaoTest {
 
         private const val TEST_AUTHORITY = "test.authority"
     }
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var contract: BusStopsContract
@@ -78,14 +86,14 @@ class AndroidBusStopsDaoTest {
             override fun getContentResolver() = mockContentResolver
         }
 
-        busStopsDao = AndroidBusStopsDao(mockContext, contract)
+        busStopsDao = AndroidBusStopsDao(mockContext, contract, coroutineRule.testDispatcher)
 
         whenever(contract.getContentUri())
                 .thenReturn(contentUri)
     }
 
     @Test
-    fun getNameForStopWithNullResultIsHandledCorrectly() {
+    fun getNameForStopWithNullResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         object : MockContentProvider() {
@@ -103,7 +111,7 @@ class AndroidBusStopsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
 
         val result = busStopsDao.getNameForStop("123456")
 
@@ -111,7 +119,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithEmptyResultIsHandledCorrectly() {
+    fun getNameForStopWithEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -130,7 +138,7 @@ class AndroidBusStopsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
 
         val result = busStopsDao.getNameForStop("123456")
 
@@ -139,7 +147,8 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithNonEmptyResultButNullNameIsHandledCorrectly() {
+    fun getNameForStopWithNonEmptyResultButNullNameIsHandledCorrectly() =
+            coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -159,7 +168,7 @@ class AndroidBusStopsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
 
         val result = busStopsDao.getNameForStop("123456")
 
@@ -168,7 +177,8 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithNonEmptyResultButNullLocalityIsHandledCorrectly() {
+    fun getNameForStopWithNonEmptyResultButNullLocalityIsHandledCorrectly() =
+            coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -188,7 +198,7 @@ class AndroidBusStopsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
         val expected = StopName("Stop name", null)
 
         val result = busStopsDao.getNameForStop("123456")
@@ -198,7 +208,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithNonEmptyResultIsHandledCorrectly() {
+    fun getNameForStopWithNonEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -218,7 +228,7 @@ class AndroidBusStopsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
         val expected = StopName("Stop name", "Locality")
 
         val result = busStopsDao.getNameForStop("123456")
@@ -228,7 +238,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getLocationForStopWithNullResultIsHandledCorrectly() {
+    fun getLocationForStopWithNullResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopLocation()
         val expectedSelectionArgs = arrayOf("123456")
         object : MockContentProvider() {
@@ -246,7 +256,7 @@ class AndroidBusStopsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
 
         val result = busStopsDao.getLocationForStop("123456")
 
@@ -254,7 +264,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getLocationForStopWithEmptyResultIsHandledCorrectly() {
+    fun getLocationForStopWithEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopLocation()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -273,7 +283,7 @@ class AndroidBusStopsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
 
         val result = busStopsDao.getLocationForStop("123456")
 
@@ -282,7 +292,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getLocationForStopWithNonEmptyResultIsHandledCorrectly() {
+    fun getLocationForStopWithNonEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopLocation()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -302,7 +312,7 @@ class AndroidBusStopsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
         val expected = StopLocation("123456", 1.0, 2.0)
 
         val result = busStopsDao.getLocationForStop("123456")
@@ -312,7 +322,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsWithNullCursorReturnsNull() {
+    fun getStopDetailsWithNullCursorReturnsNull() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopDetails()
         object : MockContentProvider() {
             override fun query(
@@ -329,7 +339,7 @@ class AndroidBusStopsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
 
         val result = busStopsDao.getStopDetails("123456")
 
@@ -337,7 +347,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsWithEmptyCursorReturnsNull() {
+    fun getStopDetailsWithEmptyCursorReturnsNull() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopDetails()
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -355,7 +365,7 @@ class AndroidBusStopsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
 
         val result = busStopsDao.getStopDetails("123456")
 
@@ -364,7 +374,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsWithNonEmptyCursorReturnsStopDetails() {
+    fun getStopDetailsWithNonEmptyCursorReturnsStopDetails() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopDetails()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf("Stop name", "Locality", 1.2, 3.4))
@@ -383,7 +393,7 @@ class AndroidBusStopsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
         val expected = StopDetails(
                 "123456",
                 StopName(

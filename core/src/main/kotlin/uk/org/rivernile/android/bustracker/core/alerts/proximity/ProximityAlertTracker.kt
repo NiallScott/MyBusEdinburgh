@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
+import kotlinx.coroutines.runBlocking
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
@@ -55,14 +56,18 @@ internal class ProximityAlertTracker @Inject constructor(
      * @param alert The alert to track.
      */
     fun trackProximityAlert(alert: ProximityAlert) {
-        busStopsDao.getLocationForStop(alert.stopCode)?.let {
-            val duration = (alert.timeAdded + MAX_DURATION_MILLIS) -
-                    timeUtils.getCurrentTimeMillis()
+        // TODO: convert this all to proper coroutines.
+        runBlocking {
+            busStopsDao.getLocationForStop(alert.stopCode)
+                    ?.let {
+                        val duration = (alert.timeAdded + MAX_DURATION_MILLIS) -
+                                timeUtils.getCurrentTimeMillis()
 
-            if (duration > 0) {
-                geofencingManager.addGeofence(alert.id, it.latitude, it.longitude,
-                        alert.distanceFrom.toFloat(), duration)
-            }
+                        if (duration > 0) {
+                            geofencingManager.addGeofence(alert.id, it.latitude, it.longitude,
+                                    alert.distanceFrom.toFloat(), duration)
+                        }
+                    }
         }
     }
 

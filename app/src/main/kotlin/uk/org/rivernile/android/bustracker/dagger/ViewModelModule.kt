@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.about.AboutViewModel
+import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
@@ -122,6 +123,19 @@ interface ViewModelModule {
     @IntoMap
     @ViewModelKey(TwitterUpdatesFragmentViewModel::class)
     fun bindTwitterUpdatesFragmentViewModel(viewModel: TwitterUpdatesFragmentViewModel): ViewModel
+
+    /**
+     * Inject a [AddProximityAlertDialogFragmentViewModel] when requested.
+     *
+     * @param viewModel A [AddProximityAlertDialogFragmentViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(AddProximityAlertDialogFragmentViewModel::class)
+    fun bindAddProximityAlertDialogFragmentViewModel(
+            viewModel: AddProximityAlertDialogFragmentViewModel): ViewModel
 
     /**
      * Inject a [DeleteProximityAlertDialogFragmentViewModel] when requested.

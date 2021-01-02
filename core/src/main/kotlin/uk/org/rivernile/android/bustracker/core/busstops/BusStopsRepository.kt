@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.core.busstops
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,17 +42,40 @@ import javax.inject.Singleton
  * This repository is used to access bus stop data.
  *
  * @param busStopsDao The DAO to access the bus stop data store.
- * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
 @Singleton
 class BusStopsRepository @Inject internal constructor(
-        private val busStopsDao: BusStopsDao,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+        private val busStopsDao: BusStopsDao) {
+
+    /**
+     * Get a [Flow] which returns [StopName] for the given `stopCode`. If the stop name is updated
+     * later, these will be emitted.
+     *
+     * @param stopCode The stop code to get details for.
+     * @return The [Flow] which emits the [StopName] for the given stop code.
+     */
+    @ExperimentalCoroutinesApi
+    fun getNameForStopFlow(stopCode: String): Flow<StopName?> = callbackFlow {
+        val listener = object : BusStopsDao.OnBusStopsChangedListener {
+            override fun onBusStopsChanged() {
+                launch {
+                    getAndSendNameForStop(channel, stopCode)
+                }
+            }
+        }
+
+        busStopsDao.addOnBusStopsChangedListener(listener)
+        getAndSendNameForStop(channel, stopCode)
+
+        awaitClose {
+            busStopsDao.removeOnBusStopsChangedListener(listener)
+        }
+    }
 
     /**
      * Get a [Flow] which returns [StopDetails] for the given `stopCode`. If stop details are
-     * updated later, these will be be emitted.
+     * updated later, these will be emitted.
      *
      * @param stopCode The stop code to get details for.
      * @return The [Flow] which emits [StopDetails] for the given stop code.
@@ -78,6 +99,20 @@ class BusStopsRepository @Inject internal constructor(
     }
 
     /**
+     * A suspended function which gets [StopName] for the given `stopCode` and sends these details
+     * tot he given `channel`. This might send `null` to the channel when no stop name was found for
+     * the given `stopCode`.
+     *
+     * @param channel The [SendChannel] that emissions should be sent to.
+     * @param stopCode The `stopCode` to obtain [StopName] for.
+     */
+    private suspend fun getAndSendNameForStop(
+            channel: SendChannel<StopName?>,
+            stopCode: String) {
+        channel.send(busStopsDao.getNameForStop(stopCode))
+    }
+
+    /**
      * A suspended function which gets [StopDetails] for the given `stopCode` and sends these
      * details to the given `channel`. This might send `null` to the channel when no details were
      * found for the given `stopCode`.
@@ -87,7 +122,7 @@ class BusStopsRepository @Inject internal constructor(
      */
     private suspend fun getAndSendStopDetails(
             channel: SendChannel<StopDetails?>,
-            stopCode: String) = withContext(ioDispatcher) {
+            stopCode: String) {
         channel.send(busStopsDao.getStopDetails(stopCode))
     }
 }

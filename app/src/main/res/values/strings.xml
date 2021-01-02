@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -406,12 +406,16 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>1000 meters (1093 yards)</item>
     </string-array>
     <string name="addproxalertdialog_button_limitations">Show limitations</string>
-    <string name="addproxalertdialog_location_disabled_blurb">Location services need to be enabled for this feature to determine proximity</string>
-    <string name="addproxalertdialog_location_disabled_button">Location settings</string>
-    <string name="addproxalertdialog_button_grant_permission">Grant permission</string>
     <string name="addproxalertdialog_button_add">Add</string>
     <string name="addproxalertdialog_error_no_location_feature">This device is unable to receive location updates. As such, it is not possible to add proximity alerts.</string>
+    <string name="addproxalertdialog_error_location_disabled">Location services need to be enabled for this feature to determine proximity</string>
+    <string name="addproxalertdialog_error_location_disabled_button">Location settings</string>
+    <string name="addproxalertdialog_error_no_location_settings">Unable to show system location settings</string>
     <string name="addproxalertdialog_error_no_location_permission">To use the proximity alert feature, the location permission needs to be granted</string>
+    <string name="addproxalertdialog_error_grant_permission_button">Grant permission</string>
+    <string name="addproxalertdialog_error_permission_denied">The proximity alert feature requires location permission, but this has been previously denied to this app. To use this feature, enable the location permission from the system settings for this app.</string>
+    <string name="addproxalertdialog_error_permission_denied_button">App settings</string>
+    <string name="addproxalertdialog_error_no_app_settings">Unable to show app settings</string>
 
     <!--
     ******************************************

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -63,7 +63,41 @@ class BusStopsRepositoryTest {
 
     @Before
     fun setUp() {
-        repository = BusStopsRepository(busStopsDao, coroutineRule.testDispatcher)
+        repository = BusStopsRepository(busStopsDao)
+    }
+
+    @Test
+    fun getNameForStopFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+        val expected = createStopName()
+        whenever(busStopsDao.getNameForStop("123456"))
+                .thenReturn(expected)
+
+        val observer = repository.getNameForStopFlow("123456").test(this)
+        observer.finish()
+
+        observer.assertValues(expected)
+        verify(busStopsDao)
+                .removeOnBusStopsChangedListener(any())
+    }
+
+    @Test
+    fun getNameForStopFlowRespondsToBusStopsChanged() = coroutineRule.runBlockingTest {
+        doAnswer {
+            val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
+            listener.onBusStopsChanged()
+            listener.onBusStopsChanged()
+        }.whenever(busStopsDao).addOnBusStopsChangedListener(any())
+        val expected1 = createStopName()
+        val expected3 = expected1.copy(locality = null)
+        whenever(busStopsDao.getNameForStop("123456"))
+                .thenReturn(expected1, null, expected3)
+
+        val observer = repository.getNameForStopFlow("123456").test(this)
+        observer.finish()
+
+        observer.assertValues(expected1, null, expected3)
+        verify(busStopsDao)
+                .removeOnBusStopsChangedListener(any())
     }
 
     @Test
@@ -99,6 +133,8 @@ class BusStopsRepositoryTest {
         verify(busStopsDao)
                 .removeOnBusStopsChangedListener(any())
     }
+
+    private fun createStopName() = StopName("Name", "Locality")
 
     private fun createStopDetails() =
             StopDetails(

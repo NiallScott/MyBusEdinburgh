@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -77,6 +77,7 @@ import javax.inject.Singleton
     CoreModule.Bindings::class,
     DatabaseModule::class,
     FlavourModule::class,
+    LocationModule::class,
     HttpModule::class,
     ServiceModule::class,
     TwitterModule::class

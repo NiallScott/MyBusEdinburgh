@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,26 +28,34 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
 import android.content.Context
 import android.database.ContentObserver
+import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
 
 /**
  * This is an Android concrete implementation of the [BusStopsDao].
  *
  * @param context The application [Context].
  * @param contract The database contract, so we know how to talk to it.
+ * @param ioDispatcher The [CoroutineDispatcher] that database operations are performed on.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidBusStopsDao @Inject constructor(
         private val context: Context,
-        private val contract: BusStopsContract): BusStopsDao {
+        private val contract: BusStopsContract,
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): BusStopsDao {
 
     private val listeners = mutableListOf<BusStopsDao.OnBusStopsChangedListener>()
     private val observer = Observer()
@@ -77,79 +85,126 @@ internal class AndroidBusStopsDao @Inject constructor(
         }
     }
 
-    override fun getNameForStop(stopCode: String) = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    BusStopsContract.STOP_NAME,
-                    BusStopsContract.LOCALITY),
-            "${BusStopsContract.STOP_CODE} = ?",
-            arrayOf(stopCode),
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
+    override suspend fun getNameForStop(stopCode: String): StopName? {
+        val cancellationSignal = CancellationSignal()
 
-        if (it.moveToFirst()) {
-            it.getString(it.getColumnIndex(BusStopsContract.STOP_NAME))?.let { name ->
-                val locality = it.getString(it.getColumnIndex(BusStopsContract.LOCALITY))
-                StopName(name, locality)
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.STOP_NAME,
+                                BusStopsContract.LOCALITY),
+                        "${BusStopsContract.STOP_CODE} = ?",
+                        arrayOf(stopCode),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
+
+                            if (it.moveToFirst()) {
+                                it.getString(it.getColumnIndex(BusStopsContract.STOP_NAME))
+                                        ?.let { name ->
+                                            val locality = it.getString(
+                                                    it.getColumnIndex(BusStopsContract.LOCALITY))
+                                            StopName(name, locality)
+                                        }
+                            } else {
+                                null
+                            }
+                        }
+
+                continuation.resume(result)
             }
-        } else {
-            null
         }
     }
 
-    override fun getLocationForStop(stopCode: String) = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    BusStopsContract.LATITUDE,
-                    BusStopsContract.LONGITUDE),
-            "${BusStopsContract.STOP_CODE} = ?",
-            arrayOf(stopCode),
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
+    override suspend fun getLocationForStop(stopCode: String): StopLocation? {
+        val cancellationSignal = CancellationSignal()
 
-        if (it.moveToFirst()) {
-            val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
-            val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
 
-            StopLocation(
-                    stopCode,
-                    it.getDouble(latitudeColumn),
-                    it.getDouble(longitudeColumn))
-        } else {
-            null
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.LATITUDE,
+                                BusStopsContract.LONGITUDE),
+                        "${BusStopsContract.STOP_CODE} = ?",
+                        arrayOf(stopCode),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
+
+                            if (it.moveToFirst()) {
+                                val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
+                                val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+
+                                StopLocation(stopCode, it.getDouble(latitudeColumn),
+                                        it.getDouble(longitudeColumn))
+                            } else {
+                                null
+                            }
+                        }
+
+                continuation.resume(result)
+            }
         }
     }
 
-    override fun getStopDetails(stopCode: String) = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    BusStopsContract.STOP_NAME,
-                    BusStopsContract.LOCALITY,
-                    BusStopsContract.LATITUDE,
-                    BusStopsContract.LONGITUDE),
-            "${BusStopsContract.STOP_CODE} = ?",
-            arrayOf(stopCode),
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
+    override suspend fun getStopDetails(stopCode: String): StopDetails? {
+        val cancellationSignal = CancellationSignal()
 
-        if (it.moveToFirst()) {
-            val stopNameColumn = it.getColumnIndex(BusStopsContract.STOP_NAME)
-            val localityColumn = it.getColumnIndex(BusStopsContract.LOCALITY)
-            val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
-            val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
 
-            StopDetails(
-                    stopCode,
-                    StopName(
-                            it.getString(stopNameColumn),
-                            it.getString(localityColumn)),
-                    it.getDouble(latitudeColumn),
-                    it.getDouble(longitudeColumn))
-        } else {
-            null
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.STOP_NAME,
+                                BusStopsContract.LOCALITY,
+                                BusStopsContract.LATITUDE,
+                                BusStopsContract.LONGITUDE),
+                        "${BusStopsContract.STOP_CODE} = ?", arrayOf(stopCode),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
+
+                            if (it.moveToFirst()) {
+                                val stopNameColumn = it.getColumnIndex(BusStopsContract.STOP_NAME)
+                                val localityColumn = it.getColumnIndex(BusStopsContract.LOCALITY)
+                                val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
+                                val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+
+                                StopDetails(
+                                        stopCode,
+                                        StopName(
+                                                it.getString(stopNameColumn),
+                                                it.getString(localityColumn)),
+                                        it.getDouble(latitudeColumn),
+                                        it.getDouble(longitudeColumn))
+                            } else {
+                                null
+                            }
+                        }
+
+                continuation.resume(result)
+            }
         }
     }
 

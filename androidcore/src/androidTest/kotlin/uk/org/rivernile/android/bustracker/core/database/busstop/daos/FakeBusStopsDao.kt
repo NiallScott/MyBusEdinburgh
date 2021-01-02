@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,9 +45,9 @@ class FakeBusStopsDao : BusStopsDao {
 
     }
 
-    override fun getNameForStop(stopCode: String): StopName? = null
+    override suspend fun getNameForStop(stopCode: String): StopName? = null
 
-    override fun getLocationForStop(stopCode: String): StopLocation? = null
+    override suspend fun getLocationForStop(stopCode: String): StopLocation? = null
 
-    override fun getStopDetails(stopCode: String): StopDetails? = null
+    override suspend fun getStopDetails(stopCode: String): StopDetails? = null
 }
