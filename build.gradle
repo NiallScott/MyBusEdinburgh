@@ -31,7 +31,7 @@ buildscript {
         androidBuildToolsVersion = '29.0.3'
 
         // Dependency versions
-        kotlinVersion = '1.4.10'
+        kotlinVersion = '1.4.21'
         kotlinCoroutinesVersion = '1.4.1'
         androidXCoreVersion = '1.3.2'
         androidXActivityVersion = '1.1.0'
@@ -43,7 +43,7 @@ buildscript {
         percentLayoutVersion = '1.0.0'
         androidXPreferenceVersion = '1.1.1'
         architectureComponentsVersion = '2.2.0'
-        daggerVersion = '2.29.1'
+        daggerVersion = '2.30.1'
         okhttpVersion = '3.14.9'
         retrofitVersion = '2.9.0'
         gsonVersion = '2.8.6'
@@ -65,7 +65,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:4.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
     }
