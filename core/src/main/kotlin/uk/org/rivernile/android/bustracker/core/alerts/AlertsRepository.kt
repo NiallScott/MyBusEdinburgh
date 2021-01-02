@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,12 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -41,12 +46,14 @@ import javax.inject.Singleton
  *
  * @param alertManager The [AlertManager] implementation.
  * @param alertsDao The DAO to access the alerts data store.
+ * @param timeUtils Used to access timestamp data.
  * @author Niall Scott
  */
 @Singleton
 class AlertsRepository @Inject internal constructor(
         private val alertManager: AlertManager,
-        private val alertsDao: AlertsDao) {
+        private val alertsDao: AlertsDao,
+        private val timeUtils: TimeUtils) {
 
     /**
      * Get a [Flow] which returns whether the given `stopCode` has an arrival alert set or not, and
@@ -96,6 +103,35 @@ class AlertsRepository @Inject internal constructor(
         awaitClose {
             alertsDao.removeOnAlertsChangedListener(listener)
         }
+    }
+
+    /**
+     * Add a new arrival alert.
+     *
+     * @param request The arrival alert to add.
+     */
+    suspend fun addArrivalAlert(request: ArrivalAlertRequest) {
+        val alert = ArrivalAlert(
+                0,
+                timeUtils.getCurrentTimeMillis(),
+                request.stopCode,
+                request.serviceNames,
+                request.timeTrigger)
+        alertManager.addArrivalAlert(alert)
+    }
+
+    /**
+     * Add a new proximity alert.
+     *
+     * @param request The proximity alert to add.
+     */
+    suspend fun addProximityAlert(request: ProximityAlertRequest) {
+        val alert = ProximityAlert(
+                0,
+                timeUtils.getCurrentTimeMillis(),
+                request.stopCode,
+                request.distanceFrom)
+        alertManager.addProximityAlert(alert)
     }
 
     /**

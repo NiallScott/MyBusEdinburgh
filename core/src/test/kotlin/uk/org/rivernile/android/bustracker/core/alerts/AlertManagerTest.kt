@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.inOrder
 import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,7 +38,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.CurrentThreadExecutor
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
@@ -66,24 +63,23 @@ class AlertManagerTest {
     private lateinit var arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher
     @Mock
     private lateinit var proximityAlertTaskLauncher: ProximityAlertTaskLauncher
-    private val backgroundExecutor = spy(CurrentThreadExecutor())
 
     private lateinit var alertManager: AlertManager
 
     @Before
     fun setUp() {
-        alertManager = AlertManager(alertsDao, arrivalAlertTaskLauncher,
-                proximityAlertTaskLauncher, backgroundExecutor)
+        alertManager = AlertManager(
+                alertsDao,
+                arrivalAlertTaskLauncher,
+                proximityAlertTaskLauncher)
     }
 
     @Test
-    fun addArrivalAlertRemovesOldAlertThenAddsNewAlertThenLaunchesTask() {
+    fun addArrivalAlertAddsAlertToDaoThenLaunchesTask() = coroutineRule.runBlockingTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
 
         alertManager.addArrivalAlert(arrivalAlert)
 
-        verify(backgroundExecutor)
-                .execute(any())
         inOrder(alertsDao, arrivalAlertTaskLauncher) {
             verify(alertsDao)
                     .addArrivalAlert(arrivalAlert)
@@ -109,13 +105,11 @@ class AlertManagerTest {
     }
 
     @Test
-    fun addProximityAlertRemovesOldAlertThenAddsNewAlertThenLaunchesTask() {
+    fun addProximityAlertAddsAlertToDaoThenLaunchesTask() = coroutineRule.runBlockingTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
 
         alertManager.addProximityAlert(proximityAlert)
 
-        verify(backgroundExecutor)
-                .execute(any())
         inOrder(alertsDao, proximityAlertTaskLauncher) {
             verify(alertsDao)
                     .addProximityAlert(proximityAlert)

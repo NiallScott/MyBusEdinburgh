@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -84,29 +84,31 @@ internal class AndroidAlertsDao @Inject constructor(
         }
     }
 
-    override fun addArrivalAlert(arrivalAlert: ArrivalAlert): Long {
-        val values = ContentValues().apply {
-            put(AlertsContract.TYPE, AlertsContract.ALERTS_TYPE_TIME)
-            put(AlertsContract.TIME_ADDED, arrivalAlert.timeAdded)
-            put(AlertsContract.STOP_CODE, arrivalAlert.stopCode)
-            put(AlertsContract.SERVICE_NAMES, arrivalAlert.serviceNames.joinToString(","))
-            put(AlertsContract.TIME_TRIGGER, arrivalAlert.timeTrigger)
+    override suspend fun addArrivalAlert(arrivalAlert: ArrivalAlert): Long =
+        withContext(ioDispatcher) {
+            val values = ContentValues().apply {
+                put(AlertsContract.TYPE, AlertsContract.ALERTS_TYPE_TIME)
+                put(AlertsContract.TIME_ADDED, arrivalAlert.timeAdded)
+                put(AlertsContract.STOP_CODE, arrivalAlert.stopCode)
+                put(AlertsContract.SERVICE_NAMES, arrivalAlert.serviceNames.joinToString(","))
+                put(AlertsContract.TIME_TRIGGER, arrivalAlert.timeTrigger)
+            }
+
+            context.contentResolver.insert(contract.getContentUri(), values)
+                    ?.let(ContentUris::parseId) ?: -1
         }
 
-        return context.contentResolver.insert(contract.getContentUri(), values)
-                ?.let(ContentUris::parseId)
-                ?: -1
-    }
+    override suspend fun addProximityAlert(proximityAlert: ProximityAlert) {
+        withContext(ioDispatcher) {
+            val values = ContentValues().apply {
+                put(AlertsContract.TYPE, AlertsContract.ALERTS_TYPE_PROXIMITY)
+                put(AlertsContract.TIME_ADDED, proximityAlert.timeAdded)
+                put(AlertsContract.STOP_CODE, proximityAlert.stopCode)
+                put(AlertsContract.DISTANCE_FROM, proximityAlert.distanceFrom)
+            }
 
-    override fun addProximityAlert(proximityAlert: ProximityAlert) {
-        val values = ContentValues().apply {
-            put(AlertsContract.TYPE, AlertsContract.ALERTS_TYPE_PROXIMITY)
-            put(AlertsContract.TIME_ADDED, proximityAlert.timeAdded)
-            put(AlertsContract.STOP_CODE, proximityAlert.stopCode)
-            put(AlertsContract.DISTANCE_FROM, proximityAlert.distanceFrom)
+            context.contentResolver.insert(contract.getContentUri(), values)
         }
-
-        context.contentResolver.insert(contract.getContentUri(), values)
     }
 
     override suspend fun removeArrivalAlert(id: Int) {

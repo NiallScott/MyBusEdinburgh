@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -39,6 +41,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -64,6 +68,8 @@ class AddProximityAlertDialogFragmentViewModelTest {
     private lateinit var busStopsRepository: BusStopsRepository
     @Mock
     private lateinit var uiStateCalculator: UiStateCalculator
+    @Mock
+    private lateinit var alertsRepository: AlertsRepository
 
     private lateinit var viewModel: AddProximityAlertDialogFragmentViewModel
 
@@ -72,6 +78,8 @@ class AddProximityAlertDialogFragmentViewModelTest {
         viewModel = AddProximityAlertDialogFragmentViewModel(
                 busStopsRepository,
                 uiStateCalculator,
+                alertsRepository,
+                coroutineRule,
                 coroutineRule.testDispatcher)
     }
 
@@ -306,5 +314,35 @@ class AddProximityAlertDialogFragmentViewModelTest {
         locationSettingsObserver.assertEmpty()
         requestLocationPermissionObserver.assertEmpty()
         showAppSettingsObserver.assertValues(null)
+    }
+
+    @Test
+    fun handleAddClickedDoesNotAddAlertWhenStopCodeIsNull() = coroutineRule.runBlockingTest {
+        viewModel.stopCode = null
+
+        viewModel.handleAddClicked(250)
+
+        verify(alertsRepository, never())
+                .addProximityAlert(any())
+    }
+
+    @Test
+    fun handleAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = coroutineRule.runBlockingTest {
+        viewModel.stopCode = ""
+
+        viewModel.handleAddClicked(250)
+
+        verify(alertsRepository, never())
+                .addProximityAlert(any())
+    }
+
+    @Test
+    fun handleAddClickedAddsAlertWhenStopCodeIsPopulated() = coroutineRule.runBlockingTest {
+        viewModel.stopCode = "123456"
+
+        viewModel.handleAddClicked(250)
+
+        verify(alertsRepository)
+                .addProximityAlert(ProximityAlertRequest("123456", 250))
     }
 }

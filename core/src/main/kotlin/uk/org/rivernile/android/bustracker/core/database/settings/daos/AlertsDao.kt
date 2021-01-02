@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,14 +56,14 @@ interface AlertsDao {
      * @param arrivalAlert The alert to add.
      * @return The ID of the new added arrival alert.
      */
-    fun addArrivalAlert(arrivalAlert: ArrivalAlert): Long
+    suspend fun addArrivalAlert(arrivalAlert: ArrivalAlert): Long
 
     /**
      * Add a new proximity alert to the database.
      *
      * @param proximityAlert The alert to add.
      */
-    fun addProximityAlert(proximityAlert: ProximityAlert)
+    suspend fun addProximityAlert(proximityAlert: ProximityAlert)
 
     /**
      * Remove an arrival alert.

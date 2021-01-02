@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,8 +31,6 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertT
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
-import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
-import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,28 +40,22 @@ import javax.inject.Singleton
  * @param alertsDao The DAO to access user alerts.
  * @param arrivalAlertTaskLauncher Used to launch the arrival alert checker task.
  * @param proximityAlertTaskLauncher Used to launch the proximity alert checker task.
- * @param backgroundExecutor An [Executor] to execute background tasks on.
  * @author Niall Scott
  */
 @Singleton
 class AlertManager @Inject internal constructor(
         private val alertsDao: AlertsDao,
         private val arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher,
-        private val proximityAlertTaskLauncher: ProximityAlertTaskLauncher,
-        @ForShortBackgroundTasks private val backgroundExecutor: Executor) {
+        private val proximityAlertTaskLauncher: ProximityAlertTaskLauncher) {
 
     /**
      * Add a new arrival alert to be tracked.
      *
      * @param arrivalAlert The new [ArrivalAlert] to add.
      */
-    fun addArrivalAlert(arrivalAlert: ArrivalAlert) {
-        backgroundExecutor.execute {
-            // As we currently only allow one arrival alert at a time, the newly added alert
-            // overwrites any existing alerts. This may change going forwards.
-            alertsDao.addArrivalAlert(arrivalAlert)
-            arrivalAlertTaskLauncher.launchArrivalAlertTask()
-        }
+    suspend fun addArrivalAlert(arrivalAlert: ArrivalAlert) {
+        alertsDao.addArrivalAlert(arrivalAlert)
+        arrivalAlertTaskLauncher.launchArrivalAlertTask()
     }
 
     /**
@@ -87,11 +79,9 @@ class AlertManager @Inject internal constructor(
      *
      * @param proximityAlert The new [ProximityAlert] to add.
      */
-    fun addProximityAlert(proximityAlert: ProximityAlert) {
-        backgroundExecutor.execute {
-            alertsDao.addProximityAlert(proximityAlert)
-            proximityAlertTaskLauncher.launchProximityAlertTask()
-        }
+    suspend fun addProximityAlert(proximityAlert: ProximityAlert) {
+        alertsDao.addProximityAlert(proximityAlert)
+        proximityAlertTaskLauncher.launchProximityAlertTask()
     }
 
     /**

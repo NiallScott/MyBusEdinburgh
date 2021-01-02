@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,8 +36,6 @@ import androidx.annotation.NonNull;
 
 import androidx.core.content.ContextCompat;
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService;
-import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRunnerService;
-import uk.org.rivernile.android.bustracker.database.settings.loaders.AddProximityAlertTask;
 import uk.org.rivernile.android.bustracker.database.settings.loaders.AddTimeAlertTask;
 
 /**
@@ -59,14 +57,6 @@ public class AlertManagerImpl implements AlertManager {
     @Inject
     AlertManagerImpl(@NonNull final Context context) {
         this.context = context;
-    }
-
-    @Override
-    public void addProximityAlert(@NonNull final String stopCode,
-            @IntRange(from = 1) final int distance) {
-        AddProximityAlertTask.start(context, stopCode, distance);
-        final Intent intent = new Intent(context, ProximityAlertRunnerService.class);
-        ContextCompat.startForegroundService(context, intent);
     }
 
     @Override

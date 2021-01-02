@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,9 +44,9 @@ class FakeAlertsDao : AlertsDao {
 
     }
 
-    override fun addArrivalAlert(arrivalAlert: ArrivalAlert) = 0L
+    override suspend fun addArrivalAlert(arrivalAlert: ArrivalAlert) = 0L
 
-    override fun addProximityAlert(proximityAlert: ProximityAlert) {
+    override suspend fun addProximityAlert(proximityAlert: ProximityAlert) {
 
     }
 

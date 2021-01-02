@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,7 +38,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -58,6 +63,8 @@ class AlertsRepositoryTest {
     private lateinit var alertManager: AlertManager
     @Mock
     private lateinit var alertsDao: AlertsDao
+    @Mock
+    private lateinit var timeUtils: TimeUtils
 
     private lateinit var repository: AlertsRepository
 
@@ -65,7 +72,8 @@ class AlertsRepositoryTest {
     fun setUp() {
         repository = AlertsRepository(
                 alertManager,
-                alertsDao)
+                alertsDao,
+                timeUtils)
     }
 
     @Test
@@ -128,6 +136,33 @@ class AlertsRepositoryTest {
         observer.assertValues(false, true, false)
         verify(alertsDao)
                 .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun addArrivalAlertAddsArrivalAlertToAlertManager() = coroutineRule.runBlockingTest {
+        whenever(timeUtils.getCurrentTimeMillis())
+                .thenReturn(123L)
+        val expected = ArrivalAlert(0, 123L, "123456", listOf("1", "2", "3"), 5)
+
+        repository.addArrivalAlert(ArrivalAlertRequest(
+                "123456",
+                listOf("1", "2", "3"),
+                5))
+
+        verify(alertManager)
+                .addArrivalAlert(expected)
+    }
+
+    @Test
+    fun addProximityAlertAddsProximityAlertToAlertManager() = coroutineRule.runBlockingTest {
+        whenever(timeUtils.getCurrentTimeMillis())
+                .thenReturn(123L)
+        val expected = ProximityAlert(0, 123L, "123456", 250)
+
+        repository.addProximityAlert(ProximityAlertRequest("123456", 250))
+
+        verify(alertManager)
+                .addProximityAlert(expected)
     }
 
     @Test

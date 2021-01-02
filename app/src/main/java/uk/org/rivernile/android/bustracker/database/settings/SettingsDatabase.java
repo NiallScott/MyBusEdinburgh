@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
-import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
@@ -98,28 +97,6 @@ public final class SettingsDatabase {
             @NonNull @Size(min = 1) final String stopCode) {
         return context.getContentResolver().delete(SettingsContract.Favourites.CONTENT_URI,
                 SettingsContract.Favourites.STOP_CODE + " = ?", new String[] { stopCode });
-    }
-
-    /**
-     * Add a new proximity alert to the database.
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The code of the bus stop that this alert is set for.
-     * @param distance The distance from the bus stop to trigger the proximity alert.
-     * @return A {@link Uri} to the newly added row, as defined by
-     * {@link android.content.ContentResolver#insert(Uri, ContentValues)}.
-     */
-    @WorkerThread
-    @Nullable
-    public static Uri addProximityAlert(@NonNull final Context context,
-            @NonNull @Size(min = 1) final String stopCode, @IntRange(from = 1) final int distance) {
-        final ContentValues cv = new ContentValues();
-        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY);
-        cv.put(SettingsContract.Alerts.TIME_ADDED, System.currentTimeMillis());
-        cv.put(SettingsContract.Alerts.STOP_CODE, stopCode);
-        cv.put(SettingsContract.Alerts.DISTANCE_FROM, distance);
-
-        return context.getContentResolver().insert(SettingsContract.Alerts.CONTENT_URI, cv);
     }
 
     /**

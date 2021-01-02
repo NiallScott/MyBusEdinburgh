@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -98,7 +98,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun addArrivalAlertSendsThroughCorrectParametersForInsert() {
+    fun addArrivalAlertSendsThroughCorrectParametersForInsert() = coroutineRule.runBlockingTest {
         val expected = ContentValues().apply {
             put(AlertsContract.TYPE, AlertsContract.ALERTS_TYPE_TIME)
             put(AlertsContract.TIME_ADDED, 123L)
@@ -118,7 +118,7 @@ class AndroidAlertsDaoTest {
 
                 return ContentUris.withAppendedId(uri, 1)
             }
-       }.also(this::addMockProvider)
+       }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.addArrivalAlert(alert)
 
@@ -126,7 +126,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun addArrivalAlertHandlesSingleServiceNameCorrectly() {
+    fun addArrivalAlertHandlesSingleServiceNameCorrectly() = coroutineRule.runBlockingTest {
         val expected = ContentValues().apply {
             put(AlertsContract.TYPE, AlertsContract.ALERTS_TYPE_TIME)
             put(AlertsContract.TIME_ADDED, 123L)
@@ -146,7 +146,7 @@ class AndroidAlertsDaoTest {
 
                 return ContentUris.withAppendedId(uri, 1)
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.addArrivalAlert(alert)
 
@@ -154,7 +154,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun addProximityAlertSendsThroughCorrectParametersForInsert() {
+    fun addProximityAlertSendsThroughCorrectParametersForInsert() = coroutineRule.runBlockingTest {
         val expected = ContentValues().apply {
             put(AlertsContract.TYPE, AlertsContract.ALERTS_TYPE_PROXIMITY)
             put(AlertsContract.TIME_ADDED, 123L)
@@ -172,7 +172,7 @@ class AndroidAlertsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         alertsDao.addProximityAlert(alert)
     }
@@ -323,7 +323,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?", selection)
@@ -354,7 +354,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?", selection)
@@ -405,7 +405,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -435,7 +435,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -465,7 +465,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -495,7 +495,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -529,7 +529,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -581,7 +581,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -610,7 +610,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -641,7 +641,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -693,7 +693,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -721,7 +721,7 @@ class AndroidAlertsDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -773,7 +773,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -803,7 +803,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -837,7 +837,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -889,7 +889,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -917,7 +917,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ?", selection)
@@ -973,7 +973,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
@@ -1004,7 +1004,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
@@ -1036,7 +1036,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
@@ -1094,7 +1094,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
@@ -1126,7 +1126,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
@@ -1158,7 +1158,7 @@ class AndroidAlertsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -121,30 +121,6 @@ public class SettingsDatabaseTests {
         });
 
         SettingsDatabase.deleteFavouriteStop(mockContext, "123456");
-    }
-
-    /**
-     * Test that adding a proximity alert passes the data through correctly to the
-     * {@link android.content.ContentProvider}.
-     */
-    @Test
-    public void testAddProximityAlert() {
-        mockContentResolver.addProvider(SettingsContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public Uri insert(final Uri uri, final ContentValues values) {
-                assertEquals(SettingsContract.Alerts.CONTENT_URI, uri);
-                assertEquals(4, values.size());
-                assertEquals(SettingsContract.Alerts.ALERTS_TYPE_PROXIMITY,
-                        (int) values.getAsInteger(SettingsContract.Alerts.TYPE));
-                assertTrue(values.getAsLong(SettingsContract.Alerts.TIME_ADDED) > 0);
-                assertEquals("123456", values.getAsString(SettingsContract.Alerts.STOP_CODE));
-                assertEquals(5, (int) values.getAsInteger(SettingsContract.Alerts.DISTANCE_FROM));
-
-                return ContentUris.withAppendedId(uri, 1);
-            }
-        });
-
-        SettingsDatabase.addProximityAlert(mockContext, "123456", 5);
     }
 
     /**

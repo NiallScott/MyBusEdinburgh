@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,22 +38,6 @@ import androidx.annotation.Size;
  * @deprecated This is currently being re-written.
  */
 public interface AlertManager {
-
-    /**
-     * Add a new proximity alert. A proximity alert is fired when the device is within the number of
-     * meters specified by {@code distance} from the bus stop specified by {@code stopCode}.
-     *
-     * <p>
-     *     Currently only 1 proximity alert at a time is supported. If this method is called and
-     *     there is already a proximity alert active, then it wil be removed and this one will be
-     *     added.
-     * </p>
-     *
-     * @param stopCode The bus stop to be notified when in proximity of.
-     * @param distance The maximum distance to be away from the bus stop before the alert is fired.
-     */
-    void addProximityAlert(@NonNull @Size(min = 1) String stopCode,
-            @IntRange(from = 1) int distance);
 
     /**
      * Add a new time alert. A time alert is fired when any of the services specified by

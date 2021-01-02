@@ -33,6 +33,7 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,9 +43,13 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -54,6 +59,8 @@ import javax.inject.Inject
  *
  * @param busStopsRepository Used to get stop details.
  * @param uiStateCalculator Used to calculate the current [UiState].
+ * @param alertsRepository Used to add the proximity alert.
+ * @param globalCoroutineScope The [CoroutineScope] to add the alert under.
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -61,6 +68,8 @@ import javax.inject.Inject
 class AddProximityAlertDialogFragmentViewModel @Inject constructor(
         private val busStopsRepository: BusStopsRepository,
         private val uiStateCalculator: UiStateCalculator,
+        private val alertsRepository: AlertsRepository,
+        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     /**
@@ -164,7 +173,13 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
      * proximity alert.
      */
     fun handleAddClicked(meters: Int) {
-        // TODO: implement adding the actual alert.
+        stopCode?.ifEmpty { null }?.let {
+            // Uses the global CoroutineScope as the Dialog dismisses immediately, and we need
+            // this task to finish. Fire and forget is fine here.
+            globalCoroutineScope.launch(defaultDispatcher) {
+                alertsRepository.addProximityAlert(ProximityAlertRequest(it, meters))
+            }
+        }
     }
 
     /**
