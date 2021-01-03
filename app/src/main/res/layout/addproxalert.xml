@@ -29,13 +29,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/padding_double">
 
     <uk.org.rivernile.android.bustracker.core.widget.ContentView
         android:id="@+id/contentView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding_double"
+        android:layout_marginStart="@dimen/dialog_margin_start_end"
+        android:layout_marginEnd="@dimen/dialog_margin_start_end"
         app:progressView="@id/progress"
         app:contentView="@id/layoutContent"
         app:errorView="@id/layoutError"
