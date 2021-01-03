@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.settings
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -44,15 +45,14 @@ class ClearSearchHistoryDialogFragment : DialogFragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    private lateinit var viewModel: ClearSearchHistoryDialogFragmentViewModel
+    private val viewModel: ClearSearchHistoryDialogFragmentViewModel by viewModels {
+        viewModelFactory
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
 
         super.onCreate(savedInstanceState)
-
-        viewModel = ViewModelProvider(this, viewModelFactory)
-                .get(ClearSearchHistoryDialogFragmentViewModel::class.java)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =

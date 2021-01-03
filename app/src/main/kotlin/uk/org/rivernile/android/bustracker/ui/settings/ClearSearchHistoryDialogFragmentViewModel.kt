@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,27 +27,32 @@
 package uk.org.rivernile.android.bustracker.ui.settings
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
-import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
-import java.util.concurrent.Executor
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
 import javax.inject.Inject
 
 /**
  * This is a [ViewModel] for use with [ClearSearchHistoryDialogFragment].
  *
  * @param searchHistoryDao The DAO to access the user's search history.
- * @param backgroundExecutor An [Executor] to run background tasks on.
+ * @param globalCoroutineScope The global [CoroutineScope].
+ * @param defaultDispatcher The default [CoroutineDispatcher] to dispatch on.
  * @author Niall Scott
  */
 class ClearSearchHistoryDialogFragmentViewModel @Inject constructor(
         private val searchHistoryDao: SearchHistoryDao,
-        @ForShortBackgroundTasks private val backgroundExecutor: Executor): ViewModel() {
+        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher): ViewModel() {
 
     /**
      * This is called when the user has confirmed they wish to clear their search history.
      */
     fun onUserConfirmClearSearchHistory() {
-        backgroundExecutor.execute {
+        globalCoroutineScope.launch(defaultDispatcher) {
             searchHistoryDao.clearSearchHistory()
         }
     }

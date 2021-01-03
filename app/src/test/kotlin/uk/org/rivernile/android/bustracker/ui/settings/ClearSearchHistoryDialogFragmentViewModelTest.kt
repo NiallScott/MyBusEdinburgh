@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,42 +26,48 @@
 
 package uk.org.rivernile.android.bustracker.ui.settings
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.CurrentThreadExecutor
 import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [ClearSearchHistoryDialogFragmentViewModel].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class ClearSearchHistoryDialogFragmentViewModelTest {
 
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
     @Mock
     private lateinit var searchHistoryDao: SearchHistoryDao
-    private val backgroundExecutor = spy(CurrentThreadExecutor())
 
     private lateinit var viewModel: ClearSearchHistoryDialogFragmentViewModel
 
     @Before
     fun setUp() {
-        viewModel = ClearSearchHistoryDialogFragmentViewModel(searchHistoryDao, backgroundExecutor)
+        viewModel = ClearSearchHistoryDialogFragmentViewModel(
+                searchHistoryDao,
+                coroutineRule,
+                coroutineRule.testDispatcher)
     }
 
     @Test
-    fun onUserConfirmClearSearchHistoryClearsHistoryOnBackgroundThread() {
+    fun onUserConfirmClearSearchHistoryClearsHistoryOnBackgroundThread() =
+            coroutineRule.runBlockingTest {
         viewModel.onUserConfirmClearSearchHistory()
 
-        verify(backgroundExecutor)
-                .execute(any())
         verify(searchHistoryDao)
                 .clearSearchHistory()
     }

@@ -44,7 +44,6 @@ import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
@@ -57,8 +56,6 @@ import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChec
 import uk.org.rivernile.android.bustracker.core.permission.PermissionChecker
 import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import javax.inject.Provider
 import javax.inject.Singleton
 
@@ -127,16 +124,6 @@ class CoreModule {
             LegacyConnectivityChecker(context.get(), connectivityManager)
         }
     }
-
-    /**
-     * Provide an [Executor] for performing short background tasks on.
-     *
-     * @return An [Executor] for performing short background tasks on.
-     */
-    @Provides
-    @Singleton
-    @ForShortBackgroundTasks
-    internal fun provideShortBackgroundTasksExecutor(): Executor = Executors.newCachedThreadPool()
 
     /**
      * Provide the [GlobalScope] as a [CoroutineScope].

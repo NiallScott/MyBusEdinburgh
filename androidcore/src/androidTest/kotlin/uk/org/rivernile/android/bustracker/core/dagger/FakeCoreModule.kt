@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,31 +37,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
-import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import javax.inject.Singleton
 
 /**
  * A module for providing fake implementations of core module resources.
  *
- * @param backgroundExecutor An alternative background [Executor] instance. Defaults to
- * [Executors.newCachedThreadPool].
+ * @param globalCoroutineScope The instance of [CoroutineScope] to represent the global scope.
+ * @param defaultDispatcher The [CoroutineDispatcher] to use to represent the default dispatcher.
  * @author Niall Scott
  */
 @Module(includes = [
     FakeCoreModule.Bindings::class
 ])
 class FakeCoreModule(
-        private val backgroundExecutor: Executor = Executors.newCachedThreadPool(),
         @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope = GlobalScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher =
                 Dispatchers.Default) {
-
-    @Provides
-    @Singleton
-    @ForShortBackgroundTasks
-    fun provideBackgroundExecutor() = backgroundExecutor
 
     @Provides
     @Singleton

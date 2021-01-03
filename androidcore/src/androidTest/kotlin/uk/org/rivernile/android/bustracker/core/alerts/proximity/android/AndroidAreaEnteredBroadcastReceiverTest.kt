@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.CurrentThreadExecutor
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.GeofencingManager
 import uk.org.rivernile.android.bustracker.core.assistInject
@@ -70,7 +69,6 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     private lateinit var geofencingManager: GeofencingManager
     @Mock
     private lateinit var notificationDispatcher: AlertNotificationDispatcher
-    private val currentThreadExecutor = CurrentThreadExecutor()
 
     private lateinit var receiver: AndroidAreaEnteredBroadcastReceiver
 
@@ -80,7 +78,6 @@ class AndroidAreaEnteredBroadcastReceiverTest {
                 geofencingManager = geofencingManager,
                 alertNotificationDispatcher = notificationDispatcher)
         val coreModule = FakeCoreModule(
-                backgroundExecutor = currentThreadExecutor,
                 globalCoroutineScope = coroutineRule,
                 defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
