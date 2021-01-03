@@ -33,6 +33,9 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Arriv
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.supervisorScope
 
 /**
  * This is the Alert Manager, where user-added alerts are controlled from.
@@ -103,13 +106,19 @@ class AlertManager @Inject internal constructor(
     /**
      * Ensure that tasks required to fulfil alerts are running.
      */
-    fun ensureTasksRunningIfAlertsExists() {
-        if (alertsDao.getArrivalAlertCount() > 0) {
-            arrivalAlertTaskLauncher.launchArrivalAlertTask()
+    suspend fun ensureTasksRunningIfAlertsExists() = supervisorScope {
+        val arrivalAlertTask = async {
+            if (alertsDao.getArrivalAlertCount() > 0) {
+                arrivalAlertTaskLauncher.launchArrivalAlertTask()
+            }
         }
 
-        if (alertsDao.getProximityAlertCount() > 0) {
-            proximityAlertTaskLauncher.launchProximityAlertTask()
+        val proximityAlertTask = async {
+            if (alertsDao.getProximityAlertCount() > 0) {
+                proximityAlertTaskLauncher.launchProximityAlertTask()
+            }
         }
+
+        awaitAll(arrivalAlertTask, proximityAlertTask)
     }
 }

@@ -660,7 +660,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getArrivalAlertCountReturnsZeroWhenCursorIsNull() {
+    fun getArrivalAlertCountReturnsZeroWhenCursorIsNull() = coroutineRule.runBlockingTest {
         val expectedProjection = arrayOf(AlertsContract.COUNT)
         object : MockContentProvider() {
             override fun query(uri: Uri,
@@ -677,7 +677,7 @@ class AndroidAlertsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getArrivalAlertCount()
 
@@ -685,7 +685,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getArrivalAlertCountReturnsZeroWhenCursorIsEmpty() {
+    fun getArrivalAlertCountReturnsZeroWhenCursorIsEmpty() = coroutineRule.runBlockingTest {
         val expectedProjection = arrayOf(AlertsContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -703,7 +703,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getArrivalAlertCount()
 
@@ -712,7 +712,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getArrivalAlertCountReturnsValueWhenCursorIsPopulated() {
+    fun getArrivalAlertCountReturnsValueWhenCursorIsPopulated() = coroutineRule.runBlockingTest {
         val expectedProjection = arrayOf(AlertsContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(5))
@@ -731,7 +731,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getArrivalAlertCount()
 
@@ -856,7 +856,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getProximityAlertCountReturnsZeroWhenCursorIsNull() {
+    fun getProximityAlertCountReturnsZeroWhenCursorIsNull() = coroutineRule.runBlockingTest {
         val expectedProjection = arrayOf(AlertsContract.COUNT)
         object : MockContentProvider() {
             override fun query(uri: Uri,
@@ -873,7 +873,7 @@ class AndroidAlertsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getProximityAlertCount()
 
@@ -881,7 +881,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getProximityAlertCountReturnsZeroWhenCursorIsEmpty() {
+    fun getProximityAlertCountReturnsZeroWhenCursorIsEmpty() = coroutineRule.runBlockingTest {
         val expectedProjection = arrayOf(AlertsContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -899,7 +899,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getProximityAlertCount()
 
@@ -908,7 +908,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getProximityAlertCountReturnsValueWhenCursorIsPopulated() {
+    fun getProximityAlertCountReturnsValueWhenCursorIsPopulated() = coroutineRule.runBlockingTest {
         val expectedProjection = arrayOf(AlertsContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(5))
@@ -927,7 +927,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getProximityAlertCount()
 

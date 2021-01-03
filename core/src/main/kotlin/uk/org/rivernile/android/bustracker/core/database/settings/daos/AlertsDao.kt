@@ -130,7 +130,7 @@ interface AlertsDao {
      *
      * @return The number of current arrival alerts.
      */
-    fun getArrivalAlertCount(): Int
+    suspend fun getArrivalAlertCount(): Int
 
     /**
      * Get all the proximity alerts.
@@ -144,7 +144,7 @@ interface AlertsDao {
      *
      * @return The number of current proximity alerts.
      */
-    fun getProximityAlertCount(): Int
+    suspend fun getProximityAlertCount(): Int
 
     /**
      * Does the given `stopCode` have an arrival alert set?

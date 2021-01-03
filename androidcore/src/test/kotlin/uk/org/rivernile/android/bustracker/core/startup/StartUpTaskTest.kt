@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,24 +27,32 @@
 package uk.org.rivernile.android.bustracker.core.startup
 
 import com.nhaarman.mockitokotlin2.inOrder
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Assert.assertTrue
+import org.junit.Rule
 
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.CurrentThreadExecutor
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.backup.BackupObserver
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [StartUpTask].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class StartUpTaskTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var appNotificationChannels: AppNotificationChannels
@@ -56,17 +64,17 @@ class StartUpTaskTest {
     private lateinit var cleanUpTask: CleanUpTask
     @Mock
     private lateinit var alertManager: AlertManager
-    private val executor = CurrentThreadExecutor()
 
     @Test
-    fun performsStartUpTasks() {
+    fun performsStartUpTasks() = coroutineRule.runBlockingTest {
         val startUpTask = StartUpTask(
                 appNotificationChannels,
                 backupObserver,
                 busStopDatabaseJobScheduler,
                 cleanUpTask,
                 alertManager,
-                executor)
+                coroutineRule,
+                coroutineRule.testDispatcher)
 
         startUpTask.performStartUpTasks()
 
@@ -93,8 +101,11 @@ class StartUpTaskTest {
                 busStopDatabaseJobScheduler,
                 null,
                 alertManager,
-                executor)
+                coroutineRule,
+                coroutineRule.testDispatcher)
 
         startUpTask.performStartUpTasks()
+
+        assertTrue(coroutineRule.uncaughtExceptions.isEmpty())
     }
 }

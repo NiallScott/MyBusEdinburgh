@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,12 +34,16 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
@@ -48,6 +52,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class TimeAlertRunnerTest {
 
@@ -55,6 +60,9 @@ class TimeAlertRunnerTest {
 
         private const val CHECK_TIMES_INTERVAL_SECS = 60L
     }
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var checkTimesTask: CheckTimesTask
@@ -129,7 +137,7 @@ class TimeAlertRunnerTest {
     }
 
     @Test
-    fun onAlertsChangedWithNonZeroCountDoesNotStopRunner() {
+    fun onAlertsChangedWithNonZeroCountDoesNotStopRunner() = coroutineRule.runBlockingTest {
         doAnswer {
             val runnable = it.getArgument<Runnable>(0)
             runnable.run()
@@ -151,7 +159,7 @@ class TimeAlertRunnerTest {
     }
 
     @Test
-    fun onAlertsChangedWithZeroCountStopsRunner() {
+    fun onAlertsChangedWithZeroCountStopsRunner() = coroutineRule.runBlockingTest {
         doAnswer {
             val runnable = it.getArgument<Runnable>(0)
             runnable.run()

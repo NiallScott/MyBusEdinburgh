@@ -283,24 +283,38 @@ internal class AndroidAlertsDao @Inject constructor(
         }
     }
 
-    override fun getArrivalAlertCount() = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    AlertsContract.COUNT),
-            "${AlertsContract.TYPE} = ?",
-            arrayOf(
-                    AlertsContract.ALERTS_TYPE_TIME.toString()),
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
+    override suspend fun getArrivalAlertCount(): Int {
+        val cancellationSignal = CancellationSignal()
 
-        if (it.moveToFirst()) {
-            val countColumn = it.getColumnIndex(AlertsContract.COUNT)
-            it.getInt(countColumn)
-        } else {
-            0
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(AlertsContract.COUNT),
+                        "${AlertsContract.TYPE} = ?",
+                        arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
+
+                            if (it.moveToFirst()) {
+                                val countColumn = it.getColumnIndex(AlertsContract.COUNT)
+                                it.getInt(countColumn)
+                            } else {
+                                0
+                            }
+                        } ?: 0
+
+                continuation.resume(result)
+            }
         }
-    } ?: 0
+    }
 
     override fun getAllProximityAlerts() = context.contentResolver.query(
             contract.getContentUri(),
@@ -341,24 +355,38 @@ internal class AndroidAlertsDao @Inject constructor(
         }
     }
 
-    override fun getProximityAlertCount() = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    AlertsContract.COUNT),
-            "${AlertsContract.TYPE} = ?",
-            arrayOf(
-                    AlertsContract.ALERTS_TYPE_PROXIMITY.toString()),
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
+    override suspend fun getProximityAlertCount(): Int {
+        val cancellationSignal = CancellationSignal()
 
-        if (it.moveToFirst()) {
-            val countColumn = it.getColumnIndex(AlertsContract.COUNT)
-            it.getInt(countColumn)
-        } else {
-            0
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(AlertsContract.COUNT),
+                        "${AlertsContract.TYPE} = ?",
+                        arrayOf(AlertsContract.ALERTS_TYPE_PROXIMITY.toString()),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
+
+                            if (it.moveToFirst()) {
+                                val countColumn = it.getColumnIndex(AlertsContract.COUNT)
+                                it.getInt(countColumn)
+                            } else {
+                                0
+                            }
+                        } ?: 0
+
+                continuation.resume(result)
+            }
         }
-    } ?: 0
+    }
 
     override suspend fun hasArrivalAlert(stopCode: String): Boolean {
         val cancellationSignal = CancellationSignal()

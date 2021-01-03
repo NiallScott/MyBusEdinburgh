@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,12 +30,14 @@ import android.content.Intent
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.CurrentThreadExecutor
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.assistInject
@@ -44,14 +46,19 @@ import uk.org.rivernile.android.bustracker.core.dagger.FakeCoreModule
 import uk.org.rivernile.android.bustracker.core.dagger.FakeSettingsDatabaseModule
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.getApplication
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [DeviceBootBroadcastReceiver].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class DeviceBootBroadcastReceiverTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var alertsDao: AlertsDao
@@ -59,7 +66,6 @@ class DeviceBootBroadcastReceiverTest {
     private lateinit var arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher
     @Mock
     private lateinit var proximityAlertTaskLauncher: ProximityAlertTaskLauncher
-    private val currentThreadExecutor = CurrentThreadExecutor()
 
     private lateinit var receiver: DeviceBootBroadcastReceiver
 
@@ -68,7 +74,9 @@ class DeviceBootBroadcastReceiverTest {
         val alertsModule = FakeAlertsModule(
                 arrivalAlertTaskLauncher = arrivalAlertTaskLauncher,
                 proximityAlertTaskLauncher = proximityAlertTaskLauncher)
-        val coreModule = FakeCoreModule(currentThreadExecutor)
+        val coreModule = FakeCoreModule(
+                globalCoroutineScope = coroutineRule,
+                defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
 
         assistInject(
@@ -81,7 +89,7 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithoutActionDoesNotExecute() {
+    fun invokingBroadcastReceiverWithoutActionDoesNotExecute() = coroutineRule.runBlockingTest {
         givenArrivalAlertCount(1)
         givenProximityAlertCount(1)
         val context = getApplication()
@@ -96,7 +104,8 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithoutBootCompletedActionDoesNotExecute() {
+    fun invokingBroadcastReceiverWithoutBootCompletedActionDoesNotExecute() =
+            coroutineRule.runBlockingTest {
         givenArrivalAlertCount(1)
         givenProximityAlertCount(1)
         val context = getApplication()
@@ -112,7 +121,8 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithNoArrivalAlertsDoesNotStartArrivalAlertTask() {
+    fun invokingBroadcastReceiverWithNoArrivalAlertsDoesNotStartArrivalAlertTask() =
+            coroutineRule.runBlockingTest {
         givenArrivalAlertCount(0)
         givenProximityAlertCount(1)
         val context = getApplication()
@@ -126,7 +136,8 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithNoProximityAlertsDoesNotStartArrivalAlertTask() {
+    fun invokingBroadcastReceiverWithNoProximityAlertsDoesNotStartArrivalAlertTask() =
+            coroutineRule.runBlockingTest {
         givenArrivalAlertCount(1)
         givenProximityAlertCount(0)
         val context = getApplication()
@@ -140,7 +151,8 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithArrivalAlertDoesStartArrivalAlertTask() {
+    fun invokingBroadcastReceiverWithArrivalAlertDoesStartArrivalAlertTask() =
+            coroutineRule.runBlockingTest {
         givenArrivalAlertCount(1)
         givenProximityAlertCount(0)
         val context = getApplication()
@@ -154,7 +166,8 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithProximityAlertDoesStartArrivalAlertTask() {
+    fun invokingBroadcastReceiverWithProximityAlertDoesStartArrivalAlertTask() =
+            coroutineRule.runBlockingTest {
         givenArrivalAlertCount(0)
         givenProximityAlertCount(1)
         val context = getApplication()
@@ -167,12 +180,12 @@ class DeviceBootBroadcastReceiverTest {
                 .launchProximityAlertTask()
     }
 
-    private fun givenArrivalAlertCount(count: Int) {
+    private suspend fun givenArrivalAlertCount(count: Int) {
         whenever(alertsDao.getArrivalAlertCount())
                 .thenReturn(count)
     }
 
-    private fun givenProximityAlertCount(count: Int) {
+    private suspend fun givenProximityAlertCount(count: Int) {
         whenever(alertsDao.getProximityAlertCount())
                 .thenReturn(count)
     }

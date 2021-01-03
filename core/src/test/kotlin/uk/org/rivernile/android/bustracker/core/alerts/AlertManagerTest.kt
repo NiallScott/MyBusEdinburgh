@@ -135,8 +135,11 @@ class AlertManagerTest {
     }
 
     @Test
-    fun ensureTasksRunningIfAlertsExistDoesNotStartArrivalTaskWhenCountIsZero() {
+    fun ensureTasksRunningIfAlertsExistDoesNotStartArrivalTaskWhenCountIsZero() =
+            coroutineRule.runBlockingTest {
         whenever(alertsDao.getArrivalAlertCount())
+                .thenReturn(0)
+        whenever(alertsDao.getProximityAlertCount())
                 .thenReturn(0)
 
         alertManager.ensureTasksRunningIfAlertsExists()
@@ -146,9 +149,12 @@ class AlertManagerTest {
     }
 
     @Test
-    fun ensureTasksRunningIfAlertsExistStartsArrivalTaskWhenCountIsGreaterThanZero() {
+    fun ensureTasksRunningIfAlertsExistStartsArrivalTaskWhenCountIsGreaterThanZero() =
+            coroutineRule.runBlockingTest {
         whenever(alertsDao.getArrivalAlertCount())
                 .thenReturn(1)
+        whenever(alertsDao.getProximityAlertCount())
+                .thenReturn(0)
 
         alertManager.ensureTasksRunningIfAlertsExists()
 
@@ -157,8 +163,11 @@ class AlertManagerTest {
     }
 
     @Test
-    fun ensureTasksRunningIfAlertsExistDoesNotStartProximityTaskWhenCountIsZero() {
+    fun ensureTasksRunningIfAlertsExistDoesNotStartProximityTaskWhenCountIsZero() =
+            coroutineRule.runBlockingTest {
         whenever(alertsDao.getProximityAlertCount())
+                .thenReturn(0)
+        whenever(alertsDao.getArrivalAlertCount())
                 .thenReturn(0)
 
         alertManager.ensureTasksRunningIfAlertsExists()
@@ -168,9 +177,12 @@ class AlertManagerTest {
     }
 
     @Test
-    fun ensureTasksRunningIfAlertsExistStartsProximityTaskWhenCountIsGreaterThanZero() {
+    fun ensureTasksRunningIfAlertsExistStartsProximityTaskWhenCountIsGreaterThanZero() =
+            coroutineRule.runBlockingTest {
         whenever(alertsDao.getProximityAlertCount())
                 .thenReturn(1)
+        whenever(alertsDao.getArrivalAlertCount())
+                .thenReturn(0)
 
         alertManager.ensureTasksRunningIfAlertsExists()
 

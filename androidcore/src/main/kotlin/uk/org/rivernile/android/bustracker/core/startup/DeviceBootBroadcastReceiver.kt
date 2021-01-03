@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,9 +30,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import dagger.android.AndroidInjection
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
-import uk.org.rivernile.android.bustracker.core.di.ForShortBackgroundTasks
-import java.util.concurrent.Executor
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
 import javax.inject.Inject
 
 /**
@@ -45,13 +48,19 @@ class DeviceBootBroadcastReceiver : BroadcastReceiver() {
     @Inject
     lateinit var alertManager: AlertManager
     @Inject
-    @ForShortBackgroundTasks
-    lateinit var backgroundExecutor: Executor
+    @ForGlobalCoroutineScope
+    lateinit var globalCoroutineScope: CoroutineScope
+    @Inject
+    @ForDefaultDispatcher
+    lateinit var defaultDispatcher: CoroutineDispatcher
 
     override fun onReceive(context: Context, intent: Intent) {
         if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
             AndroidInjection.inject(this, context)
-            backgroundExecutor.execute(alertManager::ensureTasksRunningIfAlertsExists)
+
+            globalCoroutineScope.launch(defaultDispatcher) {
+                alertManager.ensureTasksRunningIfAlertsExists()
+            }
         }
     }
 }

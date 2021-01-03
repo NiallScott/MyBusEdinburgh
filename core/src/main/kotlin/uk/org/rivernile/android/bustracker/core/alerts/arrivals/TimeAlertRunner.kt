@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
+import kotlinx.coroutines.runBlocking
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
 import java.util.concurrent.ScheduledExecutorService
@@ -95,8 +96,11 @@ class TimeAlertRunner @Inject internal constructor(
      * ourselves.
      */
     private fun checkAlertCount() {
-        if (alertsDao.getArrivalAlertCount() <= 0) {
-            stop()
+        // TODO: re-write with coroutines.
+        runBlocking {
+            if (alertsDao.getArrivalAlertCount() <= 0) {
+                stop()
+            }
         }
     }
 
