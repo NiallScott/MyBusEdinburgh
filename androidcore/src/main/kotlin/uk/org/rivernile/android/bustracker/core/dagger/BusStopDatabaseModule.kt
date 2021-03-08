@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,9 +35,11 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopD
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidBusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidDatabaseInformationDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidServiceStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidServicesDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServiceStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServicesDao
 import javax.inject.Singleton
 
@@ -85,5 +87,9 @@ internal class BusStopDatabaseModule {
         @Suppress("unused")
         @Binds
         fun bindServicesDao(androidServicesDao: AndroidServicesDao): ServicesDao
+
+        @Suppress("unused")
+        @Binds
+        fun bindServiceStopsDao(androidServiceStopsDao: AndroidServiceStopsDao): ServiceStopsDao
     }
 }

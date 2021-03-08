@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,8 +27,6 @@ package uk.org.rivernile.android.bustracker.dagger
 
 import dagger.Binds
 import dagger.Module
-import uk.org.rivernile.android.bustracker.alerts.AlertManager
-import uk.org.rivernile.android.bustracker.alerts.AlertManagerImpl
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.features.StopMapFeatureAvailabilityProvider
 import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
@@ -50,10 +48,6 @@ import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilit
     ViewModelModule::class
 ])
 interface ApplicationModule {
-
-    @Suppress("unused")
-    @Binds
-    fun bindAlertManager(alertManagerImpl: AlertManagerImpl): AlertManager
 
     @Suppress("unused")
     @Binds

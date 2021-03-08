@@ -441,6 +441,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addtimealertdialog_button_add">Add</string>
     <string name="addtimealertdialog_button_limitations">Show limitations</string>
     <string name="addtimealertdialog_services_chooser_dialog_title">Select service(s)</string>
+    <string name="addtimealertdialog_error_no_stop_code">No stop code has been supplied</string>
+    <string name="addtimealertdialog_error_no_services">There are no known services for stop %s</string>
 
     <!--
     ************************************************

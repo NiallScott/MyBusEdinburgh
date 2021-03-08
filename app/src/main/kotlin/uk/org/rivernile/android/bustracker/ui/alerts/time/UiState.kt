@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,39 +26,28 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.time
 
-import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.DialogFragment
-import uk.org.rivernile.edinburghbustracker.android.R
-
 /**
- * This [DialogFragment] shows the user some disclaimer text regarding the time alert feature in the
- * application.
+ * This is the enumeration of possible top-level UI states for
+ * [AddTimeAlertDialogFragmentViewModel].
  *
  * @author Niall Scott
  */
-class TimeLimitationsDialogFragment : DialogFragment() {
+enum class UiState {
 
-    companion object {
-
-        /**
-         * Create a new instance of [TimeLimitationsDialogFragment].
-         *
-         * @return A new instance of [TimeLimitationsDialogFragment].
-         */
-        fun newInstance() = TimeLimitationsDialogFragment()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        isCancelable = true
-    }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?) =
-            AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.timelimitationsdialog_title)
-                    .setMessage(R.string.timelimitationsdialog_message)
-                    .setNegativeButton(R.string.close, null)
-                    .create()
+    /**
+     * There was no stop code set.
+     */
+    ERROR_NO_STOP_CODE,
+    /**
+     * There are no known services for the stop.
+     */
+    ERROR_NO_SERVICES,
+    /**
+     * Show progress while required content is loading.
+     */
+    PROGRESS,
+    /**
+     * Show the content layout.
+     */
+    CONTENT
 }

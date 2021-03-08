@@ -129,7 +129,7 @@ class AndroidBusStopsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
@@ -159,7 +159,7 @@ class AndroidBusStopsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
@@ -189,7 +189,7 @@ class AndroidBusStopsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
@@ -219,7 +219,7 @@ class AndroidBusStopsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
@@ -274,7 +274,7 @@ class AndroidBusStopsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
@@ -303,7 +303,7 @@ class AndroidBusStopsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
@@ -356,7 +356,7 @@ class AndroidBusStopsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)
@@ -384,7 +384,7 @@ class AndroidBusStopsDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${BusStopsContract.STOP_CODE} = ?", selection)

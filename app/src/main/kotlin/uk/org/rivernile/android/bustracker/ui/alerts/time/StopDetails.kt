@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,39 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.time
 
-import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.DialogFragment
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 
 /**
- * This [DialogFragment] shows the user some disclaimer text regarding the time alert feature in the
- * application.
+ * This class describes stop details shown in the arrival alert dialog.
  *
+ * @property stopCode The stop code these details relate to.
+ * @property stopName The display name details for the stop.
  * @author Niall Scott
  */
-class TimeLimitationsDialogFragment : DialogFragment() {
-
-    companion object {
-
-        /**
-         * Create a new instance of [TimeLimitationsDialogFragment].
-         *
-         * @return A new instance of [TimeLimitationsDialogFragment].
-         */
-        fun newInstance() = TimeLimitationsDialogFragment()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        isCancelable = true
-    }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?) =
-            AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.timelimitationsdialog_title)
-                    .setMessage(R.string.timelimitationsdialog_message)
-                    .setNegativeButton(R.string.close, null)
-                    .create()
-}
+data class StopDetails(
+        val stopCode: String,
+        val stopName: StopName?)

@@ -209,7 +209,7 @@ internal class AndroidBusStopsDao @Inject constructor(
     }
 
     /**
-     * For all of the currently registers listeners, dispatch an alert change to them.
+     * For all of the currently registers listeners, dispatch a data change event to them.
      */
     private fun dispatchOnBusStopsChangedListeners() {
         synchronized(listeners) {
@@ -220,7 +220,7 @@ internal class AndroidBusStopsDao @Inject constructor(
     }
 
     /**
-     * This inner class is used as the [ContentObserver] for observing changes to alerts.
+     * This inner class is used as the [ContentObserver] for observing changes to bus stop data.
      */
     private inner class Observer : ContentObserver(Handler(Looper.getMainLooper())) {
 

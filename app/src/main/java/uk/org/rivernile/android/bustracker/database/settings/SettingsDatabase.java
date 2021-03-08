@@ -32,7 +32,6 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Size;
-import androidx.annotation.VisibleForTesting;
 import androidx.annotation.WorkerThread;
 
 /**
@@ -97,60 +96,5 @@ public final class SettingsDatabase {
             @NonNull @Size(min = 1) final String stopCode) {
         return context.getContentResolver().delete(SettingsContract.Favourites.CONTENT_URI,
                 SettingsContract.Favourites.STOP_CODE + " = ?", new String[] { stopCode });
-    }
-
-    /**
-     * Add a new time alert to the database.
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The code of the bus stop that this alert is set for.
-     * @param services A {@link String} array of services which can trigger this alert.
-     * @param timeTrigger The time at which to trigger the time alert. The time is relative to the
-     * number of minutes until the service is due to arrive at the stop.
-     * @return A {@link Uri} to the newly added row, as defined by
-     * {@link android.content.ContentResolver#insert(Uri, ContentValues)}.
-     */
-    @WorkerThread
-    @Nullable
-    public static Uri addTimeAlert(@NonNull final Context context,
-            @NonNull @Size(min = 1) final String stopCode,
-            @NonNull @Size(min = 1) final String[] services, final int timeTrigger) {
-        final ContentValues cv = new ContentValues();
-        cv.put(SettingsContract.Alerts.TYPE, SettingsContract.Alerts.ALERTS_TYPE_TIME);
-        cv.put(SettingsContract.Alerts.TIME_ADDED, System.currentTimeMillis());
-        cv.put(SettingsContract.Alerts.STOP_CODE, stopCode);
-        cv.put(SettingsContract.Alerts.SERVICE_NAMES, packServices(services));
-        cv.put(SettingsContract.Alerts.TIME_TRIGGER, timeTrigger);
-
-        return context.getContentResolver().insert(SettingsContract.Alerts.CONTENT_URI, cv);
-    }
-
-    /**
-     * Pack a {@link String} array of services in to a single {@link String} that can be written in
-     * to a column in the database.
-     *
-     * @param services The {@link String} array of services to pack.
-     * @return The packed {@link String} of services.
-     */
-    @NonNull
-    @VisibleForTesting
-    static String packServices(@NonNull final String[] services) {
-        final int len = services.length;
-
-        if (len > 0) {
-            final StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < len; i++) {
-                sb.append(services[i]);
-
-                if (i != (len - 1)) {
-                    sb.append(',');
-                }
-            }
-
-            return sb.toString();
-        } else {
-            return "";
-        }
     }
 }

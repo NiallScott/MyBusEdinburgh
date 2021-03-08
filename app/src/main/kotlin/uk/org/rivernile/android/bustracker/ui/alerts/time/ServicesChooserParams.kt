@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,39 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.time
 
-import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.DialogFragment
-import uk.org.rivernile.edinburghbustracker.android.R
-
 /**
- * This [DialogFragment] shows the user some disclaimer text regarding the time alert feature in the
- * application.
+ * This class contains the parameters which are sent through to the services selection UI.
  *
+ * @property services The services to choose from.
+ * @property selectedServices The currently selected services, to show the appropriate current
+ * state.
  * @author Niall Scott
  */
-class TimeLimitationsDialogFragment : DialogFragment() {
-
-    companion object {
-
-        /**
-         * Create a new instance of [TimeLimitationsDialogFragment].
-         *
-         * @return A new instance of [TimeLimitationsDialogFragment].
-         */
-        fun newInstance() = TimeLimitationsDialogFragment()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        isCancelable = true
-    }
-
-    override fun onCreateDialog(savedInstanceState: Bundle?) =
-            AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.timelimitationsdialog_title)
-                    .setMessage(R.string.timelimitationsdialog_message)
-                    .setNegativeButton(R.string.close, null)
-                    .create()
-}
+data class ServicesChooserParams(
+        val services: List<String>,
+        val selectedServices: List<String>?)

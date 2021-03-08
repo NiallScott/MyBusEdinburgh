@@ -27,7 +27,6 @@ package uk.org.rivernile.android.bustracker.database.settings;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -121,57 +120,5 @@ public class SettingsDatabaseTests {
         });
 
         SettingsDatabase.deleteFavouriteStop(mockContext, "123456");
-    }
-
-    /**
-     * Test that adding a time alert passes the data through correctly to the
-     * {@link android.content.ContentProvider}.
-     */
-    @Test
-    public void testAddTimeAlert() {
-        mockContentResolver.addProvider(SettingsContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public Uri insert(final Uri uri, final ContentValues values) {
-                assertEquals(SettingsContract.Alerts.CONTENT_URI, uri);
-                assertEquals(5, values.size());
-                assertEquals(SettingsContract.Alerts.ALERTS_TYPE_TIME,
-                        (int) values.getAsInteger(SettingsContract.Alerts.TYPE));
-                assertTrue(values.getAsLong(SettingsContract.Alerts.TIME_ADDED) > 0);
-                assertEquals("123456", values.getAsString(SettingsContract.Alerts.STOP_CODE));
-                assertEquals("1,2,3", values.getAsString(SettingsContract.Alerts.SERVICE_NAMES));
-                assertEquals(2, (int) values.getAsInteger(SettingsContract.Alerts.TIME_TRIGGER));
-
-                return ContentUris.withAppendedId(uri, 1);
-            }
-        });
-
-        SettingsDatabase.addTimeAlert(mockContext, "123456", new String[] { "1", "2", "3" }, 2);
-    }
-
-    /**
-     * Test that sending an empty {@link String} array in to
-     * {@link SettingsDatabase#packServices(String[])} returns an empty {@link String}.
-     */
-    @Test
-    public void testPackServicesWithEmptyArray() {
-        assertEquals("", SettingsDatabase.packServices(new String[] { }));
-    }
-
-    /**
-     * Test that sending a single item in to {@link SettingsDatabase#packServices(String[])} returns
-     * a correctly formatted {@link String}.
-     */
-    @Test
-    public void testPackServicesWithSingleItem() {
-        assertEquals("1", SettingsDatabase.packServices(new String[] { "1" }));
-    }
-
-    /**
-     * Test that sending multiple items in to {@link SettingsDatabase#packServices(String[])}
-     * returns a correctly formatted {@link String}.
-     */
-    @Test
-    public void testPackServicesWithMultipleItems() {
-        assertEquals("1,2,3", SettingsDatabase.packServices(new String[] { "1", "2", "3" }));
     }
 }
