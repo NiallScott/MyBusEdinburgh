@@ -110,7 +110,7 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "androidx.cardview:cardview:$cardViewVersion"
-    implementation "androidx.percentlayout:percentlayout:$percentLayoutVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
     implementation "androidx.preference:preference-ktx:$androidXPreferenceVersion"
 
     // AndroidX and support libraries KTX

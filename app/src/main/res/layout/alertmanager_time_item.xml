@@ -26,27 +26,35 @@
 */ -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:percent="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <androidx.cardview.widget.CardView
         style="@style/Card.Default"
         android:layout_marginTop="@dimen/padding_default"
         android:layout_marginBottom="@dimen/padding_default">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-            <androidx.percentlayout.widget.PercentFrameLayout
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
                 <com.google.android.gms.maps.MapView
                     android:id="@+id/mapView"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintDimensionRatio="H,16:9"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     android:visibility="gone"
-                    percent:layout_widthPercent="100%"
-                    percent:layout_aspectRatio="@fraction/alert_manager_map_aspect_ratio"
                     map:liteMode="true"
                     map:mapType="normal"
                     map:cameraZoom="16"
@@ -54,39 +62,37 @@
                     map:uiMapToolbar="false"
                     tools:background="@android:color/holo_green_light"
                     tools:visibility="visible" />
-            </androidx.percentlayout.widget.PercentFrameLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:layout_marginLeft="@dimen/padding_double"
                 android:layout_marginStart="@dimen/padding_double"
-                android:layout_marginRight="@dimen/padding_double"
                 android:layout_marginEnd="@dimen/padding_double"
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"
                 android:text="@string/alertmanager_time_title" />
+
             <TextView
                 android:id="@+id/txtDescription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:layout_marginLeft="@dimen/padding_double"
                 android:layout_marginStart="@dimen/padding_double"
-                android:layout_marginRight="@dimen/padding_double"
                 android:layout_marginEnd="@dimen/padding_double"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textColor="?android:textColorSecondary"
                 tools:text="When any of services 1, 2, 3 are within 5 minutes of Some Stop, Area (12345678)"/>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginLeft="@dimen/padding_double"
                 android:layout_marginStart="@dimen/padding_double"
-                android:layout_marginRight="@dimen/padding_double"
                 android:layout_marginEnd="@dimen/padding_double"
                 android:text="@string/alertmanager_time_blurb"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
             <Button
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:id="@+id/btnRemove"
@@ -94,8 +100,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="@dimen/padding_default"
-                android:layout_marginLeft="@dimen/padding_default"
-                android:layout_marginRight="@dimen/padding_default"
+                android:layout_marginStart="@dimen/padding_default"
+                android:layout_marginEnd="@dimen/padding_default"
                 android:text="@string/remove" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
