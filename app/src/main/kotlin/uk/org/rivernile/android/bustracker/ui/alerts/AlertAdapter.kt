@@ -34,7 +34,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerProximityItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerTimeItemBinding
 
 /**
  * This [ListAdapter] shows the user's currently set alerts.
@@ -69,13 +70,13 @@ class AlertAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
         VIEW_TYPE_ARRIVAL_ALERT ->
             ArrivalAlertViewHolder(
-                    inflater.inflate(R.layout.alertmanager_time_item, parent, false),
+                    AlertmanagerTimeItemBinding.inflate(inflater, parent, false),
                     textFormattingUtils,
                     stopMapMarkerDecorator,
                     clickListener)
         VIEW_TYPE_PROXIMITY_ALERT ->
             ProximityAlertViewHolder(
-                    inflater.inflate(R.layout.alertmanager_proximity_item, parent, false),
+                    AlertmanagerProximityItemBinding.inflate(inflater, parent, false),
                     textFormattingUtils,
                     stopMapMarkerDecorator,
                     clickListener)

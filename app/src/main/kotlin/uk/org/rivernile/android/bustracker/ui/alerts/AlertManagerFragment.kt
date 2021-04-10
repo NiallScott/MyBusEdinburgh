@@ -39,14 +39,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.android.synthetic.main.alertmanager.contentView
-import kotlinx.android.synthetic.main.alertmanager.recyclerView
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerBinding
 import javax.inject.Inject
 
 /**
@@ -71,6 +70,8 @@ class AlertManagerFragment : Fragment() {
 
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: AlertAdapter
+    private var _viewBinding: AlertmanagerBinding? = null
+    private val viewBinding get() = _viewBinding!!
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -98,14 +99,19 @@ class AlertManagerFragment : Fragment() {
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.alertmanager, container, false)
+            savedInstanceState: Bundle?): View {
+        _viewBinding = AlertmanagerBinding.inflate(inflater, container, false)
+
+        return viewBinding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView.setHasFixedSize(true)
-        recyclerView.adapter = adapter
+        viewBinding.apply {
+            recyclerView.setHasFixedSize(true)
+            recyclerView.adapter = adapter
+        }
 
         val viewLifecycle = viewLifecycleOwner
         viewModel.alertsLiveData.observe(viewLifecycle, adapter::submitList)
@@ -117,12 +123,14 @@ class AlertManagerFragment : Fragment() {
                 this::showRemoveArrivalAlertDialog)
         viewModel.showRemoveProximityAlertLiveData.observe(viewLifecycle,
                 this::showRemoveProximityAlertDialog)
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
 
         requireActivity().setTitle(R.string.alertmanager_title)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _viewBinding = null
     }
 
     /**
@@ -131,10 +139,12 @@ class AlertManagerFragment : Fragment() {
      * @param state The new state to set as the current state.
      */
     private fun setState(state: UiState) {
-        when (state) {
-            UiState.PROGRESS -> contentView.showProgressLayout()
-            UiState.CONTENT -> contentView.showContentLayout()
-            UiState.ERROR -> contentView.showErrorLayout()
+        viewBinding.apply {
+            when (state) {
+                UiState.PROGRESS -> contentView.showProgressLayout()
+                UiState.CONTENT -> contentView.showContentLayout()
+                UiState.ERROR -> contentView.showErrorLayout()
+            }
         }
     }
 

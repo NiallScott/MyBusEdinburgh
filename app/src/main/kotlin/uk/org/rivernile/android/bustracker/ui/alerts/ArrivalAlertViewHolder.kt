@@ -33,46 +33,43 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import kotlinx.android.synthetic.main.alertmanager_time_item.view.btnRemove
-import kotlinx.android.synthetic.main.alertmanager_time_item.view.mapView
-import kotlinx.android.synthetic.main.alertmanager_time_item.view.txtDescription
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerTimeItemBinding
 
 /**
  * This is a [RecyclerView.ViewHolder] to show an [UiAlert.ArrivalAlert].
  *
- * @param itemView The [View] for this ViewHolder.
+ * @param viewBinding The view binding for this [RecyclerView.ViewHolder].
  * @param textFormattingUtils Used to format the stop name.
  * @param stopMapMarkerDecorator Used to populate the stop icon on the map.
  * @param clickListener Where click events should be sent to.
  * @author Niall Scott
  */
 class ArrivalAlertViewHolder(
-        itemView: View,
+        private val viewBinding: AlertmanagerTimeItemBinding,
         private val textFormattingUtils: TextFormattingUtils,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val clickListener: OnAlertItemClickListener) : RecyclerView.ViewHolder(itemView) {
-
-    private val mapView = itemView.mapView
-    private val txtDescription = itemView.txtDescription
-    private val btnRemove = itemView.btnRemove
+        private val clickListener: OnAlertItemClickListener)
+    : RecyclerView.ViewHolder(viewBinding.root) {
 
     private var alert: UiAlert.ArrivalAlert? = null
     private var map: GoogleMap? = null
     private var marker: Marker? = null
 
     init {
-        btnRemove.setOnClickListener {
-            handleRemoveClicked()
-        }
+        viewBinding.apply {
+            btnRemove.setOnClickListener {
+                handleRemoveClicked()
+            }
 
-        mapView.isClickable = false
-        mapView.onCreate(null)
-        mapView.getMapAsync { map ->
-            this.map = map
-            populateMap(map, alert)
+            mapView.isClickable = false
+            mapView.onCreate(null)
+            mapView.getMapAsync { map ->
+                this@ArrivalAlertViewHolder.map = map
+                populateMap(map, alert)
+            }
         }
     }
 
@@ -84,7 +81,7 @@ class ArrivalAlertViewHolder(
     fun populate(alert: UiAlert.ArrivalAlert?) {
         this.alert = alert
 
-        txtDescription.text = alert?.let {
+        viewBinding.txtDescription.text = alert?.let {
             val stopName = textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode,
                     it.stopDetails?.stopName)
             val services = it.services
@@ -95,7 +92,7 @@ class ArrivalAlertViewHolder(
                 R.plurals.alertmanager_time_subtitle_single_service
             }
 
-            itemView.resources.getQuantityString(descriptionTextRes, timeTrigger,
+            viewBinding.root.resources.getQuantityString(descriptionTextRes, timeTrigger,
                     services.joinToString(", "), stopName, timeTrigger)
         }
 
@@ -127,10 +124,10 @@ class ArrivalAlertViewHolder(
                                 it.orientation)
                     }
                     .let(map::addMarker)
-            mapView.visibility = View.VISIBLE
+            viewBinding.mapView.visibility = View.VISIBLE
         } ?: run {
             marker = null
-            mapView.visibility = View.GONE
+            viewBinding.mapView.visibility = View.GONE
         }
     }
 

@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.time
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
@@ -37,18 +36,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.android.synthetic.main.addtimealert.btnLimitations
-import kotlinx.android.synthetic.main.addtimealert.btnSelectServices
-import kotlinx.android.synthetic.main.addtimealert.contentView
-import kotlinx.android.synthetic.main.addtimealert.spinnerTime
-import kotlinx.android.synthetic.main.addtimealert.txtBlurb
-import kotlinx.android.synthetic.main.addtimealert.txtErrorBlurb
-import kotlinx.android.synthetic.main.addtimealert.txtSelectedServices
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.AddtimealertBinding
 import javax.inject.Inject
 
 /**
@@ -114,7 +107,7 @@ class AddTimeAlertDialogFragment : DialogFragment(), ServicesChooserDialogFragme
         GenericSavedStateViewModelFactory(viewModelFactory, this, defaultArgs)
     }
 
-    private val rootView by lazy { createContentView() }
+    private val viewBinding by lazy { AddtimealertBinding.inflate(layoutInflater, null, false) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
@@ -128,7 +121,7 @@ class AddTimeAlertDialogFragment : DialogFragment(), ServicesChooserDialogFragme
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return AlertDialog.Builder(requireContext())
                 .setTitle(R.string.addtimealertdialog_title)
-                .setView(rootView)
+                .setView(viewBinding.root)
                 .setPositiveButton(R.string.addtimealertdialog_button_add) { _, _ ->
                     handleAddClicked()
                 }
@@ -137,7 +130,7 @@ class AddTimeAlertDialogFragment : DialogFragment(), ServicesChooserDialogFragme
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View = rootView
+            savedInstanceState: Bundle?): View = viewBinding.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -154,12 +147,14 @@ class AddTimeAlertDialogFragment : DialogFragment(), ServicesChooserDialogFragme
             showLimitationsDialog()
         }
 
-        btnSelectServices.setOnClickListener {
-            viewModel.onSelectServicesClicked()
-        }
+        viewBinding.apply {
+            btnSelectServices.setOnClickListener {
+                viewModel.onSelectServicesClicked()
+            }
 
-        btnLimitations.setOnClickListener {
-            viewModel.onLimitationsButtonClicked()
+            btnLimitations.setOnClickListener {
+                viewModel.onLimitationsButtonClicked()
+            }
         }
     }
 
@@ -168,35 +163,30 @@ class AddTimeAlertDialogFragment : DialogFragment(), ServicesChooserDialogFragme
     }
 
     /**
-     * Create the content [View] for the dialog. This is created here so that the Lint warning can
-     * be easily suppressed.
-     *
-     * @return The dialog content [View].
-     */
-    @SuppressLint("InflateParams")
-    private fun createContentView() = layoutInflater.inflate(R.layout.addtimealert, null, false)
-
-    /**
      * Handle the UI state changing by changing the visible layout.
      *
      * @param uiState The new [UiState] to display to the user.
      */
     private fun handleUiStateChanged(uiState: UiState) {
-        when (uiState) {
-            UiState.PROGRESS -> contentView.showProgressLayout()
-            UiState.CONTENT -> contentView.showContentLayout()
-            UiState.ERROR_NO_STOP_CODE -> {
-                txtErrorBlurb.setText(R.string.addtimealertdialog_error_no_stop_code)
-                contentView.showErrorLayout()
-            }
-            UiState.ERROR_NO_SERVICES -> {
-                viewModel.stopDetailsLiveData.value?.let {
-                    val formattedName = textFormattingUtils.formatBusStopNameWithStopCode(
-                            it.stopCode, it.stopName)
-                    txtErrorBlurb.text = getString(R.string.addtimealertdialog_error_no_services,
-                            formattedName)
+        viewBinding.apply {
+            when (uiState) {
+                UiState.PROGRESS -> contentView.showProgressLayout()
+                UiState.CONTENT -> contentView.showContentLayout()
+                UiState.ERROR_NO_STOP_CODE -> {
+                    txtErrorBlurb.setText(R.string.addtimealertdialog_error_no_stop_code)
                     contentView.showErrorLayout()
-                } ?: contentView.showProgressLayout() // This should never happen.
+                }
+                UiState.ERROR_NO_SERVICES -> {
+                    viewModel.stopDetailsLiveData.value?.let {
+                        val formattedName =
+                                textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode,
+                                        it.stopName)
+                        txtErrorBlurb.text =
+                                getString(R.string.addtimealertdialog_error_no_services,
+                                        formattedName)
+                        contentView.showErrorLayout()
+                    } ?: contentView.showProgressLayout() // This should never happen.
+                }
             }
         }
     }
@@ -207,7 +197,7 @@ class AddTimeAlertDialogFragment : DialogFragment(), ServicesChooserDialogFragme
      * @param stopDetails The loaded stop details.
      */
     private fun handleStopDetailsLoaded(stopDetails: StopDetails?) {
-        txtBlurb.text = stopDetails?.let {
+        viewBinding.txtBlurb.text = stopDetails?.let {
             val formattedName = textFormattingUtils.formatBusStopNameWithStopCode(
                     it.stopCode, it.stopName)
             getString(R.string.addtimealertdialog_blurb, formattedName)
@@ -220,9 +210,11 @@ class AddTimeAlertDialogFragment : DialogFragment(), ServicesChooserDialogFragme
      * @param selectedServices The current [List] of selected services.
      */
     private fun handleSelectedServicesChanged(selectedServices: List<String>?) {
-        selectedServices?.ifEmpty { null }?.let {
-            txtSelectedServices.text = it.joinToString(separator = ", ")
-        } ?: txtSelectedServices.setText(R.string.addtimealertdialog_no_services_selected)
+        viewBinding.apply {
+            selectedServices?.ifEmpty { null }?.let {
+                txtSelectedServices.text = it.joinToString(separator = ", ")
+            } ?: txtSelectedServices.setText(R.string.addtimealertdialog_no_services_selected)
+        }
     }
 
     /**
@@ -271,7 +263,7 @@ class AddTimeAlertDialogFragment : DialogFragment(), ServicesChooserDialogFragme
      *
      * @return The selected number of minutes to use as the time trigger.
      */
-    private fun getSelectedTimeTrigger() = when (spinnerTime.selectedItemPosition) {
+    private fun getSelectedTimeTrigger() = when (viewBinding.spinnerTime.selectedItemPosition) {
         0 -> 1
         1 -> 2
         2 -> 5

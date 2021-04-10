@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
@@ -46,16 +45,11 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.android.synthetic.main.addproxalert.btnErrorResolve
-import kotlinx.android.synthetic.main.addproxalert.btnLimitations
-import kotlinx.android.synthetic.main.addproxalert.contentView
-import kotlinx.android.synthetic.main.addproxalert.spinnerDistance
-import kotlinx.android.synthetic.main.addproxalert.txtBlurb
-import kotlinx.android.synthetic.main.addproxalert.txtErrorBlurb
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.AddproxalertBinding
 import javax.inject.Inject
 
 /**
@@ -98,7 +92,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         viewModelFactory
     }
 
-    private val rootView by lazy { createContentView() }
+    private val viewBinding by lazy { AddproxalertBinding.inflate(layoutInflater, null, false) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
@@ -112,7 +106,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return AlertDialog.Builder(requireContext())
                 .setTitle(R.string.addproxalertdialog_title)
-                .setView(rootView)
+                .setView(viewBinding.root)
                 .setPositiveButton(R.string.addproxalertdialog_button_add) { _, _ ->
                     handleAddClicked()
                 }
@@ -123,7 +117,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?): View = rootView
+            savedInstanceState: Bundle?): View = viewBinding.root
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -146,12 +140,14 @@ class AddProximityAlertDialogFragment : DialogFragment() {
             showAppSettings()
         }
 
-        btnLimitations.setOnClickListener {
-            viewModel.onLimitationsButtonClicked()
-        }
+        viewBinding.apply {
+            btnLimitations.setOnClickListener {
+                viewModel.onLimitationsButtonClicked()
+            }
 
-        btnErrorResolve.setOnClickListener {
-            viewModel.onResolveErrorButtonClicked()
+            btnErrorResolve.setOnClickListener {
+                viewModel.onResolveErrorButtonClicked()
+            }
         }
     }
 
@@ -175,21 +171,12 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     }
 
     /**
-     * Create the content [View] for the dialog. This is created here so that the Lint warning can
-     * be easily suppressed.
-     *
-     * @return The dialog content [View].
-     */
-    @SuppressLint("InflateParams")
-    private fun createContentView() = layoutInflater.inflate(R.layout.addproxalert, null, false)
-
-    /**
      * Handle the stop details changing, which populates the content view with the stop details.
      *
      * @param stopDetails The loaded stop details.
      */
     private fun handleStopDetailsLoaded(stopDetails: StopDetails?) {
-        txtBlurb.text = stopDetails?.let {
+        viewBinding.txtBlurb.text = stopDetails?.let {
             textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode, it.stopName)
         }
     }
@@ -201,37 +188,39 @@ class AddProximityAlertDialogFragment : DialogFragment() {
      * @param state The new [UiState].
      */
     private fun handleUiStateChanged(state: UiState) {
-        when (state) {
-            UiState.PROGRESS -> contentView.showProgressLayout()
-            UiState.CONTENT -> contentView.showContentLayout()
-            UiState.ERROR_NO_LOCATION_FEATURE -> {
-                txtErrorBlurb.setText(R.string.addproxalertdialog_error_no_location_feature)
-                btnErrorResolve.visibility = View.GONE
-                contentView.showErrorLayout()
-            }
-            UiState.ERROR_LOCATION_DISABLED -> {
-                txtErrorBlurb.setText(R.string.addproxalertdialog_error_location_disabled)
-                btnErrorResolve.apply {
-                    setText(R.string.addproxalertdialog_error_location_disabled_button)
-                    visibility = View.VISIBLE
+        viewBinding.apply {
+            when (state) {
+                UiState.PROGRESS -> viewBinding.contentView.showProgressLayout()
+                UiState.CONTENT -> viewBinding.contentView.showContentLayout()
+                UiState.ERROR_NO_LOCATION_FEATURE -> {
+                    txtErrorBlurb.setText(R.string.addproxalertdialog_error_no_location_feature)
+                    btnErrorResolve.visibility = View.GONE
+                    contentView.showErrorLayout()
                 }
-                contentView.showErrorLayout()
-            }
-            UiState.ERROR_PERMISSION_UNGRANTED -> {
-                txtErrorBlurb.setText(R.string.addproxalertdialog_error_no_location_permission)
-                btnErrorResolve.apply {
-                    setText(R.string.addproxalertdialog_error_grant_permission_button)
-                    visibility = View.VISIBLE
+                UiState.ERROR_LOCATION_DISABLED -> {
+                    txtErrorBlurb.setText(R.string.addproxalertdialog_error_location_disabled)
+                    btnErrorResolve.apply {
+                        setText(R.string.addproxalertdialog_error_location_disabled_button)
+                        visibility = View.VISIBLE
+                    }
+                    contentView.showErrorLayout()
                 }
-                contentView.showErrorLayout()
-            }
-            UiState.ERROR_PERMISSION_DENIED -> {
-                txtErrorBlurb.setText(R.string.addproxalertdialog_error_permission_denied)
-                btnErrorResolve.apply {
-                    setText(R.string.addproxalertdialog_error_permission_denied_button)
-                    visibility = View.VISIBLE
+                UiState.ERROR_PERMISSION_UNGRANTED -> {
+                    txtErrorBlurb.setText(R.string.addproxalertdialog_error_no_location_permission)
+                    btnErrorResolve.apply {
+                        setText(R.string.addproxalertdialog_error_grant_permission_button)
+                        visibility = View.VISIBLE
+                    }
+                    contentView.showErrorLayout()
                 }
-                contentView.showErrorLayout()
+                UiState.ERROR_PERMISSION_DENIED -> {
+                    txtErrorBlurb.setText(R.string.addproxalertdialog_error_permission_denied)
+                    btnErrorResolve.apply {
+                        setText(R.string.addproxalertdialog_error_permission_denied_button)
+                        visibility = View.VISIBLE
+                    }
+                    contentView.showErrorLayout()
+                }
             }
         }
     }
@@ -342,12 +331,12 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     }
 
     /**
-     * Based on the current selected position of [spinnerDistance], turn this in to the selected
+     * Based on the current selected position of the distance spinner, turn this in to the selected
      * distance in meters.
      *
      * @return The selected number of meters.
      */
-    private fun getSelectedMeters() = when (spinnerDistance.selectedItemPosition) {
+    private fun getSelectedMeters() = when (viewBinding.spinnerDistance.selectedItemPosition) {
         1 -> 250
         2 -> 500
         3 -> 750

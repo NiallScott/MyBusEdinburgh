@@ -36,33 +36,26 @@ import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import kotlinx.android.synthetic.main.alertmanager_proximity_item.view.btnLocationSettings
-import kotlinx.android.synthetic.main.alertmanager_proximity_item.view.btnRemove
-import kotlinx.android.synthetic.main.alertmanager_proximity_item.view.mapView
-import kotlinx.android.synthetic.main.alertmanager_proximity_item.view.txtDescription
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerProximityItemBinding
 
 /**
  * This is a [RecyclerView.ViewHolder] to show a [UiAlert.ProximityAlert].
  *
- * @param itemView The [View] for this ViewHolder.
+ * @param viewBinding The view binding for this [RecyclerView.ViewHolder].
  * @param textFormattingUtils Used to format the stop name.
  * @param stopMapMarkerDecorator Used to populate the stop icon on the map.
  * @param clickListener Where click events should be sent to.
  * @author Niall Scott
  */
 class ProximityAlertViewHolder(
-        itemView: View,
+        private val viewBinding: AlertmanagerProximityItemBinding,
         private val textFormattingUtils: TextFormattingUtils,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val clickListener: OnAlertItemClickListener) : RecyclerView.ViewHolder(itemView) {
-
-    private val mapView = itemView.mapView
-    private val txtDescription = itemView.txtDescription
-    private val btnLocationSettings = itemView.btnLocationSettings
-    private val btnRemove = itemView.btnRemove
+        private val clickListener: OnAlertItemClickListener)
+    : RecyclerView.ViewHolder(viewBinding.root) {
 
     private val rangeRingStrokeColour = ContextCompat.getColor(itemView.context,
             R.color.map_range_ring_stroke)
@@ -77,19 +70,21 @@ class ProximityAlertViewHolder(
     private var circle: Circle? = null
 
     init {
-        btnLocationSettings.setOnClickListener {
-            handleLocationSettingsClicked()
-        }
+        viewBinding.apply {
+            btnLocationSettings.setOnClickListener {
+                handleLocationSettingsClicked()
+            }
 
-        btnRemove.setOnClickListener {
-            handleRemoveClicked()
-        }
+            btnRemove.setOnClickListener {
+                handleRemoveClicked()
+            }
 
-        mapView.isClickable = false
-        mapView.onCreate(null)
-        mapView.getMapAsync { map ->
-            this.map = map
-            populateMap(map, alert)
+            mapView.isClickable = false
+            mapView.onCreate(null)
+            mapView.getMapAsync { map ->
+                this@ProximityAlertViewHolder.map = map
+                populateMap(map, alert)
+            }
         }
     }
 
@@ -101,10 +96,10 @@ class ProximityAlertViewHolder(
     fun populate(alert: UiAlert.ProximityAlert?) {
         this.alert = alert
 
-        txtDescription.text = alert?.let {
+        viewBinding.txtDescription.text = alert?.let {
             val stopName = textFormattingUtils.formatBusStopNameWithStopCode(it.stopCode,
                     it.stopDetails?.stopName)
-            txtDescription.context.getString(R.string.alertmanager_prox_subtitle,
+            viewBinding.root.context.getString(R.string.alertmanager_prox_subtitle,
                     it.distanceFrom, stopName)
         }
 
@@ -146,12 +141,12 @@ class ProximityAlertViewHolder(
                         }
                         .let(map::addMarker)
 
-                mapView.visibility = View.VISIBLE
+                viewBinding.mapView.visibility = View.VISIBLE
             }
         } ?: run {
             marker = null
             circle = null
-            mapView.visibility = View.GONE
+            viewBinding.mapView.visibility = View.GONE
         }
     }
 
