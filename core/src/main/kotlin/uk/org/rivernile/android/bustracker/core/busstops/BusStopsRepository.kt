@@ -99,6 +99,32 @@ class BusStopsRepository @Inject internal constructor(
     }
 
     /**
+     * Get a [Flow] which returns [StopDetails] for the given `stopCodes`. If stop details are
+     * updated later, these will be emitted.
+     *
+     * @param stopCodes The stop codes to get details for.
+     * @return The [Flow] which emits [StopDetails] for the given stop codes.
+     */
+    @ExperimentalCoroutinesApi
+    fun getBusStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?> =
+            callbackFlow {
+        val listener = object : BusStopsDao.OnBusStopsChangedListener {
+            override fun onBusStopsChanged() {
+                launch {
+                    getAndSendStopDetails(channel, stopCodes)
+                }
+            }
+        }
+
+        busStopsDao.addOnBusStopsChangedListener(listener)
+        getAndSendStopDetails(channel, stopCodes)
+
+        awaitClose {
+            busStopsDao.removeOnBusStopsChangedListener(listener)
+        }
+    }
+
+    /**
      * A suspended function which gets [StopName] for the given `stopCode` and sends these details
      * tot he given `channel`. This might send `null` to the channel when no stop name was found for
      * the given `stopCode`.
@@ -124,5 +150,19 @@ class BusStopsRepository @Inject internal constructor(
             channel: SendChannel<StopDetails?>,
             stopCode: String) {
         channel.send(busStopsDao.getStopDetails(stopCode))
+    }
+
+    /**
+     * A suspended function which gets [StopDetails] for the given `stopCodes` and sends these
+     * details to the given `channel`. This might send `null` to the channel when no details were
+     * found for the given `stopCodes`.
+     *
+     * @param channel The [SendChannel] that emissions should be sent to.
+     * @param stopCodes The `stopCodse` to obtain [StopDetails] for.
+     */
+    private suspend fun getAndSendStopDetails(
+            channel: SendChannel<Map<String, StopDetails>?>,
+            stopCodes: Set<String>) {
+        channel.send(busStopsDao.getStopDetails(stopCodes))
     }
 }

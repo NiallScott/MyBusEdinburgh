@@ -377,7 +377,7 @@ class AndroidBusStopsDaoTest {
     fun getStopDetailsWithNonEmptyCursorReturnsStopDetails() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForStopDetails()
         val cursor = MatrixCursor(expectedProjection)
-        cursor.addRow(arrayOf("Stop name", "Locality", 1.2, 3.4))
+        cursor.addRow(arrayOf("Stop name", "Locality", 1.2, 3.4, 4))
         object : MockContentProvider() {
             override fun query(
                     uri: Uri,
@@ -400,9 +400,124 @@ class AndroidBusStopsDaoTest {
                         "Stop name",
                         "Locality"),
                 1.2,
-                3.4)
+                3.4,
+                4)
 
         val result = busStopsDao.getStopDetails("123456")
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopDetailsMultiWithEmptyStopCodesReturnsNull() = coroutineRule.runBlockingTest {
+        val result = busStopsDao.getStopDetails(emptySet())
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getStopDetailsMultiWithNullCursorReturnsNull() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsMulti()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} IN (?,?,?)", selection)
+                assertArrayEquals(arrayOf("123456", "123457", "123458"), selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetails(setOf("123456", "123457", "123458"))
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getStopDetailsMultiWithEmptyCursorReturnsNull() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsMulti()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} IN (?,?,?)", selection)
+                assertArrayEquals(arrayOf("123456", "123457", "123458"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetails(setOf("123456", "123457", "123458"))
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopDetailsMultiWithNonEmptyCursorReturnsStopDetails() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsMulti()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("123456", "Stop name 1", "Locality 1", 1.2, 3.4, 4))
+        cursor.addRow(arrayOf("123457", "Stop name 2", "Locality 2", 1.3, 3.5, 5))
+        cursor.addRow(arrayOf("123458", "Stop name 3", "Locality 3", 1.4, 3.6, 6))
+        val expected = mapOf(
+                "123456" to StopDetails(
+                        "123456",
+                        StopName(
+                                "Stop name 1",
+                                "Locality 1"),
+                        1.2,
+                        3.4,
+                        4),
+                "123457" to StopDetails(
+                        "123457",
+                        StopName(
+                                "Stop name 2",
+                                "Locality 2"),
+                        1.3,
+                        3.5,
+                        5),
+                "123458" to StopDetails(
+                        "123458",
+                        StopName(
+                                "Stop name 3",
+                                "Locality 3"),
+                        1.4,
+                        3.6,
+                        6))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} IN (?,?,?)", selection)
+                assertArrayEquals(arrayOf("123456", "123457", "123458"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetails(setOf("123456", "123457", "123458"))
 
         assertEquals(expected, result)
         assertTrue(cursor.isClosed)
@@ -424,5 +539,14 @@ class AndroidBusStopsDaoTest {
             BusStopsContract.STOP_NAME,
             BusStopsContract.LOCALITY,
             BusStopsContract.LATITUDE,
-            BusStopsContract.LONGITUDE)
+            BusStopsContract.LONGITUDE,
+            BusStopsContract.ORIENTATION)
+
+    private fun getExpectedProjectionForStopDetailsMulti() = arrayOf(
+            BusStopsContract.STOP_CODE,
+            BusStopsContract.STOP_NAME,
+            BusStopsContract.LOCALITY,
+            BusStopsContract.LATITUDE,
+            BusStopsContract.LONGITUDE,
+            BusStopsContract.ORIENTATION)
 }

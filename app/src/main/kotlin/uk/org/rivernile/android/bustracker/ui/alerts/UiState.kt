@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.settings.entities
+package uk.org.rivernile.android.bustracker.ui.alerts
 
 /**
- * This data class describes a proximity alert that is persisted in the settings database.
+ * This enum contains the UI states for [AlertManagerFragmentViewModel].
  *
- * @property id The ID of this alert.
- * @property timeAdded The UNIX timestamp, in milliseconds, that the alert was created at.
- * @property stopCode What stop code does the alert concern?
- * @property distanceFrom At what maximum distance from the stop should the alert fire at? Or, what
- * is the radius of the proximity area.
  * @author Niall Scott
  */
-data class ProximityAlert(val id: Int,
-                          val timeAdded: Long,
-                          val stopCode: String,
-                          val distanceFrom: Int)
+enum class UiState {
+
+    /**
+     * The loading of data is in progress.
+     */
+    PROGRESS,
+    /**
+     * Show the content view.
+     */
+    CONTENT,
+    /**
+     * Show the error view.
+     */
+    ERROR
+}

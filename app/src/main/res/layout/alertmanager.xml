@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,36 +24,41 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<FrameLayout
+<uk.org.rivernile.android.bustracker.core.widget.ContentView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contentView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    app:progressView="@id/progress"
+    app:contentView="@id/recyclerView"
+    app:errorView="@id/txtError"
+    app:contentLayout="progress"
+    tools:contentLayout="content">
+
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@android:id/list"
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="@dimen/padding_half"
         android:paddingBottom="36dp"
         android:clipToPadding="false"
         android:scrollbars="vertical"
-        android:visibility="gone"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:visibility="visible" />
+        tools:listitem="@layout/alertmanager_time_item" />
+
     <include
-        layout="@layout/indeterminate_progress"
-        android:visibility="visible"
-        tools:visibility="gone" />
+        layout="@layout/indeterminate_progress" />
+
     <TextView
-        android:id="@android:id/empty"
+        android:id="@+id/txtError"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="@dimen/padding_double"
         android:gravity="center"
         android:textIsSelectable="true"
-        android:text="@string/alertmanager_empty"
-        android:visibility="gone" />
-</FrameLayout>
+        android:text="@string/alertmanager_empty" />
+</uk.org.rivernile.android.bustracker.core.widget.ContentView>

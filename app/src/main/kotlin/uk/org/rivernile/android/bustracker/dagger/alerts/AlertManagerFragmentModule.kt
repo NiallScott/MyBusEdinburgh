@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,32 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.daos
+package uk.org.rivernile.android.bustracker.dagger.alerts
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 
 /**
- * A fake implementation of [BusStopsDao].
+ * This [Module] contributes [androidx.fragment.app.Fragment]s for the alert manager.
  *
  * @author Niall Scott
  */
-class FakeBusStopsDao : BusStopsDao {
+@Module
+interface AlertManagerFragmentModule {
 
-    override fun addOnBusStopsChangedListener(listener: BusStopsDao.OnBusStopsChangedListener) {
-
-    }
-
-    override fun removeOnBusStopsChangedListener(listener: BusStopsDao.OnBusStopsChangedListener) {
-
-    }
-
-    override suspend fun getNameForStop(stopCode: String): StopName? = null
-
-    override suspend fun getLocationForStop(stopCode: String): StopLocation? = null
-
-    override suspend fun getStopDetails(stopCode: String): StopDetails? = null
-
-    override suspend fun getStopDetails(stopCodes: Set<String>): Map<String, StopDetails>? = null
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeAlertManagerFragment(): AlertManagerFragment
 }

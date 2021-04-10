@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,29 @@
 package uk.org.rivernile.android.bustracker.core.database.settings.entities
 
 /**
+ * This is the base type for user alerts.
+ *
+ * @author Niall Scott
+ */
+sealed class Alert {
+
+    /**
+     * The ID of this alert.
+     */
+    abstract val id: Int
+
+    /**
+     * The UNIX timestamp, in milliseconds, that the alert was created at.
+     */
+    abstract val timeAdded: Long
+
+    /**
+     * What stop code does the alert concern?
+     */
+    abstract val stopCode: String
+}
+
+/**
  * This data class describes an arrival alert that is persisted in the settings database.
  *
  * @property id The ID of this alert.
@@ -37,8 +60,25 @@ package uk.org.rivernile.android.bustracker.core.database.settings.entities
  * named stop at this value or less.
  * @author Niall Scott
  */
-data class ArrivalAlert(val id: Int,
-                        val timeAdded: Long,
-                        val stopCode: String,
-                        val serviceNames: List<String>,
-                        val timeTrigger: Int)
+data class ArrivalAlert(
+        override val id: Int,
+        override val timeAdded: Long,
+        override val stopCode: String,
+        val serviceNames: List<String>,
+        val timeTrigger: Int) : Alert()
+
+/**
+ * This data class describes a proximity alert that is persisted in the settings database.
+ *
+ * @property id The ID of this alert.
+ * @property timeAdded The UNIX timestamp, in milliseconds, that the alert was created at.
+ * @property stopCode What stop code does the alert concern?
+ * @property distanceFrom At what maximum distance from the stop should the alert fire at? Or, what
+ * is the radius of the proximity area.
+ * @author Niall Scott
+ */
+data class ProximityAlert(
+        override val id: Int,
+        override val timeAdded: Long,
+        override val stopCode: String,
+        val distanceFrom: Int) : Alert()

@@ -32,6 +32,7 @@ import dagger.Module
 import dagger.multibindings.IntoMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.about.AboutViewModel
+import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragmentViewModel
@@ -123,6 +124,18 @@ interface ViewModelModule {
     @IntoMap
     @ViewModelKey(TwitterUpdatesFragmentViewModel::class)
     fun bindTwitterUpdatesFragmentViewModel(viewModel: TwitterUpdatesFragmentViewModel): ViewModel
+
+    /**
+     * Inject a [AlertManagerFragmentViewModel] when requested.
+     *
+     * @param viewModel A [AlertManagerFragmentViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(AlertManagerFragmentViewModel::class)
+    fun bindAlertManagerFragmentViewModel(viewModel: AlertManagerFragmentViewModel): ViewModel
 
     /**
      * Inject a [AddProximityAlertDialogFragmentViewModel] when requested.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import uk.org.rivernile.android.bustracker.dagger.about.AboutFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.alerts.AlertFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.alerts.AlertManagerFragmentModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.displaystopdata.DisplayStopDataFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.main.MainFragmentsModule
@@ -57,6 +58,7 @@ interface ActivityModule {
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
         AlertFragmentsModule::class,
+        AlertManagerFragmentModule::class,
         BusStopMapFragmentsModule::class,
         MainFragmentsModule::class,
         NewsFragmentsModule::class

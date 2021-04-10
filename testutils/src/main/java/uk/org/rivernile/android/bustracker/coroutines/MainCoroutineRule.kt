@@ -55,12 +55,12 @@ class MainCoroutineRule : TestWatcher(), TestCoroutineScope by TestCoroutineScop
 
     val testDispatcher = TestCoroutineDispatcher()
 
-    override fun starting(description: Description?) {
+    override fun starting(description: Description) {
         super.starting(description)
         Dispatchers.setMain(this.coroutineContext[ContinuationInterceptor] as CoroutineDispatcher)
     }
 
-    override fun finished(description: Description?) {
+    override fun finished(description: Description) {
         super.finished(description)
         Dispatchers.resetMain()
     }

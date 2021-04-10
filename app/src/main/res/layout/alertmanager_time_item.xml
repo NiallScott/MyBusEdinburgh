@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,6 +51,7 @@
                     map:mapType="normal"
                     map:cameraZoom="16"
                     map:uiCompass="false"
+                    map:uiMapToolbar="false"
                     tools:background="@android:color/holo_green_light"
                     tools:visibility="visible" />
             </androidx.percentlayout.widget.PercentFrameLayout>

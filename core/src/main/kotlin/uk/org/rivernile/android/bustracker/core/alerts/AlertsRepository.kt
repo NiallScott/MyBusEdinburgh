@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.Alert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
@@ -153,6 +154,29 @@ class AlertsRepository @Inject internal constructor(
     }
 
     /**
+     * Get a [Flow] which emits a [List] of all the currently set user alerts.
+     *
+     * @return A [Flow] which emits a [List] of all the currently set user alerts.
+     */
+    @ExperimentalCoroutinesApi
+    fun getAllAlertsFlow(): Flow<List<Alert>?> = callbackFlow {
+        val listener = object : AlertsDao.OnAlertsChangedListener {
+            override fun onAlertsChanged() {
+                launch {
+                    getAndSendAllAlerts(channel)
+                }
+            }
+        }
+
+        alertsDao.addOnAlertsChangedListener(listener)
+        getAndSendAllAlerts(channel)
+
+        awaitClose {
+            alertsDao.removeOnAlertsChangedListener(listener)
+        }
+    }
+
+    /**
      * A suspended function which obtains the arrival alert status of the given `stopCode` and then
      * sends it to the given `channel`.
      *
@@ -176,5 +200,14 @@ class AlertsRepository @Inject internal constructor(
             channel: SendChannel<Boolean>,
             stopCode: String) {
         channel.send(alertsDao.hasProximityAlert(stopCode))
+    }
+
+    /**
+     * A suspended function which obtains all set user alerts.
+     *
+     * @param channel The [SendChannel] that emissions should be sent to.
+     */
+    private suspend fun getAndSendAllAlerts(channel: SendChannel<List<Alert>?>) {
+        channel.send(alertsDao.getAllAlerts())
     }
 }

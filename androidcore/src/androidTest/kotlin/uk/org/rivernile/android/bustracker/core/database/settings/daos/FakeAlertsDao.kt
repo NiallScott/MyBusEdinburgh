@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.settings.daos
 
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.Alert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 
@@ -73,6 +74,8 @@ class FakeAlertsDao : AlertsDao {
     override suspend fun removeAllProximityAlerts() {
 
     }
+
+    override suspend fun getAllAlerts(): List<Alert>? = null
 
     override suspend fun getProximityAlert(id: Int): ProximityAlert? = null
 

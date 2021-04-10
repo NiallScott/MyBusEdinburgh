@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,29 +21,34 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.database.settings.loaders;
-
-import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.loader.content.CursorLoader;
-
-import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
+package uk.org.rivernile.android.bustracker.ui.alerts
 
 /**
- * This {@link CursorLoader} loads details for all currently set alerts.
+ * Classes which wish to be informed when click events happen should implement this interface.
  *
  * @author Niall Scott
  */
-public class AlertsLoader extends CursorLoader {
+interface OnAlertItemClickListener {
 
     /**
-     * Create a new {@code AlertsLoader}.
-     *
-     * @param context A {@link Context} instance.
+     * This is called when the user wishes to review their device location settings.
      */
-    public AlertsLoader(@NonNull final Context context) {
-        super(context, SettingsContract.Alerts.CONTENT_URI, null, null, null, null);
-    }
+    fun onLocationSettingsClicked()
+
+    /**
+     * This is called when the user wishes to remove a previously set arrival alert.
+     *
+     * @param stopCode The stop code the arrival alert should be removed for.
+     */
+    fun onRemoveArrivalAlertClicked(stopCode: String)
+
+    /**
+     * This is called when the user wishes to remove a previously set proximity alert.
+     *
+     * @param stopCode The stop code the proximity alert should be removed for.
+     */
+    fun onRemoveProximityAlertClicked(stopCode: String)
 }

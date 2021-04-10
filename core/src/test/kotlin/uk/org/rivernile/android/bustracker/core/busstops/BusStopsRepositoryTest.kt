@@ -134,6 +134,70 @@ class BusStopsRepositoryTest {
                 .removeOnBusStopsChangedListener(any())
     }
 
+    @Test
+    fun getBusStopDetailsFlowMultiGetsInitialValue() = coroutineRule.runBlockingTest {
+        val expected = mapOf("123456" to StopDetails(
+                "123456",
+                StopName(
+                        "Stop name 1",
+                        "Locality 1"),
+                1.2,
+                3.4,
+                4))
+        whenever(busStopsDao.getStopDetails(setOf("123456", "123457")))
+                .thenReturn(expected)
+
+        val observer = repository.getBusStopDetailsFlow(setOf("123456", "123457")).test(this)
+        observer.finish()
+
+        observer.assertValues(expected)
+        verify(busStopsDao)
+                .removeOnBusStopsChangedListener(any())
+    }
+
+    @Test
+    fun getBusStopDetailsFlowMultiRespondsToBusStopsChanged() = coroutineRule.runBlockingTest {
+        doAnswer {
+            val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
+            listener.onBusStopsChanged()
+            listener.onBusStopsChanged()
+        }.whenever(busStopsDao).addOnBusStopsChangedListener(any())
+        val expected1 = mapOf("123456" to StopDetails(
+                "123456",
+                StopName(
+                        "Stop name 1",
+                        "Locality 1"),
+                1.2,
+                3.4,
+                4))
+        val expected3 = mapOf(
+                "123456" to StopDetails(
+                        "123456",
+                        StopName(
+                                "Stop name 1",
+                                "Locality 1"),
+                        1.2,
+                        3.4,
+                        4),
+                "123457" to StopDetails(
+                        "123457",
+                        StopName(
+                                "Stop name 2",
+                                "Locality 2"),
+                        1.3,
+                        3.5,
+                        5))
+        whenever(busStopsDao.getStopDetails(setOf("123456", "123457")))
+                .thenReturn(expected1, null, expected3)
+
+        val observer = repository.getBusStopDetailsFlow(setOf("123456", "123457")).test(this)
+        observer.finish()
+
+        observer.assertValues(expected1, null, expected3)
+        verify(busStopsDao)
+                .removeOnBusStopsChangedListener(any())
+    }
+
     private fun createStopName() = StopName("Name", "Locality")
 
     private fun createStopDetails() =
@@ -143,5 +207,6 @@ class BusStopsRepositoryTest {
                             "Stop name",
                             "Locality"),
                     1.2,
-                    3.4)
+                    3.4,
+                    5)
 }

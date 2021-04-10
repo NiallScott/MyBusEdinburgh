@@ -284,6 +284,97 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
+    fun getAllAlertsWithNullResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForAllAlerts()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<String>?,
+                    selection: String?,
+                    selectionArgs: Array<String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertEquals("${AlertsContract.TIME_ADDED} ASC", sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
+
+        val result = alertsDao.getAllAlerts()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getAllAlertsWithEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForAllAlerts()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<String>?,
+                    selection: String?,
+                    selectionArgs: Array<String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertEquals("${AlertsContract.TIME_ADDED} ASC", sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
+
+        val result = alertsDao.getAllAlerts()
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getAllAlertsWithPopulatedResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForAllAlerts()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf(1, 123L, "123456", AlertsContract.ALERTS_TYPE_TIME, null, "1", 5))
+        cursor.addRow(arrayOf(2, 124L, "123457", AlertsContract.ALERTS_TYPE_PROXIMITY, 250, null,
+                null))
+        cursor.addRow(arrayOf(3, 125L, "123458", AlertsContract.ALERTS_TYPE_TIME, null, "2,3,4",
+                10))
+        cursor.addRow(arrayOf(4, 126L, "123459", AlertsContract.ALERTS_TYPE_PROXIMITY, 500, null,
+                null))
+        val expected = listOf(
+                ArrivalAlert(1, 123L, "123456", listOf("1"), 5),
+                ProximityAlert(2, 124L, "123457", 250),
+                ArrivalAlert(3, 125L, "123458", listOf("2", "3", "4"), 10),
+                ProximityAlert(4, 126L, "123459", 500))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<String>?,
+                    selection: String?,
+                    selectionArgs: Array<String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertEquals("${AlertsContract.TIME_ADDED} ASC", sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
+
+        val result = alertsDao.getAllAlerts()
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
     fun getProximityAlertWithNullResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
         val expectedProjection = getExpectedProjectionForProximityAlert()
         val expectedSelectionArgs = arrayOf(
@@ -1181,6 +1272,15 @@ class AndroidAlertsDaoTest {
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
+
+    private fun getExpectedProjectionForAllAlerts() = arrayOf(
+            AlertsContract.ID,
+            AlertsContract.TIME_ADDED,
+            AlertsContract.STOP_CODE,
+            AlertsContract.TYPE,
+            AlertsContract.DISTANCE_FROM,
+            AlertsContract.SERVICE_NAMES,
+            AlertsContract.TIME_TRIGGER)
 
     private fun getExpectedProjectionForArrivalAlert() = arrayOf(
             AlertsContract.ID,

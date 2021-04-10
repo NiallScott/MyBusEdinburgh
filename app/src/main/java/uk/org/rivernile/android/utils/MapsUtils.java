@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,13 +33,16 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import uk.org.rivernile.android.bustracker.core.features.FeatureRepository;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
  * This class contains map utility methods.
  * 
  * @author Niall Scott
+ * @deprecated See method deprecation notices for descriptions.
  */
+@Deprecated
 public final class MapsUtils {
 
     /**
@@ -52,7 +55,9 @@ public final class MapsUtils {
      * 
      * @param context A {@link Context} instance.
      * @return {@code true} if the Google Maps should show, {@code false} if not.
+     * @deprecated Use {@link FeatureRepository#hasStopMapUiFeature()} instead.
      */
+    @Deprecated
     public static boolean isGoogleMapsAvailable(@NonNull final Context context) {
         return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) ==
                 ConnectionResult.SUCCESS && GraphicsUtils.getOpenGLESVersion(context) >= 2;
@@ -64,7 +69,10 @@ public final class MapsUtils {
      * @param orientation The orientation, expressed as a number between 0 and 7, with 0 being north
      * and 7 being north-west, going clockwise.
      * @return A drawable resource ID for a given {@code orientation}.
+     * @deprecated Use {@link uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator#getStopDirectionDrawableResourceId(int)}
+     * instead.
      */
+    @Deprecated
     @DrawableRes
     public static int getDirectionDrawableResourceId(final int orientation) {
         switch (orientation) {
@@ -97,7 +105,10 @@ public final class MapsUtils {
      * @param orientation The orientation of the stop, in the range of {@code 0} (north) to
      * {@code 7} (north-west), going clockwise. Any other number will be treated as unknown and the
      * stop will be given a generic icon instead.
+     * @deprecated Use {@link uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator#applyStopDirectionToMarker(MarkerOptions, int)}
+     * instead.
      */
+    @Deprecated
     public static void applyStopDirectionToMarker(@NonNull final MarkerOptions markerOptions,
             final int orientation) {
         markerOptions.icon(BitmapDescriptorFactory.fromResource(

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -151,7 +151,8 @@ class DisplayStopDataActivityViewModelTest {
                         "Name",
                         "Locality"),
                 1.2,
-                3.4)
+                3.4,
+                5)
         val flow = flow<StopDetails?> { emit(details) }
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
                 .thenReturn(flow)
@@ -170,7 +171,8 @@ class DisplayStopDataActivityViewModelTest {
                         "Name",
                         "Locality"),
                 1.2,
-                3.4)
+                3.4,
+                5)
         val flow = flow {
             emit(null)
             emit(details)
@@ -650,7 +652,8 @@ class DisplayStopDataActivityViewModelTest {
                                 "Name",
                                 "Locality"),
                         1.2,
-                        3.4)
+                        3.4,
+                        5)
                 val flow = flow { emit(details) }
                 whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
                         .thenReturn(flow)

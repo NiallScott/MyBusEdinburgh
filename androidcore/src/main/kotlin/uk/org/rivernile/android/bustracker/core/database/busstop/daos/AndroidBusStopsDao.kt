@@ -177,8 +177,10 @@ internal class AndroidBusStopsDao @Inject constructor(
                                 BusStopsContract.STOP_NAME,
                                 BusStopsContract.LOCALITY,
                                 BusStopsContract.LATITUDE,
-                                BusStopsContract.LONGITUDE),
-                        "${BusStopsContract.STOP_CODE} = ?", arrayOf(stopCode),
+                                BusStopsContract.LONGITUDE,
+                                BusStopsContract.ORIENTATION),
+                        "${BusStopsContract.STOP_CODE} = ?",
+                        arrayOf(stopCode),
                         null,
                         cancellationSignal)
                         ?.use {
@@ -190,6 +192,8 @@ internal class AndroidBusStopsDao @Inject constructor(
                                 val localityColumn = it.getColumnIndex(BusStopsContract.LOCALITY)
                                 val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
                                 val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+                                val orientationColumn =
+                                        it.getColumnIndex(BusStopsContract.ORIENTATION)
 
                                 StopDetails(
                                         stopCode,
@@ -197,7 +201,71 @@ internal class AndroidBusStopsDao @Inject constructor(
                                                 it.getString(stopNameColumn),
                                                 it.getString(localityColumn)),
                                         it.getDouble(latitudeColumn),
-                                        it.getDouble(longitudeColumn))
+                                        it.getDouble(longitudeColumn),
+                                        it.getInt(orientationColumn))
+                            } else {
+                                null
+                            }
+                        }
+
+                continuation.resume(result)
+            }
+        }
+    }
+
+    override suspend fun getStopDetails(stopCodes: Set<String>): Map<String, StopDetails>? {
+        if (stopCodes.isEmpty()) {
+            return null
+        }
+
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val inPlaceholders = Array(stopCodes.size) { '?' }
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.STOP_CODE,
+                                BusStopsContract.STOP_NAME,
+                                BusStopsContract.LOCALITY,
+                                BusStopsContract.LATITUDE,
+                                BusStopsContract.LONGITUDE,
+                                BusStopsContract.ORIENTATION),
+                        "${BusStopsContract.STOP_CODE} IN (${inPlaceholders.joinToString(",")})",
+                        stopCodes.toTypedArray(),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            val count = it.count
+
+                            if (count > 0) {
+                                val result = mutableMapOf<String, StopDetails>()
+                                val stopCodeColumn = it.getColumnIndex(BusStopsContract.STOP_CODE)
+                                val stopNameColumn = it.getColumnIndex(BusStopsContract.STOP_NAME)
+                                val localityColumn = it.getColumnIndex(BusStopsContract.LOCALITY)
+                                val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
+                                val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+                                val orientationColumn =
+                                        it.getColumnIndex(BusStopsContract.ORIENTATION)
+
+                                while (it.moveToNext()) {
+                                    val stopCode = it.getString(stopCodeColumn)
+                                    result[stopCode] = StopDetails(
+                                            stopCode,
+                                            StopName(
+                                                    it.getString(stopNameColumn),
+                                                    it.getString(localityColumn)),
+                                            it.getDouble(latitudeColumn),
+                                            it.getDouble(longitudeColumn),
+                                            it.getInt(orientationColumn))
+                                }
+
+                                result
                             } else {
                                 null
                             }

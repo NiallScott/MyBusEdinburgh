@@ -283,8 +283,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item quantity="other">When any of services %1$s are within %3$d minutes of %2$s</item>
     </plurals>
     <string name="alertmanager_time_blurb">This alert is removed after 1 hour</string>
-    <string name="alertmanager_snackbar_remove_proximity">Proximity alert removed</string>
-    <string name="alertmanager_snackbar_remove_time">Time alert removed</string>
+    <string name="alertmanager_error_no_location_settings">Unable to show system location settings</string>
 
     <!--
     **********************************

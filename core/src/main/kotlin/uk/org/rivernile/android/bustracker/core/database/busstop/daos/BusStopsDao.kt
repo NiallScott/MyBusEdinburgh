@@ -77,6 +77,15 @@ interface BusStopsDao {
     suspend fun getStopDetails(stopCode: String): StopDetails?
 
     /**
+     * Given a [Set] of stop codes, get the details for each stop.
+     *
+     * @param stopCodes The stop codes to get the details for.
+     * @return The details for the given stop codes, or `null` if no stops were found or if an error
+     * occurred.
+     */
+    suspend fun getStopDetails(stopCodes: Set<String>): Map<String, StopDetails>?
+
+    /**
      * This interface should be implemented to listen for changes to bus stops. Call
      * [addOnBusStopsChangedListener] to register the listener.
      */

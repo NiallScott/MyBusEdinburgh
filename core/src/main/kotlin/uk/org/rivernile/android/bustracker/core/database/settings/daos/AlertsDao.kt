@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.settings.daos
 
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.Alert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 
@@ -102,6 +103,13 @@ interface AlertsDao {
      * Remove all proximity alerts.
      */
     suspend fun removeAllProximityAlerts()
+
+    /**
+     * Get all user-set active alerts.
+     *
+     * @return All user set active alerts.
+     */
+    suspend fun getAllAlerts(): List<Alert>?
 
     /**
      * Get an active proximity alert.

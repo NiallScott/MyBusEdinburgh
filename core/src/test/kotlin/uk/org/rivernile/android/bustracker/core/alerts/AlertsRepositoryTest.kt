@@ -41,6 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.Alert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
@@ -179,5 +180,40 @@ class AlertsRepositoryTest {
 
         verify(alertManager)
                 .removeProximityAlert("123456")
+    }
+
+    @Test
+    fun getAllAlertsFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+        val alerts = listOf(ArrivalAlert(1, 123L, "123456", listOf("1"), 10))
+        whenever(alertsDao.getAllAlerts())
+                .thenReturn(alerts)
+
+        val observer = repository.getAllAlertsFlow().test(this)
+        observer.finish()
+
+        observer.assertValues(alerts)
+        verify(alertsDao)
+                .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun getAllAlertsFlowRespondsToAlertChanges() = coroutineRule.runBlockingTest {
+        val alerts1 = listOf(ArrivalAlert(1, 123L, "123456", listOf("1"), 10))
+        val alerts2 = emptyList<Alert>()
+        val alerts3 = listOf(ProximityAlert(2, 123L, "123457", 250))
+        doAnswer {
+            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
+            listener.onAlertsChanged()
+            listener.onAlertsChanged()
+        }.whenever(alertsDao).addOnAlertsChangedListener(any())
+        whenever(alertsDao.getAllAlerts())
+                .thenReturn(alerts1, alerts2, alerts3)
+
+        val observer = repository.getAllAlertsFlow().test(this)
+        observer.finish()
+
+        observer.assertValues(alerts1, alerts2, alerts3)
+        verify(alertsDao)
+                .removeOnAlertsChangedListener(any())
     }
 }
