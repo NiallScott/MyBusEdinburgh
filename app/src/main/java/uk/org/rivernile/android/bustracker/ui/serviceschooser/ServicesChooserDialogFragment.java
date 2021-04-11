@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,6 +44,15 @@ import uk.org.rivernile.edinburghbustracker.android.R;
  * @author Niall Scott
  */
 public class ServicesChooserDialogFragment extends DialogFragment {
+
+    /** The request key used for the new Fragment result API. */
+    public static final String REQUEST_KEY = "requestChosenServices";
+
+    /**
+     * The key to use on the {@link Bundle} returned from the new Fragment result API to get the
+     * user chosen services.
+     */
+    public static final String RESULT_CHOSEN_SERVICES = "chosenServices";
     
     /** The argument name for services. */
     private static final String ARG_SERVICES = "services";
@@ -224,6 +233,11 @@ public class ServicesChooserDialogFragment extends DialogFragment {
      * {@link #getTargetFragment()} or {@link #getActivity()}.
      */
     private void dispatchServicesChosen() {
+        final String[] chosenServices = getChosenServices();
+        final Bundle result = new Bundle();
+        result.putStringArray(RESULT_CHOSEN_SERVICES, chosenServices);
+        getParentFragmentManager().setFragmentResult(REQUEST_KEY, result);
+
         final Fragment targetFragment = getTargetFragment();
         final Activity activity = getActivity();
         final Callbacks callbacks;
@@ -237,7 +251,7 @@ public class ServicesChooserDialogFragment extends DialogFragment {
         }
 
         if (callbacks != null) {
-            callbacks.onServicesChosen(getChosenServices());
+            callbacks.onServicesChosen(chosenServices);
         }
     }
     
