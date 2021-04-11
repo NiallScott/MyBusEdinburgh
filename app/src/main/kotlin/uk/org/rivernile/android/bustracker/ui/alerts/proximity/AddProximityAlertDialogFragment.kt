@@ -39,6 +39,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
@@ -64,8 +65,6 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     companion object {
 
         private const val ARG_STOP_CODE = "stopCode"
-
-        private const val PERMISSION_REQUEST_LOCATION = 1
 
         private const val DIALOG_PROXIMITY_LIMITATIONS = "dialogProximityLimitations"
 
@@ -93,6 +92,10 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     }
 
     private val viewBinding by lazy { AddproxalertBinding.inflate(layoutInflater, null, false) }
+
+    private val requestLocationPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission(),
+                    this::handleLocationPermissionState)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
@@ -155,19 +158,6 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         super.onStart()
 
         checkLocationPermissionState()
-    }
-
-    override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray) {
-        if (requestCode == PERMISSION_REQUEST_LOCATION) {
-            if (grantResults.isNotEmpty()) {
-                grantResults[0]
-            } else {
-                PackageManager.PERMISSION_DENIED
-            }.let(this::handleLocationPermissionState)
-        }
     }
 
     /**
@@ -248,20 +238,20 @@ class AddProximityAlertDialogFragment : DialogFragment() {
      * [AddProximityAlertDialogFragmentViewModel] with the state.
      */
     private fun checkLocationPermissionState() {
-        val state = ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION)
-        handleLocationPermissionState(state)
+        val isGranted = ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        handleLocationPermissionState(isGranted)
     }
 
     /**
-     * Handle the detected state of the location permission for this app. This updates the
+     * Handle the detected granted state of the location permission for this app. This updates the
      * [AddProximityAlertDialogFragmentViewModel].
      *
-     * @param state The detected state.
+     * @param isGranted Is the location permission granted?
      */
-    private fun handleLocationPermissionState(state: Int) {
+    private fun handleLocationPermissionState(isGranted: Boolean) {
         when {
-            state == PackageManager.PERMISSION_GRANTED -> PermissionState.GRANTED
+            isGranted -> PermissionState.GRANTED
             !shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) ->
                 PermissionState.UNGRANTED
             else -> PermissionState.DENIED
@@ -303,8 +293,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
      * Request location permission from the user.
      */
     private fun requestLocationPermission() {
-        requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                PERMISSION_REQUEST_LOCATION)
+        requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
     /**
