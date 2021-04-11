@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,6 +39,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.FavouritesDao
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -61,7 +62,7 @@ class FavouritesRepositoryTest {
 
     @Before
     fun setUp() {
-        repository = FavouritesRepository(favouritesDao, coroutineRule.testDispatcher)
+        repository = FavouritesRepository(favouritesDao)
     }
 
     @Test
@@ -91,6 +92,40 @@ class FavouritesRepositoryTest {
         observer.finish()
 
         observer.assertValues(false, true, false)
+        verify(favouritesDao)
+                .removeOnFavouritesChangedListener(any())
+    }
+
+    @Test
+    fun getFavouriteStopFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+        whenever(favouritesDao.getFavouriteStop("123456"))
+                .thenReturn(FavouriteStop(1, "123456", "Favourite stop"))
+
+        val observer = repository.getFavouriteStopFlow("123456").test(this)
+        observer.finish()
+
+        observer.assertValues(FavouriteStop(1, "123456", "Favourite stop"))
+        verify(favouritesDao)
+                .removeOnFavouritesChangedListener(any())
+    }
+
+    @Test
+    fun getFavouriteStopFlowRespondsToFavouritesChanged() = coroutineRule.runBlockingTest {
+        doAnswer {
+            val listener = it.getArgument<FavouritesDao.OnFavouritesChangedListener>(0)
+            listener.onFavouritesChanged()
+            listener.onFavouritesChanged()
+        }.whenever(favouritesDao).addOnFavouritesChangedListener(any())
+        whenever(favouritesDao.getFavouriteStop("123456"))
+                .thenReturn(
+                        null,
+                        FavouriteStop(1, "123456", "Favourite stop"),
+                        null)
+
+        val observer = repository.getFavouriteStopFlow("123456").test(this)
+        observer.finish()
+
+        observer.assertValues(null, FavouriteStop(1, "123456", "Favourite stop"), null)
         verify(favouritesDao)
                 .removeOnFavouritesChangedListener(any())
     }

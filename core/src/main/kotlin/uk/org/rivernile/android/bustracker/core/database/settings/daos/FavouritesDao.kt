@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -57,7 +57,7 @@ interface FavouritesDao {
      * @param stopCode The `stopCode` to check.
      * @return `true` if the stop is added as a favourite, otherwise `false`.
      */
-    fun isStopAddedAsFavourite(stopCode: String): Boolean
+    suspend fun isStopAddedAsFavourite(stopCode: String): Boolean
 
     /**
      * Add [FavouriteStop]s.
@@ -80,6 +80,14 @@ interface FavouritesDao {
      * @return All user-saved favourite stops.
      */
     fun getAllFavouriteStops(): List<FavouriteStop>?
+
+    /**
+     * Get a specific user-saved favourite stop.
+     *
+     * @param stopCode The code of the stop to obtain from favourites.
+     * @return A specific user-saved favourite stop. Will be `null` if the favourite does not exist.
+     */
+    suspend fun getFavouriteStop(stopCode: String): FavouriteStop?
 
     /**
      * This interface should be implemented to listen for changes to favourites. Call

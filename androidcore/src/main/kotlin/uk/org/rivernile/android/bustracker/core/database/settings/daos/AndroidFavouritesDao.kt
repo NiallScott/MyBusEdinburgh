@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,12 +30,18 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.ContentObserver
 import android.database.Cursor
+import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.settings.FavouritesContract
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
 
 /**
  * This is an Android-specific implementation of [FavouritesDao] which uses a
@@ -43,12 +49,14 @@ import javax.inject.Singleton
  *
  * @param context The application [Context].
  * @param contract The contract for talking with the favourites table.
+ * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidFavouritesDao @Inject constructor(
         private val context: Context,
-        private val contract: FavouritesContract) : FavouritesDao {
+        private val contract: FavouritesContract,
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : FavouritesDao {
 
     private val listeners = mutableListOf<FavouritesDao.OnFavouritesChangedListener>()
     private val observer = Observer()
@@ -78,17 +86,32 @@ internal class AndroidFavouritesDao @Inject constructor(
         }
     }
 
-    override fun isStopAddedAsFavourite(stopCode: String) = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(FavouritesContract.COUNT),
-            "${FavouritesContract.STOP_CODE} = ?",
-            arrayOf(stopCode),
-            null)?.use {
-        // Fill Cursor window.
-        it.count
+    override suspend fun isStopAddedAsFavourite(stopCode: String): Boolean {
+        val cancellationSignal = CancellationSignal()
 
-        return it.moveToFirst() && it.getInt(it.getColumnIndex(FavouritesContract.COUNT)) > 0
-    } ?: false
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(FavouritesContract.COUNT),
+                        "${FavouritesContract.STOP_CODE} = ?",
+                        arrayOf(stopCode),
+                        null)?.use {
+                            // Fill Cursor window.
+                            it.count
+
+                            it.moveToFirst() && it.getInt(
+                                    it.getColumnIndex(FavouritesContract.COUNT)) > 0
+                        } ?: false
+
+                continuation.resume(result)
+            }
+        }
+    }
 
     override fun addFavouriteStops(favouriteStops: List<FavouriteStop>) =
             favouriteStops.map(this::mapToContentValues)
@@ -125,6 +148,44 @@ internal class AndroidFavouritesDao @Inject constructor(
             result
         } else {
             null
+        }
+    }
+
+    override suspend fun getFavouriteStop(stopCode: String): FavouriteStop? {
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                FavouritesContract.ID,
+                                FavouritesContract.STOP_NAME),
+                        "${FavouritesContract.STOP_CODE} = ?",
+                        arrayOf(stopCode),
+                        null)?.use {
+                    // Fill Cursor window.
+                    it.count
+
+                    if (it.moveToFirst()) {
+                        val idColumn = it.getColumnIndex(FavouritesContract.ID)
+                        val stopNameColumn = it.getColumnIndex(FavouritesContract.STOP_NAME)
+
+                        FavouriteStop(
+                                it.getInt(idColumn),
+                                stopCode,
+                                it.getString(stopNameColumn))
+                    } else {
+                        null
+                    }
+                }
+
+                continuation.resume(result)
+            }
         }
     }
 

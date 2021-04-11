@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,16 +36,20 @@ import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.settings.FavouritesContract
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -54,6 +58,7 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AndroidFavouritesDaoTest {
 
@@ -61,6 +66,9 @@ class AndroidFavouritesDaoTest {
 
         private const val TEST_AUTHORITY = "test.authority"
     }
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var contract: FavouritesContract
@@ -78,14 +86,14 @@ class AndroidFavouritesDaoTest {
             override fun getContentResolver() = mockContentResolver
         }
 
-        favouritesDao = AndroidFavouritesDao(mockContext, contract)
+        favouritesDao = AndroidFavouritesDao(mockContext, contract, coroutineRule.testDispatcher)
 
         whenever(contract.getContentUri())
                 .thenReturn(contentUri)
     }
 
     @Test
-    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsNull() {
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsNull() = runBlockingTest {
         val expectedProjection = arrayOf(FavouritesContract.COUNT)
         object : MockContentProvider() {
             override fun query(
@@ -102,7 +110,7 @@ class AndroidFavouritesDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
 
         val result = favouritesDao.isStopAddedAsFavourite("123456")
 
@@ -110,7 +118,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsEmpty() {
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsEmpty() = runBlockingTest {
         val expectedProjection = arrayOf(FavouritesContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -119,7 +127,7 @@ class AndroidFavouritesDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
@@ -128,7 +136,7 @@ class AndroidFavouritesDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
 
         val result = favouritesDao.isStopAddedAsFavourite("123456")
 
@@ -137,7 +145,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun isStopAddedAsFavouriteReturnsFalseWhenCursorReturnsCountOfZeroForStopCode() {
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorReturnsCountOfZeroForStopCode() = runBlocking {
         val expectedProjection = arrayOf(FavouritesContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(0))
@@ -147,7 +155,7 @@ class AndroidFavouritesDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
@@ -156,7 +164,7 @@ class AndroidFavouritesDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
 
         val result = favouritesDao.isStopAddedAsFavourite("123456")
 
@@ -165,7 +173,8 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun isStopAddedAsFavouriteReturnsTrueWhenCursorReturnsCountOfGreaterThanZeroForStopCode() {
+    fun isStopAddedAsFavouriteReturnsTrueWhenCursorReturnsCountOfGreaterThanZeroForStopCode() =
+            runBlocking {
         val expectedProjection = arrayOf(FavouritesContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(1))
@@ -175,7 +184,7 @@ class AndroidFavouritesDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
@@ -184,7 +193,7 @@ class AndroidFavouritesDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
 
         val result = favouritesDao.isStopAddedAsFavourite("123456")
 
@@ -302,7 +311,7 @@ class AndroidFavouritesDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertNull(selection)
@@ -337,7 +346,7 @@ class AndroidFavouritesDaoTest {
                     projection: Array<String>?,
                     selection: String?,
                     selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
+                    sortOrder: String?): Cursor {
                 assertEquals(contentUri, uri)
                 assertArrayEquals(expectedProjection, projection)
                 assertNull(selection)
@@ -354,6 +363,90 @@ class AndroidFavouritesDaoTest {
         assertTrue(cursor.isClosed)
     }
 
+    @Test
+    fun getFavouriteStopWithNullCursorReturnsNull() = runBlocking {
+        val expectedProjection = getExpectedProjectionForFavouriteStopSingle()
+        val expectedSelectionArgs = arrayOf("123456")
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(expectedSelectionArgs, selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        val result = favouritesDao.getFavouriteStop("123456")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getFavouriteStopWithEmptyCursorReturnsNull() = runBlocking {
+        val expectedProjection = getExpectedProjectionForFavouriteStopSingle()
+        val expectedSelectionArgs = arrayOf("123456")
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(expectedSelectionArgs, selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        val result = favouritesDao.getFavouriteStop("123456")
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getFavouriteStopWithPopulatedCursorReturnsFavouriteStop() = runBlocking {
+        val expectedProjection = getExpectedProjectionForFavouriteStopSingle()
+        val expectedSelectionArgs = arrayOf("123456")
+        val cursor = MatrixCursor(expectedProjection)
+        val expected = FavouriteStop(1, "123456", "Stop name")
+        cursor.addRow(arrayOf(1, "Stop name"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(expectedSelectionArgs, selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        val result = favouritesDao.getFavouriteStop("123456")
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
@@ -362,4 +455,10 @@ class AndroidFavouritesDaoTest {
             FavouritesContract.ID,
             FavouritesContract.STOP_CODE,
             FavouritesContract.STOP_NAME)
+
+    private fun getExpectedProjectionForFavouriteStopSingle() = arrayOf(
+            FavouritesContract.ID,
+            FavouritesContract.STOP_NAME)
+
+    private val runBlocking = coroutineRule::runBlockingTest
 }

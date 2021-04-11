@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.favourites
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.FavouritesDao
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,13 +41,11 @@ import javax.inject.Singleton
  * This repository is used to access favourites data.
  *
  * @param favouritesDao The DAO to access the favourites data store.
- * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
 @Singleton
 class FavouritesRepository @Inject internal constructor(
-        private val favouritesDao: FavouritesDao,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+        private val favouritesDao: FavouritesDao) {
 
     /**
      * Get a [Flow] which returns whether the given `stopCode` is added as a favourite or not, and
@@ -77,6 +73,31 @@ class FavouritesRepository @Inject internal constructor(
     }
 
     /**
+     * Get a [Flow] which emits [FavouriteStop] objects for the given `stopCode`. `null` will be
+     * emitted if the [FavouriteStop] does not exist.
+     *
+     * @param stopCode The `stopCode` to watch.
+     * @return The [Flow] which emits the [FavouriteStop]s for the given `stopCode`.
+     */
+    @ExperimentalCoroutinesApi
+    fun getFavouriteStopFlow(stopCode: String): Flow<FavouriteStop?> = callbackFlow {
+        val listener = object  : FavouritesDao.OnFavouritesChangedListener {
+            override fun onFavouritesChanged() {
+                launch {
+                    getAndSendFavouriteStop(channel, stopCode)
+                }
+            }
+        }
+
+        favouritesDao.addOnFavouritesChangedListener(listener)
+        getAndSendFavouriteStop(channel, stopCode)
+
+        awaitClose {
+            favouritesDao.removeOnFavouritesChangedListener(listener)
+        }
+    }
+
+    /**
      * A suspended function which obtains the favourite status of the given `stopCode` and then
      * sends it to the given `channel`.
      *
@@ -85,7 +106,20 @@ class FavouritesRepository @Inject internal constructor(
      */
     private suspend fun getAndSendIsStopAddedAsFavourite(
             channel: SendChannel<Boolean>,
-            stopCode: String) = withContext(ioDispatcher) {
+            stopCode: String) {
         channel.send(favouritesDao.isStopAddedAsFavourite(stopCode))
+    }
+
+    /**
+     * A suspended function which obtains the [FavouriteStop] of the given `stopCode` and then sends
+     * it to the channel. The result may be `null`, which means the favourite stop does not exist.
+     *
+     * @param channel The [SendChannel] that emissions should be sent to.
+     * @param stopCode The `stopCode` to obtain the [FavouriteStop] for.
+     */
+    private suspend fun getAndSendFavouriteStop(
+            channel: SendChannel<FavouriteStop?>,
+            stopCode: String) {
+        channel.send(favouritesDao.getFavouriteStop(stopCode))
     }
 }
