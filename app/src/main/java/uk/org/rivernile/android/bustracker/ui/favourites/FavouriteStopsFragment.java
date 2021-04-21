@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -148,8 +148,7 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
         try {
             callbacks = (Callbacks) context;
         } catch (ClassCastException e) {
-            throw new IllegalStateException(context.getClass().getName() + " does not implement " +
-                    Callbacks.class.getName());
+            callbacks = null;
         }
     }
 
@@ -236,7 +235,11 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
                 activity.finish();
             } else {
                 // View bus stop times.
-                callbacks.onShowBusTimes(stopCode);
+                final Callbacks callbacks = this.callbacks;
+
+                if (callbacks != null) {
+                    callbacks.onShowBusTimes(stopCode);
+                }
             }
         }
     }
@@ -528,26 +531,35 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
                 return false;
             }
 
+            final Callbacks callbacks = FavouriteStopsFragment.this.callbacks;
             final boolean result;
 
             switch (item.getItemId()) {
                 case R.id.favouritestops_context_menu_modify:
                     // Allow the user to edit the name of the favourite stop.
-                    callbacks.onShowAddEditFavouriteStop(selectedStopCode);
+                    if (callbacks != null) {
+                        callbacks.onShowAddEditFavouriteStop(selectedStopCode);
+                    }
+
                     result = true;
                     break;
                 case R.id.favouritestops_context_menu_delete:
-                    callbacks.onShowConfirmFavouriteDeletion(selectedStopCode);
+                    if (callbacks != null) {
+                        callbacks.onShowConfirmFavouriteDeletion(selectedStopCode);
+                    }
+
                     result = true;
                     break;
                 case R.id.favouritestops_context_menu_showonmap:
                     // Show the selected bus stop on the map.
-                    callbacks.onShowBusStopMapWithStopCode(selectedStopCode);
+                    if (callbacks != null) {
+                        callbacks.onShowBusStopMapWithStopCode(selectedStopCode);
+                    }
                     result = true;
                     break;
                 case R.id.favouritestops_context_menu_prox_alert:
                     // See if this stop exists as a proximity alert.
-                    if (cursorProxAlert != null) {
+                    if (callbacks != null && cursorProxAlert != null) {
                         if (cursorProxAlert.getCount() > 0) {
                             callbacks.onShowConfirmDeleteProximityAlert(selectedStopCode);
                         } else {
@@ -559,7 +571,7 @@ public class FavouriteStopsFragment extends Fragment implements LoaderManager.Lo
                     break;
                 case R.id.favouritestops_context_menu_time_alert:
                     // See if this stop exists as a time alert.
-                    if (cursorTimeAlert != null) {
+                    if (callbacks != null && cursorTimeAlert != null) {
                         if (cursorTimeAlert.getCount() > 0) {
                             callbacks.onShowConfirmDeleteTimeAlert(selectedStopCode);
                         } else {
