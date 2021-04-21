@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.settings.daos
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.database.ContentObserver
@@ -120,6 +121,25 @@ internal class AndroidFavouritesDao @Inject constructor(
                         context.contentResolver.bulkInsert(contract.getContentUri(), it)
                     }
 
+    override suspend fun addFavouriteStop(favouriteStop: FavouriteStop) {
+        withContext(ioDispatcher) {
+            context.contentResolver.insert(
+                    contract.getContentUri(),
+                    mapToContentValues(favouriteStop))
+        }
+    }
+
+    override suspend fun updateFavouriteStop(favouriteStop: FavouriteStop) {
+        withContext(ioDispatcher) {
+            val values = ContentValues().apply {
+                put(FavouritesContract.STOP_NAME, favouriteStop.stopName)
+            }
+            val rowUri = ContentUris.withAppendedId(contract.getContentUri(), favouriteStop.id)
+
+            context.contentResolver.update(rowUri, values, null, null)
+        }
+    }
+
     override fun removeAllFavouriteStops() =
             context.contentResolver.delete(contract.getContentUri(), null, null)
 
@@ -176,7 +196,7 @@ internal class AndroidFavouritesDao @Inject constructor(
                         val stopNameColumn = it.getColumnIndex(FavouritesContract.STOP_NAME)
 
                         FavouriteStop(
-                                it.getInt(idColumn),
+                                it.getLong(idColumn),
                                 stopCode,
                                 it.getString(stopNameColumn))
                     } else {
@@ -206,7 +226,7 @@ internal class AndroidFavouritesDao @Inject constructor(
             stopCodeColumn: Int,
             stopNameColumn: Int) =
             FavouriteStop(
-                    cursor.getInt(idColumn),
+                    cursor.getLong(idColumn),
                     cursor.getString(stopCodeColumn),
                     cursor.getString(stopNameColumn))
 

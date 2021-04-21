@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,17 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.settings.entities
+package uk.org.rivernile.android.bustracker.dagger.favourites
+
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
 
 /**
- * This data class describes a user-saved favourite stop persisted in the settings database.
+ * This [Module] contributes [androidx.fragment.app.Fragment]s for dealing with favourites.
  *
- * @property id The ID of this alert.
- * @property stopCode The stop code.
- * @property stopName The name given to this stop by the user.
  * @author Niall Scott
  */
-data class FavouriteStop(
-        val id: Long = 0L,
-        val stopCode: String,
-        val stopName: String)
+@Module
+interface FavouriteFragmentsModule {
+
+    @ExperimentalCoroutinesApi
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeAddEditFavouriteStopDialogFragment(): AddEditFavouriteStopDialogFragment
+}

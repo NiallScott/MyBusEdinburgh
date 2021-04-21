@@ -25,12 +25,9 @@
 
 package uk.org.rivernile.android.bustracker.database.settings;
 
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.WorkerThread;
 
@@ -41,47 +38,6 @@ import androidx.annotation.WorkerThread;
  * @author Niall Scott
  */
 public final class SettingsDatabase {
-
-    /**
-     * Add a new favourite stop to the database.
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The code of the stop to add.
-     * @param stopName The name to save for the favourite stop.
-     * @return A {@link Uri} to the newly added row, as defined by
-     * {@link android.content.ContentResolver#insert(Uri, ContentValues)}.
-     */
-    @WorkerThread
-    @Nullable
-    public static Uri addFavouriteStop(@NonNull final Context context,
-            @NonNull @Size(min = 1) final String stopCode,
-            @NonNull @Size(min = 1) final String stopName) {
-        final ContentValues cv = new ContentValues();
-        cv.put(SettingsContract.Favourites.STOP_CODE, stopCode);
-        cv.put(SettingsContract.Favourites.STOP_NAME, stopName);
-
-        return context.getContentResolver().insert(SettingsContract.Favourites.CONTENT_URI, cv);
-    }
-
-    /**
-     * Update a favourite stop in the database. This modifies the name of the favourite stop.
-     *
-     * @param context A {@link Context} instance.
-     * @param rowId The ID of the row to update.
-     * @param stopName The new user supplied name for the stop.
-     * @return The number of rows updated, as defined by
-     * {@link android.content.ContentResolver#update(Uri, ContentValues, String, String[])}.
-     */
-    @WorkerThread
-    public static int updateFavouriteStop(@NonNull final Context context,
-            final long rowId, @NonNull @Size(min = 1) final String stopName) {
-        final ContentValues cv = new ContentValues();
-        cv.put(SettingsContract.Favourites.STOP_NAME, stopName);
-
-        return context.getContentResolver().update(
-                ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, rowId), cv,
-                null, null);
-    }
 
     /**
      * Delete a favourite stop from the database, specifying what stop to delete by its stop code.

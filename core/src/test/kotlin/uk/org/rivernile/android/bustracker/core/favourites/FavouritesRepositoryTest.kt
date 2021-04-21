@@ -66,7 +66,7 @@ class FavouritesRepositoryTest {
     }
 
     @Test
-    fun isStopAddedAsFavouriteFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun isStopAddedAsFavouriteFlowGetsInitialValue() = runBlockingTest {
         whenever(favouritesDao.isStopAddedAsFavourite("123456"))
                 .thenReturn(false)
 
@@ -79,7 +79,7 @@ class FavouritesRepositoryTest {
     }
 
     @Test
-    fun isStopAddedAsFavouriteFlowRespondsToFavouritesChanged() = coroutineRule.runBlockingTest {
+    fun isStopAddedAsFavouriteFlowRespondsToFavouritesChanged() = runBlockingTest {
         doAnswer {
             val listener = it.getArgument<FavouritesDao.OnFavouritesChangedListener>(0)
             listener.onFavouritesChanged()
@@ -97,7 +97,7 @@ class FavouritesRepositoryTest {
     }
 
     @Test
-    fun getFavouriteStopFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun getFavouriteStopFlowGetsInitialValue() = runBlockingTest {
         whenever(favouritesDao.getFavouriteStop("123456"))
                 .thenReturn(FavouriteStop(1, "123456", "Favourite stop"))
 
@@ -110,7 +110,7 @@ class FavouritesRepositoryTest {
     }
 
     @Test
-    fun getFavouriteStopFlowRespondsToFavouritesChanged() = coroutineRule.runBlockingTest {
+    fun getFavouriteStopFlowRespondsToFavouritesChanged() = runBlockingTest {
         doAnswer {
             val listener = it.getArgument<FavouritesDao.OnFavouritesChangedListener>(0)
             listener.onFavouritesChanged()
@@ -129,4 +129,26 @@ class FavouritesRepositoryTest {
         verify(favouritesDao)
                 .removeOnFavouritesChangedListener(any())
     }
+
+    @Test
+    fun addFavouriteStopAddsFavouriteWithDao() = runBlockingTest {
+        val favouriteStop = FavouriteStop(0L, "123456", "Stop name")
+
+        repository.addFavouriteStop(favouriteStop)
+
+        verify(favouritesDao)
+                .addFavouriteStop(favouriteStop)
+    }
+
+    @Test
+    fun updateFavouriteStopUpdatesFavouriteWithDao() = runBlockingTest {
+        val favouriteStop = FavouriteStop(1L, "123456", "New name")
+
+        repository.updateFavouriteStop(favouriteStop)
+
+        verify(favouritesDao)
+                .updateFavouriteStop(favouriteStop)
+    }
+
+    private val runBlockingTest = coroutineRule::runBlockingTest
 }

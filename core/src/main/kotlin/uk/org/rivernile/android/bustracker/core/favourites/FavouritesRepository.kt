@@ -98,6 +98,24 @@ class FavouritesRepository @Inject internal constructor(
     }
 
     /**
+     * Add a new [FavouriteStop].
+     *
+     * @param favouriteStop The favourite stop to add.
+     */
+    suspend fun addFavouriteStop(favouriteStop: FavouriteStop) {
+        favouritesDao.addFavouriteStop(favouriteStop)
+    }
+
+    /**
+     * Update an existing [FavouriteStop].
+     *
+     * @param favouriteStop The favourite stop to update.
+     */
+    suspend fun updateFavouriteStop(favouriteStop: FavouriteStop) {
+        favouritesDao.updateFavouriteStop(favouriteStop)
+    }
+
+    /**
      * A suspended function which obtains the favourite status of the given `stopCode` and then
      * sends it to the given `channel`.
      *

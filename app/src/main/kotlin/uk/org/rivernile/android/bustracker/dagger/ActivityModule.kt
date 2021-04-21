@@ -32,6 +32,7 @@ import uk.org.rivernile.android.bustracker.dagger.alerts.AlertFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.alerts.AlertManagerFragmentModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.displaystopdata.DisplayStopDataFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.favourites.FavouriteFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.main.MainFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.news.NewsFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.settings.SettingsFragmentsModule
@@ -60,6 +61,7 @@ interface ActivityModule {
         AlertFragmentsModule::class,
         AlertManagerFragmentModule::class,
         BusStopMapFragmentsModule::class,
+        FavouriteFragmentsModule::class,
         MainFragmentsModule::class,
         NewsFragmentsModule::class
     ])
@@ -91,7 +93,8 @@ interface ActivityModule {
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
         AlertFragmentsModule::class,
-        DisplayStopDataFragmentsModule::class
+        DisplayStopDataFragmentsModule::class,
+        FavouriteFragmentsModule::class
     ])
     fun contributeDisplayStopDataActivity(): DisplayStopDataActivity
 

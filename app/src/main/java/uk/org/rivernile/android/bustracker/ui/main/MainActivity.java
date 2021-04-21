@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -59,7 +59,7 @@ import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFrag
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity;
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment;
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity;
-import uk.org.rivernile.android.bustracker.ui.favourites.AddEditFavouriteStopDialogFragment;
+import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.main.sections.AlertManagerSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;

@@ -60,6 +60,20 @@ interface FavouritesDao {
     suspend fun isStopAddedAsFavourite(stopCode: String): Boolean
 
     /**
+     * Add a stop as a favourite.
+     *
+     * @param favouriteStop The stop to add as a favourite.
+     */
+    suspend fun addFavouriteStop(favouriteStop: FavouriteStop)
+
+    /**
+     * Update an existing favourite stop.
+     *
+     * @param favouriteStop The stop to update.
+     */
+    suspend fun updateFavouriteStop(favouriteStop: FavouriteStop)
+
+    /**
      * Add [FavouriteStop]s.
      *
      * @param favouriteStops The favourite stops to add.

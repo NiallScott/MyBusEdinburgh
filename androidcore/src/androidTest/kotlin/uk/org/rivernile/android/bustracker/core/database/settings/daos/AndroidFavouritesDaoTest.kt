@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.settings.daos
 
 import android.content.ContentProvider
+import android.content.ContentUris
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -203,7 +204,7 @@ class AndroidFavouritesDaoTest {
 
     @Test
     fun addFavouriteStopsWithSingleItemAddsFavouriteStop() {
-        val favouriteStop = FavouriteStop(0, "100001", "Stop 1")
+        val favouriteStop = FavouriteStop(0L, "100001", "Stop 1")
         val favouriteStops = listOf(favouriteStop)
         val expectedContentValues = ContentValues().apply {
             put(FavouritesContract.STOP_CODE, "100001")
@@ -226,9 +227,9 @@ class AndroidFavouritesDaoTest {
 
     @Test
     fun addFavouriteStopsWithMultipleItemsAddsFavouriteStops() {
-        val favouriteStop1 = FavouriteStop(0, "100001", "Stop 1")
-        val favouriteStop2 = FavouriteStop(0, "100002", "Stop 2")
-        val favouriteStop3 = FavouriteStop(0, "100003", "Stop 3")
+        val favouriteStop1 = FavouriteStop(0L, "100001", "Stop 1")
+        val favouriteStop2 = FavouriteStop(0L, "100002", "Stop 2")
+        val favouriteStop3 = FavouriteStop(0L, "100003", "Stop 3")
         val favouriteStops = listOf(favouriteStop1, favouriteStop2, favouriteStop3)
         val expectedContentValues1 = ContentValues().apply {
             put(FavouritesContract.STOP_CODE, "100001")
@@ -256,6 +257,51 @@ class AndroidFavouritesDaoTest {
         val result = favouritesDao.addFavouriteStops(favouriteStops)
 
         assertEquals(3, result)
+    }
+
+    @Test
+    fun addFavouriteStopAddsFavouriteStop() = coroutineRule.runBlockingTest {
+        val favouriteStop = FavouriteStop(0L, "123456", "Stop name")
+        val expectedContentValues = ContentValues().apply {
+            put(FavouritesContract.STOP_CODE, "123456")
+            put(FavouritesContract.STOP_NAME, "Stop name")
+        }
+        val newItemUri = ContentUris.withAppendedId(contentUri, 1L)
+        object : MockContentProvider() {
+            override fun insert(uri: Uri, values: ContentValues?): Uri {
+                assertEquals(contentUri, uri)
+                assertEquals(expectedContentValues, values)
+
+                return newItemUri
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        favouritesDao.addFavouriteStop(favouriteStop)
+    }
+
+    @Test
+    fun updateFavouriteStopUpdatesFavouriteStop() = coroutineRule.runBlockingTest {
+        val favouriteStop = FavouriteStop(1L, "123456", "New name")
+        val expectedContentValues = ContentValues().apply {
+            put(FavouritesContract.STOP_NAME, "New name")
+        }
+        val expectedUri = ContentUris.withAppendedId(contentUri, 1L)
+        object : MockContentProvider() {
+            override fun update(
+                    uri: Uri,
+                    values: ContentValues?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?): Int {
+                assertEquals(expectedUri, uri)
+                assertEquals(expectedContentValues, values)
+                assertNull(selection)
+                assertNull(selectionArgs)
+
+                return 1
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        favouritesDao.updateFavouriteStop(favouriteStop)
     }
 
     @Test
@@ -338,9 +384,9 @@ class AndroidFavouritesDaoTest {
             addRow(arrayOf(3, "100003", "Stop 3"))
         }
         val expected = listOf(
-                FavouriteStop(1, "100001", "Stop 1"),
-                FavouriteStop(2, "100002", "Stop 2"),
-                FavouriteStop(3, "100003", "Stop 3"))
+                FavouriteStop(1L, "100001", "Stop 1"),
+                FavouriteStop(2L, "100002", "Stop 2"),
+                FavouriteStop(3L, "100003", "Stop 3"))
         object : MockContentProvider() {
             override fun query(uri: Uri,
                     projection: Array<String>?,
@@ -422,7 +468,7 @@ class AndroidFavouritesDaoTest {
         val expectedProjection = getExpectedProjectionForFavouriteStopSingle()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
-        val expected = FavouriteStop(1, "123456", "Stop name")
+        val expected = FavouriteStop(1L, "123456", "Stop name")
         cursor.addRow(arrayOf(1, "Stop name"))
         object : MockContentProvider() {
             override fun query(

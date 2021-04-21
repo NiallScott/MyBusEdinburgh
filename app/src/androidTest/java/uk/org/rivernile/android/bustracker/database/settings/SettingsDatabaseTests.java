@@ -29,8 +29,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.test.mock.MockContentProvider;
@@ -57,49 +55,6 @@ public class SettingsDatabaseTests {
                 return mockContentResolver;
             }
         };
-    }
-
-    /**
-     * Test that adding a favourite stop passes the data through correctly to the
-     * {@link android.content.ContentProvider}.
-     */
-    @Test
-    public void testAddFavouriteStop() {
-        mockContentResolver.addProvider(SettingsContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public Uri insert(final Uri uri, final ContentValues values) {
-                assertEquals(SettingsContract.Favourites.CONTENT_URI, uri);
-                assertEquals(2, values.size());
-                assertEquals("123456", values.getAsString(SettingsContract.Favourites.STOP_CODE));
-                assertEquals("Name", values.getAsString(SettingsContract.Favourites.STOP_NAME));
-
-                return ContentUris.withAppendedId(uri, 1);
-            }
-        });
-
-        SettingsDatabase.addFavouriteStop(mockContext, "123456", "Name");
-    }
-
-    /**
-     * Test that updating a favourite stop passes the data through correctly to the
-     * {@link android.content.ContentProvider}.
-     */
-    @Test
-    public void testUpdateFavouriteStop() {
-        mockContentResolver.addProvider(SettingsContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public int update(final Uri uri, final ContentValues values, final String selection,
-                    final String[] selectionArgs) {
-                assertEquals(ContentUris.withAppendedId(SettingsContract.Favourites.CONTENT_URI, 1),
-                        uri);
-                assertEquals(1, values.size());
-                assertEquals("New name", values.getAsString(SettingsContract.Favourites.STOP_NAME));
-
-                return 1;
-            }
-        });
-
-        SettingsDatabase.updateFavouriteStop(mockContext, 1, "New name");
     }
 
     /**
