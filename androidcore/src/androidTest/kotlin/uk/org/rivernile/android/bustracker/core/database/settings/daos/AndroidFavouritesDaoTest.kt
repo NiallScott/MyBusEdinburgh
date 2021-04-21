@@ -305,6 +305,24 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
+    fun removeFavouriteStopRemovesFavouriteStop() = coroutineRule.runBlockingTest {
+        object : MockContentProvider() {
+            override fun delete(
+                    uri: Uri,
+                    selection: String?,
+                    selectionArgs: Array<out String>?): Int {
+                assertEquals(contentUri, uri)
+                assertEquals("${FavouritesContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+
+                return 1
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        favouritesDao.removeFavouriteStop("123456")
+    }
+
+    @Test
     fun removeAllFavouriteStopsUsesCorrectParameters() {
         object : MockContentProvider() {
             override fun delete(

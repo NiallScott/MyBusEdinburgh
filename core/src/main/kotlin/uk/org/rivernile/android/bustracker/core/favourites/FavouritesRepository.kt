@@ -116,6 +116,15 @@ class FavouritesRepository @Inject internal constructor(
     }
 
     /**
+     * Remove an existing favourite stop.
+     *
+     * @param stopCode The saved favourite with this stop code to remove.
+     */
+    suspend fun removeFavouriteStop(stopCode: String) {
+        favouritesDao.removeFavouriteStop(stopCode)
+    }
+
+    /**
      * A suspended function which obtains the favourite status of the given `stopCode` and then
      * sends it to the given `channel`.
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.proximity
+package uk.org.rivernile.android.bustracker.ui.favourites.remove
 
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
@@ -36,24 +36,24 @@ import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject
 
 /**
- * This [DialogFragment] will show an [AlertDialog] which asks the user to confirm if they wish
- * to delete the proximity alert or not.
+ * This [DialogFragment] will show an [AlertDialog] which asks the user to confirm if they wish to
+ * delete the favourite stop or not.
  *
  * @author Niall Scott
  */
-class DeleteProximityAlertDialogFragment : DialogFragment() {
+class DeleteFavouriteDialogFragment : DialogFragment() {
 
     companion object {
 
         private const val ARG_STOP_CODE = "stopCode"
 
         /**
-         * Create a new instance of [DeleteProximityAlertDialogFragment].
+         * Create a new instance of [DeleteFavouriteDialogFragment].
          *
-         * @param stopCode The stop code to delete the proximity alert for.
+         * @param stopCode The stop code to delete the favourite for.
          */
         @JvmStatic // TODO: remove when all callers are on Kotlin.
-        fun newInstance(stopCode: String) = DeleteProximityAlertDialogFragment().apply {
+        fun newInstance(stopCode: String) = DeleteFavouriteDialogFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOP_CODE, stopCode)
             }
@@ -63,23 +63,19 @@ class DeleteProximityAlertDialogFragment : DialogFragment() {
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
-    private val viewModel: DeleteProximityAlertDialogFragmentViewModel by viewModels {
-        viewModelFactory
-    }
+    private val viewModel: DeleteFavouriteDialogFragmentViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
 
         super.onCreate(savedInstanceState)
 
-        isCancelable = true
-
         viewModel.stopCode = arguments?.getString(ARG_STOP_CODE)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
             AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.deleteproxdialog_title)
+                    .setTitle(R.string.deletefavouritedialog_title)
                     .setPositiveButton(R.string.okay) { _, _ ->
                         viewModel.onUserConfirmDeletion()
                     }

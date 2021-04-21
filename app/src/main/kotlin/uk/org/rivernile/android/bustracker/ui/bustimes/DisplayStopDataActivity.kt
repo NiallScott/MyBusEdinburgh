@@ -57,7 +57,7 @@ import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogF
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
-import uk.org.rivernile.android.bustracker.ui.favourites.DeleteFavouriteDialogFragment
+import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject

@@ -140,6 +140,15 @@ internal class AndroidFavouritesDao @Inject constructor(
         }
     }
 
+    override suspend fun removeFavouriteStop(stopCode: String) {
+        withContext(ioDispatcher) {
+            context.contentResolver.delete(
+                    contract.getContentUri(),
+                    "${FavouritesContract.STOP_CODE} = ?",
+                    arrayOf(stopCode))
+        }
+    }
+
     override fun removeAllFavouriteStops() =
             context.contentResolver.delete(contract.getContentUri(), null, null)
 

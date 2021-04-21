@@ -30,6 +30,7 @@ import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
+import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
 
 /**
  * This [Module] contributes [androidx.fragment.app.Fragment]s for dealing with favourites.
@@ -43,4 +44,8 @@ interface FavouriteFragmentsModule {
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeAddEditFavouriteStopDialogFragment(): AddEditFavouriteStopDialogFragment
+
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeDeleteFavouriteDialogFragment(): DeleteFavouriteDialogFragment
 }

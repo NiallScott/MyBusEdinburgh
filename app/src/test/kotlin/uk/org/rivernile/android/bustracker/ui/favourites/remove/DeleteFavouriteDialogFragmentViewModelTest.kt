@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.time
+package uk.org.rivernile.android.bustracker.ui.favourites.remove
 
 import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.never
@@ -37,64 +37,63 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
- * Tests for [DeleteTimeAlertDialogFragmentViewModel].
+ * Tests for [DeleteFavouriteDialogFragmentViewModel].
  *
  * @author Niall Scott
  */
 @ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
-class DeleteTimeAlertDialogFragmentViewModelTest {
+class DeleteFavouriteDialogFragmentViewModelTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var alertsRepository: AlertsRepository
+    private lateinit var favouritesRepository: FavouritesRepository
 
-    private lateinit var viewModel: DeleteTimeAlertDialogFragmentViewModel
+    private lateinit var viewModel: DeleteFavouriteDialogFragmentViewModel
 
     @Before
     fun setUp() {
-        viewModel = DeleteTimeAlertDialogFragmentViewModel(
-                alertsRepository,
+        viewModel = DeleteFavouriteDialogFragmentViewModel(
+                favouritesRepository,
                 coroutineRule,
                 coroutineRule.testDispatcher)
     }
 
     @Test
-    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsNull() =
-            coroutineRule.runBlockingTest {
+    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsNull() = runBlockingTest {
         viewModel.stopCode = null
 
         viewModel.onUserConfirmDeletion()
 
-        verify(alertsRepository, never())
-                .removeArrivalAlert(anyOrNull())
+        verify(favouritesRepository, never())
+                .removeFavouriteStop(anyOrNull())
     }
 
     @Test
-    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsEmpty() =
-            coroutineRule.runBlockingTest {
+    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsEmpty() = runBlockingTest {
         viewModel.stopCode = ""
 
         viewModel.onUserConfirmDeletion()
 
-        verify(alertsRepository, never())
-                .removeArrivalAlert(anyOrNull())
+        verify(favouritesRepository, never())
+                .removeFavouriteStop(anyOrNull())
     }
 
     @Test
-    fun onUserConfirmDeletionCausesDeletionWhenStopCodeIsPopulated() =
-            coroutineRule.runBlockingTest {
+    fun onUserConfirmDeletionCausesDeletionWhenStopCodeIsPopulated() = runBlockingTest {
         viewModel.stopCode = "123456"
 
         viewModel.onUserConfirmDeletion()
 
-        verify(alertsRepository)
-                .removeArrivalAlert("123456")
+        verify(favouritesRepository)
+                .removeFavouriteStop("123456")
     }
+
+    private val runBlockingTest = coroutineRule::runBlockingTest
 }

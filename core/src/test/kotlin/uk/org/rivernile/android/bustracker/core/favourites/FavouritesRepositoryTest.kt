@@ -150,5 +150,13 @@ class FavouritesRepositoryTest {
                 .updateFavouriteStop(favouriteStop)
     }
 
+    @Test
+    fun removeFavouriteStopRemovedFavouriteStopWithDao() = runBlockingTest {
+        repository.removeFavouriteStop("123456")
+
+        verify(favouritesDao)
+                .removeFavouriteStop("123456")
+    }
+
     private val runBlockingTest = coroutineRule::runBlockingTest
 }

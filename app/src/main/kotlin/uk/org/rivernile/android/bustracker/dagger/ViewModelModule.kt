@@ -38,6 +38,7 @@ import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAl
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivityViewModel
+import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.ClearSearchHistoryDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragmentViewModel
@@ -124,6 +125,19 @@ interface ViewModelModule {
     @IntoMap
     @ViewModelKey(TwitterUpdatesFragmentViewModel::class)
     fun bindTwitterUpdatesFragmentViewModel(viewModel: TwitterUpdatesFragmentViewModel): ViewModel
+
+    /**
+     * Inject a [DeleteFavouriteDialogFragmentViewModel] when requested.
+     *
+     * @param viewModel A [DeleteFavouriteDialogFragmentViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(DeleteFavouriteDialogFragmentViewModel::class)
+    fun bindDeleteFavouriteDialogFragmentViewModel(
+            viewModel: DeleteFavouriteDialogFragmentViewModel): ViewModel
 
     /**
      * Inject a [AlertManagerFragmentViewModel] when requested.

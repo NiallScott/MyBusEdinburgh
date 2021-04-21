@@ -74,6 +74,13 @@ interface FavouritesDao {
     suspend fun updateFavouriteStop(favouriteStop: FavouriteStop)
 
     /**
+     * Remove an existing favourite stop.
+     *
+     * @param stopCode The saved favourite with this stop code to remove.
+     */
+    suspend fun removeFavouriteStop(stopCode: String)
+
+    /**
      * Add [FavouriteStop]s.
      *
      * @param favouriteStops The favourite stops to add.

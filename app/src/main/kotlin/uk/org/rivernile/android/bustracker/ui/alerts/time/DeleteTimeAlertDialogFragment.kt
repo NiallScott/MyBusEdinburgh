@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -72,9 +72,7 @@ class DeleteTimeAlertDialogFragment : DialogFragment() {
 
         isCancelable = true
 
-        if (savedInstanceState == null) {
-            viewModel.stopCode = arguments?.getString(ARG_STOP_CODE)
-        }
+        viewModel.stopCode = arguments?.getString(ARG_STOP_CODE)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
