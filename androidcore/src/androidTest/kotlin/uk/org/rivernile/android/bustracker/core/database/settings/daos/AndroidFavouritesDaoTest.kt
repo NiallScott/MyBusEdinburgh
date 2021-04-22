@@ -511,6 +511,93 @@ class AndroidFavouritesDaoTest {
         assertTrue(cursor.isClosed)
     }
 
+    @Test
+    fun getFavouriteStopsWithNullCursorReturnsNull() = runBlocking {
+        val expectedProjection = getExpectedProjectionForFavouriteStop()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertEquals("${FavouritesContract.STOP_NAME} ASC", sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        val result = favouritesDao.getFavouriteStops()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getFavouriteStopsWithEmptyCursorReturnsNull() = runBlocking {
+        val expectedProjection = getExpectedProjectionForFavouriteStop()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertEquals("${FavouritesContract.STOP_NAME} ASC", sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        val result = favouritesDao.getFavouriteStops()
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getFavouriteStopsWithNonEmptyResultIsHandledCorrectly() = runBlocking {
+        val expectedProjection = getExpectedProjectionForFavouriteStop()
+        val cursor = MatrixCursor(expectedProjection).apply {
+            addRow(arrayOf(1, "100001", "Stop 1"))
+            addRow(arrayOf(2, "100002", "Stop 2"))
+            addRow(arrayOf(3, "100003", "Stop 3"))
+        }
+        val expected = listOf(
+                FavouriteStop(1L, "100001", "Stop 1"),
+                FavouriteStop(2L, "100002", "Stop 2"),
+                FavouriteStop(3L, "100003", "Stop 3"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertEquals("${FavouritesContract.STOP_NAME} ASC", sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidFavouritesDaoTest::addMockProvider)
+
+        val result = favouritesDao.getFavouriteStops()
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }

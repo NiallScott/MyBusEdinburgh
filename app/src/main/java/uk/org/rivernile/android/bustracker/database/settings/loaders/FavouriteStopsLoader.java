@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,16 +45,5 @@ public class FavouriteStopsLoader extends CursorLoader {
      */
     public FavouriteStopsLoader(@NonNull final Context context) {
         super(context, SettingsContract.Favourites.CONTENT_URI, null, null, null, null);
-    }
-
-    /**
-     * Used to create a {@link CursorLoader} to load a single favourite bus stop.
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The stop code of the favourite bus stop to load.
-     */
-    public FavouriteStopsLoader(@NonNull final Context context, @NonNull final String stopCode) {
-        super(context, SettingsContract.Favourites.CONTENT_URI, null,
-                SettingsContract.Favourites.STOP_CODE + " = ?", new String[] { stopCode }, null);
     }
 }

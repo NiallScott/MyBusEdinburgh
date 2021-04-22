@@ -81,7 +81,7 @@ class FavouritesRepository @Inject internal constructor(
      */
     @ExperimentalCoroutinesApi
     fun getFavouriteStopFlow(stopCode: String): Flow<FavouriteStop?> = callbackFlow {
-        val listener = object  : FavouritesDao.OnFavouritesChangedListener {
+        val listener = object : FavouritesDao.OnFavouritesChangedListener {
             override fun onFavouritesChanged() {
                 launch {
                     getAndSendFavouriteStop(channel, stopCode)
@@ -91,6 +91,28 @@ class FavouritesRepository @Inject internal constructor(
 
         favouritesDao.addOnFavouritesChangedListener(listener)
         getAndSendFavouriteStop(channel, stopCode)
+
+        awaitClose {
+            favouritesDao.removeOnFavouritesChangedListener(listener)
+        }
+    }
+
+    /**
+     * Get a [Flow] which emits [List]s of the user saved [FavouriteStop]s. `null` will be emitted
+     * if there was an error or there are no items.
+     */
+    @ExperimentalCoroutinesApi
+    val favouriteStopsFlow: Flow<List<FavouriteStop>?> get() = callbackFlow {
+        val listener = object : FavouritesDao.OnFavouritesChangedListener {
+            override fun onFavouritesChanged() {
+                launch {
+                    getAndSendFavouriteStops(channel)
+                }
+            }
+        }
+
+        favouritesDao.addOnFavouritesChangedListener(listener)
+        getAndSendFavouriteStops(channel)
 
         awaitClose {
             favouritesDao.removeOnFavouritesChangedListener(listener)
@@ -148,5 +170,15 @@ class FavouritesRepository @Inject internal constructor(
             channel: SendChannel<FavouriteStop?>,
             stopCode: String) {
         channel.send(favouritesDao.getFavouriteStop(stopCode))
+    }
+
+    /**
+     * A suspended function which obtains all [FavouriteStop]s and then sends them to the channel.
+     * The result may be `null`, which means there was an error or there are no items.
+     *
+     * @param channel The [SendChannel] that emissions should be sent to.
+     */
+    private suspend fun getAndSendFavouriteStops(channel: SendChannel<List<FavouriteStop>?>) {
+        channel.send(favouritesDao.getFavouriteStops())
     }
 }

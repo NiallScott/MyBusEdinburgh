@@ -101,7 +101,8 @@ internal class AndroidFavouritesDao @Inject constructor(
                         arrayOf(FavouritesContract.COUNT),
                         "${FavouritesContract.STOP_CODE} = ?",
                         arrayOf(stopCode),
-                        null)?.use {
+                        null,
+                        cancellationSignal)?.use {
                             // Fill Cursor window.
                             it.count
 
@@ -196,7 +197,8 @@ internal class AndroidFavouritesDao @Inject constructor(
                                 FavouritesContract.STOP_NAME),
                         "${FavouritesContract.STOP_CODE} = ?",
                         arrayOf(stopCode),
-                        null)?.use {
+                        null,
+                        cancellationSignal)?.use {
                     // Fill Cursor window.
                     it.count
 
@@ -208,6 +210,52 @@ internal class AndroidFavouritesDao @Inject constructor(
                                 it.getLong(idColumn),
                                 stopCode,
                                 it.getString(stopNameColumn))
+                    } else {
+                        null
+                    }
+                }
+
+                continuation.resume(result)
+            }
+        }
+    }
+
+    override suspend fun getFavouriteStops(): List<FavouriteStop>? {
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                FavouritesContract.ID,
+                                FavouritesContract.STOP_CODE,
+                                FavouritesContract.STOP_NAME),
+                        null,
+                        null,
+                        "${FavouritesContract.STOP_NAME} ASC",
+                        cancellationSignal)?.use {
+                    val count = it.count
+
+                    if (count > 0) {
+                        val result = ArrayList<FavouriteStop>(count)
+                        val idColumn = it.getColumnIndex(FavouritesContract.ID)
+                        val stopCodeColumn = it.getColumnIndex(FavouritesContract.STOP_CODE)
+                        val stopNameColumn = it.getColumnIndex(FavouritesContract.STOP_NAME)
+
+                        while (it.moveToNext()) {
+                            result.add(mapToFavouriteStop(
+                                    it,
+                                    idColumn,
+                                    stopCodeColumn,
+                                    stopNameColumn))
+                        }
+
+                        result
                     } else {
                         null
                     }

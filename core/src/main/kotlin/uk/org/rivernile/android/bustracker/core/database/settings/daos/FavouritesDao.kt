@@ -111,6 +111,14 @@ interface FavouritesDao {
     suspend fun getFavouriteStop(stopCode: String): FavouriteStop?
 
     /**
+     * Get all user-saved favourite stops.
+     *
+     * @return A [List] of all user-saved favourite stops. These will be returned in natural order.
+     * Will be `null` if there was an error or there are no items.
+     */
+    suspend fun getFavouriteStops(): List<FavouriteStop>?
+
+    /**
      * This interface should be implemented to listen for changes to favourites. Call
      * [addOnFavouritesChangedListener] to register the listener.
      */
