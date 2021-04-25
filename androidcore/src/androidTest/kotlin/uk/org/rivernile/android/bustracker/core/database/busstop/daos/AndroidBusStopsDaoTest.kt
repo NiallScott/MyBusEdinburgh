@@ -523,6 +523,100 @@ class AndroidBusStopsDaoTest {
         assertTrue(cursor.isClosed)
     }
 
+    @Test
+    fun getServicesForStopsWithEmptyStopCodesReturnsNull() = coroutineRule.runBlockingTest {
+        val result = busStopsDao.getServicesForStops(emptySet())
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getServicesForStopsWithNullCursorReturnsNull() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForStopsServices()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} IN (?)", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getServicesForStops(setOf("123456"))
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getServicesForStopsWithEmptyCursorReturnsNull() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForStopsServices()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} IN (?,?,?)", selection)
+                assertArrayEquals(arrayOf("111111", "222222", "333333"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getServicesForStops(setOf("111111", "222222", "333333"))
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getServicesForStopsWithNonEmptyCursorReturnsResult() = coroutineRule.runBlockingTest {
+        val expectedProjection = getExpectedProjectionForStopsServices()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("111111", "1, 2, 3"))
+        cursor.addRow(arrayOf("222222", " 3 , 4 , 5 "))
+        cursor.addRow(arrayOf("333333", "6,7, ,,,,"))
+        cursor.addRow(arrayOf("444444", null))
+        val expected = mapOf(
+                "111111" to listOf("1", "2", "3"),
+                "222222" to listOf("3", "4", "5"),
+                "333333" to listOf("6", "7"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} IN (?,?,?)", selection)
+                assertArrayEquals(arrayOf("111111", "222222", "333333"), selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getServicesForStops(setOf("111111", "222222", "333333"))
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
@@ -549,4 +643,8 @@ class AndroidBusStopsDaoTest {
             BusStopsContract.LATITUDE,
             BusStopsContract.LONGITUDE,
             BusStopsContract.ORIENTATION)
+
+    private fun getExpectedProjectionForStopsServices() = arrayOf(
+            BusStopsContract.STOP_CODE,
+            BusStopsContract.SERVICE_LISTING)
 }

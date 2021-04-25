@@ -86,6 +86,15 @@ interface BusStopsDao {
     suspend fun getStopDetails(stopCodes: Set<String>): Map<String, StopDetails>?
 
     /**
+     * Given a [Set] of stop codes, get the [List] of services which service this stop.
+     *
+     * @param stopCodes The stop codes to get the [List] of services for.
+     * @return A [Map] of stop code to the [List] of services which service that stop. If `null`
+     * is returned, this is either because of an error, or there is no data.
+     */
+    suspend fun getServicesForStops(stopCodes: Set<String>): Map<String, List<String>>?
+
+    /**
      * This interface should be implemented to listen for changes to bus stops. Call
      * [addOnBusStopsChangedListener] to register the listener.
      */

@@ -276,6 +276,62 @@ internal class AndroidBusStopsDao @Inject constructor(
         }
     }
 
+    override suspend fun getServicesForStops(stopCodes: Set<String>): Map<String, List<String>>? {
+        if (stopCodes.isEmpty()) {
+            return null
+        }
+
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val inPlaceholders = Array(stopCodes.size) { '?' }
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.STOP_CODE,
+                                BusStopsContract.SERVICE_LISTING),
+                        "${BusStopsContract.STOP_CODE} IN (${inPlaceholders.joinToString(",")})",
+                        stopCodes.toTypedArray(),
+                        null,
+                        cancellationSignal)?.use {
+                    val count = it.count
+
+                    if (count > 0) {
+                        val result = mutableMapOf<String, List<String>>()
+                        val stopCodeColumn = it.getColumnIndex(BusStopsContract.STOP_CODE)
+                        val serviceListingColumn =
+                                it.getColumnIndex(BusStopsContract.SERVICE_LISTING)
+
+                        while (it.moveToNext()) {
+                            val stopCode = it.getString(stopCodeColumn)
+                            val serviceListing = it.getString(serviceListingColumn)
+
+                            serviceListing?.split(',')
+                                    ?.mapNotNull { name ->
+                                        name.trim().ifEmpty { null }
+                                    }
+                                    ?.ifEmpty { null }
+                                    ?.let { names ->
+                                        result.put(stopCode, names)
+                                    }
+                        }
+
+                        result
+                    } else {
+                        null
+                    }
+                }
+
+                continuation.resume(result)
+            }
+        }
+    }
+
     /**
      * For all of the currently registers listeners, dispatch a data change event to them.
      */

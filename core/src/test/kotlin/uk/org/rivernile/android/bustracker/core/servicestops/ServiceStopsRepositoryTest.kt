@@ -38,6 +38,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServiceStopsDao
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
@@ -56,16 +57,18 @@ class ServiceStopsRepositoryTest {
 
     @Mock
     private lateinit var serviceStopsDao: ServiceStopsDao
+    @Mock
+    private lateinit var busStopsDao: BusStopsDao
 
     private lateinit var repository: ServiceStopsRepository
 
     @Before
     fun setUp() {
-        repository = ServiceStopsRepository(serviceStopsDao)
+        repository = ServiceStopsRepository(serviceStopsDao, busStopsDao)
     }
 
     @Test
-    fun getServicesForStopFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun getServicesForStopFlowGetsInitialValue() = runBlockingTest {
         val expected = listOf("1", "2", "3")
         whenever(serviceStopsDao.getServicesForStop("123456"))
                 .thenReturn(expected)
@@ -79,7 +82,7 @@ class ServiceStopsRepositoryTest {
     }
 
     @Test
-    fun getServicesForStopFlowRespondsToDataChanges() = coroutineRule.runBlockingTest {
+    fun getServicesForStopFlowRespondsToDataChanges() = runBlockingTest {
         doAnswer {
             val listener = it.getArgument<ServiceStopsDao.OnServiceStopsChangedListener>(0)
             listener.onServiceStopsChanged()
@@ -97,4 +100,50 @@ class ServiceStopsRepositoryTest {
         verify(serviceStopsDao)
                 .removeOnServiceStopsChangedListener(any())
     }
+
+    @Test
+    fun getServicesForStopsFlowGetsInitialValue() = runBlockingTest {
+        val expected = mapOf(
+                "111111" to listOf("1", "2", "3"),
+                "222222" to listOf("4", "5", "6"),
+                "333333" to listOf("7", "8", "9"))
+        val stopCodes = setOf("111111", "222222", "333333")
+        whenever(busStopsDao.getServicesForStops(stopCodes))
+                .thenReturn(expected)
+
+        val observer = repository.getServicesForStopsFlow(stopCodes).test(this)
+        observer.finish()
+
+        observer.assertValues(expected)
+        verify(busStopsDao)
+                .removeOnBusStopsChangedListener(any())
+    }
+
+    @Test
+    fun getServicesForStopsFlowRespondsToDataChanges() = runBlockingTest {
+        doAnswer {
+            val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
+            listener.onBusStopsChanged()
+            listener.onBusStopsChanged()
+        }.whenever(busStopsDao).addOnBusStopsChangedListener(any())
+        val expected1 = mapOf(
+                "111111" to listOf("1", "2", "3"),
+                "222222" to listOf("4", "5", "6"),
+                "333333" to listOf("7", "8", "9"))
+        val expected3 = mapOf(
+                "111111" to listOf("1", "2", "3"),
+                "222222" to listOf("4", "5", "7"))
+        val stopCodes = setOf("111111", "222222", "333333")
+        whenever(busStopsDao.getServicesForStops(stopCodes))
+                .thenReturn(expected1, null, expected3)
+
+        val observer = repository.getServicesForStopsFlow(stopCodes).test(this)
+        observer.finish()
+
+        observer.assertValues(expected1, null, expected3)
+        verify(busStopsDao)
+                .removeOnBusStopsChangedListener(any())
+    }
+
+    private val runBlockingTest = coroutineRule::runBlockingTest
 }

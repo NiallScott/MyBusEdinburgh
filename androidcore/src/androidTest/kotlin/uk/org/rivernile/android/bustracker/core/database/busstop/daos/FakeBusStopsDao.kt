@@ -52,4 +52,7 @@ class FakeBusStopsDao : BusStopsDao {
     override suspend fun getStopDetails(stopCode: String): StopDetails? = null
 
     override suspend fun getStopDetails(stopCodes: Set<String>): Map<String, StopDetails>? = null
+
+    override suspend fun getServicesForStops(stopCodes: Set<String>): Map<String, List<String>>? =
+            null
 }

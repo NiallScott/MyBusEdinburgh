@@ -32,6 +32,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServiceStopsDao
 import javax.inject.Inject
 
@@ -39,10 +40,12 @@ import javax.inject.Inject
  * This repository is used to access service stops data.
  *
  * @param serviceStopsDao The DAO to access the service stops data store.
+ * @param busStopsDao The DAO to access stop data.
  * @author Niall Scott
  */
 class ServiceStopsRepository @Inject internal constructor(
-        private val serviceStopsDao: ServiceStopsDao) {
+        private val serviceStopsDao: ServiceStopsDao,
+        private val busStopsDao: BusStopsDao) {
 
     /**
      * Get a [Flow] which emits the [List] of service names which serve the given `stopCode`. If the
@@ -53,7 +56,7 @@ class ServiceStopsRepository @Inject internal constructor(
      */
     @ExperimentalCoroutinesApi
     fun getServicesForStopFlow(stopCode: String): Flow<List<String>?> = callbackFlow {
-        val listener = object: ServiceStopsDao.OnServiceStopsChangedListener {
+        val listener = object : ServiceStopsDao.OnServiceStopsChangedListener {
             override fun onServiceStopsChanged() {
                 launch {
                     getAndSendServicesForStop(channel, stopCode)
@@ -70,6 +73,34 @@ class ServiceStopsRepository @Inject internal constructor(
     }
 
     /**
+     * Get a [Flow] which emits a [Map] of stop codes to a [List] of service names which service
+     * that stop. If there is a change to the backing data, there will be a new emission with the
+     * latest data.
+     *
+     * @param stopCodes A [Set] of the stop codes to get service names for.
+     * @return The [Flow] which emits the [Map] of stop codes to a [List] of services which service
+     * those stops.
+     */
+    @ExperimentalCoroutinesApi
+    fun getServicesForStopsFlow(stopCodes: Set<String>):
+            Flow<Map<String, List<String>>?> = callbackFlow {
+        val listener = object : BusStopsDao.OnBusStopsChangedListener {
+            override fun onBusStopsChanged() {
+                launch {
+                    getAndSendServicesForStops(channel, stopCodes)
+                }
+            }
+        }
+
+        busStopsDao.addOnBusStopsChangedListener(listener)
+        getAndSendServicesForStops(channel, stopCodes)
+
+        awaitClose {
+            busStopsDao.removeOnBusStopsChangedListener(listener)
+        }
+    }
+
+    /**
      * A suspended function which gets the [List] of services for the given `stopCode` and sends
      * these details to the given `channel`. This might send `null` to the channel when no details
      * were found for the given `stopCode`.
@@ -81,5 +112,19 @@ class ServiceStopsRepository @Inject internal constructor(
             channel: SendChannel<List<String>?>,
             stopCode: String) {
         channel.send(serviceStopsDao.getServicesForStop(stopCode))
+    }
+
+    /**
+     * A suspended function which gets the [Map] of stop code to a [List] of service names for the
+     * given stop codes and sends the result to the given `channel`. The channel will receive
+     * `null` when there was an error or there was no data.
+     *
+     * @param channel The [SendChannel] that emissions should be sent to.
+     * @param stopCodes The stop codes to get service names for.
+     */
+    private suspend fun getAndSendServicesForStops(
+            channel: SendChannel<Map<String, List<String>>?>,
+            stopCodes: Set<String>) {
+        channel.send(busStopsDao.getServicesForStops(stopCodes))
     }
 }
