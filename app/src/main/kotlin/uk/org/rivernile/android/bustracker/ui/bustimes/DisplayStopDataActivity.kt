@@ -40,13 +40,6 @@ import com.google.android.material.appbar.AppBarLayout
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
-import kotlinx.android.synthetic.main.displaystopdata.appBarLayout
-import kotlinx.android.synthetic.main.displaystopdata.collapsingLayout
-import kotlinx.android.synthetic.main.displaystopdata.tabLayout
-import kotlinx.android.synthetic.main.displaystopdata.toolbar
-import kotlinx.android.synthetic.main.displaystopdata.txtStopCode
-import kotlinx.android.synthetic.main.displaystopdata.txtStopName
-import kotlinx.android.synthetic.main.displaystopdata.viewPager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -60,6 +53,7 @@ import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavourit
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.DisplaystopdataBinding
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -108,6 +102,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
     private val viewModel: DisplayStopDataActivityViewModel by viewModels { viewModelFactory }
 
+    private lateinit var viewBinding: DisplaystopdataBinding
+
     private var favouriteMenuItem: MenuItem? = null
     private var arrivalAlertMenuItem: MenuItem? = null
     private var proximityAlertMenuItem: MenuItem? = null
@@ -118,7 +114,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.displaystopdata)
+        viewBinding = DisplaystopdataBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
 
         intent.let {
             viewModel.stopCode = if (Intent.ACTION_VIEW == it.action) {
@@ -128,19 +125,21 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             }
         }
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
         }
 
-        viewPager.apply {
-            pageMargin = resources.getDimensionPixelSize(R.dimen.padding_default)
-            adapter = StopDataPagerAdapter(this@DisplayStopDataActivity, supportFragmentManager,
-                    viewModel.stopCode)
-        }.let(tabLayout::setupWithViewPager)
+        viewBinding.apply {
+            viewPager.apply {
+                pageMargin = resources.getDimensionPixelSize(R.dimen.padding_default)
+                adapter = StopDataPagerAdapter(this@DisplayStopDataActivity, supportFragmentManager,
+                        viewModel.stopCode)
+            }.let(tabLayout::setupWithViewPager)
 
-        appBarLayout.addOnOffsetChangedListener(appBarOffsetChangedListener)
+            appBarLayout.addOnOffsetChangedListener(appBarOffsetChangedListener)
+        }
 
         viewModel.distinctStopCodeLiveData.observe(this, this::handleStopCode)
         viewModel.busStopDetails.observe(this, this::handleBusStop)
@@ -215,11 +214,10 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     private fun handleStopCode(stopCode: String?) {
         (stopCode?.ifEmpty { null }?.let {
             stopCode
-        } ?: getString(R.string.displaystopdata_error_stop_code_missing))
-                .let {
-                    txtStopCode.text = it
-                    supportActionBar?.subtitle = it
-                }
+        } ?: getString(R.string.displaystopdata_error_stop_code_missing)).let {
+            viewBinding.txtStopCode.text = it
+            supportActionBar?.subtitle = it
+        }
     }
 
     /**
@@ -231,11 +229,10 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     private fun handleBusStop(details: StopDetails?) {
         (details?.let {
             textFormattingUtils.formatBusStopName(it.stopName)
-        } ?: getString(R.string.displaystopdata_error_unknown_stop_name))
-                .let {
-                    txtStopName.text = it
-                    supportActionBar?.title = it
-                }
+        } ?: getString(R.string.displaystopdata_error_unknown_stop_name)).let {
+            viewBinding.txtStopName.text = it
+            supportActionBar?.title = it
+        }
 
         configureStreetViewMenuItem(details)
     }
@@ -424,6 +421,6 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     private val appBarOffsetChangedListener =
             AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
         supportActionBar?.setDisplayShowTitleEnabled(
-                abs(verticalOffset) >= collapsingLayout.scrimVisibleHeightTrigger)
+                abs(verticalOffset) >= viewBinding.collapsingLayout.scrimVisibleHeightTrigger)
     }
 }

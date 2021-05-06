@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -82,6 +82,7 @@
             layout="@layout/indeterminate_progress" />
 
         <include
+            android:id="@+id/layoutError"
             layout="@layout/error_with_resolve_button" />
     </uk.org.rivernile.android.bustracker.core.widget.ContentView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

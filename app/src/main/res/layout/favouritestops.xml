@@ -33,7 +33,7 @@
     android:layout_height="match_parent"
     app:progressView="@id/progress"
     app:contentView="@id/recyclerView"
-    app:errorView="@id/txtError"
+    app:errorView="@id/layoutError"
     app:contentLayout="progress"
     tools:contentLayout="content">
 
@@ -53,5 +53,6 @@
         layout="@layout/indeterminate_progress" />
 
     <include
+        android:id="@+id/layoutError"
         layout="@layout/error" />
 </uk.org.rivernile.android.bustracker.core.widget.ContentView>

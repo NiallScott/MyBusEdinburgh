@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,16 +38,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.android.synthetic.main.bustimes_fragment.contentView
-import kotlinx.android.synthetic.main.bustimes_fragment.layoutContent
-import kotlinx.android.synthetic.main.bustimes_fragment.recyclerView
-import kotlinx.android.synthetic.main.bustimes_fragment.swipeRefreshLayout
-import kotlinx.android.synthetic.main.bustimes_fragment.txtLastRefresh
-import kotlinx.android.synthetic.main.error.txtError
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.BustimesFragmentBinding
 import javax.inject.Inject
 
 /**
@@ -86,6 +81,9 @@ class BusTimesFragment : Fragment() {
     }
     private lateinit var adapter: LiveTimesAdapter
 
+    private var _viewBinding: BustimesFragmentBinding? = null
+    private val viewBinding get() = _viewBinding!!
+
     private var errorSnackbar: Snackbar? = null
 
     private var menuItemRefresh: MenuItem? = null
@@ -106,19 +104,24 @@ class BusTimesFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View =
-            inflater.inflate(R.layout.bustimes_fragment, container, false)
+            savedInstanceState: Bundle?): View {
+        _viewBinding = BustimesFragmentBinding.inflate(inflater, container, false)
+
+        return viewBinding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView.setHasFixedSize(true)
-        recyclerView.adapter = adapter
+        viewBinding.apply {
+            recyclerView.setHasFixedSize(true)
+            recyclerView.adapter = adapter
 
-        swipeRefreshLayout.apply {
-            setColorSchemeResources(R.color.colorAccent)
-            setOnRefreshListener {
-                viewModel.onSwipeToRefresh()
+            swipeRefreshLayout.apply {
+                setColorSchemeResources(R.color.colorAccent)
+                setOnRefreshListener {
+                    viewModel.onSwipeToRefresh()
+                }
             }
         }
 
@@ -134,6 +137,12 @@ class BusTimesFragment : Fragment() {
         viewModel.errorWithContentLiveData.observe(viewLifecycle, this::handleErrorWithContent)
         viewModel.lastRefreshLiveData.observe(viewLifecycle, this::handleLastRefreshUpdated)
         viewModel.refreshLiveData.observe(viewLifecycle) { /* Nothing in here. */  }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _viewBinding = null
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -179,10 +188,12 @@ class BusTimesFragment : Fragment() {
         // When transiting UI state, dismiss the existing error Snackbar.
         dismissErrorSnackbar()
 
-        when (uiState) {
-            UiState.CONTENT -> contentView.showContentLayout()
-            UiState.ERROR -> contentView.showErrorLayout()
-            else -> contentView.showProgressLayout()
+        viewBinding.contentView.apply {
+            when (uiState) {
+                UiState.CONTENT -> showContentLayout()
+                UiState.ERROR -> showErrorLayout()
+                else -> showProgressLayout()
+            }
         }
     }
 
@@ -196,12 +207,14 @@ class BusTimesFragment : Fragment() {
     private fun handleShowProgress(showProgress: Boolean?) {
         setRefreshActionItemLoadingState(showProgress)
 
-        showProgress?.also {
-            swipeRefreshLayout.isEnabled = true
-            swipeRefreshLayout.isRefreshing = it
-        } ?: run {
-            swipeRefreshLayout.isEnabled = false
-            swipeRefreshLayout.isRefreshing = false
+        viewBinding.swipeRefreshLayout.apply {
+            showProgress?.also {
+                isEnabled = true
+                isRefreshing = it
+            } ?: run {
+                isEnabled = false
+                isRefreshing = false
+            }
         }
     }
 
@@ -212,7 +225,7 @@ class BusTimesFragment : Fragment() {
      * @param error The error to display.
      */
     private fun handleError(error: ErrorType?) {
-        mapErrorToStringResource(error).let(txtError::setText)
+        mapErrorToStringResource(error).let(viewBinding.layoutError.txtError.txtError::setText)
     }
 
     /**
@@ -226,7 +239,7 @@ class BusTimesFragment : Fragment() {
         dismissErrorSnackbar()
 
         event?.getContentIfNotHandled()?.let {
-            errorSnackbar = Snackbar.make(layoutContent, mapErrorToStringResource(it),
+            errorSnackbar = Snackbar.make(viewBinding.root, mapErrorToStringResource(it),
                     Snackbar.LENGTH_LONG).apply {
                 addCallback(object : Snackbar.Callback() {
                     override fun onDismissed(snackbar: Snackbar, event: Int) {
@@ -247,7 +260,7 @@ class BusTimesFragment : Fragment() {
      */
     private fun handleConnectivityChange(hasConnectivity: Boolean) {
         val icon = if (hasConnectivity) 0 else R.drawable.ic_cloud_off
-        txtLastRefresh.setCompoundDrawablesWithIntrinsicBounds(0, 0, icon, 0)
+        viewBinding.txtLastRefresh.setCompoundDrawablesWithIntrinsicBounds(0, 0, icon, 0)
     }
 
     /**
@@ -265,7 +278,7 @@ class BusTimesFragment : Fragment() {
                 resources.getQuantityString(R.plurals.times_minsago, minutes, minutes)
             }
         }.let {
-            txtLastRefresh.text = getString(R.string.bustimes_lastupdated, it)
+            viewBinding.txtLastRefresh.text = getString(R.string.bustimes_lastupdated, it)
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,38 +28,32 @@ package uk.org.rivernile.android.bustracker.ui.news
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.tweet_item.view.imgAvatar
-import kotlinx.android.synthetic.main.tweet_item.view.text1
-import kotlinx.android.synthetic.main.tweet_item.view.text2
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.TweetItemBinding
 import java.lang.ref.WeakReference
 import java.text.DateFormat
 
 /**
  * This [RecyclerView.ViewHolder] contains a single [Tweet] as part of a list shown to the user.
  *
- * @param itemView The [View] given to us by the [RecyclerView.Adapter].
+ * @param viewBinding The [View] binding.
  * @param tweetAvatarImageLoader An implementation which loads avatar images.
  * @param dateFormat A [DateFormat] instance to render timestamps in.
  * @param clickListenerRef A [WeakReference] to the click listener.
  * @author Niall Scott
  */
 class TweetViewHolder(
-        itemView: View,
+        private val viewBinding: TweetItemBinding,
         private val tweetAvatarImageLoader: TweetAvatarImageLoader,
         private val dateFormat: DateFormat,
         private val clickListenerRef: WeakReference<OnItemClickedListener>)
-    : RecyclerView.ViewHolder(itemView) {
-
-    private val imgAvatar = itemView.imgAvatar
-    private val text1 = itemView.text1
-    private val text2 = itemView.text2
+    : RecyclerView.ViewHolder(viewBinding.root) {
 
     private var currentItem: Tweet? = null
 
     init {
-        imgAvatar.setOnClickListener {
+        viewBinding.imgAvatar.setOnClickListener {
             handleAvatarClick()
         }
     }
@@ -73,19 +67,21 @@ class TweetViewHolder(
     fun populate(tweet: Tweet?) {
         currentItem = tweet
 
-        tweet?.let {
-            tweetAvatarImageLoader.loadAvatar(imgAvatar, it.profileImageUrl)
-            val displayName = it.displayName
-            imgAvatar.contentDescription = displayName
-            text1.text = it.body
-            text2.text = text2.context.getString(R.string.tweetadapter_info_format, displayName,
-                    dateFormat.format(it.time))
-        } ?: run {
-            tweetAvatarImageLoader.assignPlaceholderToAvatarImageView(imgAvatar)
-            imgAvatar.contentDescription = null
-            imgAvatar.isClickable = false
-            text1.text = null
-            text2.text = null
+        viewBinding.apply {
+            tweet?.let {
+                tweetAvatarImageLoader.loadAvatar(imgAvatar, it.profileImageUrl)
+                val displayName = it.displayName
+                imgAvatar.contentDescription = displayName
+                text1.text = it.body
+                text2.text = text2.context.getString(R.string.tweetadapter_info_format, displayName,
+                        dateFormat.format(it.time))
+            } ?: run {
+                tweetAvatarImageLoader.assignPlaceholderToAvatarImageView(imgAvatar)
+                imgAvatar.contentDescription = null
+                imgAvatar.isClickable = false
+                text1.text = null
+                text2.text = null
+            }
         }
     }
 
