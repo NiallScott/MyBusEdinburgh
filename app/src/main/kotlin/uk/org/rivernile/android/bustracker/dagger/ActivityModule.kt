@@ -27,18 +27,21 @@ package uk.org.rivernile.android.bustracker.dagger
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.dagger.about.AboutFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.alerts.AlertFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.alerts.AlertManagerFragmentModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.displaystopdata.DisplayStopDataFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.favourites.FavouriteFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.favourites.FavouriteStopsFragmentModule
 import uk.org.rivernile.android.bustracker.dagger.main.MainFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.news.NewsFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.settings.SettingsFragmentsModule
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
+import uk.org.rivernile.android.bustracker.ui.favourites.SelectFavouriteStopActivity
 import uk.org.rivernile.android.bustracker.ui.main.MainActivity
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
@@ -48,48 +51,30 @@ import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @Module
 interface ActivityModule {
 
-    /**
-     * Presents an instance of [MainActivity] as an item to be injected.
-     *
-     * @return An instance of [MainActivity] to be injected.
-     */
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
         AlertFragmentsModule::class,
         AlertManagerFragmentModule::class,
         BusStopMapFragmentsModule::class,
+        FavouriteStopsFragmentModule::class,
         FavouriteFragmentsModule::class,
         MainFragmentsModule::class,
         NewsFragmentsModule::class
     ])
     fun contributeMainActivity(): MainActivity
 
-    /**
-     * Presents an instance of [AboutActivity] as an item to be injected.
-     *
-     * @return An instance of [AboutActivity] to be injected.
-     */
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [ AboutFragmentsModule::class ])
     fun contributeAboutActivity(): AboutActivity
 
-    /**
-     * Presents an instance of [SettingsActivity] as an item to be injected.
-     *
-     * @return An instance of [SettingsActivity] to be injected.
-     */
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [ SettingsFragmentsModule::class ])
     fun contributeSettingsActivity(): SettingsActivity
 
-    /**
-     * Presents an instance of [DisplayStopDataActivity] as an item to be injected.
-     *
-     * @return An instance of [DisplayStopDataActivity] to be injected.
-     */
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
         AlertFragmentsModule::class,
@@ -98,21 +83,17 @@ interface ActivityModule {
     ])
     fun contributeDisplayStopDataActivity(): DisplayStopDataActivity
 
-    /**
-     * Presents an instance of [BusStopMapActivity] as an item to be injected.
-     *
-     * @return An instance of [BusStopMapActivity] to be injected.
-     */
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [ BusStopMapFragmentsModule::class ])
     fun contributeBusStopMapActivity(): BusStopMapActivity
 
-    /**
-     * Presents an instance of [SearchActivity] as an item to be injected.
-     *
-     * @return An instance of [SearchActivity] to be injected.
-     */
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeSearchActivity(): SearchActivity
+
+    @Suppress("unused")
+    @ContributesAndroidInjector(modules = [
+        FavouriteStopsFragmentModule::class
+    ])
+    fun contributeSelectFavouriteStopActivity(): SelectFavouriteStopActivity
 }

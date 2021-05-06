@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,29 +21,33 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.database.settings.loaders;
+package uk.org.rivernile.android.bustracker.ui.favourites
 
-import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.loader.content.CursorLoader;
-
-import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
 
 /**
- * This class is used to load all the user's favourite bus stops or a single favourite bus stop.
+ * Classes which wish to be informed when favourite click events happen should implement this
+ * interface.
  *
  * @author Niall Scott
  */
-public class FavouriteStopsLoader extends CursorLoader {
+interface OnFavouriteItemClickListener {
 
     /**
-     * Used to create a {@link CursorLoader} to load all of the user's favourite bus stops.
+     * A favourite item has been clicked.
      *
-     * @param context A {@link Context} instance.
+     * @param favouriteStop The [FavouriteStop] which has been clicked.
      */
-    public FavouriteStopsLoader(@NonNull final Context context) {
-        super(context, SettingsContract.Favourites.CONTENT_URI, null, null, null, null);
-    }
+    fun onFavouriteClicked(favouriteStop: FavouriteStop)
+
+    /**
+     * A favourite item has been long clicked.
+     *
+     * @param stopCode The stop code of the long clicked favourite item.
+     * @return `true` if the long click was handled, otherwise `false`.
+     */
+    fun onFavouriteLongClicked(stopCode: String): Boolean
 }

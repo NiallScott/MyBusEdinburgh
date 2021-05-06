@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+
+/**
+ * Obtain a [LiveDataTestObserver] for a [LiveData] instance.
+ *
+ * @param T The type of data emitted by the [LiveData] instance.
+ * @return A [LiveDataTestObserver] for this [LiveData] instance.
+ */
+fun <T> LiveData<T>.test(): LiveDataTestObserver<T> {
+    val observer = LiveDataTestObserver<T>()
+    observeForever(observer)
+
+    return observer
+}
 
 /**
  * This class is used to collect the emissions of a [LiveData] object and store them for later

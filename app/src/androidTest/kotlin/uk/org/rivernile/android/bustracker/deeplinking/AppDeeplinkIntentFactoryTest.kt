@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -76,7 +76,7 @@ class AppDeeplinkIntentFactoryTest {
 
     @Test
     fun createShowStopOnMapIntentReturnsNullWhenStopMapUiFeatureIsNotEnabled() {
-        whenever(featureRepository.hasStopMapUiFeature())
+        whenever(featureRepository.hasStopMapUiFeature)
                 .thenReturn(false)
 
         val result = factory.createShowStopOnMapIntent("123456")
@@ -87,7 +87,7 @@ class AppDeeplinkIntentFactoryTest {
     @Test
     fun createShowStopOnMapIntentCreatesExpectedIntentWhenStopMapUiFeatureIsEnabled() {
         val context: Context = ApplicationProvider.getApplicationContext()
-        whenever(featureRepository.hasStopMapUiFeature())
+        whenever(featureRepository.hasStopMapUiFeature)
                 .thenReturn(true)
 
         val result = factory.createShowStopOnMapIntent("123456")

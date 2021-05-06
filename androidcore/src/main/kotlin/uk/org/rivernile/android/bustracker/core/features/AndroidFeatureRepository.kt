@@ -43,8 +43,11 @@ internal class AndroidFeatureRepository @Inject constructor(
         private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
         private val locationRepository: LocationRepository) : FeatureRepository {
 
-    override fun hasStopMapUiFeature() =
-            stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()
+    override val hasStopMapUiFeature get() =
+        stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()
 
-    override fun hasProximityAlertFeature() = locationRepository.hasLocationFeature
+    override val hasArrivalAlertFeature get() = true
+
+    override val hasProximityAlertFeature get() =
+        locationRepository.hasLocationFeature
 }

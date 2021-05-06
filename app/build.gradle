@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -120,7 +120,7 @@ dependencies {
     // AndroidX and support libraries KTX
     implementation "androidx.core:core-ktx:$androidXCoreVersion"
     implementation "androidx.activity:activity-ktx:$androidXActivityVersion"
-    implementation "androidx.fragment:fragment-ktx:$anroidXFragmentVersion"
+    implementation "androidx.fragment:fragment-ktx:$androidXFragmentVersion"
 
     // Android Architecture Components
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$architectureComponentsVersion"

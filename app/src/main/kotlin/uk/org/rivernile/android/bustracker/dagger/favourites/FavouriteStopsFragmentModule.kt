@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.dagger.favourites
+
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
 
 /**
- * This repository can be queried to determine if a feature is available.
+ * This [Module] contributes [androidx.fragment.app.Fragment]s for showing the user's favourites.
  *
  * @author Niall Scott
  */
-interface FeatureRepository {
+@Module
+interface FavouriteStopsFragmentModule {
 
-    /**
-     * Is the stop map UI feature available?
-     */
-    val hasStopMapUiFeature: Boolean
-
-    /**
-     * Is the time alert feature enabled?
-     */
-    val hasArrivalAlertFeature: Boolean
-
-    /**
-     * Is the proximity alert feature available?
-     */
-    val hasProximityAlertFeature: Boolean
+    @ExperimentalCoroutinesApi
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeFavouriteStopsFragment(): FavouriteStopsFragment
 }

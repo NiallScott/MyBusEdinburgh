@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-* Copyright (C) 2015 Niall 'Rivernile' Scott
+* Copyright (C) 2015 - 2021 Niall 'Rivernile' Scott
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors or contributors be held liable for
@@ -32,18 +32,21 @@
     android:minHeight="72dp"
     android:paddingTop="20dp"
     android:paddingBottom="20dp"
-    android:paddingLeft="?attr/listPreferredItemPaddingLeft"
-    android:paddingRight="?attr/listPreferredItemPaddingRight"
+    android:paddingStart="?attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?attr/listPreferredItemPaddingEnd"
     android:orientation="vertical"
     android:gravity="center_vertical"
     android:background="?selectableItemBackground"
-    android:clickable="true">
+    android:clickable="true"
+    android:focusable="true">
+
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
         tools:text="Example text" />
+
     <TextView
         android:id="@android:id/text2"
         android:layout_width="match_parent"

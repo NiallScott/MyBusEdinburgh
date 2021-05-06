@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -52,7 +52,7 @@ class AppDeeplinkIntentFactory @Inject constructor(
                     .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
 
     override fun createShowStopOnMapIntent(stopCode: String): Intent? {
-        return if (featureRepository.hasStopMapUiFeature()) {
+        return if (featureRepository.hasStopMapUiFeature) {
             Intent(context, BusStopMapActivity::class.java)
                     .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
         } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.ui.favourites
+
+import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
 
 /**
- * This repository can be queried to determine if a feature is available.
+ * This represents a single favourite stop shown on the UI.
  *
+ * @property favouriteStop The saved favourite data for this stop.
+ * @property services The service listing for this stop code.
  * @author Niall Scott
  */
-interface FeatureRepository {
-
-    /**
-     * Is the stop map UI feature available?
-     */
-    val hasStopMapUiFeature: Boolean
-
-    /**
-     * Is the time alert feature enabled?
-     */
-    val hasArrivalAlertFeature: Boolean
-
-    /**
-     * Is the proximity alert feature available?
-     */
-    val hasProximityAlertFeature: Boolean
-}
+data class UiFavouriteStop(
+        val favouriteStop: FavouriteStop,
+        val services: List<String>?)

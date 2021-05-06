@@ -26,11 +26,21 @@
 
 package uk.org.rivernile.android.bustracker.ui.favourites
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.fragment.app.commit
+import dagger.android.AndroidInjection
+import dagger.android.DispatchingAndroidInjector
+import dagger.android.HasAndroidInjector
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
+import javax.inject.Inject
 
 /**
  * This [android.app.Activity] displays the user's saved favourite stops and allows them to select
@@ -39,9 +49,16 @@ import uk.org.rivernile.edinburghbustracker.android.R
  * @author Niall Scott
  * @see FavouriteStopsFragment
  */
-class SelectFavouriteStopActivity : AppCompatActivity() {
+@ExperimentalCoroutinesApi
+class SelectFavouriteStopActivity : AppCompatActivity(),
+        FavouriteStopsFragment.CreateShortcutCallbacks, HasAndroidInjector {
+
+    @Inject
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidInjection.inject(this)
+
         super.onCreate(savedInstanceState)
 
         if (Intent.ACTION_CREATE_SHORTCUT != intent.action) {
@@ -53,8 +70,30 @@ class SelectFavouriteStopActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.commit {
-                add(R.id.fragmentContainer, FavouriteStopsFragment.newInstance(true))
+                add(R.id.fragmentContainer, FavouriteStopsFragment())
             }
         }
     }
+
+    override fun onCreateShortcut(stopCode: String, stopName: String) {
+        val busTimesIntent = Intent(DisplayStopDataActivity.ACTION_VIEW_STOP_DATA)
+                .setClass(this, DisplayStopDataActivity::class.java)
+                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+
+        val result = ShortcutInfoCompat.Builder(this, stopCode)
+                .setIntent(busTimesIntent)
+                .setShortLabel(stopName)
+                .setLongLabel(stopName)
+                .setIcon(IconCompat.createWithResource(this, R.drawable.appicon_favourite))
+                .build()
+                .let {
+                    ShortcutManagerCompat.createShortcutResultIntent(this, it)
+                }
+
+        setResult(Activity.RESULT_OK, result)
+        finish()
+    }
+
+    override fun androidInjector() = dispatchingAndroidInjector
 }

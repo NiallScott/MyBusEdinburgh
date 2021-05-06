@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -80,7 +80,7 @@ public class FavouritesSection implements Section {
     @Override
     @Nullable
     public Fragment getFragment() {
-        return FavouriteStopsFragment.newInstance(false);
+        return new FavouriteStopsFragment();
     }
 
     @Override

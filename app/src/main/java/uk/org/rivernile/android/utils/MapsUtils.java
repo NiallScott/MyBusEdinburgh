@@ -55,7 +55,7 @@ public final class MapsUtils {
      * 
      * @param context A {@link Context} instance.
      * @return {@code true} if the Google Maps should show, {@code false} if not.
-     * @deprecated Use {@link FeatureRepository#hasStopMapUiFeature()} instead.
+     * @deprecated Use {@link FeatureRepository#getHasStopMapUiFeature()} instead.
      */
     @Deprecated
     public static boolean isGoogleMapsAvailable(@NonNull final Context context) {
