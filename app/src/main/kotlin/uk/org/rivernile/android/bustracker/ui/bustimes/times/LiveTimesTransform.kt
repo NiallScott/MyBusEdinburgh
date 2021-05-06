@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -75,14 +75,12 @@ class LiveTimesTransform @Inject constructor(
      * @return A [Flow] containing the transformation parameters.
      */
     private fun getParametersFlow(expandedServicesFlow: Flow<Set<String>>) =
-            getSortByTimeFlow()
-                    .combine(getShowNightServicesFlow()) { sortByTime, showNightServices ->
-                        Preferences(sortByTime, showNightServices)
-                    }
-                    .combine(expandedServicesFlow
-                            .distinctUntilChanged()) { preferences, expandedServices ->
-                        TransformationParameters(preferences, expandedServices)
-                    }
+            combine(
+                    getSortByTimeFlow(),
+                    getShowNightServicesFlow(),
+                    expandedServicesFlow) { sortByTime, showNightServices, expandedServices ->
+                Parameters(sortByTime, showNightServices, expandedServices)
+            }
 
     /**
      * Get the [Flow] which emits the user's sorting preference.
@@ -111,7 +109,7 @@ class LiveTimesTransform @Inject constructor(
      */
     private fun transformResult(
             result: UiResult,
-            parameters: TransformationParameters) = when (result) {
+            parameters: Parameters) = when (result) {
         is UiResult.InProgress -> UiTransformedResult.InProgress
         is UiResult.Success -> mapSuccess(result, parameters)
         is UiResult.Error -> mapError(result)
@@ -131,11 +129,11 @@ class LiveTimesTransform @Inject constructor(
      */
     private fun mapSuccess(
             success: UiResult.Success,
-            parameters: TransformationParameters): UiTransformedResult {
+            parameters: Parameters): UiTransformedResult {
         return success.stop.services.let {
-            transformations.filterNightServices(it, parameters.preferences.showNightServices)
+            transformations.filterNightServices(it, parameters.showNightServices)
         }.let {
-            transformations.sortServices(it, parameters.preferences.sortByTime)
+            transformations.sortServices(it, parameters.sortByTime)
         }.let {
             transformations.applyExpansions(it, parameters.expandedServices)
         }.ifEmpty { null }?.let {
@@ -153,21 +151,11 @@ class LiveTimesTransform @Inject constructor(
             UiTransformedResult.Error(error.receiveTime, error.error)
 
     /**
-     * This class is used to store resolved preferences while in transition through the [Flow]
+     * This class is used to store resolved parameters while in transition through the [Flow]
      * operators.
      */
-    private data class Preferences(
+    private data class Parameters(
             val sortByTime: Boolean,
-            val showNightServices: Boolean)
-
-    /**
-     * This class is used to store the transformation parameters while in transition through the
-     * [Flow] operators.
-     *
-     * @property preferences The resolved preference values.
-     * @property expandedServices The resolved [Set] of expanded services.
-     */
-    private data class TransformationParameters(
-            val preferences: Preferences,
+            val showNightServices: Boolean,
             val expandedServices: Set<String>)
 }

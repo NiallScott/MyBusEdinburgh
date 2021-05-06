@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -72,16 +72,16 @@ class LiveTimesLoader @Inject constructor(
     fun loadLiveTimesFlow(
             stopCodeFlow: Flow<String?>,
             refreshFlow: Flow<Unit?>): Flow<UiResult> {
-        return stopCodeFlow
-                .combine(preferenceRepository.getLiveTimesNumberOfDeparturesFlow()) { a, b ->
-                    LoadParams(a, b)
-                }
-                .combine(refreshFlow) { params, _ -> params}
-                .flatMapLatest { params ->
-                    params.stopCode?.let {
-                        liveTimesRetriever.getLiveTimesFlow(it, params.numberOfDepartures)
-                    } ?: flowOf(UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE))
-                }
+        return combine(
+                stopCodeFlow,
+                preferenceRepository.getLiveTimesNumberOfDeparturesFlow(),
+                refreshFlow) { stopCode, numberOfDepartures, _ ->
+            LoadParams(stopCode, numberOfDepartures)
+        }.flatMapLatest { params ->
+            params.stopCode?.let {
+                liveTimesRetriever.getLiveTimesFlow(it, params.numberOfDepartures)
+            } ?: flowOf(UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE))
+        }
     }
 
     /**
