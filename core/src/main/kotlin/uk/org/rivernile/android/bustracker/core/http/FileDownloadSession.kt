@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,8 @@ package uk.org.rivernile.android.bustracker.core.http
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okio.Okio
+import okio.buffer
+import okio.sink
 import uk.org.rivernile.android.bustracker.core.extensions.closeSafely
 import java.io.File
 import java.io.IOException
@@ -82,12 +83,12 @@ class FileDownloadSession internal constructor(
             val response = call.execute()
 
             if (response.isSuccessful) {
-                response.body()?.let {
+                response.body?.let {
                     fileSink.writeAll(it.source())
                 } ?: throw FileDownloadException("No body received from server.")
             } else {
                 throw FileDownloadException("Received error response from server. Response code " +
-                        "= ${response.code()}")
+                        "= ${response.code}")
             }
         } catch (e: IOException) {
             throw FileDownloadException(e)
@@ -128,7 +129,7 @@ class FileDownloadSession internal constructor(
      */
     @Throws(FileDownloadException::class)
     private fun createFileSink() = try {
-        Okio.buffer(Okio.sink(toLocation))
+        toLocation.sink().buffer()
     } catch (e: IOException) {
         throw FileDownloadException(e)
     }
