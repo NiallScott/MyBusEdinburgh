@@ -29,7 +29,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
 ext {
-    googlePlayServicesVersion = '17.0.0'
+    googlePlayServicesVersion = '17.0.1'
 }
 
 android {
@@ -89,14 +89,14 @@ android {
     }
 
     useLibrary 'android.test.mock'
+}
 
-    afterEvaluate {
-        applicationVariants.all { variant ->
-            variant.resValue 'string', 'package_name', variant.applicationId
-            variant.resValue 'string', 'search_authority',
-                    "${variant.applicationId}.SearchSuggestionsProvider"
-        }
-    }
+androidComponents {
+    onVariants(selector().all(), { variant ->
+        variant.addResValue 'package_name', 'string', variant.applicationId, null
+        variant.addResValue 'search_authority', 'string',
+                "${variant.applicationId.get()}.SearchSuggestionsProvider", null
+    })
 }
 
 allOpen {
