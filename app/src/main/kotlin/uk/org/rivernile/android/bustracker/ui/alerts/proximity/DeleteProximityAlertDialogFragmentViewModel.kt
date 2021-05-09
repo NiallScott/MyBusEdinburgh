@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 
 /**
@@ -40,13 +40,13 @@ import javax.inject.Inject
  *
  * @param alertsRepository The [AlertsRepository], used to interface with the lower-level
  * architecture layers to handle alerts.
- * @param globalCoroutineScope The global [CoroutineScope].
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
 class DeleteProximityAlertDialogFragmentViewModel @Inject constructor(
         private val alertsRepository: AlertsRepository,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     /**
@@ -59,9 +59,9 @@ class DeleteProximityAlertDialogFragmentViewModel @Inject constructor(
      */
     fun onUserConfirmDeletion() {
         stopCode?.ifEmpty { null }?.let {
-            // Uses the global CoroutineScope as the Dialog dismisses immediately, and we need
+            // Uses the application CoroutineScope as the Dialog dismisses immediately, and we need
             // this task to finish. Fire and forget is fine here.
-            globalCoroutineScope.launch(defaultDispatcher) {
+            applicationCoroutineScope.launch(defaultDispatcher) {
                 alertsRepository.removeProximityAlert(it)
             }
         }

@@ -36,13 +36,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Singleton
 
 /**
  * A module for providing fake implementations of core module resources.
  *
- * @param globalCoroutineScope The instance of [CoroutineScope] to represent the global scope.
+ * @param applicationCoroutineScope The instance of [CoroutineScope] to represent the application
+ * scope.
  * @param defaultDispatcher The [CoroutineDispatcher] to use to represent the default dispatcher.
  * @author Niall Scott
  */
@@ -50,14 +51,15 @@ import javax.inject.Singleton
     FakeCoreModule.Bindings::class
 ])
 class FakeCoreModule(
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope = GlobalScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope =
+                GlobalScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher =
                 Dispatchers.Default) {
 
     @Provides
     @Singleton
-    @ForGlobalCoroutineScope
-    fun provideGlobalCoroutineScope() = globalCoroutineScope
+    @ForApplicationCoroutineScope
+    fun provideApplicationCoroutineScope() = applicationCoroutineScope
 
     @Provides
     @Singleton

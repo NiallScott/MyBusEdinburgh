@@ -35,7 +35,7 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.backup.BackupObserver
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import javax.inject.Inject
 
@@ -51,7 +51,7 @@ import javax.inject.Inject
  * @param cleanUpTask Implementation to perform clean up of app data - usually to remove data from
  * old installations of the app.
  * @param alertManager The [AlertManager] - for controlling user set alerts.
- * @param globalCoroutineScope The global [CoroutineScope].
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The default dispatcher to dispatch coroutines on.
  * @author Niall Scott
  */
@@ -61,7 +61,7 @@ class StartUpTask @Inject internal constructor(
         private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseJobScheduler,
         private val cleanUpTask: CleanUpTask?,
         private val alertManager: AlertManager,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
     /**
@@ -69,7 +69,7 @@ class StartUpTask @Inject internal constructor(
      * is not blocked.
      */
     fun performStartUpTasks() {
-        globalCoroutineScope.launch(defaultDispatcher) {
+        applicationCoroutineScope.launch(defaultDispatcher) {
             // In-order tasks that are pre-requisites should be executed first, before launching
             // the async tasks.
             appNotificationChannels.createNotificationChannels()

@@ -49,7 +49,7 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertR
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -60,7 +60,7 @@ import javax.inject.Inject
  * @param busStopsRepository Used to get stop details.
  * @param uiStateCalculator Used to calculate the current [UiState].
  * @param alertsRepository Used to add the proximity alert.
- * @param globalCoroutineScope The [CoroutineScope] to add the alert under.
+ * @param applicationCoroutineScope The [CoroutineScope] to add the alert under.
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -69,7 +69,7 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
         private val busStopsRepository: BusStopsRepository,
         private val uiStateCalculator: UiStateCalculator,
         private val alertsRepository: AlertsRepository,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     /**
@@ -174,9 +174,9 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
      */
     fun handleAddClicked(meters: Int) {
         stopCode?.ifEmpty { null }?.let {
-            // Uses the global CoroutineScope as the Dialog dismisses immediately, and we need
+            // Uses the application CoroutineScope as the Dialog dismisses immediately, and we need
             // this task to finish. Fire and forget is fine here.
-            globalCoroutineScope.launch(defaultDispatcher) {
+            applicationCoroutineScope.launch(defaultDispatcher) {
                 alertsRepository.addProximityAlert(ProximityAlertRequest(it, meters))
             }
         }

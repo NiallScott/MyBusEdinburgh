@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.AreaEnteredHandler
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 
 /**
@@ -58,8 +58,8 @@ class AndroidAreaEnteredBroadcastReceiver : BroadcastReceiver() {
     @Inject
     lateinit var areaEnteredHandler: AreaEnteredHandler
     @Inject
-    @ForGlobalCoroutineScope
-    lateinit var globalCoroutineScope: CoroutineScope
+    @ForApplicationCoroutineScope
+    lateinit var applicationCoroutineScope: CoroutineScope
     @Inject
     @ForDefaultDispatcher
     lateinit var defaultDispatcher: CoroutineDispatcher
@@ -81,7 +81,7 @@ class AndroidAreaEnteredBroadcastReceiver : BroadcastReceiver() {
             val isEntering = intent.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false)
 
             if (isEntering) {
-                globalCoroutineScope.launch(defaultDispatcher) {
+                applicationCoroutineScope.launch(defaultDispatcher) {
                     areaEnteredHandler.handleAreaEntered(alertId)
                 }
             }

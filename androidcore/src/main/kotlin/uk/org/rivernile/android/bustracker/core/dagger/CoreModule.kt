@@ -37,11 +37,11 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
 import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
@@ -126,14 +126,16 @@ class CoreModule {
     }
 
     /**
-     * Provide the [GlobalScope] as a [CoroutineScope].
+     * Provide a [CoroutineScope] which lives for the entire time the application is alive.
      *
-     * @return The [GlobalScope] as a [CoroutineScope].
+     * @return A [CoroutineScope] which lives for the entire time the application is alive.
      */
     @Provides
     @Singleton
-    @ForGlobalCoroutineScope
-    internal fun provideGlobalCoroutineScope(): CoroutineScope = GlobalScope
+    @ForApplicationCoroutineScope
+    internal fun provideApplicationCoroutineScope(
+            @ForDefaultDispatcher defaultDispatcher: CoroutineDispatcher): CoroutineScope =
+            CoroutineScope(SupervisorJob() + defaultDispatcher)
 
     /**
      * Provide a [CoroutineDispatcher] for performing operations on the main thread.

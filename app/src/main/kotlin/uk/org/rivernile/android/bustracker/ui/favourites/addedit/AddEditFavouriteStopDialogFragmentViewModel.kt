@@ -55,7 +55,7 @@ import uk.org.rivernile.android.bustracker.utils.Event
  * @param fetcher Used to fetch the favourite stop data for display on the UI.
  * @param textFormattingUtils Used to format the stop names when pre-populating the editable name.
  * @param defaultDispatcher The default [CoroutineDispatcher].
- * @param globalCoroutineScope The global [CoroutineScope].
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @author Niall Scott
  */
 @ExperimentalCoroutinesApi
@@ -65,7 +65,7 @@ class AddEditFavouriteStopDialogFragmentViewModel(
         private val fetcher: FavouriteStopFetcher,
         private val textFormattingUtils: TextFormattingUtils,
         private val defaultDispatcher: CoroutineDispatcher,
-        private val globalCoroutineScope: CoroutineScope) : ViewModel() {
+        private val applicationCoroutineScope: CoroutineScope) : ViewModel() {
 
     companion object {
 
@@ -167,9 +167,9 @@ class AddEditFavouriteStopDialogFragmentViewModel(
                     stopCode = mode.stopCode,
                     stopName = stopName)
 
-            globalCoroutineScope.launch(defaultDispatcher) {
-                // This is launched in global scope as the Dialog is dismissed right away when the
-                // user clicks the 'positive' button. If we were to use the ViewModel scope, the
+            applicationCoroutineScope.launch(defaultDispatcher) {
+                // This is launched in application scope as the Dialog is dismissed right away when
+                // the user clicks the 'positive' button. If we were to use the ViewModel scope, the
                 // task would be immediately cancelled. Besides, once the Dialog is dismissed, the
                 // user doesn't have the opportunity to cancel the operation anyway.
                 favouritesRepository.addFavouriteStop(favouriteStop)
@@ -187,9 +187,9 @@ class AddEditFavouriteStopDialogFragmentViewModel(
         stopNameFlow.value?.ifEmpty { null }?.let { stopName ->
             val favouriteStop = mode.favouriteStop.copy(stopName = stopName)
 
-            globalCoroutineScope.launch(defaultDispatcher) {
-                // This is launched in global scope as the Dialog is dismissed right away when the
-                // user clicks the 'positive' button. If we were to use the ViewModel scope, the
+            applicationCoroutineScope.launch(defaultDispatcher) {
+                // This is launched in application scope as the Dialog is dismissed right away when
+                // the user clicks the 'positive' button. If we were to use the ViewModel scope, the
                 // task would be immediately cancelled. Besides, once the Dialog is dismissed, the
                 // user doesn't have the opportunity to cancel the operation anyway.
                 favouritesRepository.updateFavouriteStop(favouriteStop)

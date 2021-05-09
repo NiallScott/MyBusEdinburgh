@@ -35,7 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 
 /**
@@ -48,8 +48,8 @@ class DeviceBootBroadcastReceiver : BroadcastReceiver() {
     @Inject
     lateinit var alertManager: AlertManager
     @Inject
-    @ForGlobalCoroutineScope
-    lateinit var globalCoroutineScope: CoroutineScope
+    @ForApplicationCoroutineScope
+    lateinit var applicationCoroutineScope: CoroutineScope
     @Inject
     @ForDefaultDispatcher
     lateinit var defaultDispatcher: CoroutineDispatcher
@@ -58,7 +58,7 @@ class DeviceBootBroadcastReceiver : BroadcastReceiver() {
         if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
             AndroidInjection.inject(this, context)
 
-            globalCoroutineScope.launch(defaultDispatcher) {
+            applicationCoroutineScope.launch(defaultDispatcher) {
                 alertManager.ensureTasksRunningIfAlertsExists()
             }
         }

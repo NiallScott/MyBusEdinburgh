@@ -75,7 +75,7 @@ class DeviceBootBroadcastReceiverTest {
                 arrivalAlertTaskLauncher = arrivalAlertTaskLauncher,
                 proximityAlertTaskLauncher = proximityAlertTaskLauncher)
         val coreModule = FakeCoreModule(
-                globalCoroutineScope = coroutineRule,
+                applicationCoroutineScope = coroutineRule,
                 defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
 

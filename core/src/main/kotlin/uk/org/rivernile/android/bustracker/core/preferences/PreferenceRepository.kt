@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,21 +36,21 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 
 /**
  * This repository is used to access application preference data.
  *
  * @param preferenceManager Used to access the preference backing store.
- * @param globalCoroutineScope The global [CoroutineScope].
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The [CoroutineDispatcher] to perform processing operations on.
  * @author Niall Scott
  */
 @ExperimentalCoroutinesApi
 class PreferenceRepository @Inject constructor(
         private val preferenceManager: PreferenceManager,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
     /**
@@ -105,7 +105,7 @@ class PreferenceRepository @Inject constructor(
      * Toggle the sort by time preference.
      */
     fun toggleSortByTime() {
-        globalCoroutineScope.launch(defaultDispatcher) {
+        applicationCoroutineScope.launch(defaultDispatcher) {
             preferenceManager.setBusTimesSortedByTime(!preferenceManager.isBusTimesSortedByTime())
         }
     }
@@ -114,7 +114,7 @@ class PreferenceRepository @Inject constructor(
      * Toggle the auto-refresh preference.
      */
     fun toggleAutoRefresh() {
-        globalCoroutineScope.launch(defaultDispatcher) {
+        applicationCoroutineScope.launch(defaultDispatcher) {
             preferenceManager.setBusTimesAutoRefreshEnabled(
                     !preferenceManager.isBusTimesAutoRefreshEnabled())
         }

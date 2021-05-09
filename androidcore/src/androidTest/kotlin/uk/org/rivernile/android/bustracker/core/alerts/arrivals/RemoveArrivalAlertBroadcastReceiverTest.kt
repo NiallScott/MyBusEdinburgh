@@ -64,7 +64,7 @@ class RemoveArrivalAlertBroadcastReceiverTest {
     @Before
     fun setUp() {
         val coreModule = FakeCoreModule(
-                globalCoroutineScope = coroutineRule,
+                applicationCoroutineScope = coroutineRule,
                 defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
 

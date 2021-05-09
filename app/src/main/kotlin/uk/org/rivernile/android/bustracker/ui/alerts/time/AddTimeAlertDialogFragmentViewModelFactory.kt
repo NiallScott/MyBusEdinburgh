@@ -33,7 +33,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
 import javax.inject.Inject
@@ -46,7 +46,7 @@ import javax.inject.Inject
  * @param serviceStopsRepository Used to get the services for the selected stop code.
  * @param uiStateCalculator Used to calculate the current [UiState].
  * @param alertsRepository Used to add the arrival alert.
- * @param globalCoroutineScope The [CoroutineScope] to add the alert under.
+ * @param applicationCoroutineScope The [CoroutineScope] to add the alert under.
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -56,7 +56,7 @@ class AddTimeAlertDialogFragmentViewModelFactory @Inject constructor(
         private val serviceStopsRepository: ServiceStopsRepository,
         private val uiStateCalculator: UiStateCalculator,
         private val alertsRepository: AlertsRepository,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModelSavedStateFactory<AddTimeAlertDialogFragmentViewModel> {
 
@@ -67,6 +67,6 @@ class AddTimeAlertDialogFragmentViewModelFactory @Inject constructor(
                     serviceStopsRepository,
                     uiStateCalculator,
                     alertsRepository,
-                    globalCoroutineScope,
+                    applicationCoroutineScope,
                     defaultDispatcher)
 }

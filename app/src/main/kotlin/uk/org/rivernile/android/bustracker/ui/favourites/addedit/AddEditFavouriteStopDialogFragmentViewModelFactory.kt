@@ -31,7 +31,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
@@ -45,7 +45,7 @@ import javax.inject.Inject
  * @param fetcher Used to fetch data.
  * @param textFormattingUtils Used to format stop names in to [String]s.
  * @param defaultDispatcher The default [CoroutineDispatcher].
- * @param globalCoroutineScope The global [CoroutineScope].
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @author Niall Scott
  */
 @ExperimentalCoroutinesApi
@@ -54,7 +54,7 @@ class AddEditFavouriteStopDialogFragmentViewModelFactory @Inject constructor(
         private val fetcher: FavouriteStopFetcher,
         private val textFormattingUtils: TextFormattingUtils,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope)
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope)
     : ViewModelSavedStateFactory<AddEditFavouriteStopDialogFragmentViewModel> {
 
     override fun create(handle: SavedStateHandle) =
@@ -64,5 +64,5 @@ class AddEditFavouriteStopDialogFragmentViewModelFactory @Inject constructor(
                     fetcher,
                     textFormattingUtils,
                     defaultDispatcher,
-                    globalCoroutineScope)
+                    applicationCoroutineScope)
 }

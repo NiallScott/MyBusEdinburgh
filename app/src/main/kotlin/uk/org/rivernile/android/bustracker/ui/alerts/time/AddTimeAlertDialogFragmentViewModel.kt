@@ -51,7 +51,7 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
@@ -63,7 +63,7 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @param serviceStopsRepository Used to get the services for the selected stop code.
  * @param uiStateCalculator Used to calculate the current [UiState].
  * @param alertsRepository Used to add the arrival alert.
- * @param globalCoroutineScope The [CoroutineScope] to add the alert under.
+ * @param applicationCoroutineScope The [CoroutineScope] to add the alert under.
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -74,7 +74,7 @@ class AddTimeAlertDialogFragmentViewModel(
         private val serviceStopsRepository: ServiceStopsRepository,
         uiStateCalculator: UiStateCalculator,
         private val alertsRepository: AlertsRepository,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
@@ -184,9 +184,9 @@ class AddTimeAlertDialogFragmentViewModel(
     fun onAddClicked(timeTrigger: Int) {
         stopCode?.ifEmpty { null }?.let { sc ->
             selectedServices?.ifEmpty { null }?.let { ss ->
-                // Uses the global CoroutineScope as the Dialog dismisses immediately, and we need
-                // this task to finish. Fire and forget is fine here.
-                globalCoroutineScope.launch(defaultDispatcher) {
+                // Uses the application CoroutineScope as the Dialog dismisses immediately, and we
+                // need this task to finish. Fire and forget is fine here.
+                applicationCoroutineScope.launch(defaultDispatcher) {
                     alertsRepository.addArrivalAlert(ArrivalAlertRequest(sc, ss, timeTrigger))
                 }
             }

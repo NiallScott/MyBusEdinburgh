@@ -31,7 +31,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import javax.inject.Inject
 
@@ -39,13 +39,13 @@ import javax.inject.Inject
  * This is the [ViewModel] for [DeleteFavouriteDialogFragment].
  *
  * @param favouritesRepository Used to remove the favourite stop.
- * @param globalCoroutineScope The global [CoroutineScope].
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
 class DeleteFavouriteDialogFragmentViewModel @Inject constructor(
         private val favouritesRepository: FavouritesRepository,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     /**
@@ -58,9 +58,9 @@ class DeleteFavouriteDialogFragmentViewModel @Inject constructor(
      */
     fun onUserConfirmDeletion() {
         stopCode?.ifEmpty { null }?.let {
-            // Uses the global CoroutineScope as the Dialog dismisses immediately, and we need
+            // Uses the application CoroutineScope as the Dialog dismisses immediately, and we need
             // this task to finish. Fire and forget is fine here.
-            globalCoroutineScope.launch(defaultDispatcher) {
+            applicationCoroutineScope.launch(defaultDispatcher) {
                 favouritesRepository.removeFavouriteStop(it)
             }
         }

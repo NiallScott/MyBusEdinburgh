@@ -32,27 +32,27 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForGlobalCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 
 /**
  * This is a [ViewModel] for use with [ClearSearchHistoryDialogFragment].
  *
  * @param searchHistoryDao The DAO to access the user's search history.
- * @param globalCoroutineScope The global [CoroutineScope].
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The default [CoroutineDispatcher] to dispatch on.
  * @author Niall Scott
  */
 class ClearSearchHistoryDialogFragmentViewModel @Inject constructor(
         private val searchHistoryDao: SearchHistoryDao,
-        @ForGlobalCoroutineScope private val globalCoroutineScope: CoroutineScope,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher): ViewModel() {
 
     /**
      * This is called when the user has confirmed they wish to clear their search history.
      */
     fun onUserConfirmClearSearchHistory() {
-        globalCoroutineScope.launch(defaultDispatcher) {
+        applicationCoroutineScope.launch(defaultDispatcher) {
             searchHistoryDao.clearSearchHistory()
         }
     }
