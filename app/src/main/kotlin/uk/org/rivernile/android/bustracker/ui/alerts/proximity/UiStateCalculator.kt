@@ -83,7 +83,7 @@ class UiStateCalculator @Inject constructor(
      * single `false` value.
      */
     private fun createLocationEnabledFlow() = if (locationRepository.hasLocationFeature) {
-        locationRepository.getIsLocationEnabledFlow()
+        locationRepository.isLocationEnabledFlow
     } else {
         flowOf(false)
     }

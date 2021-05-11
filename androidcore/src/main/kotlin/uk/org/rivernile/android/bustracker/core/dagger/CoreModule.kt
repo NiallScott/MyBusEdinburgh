@@ -74,6 +74,7 @@ import javax.inject.Singleton
     CoreModule.Bindings::class,
     DatabaseModule::class,
     FlavourModule::class,
+    GooglePlayServicesModule::class,
     LocationModule::class,
     HttpModule::class,
     ServiceModule::class,

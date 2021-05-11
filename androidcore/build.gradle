@@ -121,6 +121,9 @@ dependencies {
     // Retrofit
     api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
+    // Google Play Services location
+    api "com.google.android.gms:play-services-location:$playServicesLocationVersion"
+
     // Test dependencies
     androidTestImplementation project(':testutils')
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"

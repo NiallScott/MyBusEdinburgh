@@ -48,6 +48,7 @@ buildscript {
         retrofitVersion = '2.9.0'
         gsonVersion = '2.8.6'
         picassoVersion = '2.71828'
+        playServicesLocationVersion = '18.0.0'
 
         // Testing dependency versions
         junitVersion = '4.13.2'

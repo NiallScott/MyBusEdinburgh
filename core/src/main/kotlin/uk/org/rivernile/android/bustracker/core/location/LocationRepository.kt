@@ -28,6 +28,9 @@ package uk.org.rivernile.android.bustracker.core.location
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,12 +42,14 @@ import javax.inject.Singleton
  * functionality.
  * @param isLocationEnabledDetector Used to determine if location features are currently enabled on
  * the device.
+ * @param locationSource An implementation used to provide the device location.
  * @author Niall Scott
  */
 @Singleton
 class LocationRepository @Inject internal constructor(
         private val hasLocationFeatureDetector: HasLocationFeatureDetector,
-        private val isLocationEnabledDetector: IsLocationEnabledDetector) {
+        private val isLocationEnabledDetector: IsLocationEnabledDetector,
+        private val locationSource: LocationSource) {
 
     /**
      * Does this device have location-aware features or not?
@@ -54,9 +59,45 @@ class LocationRepository @Inject internal constructor(
     /**
      * Get a [Flow] which returns the location enabled status. Any updates to the status will be
      * emitted from the returned [Flow] until cancelled.
-     *
-     * @return The [Flow] which emits location enabled status.
      */
     @ExperimentalCoroutinesApi
-    fun getIsLocationEnabledFlow() = isLocationEnabledDetector.getIsLocationEnabledFlow()
+    val isLocationEnabledFlow get() = isLocationEnabledDetector.getIsLocationEnabledFlow()
+
+    /**
+     * Get a [Flow] which emits the latest [DeviceLocation] and any further location changes until
+     * cancelled.
+     *
+     * Callers should check [hasLocationFeature] first before requesting this [Flow]. When
+     * [hasLocationFeature] is `false`, the [Flow] returned by this property will only ever emit
+     * `null`.
+     *
+     * Callers should also check to see if location permissions have been granted. If they have not
+     * been, this property will return a [Flow] which only emits `null`.
+     *
+     * A [Flow] emitting `null` will also be returned when device location services are not enabled.
+     */
+    @ExperimentalCoroutinesApi
+    val userVisibleLocationFlow: Flow<DeviceLocation?> get() = if (hasLocationFeature) {
+        isLocationEnabledFlow
+                .distinctUntilChanged()
+                .flatMapLatest(this::createUserVisibleLocationFlow)
+    } else {
+        // The location feature detection is a hard no in this case. We don't expect it to change,
+        // so we just emit a Flow of `null`.
+        flowOf(null)
+    }
+
+    /**
+     * Create a [Flow] which emits [DeviceLocation] objects for user visible features. This is
+     * dependent upon whether device location services are enabled or not. If they are not enabled,
+     * a [Flow] which merely emits `null` will be returned.
+     *
+     * @param locationEnabled Are device location services enabled or not?
+     * @return A [Flow] with the latest [DeviceLocation] if available, or `null` if not available.
+     */
+    private fun createUserVisibleLocationFlow(locationEnabled: Boolean) = if (locationEnabled) {
+        locationSource.userVisibleLocationFlow
+    } else {
+        flowOf(null)
+    }
 }

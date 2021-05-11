@@ -86,7 +86,7 @@ class UiStateCalculatorTest {
             coroutineRule.runBlockingTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
-        whenever(locationRepository.getIsLocationEnabledFlow())
+        whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
         val locationPermissionFlow = flowOf(PermissionState.UNGRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
@@ -103,7 +103,7 @@ class UiStateCalculatorTest {
             coroutineRule.runBlockingTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
-        whenever(locationRepository.getIsLocationEnabledFlow())
+        whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
         val locationPermissionFlow = flowOf(PermissionState.DENIED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
@@ -119,7 +119,7 @@ class UiStateCalculatorTest {
     fun createUiStateFlowEmitsProgressWhenStopDetailsIsNull() = coroutineRule.runBlockingTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
-        whenever(locationRepository.getIsLocationEnabledFlow())
+        whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
         val locationPermissionFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(null)
@@ -135,7 +135,7 @@ class UiStateCalculatorTest {
     fun createUiStateFlowEmitsContentWhenStopDetailsIsAvailable() = coroutineRule.runBlockingTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
-        whenever(locationRepository.getIsLocationEnabledFlow())
+        whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
         val locationPermissionFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
@@ -151,7 +151,7 @@ class UiStateCalculatorTest {
     fun createUiStateFlowEmitsCorrectValuesWithRepresentativeExample() = coroutineRule.runBlockingTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
-        whenever(locationRepository.getIsLocationEnabledFlow())
+        whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flow {
                     emit(false)
                     delay(300L)

@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import android.content.Context
 import android.location.LocationManager
 import android.os.Build
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -39,7 +41,10 @@ import uk.org.rivernile.android.bustracker.core.location.HasLocationFeatureDetec
 import uk.org.rivernile.android.bustracker.core.location.IsLocationEnabledDetector
 import uk.org.rivernile.android.bustracker.core.location.IsLocationEnabledFetcher
 import uk.org.rivernile.android.bustracker.core.location.LegacyIsLocationEnabledFetcher
+import uk.org.rivernile.android.bustracker.core.location.LocationSource
 import uk.org.rivernile.android.bustracker.core.location.V28IsLocationEnabledFetcher
+import uk.org.rivernile.android.bustracker.core.location.googleplay.GooglePlayLocationSource
+import uk.org.rivernile.android.bustracker.core.location.platform.PlatformLocationSource
 import javax.inject.Provider
 
 /**
@@ -62,6 +67,19 @@ internal class LocationModule {
             LegacyIsLocationEnabledFetcher(
                     contextProvider.get(),
                     defaultDispatcherProvider.get())
+        }
+    }
+
+    @Provides
+    fun provideLocationSource(
+            context: Context,
+            platformLocationSourceProvider: Provider<PlatformLocationSource>,
+            googlePlayLocationSourceProvider: Provider<GooglePlayLocationSource>): LocationSource {
+        return if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) ==
+                ConnectionResult.SUCCESS) {
+            googlePlayLocationSourceProvider.get()
+        } else {
+            platformLocationSourceProvider.get()
         }
     }
 

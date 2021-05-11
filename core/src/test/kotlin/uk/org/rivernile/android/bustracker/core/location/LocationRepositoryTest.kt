@@ -59,6 +59,8 @@ class LocationRepositoryTest {
     private lateinit var hasLocationFeatureDetector: HasLocationFeatureDetector
     @Mock
     private lateinit var isLocationEnabledDetector: IsLocationEnabledDetector
+    @Mock
+    private lateinit var locationSource: LocationSource
 
     private lateinit var locationRepository: LocationRepository
 
@@ -66,7 +68,8 @@ class LocationRepositoryTest {
     fun setUp() {
         locationRepository = LocationRepository(
                 hasLocationFeatureDetector,
-                isLocationEnabledDetector)
+                isLocationEnabledDetector,
+                locationSource)
     }
 
     @Test
@@ -104,14 +107,83 @@ class LocationRepositoryTest {
     }
 
     @Test
-    fun getIsLocationEnabledFlowReturnsFlowFromIsLocationEnabledDetector() =
-            coroutineRule.runBlockingTest {
+    fun getIsLocationEnabledFlowReturnsFlowFromIsLocationEnabledDetector() = runBlockingTest {
         whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
                 .thenReturn(flowOf(false, true, false))
 
-        val observer = locationRepository.getIsLocationEnabledFlow().test(this)
+        val observer = locationRepository.isLocationEnabledFlow.test(this)
         observer.finish()
 
         observer.assertValues(false, true, false)
     }
+
+    @Test
+    fun userVisibleLocationFlowEmitsOnlyNullDoesNotHaveLocationFeature() = runBlockingTest {
+        whenever(hasLocationFeatureDetector.hasLocationFeature())
+                .thenReturn(false)
+
+        val observer = locationRepository.userVisibleLocationFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun userVisibleLocationFlowEmitsNullWhenLocationIsNotEnabled() = runBlockingTest {
+        whenever(hasLocationFeatureDetector.hasLocationFeature())
+                .thenReturn(true)
+        whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
+                .thenReturn(flowOf(false))
+
+        val observer = locationRepository.userVisibleLocationFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun userVisibleLocationFlowEmitsFromUpstreamWhenLocationIsEnabled() = runBlockingTest {
+        whenever(hasLocationFeatureDetector.hasLocationFeature())
+                .thenReturn(true)
+        whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
+                .thenReturn(flowOf(true))
+        whenever(locationSource.userVisibleLocationFlow)
+                .thenReturn(flowOf(DeviceLocation(1.0, 2.0)))
+
+        val observer = locationRepository.userVisibleLocationFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(DeviceLocation(1.0, 2.0))
+    }
+
+    @Test
+    fun userVisibleLocationFlowEmitsNullAfterLocationIsDisabled() = runBlockingTest {
+        whenever(hasLocationFeatureDetector.hasLocationFeature())
+                .thenReturn(true)
+        whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
+                .thenReturn(flowOf(false, false, true, true, false))
+        whenever(locationSource.userVisibleLocationFlow)
+                .thenReturn(
+                        flowOf(
+                                DeviceLocation(1.0, 2.0),
+                                DeviceLocation(3.0, 4.0),
+                                DeviceLocation(5.0, 6.0)),
+                        flowOf(null))
+
+        val observer = locationRepository.userVisibleLocationFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(
+                null,
+                DeviceLocation(1.0, 2.0),
+                DeviceLocation(3.0, 4.0),
+                DeviceLocation(5.0, 6.0),
+                null)
+    }
+
+    private val runBlockingTest = coroutineRule::runBlockingTest
 }
