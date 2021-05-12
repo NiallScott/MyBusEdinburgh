@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,18 +32,24 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Color
 import android.net.Uri
+import android.os.CancellationSignal
 import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.ServicesContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -52,6 +58,7 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AndroidServicesDaoTest {
 
@@ -59,6 +66,9 @@ class AndroidServicesDaoTest {
 
         private const val TEST_AUTHORITY = "test.authority"
     }
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var contract: ServicesContract
@@ -76,14 +86,17 @@ class AndroidServicesDaoTest {
             override fun getContentResolver() = mockContentResolver
         }
 
-        servicesDao = AndroidServicesDao(mockContext, contract)
+        servicesDao = AndroidServicesDao(
+                mockContext,
+                contract,
+                coroutineRule.testDispatcher)
 
         whenever(contract.getContentUri())
                 .thenReturn(contentUri)
     }
 
     @Test
-    fun getColoursForServicesSendsCorrectSelectionArgsWhenServicesIsNull() {
+    fun getColoursForServicesSendsCorrectSelectionArgsWhenServicesIsNull() = runBlockingTest {
         val expectedProjection = getExpectedProjectionForColours()
         val expectedSelection = "${ServicesContract.COLOUR} IS NOT NULL"
         object : MockContentProvider() {
@@ -101,13 +114,13 @@ class AndroidServicesDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
 
         servicesDao.getColoursForServices(null)
     }
 
     @Test
-    fun getColoursForServicesSendsCorrectSelectionArgsWhenServicesIsEmpty() {
+    fun getColoursForServicesSendsCorrectSelectionArgsWhenServicesIsEmpty() = runBlockingTest {
         val expectedProjection = getExpectedProjectionForColours()
         val expectedSelection = "${ServicesContract.COLOUR} IS NOT NULL"
         object : MockContentProvider() {
@@ -125,13 +138,13 @@ class AndroidServicesDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
 
         servicesDao.getColoursForServices(arrayOf())
     }
 
     @Test
-    fun getColoursForServicesSendsCorrectSelectionArgsWhenHasSingleService() {
+    fun getColoursForServicesSendsCorrectSelectionArgsWhenHasSingleService() = runBlockingTest {
         val expectedProjection = getExpectedProjectionForColours()
         val expectedSelection = "${ServicesContract.COLOUR} IS NOT NULL " +
                 "AND ${ServicesContract.NAME} IN (?)"
@@ -151,13 +164,13 @@ class AndroidServicesDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
 
         servicesDao.getColoursForServices(arrayOf("1"))
     }
 
     @Test
-    fun getColoursForServicesSendsCorrectSelectionArgsWhenHasMultipleServices() {
+    fun getColoursForServicesSendsCorrectSelectionArgsWhenHasMultipleServices() = runBlockingTest {
         val expectedProjection = getExpectedProjectionForColours()
         val expectedSelection = "${ServicesContract.COLOUR} IS NOT NULL " +
                 "AND ${ServicesContract.NAME} IN (?,?,?)"
@@ -177,13 +190,13 @@ class AndroidServicesDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
 
         servicesDao.getColoursForServices(arrayOf("1", "2", "3"))
     }
 
     @Test
-    fun getColoursForServicesReturnsNullWhenCursorIsNull() {
+    fun getColoursForServicesReturnsNullWhenCursorIsNull() = runBlockingTest {
         object : MockContentProvider() {
             override fun query(
                     uri: Uri,
@@ -191,7 +204,7 @@ class AndroidServicesDaoTest {
                     selection: String?,
                     selectionArgs: Array<out String>?,
                     sortOrder: String?): Cursor? = null
-        }.also(this::addMockProvider)
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
 
         val result = servicesDao.getColoursForServices(null)
 
@@ -199,7 +212,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesReturnsNullWhenCursorIsEmpty() {
+    fun getColoursForServicesReturnsNullWhenCursorIsEmpty() = runBlockingTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         object : MockContentProvider() {
             override fun query(
@@ -207,8 +220,8 @@ class AndroidServicesDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? = cursor
-        }.also(this::addMockProvider)
+                    sortOrder: String?): Cursor = cursor
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
 
         val result = servicesDao.getColoursForServices(null)
 
@@ -217,7 +230,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesExcludesItemsWithNullColour() {
+    fun getColoursForServicesExcludesItemsWithNullColour() = runBlockingTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         cursor.addRow(arrayOf("1", null))
         object : MockContentProvider() {
@@ -226,8 +239,8 @@ class AndroidServicesDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? = cursor
-        }.also(this::addMockProvider)
+                    sortOrder: String?): Cursor = cursor
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
 
         val result = servicesDao.getColoursForServices(null)
 
@@ -236,7 +249,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesExcludesItemsWithColourWhichFailsParsing() {
+    fun getColoursForServicesExcludesItemsWithColourWhichFailsParsing() = runBlockingTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         cursor.addRow(arrayOf("1", "foobar"))
         object : MockContentProvider() {
@@ -245,8 +258,8 @@ class AndroidServicesDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? = cursor
-        }.also(this::addMockProvider)
+                    sortOrder: String?): Cursor = cursor
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
 
         val result = servicesDao.getColoursForServices(null)
 
@@ -255,7 +268,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesReturnsSingleValidItem() {
+    fun getColoursForServicesReturnsSingleValidItem() = runBlockingTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         cursor.addRow(arrayOf("1", "#000000"))
         object : MockContentProvider() {
@@ -264,8 +277,8 @@ class AndroidServicesDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? = cursor
-        }.also(this::addMockProvider)
+                    sortOrder: String?): Cursor = cursor
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
         val expected = mapOf("1" to Color.BLACK)
 
         val result = servicesDao.getColoursForServices(null)
@@ -275,7 +288,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesReturnsMultipleValidItems() {
+    fun getColoursForServicesReturnsMultipleValidItems() = runBlockingTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         cursor.addRow(arrayOf("1", "#000000"))
         cursor.addRow(arrayOf("2", "#FFFFFF"))
@@ -286,14 +299,205 @@ class AndroidServicesDaoTest {
                     projection: Array<out String>?,
                     selection: String?,
                     selectionArgs: Array<out String>?,
-                    sortOrder: String?): Cursor? = cursor
-        }.also(this::addMockProvider)
+                    sortOrder: String?): Cursor = cursor
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
         val expected = mapOf(
                 "1" to Color.BLACK,
                 "2" to Color.WHITE,
                 "3" to Color.RED)
 
         val result = servicesDao.getColoursForServices(null)
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getServiceDetailsReturnsNullWhenServicesIsEmpty() = runBlockingTest {
+        val result = servicesDao.getServiceDetails(emptySet())
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getServiceDetailsProducesCorrectSelectionArgsForSingleService() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForServiceDetails()
+        val expectedSelection = "${ServicesContract.NAME} IN (?)"
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals(expectedSelection, selection)
+                assertArrayEquals(selectionArgs, arrayOf("1"))
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
+
+        servicesDao.getServiceDetails(setOf("1"))
+    }
+
+    @Test
+    fun getServiceDetailsWithNullCursorReturnsNull() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForServiceDetails()
+        val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals(expectedSelection, selection)
+                assertArrayEquals(selectionArgs, arrayOf("1", "2", "3"))
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
+
+        val result = servicesDao.getServiceDetails(setOf("1", "2", "3"))
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getServiceDetailsWithEmptyCursorReturnsNull() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForServiceDetails()
+        val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals(expectedSelection, selection)
+                assertArrayEquals(selectionArgs, arrayOf("1", "2", "3"))
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
+
+        val result = servicesDao.getServiceDetails(setOf("1", "2", "3"))
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getServiceDetailsWithSingleItemReturnsSingleItem() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForServiceDetails()
+        val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("2", "Route 2", "#000000"))
+        val expected = mapOf("2" to ServiceDetails("2", "Route 2", Color.BLACK))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals(expectedSelection, selection)
+                assertArrayEquals(selectionArgs, arrayOf("1", "2", "3"))
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
+
+        val result = servicesDao.getServiceDetails(setOf("1", "2", "3"))
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getServiceDetailsWithMultipleItemReturnsMultipleItems() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForServiceDetails()
+        val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("1", "Route 1", "#FFFFFF"))
+        cursor.addRow(arrayOf("2", "Route 2", "#000000"))
+        cursor.addRow(arrayOf("3", "Route 3", "#FF0000"))
+        val expected = mapOf(
+                "1" to ServiceDetails("1", "Route 1", Color.WHITE),
+                "2" to ServiceDetails("2", "Route 2", Color.BLACK),
+                "3" to ServiceDetails("3", "Route 3", Color.RED))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals(expectedSelection, selection)
+                assertArrayEquals(selectionArgs, arrayOf("1", "2", "3"))
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
+
+        val result = servicesDao.getServiceDetails(setOf("1", "2", "3"))
+
+        assertEquals(expected, result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getServiceDetailsWithNullDescriptionAndInvalidColourHandledCorrectly() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForServiceDetails()
+        val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("1", "Route 1", "#FFFFFF"))
+        cursor.addRow(arrayOf("2", null, "#000000"))
+        cursor.addRow(arrayOf("3", "Route 3", "foobar"))
+        val expected = mapOf(
+                "1" to ServiceDetails("1", "Route 1", Color.WHITE),
+                "2" to ServiceDetails("2", null, Color.BLACK),
+                "3" to ServiceDetails("3", "Route 3", null))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals(expectedSelection, selection)
+                assertArrayEquals(selectionArgs, arrayOf("1", "2", "3"))
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidServicesDaoTest::addMockProvider)
+
+        val result = servicesDao.getServiceDetails(setOf("1", "2", "3"))
 
         assertEquals(expected, result)
         assertTrue(cursor.isClosed)
@@ -306,4 +510,11 @@ class AndroidServicesDaoTest {
     private fun getExpectedProjectionForColours() = arrayOf(
             ServicesContract.NAME,
             ServicesContract.COLOUR)
+
+    private fun getExpectedProjectionForServiceDetails() = arrayOf(
+            ServicesContract.NAME,
+            ServicesContract.DESCRIPTION,
+            ServicesContract.COLOUR)
+
+    private val runBlockingTest = coroutineRule::runBlockingTest
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,6 +25,8 @@
  */
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
+
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
 
 /**
  * This DAO is used to access services.
@@ -57,7 +59,16 @@ interface ServicesDao {
      * @return A [Map] where the service name is the key and the colour for the service is the
      * value. May be `null`.
      */
-    fun getColoursForServices(services: Array<String>?): Map<String, Int>?
+    suspend fun getColoursForServices(services: Array<String>?): Map<String, Int>?
+
+    /**
+     * Get [ServiceDetails] for the given [services].
+     *
+     * @param services The services to get [ServiceDetails]s for.
+     * @return A [Map] of service name to [ServiceDetails]. May be `null` if [services] is empty,
+     * or if there are no items, or if there was some other issue getting the details.
+     */
+    suspend fun getServiceDetails(services: Set<String>): Map<String, ServiceDetails>?
 
     /**
      * This interface should be implemented to listen for changes to services. Call

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.services
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServicesDao
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
 import javax.inject.Inject
 
 /**
@@ -45,13 +43,11 @@ import javax.inject.Inject
  * @param serviceColourOverride An implementation which may override the loaded service colours with
  * a hard-wired implementation. The actual implementation will most likely be defined per product
  * flavour.
- * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
 class ServicesRepository @Inject internal constructor(
         private val servicesDao: ServicesDao,
-        private val serviceColourOverride: ServiceColourOverride?,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+        private val serviceColourOverride: ServiceColourOverride?) {
 
     /**
      * Get a [Flow] which returns a [Map] of service names to colours for the service, and will emit
@@ -81,6 +77,33 @@ class ServicesRepository @Inject internal constructor(
     }
 
     /**
+     * Get a [Flow] which emits a [Map] of service names to [ServiceDetails] for the given services,
+     * and will emit further items if the backing store changes.
+     *
+     * @param services The services to get details for.
+     * @return The [Flow] which emits the service details.
+     */
+    @ExperimentalCoroutinesApi
+    fun getServiceDetailsFlow(services: Set<String>): Flow<Map<String, ServiceDetails>?> {
+        return callbackFlow {
+            val listener = object : ServicesDao.OnServicesChangedListener {
+                override fun onServicesChanged() {
+                    launch {
+                        getAndSendServiceDetails(channel, services)
+                    }
+                }
+            }
+
+            servicesDao.addOnServicesChangedListener(listener)
+            getAndSendServiceDetails(channel, services)
+
+            awaitClose {
+                servicesDao.removeOnServicesChangedListener(listener)
+            }
+        }
+    }
+
+    /**
      * A suspended function which obtains the colours for services and then sends it to the given
      * [channel].
      *
@@ -90,7 +113,7 @@ class ServicesRepository @Inject internal constructor(
      */
     private suspend fun getAndSendColoursForServices(
             channel: SendChannel<Map<String, Int>?>,
-            services: Array<String>?) = withContext(ioDispatcher) {
+            services: Array<String>?) {
         val serviceColoursFromDao = servicesDao.getColoursForServices(services)
         val serviceColours = if (serviceColourOverride != null) {
             serviceColourOverride.overrideServiceColours(services, serviceColoursFromDao)
@@ -99,5 +122,18 @@ class ServicesRepository @Inject internal constructor(
         }
 
         channel.send(serviceColours)
+    }
+
+    /**
+     * A suspended function which obtains the [ServiceDetails] for services and then sends it to the
+     * given [channel].
+     *
+     * @param channel The [SendChannel] that emissions should be sent to.
+     * @param services The services to get details for.
+     */
+    private suspend fun getAndSendServiceDetails(
+            channel: SendChannel<Map<String, ServiceDetails>?>,
+            services: Set<String>) {
+        channel.send(servicesDao.getServiceDetails(services))
     }
 }
