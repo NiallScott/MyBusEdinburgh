@@ -49,7 +49,8 @@ import javax.inject.Singleton
 class LocationRepository @Inject internal constructor(
         private val hasLocationFeatureDetector: HasLocationFeatureDetector,
         private val isLocationEnabledDetector: IsLocationEnabledDetector,
-        private val locationSource: LocationSource) {
+        private val locationSource: LocationSource,
+        private val distanceCalculator: DistanceCalculator) {
 
     /**
      * Does this device have location-aware features or not?
@@ -86,6 +87,17 @@ class LocationRepository @Inject internal constructor(
         // so we just emit a Flow of `null`.
         flowOf(null)
     }
+
+    /**
+     * Get the distance, in meters, between [first] and [second].
+     *
+     * @param first The first location coordinate.
+     * @param second The second location coordinate.
+     * @return The number of meters between the two coordinates. A negative value implies the
+     * distance could not be calculated.
+     */
+    fun distanceBetween(first: DeviceLocation, second: DeviceLocation): Float =
+            distanceCalculator.distanceBetween(first, second)
 
     /**
      * Create a [Flow] which emits [DeviceLocation] objects for user visible features. This is

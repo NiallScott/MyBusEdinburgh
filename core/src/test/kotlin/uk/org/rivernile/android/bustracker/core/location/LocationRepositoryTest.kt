@@ -32,6 +32,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -61,6 +62,8 @@ class LocationRepositoryTest {
     private lateinit var isLocationEnabledDetector: IsLocationEnabledDetector
     @Mock
     private lateinit var locationSource: LocationSource
+    @Mock
+    private lateinit var distanceCalculator: DistanceCalculator
 
     private lateinit var locationRepository: LocationRepository
 
@@ -69,7 +72,8 @@ class LocationRepositoryTest {
         locationRepository = LocationRepository(
                 hasLocationFeatureDetector,
                 isLocationEnabledDetector,
-                locationSource)
+                locationSource,
+                distanceCalculator)
     }
 
     @Test
@@ -183,6 +187,18 @@ class LocationRepositoryTest {
                 DeviceLocation(3.0, 4.0),
                 DeviceLocation(5.0, 6.0),
                 null)
+    }
+
+    @Test
+    fun distanceBetweenDelegatesToDistanceCalculator() {
+        val first = DeviceLocation(1.0, 2.0)
+        val second = DeviceLocation(3.0, 4.0)
+        whenever(distanceCalculator.distanceBetween(first, second))
+                .thenReturn(10f)
+
+        val result = locationRepository.distanceBetween(first, second)
+
+        assertEquals(10f, result)
     }
 
     private val runBlockingTest = coroutineRule::runBlockingTest

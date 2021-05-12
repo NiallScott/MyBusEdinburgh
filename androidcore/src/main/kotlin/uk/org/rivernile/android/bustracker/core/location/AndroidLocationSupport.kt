@@ -31,6 +31,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.location.Location
 import android.location.LocationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
@@ -56,7 +57,7 @@ internal class AndroidLocationSupport @Inject constructor(
         private val context: Context,
         private val packageManager: PackageManager,
         private val isLocationEnabledFetcher: IsLocationEnabledFetcher)
-    : HasLocationFeatureDetector, IsLocationEnabledDetector {
+    : HasLocationFeatureDetector, IsLocationEnabledDetector, DistanceCalculator {
 
     override fun hasLocationFeature() =
             packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION)
@@ -78,6 +79,18 @@ internal class AndroidLocationSupport @Inject constructor(
         awaitClose {
             context.unregisterReceiver(locationEnabledReceiver)
         }
+    }
+
+    override fun distanceBetween(first: DeviceLocation, second: DeviceLocation): Float {
+        val results = FloatArray(1)
+        Location.distanceBetween(
+                first.latitude,
+                first.longitude,
+                second.latitude,
+                second.longitude,
+                results)
+
+        return results[0]
     }
 
     /**

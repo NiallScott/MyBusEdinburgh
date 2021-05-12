@@ -37,6 +37,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.location.AndroidLocationSupport
+import uk.org.rivernile.android.bustracker.core.location.DistanceCalculator
 import uk.org.rivernile.android.bustracker.core.location.HasLocationFeatureDetector
 import uk.org.rivernile.android.bustracker.core.location.IsLocationEnabledDetector
 import uk.org.rivernile.android.bustracker.core.location.IsLocationEnabledFetcher
@@ -95,5 +96,10 @@ internal class LocationModule {
         @Binds
         fun bindIsLocationEnabledDetector(
                 androidLocationSupport: AndroidLocationSupport): IsLocationEnabledDetector
+
+        @Suppress("unused")
+        @Binds
+        fun bindDistanceCalculator(
+                androidLocationSupport: AndroidLocationSupport): DistanceCalculator
     }
 }
