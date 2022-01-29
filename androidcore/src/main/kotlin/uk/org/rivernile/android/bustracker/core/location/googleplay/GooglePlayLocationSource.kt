@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,7 +38,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -77,8 +77,10 @@ internal class GooglePlayLocationSource @Inject constructor(
 
     @ExperimentalCoroutinesApi
     override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {
-        callbackFlow<DeviceLocation?> {
-            channel.send(getLastLocation())
+        callbackFlow<DeviceLocation> {
+            getLastLocation()?.let {
+                channel.send(it)
+            }
 
             // As getLastLocation() is not cancellable and can be long running, make sure we're
             // still active here.
@@ -86,7 +88,9 @@ internal class GooglePlayLocationSource @Inject constructor(
                 val callback = object : LocationCallback() {
                     override fun onLocationResult(result: LocationResult) {
                         launch {
-                            channel.send(mapToDeviceLocation(result.lastLocation))
+                            mapToDeviceLocation(result.lastLocation)?.let {
+                                channel.send(it)
+                            }
                         }
                     }
                 }
@@ -102,7 +106,7 @@ internal class GooglePlayLocationSource @Inject constructor(
             }
         }.distinctUntilChanged() // Prevent unnecessary downstream processing.
     } else {
-        flowOf(null)
+        emptyFlow()
     }
 
     /**

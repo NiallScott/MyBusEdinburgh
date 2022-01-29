@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
+import androidx.lifecycle.SavedStateHandle
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
+import javax.inject.Inject
 
 /**
- * Implementations of this interface provide [DeviceLocation]s to [LocationRepository]. This acts
- * as an abstraction layer so that platform-specific implementations can be specified.
+ * This is used to create [StopDetailsFragmentViewModel]s with its dependencies and access to
+ * [SavedStateHandle].
  *
+ * @param uiItemRetriever Used to retrieve the items which are shown on the UI.
+ * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-interface LocationSource {
+@ExperimentalCoroutinesApi
+class StopDetailsFragmentViewModelFactory @Inject constructor(
+        private val uiItemRetriever: UiItemRetriever,
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
+    : ViewModelSavedStateFactory<StopDetailsFragmentViewModel> {
 
-    /**
-     * Produce a [Flow] which emits the latest [DeviceLocation] until cancelled.
-     */
-    @ExperimentalCoroutinesApi
-    val userVisibleLocationFlow: Flow<DeviceLocation>
+    override fun create(handle: SavedStateHandle) =
+            StopDetailsFragmentViewModel(
+                    handle,
+                    uiItemRetriever,
+                    defaultDispatcher)
 }

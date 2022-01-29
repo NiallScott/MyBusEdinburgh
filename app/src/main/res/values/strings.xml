@@ -357,6 +357,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="stopdetails_stop_distance">%.1f km away</string>
     <string name="stopdetails_stop_distance_unknown">Distance unknown</string>
     <string name="stopdetails_stop_distance_permission_required">Distance unknown (location permission required)</string>
+    <string name="stopdetails_stop_distance_location_off">Distance unknown (location off)</string>
+    <string name="stopdetails_no_services">No known services for this stop</string>
 
     <!--
     **************************************

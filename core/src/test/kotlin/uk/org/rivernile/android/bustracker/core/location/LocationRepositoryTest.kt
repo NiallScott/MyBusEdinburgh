@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -122,7 +122,7 @@ class LocationRepositoryTest {
     }
 
     @Test
-    fun userVisibleLocationFlowEmitsOnlyNullDoesNotHaveLocationFeature() = runBlockingTest {
+    fun userVisibleLocationFlowDoesNotEmitWhenDoesNotHaveLocationFeature() = runBlockingTest {
         whenever(hasLocationFeatureDetector.hasLocationFeature())
                 .thenReturn(false)
 
@@ -130,11 +130,11 @@ class LocationRepositoryTest {
         advanceUntilIdle()
         observer.finish()
 
-        observer.assertValues(null)
+        observer.assertNoValues()
     }
 
     @Test
-    fun userVisibleLocationFlowEmitsNullWhenLocationIsNotEnabled() = runBlockingTest {
+    fun userVisibleLocationFlowDoesNotEmitWhenLocationIsNotEnabled() = runBlockingTest {
         whenever(hasLocationFeatureDetector.hasLocationFeature())
                 .thenReturn(true)
         whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
@@ -144,7 +144,7 @@ class LocationRepositoryTest {
         advanceUntilIdle()
         observer.finish()
 
-        observer.assertValues(null)
+        observer.assertNoValues()
     }
 
     @Test
@@ -164,7 +164,7 @@ class LocationRepositoryTest {
     }
 
     @Test
-    fun userVisibleLocationFlowEmitsNullAfterLocationIsDisabled() = runBlockingTest {
+    fun userVisibleLocationFlowDoesNotEmitAfterLocationIsDisabled() = runBlockingTest {
         whenever(hasLocationFeatureDetector.hasLocationFeature())
                 .thenReturn(true)
         whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
@@ -174,19 +174,16 @@ class LocationRepositoryTest {
                         flowOf(
                                 DeviceLocation(1.0, 2.0),
                                 DeviceLocation(3.0, 4.0),
-                                DeviceLocation(5.0, 6.0)),
-                        flowOf(null))
+                                DeviceLocation(5.0, 6.0)))
 
         val observer = locationRepository.userVisibleLocationFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                null,
                 DeviceLocation(1.0, 2.0),
                 DeviceLocation(3.0, 4.0),
-                DeviceLocation(5.0, 6.0),
-                null)
+                DeviceLocation(5.0, 6.0))
     }
 
     @Test

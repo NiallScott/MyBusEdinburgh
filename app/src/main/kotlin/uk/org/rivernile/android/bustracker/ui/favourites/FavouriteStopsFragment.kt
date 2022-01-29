@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -168,6 +168,12 @@ class FavouriteStopsFragment : Fragment() {
         viewModel.showAddProximityAlertLiveData.observe(lifecycle, this::handleAddProximityAlert)
         viewModel.showConfirmDeleteProximityAlertLiveData.observe(lifecycle,
                 this::handleConfirmDeleteProximityAlert)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _viewBinding = null
     }
 
     /**

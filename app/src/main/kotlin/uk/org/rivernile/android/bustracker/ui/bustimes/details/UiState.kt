@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,35 +21,20 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.database.busstop.loaders;
-
-import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.loader.content.CursorLoader;
-
-import uk.org.rivernile.android.bustracker.database.busstop.BusStopContract;
+package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
 /**
- * This {@link CursorLoader} loads data for a single bus stop from the bus stop database.
+ * This enum encapsulates the current state of the UI.
  *
  * @author Niall Scott
  */
-public class BusStopLoader extends CursorLoader {
+enum class UiState {
 
-    /**
-     * Create a new {@code BusStopLoader}.
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The stop code to get data for.
-     * @param projection The columns to return.
-     */
-    public BusStopLoader(@NonNull final Context context, @NonNull final String stopCode,
-            @Nullable final String[] projection) {
-        super(context, BusStopContract.BusStops.CONTENT_URI, projection,
-                BusStopContract.BusStops.STOP_CODE + " = ?",
-                new String[] { stopCode }, null);
-    }
+    /** The progress UI should be shown. */
+    PROGRESS,
+    /** The contet UI should be shown. */
+    CONTENT
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,26 +21,20 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes;
+package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
-import androidx.annotation.NonNull;
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 
-public class BusServiceUtils {
-
-    /**
-     * Constructor is private to prevent instantiation.
-     */
-    private BusServiceUtils() { }
-
-    /**
-     * Is the given service a night service?
-     *
-     * @param serviceName The name of the service.
-     * @return {@code true} if the service is a night service, {@code false} if not.
-     */
-    public static boolean isNightService(@NonNull final String serviceName) {
-        return serviceName.startsWith("N");
-    }
-}
+/**
+ * This class encapsulates the permissions that the details screen would like, and their current
+ * state.
+ *
+ * @property fineLocationPermission The state of the fine location permission.
+ * @property coarseLocationPermission The state of the coarse location permission.
+ */
+data class PermissionsState(
+        val fineLocationPermission: PermissionState = PermissionState.UNGRANTED,
+        val coarseLocationPermission: PermissionState = PermissionState.UNGRANTED)

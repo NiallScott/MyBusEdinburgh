@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,8 +37,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
@@ -69,10 +69,12 @@ internal class PlatformLocationSource @Inject constructor(
 
     @ExperimentalCoroutinesApi
     override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {
-        callbackFlow<Location?> {
+        callbackFlow<Location> {
             // Before registering for location updates, immediately obtain the last location from
             // the OS and send it to the channel. This may be null if there is no previous location.
-            channel.send(getBestInitialLocation())
+            getBestInitialLocation()?.let {
+                channel.send(it)
+            }
 
             val locationListener = object : LocationListener {
                 override fun onLocationChanged(location: Location) {
@@ -122,15 +124,15 @@ internal class PlatformLocationSource @Inject constructor(
             awaitClose {
                 locationManager.removeUpdates(locationListener)
             }
-        }.scan<Location?, Location?>(null) { accumulator, value ->
-            value?.takeIf { isBetterLocation(it, accumulator) } ?: accumulator
-        }.map { location ->
+        }.scan<Location, Location?>(null) { accumulator, value ->
+            value.takeIf { isBetterLocation(it, accumulator) } ?: accumulator
+        }.mapNotNull { location ->
             location?.let {
                 DeviceLocation(it.latitude, it.longitude)
             }
         }.distinctUntilChanged() // Prevent unnecessary downstream processing.
     } else {
-        flowOf(null)
+        emptyFlow()
     }
 
     /**

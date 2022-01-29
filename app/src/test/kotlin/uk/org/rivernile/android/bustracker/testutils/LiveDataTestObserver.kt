@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -79,5 +79,14 @@ class LiveDataTestObserver<T> : Observer<T> {
      */
     fun assertEmpty() {
         assertTrue(values.isEmpty())
+    }
+
+    /**
+     * Assert this [Observer] has collected [expectedSize] number of items.
+     *
+     * @param expectedSize The number of items to assert the collection size against.
+     */
+    fun assertSize(expectedSize: Int) {
+        assertEquals(expectedSize, values.size)
     }
 }

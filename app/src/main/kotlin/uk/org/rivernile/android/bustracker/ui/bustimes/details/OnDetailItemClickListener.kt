@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
 /*
- * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,17 +21,22 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/txtDistance"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="@dimen/padding_default"
-    android:layout_marginBottom="@dimen/padding_default"
-    android:layout_marginStart="@dimen/padding_double"
-    android:layout_marginEnd="@dimen/padding_double"
-    android:gravity="end"
-    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-    tools:text="2.4 km away" />
+ *
+ */
+
+package uk.org.rivernile.android.bustracker.ui.bustimes.details
+
+/**
+ * This interface is implemented by classes handling UI events for stop details.
+ *
+ * @author Niall Scott
+ */
+fun interface OnDetailItemClickListener {
+
+    /**
+     * This is called when the user clicks on the map.
+     *
+     * @param item The item details for the currently rendered map.
+     */
+    fun onMapClicked(item: UiItem.Map)
+}

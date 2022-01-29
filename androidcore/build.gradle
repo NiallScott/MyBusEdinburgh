@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -62,7 +62,7 @@ android {
             buildConfigField('String', 'TRACKER_BASE_URL', '\"http://ws.mybustracker.co.uk/\"')
 
             // API keys
-            buildConfigField('String', 'API_KEY', "\"${getApiKey()}\"")
+            buildConfigField('String', 'API_KEY', "\"${getApiKey("edinburgh")}\"")
 
             // Other
             buildConfigField('String', 'SCHEMA_NAME', '\"MBE_10\"')
@@ -140,16 +140,8 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
 }
 
-private static def getApiKey() {
-    // Populate the build config with API keys which are stored in local.properties so that
+private def getApiKey(final String city) {
+    // Populate the build config with API keys which is provided as a project property so that
     // ApiKey.java can pick them up.
-    final Properties properties = new Properties()
-
-    try {
-        properties.load(new FileInputStream('local.properties'))
-    } catch (IOException ignored) {
-        // Do nothing. This is probably happening on the CI server.
-    }
-
-    return properties.getProperty('apiKey', 'invalid')
+    return project.findProperty("mybus.${city}.apiKey") ?: "undefined"
 }
