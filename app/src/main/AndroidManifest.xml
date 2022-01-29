@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -74,7 +74,8 @@
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:exported="true">
 
             <intent-filter>
                 <action android:name="${applicationId}.ACTION_MANAGE_ALERTS" />
@@ -85,7 +86,8 @@
         <activity-alias
             android:name=".MainActivity"
             android:targetActivity="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:exported="true">
             <!-- This intent filter tells the system to place an app icon in the
                  launcher and use this Activity when starting the app. -->
             <intent-filter>
@@ -100,7 +102,8 @@
             android:name="uk.org.rivernile.android.bustracker.ui.favourites.SelectFavouriteStopActivity"
             android:label="@string/favouriteshortcut_title"
             android:icon="@drawable/appicon_favourite"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
+            android:exported="true">
             <!-- This signifies that this Activity can add shortcuts to the
                  home screen, and launch this Activity when the user wants to
                  create a shortcut. -->
@@ -119,7 +122,8 @@
             android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity"
             android:theme="@style/MyBusEdinburgh.NoActionBar"
             android:label="@string/displaystopdata_title"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
+            android:exported="true">
             <!-- This Activity attempts to take over HTTP accessing of
                  mobile.mybustracker.co.uk. -->
             <intent-filter>
@@ -153,7 +157,8 @@
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity"
             android:label="@string/preferences_title"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" >
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
+            android:exported="true">
             <!-- This lets the user manage network settings for the application from elsewhere in
                  the system. -->
             <intent-filter>
@@ -172,7 +177,8 @@
             android:name="uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity"
             android:label="@string/map_title"
             android:launchMode="singleTop"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
+            android:exported="true">
             <!-- External applications can call this Intent action to show the
                  bus stop map. -->
             <intent-filter>
@@ -205,7 +211,8 @@
             android:label="@string/search_title"
             android:launchMode="singleTop"
             android:theme="@style/MyBusEdinburgh.NoActionBar.Search"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
+            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
+            android:exported="true">
             <!-- This Activity handles searching. -->
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -132,7 +132,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
          * @return A new instance of [BusStopMapFragment].
          */
         @JvmStatic
-        fun newInstance(stopCode: String) = BusStopMapFragment().apply {
+        fun newInstance(stopCode: String?) = BusStopMapFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOPCODE, stopCode)
             }
@@ -608,7 +608,9 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      */
     private fun handleSearchActivityResult(resultCode: Int, intent: Intent?) {
         if (resultCode == Activity.RESULT_OK && intent != null) {
-            viewModel.onStopSearchResult(intent.getStringExtra(SearchActivity.EXTRA_STOP_CODE))
+            viewModel.onStopSearchResult(
+                    intent.getStringExtra(SearchActivity.EXTRA_STOP_CODE)
+                            ?: throw IllegalStateException())
         }
     }
 

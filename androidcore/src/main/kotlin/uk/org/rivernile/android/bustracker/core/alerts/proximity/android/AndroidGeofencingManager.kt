@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -81,6 +81,6 @@ class AndroidGeofencingManager @Inject constructor(
                     .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, alertId)
                     .let {
                         PendingIntent.getBroadcast(context, alertId, it,
-                                PendingIntent.FLAG_UPDATE_CURRENT)
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                     }
 }

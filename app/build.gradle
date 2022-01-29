@@ -1,5 +1,7 @@
+import com.android.build.api.variant.ResValue
+
 /*
- * Copyright (C) 2014 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +31,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
 ext {
-    googlePlayServicesVersion = '17.0.1'
+    googlePlayServicesVersion = '18.0.2'
 }
 
 android {
@@ -64,7 +66,7 @@ android {
         }
     }
 
-    lintOptions {
+    lint {
         // TODO: fix lint errors and remove this.
         abortOnError false
     }
@@ -93,9 +95,10 @@ android {
 
 androidComponents {
     onVariants(selector().all(), { variant ->
-        variant.addResValue 'package_name', 'string', variant.applicationId, null
-        variant.addResValue 'search_authority', 'string',
-                "${variant.applicationId.get()}.SearchSuggestionsProvider", null
+        variant.resValues[variant.makeResValueKey('string', 'package_name')] =
+                new ResValue("${variant.applicationId.get()}", null)
+        variant.resValues[variant.makeResValueKey('string', 'search_authority')] =
+                new ResValue("${variant.applicationId.get()}.SearchSuggestionsProvider", null)
     })
 }
 

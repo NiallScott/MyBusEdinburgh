@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -212,9 +212,7 @@ class BusTimesFragmentViewModel(
      * successfully loaded data, but only if it's non-empty. Otherwise, it will yield `null`.
      */
     val liveTimesLiveData = lastSuccess.map {
-        if (it.items.isNotEmpty()) {
-            it.items
-        } else {
+        it.items.ifEmpty {
             null
         }
     }

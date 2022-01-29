@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -184,7 +184,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     .let {
                         PendingIntent.getActivity(context, NOTIFICATION_ID_ARRIVAL, it,
-                                PendingIntent.FLAG_ONE_SHOT)
+                                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
                     }
 
     /**
@@ -200,6 +200,6 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     .let {
                         PendingIntent.getActivity(context, NOTIFICATION_ID_PROXIMITY, it,
-                                PendingIntent.FLAG_ONE_SHOT)
+                                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
                     }
 }

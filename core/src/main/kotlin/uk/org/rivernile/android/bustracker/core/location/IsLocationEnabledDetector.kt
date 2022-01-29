@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.location
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -40,5 +41,6 @@ interface IsLocationEnabledDetector {
      *
      * @return A [Flow] which dispatches whether the location-aware services are enabled or not.
      */
+    @ExperimentalCoroutinesApi
     fun getIsLocationEnabledFlow(): Flow<Boolean>
 }

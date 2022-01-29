@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,7 +51,6 @@ import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 @Module
 interface ActivityModule {
 
@@ -75,6 +74,7 @@ interface ActivityModule {
     @ContributesAndroidInjector(modules = [ SettingsFragmentsModule::class ])
     fun contributeSettingsActivity(): SettingsActivity
 
+    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
         AlertFragmentsModule::class,
@@ -91,6 +91,7 @@ interface ActivityModule {
     @ContributesAndroidInjector
     fun contributeSearchActivity(): SearchActivity
 
+    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
         FavouriteStopsFragmentModule::class

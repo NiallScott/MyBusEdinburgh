@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -145,6 +145,7 @@ interface ViewModelModule {
      * @param viewModel A [AlertManagerFragmentViewModel] instance.
      * @return The [ViewModel] instance.
      */
+    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @Binds
     @IntoMap
@@ -157,6 +158,7 @@ interface ViewModelModule {
      * @param viewModel A [AddProximityAlertDialogFragmentViewModel] instance.
      * @return The [ViewModel] instance.
      */
+    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @Binds
     @IntoMap

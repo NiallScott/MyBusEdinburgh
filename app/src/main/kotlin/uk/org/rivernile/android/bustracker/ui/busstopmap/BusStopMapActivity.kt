@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -93,7 +93,8 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
         (fragment as? BusStopMapFragment)?.let {
             when {
                 intent.hasExtra(EXTRA_STOP_CODE) -> {
-                    it.onNewStopCode(intent.getStringExtra(EXTRA_STOP_CODE))
+                    it.onNewStopCode(
+                            intent.getStringExtra(EXTRA_STOP_CODE) ?: throw IllegalStateException())
                 }
                 intent.hasExtra(EXTRA_LATITUDE) && intent.hasExtra(EXTRA_LONGITUDE) -> {
                     val latitude = intent.getDoubleExtra(EXTRA_LATITUDE, 0.0)

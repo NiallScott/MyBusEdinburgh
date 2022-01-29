@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -106,7 +106,7 @@ class ArrivalAlertRunnerService : Service() {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     .let {
                         PendingIntent.getActivity(this, FOREGROUND_NOTIFICATION_ID, it,
-                                PendingIntent.FLAG_UPDATE_CURRENT)
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                     }
 
     /**
@@ -132,6 +132,6 @@ class ArrivalAlertRunnerService : Service() {
             Intent(this, RemoveArrivalAlertBroadcastReceiver::class.java)
                     .let {
                         PendingIntent.getBroadcast(this, FOREGROUND_NOTIFICATION_ID, it,
-                                PendingIntent.FLAG_UPDATE_CURRENT)
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                     }
 }

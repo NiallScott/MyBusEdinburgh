@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.settings
 import android.content.Context
 import android.os.Bundle
 import android.view.View
-import androidx.lifecycle.Observer
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -59,7 +59,9 @@ class SettingsFragment : PreferenceFragmentCompat(), HasAndroidInjector {
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
-    private lateinit var viewModel: SettingsFragmentViewModel
+    private val viewModel: SettingsFragmentViewModel by viewModels {
+        viewModelFactory
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)
@@ -72,9 +74,6 @@ class SettingsFragment : PreferenceFragmentCompat(), HasAndroidInjector {
         preferenceManager.sharedPreferencesMode = Context.MODE_PRIVATE
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
-        viewModel = ViewModelProvider(this, viewModelFactory)
-                .get(SettingsFragmentViewModel::class.java)
-
         setupSummaries()
         setupClickListeners()
     }
@@ -82,9 +81,9 @@ class SettingsFragment : PreferenceFragmentCompat(), HasAndroidInjector {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.showClearSearchHistoryLiveData.observe(viewLifecycleOwner, Observer {
+        viewModel.showClearSearchHistoryLiveData.observe(viewLifecycleOwner) {
             showClearSearchHistoryDialog()
-        })
+        }
     }
 
     override fun androidInjector() = dispatchingAndroidInjector

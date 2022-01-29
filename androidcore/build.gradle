@@ -36,8 +36,6 @@ android {
     defaultConfig {
         minSdkVersion androidMinSdkVersion
         targetSdkVersion androidTargetSdkVersion
-        versionCode 1
-        versionName "1.0"
         testInstrumentationRunner 'uk.org.rivernile.android.bustracker.core.CoreTestRunner'
     }
 
@@ -86,8 +84,9 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/AL2.0'
-        exclude 'META-INF/LGPL2.1'
+        resources {
+            excludes += ['META-INF/AL2.0', 'META-INF/LGPL2.1']
+        }
     }
 
     useLibrary 'android.test.mock'
