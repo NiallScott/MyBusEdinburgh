@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,9 @@ package uk.org.rivernile.android.bustracker.ui.about
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import androidx.appcompat.app.AlertDialog
-import android.text.Html
+import androidx.core.text.HtmlCompat
+import androidx.fragment.app.DialogFragment
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
@@ -48,7 +48,9 @@ class CreditsDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return AlertDialog.Builder(requireContext())
                 .setTitle(R.string.creditsdialog_title)
-                .setMessage(Html.fromHtml(getString(R.string.creditsdialog_body)))
+                .setMessage(HtmlCompat.fromHtml(
+                        getString(R.string.creditsdialog_body),
+                        HtmlCompat.FROM_HTML_MODE_LEGACY))
                 .setPositiveButton(R.string.close, null)
                 .create()
     }
