@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
+
 /**
  * This DAO is used to access database information.
  *
@@ -39,4 +43,10 @@ interface DatabaseInformationDao {
      * @return The current topology ID of the database.
      */
     fun getTopologyId(): String?
+
+    /**
+     * A [Flow] which emits database metadata.
+     */
+    @ExperimentalCoroutinesApi
+    val databaseMetadataFlow: Flow<DatabaseMetadata?>
 }

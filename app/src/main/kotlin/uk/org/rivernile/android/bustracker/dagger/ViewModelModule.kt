@@ -71,6 +71,7 @@ interface ViewModelModule {
      * @param viewModel An [AboutViewModel] instance.
      * @return The [ViewModel] instance.
      */
+    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @Binds
     @IntoMap

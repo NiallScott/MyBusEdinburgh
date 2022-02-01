@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.data.platform
+package uk.org.rivernile.android.bustracker.core.app
 
 /**
- * This is a data source for any data that comes from the platform.
+ * This repository is used to obtain data regarding apps, e.g. data about ourself.
  *
  * @author Niall Scott
  */
-interface PlatformDataSource {
+interface AppRepository {
 
     /**
-     * Get the version of the app.
-     *
-     * @return The version of the app.
+     * This property returns the [AppVersion] for this app.
      */
-    fun getAppVersionString(): String
+    val appVersion: AppVersion
 }

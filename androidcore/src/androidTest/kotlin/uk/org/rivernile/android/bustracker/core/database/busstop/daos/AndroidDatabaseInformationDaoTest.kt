@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,22 +36,29 @@ import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runBlockingTest
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [AndroidDatabaseInformationDao].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AndroidDatabaseInformationDaoTest {
 
@@ -59,6 +66,9 @@ class AndroidDatabaseInformationDaoTest {
 
         private const val TEST_AUTHORITY = "test.authority"
     }
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     internal lateinit var contract: DatabaseInformationContract
@@ -76,7 +86,10 @@ class AndroidDatabaseInformationDaoTest {
             override fun getContentResolver(): ContentResolver = mockContentResolver
         }
 
-        databaseInformationDao = AndroidDatabaseInformationDao(mockContext, contract)
+        databaseInformationDao = AndroidDatabaseInformationDao(
+                mockContext,
+                contract,
+                coroutineRule.testDispatcher)
 
         whenever(contract.getContentUri())
                 .thenReturn(contentUri)
@@ -131,7 +144,7 @@ class AndroidDatabaseInformationDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 return cursor
             }
         }.also { addMockProvider(it) }
@@ -152,7 +165,7 @@ class AndroidDatabaseInformationDaoTest {
                                projection: Array<String>?,
                                selection: String?,
                                selectionArgs: Array<String>?,
-                               sortOrder: String?): Cursor? {
+                               sortOrder: String?): Cursor {
                 return cursor
             }
         }.also { addMockProvider(it) }
@@ -163,7 +176,93 @@ class AndroidDatabaseInformationDaoTest {
         assertTrue(cursor.isClosed)
     }
 
+    @Test
+    fun getDatabaseMetadataReturnsNullWhenCursorIsNull() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForDatabaseMetadata()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidDatabaseInformationDaoTest::addMockProvider)
+
+        val result = databaseInformationDao.getDatabaseMetadata()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getDatabaseMetadataReturnsNullWhenCursorIsEmpty() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForDatabaseMetadata()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidDatabaseInformationDaoTest::addMockProvider)
+
+        val result = databaseInformationDao.getDatabaseMetadata()
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getDatabaseMetadataReturnsDatabaseMetadataWhenCursorIsPopulated() = runBlockingTest {
+        val expectedProjection = getExpectedProjectionForDatabaseMetadata()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf(123L, "abc123"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertNull(selection)
+                assertNull(selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidDatabaseInformationDaoTest::addMockProvider)
+
+        val result = databaseInformationDao.getDatabaseMetadata()
+
+        assertEquals(DatabaseMetadata(123L, "abc123"), result)
+        assertTrue(cursor.isClosed)
+    }
+
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
+
+    private fun getExpectedProjectionForDatabaseMetadata() = arrayOf(
+            DatabaseInformationContract.LAST_UPDATE_TIMESTAMP,
+            DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
+
+    private val runBlockingTest = coroutineRule::runBlockingTest
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,12 +35,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.RecyclerView
 import dagger.android.support.AndroidSupportInjection
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.AboutFragmentBinding
 import javax.inject.Inject
 
 /**
@@ -48,13 +49,21 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 class AboutFragment : Fragment() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
 
+    private val viewModel: AboutViewModel by viewModels {
+        viewModelFactory
+    }
+
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: AboutAdapter
+
+    private val viewBinding get() = _viewBinding!!
+    private var _viewBinding: AboutFragmentBinding? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -68,48 +77,59 @@ class AboutFragment : Fragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidSupportInjection.inject(this)
+
         super.onCreate(savedInstanceState)
 
-        AndroidSupportInjection.inject(this)
-        val viewModel = ViewModelProvider(this, viewModelFactory)
-                .get(AboutViewModel::class.java)
-
-        adapter = AboutAdapter(requireContext())
-        adapter.items = viewModel.items
-        adapter.itemClickedListener = viewModel::onItemClicked
-
-        viewModel.showStoreListing.observe(this, Observer {
-            handleAppVersionItemClick()
-        })
-        viewModel.showAuthorWebsite.observe(this, Observer {
-            handleAuthorItemClick()
-        })
-        viewModel.showAppWebsite.observe(this, Observer {
-            handleWebsiteItemClick()
-        })
-        viewModel.showAppTwitter.observe(this, Observer {
-            handleTwitterItemClick()
-        })
-        viewModel.showCredits.observe(this, Observer {
-            callbacks.onShowCredits()
-        })
-        viewModel.showOpenSourceLicences.observe(this, Observer {
-            callbacks.onShowLicences()
-        })
-        viewModel.databaseVersionItem.observe(this, Observer(adapter::rebindItem))
-        viewModel.topologyVersionItem.observe(this, Observer(adapter::rebindItem))
+        adapter = AboutAdapter(requireContext(), viewModel::onItemClicked)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.about_fragment, container, false).also {
-            val recyclerView = it.findViewById(android.R.id.list) as RecyclerView
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?): View {
+        _viewBinding = AboutFragmentBinding.inflate(inflater, container, false)
 
+        return viewBinding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewBinding.apply {
             recyclerView.setHasFixedSize(true)
             recyclerView.addItemDecoration(DividerItemDecoration(requireContext(),
                     DividerItemDecoration.VERTICAL))
             recyclerView.adapter = adapter
         }
+
+        val viewLifecycleOwner = viewLifecycleOwner
+
+        viewModel.itemsLiveData.observe(viewLifecycleOwner, adapter::submitList)
+        viewModel.showStoreListingLiveData.observe(viewLifecycleOwner) {
+            handleAppVersionItemClick()
+        }
+        viewModel.showAuthorWebsiteLiveData.observe(viewLifecycleOwner) {
+            handleAuthorItemClick()
+        }
+        viewModel.showAppWebsiteLiveData.observe(viewLifecycleOwner) {
+            handleWebsiteItemClick()
+        }
+        viewModel.showAppTwitterLiveData.observe(viewLifecycleOwner) {
+            handleTwitterItemClick()
+        }
+        viewModel.showCreditsLiveData.observe(viewLifecycleOwner) {
+            callbacks.onShowCredits()
+        }
+        viewModel.showOpenSourceLicencesLiveData.observe(viewLifecycleOwner) {
+            callbacks.onShowLicences()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _viewBinding = null
     }
 
     /**
@@ -173,8 +193,8 @@ class AboutFragment : Fragment() {
     }
 
     /**
-     * Any [Activities][Activity] which host this [Fragment] must implement this
-     * interface to handle navigation events.
+     * Any [Activities][Activity] which host this [Fragment] must implement this interface to
+     * handle navigation events.
      */
     internal interface Callbacks {
 

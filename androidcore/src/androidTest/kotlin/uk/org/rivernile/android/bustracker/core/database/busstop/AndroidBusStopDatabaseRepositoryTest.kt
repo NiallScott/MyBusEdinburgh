@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,11 +34,19 @@ import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.test
 import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -48,6 +56,7 @@ import kotlin.test.assertNull
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AndroidBusStopDatabaseRepositoryTest {
 
@@ -56,8 +65,13 @@ class AndroidBusStopDatabaseRepositoryTest {
         private const val TEST_AUTHORITY = "test.authority"
     }
 
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
     @Mock
-    internal lateinit var contract: BusStopDatabaseContract
+    private lateinit var contract: BusStopDatabaseContract
+    @Mock
+    private lateinit var databaseInformationDao: DatabaseInformationDao
 
     private lateinit var mockContext: Context
     private lateinit var mockContentResolver: MockContentResolver
@@ -72,7 +86,10 @@ class AndroidBusStopDatabaseRepositoryTest {
             override fun getContentResolver(): ContentResolver = mockContentResolver
         }
 
-        database = AndroidBusStopDatabaseRepository(mockContext, contract)
+        database = AndroidBusStopDatabaseRepository(
+                mockContext,
+                contract,
+                databaseInformationDao)
 
         whenever(contract.getContentUri())
                 .thenReturn(contentUri)
@@ -97,4 +114,18 @@ class AndroidBusStopDatabaseRepositoryTest {
 
         database.replaceDatabase(fakeFile)
     }
+
+    @Test
+    fun databaseMetadataFlowReturnsFlowFromDatabaseInformationDao() = runBlockingTest {
+        val databaseMetadata = DatabaseMetadata(123L, "1.2.3")
+        whenever(databaseInformationDao.databaseMetadataFlow)
+                .thenReturn(flowOf(databaseMetadata))
+
+        val observer = database.databaseMetadataFlow.test(this)
+        advanceUntilIdle()
+
+        observer.assertValues(databaseMetadata)
+    }
+
+    private val runBlockingTest = coroutineRule::runBlockingTest
 }

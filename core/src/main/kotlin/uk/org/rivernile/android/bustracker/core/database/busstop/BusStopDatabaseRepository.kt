@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
 import java.io.File
 
 /**
@@ -41,4 +44,10 @@ interface BusStopDatabaseRepository {
      * @param newDatabase The [File] to replace the current database with.
      */
     fun replaceDatabase(newDatabase: File)
+
+    /**
+     * A [Flow] which emits database metadata.
+     */
+    @ExperimentalCoroutinesApi
+    val databaseMetadataFlow: Flow<DatabaseMetadata?>
 }

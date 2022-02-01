@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,15 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.repositories.about
-
-import java.util.Date
+package uk.org.rivernile.android.bustracker.ui.about
 
 /**
- * This class contains metadata for the bus stop database.
+ * This interface should be implemented by the receiver of about item click events.
  *
- * @property databaseVersion The version of the database.
- * @property topologyVersion The topology of the database.
  * @author Niall Scott
  */
-data class DatabaseMetadata(val databaseVersion: Date, val topologyVersion: String)
+fun interface OnItemClickedListener {
+
+    /**
+     * This is called when an about item has been clicked.
+     *
+     * @param item The item which has been clicked.
+     */
+    fun onItemClicked(item: UiAboutItem)
+}

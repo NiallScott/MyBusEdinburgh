@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,21 +24,15 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.repositories.about
-
-import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
+package uk.org.rivernile.android.bustracker.core.database.busstop.entities
 
 /**
- * This class creates new [ClearableLiveData] instances for the 'about' section.
+ * This class holds database metadata, to be able to determine database version details.
  *
+ * @property databaseVersion The timestamp the database was created at.
+ * @property topologyVersion A [String] which denotes the topology version ID.
  * @author Niall Scott
  */
-interface AboutLiveDataFactory {
-
-    /**
-     * Create a new [ClearableLiveData] which gets [DatabaseMetadata].
-     *
-     * @return A new [ClearableLiveData] which gets [DatabaseMetadata].
-     */
-    fun createDatabaseLiveData(): ClearableLiveData<DatabaseMetadata>
-}
+data class DatabaseMetadata(
+        val databaseVersion: Long,
+        val topologyVersion: String?)

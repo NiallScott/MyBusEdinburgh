@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,10 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,15 +40,21 @@ import javax.inject.Singleton
  *
  * @param context The application [Context].
  * @param contract The contract for the bus stop database.
+ * @param databaseInformationDao The DAO for accessing database information.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidBusStopDatabaseRepository @Inject constructor(
         private val context: Context,
-        private val contract: BusStopDatabaseContract): BusStopDatabaseRepository {
+        private val contract: BusStopDatabaseContract,
+        private val databaseInformationDao: DatabaseInformationDao): BusStopDatabaseRepository {
 
     override fun replaceDatabase(newDatabase: File) {
         context.contentResolver.call(contract.getContentUri(),
                 BusStopDatabaseContract.METHOD_REPLACE_DATABASE, newDatabase.absolutePath, null)
     }
+
+    @ExperimentalCoroutinesApi
+    override val databaseMetadataFlow: Flow<DatabaseMetadata?> get() =
+            databaseInformationDao.databaseMetadataFlow
 }

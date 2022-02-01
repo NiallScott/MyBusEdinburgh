@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,119 +26,125 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
-import uk.org.rivernile.android.bustracker.repositories.about.AboutItem
-import uk.org.rivernile.android.bustracker.repositories.about.AboutRepository
-import uk.org.rivernile.android.bustracker.repositories.about.DatabaseMetadata
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
+import uk.org.rivernile.android.bustracker.core.app.AppRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
-import uk.org.rivernile.android.bustracker.utils.Strings
-import uk.org.rivernile.edinburghbustracker.android.R
-import java.text.DateFormat
+import java.util.*
 import javax.inject.Inject
 
 /**
  * This is the [ViewModel] for the 'about' screen.
  *
- * @param aboutRepository The [AboutRepository] to access data for the 'about' screen.
- * @property strings Platform [String] accessor.
+ * @param appRepository Used to retrieve data relating to app version.
+ * @param busStopDatabaseRepository Used to access metadata for the bus stop database.
+ * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-class AboutViewModel @Inject constructor(aboutRepository: AboutRepository,
-                                         private val strings: Strings): ViewModel() {
-
-    /** The [List] of items to display. */
-    val items = aboutRepository.createItems()
-    /** This [LiveData] is invoked when the store listing should be shown. */
-    val showStoreListing: LiveData<Void>
-        get() = _showStoreListing
-    /** This [LiveData] is invoked when the author website should be shown. */
-    val showAuthorWebsite: LiveData<Void>
-        get() = _showAuthorWebsite
-    /** This [LiveData] is invoked when the app website should be shown. */
-    val showAppWebsite: LiveData<Void>
-        get() = _showAppWebsite
-    /** This [LiveData] is invoked when the app Twitter feed should be shown. */
-    val showAppTwitter: LiveData<Void>
-        get() = _showAppTwitter
-    /** This [LiveData] is invoked when the app credits should be shown. */
-    val showCredits: LiveData<Void>
-        get() = _showCredits
-    /** This [LiveData] is invoked when the open source licences should be shown. */
-    val showOpenSourceLicences: LiveData<Void>
-        get() = _showOpenSourceLicences
-
-    private val databaseData = aboutRepository.createDatabaseLiveData()
-    /** This [LiveData] changes when the database version item is updated. */
-    val databaseVersionItem: LiveData<AboutItem> =
-            Transformations.map(databaseData, this::processDatabaseVersion)
-    /** This [LiveData] changes when the topology version item is updated. */
-    val topologyVersionItem: LiveData<AboutItem> =
-            Transformations.map(databaseData, this::processTopologyVersion)
-
-    private val _showStoreListing = SingleLiveEvent<Void>()
-    private val _showAuthorWebsite = SingleLiveEvent<Void>()
-    private val _showAppWebsite = SingleLiveEvent<Void>()
-    private val _showAppTwitter = SingleLiveEvent<Void>()
-    private val _showCredits = SingleLiveEvent<Void>()
-    private val _showOpenSourceLicences = SingleLiveEvent<Void>()
-
-    private val dateFormat = DateFormat.getDateTimeInstance()
+@ExperimentalCoroutinesApi
+class AboutViewModel @Inject constructor(
+        private val appRepository: AppRepository,
+        private val busStopDatabaseRepository: BusStopDatabaseRepository,
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher): ViewModel() {
 
     /**
-     * This is called when an [AboutItem] has been clicked in the list.
-     *
-     * @param item The clicked [AboutItem].
+     * This [LiveData] emits the 'about' items to be displayed.
      */
-    fun onItemClicked(item: AboutItem) {
-        when (item.id) {
-            AboutRepository.ITEM_ID_APP_VERSION -> _showStoreListing.call()
-            AboutRepository.ITEM_ID_AUTHOR -> _showAuthorWebsite.call()
-            AboutRepository.ITEM_ID_WEBSITE -> _showAppWebsite.call()
-            AboutRepository.ITEM_ID_TWITTER -> _showAppTwitter.call()
-            AboutRepository.ITEM_ID_CREDITS -> _showCredits.call()
-            AboutRepository.ITEM_ID_OPEN_SOURCE_LICENCES -> _showOpenSourceLicences.call()
-        }
-    }
+    val itemsLiveData = databaseMetadataFlow
+            .mapLatest(this::createAboutItems)
+            .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
 
-    override fun onCleared() {
-        databaseData.onCleared()
+    private val databaseMetadataFlow get() = busStopDatabaseRepository
+            .databaseMetadataFlow
+            .onStart { emit(null) }
+            .distinctUntilChanged()
+
+    private val appVersion by lazy {
+        appRepository.appVersion
     }
 
     /**
-     * Process a [DatabaseMetadata] item and turn it in to a user displayable [String] inside the
-     * [AboutItem] for the database version.
-     *
-     * @param metadata The loaded [DatabaseMetadata].
-     * @return A new version of the database version [AboutItem].
+     * This [LiveData] is invoked when the store listing should be shown.
      */
-    private fun processDatabaseVersion(metadata: DatabaseMetadata?): AboutItem {
-        return items.first { item ->
-            item.id == AboutRepository.ITEM_ID_DATABASE_VERSION
-        }.apply {
-            val version = metadata?.databaseVersion
+    val showStoreListingLiveData: LiveData<Unit> get() = showStoreListing
+    private val showStoreListing = SingleLiveEvent<Unit>()
 
-            subtitle = if (version != null) {
-                strings.getString(R.string.about_database_version_format, version.time,
-                        dateFormat.format(version))
-            } else {
-                null
+    /**
+     * This [LiveData] is invoked when the author website should be shown.
+     */
+    val showAuthorWebsiteLiveData: LiveData<Unit> get() = showAuthorWebsite
+    private val showAuthorWebsite = SingleLiveEvent<Unit>()
+
+    /**
+     * This [LiveData] is invoked when the app website should be shown.
+     */
+    val showAppWebsiteLiveData: LiveData<Unit> get() = showAppWebsite
+    private val showAppWebsite = SingleLiveEvent<Unit>()
+
+    /**
+     * This [LiveData] is invoked when the app Twitter feed should be shown.
+     */
+    val showAppTwitterLiveData: LiveData<Unit> get() = showAppTwitter
+    private val showAppTwitter = SingleLiveEvent<Unit>()
+
+    /**
+     * This [LiveData] is invoked when the app credits should be shown.
+     */
+    val showCreditsLiveData: LiveData<Unit> get() = showCredits
+    private val showCredits = SingleLiveEvent<Unit>()
+
+    /**
+     * This [LiveData] is invoked when the open source licences should be shown.
+     */
+    val showOpenSourceLicencesLiveData: LiveData<Unit> get() = showOpenSourceLicences
+    private val showOpenSourceLicences = SingleLiveEvent<Unit>()
+
+    /**
+     * This is called when an [UiAboutItem] has been clicked in the list.
+     *
+     * @param item The clicked [UiAboutItem].
+     */
+    fun onItemClicked(item: UiAboutItem) {
+        when (item) {
+            is UiAboutItem.OneLineItem.Credits -> showCredits.call()
+            is UiAboutItem.OneLineItem.OpenSourceLicences -> showOpenSourceLicences.call()
+            is UiAboutItem.TwoLinesItem.AppVersion -> showStoreListing.call()
+            is UiAboutItem.TwoLinesItem.Author -> showAuthorWebsite.call()
+            is UiAboutItem.TwoLinesItem.Website -> showAppWebsite.call()
+            is UiAboutItem.TwoLinesItem.Twitter -> showAppTwitter.call()
+            else -> {
+                // Don't do anything for the other items.
             }
         }
     }
 
     /**
-     * Process a [DatabaseMetadata] item and turn it in to a user displayable [String] inside the
-     * [AboutItem] for the topology version.
+     * Create the [List] of [UiAboutItem]s.
      *
-     * @param metadata The loaded [DatabaseMetadata].
-     * @return A new version of the topology version [AboutItem].
+     * @param databaseMetadata The database metadata.
+     * @return The [List] of [UiAboutItem]s.
      */
-    private fun processTopologyVersion(metadata: DatabaseMetadata?): AboutItem {
-        return items.first { item ->
-            item.id == AboutRepository.ITEM_ID_TOPOLOGY_VERSION
-        }.apply {
-            subtitle = metadata?.topologyVersion
-        }
-    }
+    private fun createAboutItems(databaseMetadata: DatabaseMetadata?) =
+            listOf(
+                    UiAboutItem.TwoLinesItem.AppVersion(
+                            appVersion.versionName,
+                            appVersion.versionCode),
+                    UiAboutItem.TwoLinesItem.Author,
+                    UiAboutItem.TwoLinesItem.Website,
+                    UiAboutItem.TwoLinesItem.Twitter,
+                    UiAboutItem.TwoLinesItem.DatabaseVersion(
+                            databaseMetadata?.databaseVersion?.let(::Date)),
+                    UiAboutItem.TwoLinesItem.TopologyVersion(
+                            databaseMetadata?.topologyVersion),
+                    UiAboutItem.OneLineItem.Credits,
+                    UiAboutItem.OneLineItem.OpenSourceLicences)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,10 +29,7 @@ import dagger.Binds
 import dagger.Module
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.features.StopMapFeatureAvailabilityProvider
-import uk.org.rivernile.android.bustracker.dagger.about.AboutDataModule
 import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapDataModule
-import uk.org.rivernile.android.bustracker.data.platform.AndroidPlatformDataSource
-import uk.org.rivernile.android.bustracker.data.platform.PlatformDataSource
 import uk.org.rivernile.android.bustracker.deeplinking.AppDeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilityProvider
 
@@ -42,7 +39,6 @@ import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilit
  * @author Niall Scott
  */
 @Module(includes = [
-    AboutDataModule::class,
     BusStopMapDataModule::class,
     ThirdPartyModule::class,
     ViewModelModule::class
@@ -53,11 +49,6 @@ interface ApplicationModule {
     @Binds
     fun bindDeeplinkIntentFactory(appDeeplinkIntentFactory: AppDeeplinkIntentFactory)
             : DeeplinkIntentFactory
-
-    @Suppress("unused")
-    @Binds
-    fun bindPlatformDataSource(androidPlatformDataSource: AndroidPlatformDataSource)
-            : PlatformDataSource
 
     @Suppress("unused")
     @Binds

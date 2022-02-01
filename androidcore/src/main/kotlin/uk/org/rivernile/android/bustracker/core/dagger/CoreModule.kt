@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import uk.org.rivernile.android.bustracker.core.app.AndroidAppRepository
+import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
 import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
@@ -194,5 +196,9 @@ class CoreModule {
         @Binds
         fun bindPreferenceManager(androidPreferenceManager: AndroidPreferenceManager)
                 : PreferenceManager
+
+        @Suppress("unused")
+        @Binds
+        fun bindAppRepository(androidAppRepository: AndroidAppRepository): AppRepository
     }
 }

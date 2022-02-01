@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,216 +27,160 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Before
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import uk.org.rivernile.android.bustracker.repositories.about.AboutItem
-import uk.org.rivernile.android.bustracker.repositories.about.AboutRepository
-import uk.org.rivernile.android.bustracker.repositories.about.DatabaseMetadata
-import uk.org.rivernile.android.bustracker.utils.Strings
-import uk.org.rivernile.android.utils.TestableClearableLiveData
-import uk.org.rivernile.edinburghbustracker.android.R
-import java.util.Date
+import uk.org.rivernile.android.bustracker.core.app.AppRepository
+import uk.org.rivernile.android.bustracker.core.app.AppVersion
+import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.testutils.test
+import java.util.*
 
 /**
  * Tests for [AboutViewModel].
  *
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class AboutViewModelTest {
 
     @get:Rule
+    val coroutineRule = MainCoroutineRule()
+    @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @Mock
-    lateinit var aboutRepository: AboutRepository
+    private lateinit var appRepository: AppRepository
     @Mock
-    lateinit var strings: Strings
+    private lateinit var busStopDatabaseRepository: BusStopDatabaseRepository
 
-    @Mock
-    lateinit var voidObserver: Observer<Void>
-    @Mock
-    lateinit var aboutItemObserver: Observer<AboutItem>
+    @Test
+    fun itemsLiveDataEmitsItemsWhenDatabaseMetadataIsUnavailable() {
+        givenAppVersion()
+        whenever(busStopDatabaseRepository.databaseMetadataFlow)
+                .thenReturn(flowOf(null))
+        val viewModel = createViewModel()
+        val expected = listOf(
+                UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4L),
+                UiAboutItem.TwoLinesItem.Author,
+                UiAboutItem.TwoLinesItem.Website,
+                UiAboutItem.TwoLinesItem.Twitter,
+                UiAboutItem.TwoLinesItem.DatabaseVersion(null),
+                UiAboutItem.TwoLinesItem.TopologyVersion(null),
+                UiAboutItem.OneLineItem.Credits,
+                UiAboutItem.OneLineItem.OpenSourceLicences)
 
-    private val metadataLiveData = spy(TestableClearableLiveData<DatabaseMetadata>())
+        val observer = viewModel.itemsLiveData.test()
 
-    private lateinit var aboutViewModel: AboutViewModel
-
-    @Before
-    fun setUp() {
-        whenever(aboutRepository.createItems()).thenReturn(listOf(
-                AboutItem(AboutRepository.ITEM_ID_DATABASE_VERSION, "Test"),
-                AboutItem(AboutRepository.ITEM_ID_TOPOLOGY_VERSION, "Test 2")))
-        whenever(aboutRepository.createDatabaseLiveData())
-                .thenReturn(metadataLiveData)
-        aboutViewModel = AboutViewModel(aboutRepository, strings)
+        observer.assertValues(expected)
     }
 
     @Test
-    fun retrievesAboutDatabaseLiveDataOnCreate() {
-        verify(aboutRepository)
-                .createDatabaseLiveData()
+    fun itemsLiveDataEmitsItemsWhenDatabaseMetadataIsAvailable() {
+        givenAppVersion()
+        whenever(busStopDatabaseRepository.databaseMetadataFlow)
+                .thenReturn(flowOf(DatabaseMetadata(123L, "abc123")))
+        val viewModel = createViewModel()
+        val expected1 = listOf(
+                UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4L),
+                UiAboutItem.TwoLinesItem.Author,
+                UiAboutItem.TwoLinesItem.Website,
+                UiAboutItem.TwoLinesItem.Twitter,
+                UiAboutItem.TwoLinesItem.DatabaseVersion(null),
+                UiAboutItem.TwoLinesItem.TopologyVersion(null),
+                UiAboutItem.OneLineItem.Credits,
+                UiAboutItem.OneLineItem.OpenSourceLicences)
+        val expected2 = listOf(
+                UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4L),
+                UiAboutItem.TwoLinesItem.Author,
+                UiAboutItem.TwoLinesItem.Website,
+                UiAboutItem.TwoLinesItem.Twitter,
+                UiAboutItem.TwoLinesItem.DatabaseVersion(Date(123L)),
+                UiAboutItem.TwoLinesItem.TopologyVersion("abc123"),
+                UiAboutItem.OneLineItem.Credits,
+                UiAboutItem.OneLineItem.OpenSourceLicences)
+
+        val observer = viewModel.itemsLiveData.test()
+
+        observer.assertValues(expected1, expected2)
     }
 
     @Test
-    fun retrievingItemsCallsRepository() {
-        aboutViewModel.items
+    fun onItemClickedWithCreditsItemShowsCredits() {
+        val viewModel = createViewModel()
+        val observer = viewModel.showCreditsLiveData.test()
 
-        verify(aboutRepository, times(1))
-                .createItems()
+        viewModel.onItemClicked(UiAboutItem.OneLineItem.Credits)
+
+        observer.assertSize(1)
     }
 
     @Test
-    fun clickingOnAppVersionItemShowsStoreListing() {
-        aboutViewModel.showStoreListing.observeForever(voidObserver)
+    fun onItemClickedWithOpenSourceLicencesItemShowsOpenSourceLicences() {
+        val viewModel = createViewModel()
+        val observer = viewModel.showOpenSourceLicencesLiveData.test()
 
-        aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_APP_VERSION, "Test"))
+        viewModel.onItemClicked(UiAboutItem.OneLineItem.OpenSourceLicences)
 
-        verify(voidObserver, times(1))
-                .onChanged(anyOrNull())
+        observer.assertSize(1)
     }
 
     @Test
-    fun clickingOnAuthorItemShowsAuthorWebsite() {
-        aboutViewModel.showAuthorWebsite.observeForever(voidObserver)
+    fun onItemClickedWithAppVersionItemShowsStoreListing() {
+        val viewModel = createViewModel()
+        val observer = viewModel.showStoreListingLiveData.test()
 
-        aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_AUTHOR, "Test"))
+        viewModel.onItemClicked(UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4))
 
-        verify(voidObserver, times(1))
-                .onChanged(anyOrNull())
+        observer.assertSize(1)
     }
 
     @Test
-    fun clickingOnWebsiteItemShowsAppWebsite() {
-        aboutViewModel.showAppWebsite.observeForever(voidObserver)
+    fun onItemClickedWithAuthorItemShowsAuthorWebsite() {
+        val viewModel = createViewModel()
+        val observer = viewModel.showAuthorWebsiteLiveData.test()
 
-        aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_WEBSITE, "Test"))
+        viewModel.onItemClicked(UiAboutItem.TwoLinesItem.Author)
 
-        verify(voidObserver, times(1))
-                .onChanged(anyOrNull())
+        observer.assertSize(1)
     }
 
     @Test
-    fun clickingOnTwitterItemShowsAppTwitter() {
-        aboutViewModel.showAppTwitter.observeForever(voidObserver)
+    fun onItemClickedWithWebsiteItemShowsAppWebsite() {
+        val viewModel = createViewModel()
+        val observer = viewModel.showAppWebsiteLiveData.test()
 
-        aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_TWITTER, "Test"))
+        viewModel.onItemClicked(UiAboutItem.TwoLinesItem.Website)
 
-        verify(voidObserver, times(1))
-                .onChanged(anyOrNull())
+        observer.assertSize(1)
     }
 
     @Test
-    fun clickingOnCreditsItemShowsCredits() {
-        aboutViewModel.showCredits.observeForever(voidObserver)
+    fun onItemClickedWithTwitterItemShowsAppTwitter() {
+        val viewModel = createViewModel()
+        val observer = viewModel.showAppTwitterLiveData.test()
 
-        aboutViewModel.onItemClicked(AboutItem(AboutRepository.ITEM_ID_CREDITS, "Test"))
+        viewModel.onItemClicked(UiAboutItem.TwoLinesItem.Twitter)
 
-        verify(voidObserver, times(1))
-                .onChanged(anyOrNull())
+        observer.assertSize(1)
     }
 
-    @Test
-    fun clickingOnOpenSourceItemShowsOpenSourceLicences() {
-        aboutViewModel.showOpenSourceLicences.observeForever(voidObserver)
+    private fun createViewModel() =
+            AboutViewModel(
+                    appRepository,
+                    busStopDatabaseRepository,
+                    coroutineRule.testDispatcher)
 
-        aboutViewModel.onItemClicked(
-                AboutItem(AboutRepository.ITEM_ID_OPEN_SOURCE_LICENCES, "Test"))
-
-        verify(voidObserver, times(1))
-                .onChanged(anyOrNull())
-    }
-
-    @Test
-    fun databaseVersionItemWithNullDatabaseMetadata() {
-        aboutViewModel.databaseVersionItem.observeForever(aboutItemObserver)
-
-        metadataLiveData.value = null
-
-        argumentCaptor<AboutItem>().apply {
-            verify(aboutItemObserver)
-                    .onChanged(capture())
-
-            assertNull(firstValue.subtitle)
-        }
-    }
-
-    @Test
-    fun databaseVersionItemWithPopulatedData() {
-        aboutViewModel.databaseVersionItem.observeForever(aboutItemObserver)
-        val date = Date()
-        val metadata = DatabaseMetadata(date, "abc123")
-        whenever(strings.getString(eq(R.string.about_database_version_format), eq(date.time),
-                anyString()))
-                .thenReturn("Time ms (time human)")
-
-        metadataLiveData.value = metadata
-
-        argumentCaptor<AboutItem>().apply {
-            verify(aboutItemObserver)
-                    .onChanged(capture())
-
-            assertEquals("Time ms (time human)", firstValue.subtitle)
-        }
-    }
-
-    @Test
-    fun topologyVersionItemWithNullDatabaseMetadata() {
-        aboutViewModel.topologyVersionItem.observeForever(aboutItemObserver)
-
-        metadataLiveData.value = null
-
-        argumentCaptor<AboutItem>().apply {
-            verify(aboutItemObserver)
-                    .onChanged(capture())
-
-            assertNull(firstValue.subtitle)
-        }
-    }
-
-    @Test
-    fun topologyVersionItemWithPopulatedData() {
-        aboutViewModel.topologyVersionItem.observeForever(aboutItemObserver)
-        val date = Date()
-        val metadata = DatabaseMetadata(date, "abc123")
-
-        metadataLiveData.value = metadata
-
-        argumentCaptor<AboutItem>().apply {
-            verify(aboutItemObserver)
-                    .onChanged(capture())
-
-            assertEquals("abc123", firstValue.subtitle)
-        }
-    }
-
-    @Test
-    fun onClearedCallsOnClearedOnLiveData() {
-        callOnCleared()
-
-        verify(metadataLiveData)
-                .onCleared()
-    }
-
-    private fun callOnCleared() {
-        // This is required because Kotlin can't access the protected method.
-        val method = aboutViewModel.javaClass.getDeclaredMethod("onCleared")
-        method.isAccessible = true
-        method.invoke(aboutViewModel)
+    private fun givenAppVersion() {
+        whenever(appRepository.appVersion)
+                .thenReturn(AppVersion("1.2.3", 4L))
     }
 }

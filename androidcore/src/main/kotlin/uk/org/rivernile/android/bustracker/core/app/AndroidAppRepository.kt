@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,30 +24,35 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.data.platform
+package uk.org.rivernile.android.bustracker.core.app
 
 import android.content.Context
 import android.content.pm.PackageManager
-import uk.org.rivernile.edinburghbustracker.android.R
+import androidx.core.content.pm.PackageInfoCompat
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This is an Android specific implementation of [PlatformDataSource].
+ * This is an Android-specific implementation of [AppRepository].
  *
- * @property context A [Context] instance.
+ * @param context The application [Context].
+ * @param packageManager The Android [PackageManager].
  * @author Niall Scott
  */
 @Singleton
-class AndroidPlatformDataSource @Inject constructor(
-        private val context: Context) : PlatformDataSource {
+internal class AndroidAppRepository @Inject constructor(
+        private val context: Context,
+        private val packageManager: PackageManager) : AppRepository {
 
-    override fun getAppVersionString(): String = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).let {
-            context.getString(R.string.about_version_format, it.versionName, it.versionCode)
+    override val appVersion get() = try {
+        packageManager.getPackageInfo(context.packageName, 0).let {
+            AppVersion(
+                    it.versionName,
+                    PackageInfoCompat.getLongVersionCode(it))
         }
-    } catch (e: PackageManager.NameNotFoundException) {
-        // This should never happen.
-        ""
+    } catch (ignored: PackageManager.NameNotFoundException) {
+        // This should never happen as we should always be able to look up our own package name. If
+        // this happens, there is something terribly wrong in the system.
+        throw UnsupportedOperationException()
     }
 }
