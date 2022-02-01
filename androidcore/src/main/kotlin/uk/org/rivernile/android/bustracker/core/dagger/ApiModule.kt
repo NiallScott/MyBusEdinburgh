@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,10 +29,11 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
 import uk.org.rivernile.android.bustracker.core.di.ForApi
+import uk.org.rivernile.android.bustracker.core.di.ForKotlinJsonSerialization
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
 import uk.org.rivernile.android.bustracker.core.endpoints.api.json.ApiServiceFactory
@@ -84,18 +85,18 @@ internal class ApiModule {
      * Provide the [Retrofit] instance for the API.
      *
      * @param okHttpClient The [OkHttpClient] to use for requests.
-     * @param gsonConverterFactory The [GsonConverterFactory] instance.
+     * @param jsonConverterFactory The [Converter.Factory] for Kotlin JSON.
      * @return The [Retrofit] instance.
      */
     @Provides
     @ForApi
     fun provideRetrofit(
             @ForApi okHttpClient: OkHttpClient,
-            gsonConverterFactory: GsonConverterFactory): Retrofit =
+            @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory): Retrofit =
             Retrofit.Builder()
                     .baseUrl(BuildConfig.API_BASE_URL)
                     .client(okHttpClient)
-                    .addConverterFactory(gsonConverterFactory)
+                    .addConverterFactory(jsonConverterFactory)
                     .build()
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * This class describes a user object within the Twitter API.
@@ -36,10 +37,8 @@ import com.google.gson.annotations.SerializedName
  * @property screenName The username.
  * @author Niall Scott
  */
+@Serializable
 internal data class JsonUser(
-        @SerializedName("name")
-        val name: String?,
-        @SerializedName("profile_image_url_https")
-        val profileImageUrl: String?,
-        @SerializedName("screen_name")
-        val screenName: String?)
+        @SerialName("name") val name: String? = null,
+        @SerialName("profile_image_url_https") val profileImageUrl: String? = null,
+        @SerialName("screen_name") val screenName: String? = null)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,10 +30,11 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
 import uk.org.rivernile.android.bustracker.core.di.ForApi
+import uk.org.rivernile.android.bustracker.core.di.ForKotlinJsonSerialization
 import uk.org.rivernile.android.bustracker.core.di.ForTwitter
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint.ApiTwitterEndpoint
@@ -64,18 +65,18 @@ class TwitterModule {
      *
      * @param okHttpClient The [OkHttpClient] to use for requests. This intentionally re-uses the
      * API [OkHttpClient] as the current implementation uses the same endpoint.
-     * @param gsonConverterFactory The [GsonConverterFactory] instance.
+     * @param jsonConverterFactory The [Converter.Factory] instance for Kotlin JSON.
      * @return The [Retrofit] instance.
      */
     @Provides
     @ForTwitter
     fun provideRetrofit(
             @ForApi okHttpClient: OkHttpClient,
-            gsonConverterFactory: GsonConverterFactory): Retrofit =
+            @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory): Retrofit =
             Retrofit.Builder()
                     .baseUrl(BuildConfig.API_BASE_URL)
                     .client(okHttpClient)
-                    .addConverterFactory(gsonConverterFactory)
+                    .addConverterFactory(jsonConverterFactory)
                     .build()
 
     @Module

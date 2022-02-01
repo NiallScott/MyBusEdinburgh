@@ -125,6 +125,8 @@ dependencies {
 
     // Retrofit
     api "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation 'com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:' +
+            retrofitKotlinSerializationConverterVersion
 
     // Google Play Services location
     api "com.google.android.gms:play-services-location:$playServicesLocationVersion"

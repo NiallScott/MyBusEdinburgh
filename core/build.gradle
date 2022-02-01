@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
+apply plugin: 'kotlinx-serialization'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -59,8 +60,8 @@ dependencies {
     // Java dependency injection annotations
     api 'javax.inject:javax.inject:1'
 
-    // Gson
-    api "com.google.code.gson:gson:$gsonVersion"
+    // (De-)serialisation
+    api "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinJsonSerialisationVersion"
 
     // Okhttp
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"

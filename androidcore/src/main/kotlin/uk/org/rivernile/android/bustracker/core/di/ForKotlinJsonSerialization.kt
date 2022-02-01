@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,14 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
+package uk.org.rivernile.android.bustracker.core.di
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import javax.inject.Qualifier
 
 /**
- * This object describes a Tweet object within the Twitter API.
- *
- * @property createdAt The timestamp given as a [String].
- * @property text The Tweet body text.
- * @property entities Optional included Tweet entities.
- * @property user Tweet author user details.
- * @author Niall Scott
+ * This annotation defines a Dagger qualifier for Kotlin JSON serialisation.
  */
-@Serializable
-data class JsonTweet internal constructor(
-        @SerialName("created_at") internal val createdAt: String? = null,
-        @SerialName("text") internal val text: String? = null,
-        @SerialName("entities") internal val entities: JsonEntities? = null,
-        @SerialName("user") internal val user: JsonUser? = null)
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForKotlinJsonSerialization

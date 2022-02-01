@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * This class describes the entities object from the Twitter API.
@@ -34,6 +35,6 @@ import com.google.gson.annotations.SerializedName
  * @property urls A [List] of [JsonUrlEntity], which may optionally be present.
  * @author Niall Scott
  */
+@Serializable
 internal data class JsonEntities(
-        @SerializedName("urls")
-        val urls: List<JsonUrlEntity>?)
+        @SerialName("urls") val urls: List<JsonUrlEntity>? = null)

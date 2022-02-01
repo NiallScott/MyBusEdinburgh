@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -61,9 +61,24 @@ internal class DatabaseVersionApiRequest(private val call: Call<JsonDatabaseVers
     /**
      * Convert a [JsonDatabaseVersion] to a [DatabaseVersion]. Returns `null` when the input is
      * `null`.
+     *
+     * @param jsonDatabaseVersion The JSON representation of the database version.
+     * @return A [DatabaseVersion] of the mapped JSON, or `null` if the root object or expected
+     * fields are `null`.
      */
-    private fun convertToModelObject(jsonDatabaseVersion: JsonDatabaseVersion?) =
-            jsonDatabaseVersion?.let {
-                DatabaseVersion(it.schemaVersion, it.topologyId, it.databaseUrl, it.checksum)
-            }
+    private fun convertToModelObject(
+            jsonDatabaseVersion: JsonDatabaseVersion?): DatabaseVersion? {
+        return jsonDatabaseVersion?.let {
+            val schemaVersion = it.schemaVersion ?: return null
+            val topologyId = it.topologyId ?: return null
+            val databaseUrl = it.databaseUrl ?: return null
+            val checksum = it.checksum ?: return null
+
+            DatabaseVersion(
+                    schemaVersion,
+                    topologyId,
+                    databaseUrl,
+                    checksum)
+        }
+    }
 }

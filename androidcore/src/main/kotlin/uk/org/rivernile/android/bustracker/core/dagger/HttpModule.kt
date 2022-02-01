@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,12 +27,18 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import com.google.gson.Gson
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.converter.gson.GsonConverterFactory
 import uk.org.rivernile.android.bustracker.core.di.ForHttpLogging
+import uk.org.rivernile.android.bustracker.core.di.ForKotlinJsonSerialization
 import javax.inject.Singleton
 
 /**
@@ -71,4 +77,18 @@ internal class HttpModule {
     @Singleton
     fun provideGsonConverterFactory(gson: Gson): GsonConverterFactory =
             GsonConverterFactory.create(gson)
+
+    /**
+     * Provide a [Converter.Factory] instance which uses the app-wide [Json] instance to perform
+     * (de-)serialisation of JSON data in Retrofit.
+     *
+     * @param json The app-wide [Json] instance.
+     * @return A [Converter.Factory] which does Kotlin JSON (de-)serialisation.
+     */
+    @Singleton
+    @Provides
+    @ForKotlinJsonSerialization
+    @ExperimentalSerializationApi
+    fun provideKotlinJsonConverterFactory(json: Json): Converter.Factory =
+            json.asConverterFactory("application/json".toMediaType())
 }

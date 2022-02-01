@@ -38,6 +38,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.serialization.json.Json
 import uk.org.rivernile.android.bustracker.core.app.AndroidAppRepository
 import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
@@ -92,6 +93,15 @@ class CoreModule {
     @Provides
     @Singleton
     internal fun provideGson() = Gson()
+
+    /**
+     * Provide the app-wide [Json] instance.
+     *
+     * @return The app-wide [Json] instance.
+     */
+    @Provides
+    @Singleton
+    internal fun provideKotlinJsonSerialisation() = Json { ignoreUnknownKeys = true }
 
     /**
      * Provide the [AppNotificationChannels] instance for dealing with notification channels.

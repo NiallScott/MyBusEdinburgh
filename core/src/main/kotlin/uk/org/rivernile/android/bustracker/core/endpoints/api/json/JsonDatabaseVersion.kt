@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,11 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
- * This class represents a JSON version of the [DatabaseVersion] model class.
+ * This class represents the JSON structure of the database version.
  *
  * @property schemaVersion The version of the database schema.
  * @property topologyId The topology ID to represent the version of the data.
@@ -37,12 +38,9 @@ import com.google.gson.annotations.SerializedName
  * @property checksum A checksum to use to verify the consistency of the database file.
  * @author Niall Scott
  */
+@Serializable
 data class JsonDatabaseVersion(
-        @SerializedName("db_schema_version")
-        val schemaVersion: String,
-        @SerializedName("topo_id")
-        val topologyId: String,
-        @SerializedName("db_url")
-        val databaseUrl: String,
-        @SerializedName("checksum")
-        val checksum: String)
+        @SerialName("db_schema_version") val schemaVersion: String? = null,
+        @SerialName("topo_id") val topologyId: String? = null,
+        @SerialName("db_url") val databaseUrl: String? = null,
+        @SerialName("checksum") val checksum: String? = null)
