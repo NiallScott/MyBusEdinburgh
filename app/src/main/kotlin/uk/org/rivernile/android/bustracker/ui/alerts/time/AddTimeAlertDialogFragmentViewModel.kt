@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -149,8 +149,8 @@ class AddTimeAlertDialogFragmentViewModel(
     /**
      * When this [LiveData] emits a new item, the limitations dialog should be shown.
      */
-    val showLimitationsLiveData: LiveData<Nothing> get() = showLimitations
-    private val showLimitations = SingleLiveEvent<Nothing>()
+    val showLimitationsLiveData: LiveData<Unit> get() = showLimitations
+    private val showLimitations = SingleLiveEvent<Unit>()
 
     /**
      * When this [LiveData] emits a new item, the services chooser should be shown. The data that is

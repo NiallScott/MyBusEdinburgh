@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,8 +61,7 @@ class ServicesRepositoryTest {
     private lateinit var serviceColourOverride: ServiceColourOverride
 
     @Test
-    fun getColoursForServicesFlowGetsInitialValueWhenServiceColourOverrideIsNull() =
-            runBlockingTest {
+    fun getColoursForServicesFlowGetsInitialValueWhenServiceColourOverrideIsNull() = runTest {
         val serviceColours = mapOf(
                 "1" to 0x000000,
                 "2" to 0xFFFFFF)
@@ -70,7 +70,9 @@ class ServicesRepositoryTest {
         val repository = ServicesRepository(servicesDao, null)
 
         val observer = repository.getColoursForServicesFlow(arrayOf("1", "2")).test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(serviceColours)
         verify(servicesDao)
@@ -78,8 +80,7 @@ class ServicesRepositoryTest {
     }
 
     @Test
-    fun getColoursForServicesFlowGetsInitialValueWhenServiceColourOverrideIsNotNull() =
-            runBlockingTest {
+    fun getColoursForServicesFlowGetsInitialValueWhenServiceColourOverrideIsNotNull() = runTest {
         val initialServiceColours = mapOf(
                 "1" to 0x000000,
                 "2" to 0xFFFFFF)
@@ -97,7 +98,9 @@ class ServicesRepositoryTest {
                 serviceColourOverride)
 
         val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3")).test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(overriddenServiceColours)
         verify(servicesDao)
@@ -105,8 +108,7 @@ class ServicesRepositoryTest {
     }
 
     @Test
-    fun getColoursForServicesFlowResponseToChangesWhenServiceColourOverrideIsNull() =
-            runBlockingTest {
+    fun getColoursForServicesFlowResponseToChangesWhenServiceColourOverrideIsNull() = runTest {
         doAnswer {
             it.getArgument<ServicesDao.OnServicesChangedListener>(0).let { listener ->
                 listener.onServicesChanged()
@@ -129,7 +131,9 @@ class ServicesRepositoryTest {
 
         val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3", "4", "5"))
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(serviceColours1, serviceColours2, serviceColours3)
         verify(servicesDao)
@@ -137,8 +141,7 @@ class ServicesRepositoryTest {
     }
 
     @Test
-    fun getColoursForServicesFlowResponseToChangesWhenServiceColourOverrideIsNotNull() =
-            runBlockingTest {
+    fun getColoursForServicesFlowResponseToChangesWhenServiceColourOverrideIsNotNull() = runTest {
         doAnswer {
             it.getArgument<ServicesDao.OnServicesChangedListener>(0).let { listener ->
                 listener.onServicesChanged()
@@ -175,7 +178,9 @@ class ServicesRepositoryTest {
 
         val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3", "4", "5"))
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(daoServiceColours1, overriddenServiceColours2, null)
         verify(servicesDao)
@@ -183,7 +188,7 @@ class ServicesRepositoryTest {
     }
 
     @Test
-    fun getServiceDetailsFlowGetsInitialValue() = runBlockingTest {
+    fun getServiceDetailsFlowGetsInitialValue() = runTest {
         val expected = mapOf(
                 "1" to ServiceDetails("1", "Route 1", 1),
                 "2" to ServiceDetails("2", "Route 2", 2),
@@ -193,7 +198,9 @@ class ServicesRepositoryTest {
         val repository = ServicesRepository(servicesDao, null)
 
         val observer = repository.getServiceDetailsFlow(setOf("1", "2", "3")).test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected)
         verify(servicesDao)
@@ -201,7 +208,7 @@ class ServicesRepositoryTest {
     }
 
     @Test
-    fun getServiceDetailsFlowRespondsToServiceChanges() = runBlockingTest {
+    fun getServiceDetailsFlowRespondsToServiceChanges() = runTest {
         doAnswer {
             val listener = it.getArgument<ServicesDao.OnServicesChangedListener>(0)
             listener.onServicesChanged()
@@ -219,12 +226,12 @@ class ServicesRepositoryTest {
         val repository = ServicesRepository(servicesDao, null)
 
         val observer = repository.getServiceDetailsFlow(setOf("1", "2", "3")).test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected1, null, expected3)
         verify(servicesDao)
                 .removeOnServicesChangedListener(any())
     }
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

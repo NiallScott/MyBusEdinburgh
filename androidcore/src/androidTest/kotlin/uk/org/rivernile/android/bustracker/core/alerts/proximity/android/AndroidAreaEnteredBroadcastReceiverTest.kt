@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,8 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -78,7 +79,7 @@ class AndroidAreaEnteredBroadcastReceiverTest {
                 geofencingManager = geofencingManager,
                 alertNotificationDispatcher = notificationDispatcher)
         val coreModule = FakeCoreModule(
-                applicationCoroutineScope = coroutineRule,
+                applicationCoroutineScope = coroutineRule.scope,
                 defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
 
@@ -92,12 +93,12 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithoutAlertIdDoesNotShowNotification() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithoutAlertIdDoesNotShowNotification() = runTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(alertsDao, never())
                 .removeProximityAlert(any<Int>())
@@ -108,14 +109,14 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithInvalidAlertIdDoesNotShowNotification() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithInvalidAlertIdDoesNotShowNotification() = runTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                 .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, -1)
                 .putExtra(LocationManager.KEY_PROXIMITY_ENTERING, true)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(alertsDao, never())
                 .removeProximityAlert(any<Int>())
@@ -126,14 +127,14 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithNotEnteringProximityDoesNotShowNotification() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithNotEnteringProximityDoesNotShowNotification() = runTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                 .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, 1)
                 .putExtra(LocationManager.KEY_PROXIMITY_ENTERING, false)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(alertsDao, never())
                 .removeProximityAlert(any<Int>())
@@ -144,8 +145,7 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithAlertMissingFromDatabaseDoesNotShowNotification() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithAlertMissingFromDatabaseDoesNotShowNotification() = runTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                 .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, 1)
@@ -154,6 +154,7 @@ class AndroidAreaEnteredBroadcastReceiverTest {
                 .thenReturn(null)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(alertsDao)
                 .removeProximityAlert(1)
@@ -164,8 +165,7 @@ class AndroidAreaEnteredBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverAndCriteriaSatisfiedShowsNotification() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverAndCriteriaSatisfiedShowsNotification() = runTest {
         val context = getApplication()
         val intent = Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                 .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, 1)
@@ -175,6 +175,7 @@ class AndroidAreaEnteredBroadcastReceiverTest {
                 .thenReturn(proximityAlert)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(alertsDao)
                 .removeProximityAlert(1)

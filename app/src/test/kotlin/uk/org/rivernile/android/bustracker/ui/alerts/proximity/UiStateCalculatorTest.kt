@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,8 +68,7 @@ class UiStateCalculatorTest {
     }
 
     @Test
-    fun createUiStateFlowEmitsNoLocationFeatureWhenNoLocationFeature() =
-            coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsNoLocationFeatureWhenNoLocationFeature() = runTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(false)
         val locationPermissionFlow = flowOf(PermissionState.GRANTED)
@@ -76,14 +76,14 @@ class UiStateCalculatorTest {
 
         val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.ERROR_NO_LOCATION_FEATURE)
     }
 
     @Test
-    fun createUiStateFlowEmitsPermissionUngrantedWhenPermissionUngranted() =
-            coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsPermissionUngrantedWhenPermissionUngranted() = runTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
@@ -93,14 +93,14 @@ class UiStateCalculatorTest {
 
         val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.ERROR_PERMISSION_UNGRANTED)
     }
 
     @Test
-    fun createUiStateFlowEmitsPermissionDeniedWhenPermissionDenied() =
-            coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsPermissionDeniedWhenPermissionDenied() = runTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
@@ -110,13 +110,14 @@ class UiStateCalculatorTest {
 
         val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.ERROR_PERMISSION_DENIED)
     }
 
     @Test
-    fun createUiStateFlowEmitsProgressWhenStopDetailsIsNull() = coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsProgressWhenStopDetailsIsNull() = runTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
@@ -126,13 +127,14 @@ class UiStateCalculatorTest {
 
         val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.PROGRESS)
     }
 
     @Test
-    fun createUiStateFlowEmitsContentWhenStopDetailsIsAvailable() = coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsContentWhenStopDetailsIsAvailable() = runTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
@@ -142,13 +144,14 @@ class UiStateCalculatorTest {
 
         val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.CONTENT)
     }
 
     @Test
-    fun createUiStateFlowEmitsCorrectValuesWithRepresentativeExample() = coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsCorrectValuesWithRepresentativeExample() = runTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,7 +38,7 @@ import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -94,7 +94,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsNull() = runBlockingTest {
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsNull() = runTest {
         val expectedProjection = arrayOf(FavouritesContract.COUNT)
         object : MockContentProvider() {
             override fun query(
@@ -119,7 +119,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsEmpty() = runBlockingTest {
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorIsEmpty() = runTest {
         val expectedProjection = arrayOf(FavouritesContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -146,7 +146,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun isStopAddedAsFavouriteReturnsFalseWhenCursorReturnsCountOfZeroForStopCode() = runBlocking {
+    fun isStopAddedAsFavouriteReturnsFalseWhenCursorReturnsCountOfZeroForStopCode() = runTest {
         val expectedProjection = arrayOf(FavouritesContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(0))
@@ -175,7 +175,7 @@ class AndroidFavouritesDaoTest {
 
     @Test
     fun isStopAddedAsFavouriteReturnsTrueWhenCursorReturnsCountOfGreaterThanZeroForStopCode() =
-            runBlocking {
+            runTest {
         val expectedProjection = arrayOf(FavouritesContract.COUNT)
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(1))
@@ -260,7 +260,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun addFavouriteStopAddsFavouriteStop() = coroutineRule.runBlockingTest {
+    fun addFavouriteStopAddsFavouriteStop() = runTest {
         val favouriteStop = FavouriteStop(0L, "123456", "Stop name")
         val expectedContentValues = ContentValues().apply {
             put(FavouritesContract.STOP_CODE, "123456")
@@ -280,7 +280,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun updateFavouriteStopUpdatesFavouriteStop() = coroutineRule.runBlockingTest {
+    fun updateFavouriteStopUpdatesFavouriteStop() = runTest {
         val favouriteStop = FavouriteStop(1L, "123456", "New name")
         val expectedContentValues = ContentValues().apply {
             put(FavouritesContract.STOP_NAME, "New name")
@@ -305,7 +305,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun removeFavouriteStopRemovesFavouriteStop() = coroutineRule.runBlockingTest {
+    fun removeFavouriteStopRemovesFavouriteStop() = runTest {
         object : MockContentProvider() {
             override fun delete(
                     uri: Uri,
@@ -428,7 +428,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun getFavouriteStopWithNullCursorReturnsNull() = runBlocking {
+    fun getFavouriteStopWithNullCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForFavouriteStopSingle()
         val expectedSelectionArgs = arrayOf("123456")
         object : MockContentProvider() {
@@ -454,7 +454,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun getFavouriteStopWithEmptyCursorReturnsNull() = runBlocking {
+    fun getFavouriteStopWithEmptyCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForFavouriteStopSingle()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -482,7 +482,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun getFavouriteStopWithPopulatedCursorReturnsFavouriteStop() = runBlocking {
+    fun getFavouriteStopWithPopulatedCursorReturnsFavouriteStop() = runTest {
         val expectedProjection = getExpectedProjectionForFavouriteStopSingle()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -512,7 +512,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun getFavouriteStopsWithNullCursorReturnsNull() = runBlocking {
+    fun getFavouriteStopsWithNullCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForFavouriteStop()
         object : MockContentProvider() {
             override fun query(
@@ -537,7 +537,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun getFavouriteStopsWithEmptyCursorReturnsNull() = runBlocking {
+    fun getFavouriteStopsWithEmptyCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForFavouriteStop()
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -564,7 +564,7 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun getFavouriteStopsWithNonEmptyResultIsHandledCorrectly() = runBlocking {
+    fun getFavouriteStopsWithNonEmptyResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForFavouriteStop()
         val cursor = MatrixCursor(expectedProjection).apply {
             addRow(arrayOf(1, "100001", "Stop 1"))
@@ -610,6 +610,4 @@ class AndroidFavouritesDaoTest {
     private fun getExpectedProjectionForFavouriteStopSingle() = arrayOf(
             FavouritesContract.ID,
             FavouritesContract.STOP_NAME)
-
-    private val runBlocking = coroutineRule::runBlockingTest
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -70,7 +72,7 @@ class LiveTimesLoaderTest {
     }
 
     @Test
-    fun loadLiveTimesFlowWithNullStopCodeYieldsNoStopCodeError() = coroutineRule.runBlockingTest {
+    fun loadLiveTimesFlowWithNullStopCodeYieldsNoStopCodeError() = runTest {
         val stopCodes = flowOf<String?>(null)
         val numberOfDeparturesFlow = flowOf(4)
         val refreshFlow = flowOf(Unit)
@@ -78,6 +80,7 @@ class LiveTimesLoaderTest {
                 .thenReturn(numberOfDeparturesFlow)
 
         val observer = loader.loadLiveTimesFlow(stopCodes, refreshFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE))
@@ -86,7 +89,7 @@ class LiveTimesLoaderTest {
     }
 
     @Test
-    fun loadLiveTimesFlowWithPopulatedStopCodeLoadsLiveTimes() = coroutineRule.runBlockingTest {
+    fun loadLiveTimesFlowWithPopulatedStopCodeLoadsLiveTimes() = runTest {
         val stopCodes = flowOf("123456")
         val numberOfDeparturesFlow = flowOf(4)
         val refreshFlow = flowOf(Unit)
@@ -100,6 +103,7 @@ class LiveTimesLoaderTest {
                 .thenReturn(loadFlow)
 
         val observer = loader.loadLiveTimesFlow(stopCodes, refreshFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -108,7 +112,7 @@ class LiveTimesLoaderTest {
     }
 
     @Test
-    fun loadLiveTimesFlowWithStopCodeChangeCausesReload() = coroutineRule.runBlockingTest {
+    fun loadLiveTimesFlowWithStopCodeChangeCausesReload() = runTest {
         val stopCodes = flow {
             emit("123456")
             delay(100)
@@ -143,7 +147,7 @@ class LiveTimesLoaderTest {
     }
 
     @Test
-    fun loadLiveTimesFlowWithNumberOfDepartureChangeCausesReload() = coroutineRule.runBlockingTest {
+    fun loadLiveTimesFlowWithNumberOfDepartureChangeCausesReload() = runTest {
         val stopCodes = flowOf("123456")
         val numberOfDeparturesFlow = flow {
             emit(4)
@@ -177,7 +181,7 @@ class LiveTimesLoaderTest {
     }
 
     @Test
-    fun loadLiveTimesFlowWitRefreshCausesReload() = coroutineRule.runBlockingTest {
+    fun loadLiveTimesFlowWitRefreshCausesReload() = runTest {
         val stopCodes = flowOf("123456")
         val numberOfDeparturesFlow = flowOf(4)
         val refreshFlow = flow {

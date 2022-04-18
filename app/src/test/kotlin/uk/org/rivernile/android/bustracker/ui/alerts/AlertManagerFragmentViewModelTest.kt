@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,14 +31,15 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [AlertManagerFragmentViewModel].
@@ -57,12 +58,6 @@ class AlertManagerFragmentViewModelTest {
     @Mock
     private lateinit var alertsRetriever: AlertsRetriever
 
-    private val alertsObserver by lazy { LiveDataTestObserver<List<UiAlert>?>() }
-    private val uiStateObserver by lazy { LiveDataTestObserver<UiState>() }
-    private val showLocationSettingsObserver by lazy { LiveDataTestObserver<Nothing?>() }
-    private val showRemoveArrivalAlertObserver by lazy { LiveDataTestObserver<String>() }
-    private val showRemoveProximityAlertObserver by lazy { LiveDataTestObserver<String>() }
-
     private val viewModel: AlertManagerFragmentViewModel by lazy {
         // This is lazily initialised so we can mock the behaviour of dependencies before
         // instantiation.
@@ -72,40 +67,43 @@ class AlertManagerFragmentViewModelTest {
     }
 
     @Test
-    fun alertsLiveDataEmitsNullWhenRetrieverEmitsNull() {
+    fun alertsLiveDataEmitsNullWhenRetrieverEmitsNull() = runTest {
         whenever(alertsRetriever.allAlertsFlow)
                 .thenReturn(flowOf(null))
 
-        viewModel.alertsLiveData.observeForever(alertsObserver)
+        val observer = viewModel.alertsLiveData.test()
+        advanceUntilIdle()
 
-        alertsObserver.assertValues(null)
+        observer.assertValues(null)
     }
 
     @Test
-    fun alertsLiveDataEmitsEmptyListWhenRetrieverEmitsEmptyList() {
+    fun alertsLiveDataEmitsEmptyListWhenRetrieverEmitsEmptyList() = runTest {
         whenever(alertsRetriever.allAlertsFlow)
                 .thenReturn(flowOf(emptyList()))
 
-        viewModel.alertsLiveData.observeForever(alertsObserver)
+        val observer = viewModel.alertsLiveData.test()
+        advanceUntilIdle()
 
-        alertsObserver.assertValues(emptyList())
+        observer.assertValues(emptyList())
     }
 
     @Test
-    fun alertsLiveDataEmitsPopulatedListWhenRetrieverEmitsPopulatedList() {
+    fun alertsLiveDataEmitsPopulatedListWhenRetrieverEmitsPopulatedList() = runTest {
         val list = listOf(
                 mock<UiAlert.ArrivalAlert>(),
                 mock<UiAlert.ProximityAlert>())
         whenever(alertsRetriever.allAlertsFlow)
                 .thenReturn(flowOf(list))
 
-        viewModel.alertsLiveData.observeForever(alertsObserver)
+        val observer = viewModel.alertsLiveData.test()
+        advanceUntilIdle()
 
-        alertsObserver.assertValues(list)
+        observer.assertValues(list)
     }
 
     @Test
-    fun alertsLiveDataEmitsRepresentativeFlowCorrectly() = coroutineRule.runBlockingTest {
+    fun alertsLiveDataEmitsRepresentativeFlowCorrectly() = runTest {
         val list1 = listOf(
                 mock<UiAlert.ArrivalAlert>(),
                 mock<UiAlert.ProximityAlert>())
@@ -118,45 +116,47 @@ class AlertManagerFragmentViewModelTest {
                     list1,
                     list2))
 
-        viewModel.alertsLiveData.observeForever(alertsObserver)
+        val observer = viewModel.alertsLiveData.test()
         advanceUntilIdle()
 
-        alertsObserver.assertValues(null, emptyList(), list1, list2)
+        observer.assertValues(null, emptyList(), list1, list2)
     }
 
     @Test
-    fun uiStateLiveDataEmitsInProgressWhenFlowEmitsNull() {
+    fun uiStateLiveDataEmitsInProgressWhenFlowEmitsNull() = runTest {
         whenever(alertsRetriever.allAlertsFlow)
                 .thenReturn(flowOf(null))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.PROGRESS)
+        observer.assertValues(UiState.PROGRESS)
     }
 
     @Test
-    fun uiStateLiveDataEmitsErrorWhenFlowEmitsEmptyList() {
+    fun uiStateLiveDataEmitsErrorWhenFlowEmitsEmptyList() = runTest {
         whenever(alertsRetriever.allAlertsFlow)
                 .thenReturn(flowOf(emptyList()))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.ERROR)
+        observer.assertValues(UiState.ERROR)
     }
 
     @Test
-    fun uiStateLiveDataEmitsContentWhenFlowEmitsPopulatedList() {
+    fun uiStateLiveDataEmitsContentWhenFlowEmitsPopulatedList() = runTest {
         whenever(alertsRetriever.allAlertsFlow)
                 .thenReturn(flowOf(listOf(mock())))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.CONTENT)
+        observer.assertValues(UiState.CONTENT)
     }
 
     @Test
-    fun uiStateLiveDataEmitsExpectedValuesWithRepresentativeValues() =
-            coroutineRule.runBlockingTest {
+    fun uiStateLiveDataEmitsExpectedValuesWithRepresentativeValues() = runTest {
         whenever(alertsRetriever.allAlertsFlow)
                 .thenReturn(flowOf(
                         null,
@@ -165,10 +165,10 @@ class AlertManagerFragmentViewModelTest {
                         emptyList(),
                         listOf(mock(), mock())))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.PROGRESS,
                 UiState.ERROR,
                 UiState.CONTENT,
@@ -178,46 +178,46 @@ class AlertManagerFragmentViewModelTest {
 
     @Test
     fun showLocationSettingsLiveDataEmitsNoValuesByDefault() {
-        viewModel.showLocationSettingsLiveData.observeForever(showLocationSettingsObserver)
+        val observer = viewModel.showLocationSettingsLiveData.test()
 
-        showLocationSettingsObserver.assertEmpty()
+        observer.assertEmpty()
     }
 
     @Test
     fun showLocationSettingsLiveDataEmitsEventWhenShowLocationSettingsClickedIsCalled() {
-        viewModel.showLocationSettingsLiveData.observeForever(showLocationSettingsObserver)
+        val observer = viewModel.showLocationSettingsLiveData.test()
         viewModel.onShowLocationSettingsClicked()
 
-        showLocationSettingsObserver.assertValues(null)
+        observer.assertSize(1)
     }
 
     @Test
     fun showRemoveArrivalAlertLiveDataEmitsNoValuesByDefault() {
-        viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveArrivalAlertObserver)
+        val observer = viewModel.showRemoveArrivalAlertLiveData.test()
 
-        showRemoveArrivalAlertObserver.assertEmpty()
+        observer.assertEmpty()
     }
 
     @Test
     fun showRemoveArrivalAlertLiveDataEmitsEventWhenRemoveArrivalAlertClickedIsCalled() {
-        viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveArrivalAlertObserver)
+        val observer = viewModel.showRemoveArrivalAlertLiveData.test()
         viewModel.onRemoveArrivalAlertClicked("123456")
 
-        showRemoveArrivalAlertObserver.assertValues("123456")
+        observer.assertValues("123456")
     }
 
     @Test
     fun showRemoveProximityAlertLiveDataEmitsNoValuesByDefault() {
-        viewModel.showRemoveProximityAlertLiveData.observeForever(showRemoveProximityAlertObserver)
+        val observer = viewModel.showRemoveProximityAlertLiveData.test()
 
-        showRemoveProximityAlertObserver.assertEmpty()
+        observer.assertEmpty()
     }
 
     @Test
     fun showRemoveProximityAlertLiveDataEmitsEventWhenRemoveArrivalAlertClickedIsCalled() {
-        viewModel.showRemoveProximityAlertLiveData.observeForever(showRemoveProximityAlertObserver)
+        val observer = viewModel.showRemoveProximityAlertLiveData.test()
         viewModel.onRemoveProximityAlertClicked("123456")
 
-        showRemoveProximityAlertObserver.assertValues("123456")
+        observer.assertValues("123456")
     }
 }

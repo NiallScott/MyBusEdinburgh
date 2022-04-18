@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,8 @@ package uk.org.rivernile.android.bustracker.ui.settings
 
 import com.nhaarman.mockitokotlin2.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -59,14 +60,14 @@ class ClearSearchHistoryDialogFragmentViewModelTest {
     fun setUp() {
         viewModel = ClearSearchHistoryDialogFragmentViewModel(
                 searchHistoryDao,
-                coroutineRule,
+                coroutineRule.scope,
                 coroutineRule.testDispatcher)
     }
 
     @Test
-    fun onUserConfirmClearSearchHistoryClearsHistoryOnBackgroundThread() =
-            coroutineRule.runBlockingTest {
+    fun onUserConfirmClearSearchHistoryClearsHistoryOnBackgroundThread() = runTest {
         viewModel.onUserConfirmClearSearchHistory()
+        advanceUntilIdle()
 
         verify(searchHistoryDao)
                 .clearSearchHistory()

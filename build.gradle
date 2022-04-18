@@ -32,7 +32,7 @@ buildscript {
 
         // Dependency versions
         kotlinVersion = '1.6.20'
-        kotlinCoroutinesVersion = '1.5.0'
+        kotlinCoroutinesVersion = '1.6.1'
         androidXCoreVersion = '1.7.0'
         androidXActivityVersion = '1.4.0'
         androidXFragmentVersion = '1.4.1'

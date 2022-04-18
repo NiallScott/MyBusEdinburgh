@@ -40,7 +40,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.transformLatest
@@ -94,7 +93,7 @@ class BusTimesFragmentViewModel(
      * The UI should register against this [LiveData], but not expect any data to be emitted from
      * it.
      */
-    val refreshLiveData: LiveData<Nothing> get() = refresh
+    val refreshLiveData: LiveData<Unit> get() = refresh
     private val refresh = RefreshLiveData(refreshController)
 
     /**

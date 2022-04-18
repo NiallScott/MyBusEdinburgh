@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -75,7 +76,7 @@ class DeviceBootBroadcastReceiverTest {
                 arrivalAlertTaskLauncher = arrivalAlertTaskLauncher,
                 proximityAlertTaskLauncher = proximityAlertTaskLauncher)
         val coreModule = FakeCoreModule(
-                applicationCoroutineScope = coroutineRule,
+                applicationCoroutineScope = coroutineRule.scope,
                 defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
 
@@ -89,13 +90,14 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithoutActionDoesNotExecute() = coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithoutActionDoesNotExecute() = runTest {
         givenArrivalAlertCount(1)
         givenProximityAlertCount(1)
         val context = getApplication()
         val intent = Intent(context, DeviceBootBroadcastReceiver::class.java)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(arrivalAlertTaskLauncher, never())
                 .launchArrivalAlertTask()
@@ -104,8 +106,7 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithoutBootCompletedActionDoesNotExecute() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithoutBootCompletedActionDoesNotExecute() = runTest {
         givenArrivalAlertCount(1)
         givenProximityAlertCount(1)
         val context = getApplication()
@@ -113,6 +114,7 @@ class DeviceBootBroadcastReceiverTest {
                 .setAction("a.b.c")
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(arrivalAlertTaskLauncher, never())
                 .launchArrivalAlertTask()
@@ -121,8 +123,7 @@ class DeviceBootBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverWithNoArrivalAlertsDoesNotStartArrivalAlertTask() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithNoArrivalAlertsDoesNotStartArrivalAlertTask() = runTest {
         givenArrivalAlertCount(0)
         givenProximityAlertCount(1)
         val context = getApplication()
@@ -130,14 +131,14 @@ class DeviceBootBroadcastReceiverTest {
                 .setAction(Intent.ACTION_BOOT_COMPLETED)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(arrivalAlertTaskLauncher, never())
                 .launchArrivalAlertTask()
     }
 
     @Test
-    fun invokingBroadcastReceiverWithNoProximityAlertsDoesNotStartArrivalAlertTask() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithNoProximityAlertsDoesNotStartArrivalAlertTask() = runTest {
         givenArrivalAlertCount(1)
         givenProximityAlertCount(0)
         val context = getApplication()
@@ -145,14 +146,14 @@ class DeviceBootBroadcastReceiverTest {
                 .setAction(Intent.ACTION_BOOT_COMPLETED)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(proximityAlertTaskLauncher, never())
                 .launchProximityAlertTask()
     }
 
     @Test
-    fun invokingBroadcastReceiverWithArrivalAlertDoesStartArrivalAlertTask() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithArrivalAlertDoesStartArrivalAlertTask() = runTest {
         givenArrivalAlertCount(1)
         givenProximityAlertCount(0)
         val context = getApplication()
@@ -160,14 +161,14 @@ class DeviceBootBroadcastReceiverTest {
                 .setAction(Intent.ACTION_BOOT_COMPLETED)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(arrivalAlertTaskLauncher)
                 .launchArrivalAlertTask()
     }
 
     @Test
-    fun invokingBroadcastReceiverWithProximityAlertDoesStartArrivalAlertTask() =
-            coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverWithProximityAlertDoesStartArrivalAlertTask() = runTest {
         givenArrivalAlertCount(0)
         givenProximityAlertCount(1)
         val context = getApplication()
@@ -175,6 +176,7 @@ class DeviceBootBroadcastReceiverTest {
                 .setAction(Intent.ACTION_BOOT_COMPLETED)
 
         receiver.onReceive(context, intent)
+        advanceUntilIdle()
 
         verify(proximityAlertTaskLauncher)
                 .launchProximityAlertTask()

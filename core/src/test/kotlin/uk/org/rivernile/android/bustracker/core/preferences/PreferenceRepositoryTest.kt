@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -61,17 +62,21 @@ class PreferenceRepositoryTest {
 
     @Before
     fun setUp() {
-        repository = PreferenceRepository(preferenceManager, coroutineRule,
+        repository = PreferenceRepository(
+                preferenceManager,
+                coroutineRule.scope,
                 coroutineRule.testDispatcher)
     }
 
     @Test
-    fun isLiveTimesAutoRefreshEnabledFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun isLiveTimesAutoRefreshEnabledFlowGetsInitialValue() = runTest {
         whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
                 .thenReturn(true)
 
         val observer = repository.isLiveTimesAutoRefreshEnabledFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(true)
         verify(preferenceManager)
@@ -79,8 +84,7 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun isLiveTimesAutoRefreshEnabledFlowResponsdsToPreferenceChange() =
-            coroutineRule.runBlockingTest {
+    fun isLiveTimesAutoRefreshEnabledFlowRespondsToPreferenceChange() = runTest {
         doAnswer {
             val prefListener = it.getArgument<PreferenceListener>(0)
             val expectedKeys = setOf(PreferenceKey.LIVE_TIMES_AUTO_REFRESH_ENABLED)
@@ -94,7 +98,9 @@ class PreferenceRepositoryTest {
                 .thenReturn(true, false, true)
 
         val observer = repository.isLiveTimesAutoRefreshEnabledFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(true, false, true)
         verify(preferenceManager)
@@ -102,12 +108,14 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun isLiveTimesShowNightServicesEnabledFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun isLiveTimesShowNightServicesEnabledFlowGetsInitialValue() = runTest {
         whenever(preferenceManager.isBusTimesShowingNightServices())
                 .thenReturn(true)
 
         val observer = repository.isLiveTimesShowNightServicesEnabledFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(true)
         verify(preferenceManager)
@@ -115,8 +123,7 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun isLiveTimesShowNightServicesEnabledFlowRespondsToPreferenceChange() =
-            coroutineRule.runBlockingTest {
+    fun isLiveTimesShowNightServicesEnabledFlowRespondsToPreferenceChange() = runTest {
         doAnswer {
             val prefListener = it.getArgument<PreferenceListener>(0)
             val expectedKeys = setOf(PreferenceKey.LIVE_TIMES_SHOW_NIGHT_SERVICES)
@@ -130,7 +137,9 @@ class PreferenceRepositoryTest {
                 .thenReturn(true, false, true)
 
         val observer = repository.isLiveTimesShowNightServicesEnabledFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(true, false, true)
         verify(preferenceManager)
@@ -138,12 +147,14 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun isLiveTimesSortByTimeFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun isLiveTimesSortByTimeFlowGetsInitialValue() = runTest {
         whenever(preferenceManager.isBusTimesSortedByTime())
                 .thenReturn(true)
 
         val observer = repository.isLiveTimesSortByTimeFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(true)
         verify(preferenceManager)
@@ -151,7 +162,7 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun isLiveTimesSortByTimeFlowRespondsToPreferenceChange() = coroutineRule.runBlockingTest {
+    fun isLiveTimesSortByTimeFlowRespondsToPreferenceChange() = runTest {
         doAnswer {
             val prefListener = it.getArgument<PreferenceListener>(0)
             val expectedKeys = setOf(PreferenceKey.LIVE_TIMES_SORT_BY_TIME)
@@ -165,7 +176,9 @@ class PreferenceRepositoryTest {
                 .thenReturn(true, false, true)
 
         val observer = repository.isLiveTimesSortByTimeFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(true, false, true)
         verify(preferenceManager)
@@ -173,12 +186,14 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun getLiveTimesNumberOfDeparturesFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun getLiveTimesNumberOfDeparturesFlowGetsInitialValue() = runTest {
         whenever(preferenceManager.getBusTimesNumberOfDeparturesToShowPerService())
                 .thenReturn(1)
 
         val observer = repository.getLiveTimesNumberOfDeparturesFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(1)
         verify(preferenceManager)
@@ -186,8 +201,7 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun getLiveTimesNumberOfDeparturesFlowRespondsToPreferenceChange() =
-            coroutineRule.runBlockingTest {
+    fun getLiveTimesNumberOfDeparturesFlowRespondsToPreferenceChange() = runTest {
         doAnswer {
             val prefListener = it.getArgument<PreferenceListener>(0)
             val expectedKeys = setOf(PreferenceKey.LIVE_TIMES_NUMBER_OF_DEPARTURES)
@@ -201,7 +215,9 @@ class PreferenceRepositoryTest {
                 .thenReturn(1, 2, 3)
 
         val observer = repository.getLiveTimesNumberOfDeparturesFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(1, 2, 3)
         verify(preferenceManager)
@@ -209,44 +225,48 @@ class PreferenceRepositoryTest {
     }
 
     @Test
-    fun toggleSortByTimeTogglesFalseToTrue() = coroutineRule.runBlockingTest {
+    fun toggleSortByTimeTogglesFalseToTrue() = runTest {
         whenever(preferenceManager.isBusTimesSortedByTime())
                 .thenReturn(false)
 
         repository.toggleSortByTime()
+        advanceUntilIdle()
 
         verify(preferenceManager)
                 .setBusTimesSortedByTime(true)
     }
 
     @Test
-    fun toggleSortByTimeTogglesTrueToFalse() = coroutineRule.runBlockingTest {
+    fun toggleSortByTimeTogglesTrueToFalse() = runTest {
         whenever(preferenceManager.isBusTimesSortedByTime())
                 .thenReturn(true)
 
         repository.toggleSortByTime()
+        advanceUntilIdle()
 
         verify(preferenceManager)
                 .setBusTimesSortedByTime(false)
     }
 
     @Test
-    fun toggleAutoRefreshTogglesFalseToTrue() = coroutineRule.runBlockingTest {
+    fun toggleAutoRefreshTogglesFalseToTrue() = runTest {
         whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
                 .thenReturn(false)
 
         repository.toggleAutoRefresh()
+        advanceUntilIdle()
 
         verify(preferenceManager)
                 .setBusTimesAutoRefreshEnabled(true)
     }
 
     @Test
-    fun toggleAutoRefreshTogglesTrueToFalse() = coroutineRule.runBlockingTest {
+    fun toggleAutoRefreshTogglesTrueToFalse() = runTest {
         whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
                 .thenReturn(true)
 
         repository.toggleAutoRefresh()
+        advanceUntilIdle()
 
         verify(preferenceManager)
                 .setBusTimesAutoRefreshEnabled(false)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,9 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.currentTime
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -68,68 +70,78 @@ class RefreshControllerTest {
     }
 
     @Test
-    fun setActiveStateDoesNotCauseRefreshWhenNotActive() = coroutineRule.runBlockingTest {
+    fun setActiveStateDoesNotCauseRefreshWhenNotActive() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertEmpty()
     }
 
     @Test
-    fun setActiveStateCausesRefreshOnFirstActive() = coroutineRule.runBlockingTest {
+    fun setActiveStateCausesRefreshOnFirstActive() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
     }
 
     @Test
-    fun setActiveStateDoesNotCauseRefreshOnSubsequentActive() = coroutineRule.runBlockingTest {
+    fun setActiveStateDoesNotCauseRefreshOnSubsequentActive() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
         controller.setActiveState(false)
         controller.setActiveState(true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
     }
 
     @Test
-    fun setActiveStateCausesRefreshIfPendingRefreshWhenActive() = coroutineRule.runBlockingTest {
+    fun setActiveStateCausesRefreshIfPendingRefreshWhenActive() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         controller.setActiveState(false)
+        advanceUntilIdle()
         controller.requestRefresh()
+        advanceUntilIdle()
         controller.setActiveState(true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
     }
 
     @Test
-    fun requestRefreshDoesNotCauseRefreshWhenNotActive() = coroutineRule.runBlockingTest {
+    fun requestRefreshDoesNotCauseRefreshWhenNotActive() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
         controller.setActiveState(false)
         controller.requestRefresh()
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
     }
 
     @Test
-    fun requestRefreshCausesRefreshWhenActive() = coroutineRule.runBlockingTest {
+    fun requestRefreshCausesRefreshWhenActive() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         controller.requestRefresh()
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -137,11 +149,12 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsNullAndEnabledIsFalse() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(null, false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -149,11 +162,12 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsNullAndEnabledIsTrue() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(null, true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -161,11 +175,12 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsInProgressAndEnabledIsFalse() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(UiTransformedResult.InProgress, false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -173,11 +188,12 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsInProgressAndEnabledIsTrue() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(UiTransformedResult.InProgress, true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -185,7 +201,7 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsErrorAndEnabledIsFalseAndDelayLessThanInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120001L - AUTO_REFRESH_INTERVAL_MILLIS,
@@ -193,6 +209,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(data, false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -200,7 +217,7 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsErrorAndEnabledIsFalseAndDelayEqualsInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
@@ -208,6 +225,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(data, false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -215,7 +233,7 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsErrorAndEnabledIsFalseAndDelayMoreThanInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
@@ -223,6 +241,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(data, false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -230,7 +249,7 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsErrorAndEnabledIsTrueAndDelayLessThanInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120001L - AUTO_REFRESH_INTERVAL_MILLIS,
@@ -238,6 +257,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(data, true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -245,14 +265,16 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedCauseRefreshWhenResultIsErrorAndEnabledIsTrueAndDelayEqualsInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         controller.onAutoRefreshPreferenceChanged(data, true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -260,14 +282,16 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedCauseRefreshWhenResultIsErrorAndEnabledIsTrueAndDelayMoreThanInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 ErrorType.SERVER_ERROR)
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         controller.onAutoRefreshPreferenceChanged(data, true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -275,13 +299,14 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsSuccessAndEnabledFalseAndDelayLessThanInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120001L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(data, false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -289,13 +314,14 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsSuccessAndEnabledIsFalseAndDelayEqualsInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(data, false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -303,13 +329,14 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsSuccessAndEnabledFalseAndDelayMoreThanInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(data, false)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -317,13 +344,14 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsSuccessAndEnabledTrueAndDelayLessThanInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120001L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(data, true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -331,13 +359,15 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedCausesRefreshWhenResultIsSuccessAndEnabledIsTrueAndDelayEqualsInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         controller.onAutoRefreshPreferenceChanged(data, true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -345,26 +375,28 @@ class RefreshControllerTest {
 
     @Test
     fun onAutoRefreshPreferenceChangedCausesRefreshWhenResultIsSuccessAndEnabledIsTrueAndDelayMoreThanInterval() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 emptyList())
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         controller.onAutoRefreshPreferenceChanged(data, true)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
     }
 
     @Test
-    fun performAutoRefreshDelayDoesNotCauseRefreshWhenResultIsInProgress() =
-            coroutineRule.runBlockingTest {
+    fun performAutoRefreshDelayDoesNotCauseRefreshWhenResultIsInProgress() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
 
         controller.setActiveState(true)
         controller.performAutoRefreshDelay(UiTransformedResult.InProgress) { true }
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -372,7 +404,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsErrorAndCalculatedDelayIsNegative() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
@@ -382,6 +414,7 @@ class RefreshControllerTest {
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { false }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -390,16 +423,18 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsNegativeAndPredicateIsTrue() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 ErrorType.SERVER_ERROR)
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { true }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -408,7 +443,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsErrorAndCalculatedDelayIsZero() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
@@ -418,6 +453,7 @@ class RefreshControllerTest {
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { false }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -426,16 +462,18 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsZeroAndPredicateIsTrue() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { true }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -443,8 +481,7 @@ class RefreshControllerTest {
     }
 
     @Test
-    fun performAutoRefreshDelayDelaysWhenResultIsErrorAndCalculatedDelayIsPositive() =
-            coroutineRule.runBlockingTest {
+    fun performAutoRefreshDelayDelaysWhenResultIsErrorAndCalculatedDelayIsPositive() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
@@ -454,6 +491,7 @@ class RefreshControllerTest {
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { false }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -462,7 +500,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsPositiveAndPredicateIsTrue() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
@@ -472,6 +510,7 @@ class RefreshControllerTest {
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { true }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -480,7 +519,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsSuccessAndCalculatedDelayIsNegative() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
@@ -490,6 +529,7 @@ class RefreshControllerTest {
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { false }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -498,16 +538,18 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsNegative() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 emptyList())
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { true }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -516,7 +558,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsSuccessAndCalculatedDelayIsZero() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
@@ -525,6 +567,7 @@ class RefreshControllerTest {
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { false }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -533,15 +576,17 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsZero() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
         controller.setActiveState(true)
+        advanceUntilIdle()
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { true }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)
@@ -549,8 +594,7 @@ class RefreshControllerTest {
     }
 
     @Test
-    fun performAutoRefreshDelayDelaysWhenResultIsSuccessAndCalculatedDelayIsPositive() =
-            coroutineRule.runBlockingTest {
+    fun performAutoRefreshDelayDelaysWhenResultIsSuccessAndCalculatedDelayIsPositive() = runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
@@ -560,6 +604,7 @@ class RefreshControllerTest {
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { false }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit)
@@ -568,7 +613,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsPositive() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val observer = controller.refreshTriggerReceiveChannel.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
@@ -578,6 +623,7 @@ class RefreshControllerTest {
         val startTime = currentTime
         controller.performAutoRefreshDelay(data) { true }
         val endTime = currentTime
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(Unit, Unit)

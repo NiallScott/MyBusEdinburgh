@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,6 +52,7 @@ import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsReposit
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [AddTimeAlertDialogFragmentViewModel].
@@ -91,9 +93,8 @@ class AddTimeAlertDialogFragmentViewModelTest {
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to null)
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
-        val observer = LiveDataTestObserver<List<String>?>()
 
-        viewModel.selectedServicesLiveData.observeForever(observer)
+        val observer = viewModel.selectedServicesLiveData.test()
 
         observer.assertValues(null)
     }
@@ -104,9 +105,8 @@ class AddTimeAlertDialogFragmentViewModelTest {
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to emptyArray<String>())
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
-        val observer = LiveDataTestObserver<List<String>?>()
 
-        viewModel.selectedServicesLiveData.observeForever(observer)
+        val observer = viewModel.selectedServicesLiveData.test()
 
         observer.assertValues(null)
     }
@@ -117,9 +117,8 @@ class AddTimeAlertDialogFragmentViewModelTest {
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to arrayOf("1", "2"))
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
-        val observer = LiveDataTestObserver<List<String>?>()
 
-        viewModel.selectedServicesLiveData.observeForever(observer)
+        val observer = viewModel.selectedServicesLiveData.test()
 
         observer.assertValues(listOf("1", "2"))
     }
@@ -127,9 +126,8 @@ class AddTimeAlertDialogFragmentViewModelTest {
     @Test
     fun selectedServicesLiveDataEmitsChanges() {
         val viewModel = createViewModel()
-        val observer = LiveDataTestObserver<List<String>?>()
 
-        viewModel.selectedServicesLiveData.observeForever(observer)
+        val observer = viewModel.selectedServicesLiveData.test()
         viewModel.selectedServices = listOf("1")
         viewModel.selectedServices = emptyList()
         viewModel.selectedServices = listOf("1", "2")
@@ -142,35 +140,35 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsNullWhenNoStopCodeIsSet() = coroutineRule.runBlockingTest {
+    fun stopDetailsLiveDataEmitsNullWhenNoStopCodeIsSet() = runTest {
         val viewModel = createViewModel()
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
+
+        val observer = viewModel.stopDetailsLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsNullWhenStopCodeIsSetAsNull() = coroutineRule.runBlockingTest {
+    fun stopDetailsLiveDataEmitsNullWhenStopCodeIsSetAsNull() = runTest {
         val viewModel = createViewModel()
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
 
+        val observer = viewModel.stopDetailsLiveData.test()
         viewModel.stopCode = null
+        advanceUntilIdle()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsStopDetailsWithNullNameWhenRepositoryReturnsNullName() =
-            coroutineRule.runBlockingTest {
+    fun stopDetailsLiveDataEmitsStopDetailsWithNullNameWhenRepositoryReturnsNullName() = runTest {
         val viewModel = createViewModel()
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(null))
 
+        val observer = viewModel.stopDetailsLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         observer.assertValues(
                 null,
@@ -178,15 +176,14 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() =
-            coroutineRule.runBlockingTest {
+    fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() = runTest {
         val viewModel = createViewModel()
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(StopName("Name", "Locality")))
 
+        val observer = viewModel.stopDetailsLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         observer.assertValues(
                 null,
@@ -195,19 +192,23 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsCorrectDataOnChanges() = coroutineRule.runBlockingTest {
+    fun stopDetailsLiveDataEmitsCorrectDataOnChanges() = runTest {
         val viewModel = createViewModel()
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(
-                        StopName("Name", "Locality"),
-                        StopName("Name 2", null)))
+                .thenReturn(flow{
+                    emit(StopName("Name", "Locality"))
+                    delay(10L)
+                    emit(StopName("Name 2", null))
+                })
         whenever(busStopsRepository.getNameForStopFlow("987654"))
                 .thenReturn(flowOf(StopName("Name 3", "Locality 3")))
 
+        val observer = viewModel.stopDetailsLiveData.test()
+        advanceUntilIdle()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.stopCode = "987654"
+        advanceUntilIdle()
 
         observer.assertValues(
                 null,
@@ -219,7 +220,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun uiStateLiveDataEmitsCalculatedState() = coroutineRule.runBlockingTest {
+    fun uiStateLiveDataEmitsCalculatedState() = runTest {
         whenever(uiStateCalculator.createUiStateFlow(any(), any(), any()))
                 .thenReturn(flow {
                     emit(UiState.ERROR_NO_STOP_CODE)
@@ -231,8 +232,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
                     emit(UiState.CONTENT)
                 })
         val viewModel = createViewModel()
-        val observer = LiveDataTestObserver<UiState>()
-        viewModel.uiStateLiveData.observeForever(observer)
+        val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
         observer.assertValues(
@@ -243,7 +243,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun uiStateCalculatorIsPassedCorrectFlowObjects() = coroutineRule.runBlockingTest {
+    fun uiStateCalculatorIsPassedCorrectFlowObjects() = runTest {
         val stopCodeFlow = FlowTestObserver<String?>(this)
         val stopDetailsFlow = FlowTestObserver<StopDetails?>(this)
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
@@ -262,12 +262,14 @@ class AddTimeAlertDialogFragmentViewModelTest {
                 .thenReturn(flowOf(listOf("1", "2", "3")))
         whenever(serviceStopsRepository.getServicesForStopFlow("987654"))
                 .thenReturn(flowOf(listOf("4", "5", "6")))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.stopCode = "987654"
+        advanceUntilIdle()
         stopCodeFlow.finish()
         stopDetailsFlow.finish()
         availableServicesFlow.finish()
@@ -287,8 +289,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun addButtonEnabledLiveDataEmitsFalseWhenSelectedServicesIsNull() =
-            coroutineRule.runBlockingTest {
+    fun addButtonEnabledLiveDataEmitsFalseWhenSelectedServicesIsNull() = runTest {
         val uiStateFlow = flow {
             emit(UiState.ERROR_NO_STOP_CODE)
             delay(100L)
@@ -300,10 +301,9 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }
         whenever(uiStateCalculator.createUiStateFlow(any(), any(), any()))
                 .thenReturn(uiStateFlow)
-        val observer = LiveDataTestObserver<Boolean>()
         val viewModel = createViewModel()
 
-        viewModel.addButtonEnabledLiveData.observeForever(observer)
+        val observer = viewModel.addButtonEnabledLiveData.test()
         viewModel.selectedServices = null
         advanceUntilIdle()
 
@@ -311,8 +311,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun addButtonEnabledLiveDataEmitsFalseWhenSelectedServicesIsEmpty() =
-            coroutineRule.runBlockingTest {
+    fun addButtonEnabledLiveDataEmitsFalseWhenSelectedServicesIsEmpty() = runTest {
         val uiStateFlow = flow {
             emit(UiState.ERROR_NO_STOP_CODE)
             delay(100L)
@@ -324,10 +323,9 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }
         whenever(uiStateCalculator.createUiStateFlow(any(), any(), any()))
                 .thenReturn(uiStateFlow)
-        val observer = LiveDataTestObserver<Boolean>()
         val viewModel = createViewModel()
 
-        viewModel.addButtonEnabledLiveData.observeForever(observer)
+        val observer = viewModel.addButtonEnabledLiveData.test()
         viewModel.selectedServices = emptyList()
         advanceUntilIdle()
 
@@ -336,7 +334,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun addButtonEnabledLiveDataEmitsTrueWhenSelectedServicesPopulatedAndShowingContent() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val uiStateFlow = flow {
             emit(UiState.ERROR_NO_STOP_CODE)
             delay(100L)
@@ -354,10 +352,9 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }
         whenever(uiStateCalculator.createUiStateFlow(any(), any(), any()))
                 .thenReturn(uiStateFlow)
-        val observer = LiveDataTestObserver<Boolean>()
         val viewModel = createViewModel()
 
-        viewModel.addButtonEnabledLiveData.observeForever(observer)
+        val observer = viewModel.addButtonEnabledLiveData.test()
         viewModel.selectedServices = listOf("1", "2", "3")
         advanceUntilIdle()
 
@@ -366,18 +363,16 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onLimitationsButtonClickedShowsLimitations() {
-        val observer = LiveDataTestObserver<Nothing?>()
         val viewModel = createViewModel()
 
-        viewModel.showLimitationsLiveData.observeForever(observer)
+        val observer = viewModel.showLimitationsLiveData.test()
         viewModel.onLimitationsButtonClicked()
 
-        observer.assertValues(null)
+        observer.assertSize(1)
     }
 
     @Test
-    fun onSelectServicesClickedDoesNotShowServicesSelectionWhenAvailableServicesIsNull() =
-            coroutineRule.runBlockingTest {
+    fun onSelectServicesClickedDoesNotShowServicesSelectionWhenAvailableServicesIsNull() = runTest {
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
@@ -386,12 +381,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(null))
-        val observer = LiveDataTestObserver<ServicesChooserParams>()
         val viewModel = createViewModel()
 
-        viewModel.showServicesChooserLiveData.observeForever(observer)
+        val observer = viewModel.showServicesChooserLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.onSelectServicesClicked()
+        advanceUntilIdle()
         availableServicesFlow.finish()
 
         observer.assertEmpty()
@@ -399,7 +395,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onSelectServicesClickedDoesNotShowServicesSelectionWhenAvailableServicesIsEmpty() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
@@ -408,20 +404,20 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(emptyList()))
-        val observer = LiveDataTestObserver<ServicesChooserParams>()
         val viewModel = createViewModel()
 
-        viewModel.showServicesChooserLiveData.observeForever(observer)
+        val observer = viewModel.showServicesChooserLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.onSelectServicesClicked()
+        advanceUntilIdle()
         availableServicesFlow.finish()
 
         observer.assertEmpty()
     }
 
     @Test
-    fun onSelectServicesClickedShowsServicesSelectionWithNullSelectedServicesFirstTime() =
-            coroutineRule.runBlockingTest {
+    fun onSelectServicesClickedShowsServicesSelectionWithNullSelectedServicesFirstTime() = runTest {
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
@@ -430,12 +426,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
-        val observer = LiveDataTestObserver<ServicesChooserParams>()
         val viewModel = createViewModel()
 
-        viewModel.showServicesChooserLiveData.observeForever(observer)
+        val observer = viewModel.showServicesChooserLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.onSelectServicesClicked()
+        advanceUntilIdle()
         availableServicesFlow.finish()
 
         observer.assertValues(
@@ -443,8 +440,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSelectServicesClickedShowsServicesSelectionWithInitialStateSelectedServices() =
-            coroutineRule.runBlockingTest {
+    fun onSelectServicesClickedShowsServicesSelectionWithInitialStateSelectedServices() = runTest {
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
@@ -453,17 +449,17 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
-        val chooserObserver = LiveDataTestObserver<ServicesChooserParams>()
-        val selectedServicesObserver = LiveDataTestObserver<List<String>?>()
         val initialState = mapOf(
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to arrayOf("2", "3"))
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
 
-        viewModel.showServicesChooserLiveData.observeForever(chooserObserver)
-        viewModel.selectedServicesLiveData.observeForever(selectedServicesObserver)
+        val chooserObserver = viewModel.showServicesChooserLiveData.test()
+        viewModel.selectedServicesLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.onSelectServicesClicked()
+        advanceUntilIdle()
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
@@ -471,8 +467,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSelectServicesClickedShowsServicesSelectionWithSelectedServicesSet() =
-            coroutineRule.runBlockingTest {
+    fun onSelectServicesClickedShowsServicesSelectionWithSelectedServicesSet() = runTest {
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
@@ -481,15 +476,16 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
-        val chooserObserver = LiveDataTestObserver<ServicesChooserParams>()
-        val selectedServicesObserver = LiveDataTestObserver<List<String>?>()
         val viewModel = createViewModel()
 
-        viewModel.showServicesChooserLiveData.observeForever(chooserObserver)
-        viewModel.selectedServicesLiveData.observeForever(selectedServicesObserver)
+        val chooserObserver = viewModel.showServicesChooserLiveData.test()
+        viewModel.selectedServicesLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.selectedServices = listOf("2", "3")
+        advanceUntilIdle()
         viewModel.onSelectServicesClicked()
+        advanceUntilIdle()
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
@@ -497,8 +493,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSelectServicesClickedShowsServicesSelectionWithRepresentativeExample() =
-            coroutineRule.runBlockingTest {
+    fun onSelectServicesClickedShowsServicesSelectionWithRepresentativeExample() = runTest {
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
@@ -507,19 +502,21 @@ class AddTimeAlertDialogFragmentViewModelTest {
         }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
-        val chooserObserver = LiveDataTestObserver<ServicesChooserParams>()
-        val selectedServicesObserver = LiveDataTestObserver<List<String>?>()
         val initialState = mapOf(
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to arrayOf("2", "3"))
         val savedState = SavedStateHandle(initialState)
         val viewModel = createViewModel(savedState)
 
-        viewModel.showServicesChooserLiveData.observeForever(chooserObserver)
-        viewModel.selectedServicesLiveData.observeForever(selectedServicesObserver)
+        val chooserObserver = viewModel.showServicesChooserLiveData.test()
+        viewModel.selectedServicesLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.onSelectServicesClicked()
+        advanceUntilIdle()
         viewModel.selectedServices = listOf("2")
+        advanceUntilIdle()
         viewModel.onSelectServicesClicked()
+        advanceUntilIdle()
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
@@ -528,11 +525,11 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onAddClickedDoesNotAddAlertWhenStopCodeIsNull() = coroutineRule.runBlockingTest {
+    fun onAddClickedDoesNotAddAlertWhenStopCodeIsNull() = runTest {
         val viewModel = createViewModel()
         viewModel.stopCode = null
         viewModel.selectedServices = listOf("1", "2", "3")
-        viewModel.selectedServicesLiveData.observeForever(LiveDataTestObserver())
+        viewModel.selectedServicesLiveData.test()
 
         viewModel.onAddClicked(10)
 
@@ -541,11 +538,11 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = coroutineRule.runBlockingTest {
+    fun onAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = runTest {
         val viewModel = createViewModel()
         viewModel.stopCode = ""
         viewModel.selectedServices = listOf("1", "2", "3")
-        viewModel.selectedServicesLiveData.observeForever(LiveDataTestObserver())
+        viewModel.selectedServicesLiveData.test()
 
         viewModel.onAddClicked(10)
 
@@ -554,11 +551,11 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onAddClickedDoesNotAddAlertWhenSelectedServicesIsNull() = coroutineRule.runBlockingTest {
+    fun onAddClickedDoesNotAddAlertWhenSelectedServicesIsNull() = runTest {
         val viewModel = createViewModel()
         viewModel.stopCode = "123456"
         viewModel.selectedServices = null
-        viewModel.selectedServicesLiveData.observeForever(LiveDataTestObserver())
+        viewModel.selectedServicesLiveData.test()
 
         viewModel.onAddClicked(10)
 
@@ -567,11 +564,11 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onAddClickedDoesNotAddAlertWhenSelectedServicesIsEmpty() = coroutineRule.runBlockingTest {
+    fun onAddClickedDoesNotAddAlertWhenSelectedServicesIsEmpty() = runTest {
         val viewModel = createViewModel()
         viewModel.stopCode = "123456"
         viewModel.selectedServices = listOf()
-        viewModel.selectedServicesLiveData.observeForever(LiveDataTestObserver())
+        viewModel.selectedServicesLiveData.test()
 
         viewModel.onAddClicked(10)
 
@@ -580,14 +577,15 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onAddClickedAddsAlertsWhenConditionsAreSatisfied() = coroutineRule.runBlockingTest {
+    fun onAddClickedAddsAlertsWhenConditionsAreSatisfied() = runTest {
         val viewModel = createViewModel()
         viewModel.stopCode = "123456"
         viewModel.selectedServices = listOf("1", "2", "3")
         val expected = ArrivalAlertRequest("123456", listOf("1", "2", "3"), 10)
-        viewModel.selectedServicesLiveData.observeForever(LiveDataTestObserver())
+        viewModel.selectedServicesLiveData.test()
 
         viewModel.onAddClicked(10)
+        advanceUntilIdle()
 
         verify(alertsRepository)
                 .addArrivalAlert(expected)
@@ -600,6 +598,6 @@ class AddTimeAlertDialogFragmentViewModelTest {
                     serviceStopsRepository,
                     uiStateCalculator,
                     alertsRepository,
-                    coroutineRule,
+                    coroutineRule.scope,
                     coroutineRule.testDispatcher)
 }

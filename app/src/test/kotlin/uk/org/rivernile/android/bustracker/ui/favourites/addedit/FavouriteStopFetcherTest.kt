@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -70,23 +71,25 @@ class FavouriteStopFetcherTest {
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsWithNullStopCodeEmitsInProgress() = runBlockingTest {
+    fun loadFavouriteStopAndDetailsWithNullStopCodeEmitsInProgress() = runTest {
         val observer = fetcher.loadFavouriteStopAndDetails(null).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.InProgress)
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsWithEmptyStopCodeEmitsInProgress() = runBlockingTest {
+    fun loadFavouriteStopAndDetailsWithEmptyStopCodeEmitsInProgress() = runTest {
         val observer = fetcher.loadFavouriteStopAndDetails("").test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.InProgress)
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsWithNoFavouriteOrDetailsEmitsAddMode() = runBlockingTest {
+    fun loadFavouriteStopAndDetailsWithNoFavouriteOrDetailsEmitsAddMode() = runTest {
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flowOf(null))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
@@ -100,7 +103,7 @@ class FavouriteStopFetcherTest {
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsWithNoFavouriteButStopNameEmitsAddMode() = runBlockingTest {
+    fun loadFavouriteStopAndDetailsWithNoFavouriteButStopNameEmitsAddMode() = runTest {
         val stopName = StopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flowOf(null))
@@ -117,7 +120,7 @@ class FavouriteStopFetcherTest {
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsWithFavouriteButNoDetailsEmitsEditMode() = runBlockingTest {
+    fun loadFavouriteStopAndDetailsWithFavouriteButNoDetailsEmitsEditMode() = runTest {
         val favouriteStop = FavouriteStop(1, "123456", "Stored name")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flowOf(favouriteStop))
@@ -134,7 +137,7 @@ class FavouriteStopFetcherTest {
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsWithFavouriteAndStopNameEmitsEditMode() = runBlockingTest {
+    fun loadFavouriteStopAndDetailsWithFavouriteAndStopNameEmitsEditMode() = runTest {
         val favouriteStop = FavouriteStop(1, "123456", "Stored name")
         val stopName = StopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
@@ -152,7 +155,7 @@ class FavouriteStopFetcherTest {
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsPropagatesUpdatesToFavouriteStop() = runBlockingTest {
+    fun loadFavouriteStopAndDetailsPropagatesUpdatesToFavouriteStop() = runTest {
         val favouriteStop1 = FavouriteStop(1, "123456", "Stored name 1")
         val favouriteStop2 = FavouriteStop(1, "123456", "Stored name 2")
         val stopName = StopName("Name", "Locality")
@@ -179,7 +182,7 @@ class FavouriteStopFetcherTest {
     }
 
     @Test
-    fun loadFavouriteStopAndDetailsPropagatesUpdatesToStopName() = runBlockingTest {
+    fun loadFavouriteStopAndDetailsPropagatesUpdatesToStopName() = runTest {
         val favouriteStop = FavouriteStop(1, "123456", "Stored name")
         val stopName1 = StopName("Name 1", "Locality")
         val stopName2 = StopName("Name 2", "Locality")
@@ -205,6 +208,4 @@ class FavouriteStopFetcherTest {
                 UiState.Mode.Edit("123456", stopName2, favouriteStop),
                 UiState.Mode.Edit("123456", stopName3, favouriteStop))
     }
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,7 @@ import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -98,7 +98,7 @@ class AndroidServiceStopsDaoTest {
     }
 
     @Test
-    fun getServicesForStopWithNullCursorReturnsNull() = coroutineRule.runBlockingTest {
+    fun getServicesForStopWithNullCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForServices()
         object : MockContentProvider() {
             override fun query(
@@ -123,7 +123,7 @@ class AndroidServiceStopsDaoTest {
     }
 
     @Test
-    fun getServicesForStopWithEmptyCursorReturnsNull() = coroutineRule.runBlockingTest {
+    fun getServicesForStopWithEmptyCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForServices()
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -150,8 +150,7 @@ class AndroidServiceStopsDaoTest {
     }
 
     @Test
-    fun getServicesForStopWithSingleItemCursorReturnsExpectedList() =
-            coroutineRule.runBlockingTest {
+    fun getServicesForStopWithSingleItemCursorReturnsExpectedList() = runTest {
         val expectedProjection = getExpectedProjectionForServices()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf("1"))
@@ -179,35 +178,34 @@ class AndroidServiceStopsDaoTest {
     }
 
     @Test
-    fun getServicesForStopWithMultipleItemsCursorReturnsExpectedList() =
-            coroutineRule.runBlockingTest {
-                val expectedProjection = getExpectedProjectionForServices()
-                val cursor = MatrixCursor(expectedProjection)
-                cursor.addRow(arrayOf("1"))
-                cursor.addRow(arrayOf("3"))
-                cursor.addRow(arrayOf("5"))
-                object : MockContentProvider() {
-                    override fun query(
-                            uri: Uri,
-                            projection: Array<out String>?,
-                            selection: String?,
-                            selectionArgs: Array<out String>?,
-                            sortOrder: String?): Cursor {
-                        assertEquals(contentUri, uri)
-                        assertArrayEquals(arrayOf(ServiceStopsContract.SERVICE_NAME), projection)
-                        assertEquals("${ServiceStopsContract.STOP_CODE} = ?", selection)
-                        assertArrayEquals(arrayOf("123456"), selectionArgs)
-                        assertEquals(SERVICE_SORT_CLAUSE, sortOrder)
+    fun getServicesForStopWithMultipleItemsCursorReturnsExpectedList() = runTest {
+        val expectedProjection = getExpectedProjectionForServices()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("1"))
+        cursor.addRow(arrayOf("3"))
+        cursor.addRow(arrayOf("5"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(arrayOf(ServiceStopsContract.SERVICE_NAME), projection)
+                assertEquals("${ServiceStopsContract.STOP_CODE} = ?", selection)
+                assertArrayEquals(arrayOf("123456"), selectionArgs)
+                assertEquals(SERVICE_SORT_CLAUSE, sortOrder)
 
-                        return cursor
-                    }
-                }.also(this@AndroidServiceStopsDaoTest::addMockProvider)
-
-                val result = serviceStopsDao.getServicesForStop("123456")
-
-                assertEquals(listOf("1", "3", "5"), result)
-                assertTrue(cursor.isClosed)
+                return cursor
             }
+        }.also(this@AndroidServiceStopsDaoTest::addMockProvider)
+
+        val result = serviceStopsDao.getServicesForStop("123456")
+
+        assertEquals(listOf("1", "3", "5"), result)
+        assertTrue(cursor.isClosed)
+    }
 
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)

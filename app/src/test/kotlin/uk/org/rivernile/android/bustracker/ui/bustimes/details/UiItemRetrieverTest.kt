@@ -34,7 +34,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -80,7 +81,7 @@ class UiItemRetrieverTest {
     }
 
     @Test
-    fun createUiItemFlowEmitsUnknownDistanceAndNoServicesWhenStopCodeIsNull() = runBlockingTest {
+    fun createUiItemFlowEmitsUnknownDistanceAndNoServicesWhenStopCodeIsNull() = runTest {
         val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
                 .thenReturn(flowOf(UiItem.Distance.Unknown))
@@ -103,7 +104,7 @@ class UiItemRetrieverTest {
     }
 
     @Test
-    fun createUiItemFlowEmitsUnknownDistanceAndNoServicesWhenStopServicesNull() = runBlockingTest {
+    fun createUiItemFlowEmitsUnknownDistanceAndNoServicesWhenStopServicesNull() = runTest {
         val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
                 .thenReturn(flowOf(UiItem.Distance.Unknown))
@@ -130,7 +131,7 @@ class UiItemRetrieverTest {
     }
 
     @Test
-    fun createUiItemFlowEmitsNoServicesWhenStopDetailsIsNullAndServicesEmpty() = runBlockingTest {
+    fun createUiItemFlowEmitsNoServicesWhenStopDetailsIsNullAndServicesEmpty() = runTest {
         val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val services = emptyList<UiItem.Service>()
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
@@ -158,7 +159,7 @@ class UiItemRetrieverTest {
     }
 
     @Test
-    fun createUiItemFlowEmitsServicesWhenStopDetailsIsNullAndServicesPopulated() = runBlockingTest {
+    fun createUiItemFlowEmitsServicesWhenStopDetailsIsNullAndServicesPopulated() = runTest {
         val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val service1 = mock<UiItem.Service>()
         val service2 = mock<UiItem.Service>()
@@ -191,7 +192,7 @@ class UiItemRetrieverTest {
     }
 
     @Test
-    fun createUiItemFlowDoesNotEmitMapItemWhenDoesNotHaveMapFeature() = runBlockingTest {
+    fun createUiItemFlowDoesNotEmitMapItemWhenDoesNotHaveMapFeature() = runTest {
         val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val stopDetails = createStopDetails()
         givenStopMapFeatureAvailability(false)
@@ -220,7 +221,7 @@ class UiItemRetrieverTest {
     }
 
     @Test
-    fun createUiItemFlowEmitsMapItemWhenHasMapFeature() = runBlockingTest {
+    fun createUiItemFlowEmitsMapItemWhenHasMapFeature() = runTest {
         val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val stopDetails = createStopDetails()
         givenStopMapFeatureAvailability(true)
@@ -253,7 +254,7 @@ class UiItemRetrieverTest {
     }
 
     @Test
-    fun createUiItemFlowWithRepresentativeExample() = runBlockingTest {
+    fun createUiItemFlowWithRepresentativeExample() = runTest {
         val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val stopDetails = createStopDetails()
         val service1 = mock<UiItem.Service>()
@@ -306,6 +307,4 @@ class UiItemRetrieverTest {
             1.1,
             2.2,
             3)
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -139,10 +139,10 @@ class FavouriteStopsFragmentViewModel(
 
     private val hasArrivalAlertFlow = selectedStopCodeFlow
             .flatMapLatest(this::loadHasArrivalAlert)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
     private val hasProximityAlertFlow = selectedStopCodeFlow
             .flatMapLatest(this::loadHasProximityAlert)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /**
      * This [LiveData] emits the enabled state of UI allowing the user to see or manipulate arrival
@@ -333,6 +333,7 @@ class FavouriteStopsFragmentViewModel(
         when (hasProximityAlertFlow.value) {
             true -> showConfirmDeleteProximityAlert.value = it
             false -> showAddProximityAlert.value = it
+            else -> { }
         }
 
         closeContextMenu()
@@ -355,6 +356,7 @@ class FavouriteStopsFragmentViewModel(
         when (hasArrivalAlertFlow.value) {
             true -> showConfirmDeleteArrivalAlert.value = it
             false -> showAddArrivalAlert.value = it
+            else -> { }
         }
 
         closeContextMenu()

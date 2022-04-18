@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,8 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,8 +68,7 @@ class LastRefreshTimeCalculatorTest {
     }
 
     @Test
-    fun getLastRefreshTimeFlowWithNegativeRefreshTimeOnlyEmitsNever() =
-            coroutineRule.runBlockingTest {
+    fun getLastRefreshTimeFlowWithNegativeRefreshTimeOnlyEmitsNever() = runTest {
         val observer = calculator.getLastRefreshTimeFlow(-1).test(this)
         advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
         observer.finish()
@@ -77,8 +77,7 @@ class LastRefreshTimeCalculatorTest {
     }
 
     @Test
-    fun getLastRefreshTimeFlowWithZeroRefreshTimeOnlyEmitsNever() =
-            coroutineRule.runBlockingTest {
+    fun getLastRefreshTimeFlowWithZeroRefreshTimeOnlyEmitsNever() = runTest {
         val observer = calculator.getLastRefreshTimeFlow(0).test(this)
         advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
         observer.finish()
@@ -87,8 +86,7 @@ class LastRefreshTimeCalculatorTest {
     }
 
     @Test
-    fun getLastRefreshTimeFlowWithNegativeNumberOfMinutesEmitsNever() =
-            coroutineRule.runBlockingTest {
+    fun getLastRefreshTimeFlowWithNegativeNumberOfMinutesEmitsNever() = runTest {
         whenever(timeUtils.getCurrentTimeMillis())
                 .thenReturn(350000L)
 
@@ -100,8 +98,7 @@ class LastRefreshTimeCalculatorTest {
     }
 
     @Test
-    fun getLastRefreshTimeFlowWithTimeProgressingEmitsExpectedElements() =
-            coroutineRule.runBlockingTest {
+    fun getLastRefreshTimeFlowWithTimeProgressingEmitsExpectedElements() = runTest {
         whenever(timeUtils.getCurrentTimeMillis())
                 .thenReturn(50001L, 600001L, 600002L, 1800001L, 3540001L, 3700001L)
 
@@ -118,8 +115,7 @@ class LastRefreshTimeCalculatorTest {
     }
 
     @Test
-    fun getLastRefreshTimeFlowWithCancellationEmitsExpectedItems() =
-            coroutineRule.runBlockingTest {
+    fun getLastRefreshTimeFlowWithCancellationEmitsExpectedItems() = runTest {
         whenever(timeUtils.getCurrentTimeMillis())
                 .thenReturn(50001L, 600001L, 600002L, 1800001L, 3540001L, 3700001L)
 

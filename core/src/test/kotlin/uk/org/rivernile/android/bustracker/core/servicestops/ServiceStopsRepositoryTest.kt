@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -68,13 +69,15 @@ class ServiceStopsRepositoryTest {
     }
 
     @Test
-    fun getServicesForStopFlowGetsInitialValue() = runBlockingTest {
+    fun getServicesForStopFlowGetsInitialValue() = runTest {
         val expected = listOf("1", "2", "3")
         whenever(serviceStopsDao.getServicesForStop("123456"))
                 .thenReturn(expected)
 
         val observer = repository.getServicesForStopFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected)
         verify(serviceStopsDao)
@@ -82,7 +85,7 @@ class ServiceStopsRepositoryTest {
     }
 
     @Test
-    fun getServicesForStopFlowRespondsToDataChanges() = runBlockingTest {
+    fun getServicesForStopFlowRespondsToDataChanges() = runTest {
         doAnswer {
             val listener = it.getArgument<ServiceStopsDao.OnServiceStopsChangedListener>(0)
             listener.onServiceStopsChanged()
@@ -94,7 +97,9 @@ class ServiceStopsRepositoryTest {
                 .thenReturn(expected1, null, expected3)
 
         val observer = repository.getServicesForStopFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected1, null, expected3)
         verify(serviceStopsDao)
@@ -102,7 +107,7 @@ class ServiceStopsRepositoryTest {
     }
 
     @Test
-    fun getServicesForStopsFlowGetsInitialValue() = runBlockingTest {
+    fun getServicesForStopsFlowGetsInitialValue() = runTest {
         val expected = mapOf(
                 "111111" to listOf("1", "2", "3"),
                 "222222" to listOf("4", "5", "6"),
@@ -112,7 +117,9 @@ class ServiceStopsRepositoryTest {
                 .thenReturn(expected)
 
         val observer = repository.getServicesForStopsFlow(stopCodes).test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected)
         verify(busStopsDao)
@@ -120,7 +127,7 @@ class ServiceStopsRepositoryTest {
     }
 
     @Test
-    fun getServicesForStopsFlowRespondsToDataChanges() = runBlockingTest {
+    fun getServicesForStopsFlowRespondsToDataChanges() = runTest {
         doAnswer {
             val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
             listener.onBusStopsChanged()
@@ -138,12 +145,12 @@ class ServiceStopsRepositoryTest {
                 .thenReturn(expected1, null, expected3)
 
         val observer = repository.getServicesForStopsFlow(stopCodes).test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected1, null, expected3)
         verify(busStopsDao)
                 .removeOnBusStopsChangedListener(any())
     }
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

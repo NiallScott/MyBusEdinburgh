@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -73,7 +73,7 @@ class AreaEnteredHandlerTest {
     }
 
     @Test
-    fun handleAreaEnteredRemovesGeofence() = coroutineRule.runBlockingTest {
+    fun handleAreaEnteredRemovesGeofence() = runTest {
         handler.handleAreaEntered(1)
 
         verify(geofencingManager)
@@ -81,7 +81,7 @@ class AreaEnteredHandlerTest {
     }
 
     @Test
-    fun handleAreaEnteredRemovesAlertFromDao() = coroutineRule.runBlockingTest {
+    fun handleAreaEnteredRemovesAlertFromDao() = runTest {
         handler.handleAreaEntered(1)
 
         verify(alertsDao)
@@ -89,8 +89,7 @@ class AreaEnteredHandlerTest {
     }
 
     @Test
-    fun handleAreaEnteredDoesNotDispatchNotificationWhenAlertDoesNotExist() =
-            coroutineRule.runBlockingTest {
+    fun handleAreaEnteredDoesNotDispatchNotificationWhenAlertDoesNotExist() = runTest {
         handler.handleAreaEntered(1)
 
         verify(alertsDao)
@@ -100,8 +99,7 @@ class AreaEnteredHandlerTest {
     }
 
     @Test
-    fun handleAreaEnteredDispatchesNotificationWhenAlertDoesExist() =
-            coroutineRule.runBlockingTest {
+    fun handleAreaEnteredDispatchesNotificationWhenAlertDoesExist() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
         whenever(alertsDao.getProximityAlert(1))
                 .thenReturn(proximityAlert)

@@ -36,7 +36,8 @@ import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -116,7 +117,7 @@ class AndroidBusStopDatabaseRepositoryTest {
     }
 
     @Test
-    fun databaseMetadataFlowReturnsFlowFromDatabaseInformationDao() = runBlockingTest {
+    fun databaseMetadataFlowReturnsFlowFromDatabaseInformationDao() = runTest {
         val databaseMetadata = DatabaseMetadata(123L, "1.2.3")
         whenever(databaseInformationDao.databaseMetadataFlow)
                 .thenReturn(flowOf(databaseMetadata))
@@ -126,6 +127,4 @@ class AndroidBusStopDatabaseRepositoryTest {
 
         observer.assertValues(databaseMetadata)
     }
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

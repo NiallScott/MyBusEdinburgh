@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
@@ -131,20 +132,20 @@ class DisplayStopDataActivityViewModelTest {
     }
 
     @Test
-    fun busStopDetailsWithStopCodeWhichIsNotFoundReturnsNullDetails() =
-            coroutineRule.runBlockingTest {
-                val flow = flow<StopDetails?> { emit(null) }
-                whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                        .thenReturn(flow)
-                viewModel.busStopDetails.observeForever(stopDetailsObserver)
+    fun busStopDetailsWithStopCodeWhichIsNotFoundReturnsNullDetails() = runTest {
+        val flow = flow<StopDetails?> { emit(null) }
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+                .thenReturn(flow)
+        viewModel.busStopDetails.observeForever(stopDetailsObserver)
 
-                viewModel.stopCode = "123456"
+        viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
-                stopDetailsObserver.assertValues(null)
-            }
+        stopDetailsObserver.assertValues(null)
+    }
 
     @Test
-    fun busStopDetailsWithStopCodeWhichIsFoundReturnsDetails() = coroutineRule.runBlockingTest {
+    fun busStopDetailsWithStopCodeWhichIsFoundReturnsDetails() = runTest {
         val details = StopDetails(
                 "123456",
                 StopName(
@@ -159,12 +160,13 @@ class DisplayStopDataActivityViewModelTest {
         viewModel.busStopDetails.observeForever(stopDetailsObserver)
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         stopDetailsObserver.assertValues(details)
     }
 
     @Test
-    fun busStopDetailsWithStopCodesCanUpdateData() = coroutineRule.runBlockingTest {
+    fun busStopDetailsWithStopCodesCanUpdateData() = runTest {
         val details = StopDetails(
                 "123456",
                 StopName(
@@ -183,6 +185,7 @@ class DisplayStopDataActivityViewModelTest {
         viewModel.busStopDetails.observeForever(stopDetailsObserver)
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         stopDetailsObserver.assertValues(null, details, null)
     }
@@ -206,19 +209,20 @@ class DisplayStopDataActivityViewModelTest {
     }
 
     @Test
-    fun isFavouriteLiveDataEmitsNullFollowedByRepositoryValue() = coroutineRule.runBlockingTest {
+    fun isFavouriteLiveDataEmitsNullFollowedByRepositoryValue() = runTest {
         val flow = flow { emit(true) }
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
                 .thenReturn(flow)
         viewModel.isFavouriteLiveData.observeForever(booleanObserver)
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         booleanObserver.assertValues(null, true)
     }
 
     @Test
-    fun isFavouriteLiveDataCopesWithStopChange() = coroutineRule.runBlockingTest {
+    fun isFavouriteLiveDataCopesWithStopChange() = runTest {
         val flow1 = flow { emit(false) }
         val flow2 = flow { emit(true) }
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123"))
@@ -228,13 +232,15 @@ class DisplayStopDataActivityViewModelTest {
         viewModel.isFavouriteLiveData.observeForever(booleanObserver)
 
         viewModel.stopCode = "123"
+        advanceUntilIdle()
         viewModel.stopCode = "456"
+        advanceUntilIdle()
 
         booleanObserver.assertValues(null, false, null, true)
     }
 
     @Test
-    fun isFavouriteLiveDataOnlyEmitsDistinctValues() = coroutineRule.runBlockingTest {
+    fun isFavouriteLiveDataOnlyEmitsDistinctValues() = runTest {
         val flow = flow {
             emit(true)
             emit(false)
@@ -247,6 +253,7 @@ class DisplayStopDataActivityViewModelTest {
         viewModel.isFavouriteLiveData.observeForever(booleanObserver)
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         booleanObserver.assertValues(null, true, false, true)
     }
@@ -270,20 +277,20 @@ class DisplayStopDataActivityViewModelTest {
     }
 
     @Test
-    fun hasArrivalAlertLiveDataEmitsNullFollowedByRepositoryValue() = coroutineRule
-            .runBlockingTest {
+    fun hasArrivalAlertLiveDataEmitsNullFollowedByRepositoryValue() = runTest {
         val flow = flow { emit(true) }
         whenever(alertsRepository.hasArrivalAlertFlow("123456"))
                 .thenReturn(flow)
         viewModel.hasArrivalAlertLiveData.observeForever(booleanObserver)
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         booleanObserver.assertValues(null, true)
     }
 
     @Test
-    fun hasArrivalAlertLiveDataCopesWithStopChange() = coroutineRule.runBlockingTest {
+    fun hasArrivalAlertLiveDataCopesWithStopChange() = runTest {
         val flow1 = flow { emit(false) }
         val flow2 = flow { emit(true) }
         whenever(alertsRepository.hasArrivalAlertFlow("123"))
@@ -293,13 +300,15 @@ class DisplayStopDataActivityViewModelTest {
         viewModel.hasArrivalAlertLiveData.observeForever(booleanObserver)
 
         viewModel.stopCode = "123"
+        advanceUntilIdle()
         viewModel.stopCode = "456"
+        advanceUntilIdle()
 
         booleanObserver.assertValues(null, false, null, true)
     }
 
     @Test
-    fun hasArrivalAlertLiveDataOnlyEmitsDistinctValues() = coroutineRule.runBlockingTest {
+    fun hasArrivalAlertLiveDataOnlyEmitsDistinctValues() = runTest {
         val flow = flow {
             emit(true)
             emit(false)
@@ -312,6 +321,7 @@ class DisplayStopDataActivityViewModelTest {
         viewModel.hasArrivalAlertLiveData.observeForever(booleanObserver)
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         booleanObserver.assertValues(null, true, false, true)
     }
@@ -335,20 +345,20 @@ class DisplayStopDataActivityViewModelTest {
     }
 
     @Test
-    fun hasProximityAlertLiveDataEmitsNullFollowedByRepositoryValue() = coroutineRule
-            .runBlockingTest {
-                val flow = flow { emit(true) }
-                whenever(alertsRepository.hasProximityAlertFlow("123456"))
-                        .thenReturn(flow)
-                viewModel.hasProximityAlertLiveData.observeForever(booleanObserver)
+    fun hasProximityAlertLiveDataEmitsNullFollowedByRepositoryValue() = runTest {
+        val flow = flow { emit(true) }
+        whenever(alertsRepository.hasProximityAlertFlow("123456"))
+                .thenReturn(flow)
+        viewModel.hasProximityAlertLiveData.observeForever(booleanObserver)
 
-                viewModel.stopCode = "123456"
+        viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
-                booleanObserver.assertValues(null, true)
-            }
+        booleanObserver.assertValues(null, true)
+    }
 
     @Test
-    fun hasProximityAlertLiveDataCopesWithStopChange() = coroutineRule.runBlockingTest {
+    fun hasProximityAlertLiveDataCopesWithStopChange() = runTest {
         val flow1 = flow { emit(false) }
         val flow2 = flow { emit(true) }
         whenever(alertsRepository.hasProximityAlertFlow("123"))
@@ -358,13 +368,15 @@ class DisplayStopDataActivityViewModelTest {
         viewModel.hasProximityAlertLiveData.observeForever(booleanObserver)
 
         viewModel.stopCode = "123"
+        advanceUntilIdle()
         viewModel.stopCode = "456"
+        advanceUntilIdle()
 
         booleanObserver.assertValues(null, false, null, true)
     }
 
     @Test
-    fun hasProximityAlertLiveDataOnlyEmitsDistinctValues() = coroutineRule.runBlockingTest {
+    fun hasProximityAlertLiveDataOnlyEmitsDistinctValues() = runTest {
         val flow = flow {
             emit(true)
             emit(false)
@@ -377,221 +389,217 @@ class DisplayStopDataActivityViewModelTest {
         viewModel.hasProximityAlertLiveData.observeForever(booleanObserver)
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         booleanObserver.assertValues(null, true, false, true)
     }
 
     @Test
-    fun onFavouriteMenuItemClickedWithNoStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
+    fun onFavouriteMenuItemClickedWithNoStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
 
-                viewModel.onFavouriteMenuItemClicked()
+        viewModel.onFavouriteMenuItemClicked()
 
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
-
-    @Test
-    fun onFavouriteMenuItemClickedWithNullStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
-
-                viewModel.stopCode = null
-                viewModel.onFavouriteMenuItemClicked()
-
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
 
     @Test
-    fun onFavouriteMenuItemClickedWithEmptyStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
+    fun onFavouriteMenuItemClickedWithNullStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
 
-                viewModel.stopCode = ""
-                viewModel.onFavouriteMenuItemClicked()
+        viewModel.stopCode = null
+        viewModel.onFavouriteMenuItemClicked()
 
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
-
-    @Test
-    fun onFavouriteMenuItemClickedWhenAddedAsFavouriteShowsRemoveFavourite() =
-            coroutineRule.runBlockingTest{
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
-                viewModel.isFavouriteLiveData.observeForever(booleanObserver)
-                val flow = flow { emit(true) }
-                whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
-                        .thenReturn(flow)
-
-                viewModel.stopCode = "123456"
-                viewModel.onFavouriteMenuItemClicked()
-
-                showRemoveObserver.assertValues("123456")
-                showAddObserver.assertEmpty()
-            }
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
 
     @Test
-    fun onFavouriteMenuItemClickedWhenAddedNotAsFavouriteShowsAddFavourite() =
-            coroutineRule.runBlockingTest{
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
-                viewModel.isFavouriteLiveData.observeForever(booleanObserver)
-                val flow = flow { emit(true) }
-                whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
-                        .thenReturn(flow)
+    fun onFavouriteMenuItemClickedWithEmptyStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
 
-                viewModel.stopCode = "123456"
-                viewModel.onFavouriteMenuItemClicked()
+        viewModel.stopCode = ""
+        viewModel.onFavouriteMenuItemClicked()
 
-                showRemoveObserver.assertValues("123456")
-                showAddObserver.assertEmpty()
-            }
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
 
     @Test
-    fun onArrivalAlertMenuItemClickedWithNoStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
+    fun onFavouriteMenuItemClickedWhenAddedAsFavouriteShowsRemoveFavourite() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
+        viewModel.isFavouriteLiveData.observeForever(booleanObserver)
+        val flow = flow { emit(true) }
+        whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
+                .thenReturn(flow)
 
-                viewModel.onArrivalAlertMenuItemClicked()
+        viewModel.stopCode = "123456"
+        advanceUntilIdle()
+        viewModel.onFavouriteMenuItemClicked()
+        advanceUntilIdle()
 
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
-
-    @Test
-    fun onArrivalAlertMenuItemClickedWithNullStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
-
-                viewModel.stopCode = null
-                viewModel.onArrivalAlertMenuItemClicked()
-
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
+        showRemoveObserver.assertValues("123456")
+        showAddObserver.assertEmpty()
+    }
 
     @Test
-    fun onArrivalAlertMenuItemClickedWithEmptyStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
+    fun onFavouriteMenuItemClickedWhenAddedNotAsFavouriteShowsAddFavourite() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddFavouriteLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveFavouriteLiveData.observeForever(showRemoveObserver)
+        viewModel.isFavouriteLiveData.observeForever(booleanObserver)
+        val flow = flow { emit(true) }
+        whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
+                .thenReturn(flow)
 
-                viewModel.stopCode = ""
-                viewModel.onArrivalAlertMenuItemClicked()
+        viewModel.stopCode = "123456"
+        advanceUntilIdle()
+        viewModel.onFavouriteMenuItemClicked()
+        advanceUntilIdle()
 
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
-
-    @Test
-    fun onArrivalAlertMenuItemClickedWhenAddedAsArrivalAlertShowsRemoveArrivalAlert() =
-            coroutineRule.runBlockingTest{
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
-                viewModel.hasArrivalAlertLiveData.observeForever(booleanObserver)
-                val flow = flow { emit(true) }
-                whenever(alertsRepository.hasArrivalAlertFlow("123456"))
-                        .thenReturn(flow)
-
-                viewModel.stopCode = "123456"
-                viewModel.onArrivalAlertMenuItemClicked()
-
-                showRemoveObserver.assertValues("123456")
-                showAddObserver.assertEmpty()
-            }
+        showRemoveObserver.assertValues("123456")
+        showAddObserver.assertEmpty()
+    }
 
     @Test
-    fun onArrivalAlertMenuItemClickedWhenAddedNotAsArrivalAlertShowsAddArrivalAlert() =
-            coroutineRule.runBlockingTest{
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
-                viewModel.hasArrivalAlertLiveData.observeForever(booleanObserver)
-                val flow = flow { emit(true) }
-                whenever(alertsRepository.hasArrivalAlertFlow("123456"))
-                        .thenReturn(flow)
+    fun onArrivalAlertMenuItemClickedWithNoStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
 
-                viewModel.stopCode = "123456"
-                viewModel.onArrivalAlertMenuItemClicked()
+        viewModel.onArrivalAlertMenuItemClicked()
 
-                showRemoveObserver.assertValues("123456")
-                showAddObserver.assertEmpty()
-            }
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
 
     @Test
-    fun onProximityAlertMenuItemClickedWithNoStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddProximityAlertLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveProximityAlertLiveData.observeForever(showRemoveObserver)
+    fun onArrivalAlertMenuItemClickedWithNullStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
 
-                viewModel.onProximityAlertMenuItemClicked()
+        viewModel.stopCode = null
+        viewModel.onArrivalAlertMenuItemClicked()
 
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
-
-    @Test
-    fun onProximityAlertMenuItemClickedWithNullStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddProximityAlertLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveProximityAlertLiveData.observeForever(showRemoveObserver)
-
-                viewModel.stopCode = null
-                viewModel.onProximityAlertMenuItemClicked()
-
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
 
     @Test
-    fun onProximityAlertMenuItemClickedWithEmptyStopCodePerformsNoAction() =
-            coroutineRule.runBlockingTest {
-                val showAddObserver = LiveDataTestObserver<String>()
-                val showRemoveObserver = LiveDataTestObserver<String>()
-                viewModel.showAddProximityAlertLiveData.observeForever(showAddObserver)
-                viewModel.showRemoveProximityAlertLiveData.observeForever(showRemoveObserver)
+    fun onArrivalAlertMenuItemClickedWithEmptyStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
 
-                viewModel.stopCode = ""
-                viewModel.onProximityAlertMenuItemClicked()
+        viewModel.stopCode = ""
+        viewModel.onArrivalAlertMenuItemClicked()
 
-                showAddObserver.assertEmpty()
-                showRemoveObserver.assertEmpty()
-            }
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
+
+    @Test
+    fun onArrivalAlertMenuItemClickedWhenAddedAsArrivalAlertShowsRemoveArrivalAlert() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
+        viewModel.hasArrivalAlertLiveData.observeForever(booleanObserver)
+        val flow = flow { emit(true) }
+        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+                .thenReturn(flow)
+
+        viewModel.stopCode = "123456"
+        advanceUntilIdle()
+        viewModel.onArrivalAlertMenuItemClicked()
+        advanceUntilIdle()
+
+        showRemoveObserver.assertValues("123456")
+        showAddObserver.assertEmpty()
+    }
+
+    @Test
+    fun onArrivalAlertMenuItemClickedWhenAddedNotAsArrivalAlertShowsAddArrivalAlert() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddArrivalAlertLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveArrivalAlertLiveData.observeForever(showRemoveObserver)
+        viewModel.hasArrivalAlertLiveData.observeForever(booleanObserver)
+        val flow = flow { emit(true) }
+        whenever(alertsRepository.hasArrivalAlertFlow("123456"))
+                .thenReturn(flow)
+
+        viewModel.stopCode = "123456"
+        advanceUntilIdle()
+        viewModel.onArrivalAlertMenuItemClicked()
+        advanceUntilIdle()
+
+        showRemoveObserver.assertValues("123456")
+        showAddObserver.assertEmpty()
+    }
+
+    @Test
+    fun onProximityAlertMenuItemClickedWithNoStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddProximityAlertLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveProximityAlertLiveData.observeForever(showRemoveObserver)
+
+        viewModel.onProximityAlertMenuItemClicked()
+
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
+
+    @Test
+    fun onProximityAlertMenuItemClickedWithNullStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddProximityAlertLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveProximityAlertLiveData.observeForever(showRemoveObserver)
+
+        viewModel.stopCode = null
+        viewModel.onProximityAlertMenuItemClicked()
+
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
+
+    @Test
+    fun onProximityAlertMenuItemClickedWithEmptyStopCodePerformsNoAction() = runTest {
+        val showAddObserver = LiveDataTestObserver<String>()
+        val showRemoveObserver = LiveDataTestObserver<String>()
+        viewModel.showAddProximityAlertLiveData.observeForever(showAddObserver)
+        viewModel.showRemoveProximityAlertLiveData.observeForever(showRemoveObserver)
+
+        viewModel.stopCode = ""
+        viewModel.onProximityAlertMenuItemClicked()
+
+        showAddObserver.assertEmpty()
+        showRemoveObserver.assertEmpty()
+    }
 
     @Test
     fun onProximityAlertMenuItemClickedWhenAddedAsProximityAlertShowsRemoveProximityAlert() =
-            coroutineRule.runBlockingTest{
+            runTest {
                 val showAddObserver = LiveDataTestObserver<String>()
                 val showRemoveObserver = LiveDataTestObserver<String>()
                 viewModel.showAddProximityAlertLiveData.observeForever(showAddObserver)
@@ -602,7 +610,9 @@ class DisplayStopDataActivityViewModelTest {
                         .thenReturn(flow)
 
                 viewModel.stopCode = "123456"
+                advanceUntilIdle()
                 viewModel.onProximityAlertMenuItemClicked()
+                advanceUntilIdle()
 
                 showRemoveObserver.assertValues("123456")
                 showAddObserver.assertEmpty()
@@ -610,7 +620,7 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun onProximityAlertMenuItemClickedWhenAddedNotAsProximityAlertShowsAddProximityAlert() =
-            coroutineRule.runBlockingTest{
+            runTest {
                 val showAddObserver = LiveDataTestObserver<String>()
                 val showRemoveObserver = LiveDataTestObserver<String>()
                 viewModel.showAddProximityAlertLiveData.observeForever(showAddObserver)
@@ -621,49 +631,51 @@ class DisplayStopDataActivityViewModelTest {
                         .thenReturn(flow)
 
                 viewModel.stopCode = "123456"
+                advanceUntilIdle()
                 viewModel.onProximityAlertMenuItemClicked()
+                advanceUntilIdle()
 
                 showRemoveObserver.assertValues("123456")
                 showAddObserver.assertEmpty()
             }
 
     @Test
-    fun onStreetViewMenuItemClickedPerformsNoActionWhenStopDetailsIsNull() =
-            coroutineRule.runBlockingTest {
-                val flow = flow<StopDetails?> { emit(null) }
-                whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                        .thenReturn(flow)
-                val showStreetView = LiveDataTestObserver<StopDetails>()
-                viewModel.showStreetViewLiveData.observeForever(showStreetView)
-                viewModel.busStopDetails.observeForever(stopDetailsObserver)
+    fun onStreetViewMenuItemClickedPerformsNoActionWhenStopDetailsIsNull() = runTest {
+        val flow = flow<StopDetails?> { emit(null) }
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+                .thenReturn(flow)
+        val showStreetView = LiveDataTestObserver<StopDetails>()
+        viewModel.showStreetViewLiveData.observeForever(showStreetView)
+        viewModel.busStopDetails.observeForever(stopDetailsObserver)
 
-                viewModel.stopCode = "123456"
-                viewModel.onStreetViewMenuItemClicked()
+        viewModel.stopCode = "123456"
+        viewModel.onStreetViewMenuItemClicked()
 
-                showStreetView.assertEmpty()
-            }
+        showStreetView.assertEmpty()
+    }
 
     @Test
-    fun onStreetViewMenuItemClickedShowsStreetViewWhenStopDetailsIsNotNull() =
-            coroutineRule.runBlockingTest {
-                val details = StopDetails(
-                        "123456",
-                        StopName(
-                                "Name",
-                                "Locality"),
-                        1.2,
-                        3.4,
-                        5)
-                val flow = flow { emit(details) }
-                whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                        .thenReturn(flow)
-                val showStreetView = LiveDataTestObserver<StopDetails>()
-                viewModel.showStreetViewLiveData.observeForever(showStreetView)
-                viewModel.busStopDetails.observeForever(stopDetailsObserver)
+    fun onStreetViewMenuItemClickedShowsStreetViewWhenStopDetailsIsNotNull() = runTest {
+        val details = StopDetails(
+                "123456",
+                StopName(
+                        "Name",
+                        "Locality"),
+                1.2,
+                3.4,
+                5)
+        val flow = flow { emit(details) }
+        whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
+                .thenReturn(flow)
+        val showStreetView = LiveDataTestObserver<StopDetails>()
+        viewModel.showStreetViewLiveData.observeForever(showStreetView)
+        viewModel.busStopDetails.observeForever(stopDetailsObserver)
 
-                viewModel.stopCode = "123456"
-                viewModel.onStreetViewMenuItemClicked()
+        viewModel.stopCode = "123456"
+        advanceUntilIdle()
+        viewModel.onStreetViewMenuItemClicked()
+        advanceUntilIdle()
 
-                showStreetView.assertValues(details)
-            }
+        showStreetView.assertValues(details)
+    }
 }

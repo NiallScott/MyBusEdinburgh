@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -72,11 +73,12 @@ class FavouriteStopsRetrieverTest {
     }
 
     @Test
-    fun favouriteStopsFlowWithNullFavouriteStopsEmitsEmptyList() = runBlockingTest {
+    fun favouriteStopsFlowWithNullFavouriteStopsEmitsEmptyList() = runTest {
         whenever(favouritesRepository.favouriteStopsFlow)
                 .thenReturn(flowOf(null))
 
         val observer = retriever.favouriteStopsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, emptyList())
@@ -85,11 +87,12 @@ class FavouriteStopsRetrieverTest {
     }
 
     @Test
-    fun favouriteStopsFlowWithEmptyFavouriteStopsEmitsEmptyList() = runBlockingTest {
+    fun favouriteStopsFlowWithEmptyFavouriteStopsEmitsEmptyList() = runTest {
         whenever(favouritesRepository.favouriteStopsFlow)
                 .thenReturn(flowOf(emptyList()))
 
         val observer = retriever.favouriteStopsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, emptyList())
@@ -98,7 +101,7 @@ class FavouriteStopsRetrieverTest {
     }
 
     @Test
-    fun favouriteStopsFlowWithFavouriteStopsAndNullServicesEmitsExpectedList() = runBlockingTest {
+    fun favouriteStopsFlowWithFavouriteStopsAndNullServicesEmitsExpectedList() = runTest {
         val favouriteStops = listOf(
                 FavouriteStop(1L, "111111", "Favourite 1"),
                 FavouriteStop(2L, "222222", "Favourite 2"),
@@ -113,13 +116,14 @@ class FavouriteStopsRetrieverTest {
                 .thenReturn(flowOf(null))
 
         val observer = retriever.favouriteStopsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun favouriteStopsFlowWithFavouriteStopsAndEmptyServicesEmitsExpectedList() = runBlockingTest {
+    fun favouriteStopsFlowWithFavouriteStopsAndEmptyServicesEmitsExpectedList() = runTest {
         val favouriteStops = listOf(
                 FavouriteStop(1L, "111111", "Favourite 1"),
                 FavouriteStop(2L, "222222", "Favourite 2"),
@@ -134,13 +138,14 @@ class FavouriteStopsRetrieverTest {
                 .thenReturn(flowOf(emptyMap()))
 
         val observer = retriever.favouriteStopsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun favouriteStopsFlowWithFavouritesAndPopulatedServicesEmitsExpectedList() = runBlockingTest {
+    fun favouriteStopsFlowWithFavouritesAndPopulatedServicesEmitsExpectedList() = runTest {
         val favouriteStops = listOf(
                 FavouriteStop(1L, "111111", "Favourite 1"),
                 FavouriteStop(2L, "222222", "Favourite 2"),
@@ -158,13 +163,14 @@ class FavouriteStopsRetrieverTest {
                         "333333" to listOf("1"))))
 
         val observer = retriever.favouriteStopsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun favouriteStopsFlowWithChangingFavouritesEmitsExpectedLists() = runBlockingTest {
+    fun favouriteStopsFlowWithChangingFavouritesEmitsExpectedLists() = runTest {
         val favouriteStops1 = listOf(
                 FavouriteStop(1L, "111111", "Favourite 1"),
                 FavouriteStop(2L, "222222", "Favourite 2"),
@@ -210,7 +216,7 @@ class FavouriteStopsRetrieverTest {
     }
 
     @Test
-    fun favouriteStopsFlowWithChangingServicesEmitsExpectedList() = runBlockingTest {
+    fun favouriteStopsFlowWithChangingServicesEmitsExpectedList() = runTest {
         val favouriteStops = listOf(
                 FavouriteStop(1L, "111111", "Favourite 1"),
                 FavouriteStop(2L, "222222", "Favourite 2"),
@@ -254,6 +260,4 @@ class FavouriteStopsRetrieverTest {
 
         observer.assertValues(null, expected1, expected2, expected3)
     }
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,8 +28,8 @@ package uk.org.rivernile.android.bustracker.core.startup
 
 import com.nhaarman.mockitokotlin2.inOrder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
-import org.junit.Assert.assertTrue
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 
 import org.junit.Test
@@ -66,17 +66,18 @@ class StartUpTaskTest {
     private lateinit var alertManager: AlertManager
 
     @Test
-    fun performsStartUpTasks() = coroutineRule.runBlockingTest {
+    fun performsStartUpTasks() = runTest {
         val startUpTask = StartUpTask(
                 appNotificationChannels,
                 backupObserver,
                 busStopDatabaseJobScheduler,
                 cleanUpTask,
                 alertManager,
-                coroutineRule,
+                coroutineRule.scope,
                 coroutineRule.testDispatcher)
 
         startUpTask.performStartUpTasks()
+        advanceUntilIdle()
 
         inOrder(appNotificationChannels, backupObserver, busStopDatabaseJobScheduler, cleanUpTask,
                 alertManager) {
@@ -101,11 +102,9 @@ class StartUpTaskTest {
                 busStopDatabaseJobScheduler,
                 null,
                 alertManager,
-                coroutineRule,
+                coroutineRule.scope,
                 coroutineRule.testDispatcher)
 
         startUpTask.performStartUpTasks()
-
-        assertTrue(coroutineRule.uncaughtExceptions.isEmpty())
     }
 }

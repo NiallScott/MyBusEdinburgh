@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,9 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -45,7 +47,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.twitter.UnrecognisedSe
 import uk.org.rivernile.android.bustracker.core.twitter.Result
 import uk.org.rivernile.android.bustracker.core.twitter.TwitterRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
+import uk.org.rivernile.android.bustracker.testutils.test
 import java.io.IOException
 
 /**
@@ -65,7 +67,6 @@ class TwitterUpdatesFragmentViewModelTest {
     @Mock
     private lateinit var twitterRepository: TwitterRepository
 
-    private val uiStateObserver = LiveDataTestObserver<UiState>()
     private val tweets = listOf(mock<Tweet>())
 
     private lateinit var viewModel: TwitterUpdatesFragmentViewModel
@@ -76,110 +77,103 @@ class TwitterUpdatesFragmentViewModelTest {
     }
 
     @Test
-    fun initialStateBeginsLoadingTweets() {
-        val flow = flow {
-            emit(Result.InProgress)
-        }
+    fun initialStateBeginsLoadingTweets() = runTest {
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow)
+                .thenReturn(flowOf(Result.InProgress))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.ShowEmptyProgress)
+        observer.assertValues(UiState.ShowEmptyProgress)
     }
 
     @Test
-    fun errorAfterInitialStateShowsEmptyErrorState() {
-        val flow = flow {
-            emit(Result.InProgress)
-            emit(Result.Error(NoConnectivityException()))
-        }
+    fun errorAfterInitialStateShowsEmptyErrorState() = runTest {
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow)
+                .thenReturn(flowOf(
+                        Result.InProgress,
+                        Result.Error(NoConnectivityException())))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.ShowEmptyProgress,
                 UiState.ShowEmptyError(Error.NO_CONNECTIVITY))
     }
 
     @Test
-    fun nullSuccessAfterInitialStateShowsEmptyErrorState() {
-        val flow = flow {
-            emit(Result.InProgress)
-            emit(Result.Success(null))
-        }
+    fun nullSuccessAfterInitialStateShowsEmptyErrorState() = runTest {
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow)
+                .thenReturn(flowOf(
+                        Result.InProgress,
+                        Result.Success(null)))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.ShowEmptyProgress,
                 UiState.ShowEmptyError(Error.NO_DATA))
     }
 
     @Test
-    fun emptySuccessAfterInitialStateShowsEmptyErrorState() {
-        val flow = flow<Result<List<Tweet>>> {
-            emit(Result.InProgress)
-            emit(Result.Success(emptyList()))
-        }
+    fun emptySuccessAfterInitialStateShowsEmptyErrorState() = runTest {
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow)
+                .thenReturn(flowOf(
+                        Result.InProgress,
+                        Result.Success(emptyList())))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.ShowEmptyProgress,
                 UiState.ShowEmptyError(Error.NO_DATA))
     }
 
     @Test
-    fun nonEmptySuccessAfterInitialStateShowsContentState() {
-        val flow = flow {
-            emit(Result.InProgress)
-            emit(Result.Success(tweets))
-        }
+    fun nonEmptySuccessAfterInitialStateShowsContentState() = runTest {
         whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow)
+                .thenReturn(flowOf(
+                        Result.InProgress,
+                        Result.Success(tweets)))
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.ShowEmptyProgress,
                 UiState.ShowContent(tweets))
     }
 
     @Test
-    fun successiveErrorsAfterInitialStateContinuesToShowEmptyErrorState() {
-        val flow1 = flow {
-            emit(Result.InProgress)
-            emit(Result.Error(NoConnectivityException()))
-        }
-        val flow2 = flow {
-            emit(Result.InProgress)
-            emit(Result.Error(NetworkException(IOException())))
-        }
-        val flow3 = flow {
-            emit(Result.InProgress)
-            emit(Result.Error(UnrecognisedServerErrorException()))
-        }
-        val flow4 = flow {
-            emit(Result.InProgress)
-            emit(Result.Error(AuthenticationException()))
-        }
-
+    fun successiveErrorsAfterInitialStateContinuesToShowEmptyErrorState() = runTest {
+        val flow1 = flowOf(
+                Result.InProgress,
+                Result.Error(NoConnectivityException()))
+        val flow2 = flowOf(
+                Result.InProgress,
+                Result.Error(NetworkException(IOException())))
+        val flow3 = flowOf(
+                Result.InProgress,
+                Result.Error(UnrecognisedServerErrorException()))
+        val flow4 = flowOf(
+                Result.InProgress,
+                Result.Error(AuthenticationException()))
         whenever(twitterRepository.getLatestTweets())
                 .thenReturn(flow1, flow2, flow3, flow4)
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.onRefreshMenuItemClicked()
+        advanceUntilIdle()
         viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
         viewModel.onRefreshMenuItemClicked()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.ShowEmptyProgress,
                 UiState.ShowEmptyError(Error.NO_CONNECTIVITY),
                 UiState.ShowEmptyProgress,
@@ -191,22 +185,22 @@ class TwitterUpdatesFragmentViewModelTest {
     }
 
     @Test
-    fun errorAfterContentShownShowsRefreshErrorState() {
-        val flow1 = flow {
-            emit(Result.InProgress)
-            emit(Result.Success(tweets))
-        }
-        val flow2 = flow {
-            emit(Result.InProgress)
-            emit(Result.Error(NoConnectivityException()))
-        }
+    fun errorAfterContentShownShowsRefreshErrorState() = runTest {
+        val flow1 = flowOf(
+                Result.InProgress,
+                Result.Success(tweets))
+        val flow2 = flowOf(
+                Result.InProgress,
+                Result.Error(NoConnectivityException()))
         whenever(twitterRepository.getLatestTweets())
                 .thenReturn(flow1, flow2)
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.onRefreshMenuItemClicked()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.ShowEmptyProgress,
                 UiState.ShowContent(tweets),
                 UiState.ShowPopulatedProgress,
@@ -214,22 +208,22 @@ class TwitterUpdatesFragmentViewModelTest {
     }
 
     @Test
-    fun noDataErrorAfterContentShownContinuesToShowContentAndDisplaysError() {
-        val flow1 = flow {
-            emit(Result.InProgress)
-            emit(Result.Success(tweets))
-        }
-        val flow2 = flow {
-            emit(Result.InProgress)
-            emit(Result.Success(null))
-        }
+    fun noDataErrorAfterContentShownContinuesToShowContentAndDisplaysError() = runTest {
+        val flow1 = flowOf(
+                Result.InProgress,
+                Result.Success(tweets))
+        val flow2 = flowOf(
+                Result.InProgress,
+                Result.Success(null))
         whenever(twitterRepository.getLatestTweets())
                 .thenReturn(flow1, flow2)
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.onRefreshMenuItemClicked()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.ShowEmptyProgress,
                 UiState.ShowContent(tweets),
                 UiState.ShowPopulatedProgress,
@@ -237,22 +231,22 @@ class TwitterUpdatesFragmentViewModelTest {
     }
 
     @Test
-    fun successAfterSuccessContinuesToShowSuccess() {
-        val flow1 = flow {
-            emit(Result.InProgress)
-            emit(Result.Success(tweets))
-        }
-        val flow2 = flow {
-            emit(Result.InProgress)
-            emit(Result.Success(tweets))
-        }
+    fun successAfterSuccessContinuesToShowSuccess() = runTest {
+        val flow1 = flowOf(
+                Result.InProgress,
+                Result.Success(tweets))
+        val flow2 = flowOf(
+                Result.InProgress,
+                Result.Success(tweets))
         whenever(twitterRepository.getLatestTweets())
                 .thenReturn(flow1, flow2)
 
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.onRefreshMenuItemClicked()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.ShowEmptyProgress,
                 UiState.ShowContent(tweets),
                 UiState.ShowPopulatedProgress,

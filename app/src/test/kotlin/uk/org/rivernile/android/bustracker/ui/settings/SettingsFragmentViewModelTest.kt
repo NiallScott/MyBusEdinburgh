@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.settings
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
-import com.nhaarman.mockitokotlin2.isNull
-import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -39,6 +36,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [SettingsFragmentViewModel].
@@ -53,9 +51,6 @@ class SettingsFragmentViewModelTest {
 
     @Mock
     private lateinit var preferenceManager: PreferenceManager
-
-    @Mock
-    private lateinit var nothingObserver: Observer<Nothing>
 
     private lateinit var viewModel: SettingsFragmentViewModel
 
@@ -76,11 +71,10 @@ class SettingsFragmentViewModelTest {
 
     @Test
     fun onClearSearchHistoryClickedCausesShowClearSearchHistory() {
-        viewModel.showClearSearchHistoryLiveData.observeForever(nothingObserver)
+        val observer = viewModel.showClearSearchHistoryLiveData.test()
 
         viewModel.onClearSearchHistoryClicked()
 
-        verify(nothingObserver)
-                .onChanged(isNull())
+        observer.assertSize(1)
     }
 }

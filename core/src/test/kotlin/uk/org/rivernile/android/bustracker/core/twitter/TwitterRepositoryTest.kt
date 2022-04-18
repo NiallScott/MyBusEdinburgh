@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -74,11 +75,12 @@ class TwitterRepositoryTest {
     }
 
     @Test
-    fun getLatestTweetsWithNullListOfTweetsReturnsSuccess() = coroutineRule.runBlockingTest {
+    fun getLatestTweetsWithNullListOfTweetsReturnsSuccess() = runTest {
         whenever(latestTweetsRequest.performRequest())
                 .thenReturn(null)
 
         val observer = repository.getLatestTweets().test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -87,11 +89,12 @@ class TwitterRepositoryTest {
     }
 
     @Test
-    fun getLatestTweetsWithEmptyListOfTweetsReturnsSuccess() = coroutineRule.runBlockingTest {
+    fun getLatestTweetsWithEmptyListOfTweetsReturnsSuccess() = runTest {
         whenever(latestTweetsRequest.performRequest())
                 .thenReturn(emptyList())
 
         val observer = repository.getLatestTweets().test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -100,13 +103,14 @@ class TwitterRepositoryTest {
     }
 
     @Test
-    fun getLatestTweetsWithPopulatedListOfTweetsReturnsSuccess() = coroutineRule.runBlockingTest {
+    fun getLatestTweetsWithPopulatedListOfTweetsReturnsSuccess() = runTest {
         val tweet = mock<Tweet>()
         val result = listOf(tweet)
         whenever(latestTweetsRequest.performRequest())
                 .thenReturn(result)
 
         val observer = repository.getLatestTweets().test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -115,12 +119,13 @@ class TwitterRepositoryTest {
     }
 
     @Test
-    fun getLatestTweetsWithExceptionThrownReturnsFailure() = coroutineRule.runBlockingTest {
+    fun getLatestTweetsWithExceptionThrownReturnsFailure() = runTest {
         val exception = NoConnectivityException()
         whenever(latestTweetsRequest.performRequest())
                 .thenThrow(exception)
 
         val observer = repository.getLatestTweets().test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -129,11 +134,12 @@ class TwitterRepositoryTest {
     }
 
     @Test
-    fun getLatestTweetWithCancellationCausesCancellationEvent() = coroutineRule.runBlockingTest {
+    fun getLatestTweetWithCancellationCausesCancellationEvent() = runTest {
         whenever(latestTweetsRequest.performRequest())
                 .thenThrow(CancellationException::class.java)
 
         val observer = repository.getLatestTweets().test(this)
+        advanceUntilIdle()
         observer.finish()
 
         verify(latestTweetsRequest)

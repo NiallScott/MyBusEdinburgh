@@ -32,7 +32,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -70,20 +71,21 @@ class DistanceRetrieverTest {
     }
 
     @Test
-    fun createDistanceFlowWithoutLocationFeatureEmitsNoLocationFeature() = runBlockingTest {
+    fun createDistanceFlowWithoutLocationFeatureEmitsNoLocationFeature() = runTest {
         val permissionsStateFlow = flowOf(grantedPermissionsState)
         val stopDetailsFlow = flowOf(stopDetails)
         givenHasLocationFeatureState(false)
 
         val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiItem.Distance.NoLocationFeature)
     }
 
     @Test
-    fun createDistanceFlowWithoutLocationPermissionsEmitsPermissionDenied() = runBlockingTest {
+    fun createDistanceFlowWithoutLocationPermissionsEmitsPermissionDenied() = runTest {
         val permissionsStateFlow = flowOf(
                 PermissionsState(PermissionState.DENIED, PermissionState.UNGRANTED))
         val stopDetailsFlow = flowOf(stopDetails)
@@ -91,13 +93,14 @@ class DistanceRetrieverTest {
 
         val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiItem.Distance.PermissionDenied)
     }
 
     @Test
-    fun createDistanceFlowWhenLocationIsOffEmitsLocationOff() = runBlockingTest {
+    fun createDistanceFlowWhenLocationIsOffEmitsLocationOff() = runTest {
         val permissionsStateFlow = flowOf(grantedPermissionsState)
         val stopDetailsFlow = flowOf(stopDetails)
         givenHasLocationFeatureState(true)
@@ -106,13 +109,14 @@ class DistanceRetrieverTest {
 
         val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiItem.Distance.LocationOff)
     }
 
     @Test
-    fun createDistanceFlowWithNullStopDetailsEmitsUnknown() = runBlockingTest {
+    fun createDistanceFlowWithNullStopDetailsEmitsUnknown() = runTest {
         val permissionsStateFlow = flowOf(grantedPermissionsState)
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         givenHasLocationFeatureState(true)
@@ -123,13 +127,14 @@ class DistanceRetrieverTest {
 
         val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiItem.Distance.Unknown)
     }
 
     @Test
-    fun createDistanceFlowWithNoLocationEmitsUnknown() = runBlockingTest {
+    fun createDistanceFlowWithNoLocationEmitsUnknown() = runTest {
         val permissionsStateFlow = flowOf(grantedPermissionsState)
         val stopDetailsFlow = flowOf<StopDetails?>(stopDetails)
         givenHasLocationFeatureState(true)
@@ -140,13 +145,14 @@ class DistanceRetrieverTest {
 
         val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiItem.Distance.Unknown)
     }
 
     @Test
-    fun createDistanceFlowWithNegativeDistanceEmitsUnknown() = runBlockingTest {
+    fun createDistanceFlowWithNegativeDistanceEmitsUnknown() = runTest {
         val permissionsStateFlow = flowOf(grantedPermissionsState)
         val stopDetailsFlow = flowOf<StopDetails?>(stopDetails)
         givenHasLocationFeatureState(true)
@@ -161,13 +167,14 @@ class DistanceRetrieverTest {
 
         val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiItem.Distance.Unknown)
     }
 
     @Test
-    fun createDistanceFlowWithZeroDistanceEmitsDistance() = runBlockingTest {
+    fun createDistanceFlowWithZeroDistanceEmitsDistance() = runTest {
         val permissionsStateFlow = flowOf(grantedPermissionsState)
         val stopDetailsFlow = flowOf<StopDetails?>(stopDetails)
         givenHasLocationFeatureState(true)
@@ -182,6 +189,7 @@ class DistanceRetrieverTest {
 
         val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -190,7 +198,7 @@ class DistanceRetrieverTest {
     }
 
     @Test
-    fun createDistanceFlowWithPositiveDistanceEmitsDistance() = runBlockingTest {
+    fun createDistanceFlowWithPositiveDistanceEmitsDistance() = runTest {
         val permissionsStateFlow = flowOf(grantedPermissionsState)
         val stopDetailsFlow = flowOf<StopDetails?>(stopDetails)
         givenHasLocationFeatureState(true)
@@ -205,6 +213,7 @@ class DistanceRetrieverTest {
 
         val observer = retriever.createDistanceFlow(permissionsStateFlow, stopDetailsFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -213,7 +222,7 @@ class DistanceRetrieverTest {
     }
 
     @Test
-    fun createDistanceFlowWithRepresentativeExample() = runBlockingTest {
+    fun createDistanceFlowWithRepresentativeExample() = runTest {
         val permissionsStateFlow = flow {
             emit(PermissionsState(PermissionState.DENIED, PermissionState.UNGRANTED))
             delay(100L)
@@ -269,6 +278,4 @@ class DistanceRetrieverTest {
             1.0,
             2.0,
             3)
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

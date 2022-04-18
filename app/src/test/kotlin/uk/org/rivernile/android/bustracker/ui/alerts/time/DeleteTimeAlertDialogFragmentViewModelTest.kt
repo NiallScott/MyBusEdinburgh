@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,8 @@ import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -61,13 +62,12 @@ class DeleteTimeAlertDialogFragmentViewModelTest {
     fun setUp() {
         viewModel = DeleteTimeAlertDialogFragmentViewModel(
                 alertsRepository,
-                coroutineRule,
+                coroutineRule.scope,
                 coroutineRule.testDispatcher)
     }
 
     @Test
-    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsNull() =
-            coroutineRule.runBlockingTest {
+    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsNull() = runTest {
         viewModel.stopCode = null
 
         viewModel.onUserConfirmDeletion()
@@ -77,8 +77,7 @@ class DeleteTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsEmpty() =
-            coroutineRule.runBlockingTest {
+    fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsEmpty() = runTest {
         viewModel.stopCode = ""
 
         viewModel.onUserConfirmDeletion()
@@ -88,11 +87,11 @@ class DeleteTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onUserConfirmDeletionCausesDeletionWhenStopCodeIsPopulated() =
-            coroutineRule.runBlockingTest {
+    fun onUserConfirmDeletionCausesDeletionWhenStopCodeIsPopulated() = runTest {
         viewModel.stopCode = "123456"
 
         viewModel.onUserConfirmDeletion()
+        advanceUntilIdle()
 
         verify(alertsRepository)
                 .removeArrivalAlert("123456")

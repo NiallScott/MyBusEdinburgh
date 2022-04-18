@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,7 +38,7 @@ import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -96,7 +96,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesSendsCorrectSelectionArgsWhenServicesIsNull() = runBlockingTest {
+    fun getColoursForServicesSendsCorrectSelectionArgsWhenServicesIsNull() = runTest {
         val expectedProjection = getExpectedProjectionForColours()
         val expectedSelection = "${ServicesContract.COLOUR} IS NOT NULL"
         object : MockContentProvider() {
@@ -120,7 +120,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesSendsCorrectSelectionArgsWhenServicesIsEmpty() = runBlockingTest {
+    fun getColoursForServicesSendsCorrectSelectionArgsWhenServicesIsEmpty() = runTest {
         val expectedProjection = getExpectedProjectionForColours()
         val expectedSelection = "${ServicesContract.COLOUR} IS NOT NULL"
         object : MockContentProvider() {
@@ -144,7 +144,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesSendsCorrectSelectionArgsWhenHasSingleService() = runBlockingTest {
+    fun getColoursForServicesSendsCorrectSelectionArgsWhenHasSingleService() = runTest {
         val expectedProjection = getExpectedProjectionForColours()
         val expectedSelection = "${ServicesContract.COLOUR} IS NOT NULL " +
                 "AND ${ServicesContract.NAME} IN (?)"
@@ -170,7 +170,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesSendsCorrectSelectionArgsWhenHasMultipleServices() = runBlockingTest {
+    fun getColoursForServicesSendsCorrectSelectionArgsWhenHasMultipleServices() = runTest {
         val expectedProjection = getExpectedProjectionForColours()
         val expectedSelection = "${ServicesContract.COLOUR} IS NOT NULL " +
                 "AND ${ServicesContract.NAME} IN (?,?,?)"
@@ -196,7 +196,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesReturnsNullWhenCursorIsNull() = runBlockingTest {
+    fun getColoursForServicesReturnsNullWhenCursorIsNull() = runTest {
         object : MockContentProvider() {
             override fun query(
                     uri: Uri,
@@ -212,7 +212,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesReturnsNullWhenCursorIsEmpty() = runBlockingTest {
+    fun getColoursForServicesReturnsNullWhenCursorIsEmpty() = runTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         object : MockContentProvider() {
             override fun query(
@@ -230,7 +230,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesExcludesItemsWithNullColour() = runBlockingTest {
+    fun getColoursForServicesExcludesItemsWithNullColour() = runTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         cursor.addRow(arrayOf("1", null))
         object : MockContentProvider() {
@@ -249,7 +249,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesExcludesItemsWithColourWhichFailsParsing() = runBlockingTest {
+    fun getColoursForServicesExcludesItemsWithColourWhichFailsParsing() = runTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         cursor.addRow(arrayOf("1", "foobar"))
         object : MockContentProvider() {
@@ -268,7 +268,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesReturnsSingleValidItem() = runBlockingTest {
+    fun getColoursForServicesReturnsSingleValidItem() = runTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         cursor.addRow(arrayOf("1", "#000000"))
         object : MockContentProvider() {
@@ -288,7 +288,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getColoursForServicesReturnsMultipleValidItems() = runBlockingTest {
+    fun getColoursForServicesReturnsMultipleValidItems() = runTest {
         val cursor = MatrixCursor(getExpectedProjectionForColours())
         cursor.addRow(arrayOf("1", "#000000"))
         cursor.addRow(arrayOf("2", "#FFFFFF"))
@@ -313,14 +313,14 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getServiceDetailsReturnsNullWhenServicesIsEmpty() = runBlockingTest {
+    fun getServiceDetailsReturnsNullWhenServicesIsEmpty() = runTest {
         val result = servicesDao.getServiceDetails(emptySet())
 
         assertNull(result)
     }
 
     @Test
-    fun getServiceDetailsProducesCorrectSelectionArgsForSingleService() = runBlockingTest {
+    fun getServiceDetailsProducesCorrectSelectionArgsForSingleService() = runTest {
         val expectedProjection = getExpectedProjectionForServiceDetails()
         val expectedSelection = "${ServicesContract.NAME} IN (?)"
         object : MockContentProvider() {
@@ -345,7 +345,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getServiceDetailsWithNullCursorReturnsNull() = runBlockingTest {
+    fun getServiceDetailsWithNullCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForServiceDetails()
         val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
         object : MockContentProvider() {
@@ -372,7 +372,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getServiceDetailsWithEmptyCursorReturnsNull() = runBlockingTest {
+    fun getServiceDetailsWithEmptyCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForServiceDetails()
         val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
         val cursor = MatrixCursor(expectedProjection)
@@ -401,7 +401,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getServiceDetailsWithSingleItemReturnsSingleItem() = runBlockingTest {
+    fun getServiceDetailsWithSingleItemReturnsSingleItem() = runTest {
         val expectedProjection = getExpectedProjectionForServiceDetails()
         val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
         val cursor = MatrixCursor(expectedProjection)
@@ -432,7 +432,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getServiceDetailsWithMultipleItemReturnsMultipleItems() = runBlockingTest {
+    fun getServiceDetailsWithMultipleItemReturnsMultipleItems() = runTest {
         val expectedProjection = getExpectedProjectionForServiceDetails()
         val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
         val cursor = MatrixCursor(expectedProjection)
@@ -468,7 +468,7 @@ class AndroidServicesDaoTest {
     }
 
     @Test
-    fun getServiceDetailsWithNullDescriptionAndInvalidColourHandledCorrectly() = runBlockingTest {
+    fun getServiceDetailsWithNullDescriptionAndInvalidColourHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForServiceDetails()
         val expectedSelection = "${ServicesContract.NAME} IN (?,?,?)"
         val cursor = MatrixCursor(expectedProjection)
@@ -515,6 +515,4 @@ class AndroidServicesDaoTest {
             ServicesContract.NAME,
             ServicesContract.DESCRIPTION,
             ServicesContract.COLOUR)
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

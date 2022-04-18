@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -71,8 +71,8 @@ class AlertManagerFragmentViewModel @Inject constructor(
     /**
      * When this [LiveData] emits a new item, the system location settings screen should be shown.
      */
-    val showLocationSettingsLiveData: LiveData<Nothing> get() = showLocationSettings
-    private val showLocationSettings = SingleLiveEvent<Nothing>()
+    val showLocationSettingsLiveData: LiveData<Unit> get() = showLocationSettings
+    private val showLocationSettings = SingleLiveEvent<Unit>()
 
     /**
      * When this [LiveData] emits a new item, the user should be prompted to remove the arrival

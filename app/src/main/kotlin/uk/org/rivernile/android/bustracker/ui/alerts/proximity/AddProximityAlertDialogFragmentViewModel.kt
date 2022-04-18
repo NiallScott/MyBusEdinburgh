@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -124,27 +124,27 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     /**
      * When this [LiveData] emits a new item, the limitations dialog should be shown.
      */
-    val showLimitationsLiveData: LiveData<Nothing> get() = showLimitations
-    private val showLimitations = SingleLiveEvent<Nothing>()
+    val showLimitationsLiveData: LiveData<Unit> get() = showLimitations
+    private val showLimitations = SingleLiveEvent<Unit>()
 
     /**
      * When this [LiveData] emits a new item, the system location settings screen should be shown.
      */
-    val showLocationSettingsLiveData: LiveData<Nothing> get() = showLocationSettings
-    private val showLocationSettings = SingleLiveEvent<Nothing>()
+    val showLocationSettingsLiveData: LiveData<Unit> get() = showLocationSettings
+    private val showLocationSettings = SingleLiveEvent<Unit>()
 
     /**
      * When this [LiveData] emits a new item, the request location permission system dialog should
      * be shown.
      */
-    val requestLocationPermissionLiveData: LiveData<Nothing> get() = requestLocationPermission
-    private val requestLocationPermission = SingleLiveEvent<Nothing>()
+    val requestLocationPermissionLiveData: LiveData<Unit> get() = requestLocationPermission
+    private val requestLocationPermission = SingleLiveEvent<Unit>()
 
     /**
      * When this [LiveData] emits a new item, the app settings screen should be shown.
      */
-    val showAppSettingsLiveData: LiveData<Nothing> get() = showAppSettings
-    private val showAppSettings = SingleLiveEvent<Nothing>()
+    val showAppSettingsLiveData: LiveData<Unit> get() = showAppSettings
+    private val showAppSettings = SingleLiveEvent<Unit>()
 
     /**
      * Handle the user clicking on the 'Show limitations' button.
@@ -156,12 +156,12 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     /**
      * Handle the user clicking on the resolution button when an error state is being shown.
      */
-    @Suppress("NON_EXHAUSTIVE_WHEN") // We don't respond to all states.
     fun onResolveErrorButtonClicked() {
         when (uiStateLiveData.value) {
             UiState.ERROR_LOCATION_DISABLED -> showLocationSettings.call()
             UiState.ERROR_PERMISSION_UNGRANTED -> requestLocationPermission.call()
             UiState.ERROR_PERMISSION_DENIED -> showAppSettings.call()
+            else -> { }
         }
     }
 

@@ -37,7 +37,7 @@ import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -177,7 +177,7 @@ class AndroidDatabaseInformationDaoTest {
     }
 
     @Test
-    fun getDatabaseMetadataReturnsNullWhenCursorIsNull() = runBlockingTest {
+    fun getDatabaseMetadataReturnsNullWhenCursorIsNull() = runTest {
         val expectedProjection = getExpectedProjectionForDatabaseMetadata()
         object : MockContentProvider() {
             override fun query(
@@ -202,7 +202,7 @@ class AndroidDatabaseInformationDaoTest {
     }
 
     @Test
-    fun getDatabaseMetadataReturnsNullWhenCursorIsEmpty() = runBlockingTest {
+    fun getDatabaseMetadataReturnsNullWhenCursorIsEmpty() = runTest {
         val expectedProjection = getExpectedProjectionForDatabaseMetadata()
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -229,7 +229,7 @@ class AndroidDatabaseInformationDaoTest {
     }
 
     @Test
-    fun getDatabaseMetadataReturnsDatabaseMetadataWhenCursorIsPopulated() = runBlockingTest {
+    fun getDatabaseMetadataReturnsDatabaseMetadataWhenCursorIsPopulated() = runTest {
         val expectedProjection = getExpectedProjectionForDatabaseMetadata()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(123L, "abc123"))
@@ -263,6 +263,4 @@ class AndroidDatabaseInformationDaoTest {
     private fun getExpectedProjectionForDatabaseMetadata() = arrayOf(
             DatabaseInformationContract.LAST_UPDATE_TIMESTAMP,
             DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

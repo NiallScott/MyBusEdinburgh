@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -111,18 +112,19 @@ class LocationRepositoryTest {
     }
 
     @Test
-    fun getIsLocationEnabledFlowReturnsFlowFromIsLocationEnabledDetector() = runBlockingTest {
+    fun getIsLocationEnabledFlowReturnsFlowFromIsLocationEnabledDetector() = runTest {
         whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
                 .thenReturn(flowOf(false, true, false))
 
         val observer = locationRepository.isLocationEnabledFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(false, true, false)
     }
 
     @Test
-    fun userVisibleLocationFlowDoesNotEmitWhenDoesNotHaveLocationFeature() = runBlockingTest {
+    fun userVisibleLocationFlowDoesNotEmitWhenDoesNotHaveLocationFeature() = runTest {
         whenever(hasLocationFeatureDetector.hasLocationFeature())
                 .thenReturn(false)
 
@@ -134,7 +136,7 @@ class LocationRepositoryTest {
     }
 
     @Test
-    fun userVisibleLocationFlowDoesNotEmitWhenLocationIsNotEnabled() = runBlockingTest {
+    fun userVisibleLocationFlowDoesNotEmitWhenLocationIsNotEnabled() = runTest {
         whenever(hasLocationFeatureDetector.hasLocationFeature())
                 .thenReturn(true)
         whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
@@ -148,7 +150,7 @@ class LocationRepositoryTest {
     }
 
     @Test
-    fun userVisibleLocationFlowEmitsFromUpstreamWhenLocationIsEnabled() = runBlockingTest {
+    fun userVisibleLocationFlowEmitsFromUpstreamWhenLocationIsEnabled() = runTest {
         whenever(hasLocationFeatureDetector.hasLocationFeature())
                 .thenReturn(true)
         whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
@@ -164,7 +166,7 @@ class LocationRepositoryTest {
     }
 
     @Test
-    fun userVisibleLocationFlowDoesNotEmitAfterLocationIsDisabled() = runBlockingTest {
+    fun userVisibleLocationFlowDoesNotEmitAfterLocationIsDisabled() = runTest {
         whenever(hasLocationFeatureDetector.hasLocationFeature())
                 .thenReturn(true)
         whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
@@ -197,6 +199,4 @@ class LocationRepositoryTest {
 
         assertEquals(10f, result)
     }
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

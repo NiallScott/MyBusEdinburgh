@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -64,12 +65,14 @@ class ConnectivityRepositoryTest {
     }
 
     @Test
-    fun hasInternetConnectivityFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun hasInternetConnectivityFlowGetsInitialValue() = runTest {
         whenever(connectivityChecker.hasInternetConnectivity())
                 .thenReturn(true)
 
         val observer = repository.hasInternetConnectivityFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(true)
         verify(connectivityChecker)
@@ -77,7 +80,7 @@ class ConnectivityRepositoryTest {
     }
 
     @Test
-    fun hasInternetConnectivityFlowResponseToConnectivityChanges() = coroutineRule.runBlockingTest {
+    fun hasInternetConnectivityFlowResponseToConnectivityChanges() = runTest {
         doAnswer {
             it.getArgument<ConnectivityChecker.OnConnectivityChangedListener>(0).let { listener ->
                 listener.onConnectivityChanged()
@@ -88,7 +91,9 @@ class ConnectivityRepositoryTest {
                 .thenReturn(false, true, false)
 
         val observer = repository.hasInternetConnectivityFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(false, true, false)
         verify(connectivityChecker)

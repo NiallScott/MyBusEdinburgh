@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,8 @@ import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.nhaarman.mockitokotlin2.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -64,7 +65,7 @@ class RemoveProximityAlertBroadcastReceiverTest {
     @Before
     fun setUp() {
         val coreModule = FakeCoreModule(
-                applicationCoroutineScope = coroutineRule,
+                applicationCoroutineScope = coroutineRule.scope,
                 defaultDispatcher = coroutineRule.testDispatcher)
         val settingsDatabaseModule = FakeSettingsDatabaseModule(alertsDao)
 
@@ -77,8 +78,9 @@ class RemoveProximityAlertBroadcastReceiverTest {
     }
 
     @Test
-    fun invokingBroadcastReceiverRemovesProximityAlert() = coroutineRule.runBlockingTest {
+    fun invokingBroadcastReceiverRemovesProximityAlert() = runTest {
         receiver.onReceive(ApplicationProvider.getApplicationContext(), createIntent())
+        advanceUntilIdle()
 
         verify(alertsDao)
                 .removeAllProximityAlerts()

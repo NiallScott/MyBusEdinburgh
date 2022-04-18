@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,7 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -137,7 +137,7 @@ class TimeAlertRunnerTest {
     }
 
     @Test
-    fun onAlertsChangedWithNonZeroCountDoesNotStopRunner() = coroutineRule.runBlockingTest {
+    fun onAlertsChangedWithNonZeroCountDoesNotStopRunner() = runTest {
         doAnswer {
             val runnable = it.getArgument<Runnable>(0)
             runnable.run()
@@ -159,7 +159,7 @@ class TimeAlertRunnerTest {
     }
 
     @Test
-    fun onAlertsChangedWithZeroCountStopsRunner() = coroutineRule.runBlockingTest {
+    fun onAlertsChangedWithZeroCountStopsRunner() = runTest {
         doAnswer {
             val runnable = it.getArgument<Runnable>(0)
             runnable.run()

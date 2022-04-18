@@ -29,7 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.details
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,35 +68,38 @@ class ServicesRetrieverTest {
     }
 
     @Test
-    fun getServicesFlowEmitsNullWhenNullServicesForStop() = runBlockingTest {
+    fun getServicesFlowEmitsNullWhenNullServicesForStop() = runTest {
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(null))
 
         val observer = retriever.getServicesFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun getServicesFlowEmitsNullWhenEmptyServicesForStop() = runBlockingTest {
+    fun getServicesFlowEmitsNullWhenEmptyServicesForStop() = runTest {
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(emptyList()))
 
         val observer = retriever.getServicesFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun getServicesFlowEmitsServicesWhenServiceDetailsIsNull() = runBlockingTest {
+    fun getServicesFlowEmitsServicesWhenServiceDetailsIsNull() = runTest {
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
         whenever(servicesRepository.getServiceDetailsFlow(setOf("1", "2", "3")))
                 .thenReturn(flowOf(null))
 
         val observer = retriever.getServicesFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -118,13 +122,14 @@ class ServicesRetrieverTest {
     }
 
     @Test
-    fun getServicesFlowEmitsServicesWhenServiceDetailsIsEmpty() = runBlockingTest {
+    fun getServicesFlowEmitsServicesWhenServiceDetailsIsEmpty() = runTest {
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
         whenever(servicesRepository.getServiceDetailsFlow(setOf("1", "2", "3")))
                 .thenReturn(flowOf(emptyMap()))
 
         val observer = retriever.getServicesFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -147,7 +152,7 @@ class ServicesRetrieverTest {
     }
 
     @Test
-    fun getServicesFlowEmitsServicesWhenServiceDetailsIsPopulated() = runBlockingTest {
+    fun getServicesFlowEmitsServicesWhenServiceDetailsIsPopulated() = runTest {
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
         whenever(servicesRepository.getServiceDetailsFlow(setOf("1", "2", "3")))
@@ -162,6 +167,7 @@ class ServicesRetrieverTest {
                                 null))))
 
         val observer = retriever.getServicesFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
@@ -182,6 +188,4 @@ class ServicesRetrieverTest {
                                 "Service 3",
                                 null)))
     }
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

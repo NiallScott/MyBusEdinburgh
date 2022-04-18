@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -56,7 +57,7 @@ class UiStateCalculatorTest {
     }
 
     @Test
-    fun createUiStateFlowEmitsNoStopCodeWhenStopCodeIsNull() = coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsNoStopCodeWhenStopCodeIsNull() = runTest {
         val stopCodeFlow = flowOf<String?>(null)
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         val availableServicesFlow = flowOf<List<String>?>(null)
@@ -65,13 +66,14 @@ class UiStateCalculatorTest {
                 stopCodeFlow,
                 stopDetailsFlow,
                 availableServicesFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.ERROR_NO_STOP_CODE)
     }
 
     @Test
-    fun createUiStateFlowEmitsNoStopCodeWhenStopCodeIsEmpty() = coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsNoStopCodeWhenStopCodeIsEmpty() = runTest {
         val stopCodeFlow = flowOf<String?>("")
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         val availableServicesFlow = flowOf<List<String>?>(null)
@@ -80,14 +82,14 @@ class UiStateCalculatorTest {
                 stopCodeFlow,
                 stopDetailsFlow,
                 availableServicesFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.ERROR_NO_STOP_CODE)
     }
 
     @Test
-    fun createUiStateFlowEmitsProgressWhenStopDetailsIsNullAndAvailableServicesIsNull() =
-            coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsProgressWhenStopDetailsIsNullAndAvailableServicesIsNull() = runTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         val availableServicesFlow = flowOf<List<String>?>(null)
@@ -96,6 +98,7 @@ class UiStateCalculatorTest {
                 stopCodeFlow,
                 stopDetailsFlow,
                 availableServicesFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.PROGRESS)
@@ -103,7 +106,7 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsProgressWhenStopDetailsIsNullAndAvailableServicesIsNotNull() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         val availableServicesFlow = flowOf(listOf("1", "2", "3"))
@@ -112,6 +115,7 @@ class UiStateCalculatorTest {
                 stopCodeFlow,
                 stopDetailsFlow,
                 availableServicesFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.PROGRESS)
@@ -119,7 +123,7 @@ class UiStateCalculatorTest {
 
     @Test
     fun createUiStateFlowEmitsProgressWhenStopDetailsIsNotNullAndAvailableServicesIsNull() =
-            coroutineRule.runBlockingTest {
+            runTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
         val availableServicesFlow = flowOf<List<String>?>(null)
@@ -128,13 +132,14 @@ class UiStateCalculatorTest {
                 stopCodeFlow,
                 stopDetailsFlow,
                 availableServicesFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.PROGRESS)
     }
 
     @Test
-    fun createUiStateFlowEmitsNoServicesWhenServicesIsEmpty() = coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsNoServicesWhenServicesIsEmpty() = runTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
         val availableServicesFlow = flowOf<List<String>?>(emptyList())
@@ -143,13 +148,14 @@ class UiStateCalculatorTest {
                 stopCodeFlow,
                 stopDetailsFlow,
                 availableServicesFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.ERROR_NO_SERVICES)
     }
 
     @Test
-    fun createUiStateFlowEmitsContentWhenConditionsAreMet() = coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsContentWhenConditionsAreMet() = runTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
         val availableServicesFlow = flowOf(listOf("1", "2", "3"))
@@ -158,13 +164,14 @@ class UiStateCalculatorTest {
                 stopCodeFlow,
                 stopDetailsFlow,
                 availableServicesFlow).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiState.CONTENT)
     }
 
     @Test
-    fun createUiStateFlowEmitsCorrectItemsWithRepresentativeExample() = coroutineRule.runBlockingTest {
+    fun createUiStateFlowEmitsCorrectItemsWithRepresentativeExample() = runTest {
         val stopCodeFlow = flow {
             emit(null)
             delay(100L)
@@ -178,7 +185,7 @@ class UiStateCalculatorTest {
         val availableServicesFlow = flow {
             emit(null)
             delay(300L)
-            emit(emptyList<String>())
+            emit(emptyList())
             delay(100L)
             emit(listOf("1", "2", "3"))
         }

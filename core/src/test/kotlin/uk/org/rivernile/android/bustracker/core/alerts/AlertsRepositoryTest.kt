@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -78,12 +79,14 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun hasArrivalAlertFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun hasArrivalAlertFlowGetsInitialValue() = runTest {
         whenever(alertsDao.hasArrivalAlert("123456"))
                 .thenReturn(false)
 
         val observer = repository.hasArrivalAlertFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(false)
         verify(alertsDao)
@@ -91,7 +94,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun hasArrivalAlertFlowRespondsToFavouritesChanged() = coroutineRule.runBlockingTest {
+    fun hasArrivalAlertFlowRespondsToFavouritesChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
             listener.onAlertsChanged()
@@ -101,7 +104,9 @@ class AlertsRepositoryTest {
                 .thenReturn(false, true, false)
 
         val observer = repository.hasArrivalAlertFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(false, true, false)
         verify(alertsDao)
@@ -109,12 +114,14 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun hasProximityAlertFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun hasProximityAlertFlowGetsInitialValue() = runTest {
         whenever(alertsDao.hasProximityAlert("123456"))
                 .thenReturn(false)
 
         val observer = repository.hasProximityAlertFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(false)
         verify(alertsDao)
@@ -122,7 +129,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun hasProximityAlertFlowRespondsToFavouritesChanged() = coroutineRule.runBlockingTest {
+    fun hasProximityAlertFlowRespondsToFavouritesChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
             listener.onAlertsChanged()
@@ -132,7 +139,9 @@ class AlertsRepositoryTest {
                 .thenReturn(false, true, false)
 
         val observer = repository.hasProximityAlertFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(false, true, false)
         verify(alertsDao)
@@ -140,7 +149,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun addArrivalAlertAddsArrivalAlertToAlertManager() = coroutineRule.runBlockingTest {
+    fun addArrivalAlertAddsArrivalAlertToAlertManager() = runTest {
         whenever(timeUtils.getCurrentTimeMillis())
                 .thenReturn(123L)
         val expected = ArrivalAlert(0, 123L, "123456", listOf("1", "2", "3"), 5)
@@ -155,7 +164,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun addProximityAlertAddsProximityAlertToAlertManager() = coroutineRule.runBlockingTest {
+    fun addProximityAlertAddsProximityAlertToAlertManager() = runTest {
         whenever(timeUtils.getCurrentTimeMillis())
                 .thenReturn(123L)
         val expected = ProximityAlert(0, 123L, "123456", 250)
@@ -167,7 +176,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun removeArrivalAlertCallsAlertManager() = coroutineRule.runBlockingTest {
+    fun removeArrivalAlertCallsAlertManager() = runTest {
         repository.removeArrivalAlert("123456")
 
         verify(alertManager)
@@ -175,7 +184,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun removeProximityAlertCallsAlertManager() = coroutineRule.runBlockingTest {
+    fun removeProximityAlertCallsAlertManager() = runTest {
         repository.removeProximityAlert("123456")
 
         verify(alertManager)
@@ -183,13 +192,15 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun getAllAlertsFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun getAllAlertsFlowGetsInitialValue() = runTest {
         val alerts = listOf(ArrivalAlert(1, 123L, "123456", listOf("1"), 10))
         whenever(alertsDao.getAllAlerts())
                 .thenReturn(alerts)
 
         val observer = repository.getAllAlertsFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(alerts)
         verify(alertsDao)
@@ -197,7 +208,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun getAllAlertsFlowRespondsToAlertChanges() = coroutineRule.runBlockingTest {
+    fun getAllAlertsFlowRespondsToAlertChanges() = runTest {
         val alerts1 = listOf(ArrivalAlert(1, 123L, "123456", listOf("1"), 10))
         val alerts2 = emptyList<Alert>()
         val alerts3 = listOf(ProximityAlert(2, 123L, "123457", 250))
@@ -210,7 +221,9 @@ class AlertsRepositoryTest {
                 .thenReturn(alerts1, alerts2, alerts3)
 
         val observer = repository.getAllAlertsFlow().test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(alerts1, alerts2, alerts3)
         verify(alertsDao)

@@ -32,6 +32,8 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -126,7 +128,7 @@ class StopDetailsFragmentViewModelTest {
     }
 
     @Test
-    fun itemsLiveDataEmitsItemsFromUiItemRetriever() {
+    fun itemsLiveDataEmitsItemsFromUiItemRetriever() = runTest {
         val items1 = listOf(
                 UiItem.Distance.Unknown,
                 UiItem.NoServices)
@@ -163,12 +165,13 @@ class StopDetailsFragmentViewModelTest {
                 PermissionState.GRANTED,
                 PermissionState.GRANTED)
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         observer.assertValues(null, items1, items2)
     }
 
     @Test
-    fun uiStateLiveDataEmitsCorrectUiState() {
+    fun uiStateLiveDataEmitsCorrectUiState() = runTest {
         val items1 = listOf(
                 UiItem.Distance.Unknown,
                 UiItem.NoServices)
@@ -205,6 +208,7 @@ class StopDetailsFragmentViewModelTest {
                 PermissionState.GRANTED,
                 PermissionState.GRANTED)
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         observer.assertValues(UiState.PROGRESS, UiState.CONTENT)
     }

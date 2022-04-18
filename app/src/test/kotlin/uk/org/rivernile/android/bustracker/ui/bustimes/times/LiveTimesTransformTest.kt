@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -82,20 +84,21 @@ class LiveTimesTransformTest {
     }
 
     @Test
-    fun getLiveTimesTransformFlowWithInProgressYieldsInProgress() = coroutineRule.runBlockingTest {
+    fun getLiveTimesTransformFlowWithInProgressYieldsInProgress() = runTest {
         givenPreferencesReturnsFlowWithNominalValues()
         val expandedServicesFlow = flowOf(emptySet<String>())
         val liveTimesFlow = flowOf(UiResult.InProgress)
 
         val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
                 .test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiTransformedResult.InProgress)
     }
 
     @Test
-    fun getLiveTimesTransformFlowWithErrorYieldsError() = coroutineRule.runBlockingTest {
+    fun getLiveTimesTransformFlowWithErrorYieldsError() = runTest {
         givenPreferencesReturnsFlowWithNominalValues()
         val expandedServicesFlow = flowOf(emptySet<String>())
         val liveTimesFlow = flow {
@@ -115,8 +118,7 @@ class LiveTimesTransformTest {
     }
 
     @Test
-    fun getLiveTimesTransformFlowWithSuccessResultingInEmptyResultYieldsNoDataError() =
-            coroutineRule.runBlockingTest {
+    fun getLiveTimesTransformFlowWithSuccessResultingInEmptyResultYieldsNoDataError() = runTest {
         givenPreferencesReturnsFlowWithNominalValues()
         val expandedServicesFlow = flowOf(emptySet<String>())
         val liveTimesFlow = flow {
@@ -142,8 +144,7 @@ class LiveTimesTransformTest {
     }
 
     @Test
-    fun getLiveTimesTransformFlowWithSuccessAndResultingInNonEmptyListYieldsSuccess() =
-            coroutineRule.runBlockingTest {
+    fun getLiveTimesTransformFlowWithSuccessAndResultingInNonEmptyListYieldsSuccess() = runTest {
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
                 .thenReturn(flowOf(true))
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
@@ -172,8 +173,7 @@ class LiveTimesTransformTest {
     }
 
     @Test
-    fun getLiveTimesTransformFlowWithSuccessCopesWithUpstreamRefresh() =
-            coroutineRule.runBlockingTest {
+    fun getLiveTimesTransformFlowWithSuccessCopesWithUpstreamRefresh() = runTest {
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
                 .thenReturn(flowOf(true))
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
@@ -207,8 +207,7 @@ class LiveTimesTransformTest {
     }
 
     @Test
-    fun getLiveTimesTransformFlowWithSuccessCopesWithNightServicePreferenceChange() =
-            coroutineRule.runBlockingTest {
+    fun getLiveTimesTransformFlowWithSuccessCopesWithNightServicePreferenceChange() = runTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
                 .thenReturn(flow {
                     emit(false)
@@ -248,8 +247,7 @@ class LiveTimesTransformTest {
     }
 
     @Test
-    fun getLiveTimesTransformFlowWithSuccessCopesWithSortingPreferenceChange() =
-            coroutineRule.runBlockingTest {
+    fun getLiveTimesTransformFlowWithSuccessCopesWithSortingPreferenceChange() = runTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
                 .thenReturn(flowOf(false))
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
@@ -287,8 +285,7 @@ class LiveTimesTransformTest {
     }
 
     @Test
-    fun getLiveTimesTransformFlowWithSuccessCopesWithExpandedServicesChange() =
-            coroutineRule.runBlockingTest {
+    fun getLiveTimesTransformFlowWithSuccessCopesWithExpandedServicesChange() = runTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
                 .thenReturn(flowOf(false))
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())

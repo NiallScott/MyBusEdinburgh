@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,7 @@ import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -93,7 +93,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithNullResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+    fun getNameForStopWithNullResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         object : MockContentProvider() {
@@ -119,7 +119,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+    fun getNameForStopWithEmptyResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -147,8 +147,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithNonEmptyResultButNullNameIsHandledCorrectly() =
-            coroutineRule.runBlockingTest {
+    fun getNameForStopWithNonEmptyResultButNullNameIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -177,8 +176,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithNonEmptyResultButNullLocalityIsHandledCorrectly() =
-            coroutineRule.runBlockingTest {
+    fun getNameForStopWithNonEmptyResultButNullLocalityIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -208,7 +206,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getNameForStopWithNonEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+    fun getNameForStopWithNonEmptyResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForStopName()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -238,7 +236,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getLocationForStopWithNullResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+    fun getLocationForStopWithNullResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForStopLocation()
         val expectedSelectionArgs = arrayOf("123456")
         object : MockContentProvider() {
@@ -264,7 +262,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getLocationForStopWithEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+    fun getLocationForStopWithEmptyResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForStopLocation()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -292,7 +290,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getLocationForStopWithNonEmptyResultIsHandledCorrectly() = coroutineRule.runBlockingTest {
+    fun getLocationForStopWithNonEmptyResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForStopLocation()
         val expectedSelectionArgs = arrayOf("123456")
         val cursor = MatrixCursor(expectedProjection)
@@ -322,7 +320,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsWithNullCursorReturnsNull() = coroutineRule.runBlockingTest {
+    fun getStopDetailsWithNullCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForStopDetails()
         object : MockContentProvider() {
             override fun query(
@@ -347,7 +345,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsWithEmptyCursorReturnsNull() = coroutineRule.runBlockingTest {
+    fun getStopDetailsWithEmptyCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForStopDetails()
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -374,7 +372,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsWithNonEmptyCursorReturnsStopDetails() = coroutineRule.runBlockingTest {
+    fun getStopDetailsWithNonEmptyCursorReturnsStopDetails() = runTest {
         val expectedProjection = getExpectedProjectionForStopDetails()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf("Stop name", "Locality", 1.2, 3.4, 4))
@@ -410,14 +408,14 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsMultiWithEmptyStopCodesReturnsNull() = coroutineRule.runBlockingTest {
+    fun getStopDetailsMultiWithEmptyStopCodesReturnsNull() = runTest {
         val result = busStopsDao.getStopDetails(emptySet())
 
         assertNull(result)
     }
 
     @Test
-    fun getStopDetailsMultiWithNullCursorReturnsNull() = coroutineRule.runBlockingTest {
+    fun getStopDetailsMultiWithNullCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForStopDetailsMulti()
         object : MockContentProvider() {
             override fun query(
@@ -442,7 +440,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsMultiWithEmptyCursorReturnsNull() = coroutineRule.runBlockingTest {
+    fun getStopDetailsMultiWithEmptyCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForStopDetailsMulti()
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -469,7 +467,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getStopDetailsMultiWithNonEmptyCursorReturnsStopDetails() = coroutineRule.runBlockingTest {
+    fun getStopDetailsMultiWithNonEmptyCursorReturnsStopDetails() = runTest {
         val expectedProjection = getExpectedProjectionForStopDetailsMulti()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf("123456", "Stop name 1", "Locality 1", 1.2, 3.4, 4))
@@ -524,14 +522,14 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getServicesForStopsWithEmptyStopCodesReturnsNull() = coroutineRule.runBlockingTest {
+    fun getServicesForStopsWithEmptyStopCodesReturnsNull() = runTest {
         val result = busStopsDao.getServicesForStops(emptySet())
 
         assertNull(result)
     }
 
     @Test
-    fun getServicesForStopsWithNullCursorReturnsNull() = coroutineRule.runBlockingTest {
+    fun getServicesForStopsWithNullCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForStopsServices()
         object : MockContentProvider() {
             override fun query(
@@ -556,7 +554,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getServicesForStopsWithEmptyCursorReturnsNull() = coroutineRule.runBlockingTest {
+    fun getServicesForStopsWithEmptyCursorReturnsNull() = runTest {
         val expectedProjection = getExpectedProjectionForStopsServices()
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -583,7 +581,7 @@ class AndroidBusStopsDaoTest {
     }
 
     @Test
-    fun getServicesForStopsWithNonEmptyCursorReturnsResult() = coroutineRule.runBlockingTest {
+    fun getServicesForStopsWithNonEmptyCursorReturnsResult() = runTest {
         val expectedProjection = getExpectedProjectionForStopsServices()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf("111111", "1, 2, 3"))

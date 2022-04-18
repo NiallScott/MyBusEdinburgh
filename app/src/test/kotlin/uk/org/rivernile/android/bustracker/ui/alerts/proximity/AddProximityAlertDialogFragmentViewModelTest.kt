@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,11 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -48,7 +51,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopNa
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [AddProximityAlertDialogFragmentViewModel].
@@ -79,67 +82,68 @@ class AddProximityAlertDialogFragmentViewModelTest {
                 busStopsRepository,
                 uiStateCalculator,
                 alertsRepository,
-                coroutineRule,
+                coroutineRule.scope,
                 coroutineRule.testDispatcher)
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsNullWhenNoStopCodeIsSet() = coroutineRule.runBlockingTest {
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
+    fun stopDetailsLiveDataEmitsNullWhenNoStopCodeIsSet() = runTest {
+        val observer = viewModel.stopDetailsLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsNullWhenStopCodeIsSetAsNull() = coroutineRule.runBlockingTest {
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
+    fun stopDetailsLiveDataEmitsNullWhenStopCodeIsSetAsNull() = runTest {
+        val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = null
+        advanceUntilIdle()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsStopDetailsWithNullNameWhenRepositoryReturnsNullName() =
-            coroutineRule.runBlockingTest {
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
+    fun stopDetailsLiveDataEmitsStopDetailsWithNullNameWhenRepositoryReturnsNullName() = runTest {
+        val observer = viewModel.stopDetailsLiveData.test()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(null))
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         observer.assertValues(null, StopDetails("123456", null))
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() =
-            coroutineRule.runBlockingTest {
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
+    fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() = runTest {
+        val observer = viewModel.stopDetailsLiveData.test()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(StopName("Name", "Locality")))
 
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
 
         observer.assertValues(null, StopDetails("123456", StopName("Name", "Locality")))
     }
 
     @Test
-    fun stopDetailsLiveDataEmitsCorrectDataOnChanges() = coroutineRule.runBlockingTest {
-        val observer = LiveDataTestObserver<StopDetails?>()
-        viewModel.stopDetailsLiveData.observeForever(observer)
+    fun stopDetailsLiveDataEmitsCorrectDataOnChanges() = runTest {
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(
-                        StopName("Name", "Locality"),
-                        StopName("Name 2", null)))
+                .thenReturn(flow {
+                    emit(StopName("Name", "Locality"))
+                    delay(10L)
+                    emit(StopName("Name 2", null))
+                })
         whenever(busStopsRepository.getNameForStopFlow("987654"))
                 .thenReturn(flowOf(StopName("Name 3", "Locality 3")))
 
+        val observer = viewModel.stopDetailsLiveData.test()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.stopCode = "987654"
+        advanceUntilIdle()
 
         observer.assertValues(
                 null,
@@ -150,14 +154,15 @@ class AddProximityAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun uiStateLiveDataEmitsCalculatedState() = coroutineRule.runBlockingTest {
+    fun uiStateLiveDataEmitsCalculatedState() = runTest {
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(
                         UiState.ERROR_PERMISSION_UNGRANTED,
                         UiState.PROGRESS,
                         UiState.CONTENT))
-        val observer = LiveDataTestObserver<UiState>()
-        viewModel.uiStateLiveData.observeForever(observer)
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(
                 UiState.ERROR_PERMISSION_UNGRANTED,
@@ -166,7 +171,7 @@ class AddProximityAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun uiStateCalculatorIsPassedCorrectFlowObjects() = coroutineRule.runBlockingTest{
+    fun uiStateCalculatorIsPassedCorrectFlowObjects() = runTest {
         val locationPermissionObserver = FlowTestObserver<PermissionState>(this)
         val stopDetailsObserver = FlowTestObserver<StopDetails?>(this)
         doAnswer {
@@ -180,12 +185,16 @@ class AddProximityAlertDialogFragmentViewModelTest {
         whenever(busStopsRepository.getNameForStopFlow("987654"))
                 .thenReturn(flowOf(null))
 
-        val uiStateObserver = LiveDataTestObserver<UiState>()
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.locationPermissionState = PermissionState.DENIED
+        advanceUntilIdle()
         viewModel.locationPermissionState = PermissionState.GRANTED
+        advanceUntilIdle()
         viewModel.stopCode = "123456"
+        advanceUntilIdle()
         viewModel.stopCode = "987654"
+        advanceUntilIdle()
         locationPermissionObserver.finish()
         stopDetailsObserver.finish()
 
@@ -201,7 +210,7 @@ class AddProximityAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun addButtonEnabledLiveDataOnlyEmitsTrueWhenShowingContent() = coroutineRule.runBlockingTest {
+    fun addButtonEnabledLiveDataOnlyEmitsTrueWhenShowingContent() = runTest {
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(
                         UiState.ERROR_NO_LOCATION_FEATURE,
@@ -211,38 +220,33 @@ class AddProximityAlertDialogFragmentViewModelTest {
                         UiState.PROGRESS,
                         UiState.CONTENT,
                         UiState.PROGRESS))
-        val observer = LiveDataTestObserver<Boolean>()
 
-        viewModel.addButtonEnabledLiveData.observeForever(observer)
+        val observer = viewModel.addButtonEnabledLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(false, true, false)
     }
 
     @Test
-    fun onLimitationsButtonClickedShowsLimitations() {
-        val observer = LiveDataTestObserver<Nothing?>()
-
-        viewModel.showLimitationsLiveData.observeForever(observer)
+    fun onLimitationsButtonClickedShowsLimitations() = runTest {
+        val observer = viewModel.showLimitationsLiveData.test()
         viewModel.onLimitationsButtonClicked()
+        advanceUntilIdle()
 
-        observer.assertValues(null)
+        observer.assertSize(1)
     }
 
     @Test
-    fun onResolveErrorButtonClickedDoesNotTriggerEventWhenNotHandled() {
+    fun onResolveErrorButtonClickedDoesNotTriggerEventWhenNotHandled() = runTest {
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.CONTENT))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
-        val locationSettingsObserver = LiveDataTestObserver<Nothing?>()
-        val requestLocationPermissionObserver = LiveDataTestObserver<Nothing?>()
-        val showAppSettingsObserver = LiveDataTestObserver<Nothing?>()
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        viewModel.showLocationSettingsLiveData.observeForever(locationSettingsObserver)
-        viewModel.requestLocationPermissionLiveData
-                .observeForever(requestLocationPermissionObserver)
-        viewModel.showAppSettingsLiveData.observeForever(showAppSettingsObserver)
+        val uiStateObserver = viewModel.uiStateLiveData.test()
+        val locationSettingsObserver = viewModel.showLocationSettingsLiveData.test()
+        val requestLocationPermissionObserver = viewModel.requestLocationPermissionLiveData.test()
+        val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
         viewModel.onResolveErrorButtonClicked()
+        advanceUntilIdle()
 
         uiStateObserver.assertValues(UiState.CONTENT)
         locationSettingsObserver.assertEmpty()
@@ -251,96 +255,91 @@ class AddProximityAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onResolveErrorButtonClickedShowsLocationSettingsWhenLocationDisabled() {
+    fun onResolveErrorButtonClickedShowsLocationSettingsWhenLocationDisabled() = runTest {
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.ERROR_LOCATION_DISABLED))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
-        val locationSettingsObserver = LiveDataTestObserver<Nothing?>()
-        val requestLocationPermissionObserver = LiveDataTestObserver<Nothing?>()
-        val showAppSettingsObserver = LiveDataTestObserver<Nothing?>()
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        viewModel.showLocationSettingsLiveData.observeForever(locationSettingsObserver)
-        viewModel.requestLocationPermissionLiveData
-                .observeForever(requestLocationPermissionObserver)
-        viewModel.showAppSettingsLiveData.observeForever(showAppSettingsObserver)
+        val uiStateObserver = viewModel.uiStateLiveData.test()
+        val locationSettingsObserver = viewModel.showLocationSettingsLiveData.test()
+        val requestLocationPermissionObserver = viewModel.requestLocationPermissionLiveData.test()
+        val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
+        advanceUntilIdle()
         viewModel.onResolveErrorButtonClicked()
+        advanceUntilIdle()
 
         uiStateObserver.assertValues(UiState.ERROR_LOCATION_DISABLED)
-        locationSettingsObserver.assertValues(null)
+        locationSettingsObserver.assertSize(1)
         requestLocationPermissionObserver.assertEmpty()
         showAppSettingsObserver.assertEmpty()
     }
 
     @Test
-    fun onResolveErrorButtonClickedShowsRequestLocationPermissionWhenLocationPermissionUngranted() {
+    fun onResolveErrorButtonClickedShowsRequestLocationPermissionWhenLocationPermissionUngranted() =
+            runTest {
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.ERROR_PERMISSION_UNGRANTED))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
-        val locationSettingsObserver = LiveDataTestObserver<Nothing?>()
-        val requestLocationPermissionObserver = LiveDataTestObserver<Nothing?>()
-        val showAppSettingsObserver = LiveDataTestObserver<Nothing?>()
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        viewModel.showLocationSettingsLiveData.observeForever(locationSettingsObserver)
-        viewModel.requestLocationPermissionLiveData
-                .observeForever(requestLocationPermissionObserver)
-        viewModel.showAppSettingsLiveData.observeForever(showAppSettingsObserver)
+        val uiStateObserver = viewModel.uiStateLiveData.test()
+        val locationSettingsObserver = viewModel.showLocationSettingsLiveData.test()
+        val requestLocationPermissionObserver = viewModel.requestLocationPermissionLiveData.test()
+        val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
+        advanceUntilIdle()
         viewModel.onResolveErrorButtonClicked()
+        advanceUntilIdle()
 
         uiStateObserver.assertValues(UiState.ERROR_PERMISSION_UNGRANTED)
         locationSettingsObserver.assertEmpty()
-        requestLocationPermissionObserver.assertValues(null)
+        requestLocationPermissionObserver.assertSize(1)
         showAppSettingsObserver.assertEmpty()
     }
 
     @Test
-    fun onResolveErrorButtonClickedShowsAppSettingsWhenLocationPermissionDenied() {
+    fun onResolveErrorButtonClickedShowsAppSettingsWhenLocationPermissionDenied() = runTest {
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.ERROR_PERMISSION_DENIED))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
-        val locationSettingsObserver = LiveDataTestObserver<Nothing?>()
-        val requestLocationPermissionObserver = LiveDataTestObserver<Nothing?>()
-        val showAppSettingsObserver = LiveDataTestObserver<Nothing?>()
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
-        viewModel.showLocationSettingsLiveData.observeForever(locationSettingsObserver)
-        viewModel.requestLocationPermissionLiveData
-                .observeForever(requestLocationPermissionObserver)
-        viewModel.showAppSettingsLiveData.observeForever(showAppSettingsObserver)
+        val uiStateObserver = viewModel.uiStateLiveData.test()
+        val locationSettingsObserver = viewModel.showLocationSettingsLiveData.test()
+        val requestLocationPermissionObserver = viewModel.requestLocationPermissionLiveData.test()
+        val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
+        advanceUntilIdle()
         viewModel.onResolveErrorButtonClicked()
+        advanceUntilIdle()
 
         uiStateObserver.assertValues(UiState.ERROR_PERMISSION_DENIED)
         locationSettingsObserver.assertEmpty()
         requestLocationPermissionObserver.assertEmpty()
-        showAppSettingsObserver.assertValues(null)
+        showAppSettingsObserver.assertSize(1)
     }
 
     @Test
-    fun handleAddClickedDoesNotAddAlertWhenStopCodeIsNull() = coroutineRule.runBlockingTest {
+    fun handleAddClickedDoesNotAddAlertWhenStopCodeIsNull() = runTest {
         viewModel.stopCode = null
 
         viewModel.handleAddClicked(250)
+        advanceUntilIdle()
 
         verify(alertsRepository, never())
                 .addProximityAlert(any())
     }
 
     @Test
-    fun handleAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = coroutineRule.runBlockingTest {
+    fun handleAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = runTest {
         viewModel.stopCode = ""
 
         viewModel.handleAddClicked(250)
+        advanceUntilIdle()
 
         verify(alertsRepository, never())
                 .addProximityAlert(any())
     }
 
     @Test
-    fun handleAddClickedAddsAlertWhenStopCodeIsPopulated() = coroutineRule.runBlockingTest {
+    fun handleAddClickedAddsAlertWhenStopCodeIsPopulated() = runTest {
         viewModel.stopCode = "123456"
 
         viewModel.handleAddClicked(250)
+        advanceUntilIdle()
 
         verify(alertsRepository)
                 .addProximityAlert(ProximityAlertRequest("123456", 250))

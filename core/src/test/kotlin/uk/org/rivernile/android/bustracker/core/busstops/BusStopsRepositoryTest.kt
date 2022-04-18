@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,13 +68,15 @@ class BusStopsRepositoryTest {
     }
 
     @Test
-    fun getNameForStopFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun getNameForStopFlowGetsInitialValue() = runTest {
         val expected = createStopName()
         whenever(busStopsDao.getNameForStop("123456"))
                 .thenReturn(expected)
 
         val observer = repository.getNameForStopFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected)
         verify(busStopsDao)
@@ -81,7 +84,7 @@ class BusStopsRepositoryTest {
     }
 
     @Test
-    fun getNameForStopFlowRespondsToBusStopsChanged() = coroutineRule.runBlockingTest {
+    fun getNameForStopFlowRespondsToBusStopsChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
             listener.onBusStopsChanged()
@@ -93,7 +96,9 @@ class BusStopsRepositoryTest {
                 .thenReturn(expected1, null, expected3)
 
         val observer = repository.getNameForStopFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected1, null, expected3)
         verify(busStopsDao)
@@ -101,13 +106,15 @@ class BusStopsRepositoryTest {
     }
 
     @Test
-    fun getBusStopDetailsFlowGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun getBusStopDetailsFlowGetsInitialValue() = runTest {
         val expected = createStopDetails()
         whenever(busStopsDao.getStopDetails("123456"))
                 .thenReturn(expected)
 
         val observer = repository.getBusStopDetailsFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected)
         verify(busStopsDao)
@@ -115,7 +122,7 @@ class BusStopsRepositoryTest {
     }
 
     @Test
-    fun getBusStopDetailsFlowRespondsToBusStopsChanged() = coroutineRule.runBlockingTest {
+    fun getBusStopDetailsFlowRespondsToBusStopsChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
             listener.onBusStopsChanged()
@@ -127,7 +134,9 @@ class BusStopsRepositoryTest {
                 .thenReturn(expected1, null, expected3)
 
         val observer = repository.getBusStopDetailsFlow("123456").test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected1, null, expected3)
         verify(busStopsDao)
@@ -135,7 +144,7 @@ class BusStopsRepositoryTest {
     }
 
     @Test
-    fun getBusStopDetailsFlowMultiGetsInitialValue() = coroutineRule.runBlockingTest {
+    fun getBusStopDetailsFlowMultiGetsInitialValue() = runTest {
         val expected = mapOf("123456" to StopDetails(
                 "123456",
                 StopName(
@@ -148,7 +157,9 @@ class BusStopsRepositoryTest {
                 .thenReturn(expected)
 
         val observer = repository.getBusStopDetailsFlow(setOf("123456", "123457")).test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected)
         verify(busStopsDao)
@@ -156,7 +167,7 @@ class BusStopsRepositoryTest {
     }
 
     @Test
-    fun getBusStopDetailsFlowMultiRespondsToBusStopsChanged() = coroutineRule.runBlockingTest {
+    fun getBusStopDetailsFlowMultiRespondsToBusStopsChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
             listener.onBusStopsChanged()
@@ -191,7 +202,9 @@ class BusStopsRepositoryTest {
                 .thenReturn(expected1, null, expected3)
 
         val observer = repository.getBusStopDetailsFlow(setOf("123456", "123457")).test(this)
+        advanceUntilIdle()
         observer.finish()
+        advanceUntilIdle()
 
         observer.assertValues(expected1, null, expected3)
         verify(busStopsDao)

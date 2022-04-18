@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,9 +36,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,8 +49,7 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Favou
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
-import uk.org.rivernile.android.bustracker.utils.Event
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [AddEditFavouriteStopDialogFragmentViewModel].
@@ -79,141 +78,140 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     private lateinit var textFormattingUtils: TextFormattingUtils
 
     @Test
-    fun uiStateLiveDataEmitsStateFromUpstreamWithNullStopCode() {
+    fun uiStateLiveDataEmitsStateFromUpstreamWithNullStopCode() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails(null))
                 .thenReturn(flowOf(UiState.InProgress))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = null
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.InProgress)
+        observer.assertValues(UiState.InProgress)
     }
 
     @Test
-    fun uiStateLiveDataEmitsStateFromUpstreamWithEmptyStopCode() {
+    fun uiStateLiveDataEmitsStateFromUpstreamWithEmptyStopCode() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails(""))
                 .thenReturn(flowOf(UiState.InProgress))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = ""
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.InProgress)
+        observer.assertValues(UiState.InProgress)
     }
 
-    // FIXME: when coroutines fixes this bug
-    @Ignore("Currently unable to test flows with delay during testing. Awaiting fix in coroutines")
     @Test
-    fun uiStateLiveDataEmitsStateFromUpstreamWithPopulatedStopCode() = runBlockingTest {
+    fun uiStateLiveDataEmitsStateFromUpstreamWithPopulatedStopCode() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flow {
                     emit(UiState.InProgress)
                     delay(100L)
                     emit(UiState.Mode.Add("123456", StopName("Name", "Locality")))
                 })
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
-        uiStateObserver.assertValues(
+        observer.assertValues(
                 UiState.InProgress,
                 UiState.Mode.Add("123456", StopName("Name", "Locality")))
     }
 
     @Test
-    fun isPositiveButtonEnabledLiveDataIsFalseWhenStopNameIsNull() {
-        val isPositiveButtonEnabledObserver = LiveDataTestObserver<Boolean>()
+    fun isPositiveButtonEnabledLiveDataIsFalseWhenStopNameIsNull() = runTest {
         val viewModel = createViewModel()
 
         viewModel.updateStopName(null)
-        viewModel.isPositiveButtonEnabledLiveData.observeForever(isPositiveButtonEnabledObserver)
+        val observer = viewModel.isPositiveButtonEnabledLiveData.test()
+        advanceUntilIdle()
 
-        isPositiveButtonEnabledObserver.assertValues(false)
+        observer.assertValues(false)
     }
 
     @Test
-    fun isPositiveButtonEnabledLiveDataIsFalseWhenStopNameIsEmpty() {
-        val isPositiveButtonEnabledObserver = LiveDataTestObserver<Boolean>()
+    fun isPositiveButtonEnabledLiveDataIsFalseWhenStopNameIsEmpty() = runTest {
         val viewModel = createViewModel()
 
         viewModel.updateStopName("")
-        viewModel.isPositiveButtonEnabledLiveData.observeForever(isPositiveButtonEnabledObserver)
+        val observer = viewModel.isPositiveButtonEnabledLiveData.test()
+        advanceUntilIdle()
 
-        isPositiveButtonEnabledObserver.assertValues(false)
+        observer.assertValues(false)
     }
 
     @Test
-    fun isPositiveButtonEnabledLiveDataIsTrueWhenStopNameIsSingleCharacter() {
-        val isPositiveButtonEnabledObserver = LiveDataTestObserver<Boolean>()
+    fun isPositiveButtonEnabledLiveDataIsTrueWhenStopNameIsSingleCharacter() = runTest {
         val viewModel = createViewModel()
 
         viewModel.updateStopName("a")
-        viewModel.isPositiveButtonEnabledLiveData.observeForever(isPositiveButtonEnabledObserver)
+        val observer = viewModel.isPositiveButtonEnabledLiveData.test()
+        advanceUntilIdle()
 
-        isPositiveButtonEnabledObserver.assertValues(true)
+        observer.assertValues(true)
     }
 
     @Test
-    fun isPositiveButtonEnabledLiveDataIsTrueWhenStopNameIsMultipleCharacters() {
-        val isPositiveButtonEnabledObserver = LiveDataTestObserver<Boolean>()
+    fun isPositiveButtonEnabledLiveDataIsTrueWhenStopNameIsMultipleCharacters() = runTest {
         val viewModel = createViewModel()
 
         viewModel.updateStopName("abc123")
-        viewModel.isPositiveButtonEnabledLiveData.observeForever(isPositiveButtonEnabledObserver)
+        val observer = viewModel.isPositiveButtonEnabledLiveData.test()
+        advanceUntilIdle()
 
-        isPositiveButtonEnabledObserver.assertValues(true)
+        observer.assertValues(true)
     }
 
     @Test
-    fun prePopulatedNameLiveDataDoesNotEmitWhenUiStateIsInProgress() {
+    fun prePopulatedNameLiveDataDoesNotEmitWhenUiStateIsInProgress() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(UiState.InProgress))
         val viewModel = createViewModel()
-        val prePopulatedNameObserver = LiveDataTestObserver<Event<String>?>()
 
         viewModel.stopCode = "123456"
-        viewModel.prePopulateNameLiveData.observeForever(prePopulatedNameObserver)
+        advanceUntilIdle()
+        val observer = viewModel.prePopulateNameLiveData.test()
 
-        prePopulatedNameObserver.assertEmpty()
+        observer.assertEmpty()
     }
 
     @Test
-    fun prePopulatedNameLiveDataDoesNotEmitWhenUiStateIsInProgressWithState() {
+    fun prePopulatedNameLiveDataDoesNotEmitWhenUiStateIsInProgressWithState() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(UiState.InProgress))
         val savedState = SavedStateHandle(
                 mapOf(STATE_PRE_POPULATED_STOP_CODE to "123456"))
         val viewModel = createViewModel(savedState)
-        val prePopulatedNameObserver = LiveDataTestObserver<Event<String>?>()
 
         viewModel.stopCode = "123456"
-        viewModel.prePopulateNameLiveData.observeForever(prePopulatedNameObserver)
+        advanceUntilIdle()
+        val observer = viewModel.prePopulateNameLiveData.test()
 
-        prePopulatedNameObserver.assertEmpty()
+        observer.assertEmpty()
     }
 
     @Test
-    fun prePopulatedNameLiveDataEmitsStopCodeOnFirstLoadForStopCodeInAddModeWithNullStopName() {
+    fun prePopulatedNameLiveDataEmitsStopCodeOnFirstLoadForStopCodeInAddModeWithNullStopName() =
+            runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Add("123456", null)))
         val viewModel = createViewModel()
-        val prePopulatedNameObserver = LiveDataTestObserver<Event<String>?>()
 
         viewModel.stopCode = "123456"
-        viewModel.prePopulateNameLiveData.observeForever(prePopulatedNameObserver)
+        val observer = viewModel.prePopulateNameLiveData.test()
+        advanceUntilIdle()
 
-        assertEquals("123456", prePopulatedNameObserver.observedValues.first()?.peek())
+        assertEquals("123456", observer.observedValues.first().peek())
     }
 
     @Test
-    fun prePopulatedNameLiveDataEmitsStopCodeOnFirstLoadForStopCodeInAddModeWithNonNullStopName() {
+    fun prePopulatedNameLiveDataEmitsStopCodeOnFirstLoadForStopCodeInAddModeWithNonNullStopName() =
+            runTest {
         val stopName = StopName("Stop name", "Locality")
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
@@ -221,16 +219,16 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         whenever(textFormattingUtils.formatBusStopName(stopName))
                 .thenReturn("Formatted name")
         val viewModel = createViewModel()
-        val prePopulatedNameObserver = LiveDataTestObserver<Event<String>?>()
 
         viewModel.stopCode = "123456"
-        viewModel.prePopulateNameLiveData.observeForever(prePopulatedNameObserver)
+        val observer = viewModel.prePopulateNameLiveData.test()
+        advanceUntilIdle()
 
-        assertEquals("Formatted name", prePopulatedNameObserver.observedValues.first()?.peek())
+        assertEquals("Formatted name", observer.observedValues.first().peek())
     }
 
     @Test
-    fun prePopulatedNameLiveDataDoesNotEmitFurtherUpdateFrStopCodeInAddMode() {
+    fun prePopulatedNameLiveDataDoesNotEmitFurtherUpdateFrStopCodeInAddMode() = runTest {
         val stopName = StopName("Stop name", "Locality")
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
@@ -238,16 +236,16 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         val savedState = SavedStateHandle(
                 mapOf(STATE_PRE_POPULATED_STOP_CODE to "123456"))
         val viewModel = createViewModel(savedState)
-        val prePopulatedNameObserver = LiveDataTestObserver<Event<String>?>()
 
         viewModel.stopCode = "123456"
-        viewModel.prePopulateNameLiveData.observeForever(prePopulatedNameObserver)
+        val observer = viewModel.prePopulateNameLiveData.test()
+        advanceUntilIdle()
 
-        prePopulatedNameObserver.assertEmpty()
+        observer.assertEmpty()
     }
 
     @Test
-    fun prePopulatedNameLiveDataEmitsCurrentFavouriteNameOnFirstLoadInEditMode() {
+    fun prePopulatedNameLiveDataEmitsCurrentFavouriteNameOnFirstLoadInEditMode() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
@@ -255,16 +253,16 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                                 StopName("Stop name", "Locality"),
                                 FavouriteStop(1, "123456", "Saved name"))))
         val viewModel = createViewModel()
-        val prePopulatedNameObserver = LiveDataTestObserver<Event<String>?>()
 
         viewModel.stopCode = "123456"
-        viewModel.prePopulateNameLiveData.observeForever(prePopulatedNameObserver)
+        val observer = viewModel.prePopulateNameLiveData.test()
+        advanceUntilIdle()
 
-        assertEquals("Saved name", prePopulatedNameObserver.observedValues.first()?.peek())
+        assertEquals("Saved name", observer.observedValues.first().peek())
     }
 
     @Test
-    fun prePopulatedNameLiveDataDoesNotEmitFurtherUpdateFrStopCodeInEditMode() {
+    fun prePopulatedNameLiveDataDoesNotEmitFurtherUpdateFrStopCodeInEditMode() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
@@ -274,25 +272,25 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         val savedState = SavedStateHandle(
                 mapOf(STATE_PRE_POPULATED_STOP_CODE to "123456"))
         val viewModel = createViewModel(savedState)
-        val prePopulatedNameObserver = LiveDataTestObserver<Event<String>?>()
 
         viewModel.stopCode = "123456"
-        viewModel.prePopulateNameLiveData.observeForever(prePopulatedNameObserver)
+        val observer = viewModel.prePopulateNameLiveData.test()
+        advanceUntilIdle()
 
-        prePopulatedNameObserver.assertEmpty()
+        observer.assertEmpty()
     }
 
     @Test
-    fun onSubmitClickedWhenInProgressWithNullNameDoesNothing() = runBlockingTest {
+    fun onSubmitClickedWhenInProgressWithNullNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(UiState.InProgress))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
         viewModel.updateStopName(null)
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository, never())
                 .addFavouriteStop(any())
@@ -301,16 +299,16 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSubmitClickedWhenInProgressWithEmptyNameDoesNothing() = runBlockingTest {
+    fun onSubmitClickedWhenInProgressWithEmptyNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(UiState.InProgress))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
         viewModel.updateStopName("")
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository, never())
                 .addFavouriteStop(any())
@@ -319,16 +317,16 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSubmitClickedWhenInProgressWithPopulatedNameDoesNothing() = runBlockingTest {
+    fun onSubmitClickedWhenInProgressWithPopulatedNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(UiState.InProgress))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
         viewModel.updateStopName("abc123")
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository, never())
                 .addFavouriteStop(any())
@@ -337,17 +335,17 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSubmitClickedWhenInAddModeWithNullNameDoesNothing() = runBlockingTest {
+    fun onSubmitClickedWhenInAddModeWithNullNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Add("123456", StopName("Stop name", "Locality"))))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
         viewModel.updateStopName(null)
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository, never())
                 .addFavouriteStop(any())
@@ -356,17 +354,17 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSubmitClickedWhenInAddModeWithEmptyNameDoesNothing() = runBlockingTest {
+    fun onSubmitClickedWhenInAddModeWithEmptyNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Add("123456", StopName("Stop name", "Locality"))))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
         viewModel.updateStopName("")
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository, never())
                 .addFavouriteStop(any())
@@ -375,17 +373,19 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSubmitClickedWhenInAddModeWithPopulatedNameAddsFavouriteStop() = runBlockingTest {
+    fun onSubmitClickedWhenInAddModeWithPopulatedNameAddsFavouriteStop() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Add("123456", StopName("Stop name", "Locality"))))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.updateStopName("abc123")
+        advanceUntilIdle()
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository)
                 .addFavouriteStop(FavouriteStop(
@@ -396,20 +396,22 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSubmitClickedWhenInEditModeWithNullNameDoesNothing() = runBlockingTest {
+    fun onSubmitClickedWhenInEditModeWithNullNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
                                 "123456",
                                 StopName("Stop name", "Locality"),
                                 FavouriteStop(1, "123456", "Saved name"))))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.updateStopName(null)
+        advanceUntilIdle()
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository, never())
                 .addFavouriteStop(any())
@@ -418,20 +420,22 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSubmitClickedWhenInEditModeWithEmptyNameDoesNothing() = runBlockingTest {
+    fun onSubmitClickedWhenInEditModeWithEmptyNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
                                 "123456",
                                 StopName("Stop name", "Locality"),
                                 FavouriteStop(1, "123456", "Saved name"))))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.updateStopName("")
+        advanceUntilIdle()
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository, never())
                 .addFavouriteStop(any())
@@ -440,20 +444,22 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onSubmitClickedWhenInEditModeWithPopulatedNameEditsFavouriteStop() = runBlockingTest {
+    fun onSubmitClickedWhenInEditModeWithPopulatedNameEditsFavouriteStop() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
                                 "123456",
                                 StopName("Stop name", "Locality"),
                                 FavouriteStop(1, "123456", "Saved name"))))
-        val uiStateObserver = LiveDataTestObserver<UiState>()
         val viewModel = createViewModel()
 
         viewModel.stopCode = "123456"
-        viewModel.uiStateLiveData.observeForever(uiStateObserver)
+        viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
         viewModel.updateStopName("abc123")
+        advanceUntilIdle()
         viewModel.onSubmitClicked()
+        advanceUntilIdle()
 
         verify(favouritesRepository, never())
                 .addFavouriteStop(any())
@@ -468,7 +474,5 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                     fetcher,
                     textFormattingUtils,
                     coroutineRule.testDispatcher,
-                    coroutineRule)
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
+                    coroutineRule.scope)
 }

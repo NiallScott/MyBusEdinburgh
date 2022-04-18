@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.alerts
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -70,30 +71,31 @@ class AlertsRetrieverTest {
     }
 
     @Test
-    fun allAlertsFlowEmitsEmptyListWhenUpstreamEmitsNull() = runBlockingTest {
+    fun allAlertsFlowEmitsEmptyListWhenUpstreamEmitsNull() = runTest {
         whenever(alertsRepository.getAllAlertsFlow())
                 .thenReturn(flowOf(null))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, emptyList())
     }
 
     @Test
-    fun allAlertsFlowEmitsEmptyListWhenUpstreamEmitsEmptyList() = runBlockingTest {
+    fun allAlertsFlowEmitsEmptyListWhenUpstreamEmitsEmptyList() = runTest {
         whenever(alertsRepository.getAllAlertsFlow())
                 .thenReturn(flowOf(emptyList()))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, emptyList())
     }
 
     @Test
-    fun allAlertsFlowWithArrivalAlertAndNullStopDetailsEmitsAlertWithoutStopDetails() =
-            runBlockingTest {
+    fun allAlertsFlowWithArrivalAlertAndNullStopDetailsEmitsAlertWithoutStopDetails() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         whenever(alertsRepository.getAllAlertsFlow())
                 .thenReturn(flowOf(listOf(arrivalAlert)))
@@ -103,14 +105,14 @@ class AlertsRetrieverTest {
                 UiAlert.ArrivalAlert(1, "123456", null, listOf("1"), 5))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun allAlertsFlowWithArrivalAlertAndEmptyStopDetailsEmitsAlertWithoutStopDetails() =
-            runBlockingTest {
+    fun allAlertsFlowWithArrivalAlertAndEmptyStopDetailsEmitsAlertWithoutStopDetails() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         whenever(alertsRepository.getAllAlertsFlow())
                 .thenReturn(flowOf(listOf(arrivalAlert)))
@@ -120,13 +122,14 @@ class AlertsRetrieverTest {
                 UiAlert.ArrivalAlert(1, "123456", null, listOf("1"), 5))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun allAlertsWithArrivalAlertAndStopDetailsEmitsFullObject() = runBlockingTest {
+    fun allAlertsWithArrivalAlertAndStopDetailsEmitsFullObject() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         val stopDetails = StopDetails(
                 "123456",
@@ -144,13 +147,14 @@ class AlertsRetrieverTest {
                 UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 5))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun allAlertsWithArrivalAlertsEmitsUpdatedArrivalAlertDetails() = runBlockingTest {
+    fun allAlertsWithArrivalAlertsEmitsUpdatedArrivalAlertDetails() = runTest {
         val arrivalAlert1 = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         val arrivalAlert2 = ArrivalAlert(1, 123L, "123456", listOf("1"), 10)
         val stopDetails = StopDetails(
@@ -172,13 +176,14 @@ class AlertsRetrieverTest {
 
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected1, expected2)
     }
 
     @Test
-    fun allAlertsWithArrivalAlertEmitsUpdatedStopDetails() = runBlockingTest {
+    fun allAlertsWithArrivalAlertEmitsUpdatedStopDetails() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         val stopDetails1 = StopDetails(
                 "123456",
@@ -207,14 +212,14 @@ class AlertsRetrieverTest {
                 UiAlert.ArrivalAlert(1, "123456", stopDetails2, listOf("1"), 5))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected1, expected2)
     }
 
     @Test
-    fun allAlertsFlowWithProximityAlertAndNullStopDetailsEmitsAlertWithoutStopDetails() =
-            runBlockingTest {
+    fun allAlertsFlowWithProximityAlertAndNullStopDetailsEmitsAlertWithoutStopDetails() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
         whenever(alertsRepository.getAllAlertsFlow())
                 .thenReturn(flowOf(listOf(proximityAlert)))
@@ -224,14 +229,14 @@ class AlertsRetrieverTest {
                 UiAlert.ProximityAlert(1, "123456", null, 250))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun allAlertsFlowWithProximityAlertAndEmptyStopDetailsEmitsAlertWithoutStopDetails() =
-            runBlockingTest {
+    fun allAlertsFlowWithProximityAlertAndEmptyStopDetailsEmitsAlertWithoutStopDetails() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
         whenever(alertsRepository.getAllAlertsFlow())
                 .thenReturn(flowOf(listOf(proximityAlert)))
@@ -241,13 +246,14 @@ class AlertsRetrieverTest {
                 UiAlert.ProximityAlert(1, "123456", null, 250))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun allAlertsWithProximityAlertAndStopDetailsEmitsFullObject() = runBlockingTest {
+    fun allAlertsWithProximityAlertAndStopDetailsEmitsFullObject() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
         val stopDetails = StopDetails(
                 "123456",
@@ -265,13 +271,14 @@ class AlertsRetrieverTest {
                 UiAlert.ProximityAlert(1, "123456", stopDetails, 250))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected)
     }
 
     @Test
-    fun allAlertsWithProximityAlertsEmitsUpdatedProximityAlertDetails() = runBlockingTest {
+    fun allAlertsWithProximityAlertsEmitsUpdatedProximityAlertDetails() = runTest {
         val proximityAlert1 = ProximityAlert(1, 123L, "123456", 250)
         val proximityAlert2 = ProximityAlert(1, 123L, "123456", 500)
         val stopDetails = StopDetails(
@@ -293,13 +300,14 @@ class AlertsRetrieverTest {
 
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected1, expected2)
     }
 
     @Test
-    fun allAlertsWithProximityAlertEmitsUpdatedStopDetails() = runBlockingTest {
+    fun allAlertsWithProximityAlertEmitsUpdatedStopDetails() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
         val stopDetails1 = StopDetails(
                 "123456",
@@ -328,13 +336,14 @@ class AlertsRetrieverTest {
                 UiAlert.ProximityAlert(1, "123456", stopDetails2, 250))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected1, expected2)
     }
 
     @Test
-    fun allAlertsPropagatesStopDetailsUpdateToAllRelevantStops() = runBlockingTest {
+    fun allAlertsPropagatesStopDetailsUpdateToAllRelevantStops() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         val proximityAlert = ProximityAlert(2, 124L, "123456", 250)
         val stopDetails1 = StopDetails(
@@ -366,13 +375,14 @@ class AlertsRetrieverTest {
                 UiAlert.ProximityAlert(2, "123456", stopDetails2, 250))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected1, expected2)
     }
 
     @Test
-    fun allAlertsPropagatesStopDetailsUpdateOnlyToRelevantStops() = runBlockingTest {
+    fun allAlertsPropagatesStopDetailsUpdateOnlyToRelevantStops() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         val proximityAlert = ProximityAlert(2, 124L, "987654", 250)
         val stopDetails1 = StopDetails(
@@ -418,10 +428,9 @@ class AlertsRetrieverTest {
                 UiAlert.ProximityAlert(2, "987654", stopDetails2, 250))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(null, expected1, expected2)
     }
-
-    private val runBlockingTest = coroutineRule::runBlockingTest
 }

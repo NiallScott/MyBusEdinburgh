@@ -30,6 +30,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,7 +65,7 @@ class AboutViewModelTest {
     private lateinit var busStopDatabaseRepository: BusStopDatabaseRepository
 
     @Test
-    fun itemsLiveDataEmitsItemsWhenDatabaseMetadataIsUnavailable() {
+    fun itemsLiveDataEmitsItemsWhenDatabaseMetadataIsUnavailable() = runTest {
         givenAppVersion()
         whenever(busStopDatabaseRepository.databaseMetadataFlow)
                 .thenReturn(flowOf(null))
@@ -79,12 +81,13 @@ class AboutViewModelTest {
                 UiAboutItem.OneLineItem.OpenSourceLicences)
 
         val observer = viewModel.itemsLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(expected)
     }
 
     @Test
-    fun itemsLiveDataEmitsItemsWhenDatabaseMetadataIsAvailable() {
+    fun itemsLiveDataEmitsItemsWhenDatabaseMetadataIsAvailable() = runTest {
         givenAppVersion()
         whenever(busStopDatabaseRepository.databaseMetadataFlow)
                 .thenReturn(flowOf(DatabaseMetadata(123L, "abc123")))
@@ -109,6 +112,7 @@ class AboutViewModelTest {
                 UiAboutItem.OneLineItem.OpenSourceLicences)
 
         val observer = viewModel.itemsLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(expected1, expected2)
     }

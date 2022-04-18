@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -75,7 +75,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun addArrivalAlertAddsAlertToDaoThenLaunchesTask() = coroutineRule.runBlockingTest {
+    fun addArrivalAlertAddsAlertToDaoThenLaunchesTask() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
 
         alertManager.addArrivalAlert(arrivalAlert)
@@ -89,7 +89,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun removeArrivalAlertRemovesArrivalAlert() = coroutineRule.runBlockingTest {
+    fun removeArrivalAlertRemovesArrivalAlert() = runTest {
         alertManager.removeArrivalAlert("123456")
 
         verify(alertsDao)
@@ -97,7 +97,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun removeAllArrivalAlertsRemovesAllArrivalAlerts() = coroutineRule.runBlockingTest {
+    fun removeAllArrivalAlertsRemovesAllArrivalAlerts() = runTest {
         alertManager.removeAllArrivalAlerts()
 
         verify(alertsDao)
@@ -105,7 +105,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun addProximityAlertAddsAlertToDaoThenLaunchesTask() = coroutineRule.runBlockingTest {
+    fun addProximityAlertAddsAlertToDaoThenLaunchesTask() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
 
         alertManager.addProximityAlert(proximityAlert)
@@ -119,7 +119,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun removeProximityAlertRemovesProximityAlert() = coroutineRule.runBlockingTest {
+    fun removeProximityAlertRemovesProximityAlert() = runTest {
         alertManager.removeProximityAlert("123456")
 
         verify(alertsDao)
@@ -127,7 +127,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun removeAllProximityAlertsRemovesAllProximityAlerts() = coroutineRule.runBlockingTest {
+    fun removeAllProximityAlertsRemovesAllProximityAlerts() = runTest {
         alertManager.removeAllProximityAlerts()
 
         verify(alertsDao)
@@ -135,8 +135,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun ensureTasksRunningIfAlertsExistDoesNotStartArrivalTaskWhenCountIsZero() =
-            coroutineRule.runBlockingTest {
+    fun ensureTasksRunningIfAlertsExistDoesNotStartArrivalTaskWhenCountIsZero() = runTest {
         whenever(alertsDao.getArrivalAlertCount())
                 .thenReturn(0)
         whenever(alertsDao.getProximityAlertCount())
@@ -149,8 +148,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun ensureTasksRunningIfAlertsExistStartsArrivalTaskWhenCountIsGreaterThanZero() =
-            coroutineRule.runBlockingTest {
+    fun ensureTasksRunningIfAlertsExistStartsArrivalTaskWhenCountIsGreaterThanZero() = runTest {
         whenever(alertsDao.getArrivalAlertCount())
                 .thenReturn(1)
         whenever(alertsDao.getProximityAlertCount())
@@ -163,8 +161,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun ensureTasksRunningIfAlertsExistDoesNotStartProximityTaskWhenCountIsZero() =
-            coroutineRule.runBlockingTest {
+    fun ensureTasksRunningIfAlertsExistDoesNotStartProximityTaskWhenCountIsZero() = runTest {
         whenever(alertsDao.getProximityAlertCount())
                 .thenReturn(0)
         whenever(alertsDao.getArrivalAlertCount())
@@ -177,8 +174,7 @@ class AlertManagerTest {
     }
 
     @Test
-    fun ensureTasksRunningIfAlertsExistStartsProximityTaskWhenCountIsGreaterThanZero() =
-            coroutineRule.runBlockingTest {
+    fun ensureTasksRunningIfAlertsExistStartsProximityTaskWhenCountIsGreaterThanZero() = runTest {
         whenever(alertsDao.getProximityAlertCount())
                 .thenReturn(1)
         whenever(alertsDao.getArrivalAlertCount())

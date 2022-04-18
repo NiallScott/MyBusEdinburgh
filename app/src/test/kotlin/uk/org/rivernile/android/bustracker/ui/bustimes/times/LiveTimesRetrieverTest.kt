@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,8 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -76,7 +77,7 @@ class LiveTimesRetrieverTest {
     }
 
     @Test
-    fun getLiveTimesFlowWithInProgressResultDoesNotGetColours() = coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithInProgressResultDoesNotGetColours() = runTest {
         val liveTimesFlow = flowOf(Result.InProgress)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
@@ -85,6 +86,7 @@ class LiveTimesRetrieverTest {
                 .thenReturn(UiResult.InProgress)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress)
@@ -93,7 +95,7 @@ class LiveTimesRetrieverTest {
     }
 
     @Test
-    fun getLiveTimesFlowWithErrorsResultDoesNotGetColours() = coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithErrorsResultDoesNotGetColours() = runTest {
         val errorResult = Result.Error(123L, NoConnectivityException())
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)
         val liveTimesFlow = flowOf(Result.InProgress, errorResult)
@@ -107,6 +109,7 @@ class LiveTimesRetrieverTest {
                 .thenReturn(errorUiResult)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress, errorUiResult)
@@ -115,7 +118,7 @@ class LiveTimesRetrieverTest {
     }
 
     @Test
-    fun getLiveTimesFlowWithSuccessButNoStopDoesNotGetColours() = coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithSuccessButNoStopDoesNotGetColours() = runTest {
         val successResult = Result.Success(
                 LiveTimes(
                         emptyMap(),
@@ -133,6 +136,7 @@ class LiveTimesRetrieverTest {
                 .thenReturn(errorUiResult)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress, errorUiResult)
@@ -141,8 +145,7 @@ class LiveTimesRetrieverTest {
     }
 
     @Test
-    fun getLiveTimesFlowWithSuccessButNoServicesDoesNotGetColours() =
-            coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithSuccessButNoServicesDoesNotGetColours() = runTest {
         val successResult = Result.Success(
                 LiveTimes(
                         mapOf(
@@ -166,6 +169,7 @@ class LiveTimesRetrieverTest {
                 .thenReturn(errorUiResult)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress, errorUiResult)
@@ -174,7 +178,7 @@ class LiveTimesRetrieverTest {
     }
 
     @Test
-    fun getLiveTimesFlowWithSuccessSingleServiceWithNullColours() = coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithSuccessSingleServiceWithNullColours() = runTest {
         val successResult = Result.Success(
                 LiveTimes(
                         mapOf(
@@ -218,13 +222,14 @@ class LiveTimesRetrieverTest {
                 .thenReturn(successUiResult)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress, successUiResult)
     }
 
     @Test
-    fun getLiveTimesFlowWithSuccessSingleServiceWithEmptyColours() = coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithSuccessSingleServiceWithEmptyColours() = runTest {
         val successResult = Result.Success(
                 LiveTimes(
                         mapOf(
@@ -268,13 +273,14 @@ class LiveTimesRetrieverTest {
                 .thenReturn(successUiResult)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress, successUiResult)
     }
 
     @Test
-    fun getLiveTimesFlowWithSuccessSingleServiceGetsColours() = coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithSuccessSingleServiceGetsColours() = runTest {
         val successResult = Result.Success(
                 LiveTimes(
                         mapOf(
@@ -320,13 +326,14 @@ class LiveTimesRetrieverTest {
                 .thenReturn(successUiResult)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress, successUiResult)
     }
 
     @Test
-    fun getLiveTimesFlowWithSuccessMultipleServicesGetsColours() = coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithSuccessMultipleServicesGetsColours() = runTest {
         val successResult = Result.Success(
                 LiveTimes(
                         mapOf(
@@ -397,13 +404,14 @@ class LiveTimesRetrieverTest {
                 .thenReturn(successUiResult)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress, successUiResult)
     }
 
     @Test
-    fun getLiveTimesFlowWithSuccessSingleServiceUpdatesColours() = coroutineRule.runBlockingTest {
+    fun getLiveTimesFlowWithSuccessSingleServiceUpdatesColours() = runTest {
         val successResult = Result.Success(
                 LiveTimes(
                         mapOf(
@@ -464,6 +472,7 @@ class LiveTimesRetrieverTest {
                 .thenReturn(successUiResult2)
 
         val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(UiResult.InProgress, successUiResult1, successUiResult2)

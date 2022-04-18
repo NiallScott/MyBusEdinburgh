@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -76,8 +76,7 @@ class ProximityAlertTrackerTest {
     }
 
     @Test
-    fun trackProximityAlertWithNoLocationInBusStopDaoDoesNotAddGeofence() =
-            coroutineRule.runBlockingTest {
+    fun trackProximityAlertWithNoLocationInBusStopDaoDoesNotAddGeofence() = runTest {
         val alert = ProximityAlert(1, 101L, "123456", 50)
         whenever(busStopsDao.getLocationForStop("123456"))
                 .thenReturn(null)
@@ -89,7 +88,7 @@ class ProximityAlertTrackerTest {
     }
 
     @Test
-    fun trackProximityAlertOutwithTimeRangeDoesNotAddGeofence() = coroutineRule.runBlockingTest {
+    fun trackProximityAlertOutwithTimeRangeDoesNotAddGeofence() = runTest {
         val alert = ProximityAlert(1, 100L, "123456", 50)
         val location = StopLocation("123456", 1.0, 2.0)
         whenever(busStopsDao.getLocationForStop("123456"))
@@ -104,7 +103,7 @@ class ProximityAlertTrackerTest {
     }
 
     @Test
-    fun trackProximityAlertWithinTimeRangeAddsGeofence() = coroutineRule.runBlockingTest {
+    fun trackProximityAlertWithinTimeRangeAddsGeofence() = runTest {
         val alert = ProximityAlert(1, 100L, "123456", 50)
         val location = StopLocation("123456", 1.0, 2.0)
         whenever(busStopsDao.getLocationForStop("123456"))
