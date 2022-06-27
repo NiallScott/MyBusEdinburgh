@@ -65,6 +65,7 @@ import uk.org.rivernile.android.bustracker.ui.main.sections.AlertManagerSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.FavouritesSection;
 import uk.org.rivernile.android.bustracker.ui.main.sections.Section;
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivity;
+import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment;
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig;
 import uk.org.rivernile.edinburghbustracker.android.R;
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment;
@@ -72,7 +73,6 @@ import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAl
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.search.InstallBarcodeScannerDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment;
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment;
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment;
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment;
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment;

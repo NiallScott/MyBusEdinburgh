@@ -42,6 +42,7 @@ import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteD
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.ClearSearchHistoryDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragmentViewModel
+import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragmentViewModel
 
 /**
  * This [Module] is used for injecting classes with [ViewModel] instances
@@ -192,6 +193,20 @@ interface ViewModelModule {
     @ViewModelKey(DeleteTimeAlertDialogFragmentViewModel::class)
     fun bindDeleteTimeAlertDialogFragmentViewModel(
             viewModel: DeleteTimeAlertDialogFragmentViewModel): ViewModel
+
+    /**
+     * Inject a [TurnOnGpsDialogFragmentViewModel] when requested.
+     *
+     * @param viewModel A [TurnOnGpsDialogFragmentViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @ExperimentalCoroutinesApi
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(TurnOnGpsDialogFragmentViewModel::class)
+    fun bindTurnOnGpsDialogFragmentViewModel(
+            viewModel: TurnOnGpsDialogFragmentViewModel): ViewModel
 
     /**
      * Inject a [ViewModelFactory] when requested.

@@ -28,7 +28,8 @@ package uk.org.rivernile.android.bustracker.dagger.main
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
 
 /**
  * This [Module] contributes [androidx.fragment.app.Fragment]s for
@@ -39,6 +40,7 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsD
 @Module
 interface MainFragmentsModule {
 
+    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeTurnOnGpsDialogFragment(): TurnOnGpsDialogFragment

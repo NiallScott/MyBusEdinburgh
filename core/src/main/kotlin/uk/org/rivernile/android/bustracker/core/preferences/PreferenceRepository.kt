@@ -104,7 +104,11 @@ class PreferenceRepository @Inject constructor(
     /**
      * Is the GPS prompt disabled?
      */
-    val isGpsPromptDisabled get() = preferenceManager.isGpsPromptDisabled()
+    var isGpsPromptDisabled
+        get() = preferenceManager.isGpsPromptDisabled()
+        set(value) {
+            preferenceManager.setGpsPromptDisabled(value)
+        }
 
     /**
      * Toggle the sort by time preference.
