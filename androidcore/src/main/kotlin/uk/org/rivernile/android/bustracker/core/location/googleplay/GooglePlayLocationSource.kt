@@ -34,6 +34,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -70,14 +71,14 @@ internal class GooglePlayLocationSource @Inject constructor(
 
     private val userVisibleLocationRequest by lazy {
         LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setInterval(USER_VISIBLE_LOCATION_INTERVAL_MILLIS)
                 .setFastestInterval(USER_VISIBLE_LOCATION_FASTEST_INTERVAL_MILLIS)
     }
 
     @ExperimentalCoroutinesApi
     override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {
-        callbackFlow<DeviceLocation> {
+        callbackFlow {
             getLastLocation()?.let {
                 channel.send(it)
             }
@@ -119,7 +120,7 @@ internal class GooglePlayLocationSource @Inject constructor(
         Manifest.permission.ACCESS_FINE_LOCATION
     ])
     private suspend fun getLastLocation() = withTimeoutOrNull(LAST_LOCATION_TIMEOUT_MILLIS) {
-        suspendCoroutine<DeviceLocation?> { continuation ->
+        suspendCoroutine { continuation ->
             fusedLocationProviderClient.lastLocation.addOnCompleteListener {
                 val result = if (it.isSuccessful) {
                     it.result

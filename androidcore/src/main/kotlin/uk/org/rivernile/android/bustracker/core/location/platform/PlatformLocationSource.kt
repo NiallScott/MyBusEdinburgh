@@ -69,7 +69,7 @@ internal class PlatformLocationSource @Inject constructor(
 
     @ExperimentalCoroutinesApi
     override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {
-        callbackFlow<Location> {
+        callbackFlow {
             // Before registering for location updates, immediately obtain the last location from
             // the OS and send it to the channel. This may be null if there is no previous location.
             getBestInitialLocation()?.let {
