@@ -31,6 +31,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
+import android.os.CancellationSignal
 import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
@@ -46,7 +47,9 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.ServiceStopsContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -77,7 +80,7 @@ class AndroidBusStopsDaoTest {
     private lateinit var mockContentResolver: MockContentResolver
     private val contentUri = Uri.parse("content://$TEST_AUTHORITY/tableName")
 
-    private lateinit var busStopsDao: BusStopsDao
+    private lateinit var busStopsDao: AndroidBusStopsDao
 
     @Before
     fun setUp() {
@@ -615,6 +618,400 @@ class AndroidBusStopsDaoTest {
         assertTrue(cursor.isClosed)
     }
 
+    @Test
+    fun getStopDetailsWithSpanReturnsNullWhenCursorIsNull() = runTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsWithServices()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?)", selection)
+                assertArrayEquals(
+                        arrayOf(
+                                1.0.toString(),
+                                3.0.toString(),
+                                2.0.toString(),
+                                4.0.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetailsWithinSpan(1.0, 2.0, 3.0, 4.0)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getStopDetailsWithSpanReturnsNullWhenCursorIsEmpty() = runTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsWithServices()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?)", selection)
+                assertArrayEquals(
+                        arrayOf(
+                                1.0.toString(),
+                                3.0.toString(),
+                                2.0.toString(),
+                                4.0.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetailsWithinSpan(1.0, 2.0, 3.0, 4.0)
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopDetailsWithSpanReturnsItemWhenCursorHasSingleItem() = runTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsWithServices()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("123456", "Stop name", "Locality", 1.0, 2.0, 1, "1, 2, 3"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?)", selection)
+                assertArrayEquals(
+                        arrayOf(
+                                1.0.toString(),
+                                3.0.toString(),
+                                2.0.toString(),
+                                4.0.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetailsWithinSpan(1.0, 2.0, 3.0, 4.0)
+
+        assertEquals(
+                listOf(
+                        StopDetailsWithServices(
+                                "123456",
+                                StopName(
+                                        "Stop name",
+                                        "Locality"),
+                                1.0,
+                                2.0,
+                                1,
+                                "1, 2, 3")),
+                result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopDetailsWithSpanReturnsItemsWhenCursorHasMultipleItems() = runTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsWithServices()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("123456", "Stop name 1", "Locality 1", 1.0, 2.0, 1, "1, 2, 3"))
+        cursor.addRow(arrayOf("123457", "Stop name 2", "Locality 2", 3.0, 4.0, 2, "4, 5, 6"))
+        cursor.addRow(arrayOf("123458", "Stop name 3", "Locality 3", 5.0, 6.0, 3, "7, 8, 9"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?)", selection)
+                assertArrayEquals(
+                        arrayOf(
+                                1.0.toString(),
+                                3.0.toString(),
+                                2.0.toString(),
+                                4.0.toString()),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetailsWithinSpan(1.0, 2.0, 3.0, 4.0)
+
+        assertEquals(
+                listOf(
+                        StopDetailsWithServices(
+                                "123456",
+                                StopName(
+                                        "Stop name 1",
+                                        "Locality 1"),
+                                1.0,
+                                2.0,
+                                1,
+                                "1, 2, 3"),
+                        StopDetailsWithServices(
+                                "123457",
+                                StopName(
+                                        "Stop name 2",
+                                        "Locality 2"),
+                                3.0,
+                                4.0,
+                                2,
+                                "4, 5, 6"),
+                        StopDetailsWithServices(
+                                "123458",
+                                StopName(
+                                        "Stop name 3",
+                                        "Locality 3"),
+                                5.0,
+                                6.0,
+                                3,
+                                "7, 8, 9")),
+                result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopDetailsWithSpanFilteredReturnsNullWhenCursorIsNull() = runTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsWithServices()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?) " +
+                        "AND ${BusStopsContract.STOP_CODE} IN (" +
+                        "SELECT ${ServiceStopsContract.STOP_CODE} " +
+                        "FROM ${ServiceStopsContract.TABLE_NAME} " +
+                        "WHERE ${ServiceStopsContract.SERVICE_NAME} IN (?))",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(
+                                1.0.toString(),
+                                3.0.toString(),
+                                2.0.toString(),
+                                4.0.toString(),
+                                "1"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetailsWithinSpan(1.0, 2.0, 3.0, 4.0, listOf("1"))
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getStopDetailsWithSpanFilteredReturnsNullWhenCursorIsEmpty() = runTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsWithServices()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?) " +
+                        "AND ${BusStopsContract.STOP_CODE} IN (" +
+                        "SELECT ${ServiceStopsContract.STOP_CODE} " +
+                        "FROM ${ServiceStopsContract.TABLE_NAME} " +
+                        "WHERE ${ServiceStopsContract.SERVICE_NAME} IN (?,?,?))",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(
+                                1.0.toString(),
+                                3.0.toString(),
+                                2.0.toString(),
+                                4.0.toString(),
+                                "1",
+                                "2",
+                                "3"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetailsWithinSpan(1.0, 2.0, 3.0, 4.0, listOf("1", "2", "3"))
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopDetailsWithSpanFilteredReturnsItemWhenCursorHasSingleItem() = runTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsWithServices()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("123456", "Stop name", "Locality", 1.0, 2.0, 1, "1, 2, 3"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?) " +
+                        "AND ${BusStopsContract.STOP_CODE} IN (" +
+                        "SELECT ${ServiceStopsContract.STOP_CODE} " +
+                        "FROM ${ServiceStopsContract.TABLE_NAME} " +
+                        "WHERE ${ServiceStopsContract.SERVICE_NAME} IN (?,?,?))",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(
+                                1.0.toString(),
+                                3.0.toString(),
+                                2.0.toString(),
+                                4.0.toString(),
+                                "1",
+                                "2",
+                                "3"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetailsWithinSpan(1.0, 2.0, 3.0, 4.0, listOf("1", "2", "3"))
+
+        assertEquals(
+                listOf(
+                        StopDetailsWithServices(
+                                "123456",
+                                StopName(
+                                        "Stop name",
+                                        "Locality"),
+                                1.0,
+                                2.0,
+                                1,
+                                "1, 2, 3")),
+                result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopDetailsWithSpanFilteredReturnsItemsWhenCursorHasMultipleItems() = runTest {
+        val expectedProjection = getExpectedProjectionForStopDetailsWithServices()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("123456", "Stop name 1", "Locality 1", 1.0, 2.0, 1, "1, 2, 3"))
+        cursor.addRow(arrayOf("123457", "Stop name 2", "Locality 2", 3.0, 4.0, 2, "4, 5, 6"))
+        cursor.addRow(arrayOf("123458", "Stop name 3", "Locality 3", 5.0, 6.0, 3, "7, 8, 9"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?) " +
+                        "AND ${BusStopsContract.STOP_CODE} IN (" +
+                        "SELECT ${ServiceStopsContract.STOP_CODE} " +
+                        "FROM ${ServiceStopsContract.TABLE_NAME} " +
+                        "WHERE ${ServiceStopsContract.SERVICE_NAME} IN (?,?,?))",
+                        selection)
+                assertArrayEquals(
+                        arrayOf(
+                                1.0.toString(),
+                                3.0.toString(),
+                                2.0.toString(),
+                                4.0.toString(),
+                                "1",
+                                "2",
+                                "3"),
+                        selectionArgs)
+                assertNull(sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopDetailsWithinSpan(1.0, 2.0, 3.0, 4.0, listOf("1", "2", "3"))
+
+        assertEquals(
+                listOf(
+                        StopDetailsWithServices(
+                                "123456",
+                                StopName(
+                                        "Stop name 1",
+                                        "Locality 1"),
+                                1.0,
+                                2.0,
+                                1,
+                                "1, 2, 3"),
+                        StopDetailsWithServices(
+                                "123457",
+                                StopName(
+                                        "Stop name 2",
+                                        "Locality 2"),
+                                3.0,
+                                4.0,
+                                2,
+                                "4, 5, 6"),
+                        StopDetailsWithServices(
+                                "123458",
+                                StopName(
+                                        "Stop name 3",
+                                        "Locality 3"),
+                                5.0,
+                                6.0,
+                                3,
+                                "7, 8, 9")),
+                result)
+        assertTrue(cursor.isClosed)
+    }
+
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
@@ -644,5 +1041,14 @@ class AndroidBusStopsDaoTest {
 
     private fun getExpectedProjectionForStopsServices() = arrayOf(
             BusStopsContract.STOP_CODE,
+            BusStopsContract.SERVICE_LISTING)
+
+    private fun getExpectedProjectionForStopDetailsWithServices() = arrayOf(
+            BusStopsContract.STOP_CODE,
+            BusStopsContract.STOP_NAME,
+            BusStopsContract.LOCALITY,
+            BusStopsContract.LATITUDE,
+            BusStopsContract.LONGITUDE,
+            BusStopsContract.ORIENTATION,
             BusStopsContract.SERVICE_LISTING)
 }

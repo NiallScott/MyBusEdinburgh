@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,7 +36,6 @@ import android.location.LocationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -56,14 +55,18 @@ import javax.inject.Singleton
 internal class AndroidLocationSupport @Inject constructor(
         private val context: Context,
         private val packageManager: PackageManager,
+        private val locationManager: LocationManager,
         private val isLocationEnabledFetcher: IsLocationEnabledFetcher)
     : HasLocationFeatureDetector, IsLocationEnabledDetector, DistanceCalculator {
 
-    override fun hasLocationFeature() =
-            packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION)
+    override val hasLocationFeature get() =
+        packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION)
+
+    override val hasGpsLocationProvider get() =
+        packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 
     @ExperimentalCoroutinesApi
-    override fun getIsLocationEnabledFlow(): Flow<Boolean> = callbackFlow {
+    override val isLocationEnabledFlow get() = callbackFlow {
         val locationEnabledReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 launch {
@@ -80,6 +83,9 @@ internal class AndroidLocationSupport @Inject constructor(
             context.unregisterReceiver(locationEnabledReceiver)
         }
     }
+
+    override val isGpsLocationProviderEnabled get() =
+        locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
     override fun distanceBetween(first: DeviceLocation, second: DeviceLocation): Float {
         val results = FloatArray(1)

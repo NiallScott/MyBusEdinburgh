@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,8 +32,15 @@ import android.graphics.Color
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.VisibleForTesting
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.ServicesContract
@@ -50,11 +57,20 @@ import javax.inject.Singleton
  * @param ioDispatcher The [CoroutineDispatcher] that database operations are performed on.
  * @author Niall Scott
  */
+@ExperimentalCoroutinesApi
 @Singleton
 internal class AndroidServicesDao @Inject constructor(
         private val context: Context,
         private val contract: ServicesContract,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): ServicesDao {
+
+    companion object {
+
+        private const val SERVICE_SORT_CLAUSE =
+                "CASE WHEN ${ServicesContract.NAME} GLOB '[^0-9.]*' THEN " +
+                        "${ServicesContract.NAME} ELSE " +
+                        "cast(${ServicesContract.NAME} AS int) END"
+    }
 
     private val listeners = mutableListOf<ServicesDao.OnServicesChangedListener>()
     private val observer = Observer()
@@ -192,6 +208,81 @@ internal class AndroidServicesDao @Inject constructor(
                         }
 
                         result.ifEmpty { null }
+                    } else {
+                        null
+                    }
+                }
+
+                continuation.resume(result)
+            }
+        }
+    }
+
+    override val allServiceNamesFlow: Flow<List<String>?> get() = callbackFlow {
+        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+
+            override fun deliverSelfNotifications() = true
+
+            override fun onChange(selfChange: Boolean) {
+                launch {
+                    getAndSendAllServices()
+                }
+            }
+        }
+
+        context.contentResolver.registerContentObserver(
+                contract.getContentUri(),
+                true,
+                observer)
+        getAndSendAllServices()
+
+        awaitClose {
+            context.contentResolver.unregisterContentObserver(observer)
+        }
+    }
+
+    /**
+     * Get all service names and send it to the [ProducerScope]'s channel.
+     */
+    private suspend fun ProducerScope<List<String>?>.getAndSendAllServices() {
+        channel.send(getAllServiceNames())
+    }
+
+    /**
+     * Get all service names. This will return `null` when there are no services or if there was
+     * an error.
+     *
+     * @return All service names, or `null` if there are no services or there was an error.
+     */
+    @VisibleForTesting
+    suspend fun getAllServiceNames(): List<String>? {
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(ServicesContract.NAME),
+                        null,
+                        null,
+                        SERVICE_SORT_CLAUSE,
+                        cancellationSignal)?.use {
+                    // Fill the Cursor window.
+                    val count = it.count
+
+                    if (count > 0) {
+                        val result = ArrayList<String>(count)
+                        val serviceNameColumn = it.getColumnIndexOrThrow(ServicesContract.NAME)
+
+                        while (it.moveToNext()) {
+                            result.add(it.getString(serviceNameColumn))
+                        }
+
+                        result
                     } else {
                         null
                     }

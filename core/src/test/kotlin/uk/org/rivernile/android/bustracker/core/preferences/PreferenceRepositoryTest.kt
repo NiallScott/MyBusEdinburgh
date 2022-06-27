@@ -34,6 +34,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -222,6 +224,26 @@ class PreferenceRepositoryTest {
         observer.assertValues(1, 2, 3)
         verify(preferenceManager)
                 .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
+    fun isGpsPromptDisabledReturnsFalseWhenPreferenceManagerReturnsFalse() {
+        whenever(preferenceManager.isGpsPromptDisabled())
+                .thenReturn(false)
+
+        val result = repository.isGpsPromptDisabled
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun isGpsPromptDisabledReturnsTrueWhenPreferenceManagerReturnsTrue() {
+        whenever(preferenceManager.isGpsPromptDisabled())
+                .thenReturn(true)
+
+        val result = repository.isGpsPromptDisabled
+
+        assertTrue(result)
     }
 
     @Test

@@ -38,9 +38,12 @@ interface IsLocationEnabledDetector {
 
     /**
      * Get a [Flow] which dispatches whether the location-aware services are enabled or not.
-     *
-     * @return A [Flow] which dispatches whether the location-aware services are enabled or not.
      */
     @ExperimentalCoroutinesApi
-    fun getIsLocationEnabledFlow(): Flow<Boolean>
+    val isLocationEnabledFlow: Flow<Boolean>
+
+    /**
+     * Is the GPS location provider enabled?
+     */
+    val isGpsLocationProviderEnabled: Boolean
 }

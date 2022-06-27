@@ -79,7 +79,7 @@ class LocationRepositoryTest {
 
     @Test
     fun hasLocationFeatureIsFalseWhenHasLocationFeatureDetectorReturnsFalse() {
-        whenever(hasLocationFeatureDetector.hasLocationFeature())
+        whenever(hasLocationFeatureDetector.hasLocationFeature)
                 .thenReturn(false)
 
         val result = locationRepository.hasLocationFeature
@@ -89,7 +89,7 @@ class LocationRepositoryTest {
 
     @Test
     fun hasLocationFeatureIsTrueWhenHasLocationFeatureDetectorReturnsTrue() {
-        whenever(hasLocationFeatureDetector.hasLocationFeature())
+        whenever(hasLocationFeatureDetector.hasLocationFeature)
                 .thenReturn(true)
 
         val result = locationRepository.hasLocationFeature
@@ -99,7 +99,7 @@ class LocationRepositoryTest {
 
     @Test
     fun hasLocationFeatureCallsHasLocationFeatureDetectorOnlyOnce() {
-        whenever(hasLocationFeatureDetector.hasLocationFeature())
+        whenever(hasLocationFeatureDetector.hasLocationFeature)
                 .thenReturn(true)
 
         locationRepository.hasLocationFeature
@@ -108,12 +108,46 @@ class LocationRepositoryTest {
 
         assertTrue(result)
         verify(hasLocationFeatureDetector, times(1))
-                .hasLocationFeature()
+                .hasLocationFeature
+    }
+
+    @Test
+    fun hasGpsLocationProviderIsFalseWhenLocationFeatureDetectorReturnsFalse() {
+        whenever(hasLocationFeatureDetector.hasGpsLocationProvider)
+                .thenReturn(false)
+
+        val result = locationRepository.hasGpsLocationProvider
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun hasGpsLocationProviderIsTrueWhenLocationFeatureDetectorReturnsTrue() {
+        whenever(hasLocationFeatureDetector.hasGpsLocationProvider)
+                .thenReturn(true)
+
+        val result = locationRepository.hasGpsLocationProvider
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun hasGpsLocationProviderCallsHasLocationFeatureDetectorOnlyOnce() {
+        whenever(hasLocationFeatureDetector.hasGpsLocationProvider)
+                .thenReturn(true)
+
+        locationRepository.hasGpsLocationProvider
+        locationRepository.hasGpsLocationProvider
+        val result = locationRepository.hasGpsLocationProvider
+
+        assertTrue(result)
+        verify(hasLocationFeatureDetector, times(1))
+                .hasGpsLocationProvider
     }
 
     @Test
     fun getIsLocationEnabledFlowReturnsFlowFromIsLocationEnabledDetector() = runTest {
-        whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
+        whenever(isLocationEnabledDetector.isLocationEnabledFlow)
                 .thenReturn(flowOf(false, true, false))
 
         val observer = locationRepository.isLocationEnabledFlow.test(this)
@@ -124,8 +158,28 @@ class LocationRepositoryTest {
     }
 
     @Test
+    fun isGpsLocationProviderEnabledReturnsFalseWhenIsLocationEnabledDetectorReturnsFalse() {
+        whenever(isLocationEnabledDetector.isGpsLocationProviderEnabled)
+                .thenReturn(false)
+
+        val result = locationRepository.isGpsLocationProviderEnabled
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun isGpsLocationProviderEnabledReturnsTrueWhenIsLocationEnabledDetectorReturnsTrue() {
+        whenever(isLocationEnabledDetector.isGpsLocationProviderEnabled)
+                .thenReturn(true)
+
+        val result = locationRepository.isGpsLocationProviderEnabled
+
+        assertTrue(result)
+    }
+
+    @Test
     fun userVisibleLocationFlowDoesNotEmitWhenDoesNotHaveLocationFeature() = runTest {
-        whenever(hasLocationFeatureDetector.hasLocationFeature())
+        whenever(hasLocationFeatureDetector.hasLocationFeature)
                 .thenReturn(false)
 
         val observer = locationRepository.userVisibleLocationFlow.test(this)
@@ -137,9 +191,9 @@ class LocationRepositoryTest {
 
     @Test
     fun userVisibleLocationFlowDoesNotEmitWhenLocationIsNotEnabled() = runTest {
-        whenever(hasLocationFeatureDetector.hasLocationFeature())
+        whenever(hasLocationFeatureDetector.hasLocationFeature)
                 .thenReturn(true)
-        whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
+        whenever(isLocationEnabledDetector.isLocationEnabledFlow)
                 .thenReturn(flowOf(false))
 
         val observer = locationRepository.userVisibleLocationFlow.test(this)
@@ -151,9 +205,9 @@ class LocationRepositoryTest {
 
     @Test
     fun userVisibleLocationFlowEmitsFromUpstreamWhenLocationIsEnabled() = runTest {
-        whenever(hasLocationFeatureDetector.hasLocationFeature())
+        whenever(hasLocationFeatureDetector.hasLocationFeature)
                 .thenReturn(true)
-        whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
+        whenever(isLocationEnabledDetector.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
         whenever(locationSource.userVisibleLocationFlow)
                 .thenReturn(flowOf(DeviceLocation(1.0, 2.0)))
@@ -167,9 +221,9 @@ class LocationRepositoryTest {
 
     @Test
     fun userVisibleLocationFlowDoesNotEmitAfterLocationIsDisabled() = runTest {
-        whenever(hasLocationFeatureDetector.hasLocationFeature())
+        whenever(hasLocationFeatureDetector.hasLocationFeature)
                 .thenReturn(true)
-        whenever(isLocationEnabledDetector.getIsLocationEnabledFlow())
+        whenever(isLocationEnabledDetector.isLocationEnabledFlow)
                 .thenReturn(flowOf(false, false, true, true, false))
         whenever(locationSource.userVisibleLocationFlow)
                 .thenReturn(

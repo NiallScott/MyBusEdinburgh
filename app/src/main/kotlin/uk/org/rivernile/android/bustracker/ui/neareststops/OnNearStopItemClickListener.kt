@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,28 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+package uk.org.rivernile.android.bustracker.ui.neareststops
 
 /**
- * This interface is used to determine if the device the app is running on is capable of using
- * location-aware services.
+ * Classes which wish to be informed when favourite click events happen should implement this
+ * interface.
  *
  * @author Niall Scott
  */
-interface HasLocationFeatureDetector {
+interface OnNearStopItemClickListener {
 
     /**
-     * Does the device have location-aware features?
+     * A nearest stop item has been clicked.
+     *
+     * @param item The item which has been clicked.
      */
-    val hasLocationFeature: Boolean
+    fun onNearestStopClicked(item: UiNearestStop)
 
     /**
-     * Does the device have a GPS location provider?
+     * A nearest stop item has been long clicked.
+     *
+     * @param stopCode The stop code of the long clicked nearest stop.
+     * @return `true` if the long click was handled, otherwise `false`.
      */
-    val hasGpsLocationProvider: Boolean
+    fun onNearestStopLongClicked(stopCode: String): Boolean
 }

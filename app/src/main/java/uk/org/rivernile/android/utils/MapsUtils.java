@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,12 @@
  */
 package uk.org.rivernile.android.utils;
 
-import android.content.Context;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import uk.org.rivernile.android.bustracker.core.features.FeatureRepository;
 import uk.org.rivernile.edinburghbustracker.android.R;
 
 /**
@@ -49,19 +45,6 @@ public final class MapsUtils {
      * This constructor is private to prevent instantiation.
      */
     private MapsUtils() { }
-    
-    /**
-     * A utility method to determine if the Google Maps component will show on the device.
-     * 
-     * @param context A {@link Context} instance.
-     * @return {@code true} if the Google Maps should show, {@code false} if not.
-     * @deprecated Use {@link FeatureRepository#getHasStopMapUiFeature()} instead.
-     */
-    @Deprecated
-    public static boolean isGoogleMapsAvailable(@NonNull final Context context) {
-        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) ==
-                ConnectionResult.SUCCESS && GraphicsUtils.getOpenGLESVersion(context) >= 2;
-    }
 
     /**
      * Get a drawable resource ID for a given {@code orientation}.

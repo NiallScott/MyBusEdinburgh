@@ -56,14 +56,24 @@ class LocationRepository @Inject internal constructor(
     /**
      * Does this device have location-aware features or not?
      */
-    val hasLocationFeature by lazy { hasLocationFeatureDetector.hasLocationFeature() }
+    val hasLocationFeature by lazy { hasLocationFeatureDetector.hasLocationFeature }
+
+    /**
+     * Does this device have a GPS location provider?
+     */
+    val hasGpsLocationProvider by lazy { hasLocationFeatureDetector.hasGpsLocationProvider }
 
     /**
      * Get a [Flow] which returns the location enabled status. Any updates to the status will be
      * emitted from the returned [Flow] until cancelled.
      */
     @ExperimentalCoroutinesApi
-    val isLocationEnabledFlow get() = isLocationEnabledDetector.getIsLocationEnabledFlow()
+    val isLocationEnabledFlow get() = isLocationEnabledDetector.isLocationEnabledFlow
+
+    /**
+     * Is the GPS location provider enabled?
+     */
+    val isGpsLocationProviderEnabled get() = isLocationEnabledDetector.isGpsLocationProviderEnabled
 
     /**
      * Get a [Flow] which emits the latest [DeviceLocation] and any further location changes until

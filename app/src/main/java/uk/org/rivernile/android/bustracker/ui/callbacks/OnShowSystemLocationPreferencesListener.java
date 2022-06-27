@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,6 +36,9 @@ public interface OnShowSystemLocationPreferencesListener {
     /**
      * This is called when the user wishes to be taken to the system location
      * preferences.
+     *
+     * @return {@code true} when the system location preferences is started, otherwise {@code false}
+     * in the event of an error.
      */
-    public void onShowSystemLocationPreferences();
+    boolean onShowSystemLocationPreferences();
 }

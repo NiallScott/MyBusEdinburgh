@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,8 @@ import com.davekoelle.alphanum.AlphanumComparator
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.config.BuildConfiguration
+import uk.org.rivernile.android.bustracker.core.config.EdinburghBuildConfiguration
 import uk.org.rivernile.android.bustracker.core.livetimes.EdinburghIsNightServiceDetector
 import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
 import uk.org.rivernile.android.bustracker.core.services.EdinburghServiceColourOverride
@@ -69,5 +71,10 @@ internal class FlavourModule {
         fun bindServiceColourOverride(
                 edinburghServiceColourOverride: EdinburghServiceColourOverride)
                 : ServiceColourOverride
+
+        @Suppress("unused")
+        @Binds
+        fun bindBuildConfiguration(
+                edinburghBuildConfiguration: EdinburghBuildConfiguration): BuildConfiguration
     }
 }

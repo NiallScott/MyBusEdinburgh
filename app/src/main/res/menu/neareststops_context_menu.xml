@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2012 - 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2012 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,23 +26,29 @@
 */ -->
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:compat="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:compat="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/neareststops_context_menu_favourite"
-        compat:showAsAction="ifRoom"
-        tools:ignore="MenuTitle" />
+        android:title="@string/neareststops_context_addasfav"
+        android:icon="@drawable/ic_action_star_border"
+        compat:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/neareststops_context_menu_showonmap"
         android:title="@string/neareststops_context_showonmap"
         android:icon="@drawable/ic_action_map"
         compat:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/neareststops_context_menu_prox_alert"
-        compat:showAsAction="never"
-        tools:ignore="MenuTitle" />
+        android:title="@string/neareststops_menu_prox_add"
+        android:icon="@drawable/ic_action_location_on"
+        compat:showAsAction="never" />
+
     <item
         android:id="@+id/neareststops_context_menu_time_alert"
-        compat:showAsAction="never"
-        tools:ignore="MenuTitle" />
+        android:title="@string/neareststops_menu_time_add"
+        android:icon="@drawable/ic_action_alarm_add"
+        compat:showAsAction="never" />
 </menu>

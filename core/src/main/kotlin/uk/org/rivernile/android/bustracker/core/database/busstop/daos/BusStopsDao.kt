@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 
@@ -93,6 +96,47 @@ interface BusStopsDao {
      * is returned, this is either because of an error, or there is no data.
      */
     suspend fun getServicesForStops(stopCodes: Set<String>): Map<String, List<String>>?
+
+    /**
+     * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects which are within
+     * the bounding box created by the min/max latitude/longitudes.
+     *
+     * @param minLatitude The minimum latitude of the included stops.
+     * @param minLongitude The minimum longitude of the included stops.
+     * @param maxLatitude The maximum latitude of the included stops.
+     * @param maxLongitude The maximum longitude of the included stops.
+     * @return A [Flow] which emits [List]s of [StopDetailsWithServices] objects which match the
+     * filter parameters.
+     */
+    @ExperimentalCoroutinesApi
+    fun getStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double): Flow<List<StopDetailsWithServices>?>
+
+    /**
+     * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects which are within
+     * the bounding box created by the min/max latitude/longitudes. Additionally, a [serviceFilter]
+     * must be specified where these stops are further filtered to only include stops with these
+     * services.
+     *
+     * @param minLatitude The minimum latitude of the included stops.
+     * @param minLongitude The minimum longitude of the included stops.
+     * @param maxLatitude The maximum latitude of the included stops.
+     * @param maxLongitude The maximum longitude of the included stops.
+     * @param serviceFilter A service filter. Only stops which include these services will be
+     * emitted.
+     * @return A [Flow] which emits [List]s of [StopDetailsWithServices] objects which match the
+     * filter parameters.
+     */
+    @ExperimentalCoroutinesApi
+    fun getStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double,
+            serviceFilter: List<String>): Flow<List<StopDetailsWithServices>?>
 
     /**
      * This interface should be implemented to listen for changes to bus stops. Call

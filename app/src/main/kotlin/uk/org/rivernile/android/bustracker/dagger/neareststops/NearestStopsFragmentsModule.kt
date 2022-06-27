@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+package uk.org.rivernile.android.bustracker.dagger.neareststops
+
+import dagger.Module
+import dagger.android.ContributesAndroidInjector
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 
 /**
- * This interface is used to determine if the device the app is running on is capable of using
- * location-aware services.
+ * This [Module] is used to inject [androidx.fragment.app.Fragment]s owned by
  *
  * @author Niall Scott
  */
-interface HasLocationFeatureDetector {
+@Module
+interface NearestStopsFragmentsModule {
 
-    /**
-     * Does the device have location-aware features?
-     */
-    val hasLocationFeature: Boolean
-
-    /**
-     * Does the device have a GPS location provider?
-     */
-    val hasGpsLocationProvider: Boolean
+    @ExperimentalCoroutinesApi
+    @Suppress("unused")
+    @ContributesAndroidInjector
+    fun contributeNearestStopsFragment(): NearestStopsFragment
 }

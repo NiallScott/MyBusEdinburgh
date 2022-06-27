@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -102,6 +102,11 @@ class PreferenceRepository @Inject constructor(
     }
 
     /**
+     * Is the GPS prompt disabled?
+     */
+    val isGpsPromptDisabled get() = preferenceManager.isGpsPromptDisabled()
+
+    /**
      * Toggle the sort by time preference.
      */
     fun toggleSortByTime() {
@@ -129,7 +134,7 @@ class PreferenceRepository @Inject constructor(
      * @param block This block is executed to retrieve the preference value. It will be executed on
      * the default [CoroutineDispatcher].
      */
-    private fun <T> getPreferenceFlow(key: PreferenceKey, block: () -> T) = callbackFlow<T> {
+    private fun <T> getPreferenceFlow(key: PreferenceKey, block: () -> T) = callbackFlow {
         val listener = object : OnPreferenceChangedListener {
             override fun onPreferenceChanged(preference: PreferenceKey?) {
                 if (key == preference) {

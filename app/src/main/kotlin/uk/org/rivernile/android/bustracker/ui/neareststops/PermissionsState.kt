@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+package uk.org.rivernile.android.bustracker.ui.neareststops
+
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 
 /**
- * This interface is used to determine if the device the app is running on is capable of using
- * location-aware services.
+ * This class encapsulates the permissions that the details screen would like, and their current
+ * state.
  *
- * @author Niall Scott
+ * @property fineLocationPermission The state of the fine location permission.
+ * @property coarseLocationPermission The state of the coarse location permission.
  */
-interface HasLocationFeatureDetector {
-
-    /**
-     * Does the device have location-aware features?
-     */
-    val hasLocationFeature: Boolean
-
-    /**
-     * Does the device have a GPS location provider?
-     */
-    val hasGpsLocationProvider: Boolean
-}
+data class PermissionsState(
+        val fineLocationPermission: PermissionState = PermissionState.UNGRANTED,
+        val coarseLocationPermission: PermissionState = PermissionState.UNGRANTED)

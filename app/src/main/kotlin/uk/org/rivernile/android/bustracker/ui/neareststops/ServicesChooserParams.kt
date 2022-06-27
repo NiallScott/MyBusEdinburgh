@@ -24,23 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+package uk.org.rivernile.android.bustracker.ui.neareststops
 
 /**
- * This interface is used to determine if the device the app is running on is capable of using
- * location-aware services.
+ * This class contains the parameters which are sent through to the services selection UI.
  *
+ * @property services The services to choose from.
+ * @property selectedServices The currently selected services, to show the appropriate current
+ * state.
  * @author Niall Scott
  */
-interface HasLocationFeatureDetector {
-
-    /**
-     * Does the device have location-aware features?
-     */
-    val hasLocationFeature: Boolean
-
-    /**
-     * Does the device have a GPS location provider?
-     */
-    val hasGpsLocationProvider: Boolean
-}
+data class ServicesChooserParams(
+        val services: List<String>,
+        val selectedServices: List<String>?)

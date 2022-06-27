@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
@@ -55,4 +57,19 @@ class FakeBusStopsDao : BusStopsDao {
 
     override suspend fun getServicesForStops(stopCodes: Set<String>): Map<String, List<String>>? =
             null
+
+    @ExperimentalCoroutinesApi
+    override fun getStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double) = flowOf(null)
+
+    @ExperimentalCoroutinesApi
+    override fun getStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double,
+            serviceFilter: List<String>) = flowOf(null)
 }

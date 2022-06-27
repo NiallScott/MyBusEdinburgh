@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.dagger.main
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsDialogFragment
 
 /**
@@ -39,10 +38,6 @@ import uk.org.rivernile.edinburghbustracker.android.fragments.dialogs.TurnOnGpsD
  */
 @Module
 interface MainFragmentsModule {
-
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeNearestStopsFragment(): NearestStopsFragment
 
     @Suppress("unused")
     @ContributesAndroidInjector

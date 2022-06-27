@@ -36,6 +36,7 @@ import uk.org.rivernile.android.bustracker.dagger.displaystopdata.DisplayStopDat
 import uk.org.rivernile.android.bustracker.dagger.favourites.FavouriteFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.favourites.FavouriteStopsFragmentModule
 import uk.org.rivernile.android.bustracker.dagger.main.MainFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.neareststops.NearestStopsFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.news.NewsFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.settings.SettingsFragmentsModule
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
@@ -62,6 +63,7 @@ interface ActivityModule {
         FavouriteStopsFragmentModule::class,
         FavouriteFragmentsModule::class,
         MainFragmentsModule::class,
+        NearestStopsFragmentsModule::class,
         NewsFragmentsModule::class
     ])
     fun contributeMainActivity(): MainActivity

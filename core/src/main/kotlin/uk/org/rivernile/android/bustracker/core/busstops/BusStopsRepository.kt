@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -123,6 +124,36 @@ class BusStopsRepository @Inject internal constructor(
             busStopsDao.removeOnBusStopsChangedListener(listener)
         }
     }
+
+    /**
+     * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects for stops which
+     * match the parameters supplied to this method.
+     *
+     * @param minLatitude The minimum latitude of stops.
+     * @param minLongitude The minimum longitude of stops.
+     * @param maxLatitude The maximum latitude of stops.
+     * @param maxLongitude The maximum longitude of stops.
+     * @param serviceFilter The listing of services to filter by.
+     */
+    @ExperimentalCoroutinesApi
+    fun getStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double,
+            serviceFilter: List<String>?) =
+            serviceFilter?.ifEmpty { null }?.let {
+                busStopsDao.getStopDetailsWithinSpanFlow(
+                        minLatitude,
+                        minLongitude,
+                        maxLatitude,
+                        maxLongitude,
+                        it)
+            } ?: busStopsDao.getStopDetailsWithinSpanFlow(
+                    minLatitude,
+                    minLongitude,
+                    maxLatitude,
+                    maxLongitude)
 
     /**
      * A suspended function which gets [StopName] for the given `stopCode` and sends these details

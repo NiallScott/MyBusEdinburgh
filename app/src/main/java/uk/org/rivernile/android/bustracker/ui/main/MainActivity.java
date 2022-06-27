@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -100,7 +101,6 @@ public class MainActivity extends AppCompatActivity
     private static final String DIALOG_ADD_TIME_ALERT = "addTimeAlertDialog";
     private static final String DIALOG_DELETE_PROX_ALERT = "deleteProxAlertDialog";
     private static final String DIALOG_DELETE_TIME_ALERT = "deleteTimeAlertDialog";
-    private static final String DIALOG_SERVICES_CHOOSER = "servicesChooserDialog";
     private static final String DIALOG_CONFIRM_DELETE_FAVOURITE = "deleteFavouriteDialog";
     private static final String DIALOG_TURN_ON_GPS = "turnOnGpsDialog";
 
@@ -257,14 +257,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowServicesChooser(final String[] services,
-            final String[] selectedServices, final String title) {
-        ServicesChooserDialogFragment
-                .newInstance(services, selectedServices, title)
-                .show(getSupportFragmentManager(), DIALOG_SERVICES_CHOOSER);
-    }
-
-    @Override
     public void onShowBusTimes(final String stopCode) {
         final Intent intent = new Intent(this, DisplayStopDataActivity.class);
         intent.putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode);
@@ -335,12 +327,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onShowSystemLocationPreferences() {
+    public boolean onShowSystemLocationPreferences() {
         try {
-            startActivity(TurnOnGpsDialogFragment.TURN_ON_GPS_INTENT);
+            final Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         } catch (ActivityNotFoundException e) {
-            // Do nothing.
+            return false;
         }
+
+        return true;
     }
 
     @Override

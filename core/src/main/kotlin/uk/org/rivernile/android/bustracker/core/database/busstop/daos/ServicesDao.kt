@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
+import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
 
 /**
@@ -69,6 +70,11 @@ interface ServicesDao {
      * or if there are no items, or if there was some other issue getting the details.
      */
     suspend fun getServiceDetails(services: Set<String>): Map<String, ServiceDetails>?
+
+    /**
+     * This is a [Flow] which emits a [List] of the names of all known services.
+     */
+    val allServiceNamesFlow: Flow<List<String>?>
 
     /**
      * This interface should be implemented to listen for changes to services. Call

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,14 +28,23 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
 import android.content.Context
 import android.database.ContentObserver
+import android.database.Cursor
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.ProducerScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopsContract
+import uk.org.rivernile.android.bustracker.core.database.busstop.ServiceStopsContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
@@ -108,10 +117,11 @@ internal class AndroidBusStopsDao @Inject constructor(
                             it.count
 
                             if (it.moveToFirst()) {
-                                it.getString(it.getColumnIndex(BusStopsContract.STOP_NAME))
+                                it.getString(it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME))
                                         ?.let { name ->
                                             val locality = it.getString(
-                                                    it.getColumnIndex(BusStopsContract.LOCALITY))
+                                                    it.getColumnIndexOrThrow(
+                                                            BusStopsContract.LOCALITY))
                                             StopName(name, locality)
                                         }
                             } else {
@@ -147,8 +157,10 @@ internal class AndroidBusStopsDao @Inject constructor(
                             it.count
 
                             if (it.moveToFirst()) {
-                                val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
-                                val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+                                val latitudeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+                                val longitudeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
 
                                 StopLocation(stopCode, it.getDouble(latitudeColumn),
                                         it.getDouble(longitudeColumn))
@@ -188,12 +200,16 @@ internal class AndroidBusStopsDao @Inject constructor(
                             it.count
 
                             if (it.moveToFirst()) {
-                                val stopNameColumn = it.getColumnIndex(BusStopsContract.STOP_NAME)
-                                val localityColumn = it.getColumnIndex(BusStopsContract.LOCALITY)
-                                val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
-                                val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+                                val stopNameColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
+                                val localityColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
+                                val latitudeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+                                val longitudeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
                                 val orientationColumn =
-                                        it.getColumnIndex(BusStopsContract.ORIENTATION)
+                                        it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
 
                                 StopDetails(
                                         stopCode,
@@ -245,13 +261,18 @@ internal class AndroidBusStopsDao @Inject constructor(
 
                             if (count > 0) {
                                 val result = mutableMapOf<String, StopDetails>()
-                                val stopCodeColumn = it.getColumnIndex(BusStopsContract.STOP_CODE)
-                                val stopNameColumn = it.getColumnIndex(BusStopsContract.STOP_NAME)
-                                val localityColumn = it.getColumnIndex(BusStopsContract.LOCALITY)
-                                val latitudeColumn = it.getColumnIndex(BusStopsContract.LATITUDE)
-                                val longitudeColumn = it.getColumnIndex(BusStopsContract.LONGITUDE)
+                                val stopCodeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
+                                val stopNameColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
+                                val localityColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
+                                val latitudeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+                                val longitudeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
                                 val orientationColumn =
-                                        it.getColumnIndex(BusStopsContract.ORIENTATION)
+                                        it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
 
                                 while (it.moveToNext()) {
                                     val stopCode = it.getString(stopCodeColumn)
@@ -303,9 +324,9 @@ internal class AndroidBusStopsDao @Inject constructor(
 
                     if (count > 0) {
                         val result = mutableMapOf<String, List<String>>()
-                        val stopCodeColumn = it.getColumnIndex(BusStopsContract.STOP_CODE)
+                        val stopCodeColumn = it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
                         val serviceListingColumn =
-                                it.getColumnIndex(BusStopsContract.SERVICE_LISTING)
+                                it.getColumnIndexOrThrow(BusStopsContract.SERVICE_LISTING)
 
                         while (it.moveToNext()) {
                             val stopCode = it.getString(stopCodeColumn)
@@ -329,6 +350,273 @@ internal class AndroidBusStopsDao @Inject constructor(
 
                 continuation.resume(result)
             }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun getStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double) = callbackFlow {
+        val listener = object : BusStopsDao.OnBusStopsChangedListener {
+            override fun onBusStopsChanged() {
+                launch {
+                    getAndSendStopDetailsWithinSpanFlow(
+                            minLatitude,
+                            minLongitude,
+                            maxLatitude,
+                            maxLongitude)
+                }
+            }
+        }
+
+        addOnBusStopsChangedListener(listener)
+        getAndSendStopDetailsWithinSpanFlow(
+                minLatitude,
+                minLongitude,
+                maxLatitude,
+                maxLongitude)
+
+        awaitClose {
+            removeOnBusStopsChangedListener(listener)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun getStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double,
+            serviceFilter: List<String>) = callbackFlow {
+        val listener = object : BusStopsDao.OnBusStopsChangedListener {
+            override fun onBusStopsChanged() {
+                launch {
+                    getAndSendStopDetailsWithinSpanFlow(
+                            minLatitude,
+                            minLongitude,
+                            maxLatitude,
+                            maxLongitude,
+                            serviceFilter)
+                }
+            }
+        }
+
+        addOnBusStopsChangedListener(listener)
+        getAndSendStopDetailsWithinSpanFlow(
+                minLatitude,
+                minLongitude,
+                maxLatitude,
+                maxLongitude,
+                serviceFilter)
+
+        awaitClose {
+            removeOnBusStopsChangedListener(listener)
+        }
+    }
+
+    /**
+     * Get a [List] of [StopDetailsWithServices]s from the database using the parameters as the
+     * filter and send it to the channel.
+     *
+     * @param minLatitude The minimum latitude.
+     * @param minLongitude The minimum longitude.
+     * @param maxLatitude The maximum latitude.
+     * @param maxLongitude The maximum longitude.
+     */
+    @ExperimentalCoroutinesApi
+    private suspend fun ProducerScope<List<StopDetailsWithServices>?>.
+            getAndSendStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double) {
+        channel.send(getStopDetailsWithinSpan(
+                minLatitude,
+                minLongitude,
+                maxLatitude,
+                maxLongitude))
+    }
+
+    /**
+     * Get a [List] of [StopDetailsWithServices]s from the database using the parameters as the
+     * filter and send it to the channel.
+     *
+     * @param minLatitude The minimum latitude.
+     * @param minLongitude The minimum longitude.
+     * @param maxLatitude The maximum latitude.
+     * @param maxLongitude The maximum longitude.
+     * @param serviceFilter Service names to filter the results on.
+     */
+    @ExperimentalCoroutinesApi
+    private suspend fun ProducerScope<List<StopDetailsWithServices>?>.
+            getAndSendStopDetailsWithinSpanFlow(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double,
+            serviceFilter: List<String>) {
+        channel.send(getStopDetailsWithinSpan(
+                minLatitude,
+                minLongitude,
+                maxLatitude,
+                maxLongitude,
+                serviceFilter))
+    }
+
+    /**
+     * Query the database to return a [List] of [StopDetailsWithServices] based on the given filter
+     * parameters. Will return `null` when there are no results.
+     *
+     * @param minLatitude The minimum latitude.
+     * @param minLongitude The minimum longitude.
+     * @param maxLatitude The maximum latitude.
+     * @param maxLongitude The maximum longitude.
+     * @return A [List] of [StopDetailsWithServices] objects, or `null`.
+     */
+    @VisibleForTesting
+    suspend fun getStopDetailsWithinSpan(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double): List<StopDetailsWithServices>? {
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val selection = "(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?)"
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.STOP_CODE,
+                                BusStopsContract.STOP_NAME,
+                                BusStopsContract.LOCALITY,
+                                BusStopsContract.LATITUDE,
+                                BusStopsContract.LONGITUDE,
+                                BusStopsContract.ORIENTATION,
+                                BusStopsContract.SERVICE_LISTING),
+                        selection,
+                        arrayOf(
+                                minLatitude.toString(),
+                                maxLatitude.toString(),
+                                minLongitude.toString(),
+                                maxLongitude.toString()),
+                        null,
+                        cancellationSignal)
+                        ?.use(this@AndroidBusStopsDao::mapCursorToStopDetailsWithServicesListing)
+
+                continuation.resume(result)
+            }
+        }
+    }
+
+    /**
+     * Query the database to return a [List] of [StopDetailsWithServices] based on the given filter
+     * parameters. Will return `null` when there are no results.
+     *
+     * @param minLatitude The minimum latitude.
+     * @param minLongitude The minimum longitude.
+     * @param maxLatitude The maximum latitude.
+     * @param maxLongitude The maximum longitude.
+     * @param serviceFilter A [List] of service names to filter results by.
+     * @return A [List] of [StopDetailsWithServices] objects, or `null`.
+     */
+    @VisibleForTesting
+    suspend fun getStopDetailsWithinSpan(
+            minLatitude: Double,
+            minLongitude: Double,
+            maxLatitude: Double,
+            maxLongitude: Double,
+            serviceFilter: List<String>): List<StopDetailsWithServices>? {
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val inPlaceholders = Array(serviceFilter.size) { '?' }
+                val selection = "(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
+                        "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?) " +
+                        "AND ${BusStopsContract.STOP_CODE} IN (" +
+                        "SELECT ${ServiceStopsContract.STOP_CODE} " +
+                        "FROM ${ServiceStopsContract.TABLE_NAME} " +
+                        "WHERE ${ServiceStopsContract.SERVICE_NAME} IN (" +
+                        "${inPlaceholders.joinToString(",")}))"
+
+                val selectionArgs = arrayOf(
+                        minLatitude.toString(),
+                        maxLatitude.toString(),
+                        minLongitude.toString(),
+                        maxLongitude.toString()) + serviceFilter
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.STOP_CODE,
+                                BusStopsContract.STOP_NAME,
+                                BusStopsContract.LOCALITY,
+                                BusStopsContract.LATITUDE,
+                                BusStopsContract.LONGITUDE,
+                                BusStopsContract.ORIENTATION,
+                                BusStopsContract.SERVICE_LISTING),
+                        selection,
+                        selectionArgs,
+                        null,
+                        cancellationSignal)
+                        ?.use(this@AndroidBusStopsDao::mapCursorToStopDetailsWithServicesListing)
+
+                continuation.resume(result)
+            }
+        }
+    }
+
+    /**
+     * Given a [Cursor], map its contents to a [List] of [StopDetailsWithServices].
+     *
+     * @param cursor The [Cursor] to map.
+     * @return A [List] of [StopDetailsWithServices] objects when the mapping was successful and has
+     * items, otherwise `null`.
+     */
+    private fun mapCursorToStopDetailsWithServicesListing(
+            cursor: Cursor): List<StopDetailsWithServices>? {
+        // Fill Cursor window.
+        val count = cursor.count
+
+        return if (count > 0) {
+            val result = mutableListOf<StopDetailsWithServices>()
+            val stopCodeColumn = cursor.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
+            val stopNameColumn = cursor.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
+            val localityColumn = cursor.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
+            val latitudeColumn = cursor.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+            val longitudeColumn = cursor.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
+            val orientationColumn = cursor.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
+            val serviceListingColumn =
+                    cursor.getColumnIndexOrThrow(BusStopsContract.SERVICE_LISTING)
+
+            while (cursor.moveToNext()) {
+                result += StopDetailsWithServices(
+                        cursor.getString(stopCodeColumn),
+                        StopName(
+                                cursor.getString(stopNameColumn),
+                                cursor.getString(localityColumn)),
+                        cursor.getDouble(latitudeColumn),
+                        cursor.getDouble(longitudeColumn),
+                        cursor.getInt(orientationColumn),
+                        cursor.getString(serviceListingColumn))
+            }
+
+            result
+        } else {
+            null
         }
     }
 

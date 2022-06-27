@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,34 +21,25 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.database.settings.loaders;
-
-import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.loader.content.CursorLoader;
-
-import uk.org.rivernile.android.bustracker.database.settings.SettingsContract;
+package uk.org.rivernile.android.bustracker.core.config
 
 /**
- * This {@link CursorLoader} is used to determine if the given stop code is saved in the user's
- * favourites.
+ * This interface defines configuration properties which are provided at build time.
  *
  * @author Niall Scott
  */
-public class HasFavouriteStopLoader extends CursorLoader {
+interface BuildConfiguration {
 
     /**
-     * Used to create a {@code CursorLoader} which determines if the given stop code is saved in
-     * the user's favourites.
-     *
-     * @param context A {@link Context} instance.
-     * @param stopCode The bus stop code to determine if the user has a favourite saved for.
+     * The nearest stops latitude span.
      */
-    public HasFavouriteStopLoader(@NonNull final Context context, @NonNull final String stopCode) {
-        super(context, SettingsContract.Favourites.CONTENT_URI,
-                new String[] { SettingsContract.Favourites._ID },
-                SettingsContract.Favourites.STOP_CODE + " = ?", new String[] { stopCode }, null);
-    }
+    val nearestStopsLatitudeSpan: Double
+
+    /**
+     * The nearest stops longitude span.
+     */
+    val nearestStopsLongitudeSpan: Double
 }

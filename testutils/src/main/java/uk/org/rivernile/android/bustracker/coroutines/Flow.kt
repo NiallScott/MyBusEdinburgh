@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,31 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+package uk.org.rivernile.android.bustracker.coroutines
+
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
- * This interface is used to determine if the device the app is running on is capable of using
- * location-aware services.
+ * To aid in testing, this produces a [Flow] which initially delays for an optionally supplied
+ * [initialDelay] and then emits [elements] one by one with a given [interval] between each
+ * emission.
  *
- * @author Niall Scott
+ * @param initialDelay The initial delay before emitting elements.
+ * @param interval The interval between emitting elements.
+ * @param elements The elements to emit.
+ * @param T The type of item emitted by this [Flow].
+ * @return A [Flow] which emits the given elements with the given delays.
  */
-interface HasLocationFeatureDetector {
+fun <T> intervalFlowOf(
+        initialDelay: Long,
+        interval: Long,
+        vararg elements: T): Flow<T> = flow {
+    delay(initialDelay)
 
-    /**
-     * Does the device have location-aware features?
-     */
-    val hasLocationFeature: Boolean
-
-    /**
-     * Does the device have a GPS location provider?
-     */
-    val hasGpsLocationProvider: Boolean
+    for (element in elements) {
+        emit(element)
+        delay(interval)
+    }
 }

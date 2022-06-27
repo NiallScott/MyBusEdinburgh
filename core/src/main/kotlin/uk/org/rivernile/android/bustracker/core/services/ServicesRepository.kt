@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -102,6 +102,11 @@ class ServicesRepository @Inject internal constructor(
             }
         }
     }
+
+    /**
+     * This provides a [Flow] which emits a [List] containing all known service names.
+     */
+    val allServiceNamesFlow get() = servicesDao.allServiceNamesFlow
 
     /**
      * A suspended function which obtains the colours for services and then sends it to the given

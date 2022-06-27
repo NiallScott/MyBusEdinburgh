@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,28 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+package uk.org.rivernile.android.bustracker.core.config
+
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * This interface is used to determine if the device the app is running on is capable of using
- * location-aware services.
+ * This repository contains properties which pertain to how the application is configured.
  *
+ * @param buildConfiguration The configuration generated at build time.
  * @author Niall Scott
  */
-interface HasLocationFeatureDetector {
+@Singleton
+class ConfigRepository @Inject internal constructor(
+        private val buildConfiguration: BuildConfiguration) {
 
     /**
-     * Does the device have location-aware features?
+     * The nearest stops latitude span.
      */
-    val hasLocationFeature: Boolean
+    val nearestStopsLatitudeSpan get() = buildConfiguration.nearestStopsLatitudeSpan
 
     /**
-     * Does the device have a GPS location provider?
+     * The nearest stops longitude span.
      */
-    val hasGpsLocationProvider: Boolean
+    val nearestStopsLongitudeSpan get() = buildConfiguration.nearestStopsLongitudeSpan
 }

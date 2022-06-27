@@ -28,11 +28,15 @@ package uk.org.rivernile.android.bustracker.core.busstops
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -41,6 +45,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
@@ -209,6 +214,58 @@ class BusStopsRepositoryTest {
         observer.assertValues(expected1, null, expected3)
         verify(busStopsDao)
                 .removeOnBusStopsChangedListener(any())
+    }
+
+    @Test
+    fun getStopDetailsWithinSpanFlowDoesNotUseServiceFilterWhenItIsNull() {
+        val stopDetailsFlow = mock<Flow<List<StopDetailsWithServices>?>>()
+        whenever(busStopsDao.getStopDetailsWithinSpanFlow(
+                any(),
+                any(),
+                any(),
+                any()))
+                .thenReturn(stopDetailsFlow)
+
+        val result = repository.getStopDetailsWithinSpanFlow(1.0, 2.0, 3.0, 4.0, null)
+
+        assertNotNull(result)
+        verify(busStopsDao, never())
+                .getStopDetailsWithinSpanFlow(any(), any(), any(), any(), any())
+    }
+
+    @Test
+    fun getStopDetailsWithinSpanFlowDoesNotUseServiceFilterWhenItIsEmpty() {
+        val stopDetailsFlow = mock<Flow<List<StopDetailsWithServices>?>>()
+        whenever(busStopsDao.getStopDetailsWithinSpanFlow(
+                any(),
+                any(),
+                any(),
+                any()))
+                .thenReturn(stopDetailsFlow)
+
+        val result = repository.getStopDetailsWithinSpanFlow(1.0, 2.0, 3.0, 4.0, emptyList())
+
+        assertNotNull(result)
+        verify(busStopsDao, never())
+                .getStopDetailsWithinSpanFlow(any(), any(), any(), any(), any())
+    }
+
+    @Test
+    fun getStopDetailsWithinSpanFlowUsesServiceFilterWithItIsPopulated() {
+        val stopDetailsFlow = mock<Flow<List<StopDetailsWithServices>?>>()
+        whenever(busStopsDao.getStopDetailsWithinSpanFlow(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()))
+                .thenReturn(stopDetailsFlow)
+
+        val result = repository.getStopDetailsWithinSpanFlow(1.0, 2.0, 3.0, 4.0, listOf("1", "2"))
+
+        assertNotNull(result)
+        verify(busStopsDao, never())
+                .getStopDetailsWithinSpanFlow(any(), any(), any(), any())
     }
 
     private fun createStopName() = StopName("Name", "Locality")

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-* Copyright (C) 2011 - 2018 Niall 'Rivernile' Scott
+* Copyright (C) 2011 - 2022 Niall 'Rivernile' Scott
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors or contributors be held liable for
@@ -24,14 +24,20 @@
 *     software but are simply adaptations to a specific environment are
 *     exempt from clause 2.
 */ -->
-<FrameLayout
+<uk.org.rivernile.android.bustracker.core.widget.ContentView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/contentView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    app:progressView="@id/progress"
+    app:contentView="@id/recyclerView"
+    app:errorView="@id/layoutError"
+    tools:contentLayout="content">
+
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@android:id/list"
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="@dimen/padding_default"
@@ -41,11 +47,14 @@
         android:visibility="gone"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:visbility="visible" />
+        tools:listitem="@layout/neareststops_list_item" />
+
     <include
         layout="@layout/indeterminate_progress"
         android:visibility="visible"
         tools:visibility="gone" />
+
     <include
+        android:id="@+id/layoutError"
         layout="@layout/error_with_resolve_button" />
-</FrameLayout>
+</uk.org.rivernile.android.bustracker.core.widget.ContentView>

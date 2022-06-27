@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -60,7 +60,7 @@ internal class ServiceStopsContract @Inject constructor(
          */
         const val SERVICE_NAME = "serviceName"
 
-        private const val TABLE_NAME = "service_stops"
+        internal const val TABLE_NAME = "service_stops"
     }
 
     private val typeSingle = "${TableContract.SUBTYPE_SINGLE}/vnd.$authority.$TABLE_NAME"

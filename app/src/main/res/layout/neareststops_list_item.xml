@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,15 +29,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="72dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingLeft="?listPreferredItemPaddingLeft"
-    android:paddingStart="?listPreferredItemPaddingLeft"
-    android:paddingRight="?listPreferredItemPaddingRight"
-    android:paddingEnd="?listPreferredItemPaddingRight"
+    android:paddingStart="?listPreferredItemPaddingStart"
+    android:paddingEnd="?listPreferredItemPaddingEnd"
     android:background="?selectableItemBackground"
     android:clickable="true"
+    android:focusable="true"
     android:longClickable="true">
+
     <ImageView
         android:id="@+id/imgDirection"
         android:layout_width="40dp"
@@ -45,25 +46,25 @@
         android:scaleType="center"
         android:contentDescription="@null"
         tools:src="@drawable/mapmarker_n" />
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp"
-        android:minHeight="72dp"
         android:paddingTop="20dp"
         android:paddingBottom="20dp"
         android:orientation="vertical"
         android:gravity="center_vertical">
+
         <TextView
             android:id="@android:id/text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
             tools:text="Example text" />
+
         <TextView
             android:id="@android:id/text2"
             android:layout_width="match_parent"
@@ -71,6 +72,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
             tools:text="Sample subtext" />
     </LinearLayout>
+
     <TextView
         android:id="@+id/txtDistance"
         android:layout_width="wrap_content"

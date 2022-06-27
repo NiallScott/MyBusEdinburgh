@@ -28,11 +28,14 @@ package uk.org.rivernile.android.bustracker.core.services
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -233,5 +236,17 @@ class ServicesRepositoryTest {
         observer.assertValues(expected1, null, expected3)
         verify(servicesDao)
                 .removeOnServicesChangedListener(any())
+    }
+
+    @Test
+    fun allServiceNameFlowGetsFlowFromDao() {
+        val repository = ServicesRepository(servicesDao, null)
+        val mockFlow = mock<Flow<List<String>?>>()
+        whenever(servicesDao.allServiceNamesFlow)
+                .thenReturn(mockFlow)
+
+        val result = repository.allServiceNamesFlow
+
+        assertSame(mockFlow, result)
     }
 }

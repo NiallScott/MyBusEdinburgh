@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+package uk.org.rivernile.android.bustracker.core.database.busstop.entities
 
 /**
- * This interface is used to determine if the device the app is running on is capable of using
- * location-aware services.
+ * This class describes stop details for a single stop.
  *
+ * @property stopCode The stop code.
+ * @property stopName The name details for the stop.
+ * @property latitude The latitude of the stop.
+ * @property longitude The longitude of the stop.
+ * @property orientation The orientation of the stop.
+ * @property serviceListing A [String] which lists the known services for the stop.
  * @author Niall Scott
  */
-interface HasLocationFeatureDetector {
-
-    /**
-     * Does the device have location-aware features?
-     */
-    val hasLocationFeature: Boolean
-
-    /**
-     * Does the device have a GPS location provider?
-     */
-    val hasGpsLocationProvider: Boolean
-}
+data class StopDetailsWithServices(
+        val stopCode: String,
+        val stopName: StopName,
+        val latitude: Double,
+        val longitude: Double,
+        val orientation: Int,
+        val serviceListing: String?)
