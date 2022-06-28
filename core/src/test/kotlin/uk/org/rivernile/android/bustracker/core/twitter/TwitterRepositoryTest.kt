@@ -26,9 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.twitter
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -39,6 +36,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.NoConnectivityException
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterEndpoint

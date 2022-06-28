@@ -35,7 +35,6 @@ import android.net.Uri
 import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
-import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
@@ -49,6 +48,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule

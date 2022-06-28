@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Assert.assertSame
 import org.junit.Before
@@ -34,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.whenever
 
 /**
  * Tests for [LiveTimesFlowFactory].

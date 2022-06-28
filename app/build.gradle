@@ -142,16 +142,13 @@ dependencies {
     implementation "com.squareup.picasso:picasso:$picassoVersion"
 
     // Test dependencies
+    androidTestImplementation project(':testutils')
     androidTestImplementation "androidx.test:core:$androidTestCoreVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "org.hamcrest:hamcrest-library:$hamcrestVersion"
     androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
-    androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
 
     testImplementation project(':testutils')
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
 }

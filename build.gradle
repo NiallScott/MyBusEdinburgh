@@ -56,7 +56,7 @@ buildscript {
         junitVersion = '4.13.2'
         androidTestCoreVersion = '1.4.0'
         mockitoVersion = '4.6.1'
-        mockitoKotlinVersion = '2.2.0'
+        mockitoKotlinVersion = '4.0.0'
         androidXCoreTesting = '2.1.0'
         hamcrestVersion = '2.2'
         espressoVersion = '3.4.0'

@@ -137,13 +137,10 @@ dependencies {
     androidTestImplementation "androidx.test:core:$androidTestCoreVersion"
     androidTestImplementation "androidx.test:runner:$androidTestCoreVersion"
     androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
-    androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
     kaptAndroidTest "com.google.dagger:dagger-compiler:$daggerVersion"
     kaptAndroidTest "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     testImplementation project(':testutils')
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
 }
 
