@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.core.preferences
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -47,7 +46,6 @@ import javax.inject.Inject
  * @param defaultDispatcher The [CoroutineDispatcher] to perform processing operations on.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class PreferenceRepository @Inject constructor(
         private val preferenceManager: PreferenceManager,
         @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,

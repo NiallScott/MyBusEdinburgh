@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.neareststops
 
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -53,7 +52,6 @@ import javax.inject.Inject
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class NearestStopsFragmentViewModelFactory @Inject constructor(
         private val servicesRepository: ServicesRepository,
         private val busStopsRepository: BusStopsRepository,

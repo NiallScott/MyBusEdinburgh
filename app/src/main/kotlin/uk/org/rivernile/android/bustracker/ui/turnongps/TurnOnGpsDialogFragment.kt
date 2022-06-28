@@ -37,7 +37,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.TurnOnGpsBinding
@@ -50,7 +49,6 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class TurnOnGpsDialogFragment : DialogFragment() {
 
     @Inject

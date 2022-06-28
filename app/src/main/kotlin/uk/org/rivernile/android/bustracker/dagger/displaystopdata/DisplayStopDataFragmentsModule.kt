@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.dagger.displaystopdata
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment
 
@@ -41,12 +40,10 @@ import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment
 @Module
 interface DisplayStopDataFragmentsModule {
 
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeBusTimesFragment(): BusTimesFragment
 
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeStopDetailsFragment(): StopDetailsFragment

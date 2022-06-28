@@ -52,7 +52,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class TimeAlertRunnerTest {
 

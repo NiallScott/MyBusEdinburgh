@@ -50,7 +50,6 @@ import javax.inject.Inject
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AboutViewModel @Inject constructor(
         private val appRepository: AppRepository,
         private val busStopDatabaseRepository: BusStopDatabaseRepository,
@@ -59,6 +58,7 @@ class AboutViewModel @Inject constructor(
     /**
      * This [LiveData] emits the 'about' items to be displayed.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     val itemsLiveData = databaseMetadataFlow
             .mapLatest(this::createAboutItems)
             .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)

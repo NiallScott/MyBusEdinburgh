@@ -33,7 +33,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -77,7 +76,6 @@ internal class AndroidDatabaseInformationDao @Inject constructor(
         }
     }
 
-    @ExperimentalCoroutinesApi
     override val databaseMetadataFlow get() = callbackFlow {
         val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
 
@@ -101,7 +99,6 @@ internal class AndroidDatabaseInformationDao @Inject constructor(
     /**
      * Get the [DatabaseMetadata] from the database and send it to the channel.
      */
-    @ExperimentalCoroutinesApi
     private suspend fun ProducerScope<DatabaseMetadata?>.getAndSendDatabaseMetadata() {
         channel.send(getDatabaseMetadata())
     }

@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.services
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +56,6 @@ class ServicesRepository @Inject internal constructor(
      * services will be returned.
      * @return The [Flow] which emits the service-colour mapping.
      */
-    @ExperimentalCoroutinesApi
     fun getColoursForServicesFlow(services: Array<String>?)
             : Flow<Map<String, Int>?> = callbackFlow {
         val listener = object : ServicesDao.OnServicesChangedListener {
@@ -83,7 +81,6 @@ class ServicesRepository @Inject internal constructor(
      * @param services The services to get details for.
      * @return The [Flow] which emits the service details.
      */
-    @ExperimentalCoroutinesApi
     fun getServiceDetailsFlow(services: Set<String>): Flow<Map<String, ServiceDetails>?> {
         return callbackFlow {
             val listener = object : ServicesDao.OnServicesChangedListener {

@@ -53,7 +53,7 @@ import uk.org.rivernile.android.bustracker.coroutines.test
 /**
  * Tests for [UiItemRetriever].
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class UiItemRetrieverTest {
 

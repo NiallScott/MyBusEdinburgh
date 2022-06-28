@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.dagger.neareststops
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 
 /**
@@ -39,7 +38,6 @@ import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 @Module
 interface NearestStopsFragmentsModule {
 
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeNearestStopsFragment(): NearestStopsFragment

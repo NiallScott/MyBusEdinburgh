@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -48,7 +48,6 @@ import javax.inject.Inject
  * @param busStopsRepository Where the stop details are sourced from.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AlertsRetriever @Inject constructor(
         private val alertsRepository: AlertsRepository,
         private val busStopsRepository: BusStopsRepository,) {
@@ -56,6 +55,7 @@ class AlertsRetriever @Inject constructor(
     /**
      * This produces a [Flow] which emits [List]s of [UiAlert]s.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     val allAlertsFlow: Flow<List<UiAlert>?> get() =
             alertsRepository.getAllAlertsFlow()
                     .flatMapLatest(this::loadStopDetailsForAlerts)

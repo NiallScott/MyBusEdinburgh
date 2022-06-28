@@ -39,7 +39,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.AboutFragmentBinding
 import javax.inject.Inject
@@ -49,7 +48,6 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AboutFragment : Fragment() {
 
     @Inject

@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.dagger.alerts
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment
@@ -42,7 +41,6 @@ import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogF
 @Module
 interface AlertFragmentsModule {
 
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeAddTimeAlertDialogFragment(): AddTimeAlertDialogFragment
@@ -51,7 +49,6 @@ interface AlertFragmentsModule {
     @ContributesAndroidInjector
     fun contributeDeleteTimeAlertDialogFragment(): DeleteTimeAlertDialogFragment
 
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeAddProximityAlertDialogFragment(): AddProximityAlertDialogFragment

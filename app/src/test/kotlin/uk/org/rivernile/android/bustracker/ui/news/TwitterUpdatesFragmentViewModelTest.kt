@@ -55,7 +55,7 @@ import java.io.IOException
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class TwitterUpdatesFragmentViewModelTest {
 

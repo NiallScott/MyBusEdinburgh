@@ -33,7 +33,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.os.Looper
 import androidx.annotation.RequiresPermission
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -67,7 +66,6 @@ internal class PlatformLocationSource @Inject constructor(
         private const val USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS = 10f
     }
 
-    @ExperimentalCoroutinesApi
     override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {
         callbackFlow {
             // Before registering for location updates, immediately obtain the last location from
@@ -83,6 +81,7 @@ internal class PlatformLocationSource @Inject constructor(
                     }
                 }
 
+                @Deprecated("Deprecated in Java")
                 override fun onStatusChanged(provider: String, status: Int, extras: Bundle?) {
                     // This is deprecated in Android Q and above. But we don't need anything from
                     // this callback anyway.

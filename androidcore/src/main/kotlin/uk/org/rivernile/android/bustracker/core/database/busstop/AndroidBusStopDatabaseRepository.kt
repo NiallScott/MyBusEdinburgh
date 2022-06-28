@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
@@ -54,7 +53,6 @@ internal class AndroidBusStopDatabaseRepository @Inject constructor(
                 BusStopDatabaseContract.METHOD_REPLACE_DATABASE, newDatabase.absolutePath, null)
     }
 
-    @ExperimentalCoroutinesApi
     override val databaseMetadataFlow: Flow<DatabaseMetadata?> get() =
             databaseInformationDao.databaseMetadataFlow
 }

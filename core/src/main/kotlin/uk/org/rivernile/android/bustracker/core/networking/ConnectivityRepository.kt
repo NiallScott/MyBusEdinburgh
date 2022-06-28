@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.networking
 
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +56,6 @@ class ConnectivityRepository @Inject internal constructor(
      *
      * @return The [Flow] which emits device connectivity status.
      */
-    @ExperimentalCoroutinesApi
     fun hasInternetConnectivityFlow(): Flow<Boolean> = callbackFlow {
         val listener = object : ConnectivityChecker.OnConnectivityChangedListener {
             override fun onConnectivityChanged() {

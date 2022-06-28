@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.ui.alerts.time
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
@@ -50,7 +49,6 @@ import javax.inject.Inject
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AddTimeAlertDialogFragmentViewModelFactory @Inject constructor(
         private val busStopsRepository: BusStopsRepository,
         private val serviceStopsRepository: ServiceStopsRepository,

@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.location
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -40,6 +39,5 @@ interface LocationSource {
     /**
      * Produce a [Flow] which emits the latest [DeviceLocation] until cancelled.
      */
-    @ExperimentalCoroutinesApi
     val userVisibleLocationFlow: Flow<DeviceLocation>
 }

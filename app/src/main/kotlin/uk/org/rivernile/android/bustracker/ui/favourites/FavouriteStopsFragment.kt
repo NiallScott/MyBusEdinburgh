@@ -38,7 +38,6 @@ import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener
@@ -68,7 +67,6 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class FavouriteStopsFragment : Fragment() {
 
     @Inject

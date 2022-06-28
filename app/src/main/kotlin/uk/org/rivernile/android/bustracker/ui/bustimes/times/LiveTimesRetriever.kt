@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,7 +46,6 @@ import javax.inject.Inject
  * @param liveTimesMapper Used to map the obtained data in to a [UiResult].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class LiveTimesRetriever @Inject constructor(
         private val liveTimesRepository: LiveTimesRepository,
         private val servicesRepository: ServicesRepository,
@@ -61,6 +60,7 @@ class LiveTimesRetriever @Inject constructor(
      * @param numberOfDepartures The number of departures per service to obtain.
      * @return A [Flow] which contains the updating [UiResult].
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getLiveTimesFlow(stopCode: String, numberOfDepartures: Int): Flow<UiResult> =
             liveTimesRepository.getLiveTimesFlow(stopCode, numberOfDepartures)
                     .flatMapLatest {

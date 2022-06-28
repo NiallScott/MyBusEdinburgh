@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.servicestops
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +53,6 @@ class ServiceStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get the services for.
      * @return The [Flow] which emits the [List] of services for the given stop code.
      */
-    @ExperimentalCoroutinesApi
     fun getServicesForStopFlow(stopCode: String): Flow<List<String>?> = callbackFlow {
         val listener = object : ServiceStopsDao.OnServiceStopsChangedListener {
             override fun onServiceStopsChanged() {
@@ -81,7 +79,6 @@ class ServiceStopsRepository @Inject internal constructor(
      * @return The [Flow] which emits the [Map] of stop codes to a [List] of services which service
      * those stops.
      */
-    @ExperimentalCoroutinesApi
     fun getServicesForStopsFlow(stopCodes: Set<String>):
             Flow<Map<String, List<String>>?> = callbackFlow {
         val listener = object : BusStopsDao.OnBusStopsChangedListener {

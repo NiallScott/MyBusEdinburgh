@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.busstops
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +55,6 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get details for.
      * @return The [Flow] which emits the [StopName] for the given stop code.
      */
-    @ExperimentalCoroutinesApi
     fun getNameForStopFlow(stopCode: String): Flow<StopName?> = callbackFlow {
         val listener = object : BusStopsDao.OnBusStopsChangedListener {
             override fun onBusStopsChanged() {
@@ -81,7 +79,6 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get details for.
      * @return The [Flow] which emits [StopDetails] for the given stop code.
      */
-    @ExperimentalCoroutinesApi
     fun getBusStopDetailsFlow(stopCode: String): Flow<StopDetails?> = callbackFlow {
         val listener = object : BusStopsDao.OnBusStopsChangedListener {
             override fun onBusStopsChanged() {
@@ -106,7 +103,6 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCodes The stop codes to get details for.
      * @return The [Flow] which emits [StopDetails] for the given stop codes.
      */
-    @ExperimentalCoroutinesApi
     fun getBusStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?> =
             callbackFlow {
         val listener = object : BusStopsDao.OnBusStopsChangedListener {
@@ -135,7 +131,6 @@ class BusStopsRepository @Inject internal constructor(
      * @param maxLongitude The maximum longitude of stops.
      * @param serviceFilter The listing of services to filter by.
      */
-    @ExperimentalCoroutinesApi
     fun getStopDetailsWithinSpanFlow(
             minLatitude: Double,
             minLongitude: Double,

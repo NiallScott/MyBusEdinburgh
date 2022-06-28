@@ -60,7 +60,7 @@ import kotlin.test.assertFalse
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AndroidAlertsDaoTest {
 

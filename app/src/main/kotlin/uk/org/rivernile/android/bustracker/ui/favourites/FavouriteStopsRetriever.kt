@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,6 @@ import javax.inject.Inject
  * @param serviceStopsRepository Used to retrieve the service listing for the stops.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class FavouriteStopsRetriever @Inject constructor(
         private val favouritesRepository: FavouritesRepository,
         private val serviceStopsRepository: ServiceStopsRepository) {
@@ -53,6 +52,7 @@ class FavouriteStopsRetriever @Inject constructor(
     /**
      * This produces a [Flow] which emits [List]s of [UiFavouriteStop]s.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     val favouriteStopsFlow: Flow<List<UiFavouriteStop>?> get() =
             favouritesRepository.favouriteStopsFlow
                     .flatMapLatest(this::loadServices)

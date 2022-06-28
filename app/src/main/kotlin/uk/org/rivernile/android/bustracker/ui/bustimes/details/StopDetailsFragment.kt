@@ -38,7 +38,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.android.support.AndroidSupportInjection
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
@@ -50,7 +49,6 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class StopDetailsFragment : Fragment() {
 
     companion object {

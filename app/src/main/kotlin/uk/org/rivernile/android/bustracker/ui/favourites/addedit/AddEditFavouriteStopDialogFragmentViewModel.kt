@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -58,7 +58,6 @@ import uk.org.rivernile.android.bustracker.utils.Event
  * @param applicationCoroutineScope The application [CoroutineScope].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AddEditFavouriteStopDialogFragmentViewModel(
         private val savedState: SavedStateHandle,
         private val favouritesRepository: FavouritesRepository,
@@ -85,7 +84,9 @@ class AddEditFavouriteStopDialogFragmentViewModel(
 
     private val stopNameFlow = MutableStateFlow<String?>(null)
 
-    private val uiStateFlow = stopCodeFlow.flatMapLatest(fetcher::loadFavouriteStopAndDetails)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val uiStateFlow = stopCodeFlow
+            .flatMapLatest(fetcher::loadFavouriteStopAndDetails)
             .flowOn(defaultDispatcher)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.InProgress)
 

@@ -50,7 +50,7 @@ import java.util.*
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AboutViewModelTest {
 

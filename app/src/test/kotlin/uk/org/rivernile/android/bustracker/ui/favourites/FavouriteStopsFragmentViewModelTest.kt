@@ -52,7 +52,7 @@ import uk.org.rivernile.android.bustracker.testutils.test
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class FavouriteStopsFragmentViewModelTest {
 

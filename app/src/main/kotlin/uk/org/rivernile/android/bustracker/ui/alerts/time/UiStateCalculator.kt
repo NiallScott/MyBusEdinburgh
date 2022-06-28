@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,7 +38,6 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class UiStateCalculator @Inject constructor() {
 
     /**
@@ -51,6 +50,7 @@ class UiStateCalculator @Inject constructor() {
      * code.
      * @return A [Flow] of [UiState]s, which emits new items when relevant states change.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun createUiStateFlow(
             stopCodeFlow: Flow<String?>,
             stopDetailsFlow: Flow<StopDetails?>,

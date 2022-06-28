@@ -57,7 +57,7 @@ import java.util.Date
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class CheckTimesTaskTest {
 

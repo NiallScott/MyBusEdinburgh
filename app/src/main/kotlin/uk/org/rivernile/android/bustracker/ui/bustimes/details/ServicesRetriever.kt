@@ -45,7 +45,6 @@ import javax.inject.Inject
  * @param servicesRepository Used to retrieve the details for the services.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class ServicesRetriever @Inject constructor(
     private val serviceStopsRepository: ServiceStopsRepository,
     private val servicesRepository: ServicesRepository) {
@@ -58,6 +57,7 @@ class ServicesRetriever @Inject constructor(
      * @return A [Flow] which emits a [List] of [UiItem.Service] for all known services at this
      * stop or `null` is emitted when there are no services for this stop.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getServicesFlow(stopCode: String): Flow<List<UiItem.Service>?> =
             serviceStopsRepository.getServicesForStopFlow(stopCode)
                     .flatMapLatest(this::loadServiceDetails)

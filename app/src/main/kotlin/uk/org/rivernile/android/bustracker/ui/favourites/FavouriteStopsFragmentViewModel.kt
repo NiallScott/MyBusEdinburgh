@@ -61,7 +61,6 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class FavouriteStopsFragmentViewModel(
         savedState: SavedStateHandle,
         favouriteStopsRetriever: FavouriteStopsRetriever,
@@ -137,9 +136,12 @@ class FavouriteStopsFragmentViewModel(
     val isProximityAlertVisibleLiveData: LiveData<Boolean> =
             MutableLiveData(featureRepository.hasProximityAlertFeature)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val hasArrivalAlertFlow = selectedStopCodeFlow
             .flatMapLatest(this::loadHasArrivalAlert)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val hasProximityAlertFlow = selectedStopCodeFlow
             .flatMapLatest(this::loadHasProximityAlert)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)

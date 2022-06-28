@@ -50,7 +50,6 @@ import javax.inject.Inject
  * @param locationRepository Used to access location information.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class DistanceRetriever @Inject constructor(
         private val locationRepository: LocationRepository) {
 
@@ -65,6 +64,7 @@ class DistanceRetriever @Inject constructor(
      * latest stop data to calculate the distance from.
      * @return A [Flow] which emits [UiItem.Distance] items.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun createDistanceFlow(
             permissionsStateFlow: Flow<PermissionsState>,
             stopDetailsFlow: Flow<StopDetails?>): Flow<UiItem.Distance> {
@@ -90,6 +90,7 @@ class DistanceRetriever @Inject constructor(
      * @param stopDetailsFlow A [Flow] which emits [StopDetails].
      * @return A [Flow] of [UiItem.Distance].
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun handlePermissionsStateChanged(
             isPermissionsSufficient: Boolean,
             stopDetailsFlow: Flow<StopDetails?>): Flow<UiItem.Distance> {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -39,7 +38,6 @@ import javax.inject.Inject
  * correct state for the UI.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class LiveTimesFlowFactory @Inject constructor(
         private val liveTimesLoader: LiveTimesLoader,
         private val liveTimesTransform: LiveTimesTransform) {

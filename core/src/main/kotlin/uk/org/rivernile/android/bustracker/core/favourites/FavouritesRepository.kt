@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.favourites
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +53,6 @@ class FavouritesRepository @Inject internal constructor(
      * @param stopCode The `stopCode` to watch.
      * @return The [Flow] which emits the favourite status of the given `stopCode`.
      */
-    @ExperimentalCoroutinesApi
     fun isStopAddedAsFavouriteFlow(stopCode: String): Flow<Boolean> = callbackFlow {
         val listener = object : FavouritesDao.OnFavouritesChangedListener {
             override fun onFavouritesChanged() {
@@ -79,7 +77,6 @@ class FavouritesRepository @Inject internal constructor(
      * @param stopCode The `stopCode` to watch.
      * @return The [Flow] which emits the [FavouriteStop]s for the given `stopCode`.
      */
-    @ExperimentalCoroutinesApi
     fun getFavouriteStopFlow(stopCode: String): Flow<FavouriteStop?> = callbackFlow {
         val listener = object : FavouritesDao.OnFavouritesChangedListener {
             override fun onFavouritesChanged() {
@@ -101,7 +98,6 @@ class FavouritesRepository @Inject internal constructor(
      * Get a [Flow] which emits [List]s of the user saved [FavouriteStop]s. `null` will be emitted
      * if there was an error or there are no items.
      */
-    @ExperimentalCoroutinesApi
     val favouriteStopsFlow: Flow<List<FavouriteStop>?> get() = callbackFlow {
         val listener = object : FavouritesDao.OnFavouritesChangedListener {
             override fun onFavouritesChanged() {

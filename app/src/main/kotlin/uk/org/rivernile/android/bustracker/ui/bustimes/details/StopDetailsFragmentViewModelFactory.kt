@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
 import javax.inject.Inject
@@ -41,7 +40,6 @@ import javax.inject.Inject
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class StopDetailsFragmentViewModelFactory @Inject constructor(
         private val uiItemRetriever: UiItemRetriever,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)

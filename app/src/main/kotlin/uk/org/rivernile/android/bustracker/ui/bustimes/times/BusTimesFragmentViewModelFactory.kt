@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
@@ -47,7 +46,6 @@ import javax.inject.Inject
  * @param defaultDispatcher The dispatcher to use to execute background processing on.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class BusTimesFragmentViewModelFactory @Inject constructor(
         private val liveTimesFlowFactory: LiveTimesFlowFactory,
         private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,

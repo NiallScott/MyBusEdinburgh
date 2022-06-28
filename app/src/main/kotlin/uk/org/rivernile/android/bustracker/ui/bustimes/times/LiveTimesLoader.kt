@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,7 +50,6 @@ import javax.inject.Inject
  * @param preferenceRepository Used to obtain preferences which are required to load the data.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class LiveTimesLoader @Inject constructor(
         private val liveTimesRetriever: LiveTimesRetriever,
         private val preferenceRepository: PreferenceRepository) {
@@ -69,6 +68,7 @@ class LiveTimesLoader @Inject constructor(
      * should occur, this [Flow] will emit a new [Unit].
      * @return A [Flow] which emits [UiResult]s of attempting to load live times.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun loadLiveTimesFlow(
             stopCodeFlow: Flow<String?>,
             refreshFlow: Flow<Unit?>): Flow<UiResult> {

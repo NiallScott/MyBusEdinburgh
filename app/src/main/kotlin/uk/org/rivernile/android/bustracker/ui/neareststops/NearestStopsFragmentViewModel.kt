@@ -73,7 +73,6 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class NearestStopsFragmentViewModel(
         private val savedState: SavedStateHandle,
         servicesRepository: ServicesRepository,
@@ -181,6 +180,7 @@ class NearestStopsFragmentViewModel(
     /**
      * This [LiveData] emits the name of the currently selected stop.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     val selectedStopNameLiveData = selectedStopCodeFlow
             .flatMapLatest(this::loadBusStopName)
             .distinctUntilChanged()

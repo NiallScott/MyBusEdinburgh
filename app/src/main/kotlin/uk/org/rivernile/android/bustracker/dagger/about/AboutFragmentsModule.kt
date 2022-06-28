@@ -27,7 +27,6 @@ package uk.org.rivernile.android.bustracker.dagger.about
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.about.AboutFragment
 
 /**
@@ -44,7 +43,6 @@ interface AboutFragmentsModule {
      *
      * @return An instance of the [AboutFragment] to be injected.
      */
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeAboutFragment(): AboutFragment

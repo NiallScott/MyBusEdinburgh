@@ -64,7 +64,6 @@ import javax.inject.Inject
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AddProximityAlertDialogFragmentViewModel @Inject constructor(
         private val busStopsRepository: BusStopsRepository,
         private val uiStateCalculator: UiStateCalculator,
@@ -93,6 +92,7 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     private val stopCodeFlow = MutableStateFlow<String?>(null)
     private val locationPermissionStateFlow = MutableStateFlow(PermissionState.UNGRANTED)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val stopDetailsFlow = stopCodeFlow.flatMapLatest {
         loadStopDetails(it)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
@@ -190,6 +190,7 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
      * if the stop details change), or a [kotlinx.coroutines.flow.Flow] of `null` if the stop
      * code is `null` or empty.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadStopDetails(stopCode: String?) = if (stopCode?.isNotEmpty() == true) {
         busStopsRepository.getNameForStopFlow(stopCode)
                 .mapLatest<StopName?, StopDetails?> {

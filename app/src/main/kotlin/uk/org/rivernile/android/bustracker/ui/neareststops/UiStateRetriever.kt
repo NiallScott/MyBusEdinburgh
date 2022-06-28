@@ -52,7 +52,6 @@ import kotlin.math.absoluteValue
  * for nearest stops.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class UiStateRetriever @Inject constructor(
         private val locationRepository: LocationRepository,
         private val busStopsRepository: BusStopsRepository,
@@ -66,6 +65,7 @@ class UiStateRetriever @Inject constructor(
      * @param serviceFilterFlow A [Flow] which represents the user's service filter.
      * @return A [Flow] which emits [UiState]s.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getUiStateFlow(
             permissionStateFlow: Flow<PermissionsState>,
             serviceFilterFlow: Flow<List<String>?>): Flow<UiState> {
@@ -89,6 +89,7 @@ class UiStateRetriever @Inject constructor(
      * @param serviceFilterFlow A [Flow] which emits the user's selected services filter.
      * @return A [Flow] of [UiState].
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun handlePermissionsStateChanged(
             isPermissionsSufficient: Boolean,
             serviceFilterFlow: Flow<List<String>?>): Flow<UiState> {
@@ -111,6 +112,7 @@ class UiStateRetriever @Inject constructor(
      * @param serviceFilterFlow A [Flow] which emits the user's selected services filter.
      * @return A [Flow] of [UiState].
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleLocationEnabled(
             isEnabled: Boolean,
             serviceFilterFlow: Flow<List<String>?>): Flow<UiState> {
@@ -133,6 +135,7 @@ class UiStateRetriever @Inject constructor(
      * service name. This is the service filter used to filter results.
      * @return A [Flow] which emits [UiState]s.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadNearestStops(
             location: DeviceLocation,
             serviceFilterFlow: Flow<List<String>?>): Flow<UiState> {

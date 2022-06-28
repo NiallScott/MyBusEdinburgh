@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,6 @@ import androidx.fragment.app.commit
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject
@@ -49,7 +48,6 @@ import javax.inject.Inject
  * @author Niall Scott
  * @see FavouriteStopsFragment
  */
-@ExperimentalCoroutinesApi
 class SelectFavouriteStopActivity : AppCompatActivity(),
         FavouriteStopsFragment.CreateShortcutCallbacks, HasAndroidInjector {
 

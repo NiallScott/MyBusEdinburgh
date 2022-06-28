@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.turnongps
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.nhaarman.mockitokotlin2.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -43,7 +42,6 @@ import uk.org.rivernile.android.bustracker.testutils.test
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class TurnOnGpsDialogFragmentViewModelTest {
 

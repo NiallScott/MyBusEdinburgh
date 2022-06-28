@@ -61,7 +61,7 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AndroidBusStopsDaoTest {
 

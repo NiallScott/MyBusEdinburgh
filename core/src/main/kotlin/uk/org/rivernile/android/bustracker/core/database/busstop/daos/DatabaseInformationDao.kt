@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
 
@@ -47,6 +46,5 @@ interface DatabaseInformationDao {
     /**
      * A [Flow] which emits database metadata.
      */
-    @ExperimentalCoroutinesApi
     val databaseMetadataFlow: Flow<DatabaseMetadata?>
 }

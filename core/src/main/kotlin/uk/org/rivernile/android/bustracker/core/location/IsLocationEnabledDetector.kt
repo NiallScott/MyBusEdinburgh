@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.location
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -39,7 +38,6 @@ interface IsLocationEnabledDetector {
     /**
      * Get a [Flow] which dispatches whether the location-aware services are enabled or not.
      */
-    @ExperimentalCoroutinesApi
     val isLocationEnabledFlow: Flow<Boolean>
 
     /**

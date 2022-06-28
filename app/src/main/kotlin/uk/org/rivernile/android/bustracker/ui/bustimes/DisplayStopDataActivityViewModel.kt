@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,6 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
@@ -50,7 +49,6 @@ import javax.inject.Inject
  * @param alertsRepository The repository to obtain alert details from.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class DisplayStopDataActivityViewModel @Inject constructor(
         private val busStopsRepository: BusStopsRepository,
         private val favouritesRepository: FavouritesRepository,

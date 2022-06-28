@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.dagger.alerts
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 
 /**
@@ -39,7 +38,6 @@ import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 @Module
 interface AlertManagerFragmentModule {
 
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector
     fun contributeAlertManagerFragment(): AlertManagerFragment

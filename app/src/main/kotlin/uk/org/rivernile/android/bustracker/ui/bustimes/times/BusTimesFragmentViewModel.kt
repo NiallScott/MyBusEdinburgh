@@ -64,7 +64,6 @@ import uk.org.rivernile.android.bustracker.utils.Event
  * @param defaultDispatcher Computation is run on this [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class BusTimesFragmentViewModel(
         private val expandedServicesTracker: ExpandedServicesTracker,
         private val liveTimesFlowFactory: LiveTimesFlowFactory,
@@ -126,6 +125,7 @@ class BusTimesFragmentViewModel(
      *
      * If there is no set stop code, this will emit `null`.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     val isAutoRefreshLiveData = distinctStopCodeLiveData.switchMap {
         if (it?.isNotEmpty() == true) {
             preferenceRepository.isLiveTimesAutoRefreshEnabledFlow()
@@ -336,6 +336,7 @@ class BusTimesFragmentViewModel(
      *
      * @return A [Flow] which produces live times.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun createLiveTimesFlow(): Flow<UiTransformedResult> {
         return liveTimesFlowFactory.createLiveTimesFlow(
                 distinctStopCodeLiveData.asFlow(),

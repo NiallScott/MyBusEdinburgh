@@ -42,7 +42,6 @@ import javax.inject.Inject
  * @param favouritesRepository The favourites repository.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class FavouritesStateRetriever @Inject constructor(
         private val favouritesRepository: FavouritesRepository) {
 
@@ -55,6 +54,7 @@ class FavouritesStateRetriever @Inject constructor(
      * @return A [Flow] which emits whether the selected stop is added as a favourite or not, or
      * emits `null` when loading or no stop code is selected.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getIsAddedAsFavouriteStopFlow(selectedStopCodeFlow: Flow<String?>) =
             selectedStopCodeFlow
                     .flatMapLatest(this::loadIsFavouriteStop)

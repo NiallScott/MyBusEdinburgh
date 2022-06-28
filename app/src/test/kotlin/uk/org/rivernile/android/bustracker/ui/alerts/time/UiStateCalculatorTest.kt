@@ -43,7 +43,7 @@ import uk.org.rivernile.android.bustracker.coroutines.test
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class UiStateCalculatorTest {
 
     @get:Rule

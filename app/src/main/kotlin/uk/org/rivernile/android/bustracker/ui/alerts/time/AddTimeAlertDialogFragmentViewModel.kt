@@ -67,7 +67,6 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AddTimeAlertDialogFragmentViewModel(
         private val savedState: SavedStateHandle,
         private val busStopsRepository: BusStopsRepository,
@@ -106,10 +105,12 @@ class AddTimeAlertDialogFragmentViewModel(
 
     private val stopCodeFlow = MutableStateFlow<String?>(null)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val stopDetailsFlow = stopCodeFlow.flatMapLatest {
         loadStopDetails(it)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val availableServicesFlow = stopCodeFlow.flatMapLatest {
         loadServicesForStop(it)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
@@ -201,6 +202,7 @@ class AddTimeAlertDialogFragmentViewModel(
      * if the stop details change), or a [kotlinx.coroutines.flow.Flow] of `null` if the stop
      * code is `null` or empty.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadStopDetails(stopCode: String?) = if (stopCode?.isNotEmpty() == true) {
         busStopsRepository.getNameForStopFlow(stopCode)
                 .mapLatest {
@@ -225,6 +227,7 @@ class AddTimeAlertDialogFragmentViewModel(
      * items if the data changes), or a [kotlinx.coroutines.flow.Flow] of `null` if the stop code is
      * `null` or empty.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadServicesForStop(stopCode: String?) = if (stopCode?.isNotEmpty() == true) {
         serviceStopsRepository.getServicesForStopFlow(stopCode)
                 .mapLatest<List<String>?, List<String>?> {

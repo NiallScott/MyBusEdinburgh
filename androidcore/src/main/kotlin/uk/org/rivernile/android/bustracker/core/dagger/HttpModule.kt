@@ -85,10 +85,10 @@ internal class HttpModule {
      * @param json The app-wide [Json] instance.
      * @return A [Converter.Factory] which does Kotlin JSON (de-)serialisation.
      */
+    @OptIn(ExperimentalSerializationApi::class)
     @Singleton
     @Provides
     @ForKotlinJsonSerialization
-    @ExperimentalSerializationApi
     fun provideKotlinJsonConverterFactory(json: Json): Converter.Factory =
             json.asConverterFactory("application/json".toMediaType())
 }

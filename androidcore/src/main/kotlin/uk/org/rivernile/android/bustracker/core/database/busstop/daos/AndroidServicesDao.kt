@@ -35,7 +35,6 @@ import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +56,6 @@ import javax.inject.Singleton
  * @param ioDispatcher The [CoroutineDispatcher] that database operations are performed on.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 @Singleton
 internal class AndroidServicesDao @Inject constructor(
         private val context: Context,

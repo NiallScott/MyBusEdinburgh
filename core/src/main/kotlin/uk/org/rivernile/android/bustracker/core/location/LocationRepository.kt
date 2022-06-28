@@ -67,7 +67,6 @@ class LocationRepository @Inject internal constructor(
      * Get a [Flow] which returns the location enabled status. Any updates to the status will be
      * emitted from the returned [Flow] until cancelled.
      */
-    @ExperimentalCoroutinesApi
     val isLocationEnabledFlow get() = isLocationEnabledDetector.isLocationEnabledFlow
 
     /**
@@ -88,7 +87,7 @@ class LocationRepository @Inject internal constructor(
      *
      * A empty [Flow] will also be returned when device location services are not enabled.
      */
-    @ExperimentalCoroutinesApi
+    @OptIn(ExperimentalCoroutinesApi::class)
     val userVisibleLocationFlow: Flow<DeviceLocation> get() = if (hasLocationFeature) {
         isLocationEnabledFlow
                 .distinctUntilChanged()
@@ -118,7 +117,6 @@ class LocationRepository @Inject internal constructor(
      * @return A [Flow] with the latest [DeviceLocation] if available, or an empty [Flow] if not
      * available.
      */
-    @ExperimentalCoroutinesApi
     private fun createUserVisibleLocationFlow(locationEnabled: Boolean) = if (locationEnabled) {
         locationSource.userVisibleLocationFlow
     } else {

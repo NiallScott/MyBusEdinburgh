@@ -33,7 +33,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -65,7 +64,6 @@ internal class AndroidLocationSupport @Inject constructor(
     override val hasGpsLocationProvider get() =
         packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 
-    @ExperimentalCoroutinesApi
     override val isLocationEnabledFlow get() = callbackFlow {
         val locationEnabledReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {

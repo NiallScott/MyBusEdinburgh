@@ -35,7 +35,6 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -76,7 +75,6 @@ internal class GooglePlayLocationSource @Inject constructor(
                 .setFastestInterval(USER_VISIBLE_LOCATION_FASTEST_INTERVAL_MILLIS)
     }
 
-    @ExperimentalCoroutinesApi
     override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {
         callbackFlow {
             getLastLocation()?.let {

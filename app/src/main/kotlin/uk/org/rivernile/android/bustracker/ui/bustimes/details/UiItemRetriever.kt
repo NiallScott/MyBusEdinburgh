@@ -50,7 +50,6 @@ import javax.inject.Inject
  * @param featureRepository Used to determine device feature availability.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class UiItemRetriever @Inject constructor(
         private val busStopsRepository: BusStopsRepository,
         private val distanceRetriever: DistanceRetriever,
@@ -67,6 +66,7 @@ class UiItemRetriever @Inject constructor(
      * @param coroutineScope The [CoroutineScope] to execute shared [Flow]s under.
      * @return A [Flow] which emits a [List] of [UiItem]s.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun createUiItemFlow(
             stopCodeFlow: SharedFlow<String?>,
             permissionsStateFlow: Flow<PermissionsState>,

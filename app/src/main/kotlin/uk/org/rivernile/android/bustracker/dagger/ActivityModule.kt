@@ -27,7 +27,6 @@ package uk.org.rivernile.android.bustracker.dagger
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.dagger.about.AboutFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.alerts.AlertFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.alerts.AlertManagerFragmentModule
@@ -76,7 +75,6 @@ interface ActivityModule {
     @ContributesAndroidInjector(modules = [ SettingsFragmentsModule::class ])
     fun contributeSettingsActivity(): SettingsActivity
 
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
         AlertFragmentsModule::class,
@@ -93,7 +91,6 @@ interface ActivityModule {
     @ContributesAndroidInjector
     fun contributeSearchActivity(): SearchActivity
 
-    @ExperimentalCoroutinesApi
     @Suppress("unused")
     @ContributesAndroidInjector(modules = [
         FavouriteStopsFragmentModule::class

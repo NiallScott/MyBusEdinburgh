@@ -34,7 +34,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
@@ -353,7 +352,6 @@ internal class AndroidBusStopsDao @Inject constructor(
         }
     }
 
-    @ExperimentalCoroutinesApi
     override fun getStopDetailsWithinSpanFlow(
             minLatitude: Double,
             minLongitude: Double,
@@ -383,7 +381,6 @@ internal class AndroidBusStopsDao @Inject constructor(
         }
     }
 
-    @ExperimentalCoroutinesApi
     override fun getStopDetailsWithinSpanFlow(
             minLatitude: Double,
             minLongitude: Double,
@@ -425,7 +422,6 @@ internal class AndroidBusStopsDao @Inject constructor(
      * @param maxLatitude The maximum latitude.
      * @param maxLongitude The maximum longitude.
      */
-    @ExperimentalCoroutinesApi
     private suspend fun ProducerScope<List<StopDetailsWithServices>?>.
             getAndSendStopDetailsWithinSpanFlow(
             minLatitude: Double,
@@ -449,7 +445,6 @@ internal class AndroidBusStopsDao @Inject constructor(
      * @param maxLongitude The maximum longitude.
      * @param serviceFilter Service names to filter the results on.
      */
-    @ExperimentalCoroutinesApi
     private suspend fun ProducerScope<List<StopDetailsWithServices>?>.
             getAndSendStopDetailsWithinSpanFlow(
             minLatitude: Double,

@@ -44,7 +44,7 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ClearSearchHistoryDialogFragmentViewModelTest {
 

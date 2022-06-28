@@ -44,7 +44,6 @@ import javax.inject.Inject
  * @param alertsRepository The alerts repository.
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AlertsStateRetriever @Inject constructor(
         private val featureRepository: FeatureRepository,
         private val alertsRepository: AlertsRepository) {
@@ -70,6 +69,7 @@ class AlertsStateRetriever @Inject constructor(
      * @return A [Flow] which emits whether the selected stop is added as an arrival alert or not,
      * or emits `null` when loading or no stop code is selected.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getHasArrivalAlertFlow(selectedStopCodeFlow: Flow<String?>) =
             selectedStopCodeFlow
                     .flatMapLatest(this::loadHasArrivalAlert)
@@ -83,6 +83,7 @@ class AlertsStateRetriever @Inject constructor(
      * @return A [Flow] which emits whether the selected stop is added as a proximity alert or not,
      * or emits `null` when loading or no stop code is selected.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getHasProximityAlertFlow(selectedStopCodeFlow: Flow<String?>) =
             selectedStopCodeFlow
                     .flatMapLatest(this::loadHasProximityAlert)

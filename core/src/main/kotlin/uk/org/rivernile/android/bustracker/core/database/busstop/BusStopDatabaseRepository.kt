@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
 import java.io.File
@@ -48,6 +47,5 @@ interface BusStopDatabaseRepository {
     /**
      * A [Flow] which emits database metadata.
      */
-    @ExperimentalCoroutinesApi
     val databaseMetadataFlow: Flow<DatabaseMetadata?>
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.ui.favourites.addedit
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
@@ -48,7 +47,6 @@ import javax.inject.Inject
  * @param applicationCoroutineScope The application [CoroutineScope].
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
 class AddEditFavouriteStopDialogFragmentViewModelFactory @Inject constructor(
         private val favouritesRepository: FavouritesRepository,
         private val fetcher: FavouriteStopFetcher,

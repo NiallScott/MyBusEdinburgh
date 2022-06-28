@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -63,7 +62,6 @@ class AlertsRepository @Inject internal constructor(
      * @param stopCode The `stopCode` to watch.
      * @return The [Flow] which emits the arrival alert status of the given `stopCode`.
      */
-    @ExperimentalCoroutinesApi
     fun hasArrivalAlertFlow(stopCode: String): Flow<Boolean> = callbackFlow {
         val listener = object : AlertsDao.OnAlertsChangedListener {
             override fun onAlertsChanged() {
@@ -88,7 +86,6 @@ class AlertsRepository @Inject internal constructor(
      * @param stopCode The `stopCode` to watch.
      * @return The [Flow] which emits the proximity alert status of the given `stopCode`.
      */
-    @ExperimentalCoroutinesApi
     fun hasProximityAlertFlow(stopCode: String): Flow<Boolean> = callbackFlow {
         val listener = object : AlertsDao.OnAlertsChangedListener {
             override fun onAlertsChanged() {
@@ -158,7 +155,6 @@ class AlertsRepository @Inject internal constructor(
      *
      * @return A [Flow] which emits a [List] of all the currently set user alerts.
      */
-    @ExperimentalCoroutinesApi
     fun getAllAlertsFlow(): Flow<List<Alert>?> = callbackFlow {
         val listener = object : AlertsDao.OnAlertsChangedListener {
             override fun onAlertsChanged() {

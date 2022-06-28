@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
@@ -58,14 +57,12 @@ class FakeBusStopsDao : BusStopsDao {
     override suspend fun getServicesForStops(stopCodes: Set<String>): Map<String, List<String>>? =
             null
 
-    @ExperimentalCoroutinesApi
     override fun getStopDetailsWithinSpanFlow(
             minLatitude: Double,
             minLongitude: Double,
             maxLatitude: Double,
             maxLongitude: Double) = flowOf(null)
 
-    @ExperimentalCoroutinesApi
     override fun getStopDetailsWithinSpanFlow(
             minLatitude: Double,
             minLongitude: Double,

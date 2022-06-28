@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.daos
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
@@ -108,7 +107,6 @@ interface BusStopsDao {
      * @return A [Flow] which emits [List]s of [StopDetailsWithServices] objects which match the
      * filter parameters.
      */
-    @ExperimentalCoroutinesApi
     fun getStopDetailsWithinSpanFlow(
             minLatitude: Double,
             minLongitude: Double,
@@ -130,7 +128,6 @@ interface BusStopsDao {
      * @return A [Flow] which emits [List]s of [StopDetailsWithServices] objects which match the
      * filter parameters.
      */
-    @ExperimentalCoroutinesApi
     fun getStopDetailsWithinSpanFlow(
             minLatitude: Double,
             minLongitude: Double,

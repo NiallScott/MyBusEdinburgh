@@ -57,7 +57,7 @@ import kotlin.test.assertNull
  *
  * @author Niall Scott
  */
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AndroidBusStopDatabaseRepositoryTest {
 
