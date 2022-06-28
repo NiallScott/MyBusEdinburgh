@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,43 +26,47 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes
 
-import android.content.Context
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.annotation.StringRes
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
- * This [FragmentPagerAdapter] provides the pages and tab titles for [DisplayStopDataActivity].
+ * This [FragmentStateAdapter] provides the pages and tab titles for [DisplayStopDataActivity].
  *
- * @param context The [Context] of [DisplayStopDataActivity].
- * @param fragmentManager The [FragmentManager] owned by [DisplayStopDataActivity].
+ * @param activity The hosting [FragmentActivity].
  * @param stopCode The stop code to show pages for. As the [android.content.Intent] of
  * [DisplayStopDataActivity] cannot be updated after it has been started, the stop code is locked
  * in. Therefore, there is no mechanism to update the stop code later.
  * @author Niall Scott
  */
 class StopDataPagerAdapter(
-        private val context: Context,
-        fragmentManager: FragmentManager,
+        activity: FragmentActivity,
         private val stopCode: String?)
-    : FragmentPagerAdapter(fragmentManager, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+    : FragmentStateAdapter(activity) {
 
-    override fun getItem(position: Int): Fragment = when(position) {
-        0 -> BusTimesFragment.newInstance(stopCode)
-        // We're not allowed to return null when the position is unknown as per the specified
-        // interface of the parent class, so we stick StopDetailsFragment in the last position and
-        // hope the value of getCount() method is respected properly.
-        else -> StopDetailsFragment.newInstance(stopCode)
+    companion object {
+
+        private const val PAGE_COUNT = 2
+
+        private const val PAGE_TIMES = 0
+        private const val PAGE_DETAILS = 1
     }
 
-    override fun getCount() = 2
+    override fun getItemCount() = PAGE_COUNT
 
-    override fun getPageTitle(position: Int): CharSequence? = when (position) {
-        0 -> context.getString(R.string.displaystopdata_tab_times)
-        1 -> context.getString(R.string.displaystopdata_tab_details)
-        else -> null
+    override fun createFragment(position: Int) = when (position) {
+        PAGE_TIMES -> BusTimesFragment.newInstance(stopCode)
+        PAGE_DETAILS -> StopDetailsFragment.newInstance(stopCode)
+        else -> throw IllegalArgumentException()
+    }
+
+    @StringRes
+    fun getPageTitleRes(position: Int) = when (position) {
+        PAGE_TIMES -> R.string.displaystopdata_tab_times
+        PAGE_DETAILS -> R.string.displaystopdata_tab_details
+        else -> throw IllegalArgumentException()
     }
 }

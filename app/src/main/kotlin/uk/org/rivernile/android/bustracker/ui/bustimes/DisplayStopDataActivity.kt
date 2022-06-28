@@ -36,7 +36,9 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.viewpager2.widget.MarginPageTransformer
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -130,11 +132,17 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         }
 
         viewBinding.apply {
-            viewPager.apply {
-                pageMargin = resources.getDimensionPixelSize(R.dimen.padding_default)
-                adapter = StopDataPagerAdapter(this@DisplayStopDataActivity, supportFragmentManager,
-                        viewModel.stopCode)
-            }.let(tabLayout::setupWithViewPager)
+            val pagerAdapter = StopDataPagerAdapter(
+                    this@DisplayStopDataActivity,
+                    viewModel.stopCode)
+            viewPager.adapter = pagerAdapter
+            viewPager.setPageTransformer(MarginPageTransformer(
+                    resources.getDimensionPixelSize(R.dimen.padding_default)))
+            viewPager.offscreenPageLimit = 1
+
+            TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+                tab.text = getString(pagerAdapter.getPageTitleRes(position))
+            }.attach()
 
             appBarLayout.addOnOffsetChangedListener(appBarOffsetChangedListener)
         }
