@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,6 +48,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDa
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -266,6 +268,17 @@ class BusStopsRepositoryTest {
         assertNotNull(result)
         verify(busStopsDao, never())
                 .getStopDetailsWithinSpanFlow(any(), any(), any(), any())
+    }
+
+    @Test
+    fun getStopSearchResultsFlowReturnsFlowFromBusStopsDao() {
+        val stopSearchResultsFlow = mock<Flow<List<StopSearchResult>?>>()
+        whenever(busStopsDao.getStopSearchResultsFlow("123456"))
+                .thenReturn(stopSearchResultsFlow)
+
+        val result = repository.getStopSearchResultsFlow("123456")
+
+        assertSame(stopSearchResultsFlow, result)
     }
 
     private fun createStopName() = StopName("Name", "Locality")

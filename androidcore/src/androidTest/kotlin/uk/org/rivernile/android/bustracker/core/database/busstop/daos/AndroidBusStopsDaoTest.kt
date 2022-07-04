@@ -52,6 +52,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDe
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -1012,6 +1013,163 @@ class AndroidBusStopsDaoTest {
         assertTrue(cursor.isClosed)
     }
 
+    @Test
+    fun getStopSearchResultsReturnsNullWhenCursorIsNull() = runTest {
+        val expectedProjection = getExpectedProjectionForStopSearchResult()
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor? {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} LIKE ? OR " +
+                        "${BusStopsContract.STOP_NAME} LIKE ? OR " +
+                        "${BusStopsContract.LOCALITY} LIKE ?",
+                        selection)
+                assertArrayEquals(arrayOf("%term%", "%term%", "%term%"), selectionArgs)
+                assertEquals("${BusStopsContract.STOP_NAME} ASC", sortOrder)
+
+                return null
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopSearchResults("term")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getStopSearchResultsReturnsNullWhenCursorIsEmpty() = runTest {
+        val expectedProjection = getExpectedProjectionForStopSearchResult()
+        val cursor = MatrixCursor(expectedProjection)
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} LIKE ? OR " +
+                        "${BusStopsContract.STOP_NAME} LIKE ? OR " +
+                        "${BusStopsContract.LOCALITY} LIKE ?",
+                        selection)
+                assertArrayEquals(arrayOf("%term%", "%term%", "%term%"), selectionArgs)
+                assertEquals("${BusStopsContract.STOP_NAME} ASC", sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+
+        val result = busStopsDao.getStopSearchResults("term")
+
+        assertNull(result)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopSearchResultsReturnsResultWhenCursorHasSingleItem() = runTest {
+        val expectedProjection = getExpectedProjectionForStopSearchResult()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("123456", "Stop name", "Locality", 1, "1, 2, 3"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} LIKE ? OR " +
+                        "${BusStopsContract.STOP_NAME} LIKE ? OR " +
+                        "${BusStopsContract.LOCALITY} LIKE ?",
+                        selection)
+                assertArrayEquals(arrayOf("%term%", "%term%", "%term%"), selectionArgs)
+                assertEquals("${BusStopsContract.STOP_NAME} ASC", sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+        val expected = listOf(
+                StopSearchResult(
+                        "123456",
+                        StopName(
+                                "Stop name",
+                                "Locality"),
+                        1,
+                        "1, 2, 3"))
+
+        val result = busStopsDao.getStopSearchResults("term")
+
+        assertEquals(result, expected)
+        assertTrue(cursor.isClosed)
+    }
+
+    @Test
+    fun getStopSearchResultsReturnsResultWhenCursorHasMultipleItems() = runTest {
+        val expectedProjection = getExpectedProjectionForStopSearchResult()
+        val cursor = MatrixCursor(expectedProjection)
+        cursor.addRow(arrayOf("123456", "Stop name 1", "Locality", 1, "1, 2, 3"))
+        cursor.addRow(arrayOf("987654", "Stop name 2", "Locality", 2, null))
+        cursor.addRow(arrayOf("135790", "Stop name 3", null, 3, "1"))
+        object : MockContentProvider() {
+            override fun query(
+                    uri: Uri,
+                    projection: Array<out String>?,
+                    selection: String?,
+                    selectionArgs: Array<out String>?,
+                    sortOrder: String?,
+                    cancellationSignal: CancellationSignal?): Cursor {
+                assertEquals(contentUri, uri)
+                assertArrayEquals(expectedProjection, projection)
+                assertEquals("${BusStopsContract.STOP_CODE} LIKE ? OR " +
+                        "${BusStopsContract.STOP_NAME} LIKE ? OR " +
+                        "${BusStopsContract.LOCALITY} LIKE ?",
+                        selection)
+                assertArrayEquals(arrayOf("%term%", "%term%", "%term%"), selectionArgs)
+                assertEquals("${BusStopsContract.STOP_NAME} ASC", sortOrder)
+
+                return cursor
+            }
+        }.also(this@AndroidBusStopsDaoTest::addMockProvider)
+        val expected = listOf(
+                StopSearchResult(
+                        "123456",
+                        StopName(
+                                "Stop name 1",
+                                "Locality"),
+                        1,
+                        "1, 2, 3"),
+                StopSearchResult(
+                        "987654",
+                        StopName(
+                                "Stop name 2",
+                                "Locality"),
+                        2,
+                        null),
+                StopSearchResult(
+                        "135790",
+                        StopName(
+                                "Stop name 3",
+                                null),
+                        3,
+                        "1")
+        )
+
+        val result = busStopsDao.getStopSearchResults("term")
+
+        assertEquals(result, expected)
+        assertTrue(cursor.isClosed)
+    }
+
     private fun addMockProvider(provider: ContentProvider) {
         mockContentResolver.addProvider(TEST_AUTHORITY, provider)
     }
@@ -1049,6 +1207,13 @@ class AndroidBusStopsDaoTest {
             BusStopsContract.LOCALITY,
             BusStopsContract.LATITUDE,
             BusStopsContract.LONGITUDE,
+            BusStopsContract.ORIENTATION,
+            BusStopsContract.SERVICE_LISTING)
+
+    private fun getExpectedProjectionForStopSearchResult() = arrayOf(
+            BusStopsContract.STOP_CODE,
+            BusStopsContract.STOP_NAME,
+            BusStopsContract.LOCALITY,
             BusStopsContract.ORIENTATION,
             BusStopsContract.SERVICE_LISTING)
 }

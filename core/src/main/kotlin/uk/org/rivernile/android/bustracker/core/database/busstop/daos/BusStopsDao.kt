@@ -31,6 +31,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDe
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 
 /**
  * This DAO is used to access bus stops.
@@ -134,6 +135,16 @@ interface BusStopsDao {
             maxLatitude: Double,
             maxLongitude: Double,
             serviceFilter: List<String>): Flow<List<StopDetailsWithServices>?>
+
+    /**
+     * Return a [Flow] which emits [List]s of [StopSearchResult] objects, based upon the supplied
+     * [searchTerm].
+     *
+     * @param searchTerm The search term to use to search for stops.
+     * @return A [Flow] which emits [List]s of [StopSearchResult] objects, based upon the supplied
+     * [searchTerm].
+     */
+    fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?>
 
     /**
      * This interface should be implemented to listen for changes to bus stops. Call

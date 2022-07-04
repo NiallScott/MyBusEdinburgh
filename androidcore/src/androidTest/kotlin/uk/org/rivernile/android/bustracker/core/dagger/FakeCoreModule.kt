@@ -33,6 +33,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
@@ -50,7 +51,7 @@ import javax.inject.Singleton
 @Module(includes = [
     FakeCoreModule.Bindings::class
 ])
-class FakeCoreModule(
+class FakeCoreModule @OptIn(DelicateCoroutinesApi::class) constructor(
         @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope =
                 GlobalScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher =

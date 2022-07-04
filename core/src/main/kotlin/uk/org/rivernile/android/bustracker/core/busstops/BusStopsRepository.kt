@@ -35,6 +35,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDa
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -149,6 +150,17 @@ class BusStopsRepository @Inject internal constructor(
                     minLongitude,
                     maxLatitude,
                     maxLongitude)
+
+    /**
+     * Return a [Flow] which emits [List]s of [StopSearchResult] objects for stops which match the
+     * given search term.
+     *
+     * @param searchTerm The search term to use to search for stops.
+     * @return A [Flow] which emits [List]s of [StopSearchResult] objects for stops which match the
+     * given search term.
+     */
+    fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?> =
+            busStopsDao.getStopSearchResultsFlow(searchTerm)
 
     /**
      * A suspended function which gets [StopName] for the given `stopCode` and sends these details

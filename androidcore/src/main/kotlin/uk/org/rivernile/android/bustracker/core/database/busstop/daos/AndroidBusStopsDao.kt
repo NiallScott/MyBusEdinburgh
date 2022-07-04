@@ -46,6 +46,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDe
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -413,6 +414,23 @@ internal class AndroidBusStopsDao @Inject constructor(
         }
     }
 
+    override fun getStopSearchResultsFlow(searchTerm: String) = callbackFlow {
+        val listener = object : BusStopsDao.OnBusStopsChangedListener {
+            override fun onBusStopsChanged() {
+                launch {
+                    getAndSendStopSearchResults(searchTerm)
+                }
+            }
+        }
+
+        addOnBusStopsChangedListener(listener)
+        getAndSendStopSearchResults(searchTerm)
+
+        awaitClose {
+            removeOnBusStopsChangedListener(listener)
+        }
+    }
+
     /**
      * Get a [List] of [StopDetailsWithServices]s from the database using the parameters as the
      * filter and send it to the channel.
@@ -428,7 +446,7 @@ internal class AndroidBusStopsDao @Inject constructor(
             minLongitude: Double,
             maxLatitude: Double,
             maxLongitude: Double) {
-        channel.send(getStopDetailsWithinSpan(
+        send(getStopDetailsWithinSpan(
                 minLatitude,
                 minLongitude,
                 maxLatitude,
@@ -452,12 +470,23 @@ internal class AndroidBusStopsDao @Inject constructor(
             maxLatitude: Double,
             maxLongitude: Double,
             serviceFilter: List<String>) {
-        channel.send(getStopDetailsWithinSpan(
+        send(getStopDetailsWithinSpan(
                 minLatitude,
                 minLongitude,
                 maxLatitude,
                 maxLongitude,
                 serviceFilter))
+    }
+
+    /**
+     * Get a [List] of [StopSearchResult]s from the database using the [searchTerm] and send it to
+     * the channel
+     *
+     * @param searchTerm The search term to use to search for stops.
+     */
+    private suspend fun ProducerScope<List<StopSearchResult>?>.
+            getAndSendStopSearchResults(searchTerm: String) {
+        send(getStopSearchResults(searchTerm))
     }
 
     /**
@@ -574,6 +603,41 @@ internal class AndroidBusStopsDao @Inject constructor(
         }
     }
 
+    @VisibleForTesting
+    suspend fun getStopSearchResults(searchTerm: String): List<StopSearchResult>? {
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val selection = "${BusStopsContract.STOP_CODE} LIKE ? OR " +
+                        "${BusStopsContract.STOP_NAME} LIKE ? OR " +
+                        "${BusStopsContract.LOCALITY} LIKE ?"
+                val fixedSearchTerm = "%$searchTerm%"
+                val selectionArgs = arrayOf(fixedSearchTerm, fixedSearchTerm, fixedSearchTerm)
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.STOP_CODE,
+                                BusStopsContract.STOP_NAME,
+                                BusStopsContract.LOCALITY,
+                                BusStopsContract.ORIENTATION,
+                                BusStopsContract.SERVICE_LISTING),
+                        selection,
+                        selectionArgs,
+                        "${BusStopsContract.STOP_NAME} ASC",
+                        cancellationSignal)
+                        ?.use(this@AndroidBusStopsDao::mapCursorToStopSearchResult)
+
+                continuation.resume(result)
+            }
+        }
+    }
+
     /**
      * Given a [Cursor], map its contents to a [List] of [StopDetailsWithServices].
      *
@@ -605,6 +669,35 @@ internal class AndroidBusStopsDao @Inject constructor(
                                 cursor.getString(localityColumn)),
                         cursor.getDouble(latitudeColumn),
                         cursor.getDouble(longitudeColumn),
+                        cursor.getInt(orientationColumn),
+                        cursor.getString(serviceListingColumn))
+            }
+
+            result
+        } else {
+            null
+        }
+    }
+
+    private fun mapCursorToStopSearchResult(cursor: Cursor): List<StopSearchResult>? {
+        // Fill the Cursor window.
+        val count = cursor.count
+
+        return if (count > 0) {
+            val result = mutableListOf<StopSearchResult>()
+            val stopCodeColumn = cursor.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
+            val stopNameColumn = cursor.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
+            val localityColumn = cursor.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
+            val orientationColumn = cursor.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
+            val serviceListingColumn =
+                    cursor.getColumnIndexOrThrow(BusStopsContract.SERVICE_LISTING)
+
+            while (cursor.moveToNext()) {
+                result += StopSearchResult(
+                        cursor.getString(stopCodeColumn),
+                        StopName(
+                                cursor.getString(stopNameColumn),
+                                cursor.getString(localityColumn)),
                         cursor.getInt(orientationColumn),
                         cursor.getString(serviceListingColumn))
             }
