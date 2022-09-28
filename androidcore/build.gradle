@@ -30,6 +30,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
 android {
+    namespace 'uk.org.rivernile.android.bustracker.androidcore'
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
 

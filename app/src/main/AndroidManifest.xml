@@ -26,8 +26,7 @@
 */ -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="uk.org.rivernile.edinburghbustracker.android">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Tell the Google Play Store that this app uses location features, but
          app does not require that devices have them. -->

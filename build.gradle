@@ -31,7 +31,7 @@ buildscript {
         androidBuildToolsVersion = '31.0.0'
 
         // Dependency versions
-        kotlinVersion = '1.7.0'
+        kotlinVersion = '1.7.10'
         kotlinCoroutinesVersion = '1.6.3'
         androidXCoreVersion = '1.8.0'
         androidXActivityVersion = '1.4.0'
@@ -69,7 +69,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.1'
+        classpath 'com.android.tools.build:gradle:7.3.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"

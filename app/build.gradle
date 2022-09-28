@@ -35,6 +35,7 @@ ext {
 }
 
 android {
+    namespace 'uk.org.rivernile.edinburghbustracker.android'
     compileSdkVersion androidCompileSdkVersion
     buildToolsVersion androidBuildToolsVersion
 
