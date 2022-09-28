@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.features
 
+import android.content.pm.PackageManager
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,12 +37,14 @@ import javax.inject.Singleton
  * @param stopMapFeatureAvailabilityProvider An implementation which tells us if the stop map
  * feature is available.
  * @param locationRepository Used to obtain location service information.
+ * @param packageManager Used to query the package manager for device features.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidFeatureRepository @Inject constructor(
         private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
-        private val locationRepository: LocationRepository) : FeatureRepository {
+        private val locationRepository: LocationRepository,
+        private val packageManager: PackageManager) : FeatureRepository {
 
     override val hasStopMapUiFeature get() =
         stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()
@@ -50,4 +53,7 @@ internal class AndroidFeatureRepository @Inject constructor(
 
     override val hasProximityAlertFeature get() =
         locationRepository.hasLocationFeature
+
+    override val hasCameraFeature get() =
+            packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
 }

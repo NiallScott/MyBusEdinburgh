@@ -36,7 +36,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.verify
-import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
+import uk.org.rivernile.android.bustracker.core.search.SearchHistoryRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
@@ -52,14 +52,14 @@ class ClearSearchHistoryDialogFragmentViewModelTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var searchHistoryDao: SearchHistoryDao
+    private lateinit var searchHistoryRepository: SearchHistoryRepository
 
     private lateinit var viewModel: ClearSearchHistoryDialogFragmentViewModel
 
     @Before
     fun setUp() {
         viewModel = ClearSearchHistoryDialogFragmentViewModel(
-                searchHistoryDao,
+                searchHistoryRepository,
                 coroutineRule.scope,
                 coroutineRule.testDispatcher)
     }
@@ -69,7 +69,7 @@ class ClearSearchHistoryDialogFragmentViewModelTest {
         viewModel.onUserConfirmClearSearchHistory()
         advanceUntilIdle()
 
-        verify(searchHistoryDao)
+        verify(searchHistoryRepository)
                 .clearSearchHistory()
     }
 }

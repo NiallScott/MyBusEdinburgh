@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -64,41 +64,6 @@ public class BusStopDatabaseIntegrationTests {
                 return mockContentResolver;
             }
         };
-    }
-
-    /**
-     * Test that the query arguments are correct for
-     * {@link BusStopDatabase#searchBusStops(Context, String)}.
-     */
-    @Test
-    public void testSearchDatabaseQuery() {
-        mockContentResolver.addProvider(BusStopContract.AUTHORITY, new MockContentProvider() {
-            @Override
-            public Cursor query(final Uri uri, final String[] projection, final String selection,
-                    final String[] selectionArgs, final String sortOrder) {
-                assertEquals(BusStopContract.BusStops.CONTENT_URI, uri);
-                assertArrayEquals(new String[] {
-                        BusStopContract.BusStops.STOP_CODE,
-                        BusStopContract.BusStops.STOP_NAME,
-                        BusStopContract.BusStops.LATITUDE,
-                        BusStopContract.BusStops.LONGITUDE,
-                        BusStopContract.BusStops.ORIENTATION,
-                        BusStopContract.BusStops.LOCALITY,
-                        BusStopContract.BusStops.SERVICE_LISTING
-                }, projection);
-                assertEquals("stopCode LIKE ? OR stopName LIKE ? OR locality LIKE ?", selection);
-                assertArrayEquals(new String[] {
-                        "%example%",
-                        "%example%",
-                        "%example%"
-                }, selectionArgs);
-                assertNull(sortOrder);
-
-                return null;
-            }
-        });
-
-        BusStopDatabase.searchBusStops(mockContext, "example");
     }
 
     /**

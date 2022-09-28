@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,32 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.ui.search
+
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 
 /**
- * This repository can be queried to determine if a feature is available.
+ * This class contains the UI data for showing a single stop search result within the UI.
  *
+ * @property stopCode The stop code of the search result.
+ * @property stopName The name details for the stop.
+ * @property orientation The stop orientation.
+ * @property services The service listing for the stop.
  * @author Niall Scott
  */
-interface FeatureRepository {
-
-    /**
-     * Is the stop map UI feature available?
-     */
-    val hasStopMapUiFeature: Boolean
-
-    /**
-     * Is the time alert feature enabled?
-     */
-    val hasArrivalAlertFeature: Boolean
-
-    /**
-     * Is the proximity alert feature available?
-     */
-    val hasProximityAlertFeature: Boolean
-
-    /**
-     * Is the camera feature available?
-     */
-    val hasCameraFeature: Boolean
-}
+data class UiSearchResult(
+        val stopCode: String,
+        val stopName: StopName?,
+        val orientation: Int,
+        val services: String?)

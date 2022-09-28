@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,11 +24,9 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.search.daos
+package uk.org.rivernile.android.bustracker.core.search
 
-import android.provider.SearchRecentSuggestions
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -37,45 +35,44 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.verify
+import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
- * Tests for [AndroidSearchHistoryDao].
+ * Tests for [SearchHistoryRepository].
  *
  * @author Niall Scott
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
-class AndroidSearchHistoryDaoTest {
+class SearchHistoryRepositoryTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var recentSuggestions: SearchRecentSuggestions
+    private lateinit var searchHistoryDao: SearchHistoryDao
 
-    private lateinit var searchHistoryDao: AndroidSearchHistoryDao
+    private lateinit var searchHistoryRepository: SearchHistoryRepository
 
     @Before
     fun setUp() {
-        searchHistoryDao = AndroidSearchHistoryDao(recentSuggestions, coroutineRule.testDispatcher)
+        searchHistoryRepository = SearchHistoryRepository(searchHistoryDao)
     }
 
     @Test
-    fun addSearchTermAddsTermToRecentSuggestions() = runTest {
-        searchHistoryDao.addSearchTerm("test")
-        advanceUntilIdle()
+    fun addSearchTermAddsSearchTermToDao() = runTest {
+        searchHistoryRepository.addSearchTerm("test")
 
-        verify(recentSuggestions)
-                .saveRecentQuery("test", null)
+        verify(searchHistoryDao)
+                .addSearchTerm("test")
     }
 
     @Test
-    fun clearSearchHistoryClearsHistoryOnRecentSuggestions() = runTest {
-        searchHistoryDao.clearSearchHistory()
-        advanceUntilIdle()
+    fun clearSearchHistoryCallsDao() = runTest {
+        searchHistoryRepository.clearSearchHistory()
 
-        verify(recentSuggestions)
-                .clearHistory()
+        verify(searchHistoryDao)
+                .clearSearchHistory()
     }
 }

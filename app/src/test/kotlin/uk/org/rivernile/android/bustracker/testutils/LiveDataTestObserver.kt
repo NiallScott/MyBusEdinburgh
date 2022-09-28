@@ -37,12 +37,7 @@ import org.junit.Assert.assertTrue
  * @param T The type of data emitted by the [LiveData] instance.
  * @return A [LiveDataTestObserver] for this [LiveData] instance.
  */
-fun <T> LiveData<T>.test(): LiveDataTestObserver<T> {
-    val observer = LiveDataTestObserver<T>()
-    observeForever(observer)
-
-    return observer
-}
+fun <T> LiveData<T>.test() = LiveDataTestObserver<T>().also(this::observeForever)
 
 /**
  * This class is used to collect the emissions of a [LiveData] object and store them for later
@@ -78,7 +73,7 @@ class LiveDataTestObserver<T> : Observer<T> {
      * Assert this [Observer] has not collected any values.
      */
     fun assertEmpty() {
-        assertTrue(values.isEmpty())
+        assertTrue("values = $values", values.isEmpty())
     }
 
     /**

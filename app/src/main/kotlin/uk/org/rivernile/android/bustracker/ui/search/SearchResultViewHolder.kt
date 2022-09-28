@@ -24,16 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.neareststops
+package uk.org.rivernile.android.bustracker.ui.search
 
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.NeareststopsListItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.SearchListItemBinding
 
 /**
- * A [RecyclerView.ViewHolder] which shows nearest stop items.
+ * A [RecyclerView.ViewHolder] which shows search result items.
  *
  * @param viewBinding The view binding.
  * @param clickListener This listener is called when there are click events on this view holder.
@@ -43,34 +43,28 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.NeareststopsList
  * caching mechanism.
  * @author Niall Scott
  */
-class NearestStopViewHolder(
-        private val viewBinding: NeareststopsListItemBinding,
-        private val clickListener: OnNearStopItemClickListener,
+class SearchResultViewHolder(
+        private val viewBinding: SearchListItemBinding,
+        private val clickListener: OnItemClickedListener,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
         private val textFormattingUtils: TextFormattingUtils,
         private val directionStrings: Array<String>)
     : RecyclerView.ViewHolder(viewBinding.root) {
 
-    private var item: UiNearestStop? = null
+    private var item: UiSearchResult? = null
 
     init {
-        viewBinding.root.apply {
-            setOnClickListener {
-                handleClick()
-            }
-
-            setOnLongClickListener {
-                handleLongClick()
-            }
+        viewBinding.root.setOnClickListener {
+            handleClick()
         }
     }
 
     /**
-     * Populate this item with a [UiNearestStop].
+     * Populate this item with a [UiSearchResult].
      *
      * @param item The item to populate this [RecyclerView.ViewHolder] with.
      */
-    fun populate(item: UiNearestStop?) {
+    fun populate(item: UiSearchResult?) {
         this.item = item
 
         viewBinding.apply {
@@ -85,11 +79,7 @@ class NearestStopViewHolder(
                         it.stopName)
 
                 text2.text = it.services?.ifBlank { null }
-                        ?: viewBinding.root.context.getString(R.string.neareststops_no_services)
-
-                txtDistance.text = viewBinding.root.context.getString(
-                        R.string.neareststops_distance_format,
-                        it.distance)
+                        ?: viewBinding.root.context.getString(R.string.search_item_no_services)
 
                 if (orientation >= 0 && orientation < directionStrings.size) {
                     directionStrings[orientation]
@@ -101,7 +91,6 @@ class NearestStopViewHolder(
                 imgDirection.contentDescription = null
                 text1.text = null
                 text2.text = null
-                txtDistance.text = null
             }
         }
     }
@@ -110,15 +99,6 @@ class NearestStopViewHolder(
      * Handle this item being clicked.
      */
     private fun handleClick() {
-        item?.let(clickListener::onNearestStopClicked)
+        item?.let(clickListener::onItemClicked)
     }
-
-    /**
-     * Handle this item being long clicked.
-     *
-     * @return `true` if the long click was handled, otherwise `false`.
-     */
-    private fun handleLongClick() = item?.let {
-        clickListener.onNearestStopLongClicked(it.stopCode)
-    } ?: false
 }

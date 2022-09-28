@@ -158,11 +158,12 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ******************************
     -->
     <string name="search_title">Search</string>
+    <string name="search_item_no_services">No known services</string>
     <string name="search_scan_error">There was a problem reading the QR code data</string>
     <string name="search_invalid_qrcode">The scanned QR code does not contain stop data</string>
     <string name="search_error_empty">Type your search term or enter a stop code to begin</string>
     <string name="search_error_no_results">No results</string>
-    
+
     <!--
     ********************************
     * Strings for SettingsActivity *

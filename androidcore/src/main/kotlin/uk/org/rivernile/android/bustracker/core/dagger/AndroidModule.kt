@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.app.Application
+import android.app.SearchManager
 import android.app.backup.BackupManager
 import android.app.job.JobScheduler
 import android.content.Context
@@ -154,6 +155,17 @@ internal class AndroidModule {
     @Provides
     @Singleton
     fun providePackageManager(context: Context): PackageManager = context.packageManager
+
+    /**
+     * Provide the [SearchManager].
+     *
+     * @param context The application [Context].
+     * @return The [SearchManager] instance.
+     */
+    @Provides
+    @Singleton
+    fun provideSearchManager(context: Context): SearchManager =
+            context.getSystemService(Context.SEARCH_SERVICE) as SearchManager
 
     /**
      * This interface contains Dagger bindings for pre-provided types.

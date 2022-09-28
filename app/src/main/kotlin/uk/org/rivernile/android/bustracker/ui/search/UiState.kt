@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,32 +24,36 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.ui.search
 
 /**
- * This repository can be queried to determine if a feature is available.
+ * This sealed interface encapsultes the different ways the UI can be presented depending upon the
+ * state.
  *
  * @author Niall Scott
  */
-interface FeatureRepository {
+sealed interface UiState {
 
     /**
-     * Is the stop map UI feature available?
+     * The UI should present the empty search term state.
      */
-    val hasStopMapUiFeature: Boolean
+    object EmptySearchTerm : UiState
 
     /**
-     * Is the time alert feature enabled?
+     * The UI should present the progress state.
      */
-    val hasArrivalAlertFeature: Boolean
+    object InProgress : UiState
 
     /**
-     * Is the proximity alert feature available?
+     * The UI should present the no results state.
      */
-    val hasProximityAlertFeature: Boolean
+    object NoResults : UiState
 
     /**
-     * Is the camera feature available?
+     * The UI should present the content state.
+     *
+     * @property results The results to be shown.
      */
-    val hasCameraFeature: Boolean
+    data class Content(
+            val results: List<UiSearchResult>) : UiState
 }

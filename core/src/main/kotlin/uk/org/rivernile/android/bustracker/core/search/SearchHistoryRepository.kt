@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,32 +24,35 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.core.search
+
+import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * This repository can be queried to determine if a feature is available.
+ * This repository is used to access data and perform actions on search history.
  *
+ * @param searchHistoryDao Used to access the search history data.
  * @author Niall Scott
  */
-interface FeatureRepository {
+@Singleton
+class SearchHistoryRepository @Inject internal constructor(
+        private val searchHistoryDao: SearchHistoryDao) {
 
     /**
-     * Is the stop map UI feature available?
+     * Add a new search term to the search history collection of previous search terms.
+     *
+     * @param searchTerm The search term to add.
      */
-    val hasStopMapUiFeature: Boolean
+    suspend fun addSearchTerm(searchTerm: String) {
+        searchHistoryDao.addSearchTerm(searchTerm)
+    }
 
     /**
-     * Is the time alert feature enabled?
+     * Clear the search history, so that all previously entered user search terms are removed.
      */
-    val hasArrivalAlertFeature: Boolean
-
-    /**
-     * Is the proximity alert feature available?
-     */
-    val hasProximityAlertFeature: Boolean
-
-    /**
-     * Is the camera feature available?
-     */
-    val hasCameraFeature: Boolean
+    suspend fun clearSearchHistory() {
+        searchHistoryDao.clearSearchHistory()
+    }
 }

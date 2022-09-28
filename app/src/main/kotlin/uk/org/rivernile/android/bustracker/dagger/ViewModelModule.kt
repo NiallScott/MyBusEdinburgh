@@ -39,6 +39,7 @@ import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivityViewModel
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragmentViewModel
+import uk.org.rivernile.android.bustracker.ui.search.SearchActivityViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.ClearSearchHistoryDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragmentViewModel
@@ -201,6 +202,19 @@ interface ViewModelModule {
     @ViewModelKey(TurnOnGpsDialogFragmentViewModel::class)
     fun bindTurnOnGpsDialogFragmentViewModel(
             viewModel: TurnOnGpsDialogFragmentViewModel): ViewModel
+
+    /**
+     * Inject a [SearchActivityViewModel] when requested.
+     *
+     * @param viewModel A [SearchActivityViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(SearchActivityViewModel::class)
+    fun bindSearchActivityViewModel(
+            viewModel: SearchActivityViewModel): ViewModel
 
     /**
      * Inject a [ViewModelFactory] when requested.

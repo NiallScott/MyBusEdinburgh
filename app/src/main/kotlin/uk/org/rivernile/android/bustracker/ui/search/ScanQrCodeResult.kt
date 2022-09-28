@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,32 +24,27 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.ui.search
 
 /**
- * This repository can be queried to determine if a feature is available.
+ * This sealed interface encapsulates the result of scanning a QR code.
  *
  * @author Niall Scott
  */
-interface FeatureRepository {
+sealed interface ScanQrCodeResult {
 
     /**
-     * Is the stop map UI feature available?
+     * Scanning the QR code was successful (the remote [android.app.Activity] returned a result).
+     * However, this does not necessarily mean the data was valid. For example, the given [stopCode]
+     * could still be `null` or some other invalid value.
+     *
+     * @property stopCode The scanned stop code - may be valid or invalid data.
      */
-    val hasStopMapUiFeature: Boolean
+    data class Success(
+            val stopCode: String?) : ScanQrCodeResult
 
     /**
-     * Is the time alert feature enabled?
+     * There was an error scanning the QR code, e.g. operation was cancelled.
      */
-    val hasArrivalAlertFeature: Boolean
-
-    /**
-     * Is the proximity alert feature available?
-     */
-    val hasProximityAlertFeature: Boolean
-
-    /**
-     * Is the camera feature available?
-     */
-    val hasCameraFeature: Boolean
+    object Error : ScanQrCodeResult
 }

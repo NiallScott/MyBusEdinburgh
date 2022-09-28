@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,32 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.ui.search
 
 /**
- * This repository can be queried to determine if a feature is available.
+ * Classes which wish to be informed that a search item has been clicked should implement this
+ * interface.
  *
  * @author Niall Scott
  */
-interface FeatureRepository {
+fun interface OnItemClickedListener {
 
     /**
-     * Is the stop map UI feature available?
+     * This is called when a [UiSearchResult] has been clicked.
+     *
+     * @param item The item which has been clicked.
      */
-    val hasStopMapUiFeature: Boolean
-
-    /**
-     * Is the time alert feature enabled?
-     */
-    val hasArrivalAlertFeature: Boolean
-
-    /**
-     * Is the proximity alert feature available?
-     */
-    val hasProximityAlertFeature: Boolean
-
-    /**
-     * Is the camera feature available?
-     */
-    val hasCameraFeature: Boolean
+    fun onItemClicked(item: UiSearchResult)
 }

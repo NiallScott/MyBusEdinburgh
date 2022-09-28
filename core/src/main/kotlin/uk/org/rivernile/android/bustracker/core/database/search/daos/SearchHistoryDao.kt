@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,10 +38,10 @@ interface SearchHistoryDao {
      *
      * @param searchTerm The user's search term.
      */
-    fun addSearchTerm(searchTerm: String)
+    suspend fun addSearchTerm(searchTerm: String)
 
     /**
      * Clear the user's search history.
      */
-    fun clearSearchHistory()
+    suspend fun clearSearchHistory()
 }

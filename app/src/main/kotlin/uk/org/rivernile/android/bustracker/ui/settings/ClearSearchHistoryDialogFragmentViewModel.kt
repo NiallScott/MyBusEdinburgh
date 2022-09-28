@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,21 +30,21 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.search.SearchHistoryRepository
 import javax.inject.Inject
 
 /**
  * This is a [ViewModel] for use with [ClearSearchHistoryDialogFragment].
  *
- * @param searchHistoryDao The DAO to access the user's search history.
+ * @param searchHistoryRepository Used to access search history data.
  * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The default [CoroutineDispatcher] to dispatch on.
  * @author Niall Scott
  */
 class ClearSearchHistoryDialogFragmentViewModel @Inject constructor(
-        private val searchHistoryDao: SearchHistoryDao,
+        private val searchHistoryRepository: SearchHistoryRepository,
         @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher): ViewModel() {
 
@@ -53,7 +53,7 @@ class ClearSearchHistoryDialogFragmentViewModel @Inject constructor(
      */
     fun onUserConfirmClearSearchHistory() {
         applicationCoroutineScope.launch(defaultDispatcher) {
-            searchHistoryDao.clearSearchHistory()
+            searchHistoryRepository.clearSearchHistory()
         }
     }
 }

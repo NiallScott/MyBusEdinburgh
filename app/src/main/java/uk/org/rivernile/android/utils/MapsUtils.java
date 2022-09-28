@@ -57,7 +57,7 @@ public final class MapsUtils {
      */
     @Deprecated
     @DrawableRes
-    public static int getDirectionDrawableResourceId(final int orientation) {
+    static int getDirectionDrawableResourceId(final int orientation) {
         switch (orientation) {
             case 0:
                 return R.drawable.mapmarker_n;
