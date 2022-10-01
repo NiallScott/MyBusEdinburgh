@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 import android.Manifest
 import android.app.Activity
 import android.app.PendingIntent
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import android.content.Context
 import android.content.Intent
@@ -41,14 +40,13 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.MenuProvider
+import androidx.fragment.app.viewModels
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
@@ -64,6 +62,7 @@ import uk.org.rivernile.android.bustracker.ui.search.SearchActivity
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.utils.LocationUtils
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.BusstopmapFragmentBinding
 import javax.inject.Inject
 
 /**
@@ -85,17 +84,16 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     @Inject
     lateinit var googleApiAvailability: GoogleApiAvailability
 
+    private val viewModel: BusStopMapViewModel by viewModels { viewModelFactory }
+
     private lateinit var callbacks: Callbacks
-    private lateinit var viewModel: BusStopMapViewModel
     private var map: GoogleMap? = null
     private var clusterManager: ClusterManager<Stop>? = null
     private var stopClusterRenderer: StopClusterRenderer? = null
     private var routeLines: Map<String, List<Polyline>>? = null
 
-    private var layoutError: View? = null
-    private var txtError: TextView? = null
-    private var btnErrorResolve: Button? = null
-    private var mapView: MapView? = null
+    private val viewBinding get() = _viewBinding!!
+    private var _viewBinding: BusstopmapFragmentBinding? = null
 
     private var menuItemServices: MenuItem? = null
     private var menuItemTrafficView: MenuItem? = null
@@ -131,7 +129,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
          * @param stopCode The initially selected stop code.
          * @return A new instance of [BusStopMapFragment].
          */
-        @JvmStatic
         fun newInstance(stopCode: String?) = BusStopMapFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOPCODE, stopCode)
@@ -146,7 +143,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
          * @param longitude The initial camera longitude.
          * @return A new instance of [BusStopMapFragment].
          */
-        @JvmStatic
         fun newInstance(latitude: Double, longitude: Double) = BusStopMapFragment().apply {
             arguments = Bundle().apply {
                 putDouble(ARG_LATITUDE, latitude)
@@ -168,52 +164,46 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?): View {
+        _viewBinding = BusstopmapFragmentBinding.inflate(inflater, container, false)
 
-        viewModel = ViewModelProvider(this, viewModelFactory)
-                .get(BusStopMapViewModel::class.java)
-
-        viewModel.serviceNames.observe(this, Observer {
-            configureServicesMenuItem()
-        })
-        viewModel.showStopDetails.observe(this, Observer(callbacks::onShowBusTimes))
-        viewModel.showSearch.observe(this, Observer {
-            showSearch()
-        })
-        viewModel.showServicesChooser.observe(this, Observer {
-            showServicesChooser()
-        })
-        viewModel.showMapTypeSelection.observe(this, Observer {
-            showMapTypeSelection()
-        })
-        viewModel.updateTrafficView.observe(this, Observer {
-            handleTrafficViewMenuItemSelected()
-        })
+        return viewBinding.root
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.busstopmap_fragment, container, false).apply {
-            layoutError = findViewById(R.id.layoutError)
-            txtError = findViewById(R.id.txtError)
-            btnErrorResolve = findViewById(R.id.btnErrorResolve)
-            mapView = findViewById(R.id.mapView)
-
-            btnErrorResolve?.setText(R.string.busstopmapfragment_button_resolve)
-        }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         requireActivity().setTitle(R.string.map_title)
 
         savedInstanceState?.let(this::restoreState) ?: doFirstCreate()
 
-        mapView?.let {
-            it.onCreate(savedInstanceState)
-            it.getMapAsync(this)
+        viewBinding.mapView.apply {
+            onCreate(savedInstanceState)
+            getMapAsync(this@BusStopMapFragment)
+        }
+
+        viewBinding.layoutError.btnErrorResolve.setText(R.string.busstopmapfragment_button_resolve)
+
+        val viewLifecycleOwner = viewLifecycleOwner
+
+        viewModel.serviceNames.observe(viewLifecycleOwner) {
+            configureServicesMenuItem()
+        }
+        viewModel.showStopDetails.observe(viewLifecycleOwner, callbacks::onShowBusTimes)
+        viewModel.showSearch.observe(viewLifecycleOwner) {
+            showSearch()
+        }
+        viewModel.showServicesChooser.observe(viewLifecycleOwner) {
+            showServicesChooser()
+        }
+        viewModel.showMapTypeSelection.observe(viewLifecycleOwner) {
+            showMapTypeSelection()
+        }
+        viewModel.updateTrafficView.observe(viewLifecycleOwner) {
+            handleTrafficViewMenuItemSelected()
         }
 
         if (savedInstanceState == null) {
@@ -227,25 +217,25 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         super.onStart()
 
         checkGooglePlayServices()
-        mapView?.onStart()
+        viewBinding.mapView.onStart()
     }
 
     override fun onResume() {
         super.onResume()
 
-        mapView?.onResume()
+        viewBinding.mapView.onResume()
     }
 
     override fun onPause() {
         super.onPause()
 
-        mapView?.onPause()
+        viewBinding.mapView.onPause()
     }
 
     override fun onStop() {
         super.onStop()
 
-        mapView?.onStop()
+        viewBinding.mapView.onStop()
 
         map?.let {
             val position = it.cameraPosition
@@ -259,19 +249,15 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onDestroyView() {
         super.onDestroyView()
 
+        viewBinding.mapView.onDestroy()
         map = null
-        mapView?.onDestroy()
-        mapView = null
-
-        layoutError = null
-        txtError = null
-        btnErrorResolve = null
+        _viewBinding = null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        mapView?.onSaveInstanceState(outState)
+        viewBinding.mapView.onSaveInstanceState(outState)
         outState.putStringArray(STATE_SELECTED_SERVICES, viewModel.selectedServices)
         outState.putString(STATE_SELECTED_STOP_CODE, viewModel.showMapMarkerBubble.value?.stopCode)
     }
@@ -279,41 +265,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onLowMemory() {
         super.onLowMemory()
 
-        mapView?.onLowMemory()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.busstopmap_option_menu, menu)
-
-        menuItemServices = menu.findItem(R.id.busstopmap_option_menu_services)
-        menuItemTrafficView = menu.findItem(R.id.busstopmap_option_menu_trafficview)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-
-        configureServicesMenuItem()
-        configureTrafficViewMenuItem()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.busstopmap_option_menu_search -> {
-            viewModel.onSearchMenuItemClicked()
-            true
-        }
-        R.id.busstopmap_option_menu_services -> {
-            viewModel.onServicesMenuItemClicked()
-            true
-        }
-        R.id.busstopmap_option_menu_maptype -> {
-            viewModel.onMapTypeMenuItemClicked()
-            true
-        }
-        R.id.busstopmap_option_menu_trafficview -> {
-            viewModel.onTrafficViewMenuItemClicked()
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
+        viewBinding.mapView.onLowMemory()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -332,7 +284,8 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
     override fun onMapReady(map: GoogleMap) {
         this.map = map
-        setHasOptionsMenu(true)
+        val viewLifecycleOwner = viewLifecycleOwner
+        requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner)
 
         map.uiSettings.apply {
             isMyLocationButtonEnabled = true
@@ -358,11 +311,11 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         this.clusterManager = clusterManager
         this.stopClusterRenderer = clusterRenderer
 
-        viewModel.mapType.observe(this, Observer(this::handleMapTypeChanged))
-        viewModel.cameraLocation.observe(this, Observer(this::handleCameraPositionChanged))
-        viewModel.busStops.observe(this, Observer(this::handleStopsChanged))
-        viewModel.routeLines.observe(this, Observer(this::handleRouteLinesChanged))
-        viewModel.showMapMarkerBubble.observe(this, Observer(this::handleShowMapMarkerBubble))
+        viewModel.mapType.observe(viewLifecycleOwner, this::handleMapTypeChanged)
+        viewModel.cameraLocation.observe(viewLifecycleOwner, this::handleCameraPositionChanged)
+        viewModel.busStops.observe(viewLifecycleOwner, this::handleStopsChanged)
+        viewModel.routeLines.observe(viewLifecycleOwner, this::handleRouteLinesChanged)
+        viewModel.showMapMarkerBubble.observe(viewLifecycleOwner, this::handleShowMapMarkerBubble)
     }
 
     override fun onServicesChosen(chosenServices: Array<String>?) {
@@ -700,31 +653,33 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         val context = requireContext()
         val result = googleApiAvailability.isGooglePlayServicesAvailable(context)
 
-        if (result == ConnectionResult.SUCCESS) {
-            layoutError?.visibility = View.GONE
-            mapView?.visibility = View.VISIBLE
-            btnErrorResolve?.setOnClickListener(null)
-        } else {
-            mapView?.visibility = View.GONE
-            layoutError?.visibility = View.VISIBLE
-            txtError?.setText(getPlayServicesErrorString(result))
+        viewBinding.apply {
+            if (result == ConnectionResult.SUCCESS) {
+                layoutError.layoutError.visibility = View.GONE
+                mapView.visibility = View.VISIBLE
+                layoutError.btnErrorResolve.setOnClickListener(null)
+            } else {
+                mapView.visibility = View.GONE
+                layoutError.layoutError.visibility = View.VISIBLE
+                layoutError.txtError.txtError.setText(getPlayServicesErrorString(result))
 
-            btnErrorResolve?.apply {
-                if (googleApiAvailability.isUserResolvableError(result)) {
-                    visibility = View.VISIBLE
-                    setOnClickListener {
-                        val pendingIntent = googleApiAvailability
-                                .getErrorResolutionPendingIntent(context, result, 0)
+                layoutError.btnErrorResolve.apply {
+                    if (googleApiAvailability.isUserResolvableError(result)) {
+                        visibility = View.VISIBLE
+                        setOnClickListener {
+                            val pendingIntent = googleApiAvailability
+                                    .getErrorResolutionPendingIntent(context, result, 0)
 
-                        try {
-                            pendingIntent?.send() ?: showFailedToResolvePlayServicesToast()
-                        } catch (ignored: PendingIntent.CanceledException) {
-                            showFailedToResolvePlayServicesToast()
+                            try {
+                                pendingIntent?.send() ?: showFailedToResolvePlayServicesToast()
+                            } catch (ignored: PendingIntent.CanceledException) {
+                                showFailedToResolvePlayServicesToast()
+                            }
                         }
+                    } else {
+                        visibility = View.GONE
+                        setOnClickListener(null)
                     }
-                } else {
-                    visibility = View.GONE
-                    setOnClickListener(null)
                 }
             }
         }
@@ -761,6 +716,40 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
                 R.string.busstopmapfragment_error_play_services_resolve_failed,
                 Toast.LENGTH_SHORT)
                 .show()
+    }
+
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.busstopmap_option_menu, menu)
+
+            menuItemServices = menu.findItem(R.id.busstopmap_option_menu_services)
+            menuItemTrafficView = menu.findItem(R.id.busstopmap_option_menu_trafficview)
+        }
+
+        override fun onPrepareMenu(menu: Menu) {
+            configureServicesMenuItem()
+            configureTrafficViewMenuItem()
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
+            R.id.busstopmap_option_menu_search -> {
+                viewModel.onSearchMenuItemClicked()
+                true
+            }
+            R.id.busstopmap_option_menu_services -> {
+                viewModel.onServicesMenuItemClicked()
+                true
+            }
+            R.id.busstopmap_option_menu_maptype -> {
+                viewModel.onMapTypeMenuItemClicked()
+                true
+            }
+            R.id.busstopmap_option_menu_trafficview -> {
+                viewModel.onTrafficViewMenuItemClicked()
+                true
+            }
+            else -> false
+        }
     }
 
     /**
