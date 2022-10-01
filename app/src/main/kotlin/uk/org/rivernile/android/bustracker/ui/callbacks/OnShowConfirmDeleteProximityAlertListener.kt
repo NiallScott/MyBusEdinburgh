@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,23 +21,25 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.ui.callbacks;
+package uk.org.rivernile.android.bustracker.ui.callbacks
 
 /**
- * This listener is used to send callbacks from Fragments to Activities when the
- * user wishes to view a bus stop on the map.
- * 
+ * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
+ * [android.app.Activity]s to confirm with the user that they wish to delete the active proximity
+ * alert.
+ *
  * @author Niall Scott
  */
-public interface OnShowBusStopMapWithStopCodeListener {
-    
+interface OnShowConfirmDeleteProximityAlertListener {
+
     /**
-     * This is called when the user wants to view the bus stop map centered on a
-     * specific bus stop.
-     * 
-     * @param stopCode The stopCode that the map should center on.
+     * This is called when it should be confirmed with the user that they want to delete the
+     * proximity alert.
+     *
+     * @param stopCode The stop code to remove the proximity alert for.
      */
-    public void onShowBusStopMapWithStopCode(String stopCode);
+    fun onShowConfirmDeleteProximityAlert(stopCode: String)
 }

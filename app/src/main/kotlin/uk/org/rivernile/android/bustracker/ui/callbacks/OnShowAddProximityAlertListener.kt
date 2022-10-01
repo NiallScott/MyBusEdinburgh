@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,24 +21,23 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.ui.callbacks;
+package uk.org.rivernile.android.bustracker.ui.callbacks
 
 /**
- * This listener is used to send callbacks from Fragments to Activities when the
- * user wishes to be taken to the system location preferences.
- * 
+ * This listener is used to send callbacks from [androidx.fragment.app.Fragment] to
+ * [android.app.Activity]s when the user wishes to add a new proximity alert.
+ *
  * @author Niall Scott
  */
-public interface OnShowSystemLocationPreferencesListener {
-    
+interface OnShowAddProximityAlertListener {
+
     /**
-     * This is called when the user wishes to be taken to the system location
-     * preferences.
+     * This is called when the user wants to view the interface to add a new proximity alert.
      *
-     * @return {@code true} when the system location preferences is started, otherwise {@code false}
-     * in the event of an error.
+     * @param stopCode The stopCode the proximity alert should be added for.
      */
-    boolean onShowSystemLocationPreferences();
+    fun onShowAddProximityAlert(stopCode: String)
 }

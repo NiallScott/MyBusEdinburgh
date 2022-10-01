@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,25 +21,23 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.ui.callbacks;
-
-import androidx.annotation.NonNull;
+package uk.org.rivernile.android.bustracker.ui.callbacks
 
 /**
- * This listener is used to send callbacks from Fragments to Activities to
- * confirm with the user that they wish to delete the active time alert.
- * 
+ * This listener is used to send callbacks from [androidx.fragment.app.Fragment] to
+ * [android.app.Activity]s when the user wishes to view a bus stop on the map.
+ *
  * @author Niall Scott
  */
-public interface OnShowConfirmDeleteTimeAlertListener {
-    
+interface OnShowBusStopMapWithStopCodeListener {
+
     /**
-     * This is called when it should be confirmed with the user that they want
-     * to delete the time alert.
+     * This is called when the user wants to view the stop map centered on a specific stop.
      *
-     * @param stopCode The stop code to remove the arrival alert for.
+     * @param stopCode The stopCode that the map should center on.
      */
-    void onShowConfirmDeleteTimeAlert(@NonNull String stopCode);
+    fun onShowBusStopMapWithStopCode(stopCode: String)
 }

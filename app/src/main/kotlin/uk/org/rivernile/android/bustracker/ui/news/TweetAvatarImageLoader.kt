@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ import android.content.Context
 import android.widget.ImageView
 import com.squareup.picasso.Picasso
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
-import uk.org.rivernile.android.utils.CircleTransform
+import uk.org.rivernile.android.bustracker.picasso.CircleTransform
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject
 
@@ -39,14 +39,16 @@ import javax.inject.Inject
  *
  * @param context A [Context] instance.
  * @param picasso An instance of [Picasso] - the image loading library.
+ * @param avatarTransformation The [CircleTransform] to use on the avatar to transform it in to the
+ * correct shape.
  * @author Niall Scott
  */
 class TweetAvatarImageLoader @Inject constructor(
         context: Context,
-        private val picasso: Picasso) {
+        private val picasso: Picasso,
+        private val avatarTransformation: CircleTransform) {
 
     private val avatarSize = context.resources.getDimensionPixelSize(R.dimen.news_avatar_size)
-    private val avatarTransformation = CircleTransform()
 
     /**
      * Load the avatar.

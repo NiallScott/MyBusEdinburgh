@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,26 +21,23 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-package uk.org.rivernile.android.bustracker.ui.callbacks;
+package uk.org.rivernile.android.bustracker.ui.callbacks
 
 /**
- * This listener is used to send callbacks from Fragments to Activities when the
- * user wishes to select services.
- * 
+ * This listener is used to send callbacks from [androidx.fragment.app.Fragment]s to
+ * [android.app.Activity]s when the user wishes to add a new favourite stop.
+ *
  * @author Niall Scott
  */
-public interface OnShowServicesChooserListener {
-    
+interface OnShowAddEditFavouriteStopListener {
+
     /**
-     * This is called when the user wishes to select services, for example,
-     * for filtering.
-     * 
-     * @param services The services to choose from.
-     * @param selectedServices Any services that should be selected by default.
-     * @param title A title to show on the chooser.
+     * This is called when the user wants to add or edit a favourite stop.
+     *
+     * @param stopCode The stop code of the stop to add or edit.
      */
-    public void onShowServicesChooser(String[] services,
-            String[] selectedServices, String title);
+    fun onShowAddEditFavouriteStop(stopCode: String)
 }

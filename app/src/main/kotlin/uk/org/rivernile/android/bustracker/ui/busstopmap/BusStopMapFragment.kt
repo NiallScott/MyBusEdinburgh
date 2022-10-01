@@ -586,7 +586,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     private fun showMapTypeSelection() {
         MapTypeBottomSheetDialogFragment.newInstance(toMapType()).also {
             it.setTargetFragment(this, 0)
-            it.show(childFragmentManager, DIALOG_MAP_TYPE_BOTTOM_SHEET)
+            it.show(parentFragmentManager, DIALOG_MAP_TYPE_BOTTOM_SHEET)
         }
     }
 
