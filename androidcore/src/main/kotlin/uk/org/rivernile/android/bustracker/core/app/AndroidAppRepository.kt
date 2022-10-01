@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.app
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.pm.PackageInfoCompat
+import uk.org.rivernile.android.bustracker.core.packagemanager.getPackageInfoCompat
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,7 +46,7 @@ internal class AndroidAppRepository @Inject constructor(
         private val packageManager: PackageManager) : AppRepository {
 
     override val appVersion get() = try {
-        packageManager.getPackageInfo(context.packageName, 0).let {
+        packageManager.getPackageInfoCompat(context.packageName, 0).let {
             AppVersion(
                     it.versionName,
                     PackageInfoCompat.getLongVersionCode(it))

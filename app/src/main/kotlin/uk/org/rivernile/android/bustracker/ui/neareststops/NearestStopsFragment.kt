@@ -41,6 +41,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.android.support.AndroidSupportInjection
@@ -129,8 +130,6 @@ class NearestStopsFragment : Fragment() {
                 itemClickListener,
                 stopMapMarkerDecorator,
                 textFormattingUtils)
-
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -211,6 +210,8 @@ class NearestStopsFragment : Fragment() {
         viewModel.showTurnOnGpsLiveData.observe(viewLifecycleOwner) {
             callbacks.onAskTurnOnGps()
         }
+
+        requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner)
     }
 
     override fun onResume() {
@@ -223,25 +224,6 @@ class NearestStopsFragment : Fragment() {
         super.onDestroyView()
 
         _viewBinding = null
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.neareststops_option_menu, menu)
-        menuItemFilter = menu.findItem(R.id.neareststops_option_menu_filter)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-
-        handleIsFilterEnabled(viewModel.isFilterEnabledLiveData.value ?: false)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.neareststops_option_menu_filter -> {
-            viewModel.onFilterMenuItemClicked()
-            true
-        }
-        else -> false
     }
 
     /**
@@ -694,5 +676,24 @@ class NearestStopsFragment : Fragment() {
          * This is called when the user should be asked if they want to turn on GPS or not.
          */
         fun onAskTurnOnGps()
+    }
+
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.neareststops_option_menu, menu)
+            menuItemFilter = menu.findItem(R.id.neareststops_option_menu_filter)
+        }
+
+        override fun onPrepareMenu(menu: Menu) {
+            handleIsFilterEnabled(viewModel.isFilterEnabledLiveData.value ?: false)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
+            R.id.neareststops_option_menu_filter -> {
+                viewModel.onFilterMenuItemClicked()
+                true
+            }
+            else -> false
+        }
     }
 }

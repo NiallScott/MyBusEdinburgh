@@ -34,8 +34,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -97,8 +99,6 @@ class BusTimesFragment : Fragment() {
 
         adapter = LiveTimesAdapter(requireContext(), viewHolderFieldPopulator,
                 viewModel::onParentItemClicked)
-
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -135,44 +135,14 @@ class BusTimesFragment : Fragment() {
         viewModel.errorWithContentLiveData.observe(viewLifecycle, this::handleErrorWithContent)
         viewModel.lastRefreshLiveData.observe(viewLifecycle, this::handleLastRefreshUpdated)
         viewModel.refreshLiveData.observe(viewLifecycle) { /* Nothing in here. */  }
+
+        requireActivity().addMenuProvider(menuProvider, viewLifecycle, Lifecycle.State.RESUMED)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
 
         _viewBinding = null
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.bustimes_option_menu, menu)
-
-        menuItemRefresh = menu.findItem(R.id.bustimes_option_menu_refresh)
-        menuItemSort = menu.findItem(R.id.bustimes_option_menu_sort)
-        menuItemAutoRefresh = menu.findItem(R.id.bustimes_option_menu_autorefresh)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-
-        setRefreshActionItemLoadingState(viewModel.showProgressLiveData.value)
-        setSortedByTimeActionItemState(viewModel.isSortedByTimeLiveData.value)
-        setAutoRefreshActionItemState(viewModel.isAutoRefreshLiveData.value)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.bustimes_option_menu_refresh -> {
-            viewModel.onRefreshMenuItemClicked()
-            true
-        }
-        R.id.bustimes_option_menu_sort -> {
-            viewModel.onSortMenuItemClicked()
-            true
-        }
-        R.id.bustimes_option_menu_autorefresh -> {
-            viewModel.onAutoRefreshMenuItemClicked()
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
     }
 
     /**
@@ -368,5 +338,37 @@ class BusTimesFragment : Fragment() {
     private fun dismissErrorSnackbar() {
         errorSnackbar?.dismiss()
         errorSnackbar = null
+    }
+
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.bustimes_option_menu, menu)
+
+            menuItemRefresh = menu.findItem(R.id.bustimes_option_menu_refresh)
+            menuItemSort = menu.findItem(R.id.bustimes_option_menu_sort)
+            menuItemAutoRefresh = menu.findItem(R.id.bustimes_option_menu_autorefresh)
+        }
+
+        override fun onPrepareMenu(menu: Menu) {
+            setRefreshActionItemLoadingState(viewModel.showProgressLiveData.value)
+            setSortedByTimeActionItemState(viewModel.isSortedByTimeLiveData.value)
+            setAutoRefreshActionItemState(viewModel.isAutoRefreshLiveData.value)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
+            R.id.bustimes_option_menu_refresh -> {
+                viewModel.onRefreshMenuItemClicked()
+                true
+            }
+            R.id.bustimes_option_menu_sort -> {
+                viewModel.onSortMenuItemClicked()
+                true
+            }
+            R.id.bustimes_option_menu_autorefresh -> {
+                viewModel.onAutoRefreshMenuItemClicked()
+                true
+            }
+            else -> false
+        }
     }
 }

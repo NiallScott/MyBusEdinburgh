@@ -38,6 +38,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -76,7 +77,6 @@ class TwitterUpdatesFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         adapter = TweetAdapter(requireContext(), avatarImageLoader, this::handleItemClicked)
-        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -106,33 +106,16 @@ class TwitterUpdatesFragment : Fragment() {
         val lifecycle = viewLifecycleOwner
         viewModel.uiStateLiveData.observe(lifecycle, Observer(this::handleUiStateChanged))
 
-        requireActivity().setTitle(R.string.twitterupdates_title)
+        requireActivity().apply {
+            setTitle(R.string.twitterupdates_title)
+            addMenuProvider(menuProvider, lifecycle)
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
 
         _viewBinding = null
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.twitterupdates_option_menu, menu)
-        refreshMenuItem = menu.findItem(R.id.twitterupdates_option_menu_refresh)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-
-        setRefreshActionItemLoadingState(viewModel.uiStateLiveData.value)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.twitterupdates_option_menu_refresh -> {
-            viewModel.onRefreshMenuItemClicked()
-
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
     }
 
     /**
@@ -260,5 +243,24 @@ class TwitterUpdatesFragment : Fragment() {
                                 .show()
                     }
                 }
+    }
+
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.twitterupdates_option_menu, menu)
+            refreshMenuItem = menu.findItem(R.id.twitterupdates_option_menu_refresh)
+        }
+
+        override fun onPrepareMenu(menu: Menu) {
+            setRefreshActionItemLoadingState(viewModel.uiStateLiveData.value)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
+            R.id.twitterupdates_option_menu_refresh -> {
+                viewModel.onRefreshMenuItemClicked()
+                true
+            }
+            else -> false
+        }
     }
 }

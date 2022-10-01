@@ -32,12 +32,14 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuProvider
 import androidx.lifecycle.ViewModelProvider
 import dagger.android.AndroidInjection
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -139,6 +141,7 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
             showInvalidQrCodeError()
         }
 
+        addMenuProvider(menuProvider)
         handleIntent(intent)
     }
 
@@ -147,31 +150,6 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
 
         this.intent = intent
         handleIntent(intent)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        super.onCreateOptionsMenu(menu)
-
-        menuInflater.inflate(R.menu.search_option_menu, menu)
-        menuItemScan = menu.findItem(R.id.search_option_menu_scan)
-
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        super.onPrepareOptionsMenu(menu)
-
-        handleIsScanMenuItemVisible(viewModel.isScanMenuItemVisibleLiveData.value ?: false)
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.search_option_menu_scan -> {
-            viewModel.onScanMenuItemClicked()
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
     }
 
     override fun onShowInstallBarcodeScanner() {
@@ -308,6 +286,25 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
         override fun onQueryTextChange(newText: String?): Boolean {
             viewModel.searchTerm = newText
             return false
+        }
+    }
+
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.search_option_menu, menu)
+            menuItemScan = menu.findItem(R.id.search_option_menu_scan)
+        }
+
+        override fun onPrepareMenu(menu: Menu) {
+            handleIsScanMenuItemVisible(viewModel.isScanMenuItemVisibleLiveData.value ?: false)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
+            R.id.search_option_menu_scan -> {
+                viewModel.onScanMenuItemClicked()
+                true
+            }
+            else -> false
         }
     }
 }

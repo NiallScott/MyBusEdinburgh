@@ -31,10 +31,12 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuProvider
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.MarginPageTransformer
 import com.google.android.material.appbar.AppBarLayout
@@ -159,49 +161,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         viewModel.showAddProximityAlertLiveData.observe(this, this::showAddProximityAlert)
         viewModel.showRemoveProximityAlertLiveData.observe(this, this::showRemoveProximityAlert)
         viewModel.showStreetViewLiveData.observe(this, this::showStreetView)
-    }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        super.onCreateOptionsMenu(menu)
-
-        menuInflater.inflate(R.menu.displaystopdata_option_menu, menu)
-        favouriteMenuItem = menu.findItem(R.id.displaystopdata_option_menu_favourite)
-        arrivalAlertMenuItem = menu.findItem(R.id.displaystopdata_option_menu_time)
-        proximityAlertMenuItem = menu.findItem(R.id.displaystopdata_option_menu_prox)
-        streetViewMenuItem = menu.findItem(R.id.displaystopdata_option_menu_street_view)
-
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        super.onPrepareOptionsMenu(menu)
-
-        configureFavouriteMenuItem(viewModel.isFavouriteLiveData.value)
-        configureArrivalAlertMenuItem(viewModel.hasArrivalAlertLiveData.value)
-        configureProximityAlertMenuItem(viewModel.hasProximityAlertLiveData.value)
-        configureStreetViewMenuItem(viewModel.busStopDetails.value)
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.displaystopdata_option_menu_favourite -> {
-            viewModel.onFavouriteMenuItemClicked()
-            true
-        }
-        R.id.displaystopdata_option_menu_time -> {
-            viewModel.onArrivalAlertMenuItemClicked()
-            true
-        }
-        R.id.displaystopdata_option_menu_prox -> {
-            viewModel.onProximityAlertMenuItemClicked()
-            true
-        }
-        R.id.displaystopdata_option_menu_street_view -> {
-            viewModel.onStreetViewMenuItemClicked()
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
+        addMenuProvider(menuProvider)
     }
 
     override fun showMapForStop(stopCode: String) {
@@ -428,5 +389,42 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
         supportActionBar?.setDisplayShowTitleEnabled(
                 abs(verticalOffset) >= viewBinding.collapsingLayout.scrimVisibleHeightTrigger)
+    }
+
+    private val menuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.displaystopdata_option_menu, menu)
+            favouriteMenuItem = menu.findItem(R.id.displaystopdata_option_menu_favourite)
+            arrivalAlertMenuItem = menu.findItem(R.id.displaystopdata_option_menu_time)
+            proximityAlertMenuItem = menu.findItem(R.id.displaystopdata_option_menu_prox)
+            streetViewMenuItem = menu.findItem(R.id.displaystopdata_option_menu_street_view)
+        }
+
+        override fun onPrepareMenu(menu: Menu) {
+            configureFavouriteMenuItem(viewModel.isFavouriteLiveData.value)
+            configureArrivalAlertMenuItem(viewModel.hasArrivalAlertLiveData.value)
+            configureProximityAlertMenuItem(viewModel.hasProximityAlertLiveData.value)
+            configureStreetViewMenuItem(viewModel.busStopDetails.value)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
+            R.id.displaystopdata_option_menu_favourite -> {
+                viewModel.onFavouriteMenuItemClicked()
+                true
+            }
+            R.id.displaystopdata_option_menu_time -> {
+                viewModel.onArrivalAlertMenuItemClicked()
+                true
+            }
+            R.id.displaystopdata_option_menu_prox -> {
+                viewModel.onProximityAlertMenuItemClicked()
+                true
+            }
+            R.id.displaystopdata_option_menu_street_view -> {
+                viewModel.onStreetViewMenuItemClicked()
+                true
+            }
+            else -> false
+        }
     }
 }
