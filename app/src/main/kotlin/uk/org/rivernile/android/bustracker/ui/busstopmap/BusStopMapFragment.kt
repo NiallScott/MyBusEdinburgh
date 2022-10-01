@@ -31,7 +31,6 @@ import android.app.Activity
 import android.app.PendingIntent
 import androidx.lifecycle.ViewModelProvider
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -41,6 +40,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.launch
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.viewModels
 import com.google.android.gms.common.ConnectionResult
@@ -55,10 +55,10 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
 import dagger.android.support.AndroidSupportInjection
+import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
-import uk.org.rivernile.android.bustracker.ui.search.SearchActivity
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.utils.LocationUtils
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -71,8 +71,6 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class BusStopMapFragment : Fragment(), OnMapReadyCallback,
-        ServicesChooserDialogFragment.Callbacks,
-        MapTypeBottomSheetDialogFragment.OnMapTypeSelectedListener,
         ClusterManager.OnClusterClickListener<Stop>,
         ClusterManager.OnClusterItemClickListener<Stop>,
         ClusterManager.OnClusterItemInfoWindowClickListener<Stop>,
@@ -98,6 +96,12 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     private var menuItemServices: MenuItem? = null
     private var menuItemTrafficView: MenuItem? = null
 
+    private val searchStopLauncher = registerForActivityResult(SearchStop()) { stopCode ->
+        stopCode?.let {
+            viewModel.onStopSearchResult(it)
+        }
+    }
+
     companion object {
 
         private const val ARG_STOPCODE = "stopCode"
@@ -106,8 +110,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
         private const val STATE_SELECTED_SERVICES = "selectedServices"
         private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
-
-        private const val REQUEST_CODE_SEARCH = 100
 
         private const val DIALOG_SERVICES_CHOOSER = "dialogServicesChooser"
         private const val DIALOG_MAP_TYPE_BOTTOM_SHEET = "bottomSheetMapType"
@@ -268,12 +270,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         viewBinding.mapView.onLowMemory()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            REQUEST_CODE_SEARCH -> handleSearchActivityResult(resultCode, data)
-        }
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
                                             grantResults: IntArray) {
@@ -286,6 +282,23 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         this.map = map
         val viewLifecycleOwner = viewLifecycleOwner
         requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner)
+
+        childFragmentManager.setFragmentResultListener(
+                MapTypeBottomSheetDialogFragment.REQUEST_KEY,
+                viewLifecycleOwner) { _, result ->
+            val mapType = result.getSerializableCompat(
+                    MapTypeBottomSheetDialogFragment.RESULT_CHOSEN_MAP_TYPE)
+                    ?: MapType.NORMAL
+            viewModel.onMapTypeSelected(mapType)
+        }
+
+        childFragmentManager.setFragmentResultListener(
+                ServicesChooserDialogFragment.REQUEST_KEY,
+                viewLifecycleOwner) { _, result ->
+            val chosenServices = result.getStringArray(
+                    ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
+            viewModel.onServicesChosen(chosenServices)
+        }
 
         map.uiSettings.apply {
             isMyLocationButtonEnabled = true
@@ -316,14 +329,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         viewModel.busStops.observe(viewLifecycleOwner, this::handleStopsChanged)
         viewModel.routeLines.observe(viewLifecycleOwner, this::handleRouteLinesChanged)
         viewModel.showMapMarkerBubble.observe(viewLifecycleOwner, this::handleShowMapMarkerBubble)
-    }
-
-    override fun onServicesChosen(chosenServices: Array<String>?) {
-        viewModel.onServicesChosen(chosenServices)
-    }
-
-    override fun onMapTypeSelected(@MapType mapType: Int) {
-        viewModel.onMapTypeSelected(mapType)
     }
 
     override fun onClusterClick(cluster: Cluster<Stop>): Boolean {
@@ -461,10 +466,8 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      *
      * @param mapType The new map type.
      */
-    private fun handleMapTypeChanged(mapType: Int?) {
-        if (mapType != null) {
-            map?.mapType = toGoogleMapType(mapType)
-        }
+    private fun handleMapTypeChanged(mapType: MapType) {
+        map?.mapType = toGoogleMapType(mapType)
     }
 
     /**
@@ -517,30 +520,26 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * Show the search UI.
      */
     private fun showSearch() {
-        startActivityForResult(Intent(requireContext(), SearchActivity::class.java),
-                REQUEST_CODE_SEARCH)
+        searchStopLauncher.launch()
     }
 
     /**
      * Show the services chooser UI.
      */
     private fun showServicesChooser() {
-        ServicesChooserDialogFragment.newInstance(viewModel.serviceNames.value,
+        ServicesChooserDialogFragment.newInstance(
+                viewModel.serviceNames.value,
                 viewModel.selectedServices,
-                getString(R.string.busstopmapfragment_service_chooser_title)).also {
-            it.setTargetFragment(this, 0)
-            it.show(parentFragmentManager, DIALOG_SERVICES_CHOOSER)
-        }
+                getString(R.string.busstopmapfragment_service_chooser_title))
+                .show(childFragmentManager, DIALOG_SERVICES_CHOOSER)
     }
 
     /**
      * Handle the map type menu item being selected.
      */
     private fun showMapTypeSelection() {
-        MapTypeBottomSheetDialogFragment.newInstance(toMapType()).also {
-            it.setTargetFragment(this, 0)
-            it.show(parentFragmentManager, DIALOG_MAP_TYPE_BOTTOM_SHEET)
-        }
+        MapTypeBottomSheetDialogFragment.newInstance(toMapType())
+                .show(childFragmentManager, DIALOG_MAP_TYPE_BOTTOM_SHEET)
     }
 
     /**
@@ -550,20 +549,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         map?.apply {
             isTrafficEnabled = !isTrafficEnabled
             configureTrafficViewMenuItem()
-        }
-    }
-
-    /**
-     * Handle a result being returned from a previous request to show the search UI.
-     *
-     * @param resultCode The result code of the operation.
-     * @param intent The returned [Intent].
-     */
-    private fun handleSearchActivityResult(resultCode: Int, intent: Intent?) {
-        if (resultCode == Activity.RESULT_OK && intent != null) {
-            viewModel.onStopSearchResult(
-                    intent.getStringExtra(SearchActivity.EXTRA_STOP_CODE)
-                            ?: throw IllegalStateException())
         }
     }
 
@@ -621,24 +606,21 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      *
      * @return The current map type as understood by [MapTypeBottomSheetDialogFragment].
      */
-    @MapType
     private fun toMapType() = when (map?.mapType) {
-        GoogleMap.MAP_TYPE_SATELLITE -> MapTypeBottomSheetDialogFragment.MAP_TYPE_SATELLITE
-        GoogleMap.MAP_TYPE_HYBRID -> MapTypeBottomSheetDialogFragment.MAP_TYPE_HYBRID
-        else -> MapTypeBottomSheetDialogFragment.MAP_TYPE_NORMAL
+        GoogleMap.MAP_TYPE_SATELLITE -> MapType.SATELLITE
+        GoogleMap.MAP_TYPE_HYBRID -> MapType.HYBRID
+        else -> MapType.NORMAL
     }
 
     /**
-     * Convert the [MapTypeBottomSheetDialogFragment] map type in to the type understood by
-     * [GoogleMap].
+     * Convert a [MapType] in to the type understood by [GoogleMap].
      *
-     * @param mapType The map type returned by [MapTypeBottomSheetDialogFragment].
+     * @param mapType The [MapType].
      * @return The [GoogleMap] version of the map type.
      */
-    private fun toGoogleMapType(@MapType mapType: Int) = when (mapType) {
-        MapTypeBottomSheetDialogFragment.MAP_TYPE_NORMAL -> GoogleMap.MAP_TYPE_NORMAL
-        MapTypeBottomSheetDialogFragment.MAP_TYPE_SATELLITE -> GoogleMap.MAP_TYPE_SATELLITE
-        MapTypeBottomSheetDialogFragment.MAP_TYPE_HYBRID -> GoogleMap.MAP_TYPE_HYBRID
+    private fun toGoogleMapType(mapType: MapType) = when (mapType) {
+        MapType.SATELLITE -> GoogleMap.MAP_TYPE_SATELLITE
+        MapType.HYBRID -> GoogleMap.MAP_TYPE_HYBRID
         else -> GoogleMap.MAP_TYPE_NORMAL
     }
 

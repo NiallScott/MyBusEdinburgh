@@ -84,7 +84,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     /**
      * A [LiveData] representing the type of map to be displayed.
      */
-    val mapType: LiveData<Int>
+    val mapType: LiveData<MapType>
         get() = _mapType
     /**
      * A [LiveData] representing a requested camera location.
@@ -128,9 +128,9 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     val shouldShowZoomControls: Boolean
         get() = preferenceManager.isMapZoomButtonsShown()
 
-    private val _selectedStopCode = MutableLiveData<String>()
+    private val _selectedStopCode = MutableLiveData<String?>()
 
-    private val _mapType = MutableLiveData<Int>()
+    private val _mapType = MutableLiveData<MapType>()
     private val _cameraLocation = MutableLiveData<CameraLocation>()
     private val _showStopDetails = SingleLiveEvent<String>()
     private val _showSearch = SingleLiveEvent<Void>()
@@ -162,7 +162,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
                 preferenceManager.getLastMapLatitude(),
                 preferenceManager.getLastMapLongitude(),
                 preferenceManager.getLastMapZoomLevel(), false)
-        _mapType.value = preferenceManager.getLastMapType()
+        _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
 
         if (!Arrays.equals(_selectedServices.value, selectedServices)) {
             _selectedServices.value = selectedServices
@@ -182,7 +182,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
                 preferenceManager.getLastMapLongitude(),
                 preferenceManager.getLastMapZoomLevel(),
                 false)
-        _mapType.value = preferenceManager.getLastMapType()
+        _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
     }
 
     /**
@@ -193,7 +193,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
     fun onFirstCreate(stopCode: String) {
         searchedBusStop = stopCode
         _selectedStopCode.value = stopCode
-        _mapType.value = preferenceManager.getLastMapType()
+        _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
     }
 
     /**
@@ -205,7 +205,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     fun onFirstCreate(latitude: Double, longitude: Double) {
         _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
-        _mapType.value = preferenceManager.getLastMapType()
+        _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
     }
 
     override fun onCleared() {
@@ -261,12 +261,12 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      * @param mapType The map type to be persisted.
      */
     fun onPersistMapParameters(latitude: Double, longitude: Double, zoomLevel: Float,
-                               mapType: Int) {
+                               mapType: MapType) {
         preferenceManager.apply {
             setLastMapLatitude(latitude)
             setLastMapLongitude(longitude)
             setLastMapZoomLevel(zoomLevel)
-            setLastMapType(mapType)
+            setLastMapType(mapType.value)
         }
     }
 
@@ -275,7 +275,7 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      *
      * @param mapType The selected map type.
      */
-    fun onMapTypeSelected(mapType: Int) {
+    fun onMapTypeSelected(mapType: MapType) {
         _mapType.value = mapType
     }
 

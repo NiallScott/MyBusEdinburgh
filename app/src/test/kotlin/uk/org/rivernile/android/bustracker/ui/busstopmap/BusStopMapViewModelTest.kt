@@ -81,7 +81,7 @@ class BusStopMapViewModelTest {
     @Mock
     lateinit var voidObserver: Observer<Void>
     @Mock
-    lateinit var mapTypeObserver: Observer<Int>
+    lateinit var mapTypeObserver: Observer<MapType>
     @Mock
     lateinit var busStopsObserver: Observer<Map<String, Stop>>
     @Mock
@@ -156,7 +156,7 @@ class BusStopMapViewModelTest {
         viewModel.onFirstCreate()
 
         verify(mapTypeObserver)
-                .onChanged(2)
+                .onChanged(MapType.SATELLITE)
     }
 
     @Test
@@ -187,7 +187,7 @@ class BusStopMapViewModelTest {
         viewModel.onFirstCreate("123456")
 
         verify(mapTypeObserver)
-                .onChanged(2)
+                .onChanged(MapType.SATELLITE)
     }
 
     @Test
@@ -247,12 +247,12 @@ class BusStopMapViewModelTest {
         viewModel.onFirstCreate(1.0, 2.0)
 
         verify(mapTypeObserver)
-                .onChanged(2)
+                .onChanged(MapType.SATELLITE)
     }
 
     @Test
     fun persistingMapParametersWritesParametersToPreferences() {
-        viewModel.onPersistMapParameters(1.0, 2.0, 3f, 4)
+        viewModel.onPersistMapParameters(1.0, 2.0, 3f, MapType.NORMAL)
 
         verify(preferenceManager)
                 .setLastMapLatitude(1.0)
@@ -261,7 +261,7 @@ class BusStopMapViewModelTest {
         verify(preferenceManager)
                 .setLastMapZoomLevel(3f)
         verify(preferenceManager)
-                .setLastMapType(4)
+                .setLastMapType(1)
     }
 
     @Test
@@ -329,10 +329,10 @@ class BusStopMapViewModelTest {
     fun onMapTypeSelectedSetsMapType() {
         viewModel.mapType.observeForever(mapTypeObserver)
 
-        viewModel.onMapTypeSelected(2)
+        viewModel.onMapTypeSelected(MapType.HYBRID)
 
         verify(mapTypeObserver)
-                .onChanged(2)
+                .onChanged(MapType.HYBRID)
     }
 
     @Test
@@ -569,7 +569,7 @@ class BusStopMapViewModelTest {
         viewModel.onRestoreState(null, null)
 
         verify(mapTypeObserver)
-                .onChanged(2)
+                .onChanged(MapType.SATELLITE)
     }
 
     @Test

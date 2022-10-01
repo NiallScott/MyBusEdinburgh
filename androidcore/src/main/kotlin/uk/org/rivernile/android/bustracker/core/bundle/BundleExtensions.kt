@@ -24,33 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.busstopmap
+package uk.org.rivernile.android.bustracker.core.bundle
+
+import android.os.Build
+import android.os.Bundle
+import java.io.Serializable
 
 /**
- * An enumeration of map types.
+ * Android Tiramisu introduces a new method to obtain a [Serializable] from a [Bundle] and
+ * deprecates the old way. This extension method allows this to be accessed in a compatible way.
  *
- * @author Niall Scott
+ * @param key See [Bundle.getSerializable].
+ * @param T See [Bundle.getSerializable].
+ * @return See [Bundle.getSerializable].
+ * @see Bundle.getSerializable
  */
-enum class MapType(val value: Int) {
-
-    /** Normal map. */
-    NORMAL(1),
-    /** Satellite map. */
-    SATELLITE(2),
-    /** Hybrid map. */
-    HYBRID(3);
-
-    companion object {
-
-        /**
-         * Given an integer [value], convert this to a [MapType].
-         *
-         * @param value The integer value of the [MapType].
-         * @return The [MapType] associated with this value. Returns [MapType.NORMAL] when the value
-         * is unknown.
-         */
-        fun fromValue(value: Int) = values().firstOrNull {
-            it.value == value
-        } ?: NORMAL
-    }
+inline fun <reified T : Serializable> Bundle.getSerializableCompat(key: String): T? = when {
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getSerializable(key, T::class.java)
+    else -> @Suppress("DEPRECATION") getSerializable(key) as? T
 }

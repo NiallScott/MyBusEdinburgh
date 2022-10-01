@@ -26,31 +26,28 @@
 
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContract
+import uk.org.rivernile.android.bustracker.ui.search.SearchActivity
+
 /**
- * An enumeration of map types.
+ * This [ActivityResultContract] creates an [Intent] to search for a stop, and returns the result
+ * to the calling [Activity].
  *
  * @author Niall Scott
  */
-enum class MapType(val value: Int) {
+class SearchStop : ActivityResultContract<Unit, String?>() {
 
-    /** Normal map. */
-    NORMAL(1),
-    /** Satellite map. */
-    SATELLITE(2),
-    /** Hybrid map. */
-    HYBRID(3);
+    override fun createIntent(context: Context, input: Unit) =
+            Intent(context, SearchActivity::class.java)
 
-    companion object {
-
-        /**
-         * Given an integer [value], convert this to a [MapType].
-         *
-         * @param value The integer value of the [MapType].
-         * @return The [MapType] associated with this value. Returns [MapType.NORMAL] when the value
-         * is unknown.
-         */
-        fun fromValue(value: Int) = values().firstOrNull {
-            it.value == value
-        } ?: NORMAL
+    override fun parseResult(resultCode: Int, intent: Intent?): String? {
+        return if (resultCode == Activity.RESULT_OK) {
+            intent?.getStringExtra(SearchActivity.EXTRA_STOP_CODE)
+        } else {
+            null
+        }
     }
 }
