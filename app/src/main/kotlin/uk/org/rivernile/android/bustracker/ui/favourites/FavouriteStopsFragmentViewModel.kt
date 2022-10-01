@@ -97,7 +97,7 @@ class FavouriteStopsFragmentViewModel(
             .asLiveData(viewModelScope.coroutineContext)
 
     private val selectedStopCodeLiveData =
-            savedState.getLiveData<String>(STATE_SELECTED_STOP_CODE, null)
+            savedState.getLiveData<String?>(STATE_SELECTED_STOP_CODE, null)
     private val selectedStopCodeFlow = selectedStopCodeLiveData.asFlow()
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
     private val selectedStopCode get() = selectedStopCodeLiveData.value?.ifEmpty { null }

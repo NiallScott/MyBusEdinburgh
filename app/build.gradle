@@ -31,7 +31,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
 ext {
-    googlePlayServicesVersion = '18.0.2'
+    googlePlayServicesVersion = '18.1.0'
 }
 
 android {
