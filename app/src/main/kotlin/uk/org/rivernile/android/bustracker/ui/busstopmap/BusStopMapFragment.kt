@@ -27,10 +27,11 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
-import androidx.lifecycle.ViewModelProvider
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -40,7 +41,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.viewModels
 import com.google.android.gms.common.ConnectionResult
@@ -56,11 +59,12 @@ import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
-import uk.org.rivernile.android.utils.LocationUtils
+import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.BusstopmapFragmentBinding
 import javax.inject.Inject
@@ -77,31 +81,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         GoogleMap.OnInfoWindowCloseListener,
         StopClusterRenderer.OnItemRenderedListener {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-    @Inject
-    lateinit var googleApiAvailability: GoogleApiAvailability
-
-    private val viewModel: BusStopMapViewModel by viewModels { viewModelFactory }
-
-    private lateinit var callbacks: Callbacks
-    private var map: GoogleMap? = null
-    private var clusterManager: ClusterManager<Stop>? = null
-    private var stopClusterRenderer: StopClusterRenderer? = null
-    private var routeLines: Map<String, List<Polyline>>? = null
-
-    private val viewBinding get() = _viewBinding!!
-    private var _viewBinding: BusstopmapFragmentBinding? = null
-
-    private var menuItemServices: MenuItem? = null
-    private var menuItemTrafficView: MenuItem? = null
-
-    private val searchStopLauncher = registerForActivityResult(SearchStop()) { stopCode ->
-        stopCode?.let {
-            viewModel.onStopSearchResult(it)
-        }
-    }
-
     companion object {
 
         private const val ARG_STOPCODE = "stopCode"
@@ -113,8 +92,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
         private const val DIALOG_SERVICES_CHOOSER = "dialogServicesChooser"
         private const val DIALOG_MAP_TYPE_BOTTOM_SHEET = "bottomSheetMapType"
-
-        private const val PERMISSION_REQUEST_LOCATION = 1
 
         /**
          * Create a new instance of [BusStopMapFragment] with no parameters.
@@ -153,10 +130,39 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         }
     }
 
+    @Inject
+    lateinit var viewModelFactory: BusStopMapFragmentViewModelFactory
+    @Inject
+    lateinit var googleApiAvailability: GoogleApiAvailability
+
+    private val viewModel: BusStopMapViewModel by viewModels {
+        GenericSavedStateViewModelFactory(viewModelFactory, this)
+    }
+
+    private lateinit var callbacks: Callbacks
+    private var map: GoogleMap? = null
+    private var clusterManager: ClusterManager<Stop>? = null
+    private var stopClusterRenderer: StopClusterRenderer? = null
+    private var routeLines: Map<String, List<Polyline>>? = null
+
+    private val viewBinding get() = _viewBinding!!
+    private var _viewBinding: BusstopmapFragmentBinding? = null
+
+    private var menuItemServices: MenuItem? = null
+    private var menuItemTrafficView: MenuItem? = null
+
+    private val requestLocationPermissionsLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+            this::handleLocationPermissionsResult)
+
+    private val searchStopLauncher = registerForActivityResult(SearchStop()) { stopCode ->
+        stopCode?.let {
+            viewModel.onStopSearchResult(it)
+        }
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
-
-        AndroidSupportInjection.inject(this)
 
         try {
             callbacks = context as Callbacks
@@ -164,6 +170,12 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
             throw IllegalStateException("${context.javaClass.name} does not implement " +
                     Callbacks::class.java.name)
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AndroidSupportInjection.inject(this)
+
+        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateView(
@@ -191,6 +203,12 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
         val viewLifecycleOwner = viewLifecycleOwner
 
+        viewModel.requestLocationPermissionsLiveData.observe(viewLifecycleOwner) {
+            handleRequestLocationPermissions()
+        }
+        viewModel.isMyLocationFeatureEnabledLiveData.observe(viewLifecycleOwner,
+                this::handleMyLocationEnabledChanged)
+
         viewModel.serviceNames.observe(viewLifecycleOwner) {
             configureServicesMenuItem()
         }
@@ -207,12 +225,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         viewModel.updateTrafficView.observe(viewLifecycleOwner) {
             handleTrafficViewMenuItemSelected()
         }
-
-        if (savedInstanceState == null) {
-            if (!LocationUtils.checkLocationPermission(requireContext())) {
-                requestLocationPermission()
-            }
-        }
     }
 
     override fun onStart() {
@@ -226,6 +238,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         super.onResume()
 
         viewBinding.mapView.onResume()
+        updatePermissions()
     }
 
     override fun onPause() {
@@ -270,14 +283,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         viewBinding.mapView.onLowMemory()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        if (requestCode == PERMISSION_REQUEST_LOCATION) {
-            updateMyLocationFeature()
-        }
-    }
-
     override fun onMapReady(map: GoogleMap) {
         this.map = map
         val viewLifecycleOwner = viewLifecycleOwner
@@ -302,7 +307,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
         map.uiSettings.apply {
             isMyLocationButtonEnabled = true
-            isMapToolbarEnabled = false
             isZoomControlsEnabled = viewModel.shouldShowZoomControls
         }
 
@@ -320,7 +324,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         map.setOnInfoWindowClickListener(clusterManager)
         map.setOnInfoWindowCloseListener(this)
         map.setInfoWindowAdapter(MapInfoWindow(requireActivity(), view as ViewGroup))
-        map.isMyLocationEnabled = LocationUtils.checkLocationPermission(context)
+        handleMyLocationEnabledChanged(viewModel.isMyLocationFeatureEnabledLiveData.value ?: false)
         this.clusterManager = clusterManager
         this.stopClusterRenderer = clusterRenderer
 
@@ -391,6 +395,77 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      */
     fun onRequestCameraLocation(latitude: Double, longitude: Double) {
         viewModel.onRequestCameraLocation(latitude, longitude)
+    }
+
+    /**
+     * Update [BusStopMapViewModel] with the current state of permissions.
+     */
+    private fun updatePermissions() {
+        viewModel.permissionsState = PermissionsState(
+                getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION),
+                getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
+
+    /**
+     * Handle asking the user to grant permissions.
+     */
+    private fun handleRequestLocationPermissions() {
+        requestLocationPermissionsLauncher.launch(
+                arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
+
+    /**
+     * Handle the result of asking for location permission access.
+     *
+     * @param states A [Map] of the permission to a boolean which informs us if the permission was
+     * granted or not.
+     */
+    private fun handleLocationPermissionsResult(states: Map<String, Boolean>) {
+        val fineLocationState = states[Manifest.permission.ACCESS_FINE_LOCATION]
+                ?.let(this::getPermissionState)
+                ?: getPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseLocationState = states[Manifest.permission.ACCESS_COARSE_LOCATION]
+                ?.let(this::getPermissionState)
+                ?: getPermissionState(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        viewModel.permissionsState = PermissionsState(fineLocationState, coarseLocationState)
+    }
+
+    /**
+     * For a given [permission], determine the [PermissionState].
+     *
+     * @param permission The permission to obtain the [PermissionState] for.
+     * @return The determined [PermissionState].
+     */
+    private fun getPermissionState(permission: String) =
+            getPermissionState(
+                    ContextCompat.checkSelfPermission(requireContext(), permission) ==
+                            PackageManager.PERMISSION_GRANTED)
+
+    /**
+     * Maps the permission granted status in to a [PermissionState].
+     *
+     * @param isGranted Has the permission been granted? `true` implies [PermissionState.GRANTED],
+     * otherwise [PermissionState.UNGRANTED].
+     * @return The determined [PermissionState].
+     */
+    private fun getPermissionState(isGranted: Boolean) = if (isGranted) {
+        PermissionState.GRANTED
+    } else {
+        PermissionState.UNGRANTED
+    }
+
+    /**
+     * Handle whether the My Location layer should be shown on the map. This consists of the
+     * device's location being drawn on the map, and the display of location UI controls.
+     *
+     * @param isEnabled `true` if the My Location layer has been enabled, otherwise `false`.
+     */
+    @SuppressLint("MissingPermission")
+    private fun handleMyLocationEnabledChanged(isEnabled: Boolean) {
+        map?.isMyLocationEnabled = isEnabled
     }
 
     /**
@@ -550,23 +625,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
             isTrafficEnabled = !isTrafficEnabled
             configureTrafficViewMenuItem()
         }
-    }
-
-    /**
-     * Request the location permission from the user.
-     */
-    private fun requestLocationPermission() {
-        requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION),
-                PERMISSION_REQUEST_LOCATION)
-    }
-
-    /**
-     * Enable the 'My Location' layer if the user has enabled it and if the permission has been
-     * granted.
-     */
-    private fun updateMyLocationFeature() {
-        map?.isMyLocationEnabled = LocationUtils.checkLocationPermission(requireContext())
     }
 
     /**

@@ -35,7 +35,6 @@ import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragmentViewMod
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragmentViewModel
-import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapViewModel
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivityViewModel
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragmentViewModel
@@ -101,18 +100,6 @@ interface ViewModelModule {
     @ViewModelKey(ClearSearchHistoryDialogFragmentViewModel::class)
     fun bindClearSearchHistoryDialogFragmentViewModel(
             viewModel: ClearSearchHistoryDialogFragmentViewModel): ViewModel
-
-    /**
-     * Inject a [BusStopMapViewModel] when requested.
-     *
-     * @param viewModel A [BusStopMapViewModel] instance.
-     * @return The [ViewModel] instance.
-     */
-    @Suppress("unused")
-    @Binds
-    @IntoMap
-    @ViewModelKey(BusStopMapViewModel::class)
-    fun bindBusStopMapViewModel(viewModel: BusStopMapViewModel): ViewModel
 
     /**
      * Inject a [TwitterUpdatesFragmentViewModel] when request.

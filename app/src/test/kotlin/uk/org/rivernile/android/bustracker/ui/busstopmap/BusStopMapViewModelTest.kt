@@ -28,7 +28,9 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
+import androidx.lifecycle.SavedStateHandle
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -44,6 +46,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
@@ -68,9 +71,13 @@ class BusStopMapViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     @Mock
-    lateinit var repository: BusStopMapRepository
+    private lateinit var locationRepository: LocationRepository
     @Mock
-    lateinit var preferenceManager: PreferenceManager
+    private lateinit var isMyLocationEnabledDetector: IsMyLocationEnabledDetector
+    @Mock
+    private lateinit var repository: BusStopMapRepository
+    @Mock
+    private lateinit var preferenceManager: PreferenceManager
 
     @Mock
     lateinit var cameraLocationObserver: Observer<CameraLocation>
@@ -98,7 +105,15 @@ class BusStopMapViewModelTest {
         serviceNamesLiveData = spy(ClearableLiveData())
         whenever(repository.getServiceNames())
                 .thenReturn(serviceNamesLiveData)
-        viewModel = BusStopMapViewModel(repository, preferenceManager)
+        // TODO: temp fix for tests.
+        whenever(isMyLocationEnabledDetector.getIsMyLocationFeatureEnabledFlow(any()))
+                .thenReturn(flowOf(false))
+        viewModel = BusStopMapViewModel(
+                SavedStateHandle(),
+                locationRepository,
+                isMyLocationEnabledDetector,
+                repository,
+                preferenceManager)
     }
 
     @Test

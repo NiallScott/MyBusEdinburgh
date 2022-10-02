@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,9 +29,16 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import uk.org.rivernile.android.bustracker.core.location.LocationRepository
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
@@ -39,7 +46,6 @@ import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
 import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import java.util.Arrays
-import javax.inject.Inject
 
 /**
  * This is a [ViewModel] for presenting the stop map.
@@ -48,14 +54,45 @@ import javax.inject.Inject
  * @param repository The [BusStopMapRepository].
  * @param preferenceManager The [PreferenceManager].
  */
-class BusStopMapViewModel @Inject constructor(private val repository: BusStopMapRepository,
-                                              private val preferenceManager: PreferenceManager)
+class BusStopMapViewModel(
+        private val savedState: SavedStateHandle,
+        private val locationRepository: LocationRepository,
+        isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
+        private val repository: BusStopMapRepository,
+        private val preferenceManager: PreferenceManager)
     : ViewModel() {
 
     companion object {
 
+        private const val STATE_REQUESTED_LOCATION_PERMISSIONS = "requestedLocationPermissions"
+
         private const val DEFAULT_ZOOM = 14f
     }
+
+    /**
+     * The current state of permissions pertaining to this view.
+     */
+    var permissionsState: PermissionsState
+        get() = permissionsStateFlow.value ?: PermissionsState()
+        set(value) {
+            permissionsStateFlow.value = value
+            handlePermissionsSet(value)
+        }
+
+    private val permissionsStateFlow = MutableStateFlow<PermissionsState?>(null)
+
+    /**
+     * This [LiveData] emits when the user should be asked to grant location permissions.
+     */
+    val requestLocationPermissionsLiveData: LiveData<Unit> get() = requestLocationPermissions
+    private val requestLocationPermissions = SingleLiveEvent<Unit>()
+
+    /**
+     * This [LiveData] emits whether the My Location feature is enabled or not.
+     */
+    val isMyLocationFeatureEnabledLiveData = isMyLocationEnabledDetector
+            .getIsMyLocationFeatureEnabledFlow(permissionsStateFlow.filterNotNull())
+            .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * A [LiveData] which represents all known services.
@@ -337,6 +374,26 @@ class BusStopMapViewModel @Inject constructor(private val repository: BusStopMap
      */
     fun onRequestCameraLocation(latitude: Double, longitude: Double) {
         _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
+    }
+
+    /**
+     * Handle the permissions being updated. The logic in here determines if the user should be
+     * asked to grant permission(s).
+     *
+     * @param permissionsState The newly-set [PermissionsState].
+     */
+    private fun handlePermissionsSet(permissionsState: PermissionsState) {
+        val requestedPermissions: Boolean? = savedState[STATE_REQUESTED_LOCATION_PERMISSIONS]
+
+        if (requestedPermissions != true) {
+            savedState[STATE_REQUESTED_LOCATION_PERMISSIONS] = true
+
+            if (locationRepository.hasLocationFeature &&
+                    permissionsState.fineLocationPermission == PermissionState.UNGRANTED &&
+                    permissionsState.coarseLocationPermission == PermissionState.UNGRANTED) {
+                requestLocationPermissions.call()
+            }
+        }
     }
 
     /**
