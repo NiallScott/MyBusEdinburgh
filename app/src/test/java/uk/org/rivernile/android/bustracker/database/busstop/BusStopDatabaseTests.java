@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,16 +35,6 @@ import org.junit.Test;
  * @author Niall Scott
  */
 public class BusStopDatabaseTests {
-
-    /**
-     * Test that a correct {@code SORT BY} condition is generated in
-     * {@link BusStopDatabase#getServicesSortByCondition(String)} with the provided column name.
-     */
-    @Test
-    public void testGetServicesSortByCondition() {
-        assertEquals("CASE WHEN test GLOB '[^0-9.]*' THEN test ELSE cast(test AS int) END",
-                BusStopDatabase.getServicesSortByCondition("test"));
-    }
 
     /**
      * Test that {@link BusStopDatabase#generateInPlaceholders(int)} returns an empty {@link String}

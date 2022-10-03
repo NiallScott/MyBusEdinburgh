@@ -52,14 +52,6 @@ class BusStopMapRepositoryTest {
     }
 
     @Test
-    fun getServiceNamesCreatesServiceNamesLiveData() {
-        repository.getServiceNames()
-
-        verify(liveDataFactory)
-                .createServiceNamesLiveData()
-    }
-
-    @Test
     fun getBusStopsCreatesBusStopsLiveData() {
         repository.getBusStops(arrayOf("1", "2", "3"))
 

@@ -87,7 +87,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         private const val ARG_LATITUDE = "latitude"
         private const val ARG_LONGITUDE = "longitude"
 
-        private const val STATE_SELECTED_SERVICES = "selectedServices"
         private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
 
         private const val DIALOG_SERVICES_CHOOSER = "dialogServicesChooser"
@@ -208,16 +207,13 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         }
         viewModel.isMyLocationFeatureEnabledLiveData.observe(viewLifecycleOwner,
                 this::handleMyLocationEnabledChanged)
+        viewModel.isFilterEnabledLiveData.observe(viewLifecycleOwner,
+                this::handleServicesMenuItemEnabledChanged)
+        viewModel.showServicesChooserLiveData.observe(viewLifecycleOwner, this::showServicesChooser)
 
-        viewModel.serviceNames.observe(viewLifecycleOwner) {
-            configureServicesMenuItem()
-        }
         viewModel.showStopDetails.observe(viewLifecycleOwner, callbacks::onShowBusTimes)
         viewModel.showSearch.observe(viewLifecycleOwner) {
             showSearch()
-        }
-        viewModel.showServicesChooser.observe(viewLifecycleOwner) {
-            showServicesChooser()
         }
         viewModel.showMapTypeSelection.observe(viewLifecycleOwner) {
             showMapTypeSelection()
@@ -273,7 +269,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         super.onSaveInstanceState(outState)
 
         viewBinding.mapView.onSaveInstanceState(outState)
-        outState.putStringArray(STATE_SELECTED_SERVICES, viewModel.selectedServices)
         outState.putString(STATE_SELECTED_STOP_CODE, viewModel.showMapMarkerBubble.value?.stopCode)
     }
 
@@ -300,9 +295,9 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         childFragmentManager.setFragmentResultListener(
                 ServicesChooserDialogFragment.REQUEST_KEY,
                 viewLifecycleOwner) { _, result ->
-            val chosenServices = result.getStringArray(
+            val selectedServices = result.getStringArray(
                     ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
-            viewModel.onServicesChosen(chosenServices)
+            viewModel.onServicesSelected(selectedServices?.toList())
         }
 
         map.uiSettings.apply {
@@ -496,8 +491,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
      * @param savedInstanceState Previously saved state.
      */
     private fun restoreState(savedInstanceState: Bundle) {
-        viewModel.onRestoreState(savedInstanceState.getStringArray(STATE_SELECTED_SERVICES),
-                savedInstanceState.getString(STATE_SELECTED_STOP_CODE))
+        viewModel.onRestoreState(savedInstanceState.getString(STATE_SELECTED_STOP_CODE))
     }
 
     /**
@@ -600,11 +594,13 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
     /**
      * Show the services chooser UI.
+     *
+     * @param params The parameters to start [ServicesChooserDialogFragment] with.
      */
-    private fun showServicesChooser() {
+    private fun showServicesChooser(params: ServicesChooserParams) {
         ServicesChooserDialogFragment.newInstance(
-                viewModel.serviceNames.value,
-                viewModel.selectedServices,
+                params.services.toTypedArray(),
+                params.selectedServices?.toTypedArray(),
                 getString(R.string.busstopmapfragment_service_chooser_title))
                 .show(childFragmentManager, DIALOG_SERVICES_CHOOSER)
     }
@@ -628,13 +624,12 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     }
 
     /**
-     * Update the filter [MenuItem] to be enabled/disabled depending on the current state.
+     * Handle a change in the enabled state of the services menu item.
+     *
+     * @param isEnabled Is the services menu item enabled?
      */
-    private fun configureServicesMenuItem() {
-        menuItemServices?.apply {
-            val serviceNames = viewModel.serviceNames.value
-            isEnabled = serviceNames?.isNotEmpty() ?: false
-        }
+    private fun handleServicesMenuItemEnabledChanged(isEnabled: Boolean) {
+        menuItemServices?.isEnabled = isEnabled
     }
 
     /**
@@ -767,7 +762,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         }
 
         override fun onPrepareMenu(menu: Menu) {
-            configureServicesMenuItem()
+            handleServicesMenuItemEnabledChanged(viewModel.isFilterEnabledLiveData.value ?: false)
             configureTrafficViewMenuItem()
         }
 

@@ -27,8 +27,11 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import androidx.lifecycle.SavedStateHandle
+import kotlinx.coroutines.CoroutineDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
 import javax.inject.Inject
@@ -38,24 +41,30 @@ import javax.inject.Inject
  * [SavedStateHandle].
  *
  * @param locationRepository Used to access location-related data.
+ * @param servicesRepository Used to access services data.
  * @param isMyLocationEnabledDetector Used to detect whether the My Location feature is enabled or
  * not.
  * @param repository The [BusStopMapRepository].
  * @param preferenceManager The [PreferenceManager].
+ * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
 class BusStopMapFragmentViewModelFactory @Inject constructor(
         private val locationRepository: LocationRepository,
+        private val servicesRepository: ServicesRepository,
         private val isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
         private val repository: BusStopMapRepository,
-        private val preferenceManager: PreferenceManager)
+        private val preferenceManager: PreferenceManager,
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModelSavedStateFactory<BusStopMapViewModel> {
 
     override fun create(handle: SavedStateHandle) =
             BusStopMapViewModel(
                     handle,
                     locationRepository,
+                    servicesRepository,
                     isMyLocationEnabledDetector,
                     repository,
-                    preferenceManager)
+                    preferenceManager,
+                    defaultDispatcher)
 }

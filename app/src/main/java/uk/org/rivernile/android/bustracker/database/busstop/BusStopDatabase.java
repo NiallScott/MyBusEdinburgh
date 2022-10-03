@@ -99,25 +99,6 @@ public final class BusStopDatabase {
     }
 
     /**
-     * Return a SQLite {@code ORDER BY} condition to alphanumerically sort the service names.
-     *
-     * @param serviceColumnName The column name of the services within the table.
-     * @return A SQLite {@code ORDER BY} condition to alphanumerically sort the service names.
-     */
-    @NonNull
-    public static String getServicesSortByCondition(@NonNull final String serviceColumnName) {
-        return new StringBuilder()
-                .append("CASE WHEN ")
-                .append(serviceColumnName)
-                .append(" GLOB '[^0-9.]*' THEN ")
-                .append(serviceColumnName)
-                .append(" ELSE cast(")
-                .append(serviceColumnName)
-                .append(" AS int) END")
-                .toString();
-    }
-
-    /**
      * Generate placeholders for a SQL 'IN' clause.
      *
      * @param count The number of placeholders to generate.

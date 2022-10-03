@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,13 +36,6 @@ import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
  * @author Niall Scott
  */
 interface BusStopMapLiveDataFactory {
-
-    /**
-     * Obtain a new instance of a [ClearableLiveData] object which is able to get all service names.
-     *
-     * @return A new [ClearableLiveData] for getting all service names.
-     */
-    fun createServiceNamesLiveData(): ClearableLiveData<Array<String>>
 
     /**
      * Obtain a new instance of a [ClearableLiveData] object which is able to get stops based on an

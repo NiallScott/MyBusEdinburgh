@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,9 +42,6 @@ import javax.inject.Inject
 class AndroidBusStopMapLiveDataFactory @Inject constructor(
         private val context: Context,
         private val strings: Strings): BusStopMapLiveDataFactory {
-
-    override fun createServiceNamesLiveData(): ClearableLiveData<Array<String>> =
-            ServiceNamesLiveData(context)
 
     override fun createBusStopsLiveData(filteredServices: Array<String>?)
             : ClearableLiveData<Map<String, Stop>> =

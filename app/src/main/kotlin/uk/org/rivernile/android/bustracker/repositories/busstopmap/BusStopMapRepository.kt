@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,13 +40,6 @@ import javax.inject.Inject
 @OpenForTesting
 class BusStopMapRepository @Inject constructor(
         private val liveDataFactory: BusStopMapLiveDataFactory) {
-
-    /**
-     * Get a [ClearableLiveData] instance for getting service names.
-     *
-     * @return A [ClearableLiveData] instance for getting service names.
-     */
-    fun getServiceNames() = liveDataFactory.createServiceNamesLiveData()
 
     /**
      * Get a [ClearableLiveData] instance for getting stops to display on the map.

@@ -35,17 +35,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.PolylineOptions
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
 import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
-import java.util.Arrays
 
 /**
  * This is a [ViewModel] for presenting the stop map.
@@ -57,14 +63,17 @@ import java.util.Arrays
 class BusStopMapViewModel(
         private val savedState: SavedStateHandle,
         private val locationRepository: LocationRepository,
+        servicesRepository: ServicesRepository,
         isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
         private val repository: BusStopMapRepository,
-        private val preferenceManager: PreferenceManager)
+        private val preferenceManager: PreferenceManager,
+        defaultDispatcher: CoroutineDispatcher)
     : ViewModel() {
 
     companion object {
 
         private const val STATE_REQUESTED_LOCATION_PERMISSIONS = "requestedLocationPermissions"
+        private const val STATE_SELECTED_SERVICES = "selectedServices"
 
         private const val DEFAULT_ZOOM = 14f
     }
@@ -94,28 +103,43 @@ class BusStopMapViewModel(
             .getIsMyLocationFeatureEnabledFlow(permissionsStateFlow.filterNotNull())
             .asLiveData(viewModelScope.coroutineContext)
 
+    private val allServiceNamesFlow = servicesRepository.allServiceNamesFlow
+            .flowOn(defaultDispatcher)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
     /**
-     * A [LiveData] which represents all known services.
+     * A [LiveData] which emits whether the filter menu item is enabled.
      */
-    val serviceNames = repository.getServiceNames()
-    private val _selectedServices = MutableLiveData<Array<String>?>()
+    val isFilterEnabledLiveData = allServiceNamesFlow
+            .map { !it.isNullOrEmpty() }
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
+
     /**
-     * The currently selected services.
+     * When this [LiveData] emits a new item, the services chooser should be shown. The data that is
+     * emitted is the parameters which should be passed to the chooser UI.
      */
-    val selectedServices: Array<String>?
-        get() = _selectedServices.value
+    val showServicesChooserLiveData: LiveData<ServicesChooserParams> get() = showServicesChooser
+    private val showServicesChooser = SingleLiveEvent<ServicesChooserParams>()
+
+    private val selectedServicesFlow =
+            savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
+    // TODO: this is a temporary measure.
+    private val selectedServicesLiveData =
+            selectedServicesFlow.asLiveData(viewModelScope.coroutineContext)
+
     private var _busStops: ClearableLiveData<Map<String, Stop>>? = null
     /**
      * A [LiveData] which represents all stops to be shown on the map.
      */
     val busStops: LiveData<Map<String, Stop>> =
-            Transformations.switchMap(_selectedServices, this::loadBusStops)
+            Transformations.switchMap(selectedServicesLiveData, this::loadBusStops)
 
     /**
      * A [LiveData] which represents route lines shown on the map.
      */
     val routeLines: LiveData<Map<String, List<PolylineOptions>>> =
-            Transformations.switchMap(_selectedServices, this::loadRouteLines)
+            Transformations.switchMap(selectedServicesLiveData, this::loadRouteLines)
     private var _routeLines: ClearableLiveData<Map<String, List<PolylineOptions>>>? = null
 
     /**
@@ -144,11 +168,6 @@ class BusStopMapViewModel(
     val showSearch: LiveData<Void>
         get() = _showSearch
     /**
-     * A [LiveData] representing a request to show the services chooser.
-     */
-    val showServicesChooser: LiveData<Void>
-        get() = _showServicesChooser
-    /**
      * A [LiveData] representing a request to show the map type selector.
      */
     val showMapTypeSelection: LiveData<Void>
@@ -171,7 +190,6 @@ class BusStopMapViewModel(
     private val _cameraLocation = MutableLiveData<CameraLocation>()
     private val _showStopDetails = SingleLiveEvent<String>()
     private val _showSearch = SingleLiveEvent<Void>()
-    private val _showServicesChooser = SingleLiveEvent<Void>()
     private val _showMapTypeSelection = SingleLiveEvent<Void>()
     private val _updateTrafficView = SingleLiveEvent<Void>()
 
@@ -184,26 +202,17 @@ class BusStopMapViewModel(
 
     private var searchedBusStop: String? = null
 
-    init {
-        _selectedServices.value = null
-    }
-
     /**
      * This should be called when state is being restored from the UI.
      *
-     * @param selectedServices The user selected services.
      * @param selectedStopCode The selected stop code.
      */
-    fun onRestoreState(selectedServices: Array<String>?, selectedStopCode: String?) {
+    fun onRestoreState(selectedStopCode: String?) {
         _cameraLocation.value = CameraLocation(
                 preferenceManager.getLastMapLatitude(),
                 preferenceManager.getLastMapLongitude(),
                 preferenceManager.getLastMapZoomLevel(), false)
         _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
-
-        if (!Arrays.equals(_selectedServices.value, selectedServices)) {
-            _selectedServices.value = selectedServices
-        }
 
         if (_selectedStopCode.value != selectedStopCode) {
             _selectedStopCode.value = selectedStopCode
@@ -246,7 +255,6 @@ class BusStopMapViewModel(
     }
 
     override fun onCleared() {
-        serviceNames.onCleared()
         _busStops?.onCleared()
         _selectedStop?.onCleared()
         _routeLines?.onCleared()
@@ -272,7 +280,11 @@ class BusStopMapViewModel(
      * This is called when the services menu item is clicked.
      */
     fun onServicesMenuItemClicked() {
-        _showServicesChooser.call()
+        allServiceNamesFlow.value?.ifEmpty { null }?.let {
+            showServicesChooser.value = ServicesChooserParams(
+                    it,
+                    selectedServicesFlow.value?.toList())
+        }
     }
 
     /**
@@ -317,12 +329,12 @@ class BusStopMapViewModel(
     }
 
     /**
-     * This is called when services have been chosen.
+     * This is called when services have been selected.
      *
-     * @param chosenServices The chosen services.
+     * @param selectedServices The selected services.
      */
-    fun onServicesChosen(chosenServices: Array<String>?) {
-        _selectedServices.value = chosenServices
+    fun onServicesSelected(selectedServices: List<String>?) {
+        savedState[STATE_SELECTED_SERVICES] = selectedServices?.toTypedArray()
     }
 
     /**
