@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.map
 
 import androidx.annotation.DrawableRes
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject
@@ -52,6 +53,19 @@ class StopMapMarkerDecorator @Inject constructor() {
      */
     fun applyStopDirectionToMarker(markerOptions: MarkerOptions, orientation: Int) {
         markerOptions.icon(BitmapDescriptorFactory.fromResource(
+                getStopDirectionDrawableResourceId(orientation)))
+    }
+
+    /**
+     * Apply the correct direction icon to the [Marker] object based on the supplied orientation.
+     *
+     * @param marker The [Marker] to apply the direction icon to.
+     * @param orientation The orientation of the stop, in the range of `0` (north) to `7`
+     * (north-west), going clockwise. Any other number will be treated as unknown and the
+     * stop will be given a generic icon instead.
+     */
+    fun applyStopDirectionToMarker(marker: Marker, orientation: Int) {
+        marker.setIcon(BitmapDescriptorFactory.fromResource(
                 getStopDirectionDrawableResourceId(orientation)))
     }
 

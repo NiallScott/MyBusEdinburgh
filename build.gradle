@@ -51,7 +51,11 @@ buildscript {
         kotlinJsonSerialisationVersion = '1.4.0'
         gsonVersion = '2.8.9'
         picassoVersion = '2.71828'
+        playServicesMapsVersion = '18.1.0'
         playServicesLocationVersion = '20.0.0'
+        googleMapsKtxVersion = '3.4.0'
+        googleMapsUtilsVersion = '2.4.0'
+        googleMapsUtilsKtxVersion = '3.4.0'
 
         // Testing dependency versions
         junitVersion = '4.13.2'

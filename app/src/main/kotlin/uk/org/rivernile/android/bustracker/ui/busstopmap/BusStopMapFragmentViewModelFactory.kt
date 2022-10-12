@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.CoroutineDispatcher
+import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
@@ -42,6 +43,8 @@ import javax.inject.Inject
  *
  * @param locationRepository Used to access location-related data.
  * @param servicesRepository Used to access services data.
+ * @param busStopsRepository Used to access bus stop data.
+ * @param serviceListingRetriever Used to access service listings.
  * @param isMyLocationEnabledDetector Used to detect whether the My Location feature is enabled or
  * not.
  * @param repository The [BusStopMapRepository].
@@ -52,6 +55,8 @@ import javax.inject.Inject
 class BusStopMapFragmentViewModelFactory @Inject constructor(
         private val locationRepository: LocationRepository,
         private val servicesRepository: ServicesRepository,
+        private val busStopsRepository: BusStopsRepository,
+        private val serviceListingRetriever: ServiceListingRetriever,
         private val isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
         private val repository: BusStopMapRepository,
         private val preferenceManager: PreferenceManager,
@@ -63,6 +68,8 @@ class BusStopMapFragmentViewModelFactory @Inject constructor(
                     handle,
                     locationRepository,
                     servicesRepository,
+                    busStopsRepository,
+                    serviceListingRetriever,
                     isMyLocationEnabledDetector,
                     repository,
                     preferenceManager,

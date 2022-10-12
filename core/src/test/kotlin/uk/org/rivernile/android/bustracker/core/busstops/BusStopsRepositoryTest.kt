@@ -271,6 +271,16 @@ class BusStopsRepositoryTest {
     }
 
     @Test
+    fun getStopDetailsWithServiceFilterFlowUsesFlowFromDao() {
+        val stopDetailsFlow = mock<Flow<List<StopDetails>?>>()
+        whenever(busStopsDao.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")))
+                .thenReturn(stopDetailsFlow)
+
+        val result = repository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3"))
+        assertNotNull(result)
+    }
+
+    @Test
     fun getStopSearchResultsFlowReturnsFlowFromBusStopsDao() {
         val stopSearchResultsFlow = mock<Flow<List<StopSearchResult>?>>()
         whenever(busStopsDao.getStopSearchResultsFlow("123456"))

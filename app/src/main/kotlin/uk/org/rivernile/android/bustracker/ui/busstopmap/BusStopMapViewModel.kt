@@ -27,43 +27,48 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
 import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
 /**
  * This is a [ViewModel] for presenting the stop map.
  *
- * @author Niall Scott
  * @param repository The [BusStopMapRepository].
  * @param preferenceManager The [PreferenceManager].
+ * @author Niall Scott
  */
 class BusStopMapViewModel(
         private val savedState: SavedStateHandle,
         private val locationRepository: LocationRepository,
         servicesRepository: ServicesRepository,
+        private val busStopsRepository: BusStopsRepository,
+        private val serviceListingRetriever: ServiceListingRetriever,
         isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
         private val repository: BusStopMapRepository,
         private val preferenceManager: PreferenceManager,
@@ -74,6 +79,7 @@ class BusStopMapViewModel(
 
         private const val STATE_REQUESTED_LOCATION_PERMISSIONS = "requestedLocationPermissions"
         private const val STATE_SELECTED_SERVICES = "selectedServices"
+        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
 
         private const val DEFAULT_ZOOM = 14f
     }
@@ -128,12 +134,31 @@ class BusStopMapViewModel(
     private val selectedServicesLiveData =
             selectedServicesFlow.asLiveData(viewModelScope.coroutineContext)
 
-    private var _busStops: ClearableLiveData<Map<String, Stop>>? = null
-    /**
-     * A [LiveData] which represents all stops to be shown on the map.
-     */
-    val busStops: LiveData<Map<String, Stop>> =
-            Transformations.switchMap(selectedServicesLiveData, this::loadBusStops)
+    private val selectedStopCodeFlow =
+            savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val serviceListingFlow get() = selectedStopCodeFlow
+            .flatMapLatest(serviceListingRetriever::getServiceListingFlow)
+
+    val showStopMarkerInfoWindowLiveData =
+            selectedStopCodeFlow.asLiveData(viewModelScope.coroutineContext)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val stopMarkersLiveData = selectedServicesFlow
+            .flatMapLatest(this::loadBusStops)
+            .combine(serviceListingFlow, this::mapToUiStopMarkers)
+            .flowOn(defaultDispatcher)
+            .asLiveData(viewModelScope.coroutineContext)
+
+    val cameraLocationLiveData: LiveData<CameraLocation> get() = cameraLocation
+    private val cameraLocation = SingleLiveEvent<CameraLocation>()
+
+    val showStopDetailsLiveData: LiveData<String> get() = showStopDetails
+    private val showStopDetails = SingleLiveEvent<String>()
+
+    val showSearchLiveData: LiveData<Unit> get() = showSearch
+    private val showSearch = SingleLiveEvent<Unit>()
 
     /**
      * A [LiveData] which represents route lines shown on the map.
@@ -147,26 +172,6 @@ class BusStopMapViewModel(
      */
     val mapType: LiveData<MapType>
         get() = _mapType
-    /**
-     * A [LiveData] representing a requested camera location.
-     */
-    val cameraLocation: LiveData<CameraLocation>
-        get() = _cameraLocation
-    /**
-     * A [LiveData] representing a request to show the map marker bubble.
-     */
-    val showMapMarkerBubble: LiveData<SelectedStop>
-        get() = _showMapMarkerBubble
-    /**
-     * A [LiveData] representing a request to show details for a stop.
-     */
-    val showStopDetails: LiveData<String>
-        get() = _showStopDetails
-    /**
-     * A [LiveData] representing a request to show the search UI.
-     */
-    val showSearch: LiveData<Void>
-        get() = _showSearch
     /**
      * A [LiveData] representing a request to show the map type selector.
      */
@@ -184,21 +189,9 @@ class BusStopMapViewModel(
     val shouldShowZoomControls: Boolean
         get() = preferenceManager.isMapZoomButtonsShown()
 
-    private val _selectedStopCode = MutableLiveData<String?>()
-
     private val _mapType = MutableLiveData<MapType>()
-    private val _cameraLocation = MutableLiveData<CameraLocation>()
-    private val _showStopDetails = SingleLiveEvent<String>()
-    private val _showSearch = SingleLiveEvent<Void>()
     private val _showMapTypeSelection = SingleLiveEvent<Void>()
     private val _updateTrafficView = SingleLiveEvent<Void>()
-
-    private val _selectedStopLiveData =
-            Transformations.switchMap(_selectedStopCode, this::loadBusStop)
-    private var _selectedStop: ClearableLiveData<SelectedStop>? = null
-    private val _showMapMarkerBubble = MediatorLiveData<SelectedStop>().also {
-        it.addSource(_selectedStopLiveData, this::handleSelectedStopLoaded)
-    }
 
     private var searchedBusStop: String? = null
 
@@ -208,22 +201,18 @@ class BusStopMapViewModel(
      * @param selectedStopCode The selected stop code.
      */
     fun onRestoreState(selectedStopCode: String?) {
-        _cameraLocation.value = CameraLocation(
+        cameraLocation.value = CameraLocation(
                 preferenceManager.getLastMapLatitude(),
                 preferenceManager.getLastMapLongitude(),
                 preferenceManager.getLastMapZoomLevel(), false)
         _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
-
-        if (_selectedStopCode.value != selectedStopCode) {
-            _selectedStopCode.value = selectedStopCode
-        }
     }
 
     /**
      * This is called when the hosting UI is first created and has no arguments.
      */
     fun onFirstCreate() {
-        _cameraLocation.value = CameraLocation(
+        cameraLocation.value = CameraLocation(
                 preferenceManager.getLastMapLatitude(),
                 preferenceManager.getLastMapLongitude(),
                 preferenceManager.getLastMapZoomLevel(),
@@ -238,7 +227,6 @@ class BusStopMapViewModel(
      */
     fun onFirstCreate(stopCode: String) {
         searchedBusStop = stopCode
-        _selectedStopCode.value = stopCode
         _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
     }
 
@@ -250,30 +238,28 @@ class BusStopMapViewModel(
      * @param longitude The supplied longitude.
      */
     fun onFirstCreate(latitude: Double, longitude: Double) {
-        _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
+        cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
         _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
     }
 
     override fun onCleared() {
-        _busStops?.onCleared()
-        _selectedStop?.onCleared()
         _routeLines?.onCleared()
     }
 
     /**
      * This is called when the marker bubble is clicked.
      *
-     * @param stop The stop that was clicked on.
+     * @param stopMarker The stop marker that was clicked on.
      */
-    fun onMarkerBubbleClicked(stop: Stop) {
-        _showStopDetails.value = stop.stopCode
+    fun onMarkerBubbleClicked(stopMarker: UiStopMarker) {
+        showStopDetails.value = stopMarker.stopCode
     }
 
     /**
      * This is called when the search menu item is clicked.
      */
     fun onSearchMenuItemClicked() {
-        _showSearch.call()
+        showSearch.call()
     }
 
     /**
@@ -343,8 +329,7 @@ class BusStopMapViewModel(
      * @param stopCode The selected stop code.
      */
     fun onStopSearchResult(stopCode: String) {
-        searchedBusStop = stopCode
-        _selectedStopCode.value = stopCode
+        savedState[STATE_SELECTED_STOP_CODE] = stopCode
     }
 
     /**
@@ -355,27 +340,24 @@ class BusStopMapViewModel(
      * @param currentZoom The current camera zoom.
      */
     fun onClusterMarkerClicked(latitude: Double, longitude: Double, currentZoom: Float) {
-        _cameraLocation.value = CameraLocation(latitude, longitude, currentZoom + 1f, true)
+        cameraLocation.value = CameraLocation(latitude, longitude, currentZoom + 1f, true)
     }
 
     /**
      * This is called when a map marker has been clicked.
      *
-     * @param stop The stop representing the map marker.
+     * @param stopMarker The stop marker.
      */
-    fun onMapMarkerClicked(stop: Stop) {
-        _selectedStopCode.value = stop.stopCode
-        _cameraLocation.value = CameraLocation(stop.latitude, stop.longitude, null, true)
+    fun onMapMarkerClicked(stopMarker: UiStopMarker) {
+        savedState[STATE_SELECTED_STOP_CODE] = stopMarker.stopCode
+        //_cameraLocation.value = CameraLocation(stop.latitude, stop.longitude, null, true)
     }
 
     /**
      * This is called when the map marker bubble has been closed.
      */
-    fun onMapMarkerBubbleClosed(stopCode: String) {
-        if (stopCode == _selectedStopCode.value) {
-            _selectedStopCode.value = null
-            _showMapMarkerBubble.value = null
-        }
+    fun onInfoWindowClosed() {
+        savedState[STATE_SELECTED_STOP_CODE] = null
     }
 
     /**
@@ -385,7 +367,7 @@ class BusStopMapViewModel(
      * @param longitude The requested longitude.
      */
     fun onRequestCameraLocation(latitude: Double, longitude: Double) {
-        _cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
+        cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
     }
 
     /**
@@ -414,22 +396,7 @@ class BusStopMapViewModel(
      * @param filteredServices Filtered services, if any.
      */
     private fun loadBusStops(filteredServices: Array<String>?) =
-            repository.getBusStops(filteredServices).also {
-                _busStops?.onCleared()
-                _busStops = it
-            }
-
-    /**
-     * This is called when a stop should be loaded.
-     *
-     * @param stopCode The stop code of the stop to load. `null` will mean no loading will occur.
-     */
-    private fun loadBusStop(stopCode: String?) = stopCode?.let {
-        repository.getBusStop(it).also { liveData ->
-            _selectedStop?.onCleared()
-            _selectedStop = liveData
-        }
-    }
+            busStopsRepository.getStopDetailsWithServiceFilterFlow(filteredServices?.toSet())
 
     /**
      * This is called when route lines should be loaded.
@@ -443,17 +410,37 @@ class BusStopMapViewModel(
             }
 
     /**
-     * Handle a selected stop load result.
+     * Given an optional [List] of [StopDetails] and an optional [UiServiceListing], map this to a
+     * [List] of [UiStopMarker]. This will be `null` if [stopDetails] is `null` or empty.
      *
-     * @param selectedStop The selected stop.
+     * @param stopDetails The [List] of [StopDetails].
+     * @param serviceListing An optional [UiServiceListing] if a stop is currently selected.
+     * @return The mapped [List] of [UiStopMarker], or `null`.
      */
-    private fun handleSelectedStopLoaded(selectedStop: SelectedStop?) {
-        _showMapMarkerBubble.value = selectedStop
+    private fun mapToUiStopMarkers(
+            stopDetails: List<StopDetails>?,
+            serviceListing: UiServiceListing?) =
+            stopDetails?.map { sd ->
+                val sl = serviceListing?.takeIf { it.stopCode == sd.stopCode }
 
-        if (searchedBusStop != null && searchedBusStop == selectedStop?.stopCode) {
-            selectedStop?.let {
-                _cameraLocation.value = CameraLocation(it.latitude, it.longitude, 99f, false)
-            }
-        }
-    }
+                mapToUiStopMarker(sd, sl)
+            }?.ifEmpty { null }
+
+    /**
+     * Given a [StopDetails], map this to a [UiStopMarker]. If [serviceListing] is not `null`, this
+     * means this stop is currently selected.
+     *
+     * @param stopDetails The [StopDetails] to map from.
+     * @param serviceListing The [UiServiceListing] if this stop is currently selected.
+     * @return The mapped [UiStopMarker].
+     */
+    private fun mapToUiStopMarker(
+            stopDetails: StopDetails,
+            serviceListing: UiServiceListing?) =
+            UiStopMarker(
+                    stopDetails.stopCode,
+                    stopDetails.stopName,
+                    LatLng(stopDetails.latitude, stopDetails.longitude),
+                    stopDetails.orientation,
+                    serviceListing)
 }

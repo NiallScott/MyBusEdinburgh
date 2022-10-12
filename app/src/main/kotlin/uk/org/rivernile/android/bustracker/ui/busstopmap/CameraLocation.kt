@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,12 +29,12 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 /**
  * A data class which represents a camera location update.
  *
- * @author Niall Scott
  * @property latitude The latitude the camera should be centered on.
  * @property longitude The longitude the camera should be centered on.
  * @property zoomLevel An optional parameter to specify the zoom level of the camera. `null` means
  * the zoom level should not be changed.
  * @property animate Whether the camera update should be animated or not.
+ * @author Niall Scott
  */
 data class CameraLocation(
         val latitude: Double,

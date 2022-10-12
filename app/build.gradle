@@ -30,10 +30,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
-ext {
-    googlePlayServicesVersion = '18.1.0'
-}
-
 android {
     namespace 'uk.org.rivernile.edinburghbustracker.android'
     compileSdkVersion androidCompileSdkVersion
@@ -131,8 +127,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$architectureComponentsVersion"
 
     // Google Play Services
-    implementation "com.google.android.gms:play-services-maps:$googlePlayServicesVersion"
-    implementation 'com.google.maps.android:android-maps-utils:0.5'
+    implementation "com.google.android.gms:play-services-maps:$playServicesMapsVersion"
+    implementation "com.google.maps.android:maps-ktx:$googleMapsKtxVersion"
+    implementation "com.google.maps.android:android-maps-utils:$googleMapsUtilsVersion"
+    implementation "com.google.maps.android:maps-utils-ktx:$googleMapsUtilsKtxVersion"
 
     // Dagger 2
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"

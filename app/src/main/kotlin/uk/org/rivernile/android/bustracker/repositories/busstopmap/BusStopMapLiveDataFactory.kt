@@ -38,25 +38,6 @@ import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 interface BusStopMapLiveDataFactory {
 
     /**
-     * Obtain a new instance of a [ClearableLiveData] object which is able to get stops based on an
-     * optional service filter.
-     *
-     * @param filteredServices An optional array of [String] services to filter stops on.
-     * @return A new [ClearableLiveData] for getting stops.
-     */
-    fun createBusStopsLiveData(filteredServices: Array<String>?)
-            : ClearableLiveData<Map<String, Stop>>
-
-    /**
-     * Obtain a new instance of a [ClearableLiveData] object which is able to get a stop based on
-     * its `stopCode`.
-     *
-     * @param stopCode The stop code of the stop.
-     * @return A new [ClearableLiveData] for getting the given stop.
-     */
-    fun createBusStopLiveData(stopCode: String): ClearableLiveData<SelectedStop>
-
-    /**
      * Obtain a new instance of a [ClearableLiveData] object which is able to load route lines for
      * given services.
      *

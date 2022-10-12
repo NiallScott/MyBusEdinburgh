@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,66 +32,68 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
-import uk.org.rivernile.android.utils.MapsUtils
-import java.lang.ref.WeakReference
+import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
+import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 
 /**
- * This class overrides [DefaultClusterRenderer] so that the markers are customised and to also
- * provide a callback interface that's called when a marker is rendered.
+ * This class overrides [DefaultClusterRenderer] so that the markers are customised.
  *
- * @author Niall Scott
  * @param context The [android.app.Activity] instance.
- * @param map The map object.
+ * @param map The [GoogleMap] object which will be operated upon.
  * @param clusterManager The [ClusterManager] instance.
- * @param itemRenderedListener See [OnItemRenderedListener].
- * @param viewModel The [BusStopMapViewModel] being used to control the UI.
+ * @param stopMapMarkerDecorator Used to decorate the marker icons correctly.
+ * @param textFormattingUtils Used to format text on the marker.
+ * @author Niall Scott
  */
-internal class StopClusterRenderer(context: Context,
-                                   map: GoogleMap,
-                                   clusterManager: ClusterManager<Stop>,
-                                   itemRenderedListener: OnItemRenderedListener,
-                                   private val viewModel: BusStopMapViewModel)
-    : DefaultClusterRenderer<Stop>(context, map, clusterManager) {
+class StopClusterRenderer(
+        context: Context,
+        map: GoogleMap,
+        clusterManager: ClusterManager<UiStopMarker>,
+        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+        private val textFormattingUtils: TextFormattingUtils)
+    : DefaultClusterRenderer<UiStopMarker>(context, map, clusterManager) {
 
-    private val itemRenderedListenerRef =
-            WeakReference<OnItemRenderedListener>(itemRenderedListener)
-
-    override fun onBeforeClusterItemRendered(item: Stop, markerOptions: MarkerOptions) {
-        MapsUtils.applyStopDirectionToMarker(markerOptions, item.orientation)
-        markerOptions.anchor(0.5f, 1f)
-                .draggable(false)
-    }
-
-    override fun onClusterItemRendered(clusterItem: Stop, marker: Marker) {
-        val stopCode = clusterItem.stopCode
-        marker.tag = stopCode
-
-        if (stopCode == viewModel.showMapMarkerBubble.value?.stopCode) {
-            dispatchItemRenderedListener(marker)
+    override fun onBeforeClusterItemRendered(item: UiStopMarker, markerOptions: MarkerOptions) {
+        markerOptions.apply {
+            stopMapMarkerDecorator.applyStopDirectionToMarker(this, item.orientation)
+            title(textFormattingUtils.formatBusStopNameWithStopCode(
+                    item.stopCode,
+                    item.stopName))
+            anchor(0.5f, 1f)
+            draggable(false)
         }
     }
 
-    /**
-     * Dispatch the listener for when the selected stop code is rendered.
-     *
-     * @param marker The rendered [Marker].
-     */
-    private fun dispatchItemRenderedListener(marker: Marker) {
-        itemRenderedListenerRef.get()?.onItemRendered(marker)
+    override fun onClusterItemRendered(clusterItem: UiStopMarker, marker: Marker) {
+        marker.tag = clusterItem
+
+        if (clusterItem.isInfoWindowShown) {
+            marker.showInfoWindow()
+        } else if (marker.isInfoWindowShown) {
+            marker.hideInfoWindow()
+        }
     }
 
-    /**
-     * This interface should be implemented by the class interested in getting callbacks when a
-     * [Marker] with that matches the selected stop is rendered to the map.
-     */
-    internal interface OnItemRenderedListener {
+    override fun onClusterItemUpdated(item: UiStopMarker, marker: Marker) {
+        val currentItem = marker.tag as? UiStopMarker
 
-        /**
-         * This is called when the [Marker] that matches the selected stop is rendered to the map.
-         *
-         * @param marker The [Marker] that has been rendered to the map.
-         */
-        fun onItemRendered(marker: Marker)
+        if (!item.deepEquals(currentItem)) {
+            marker.apply {
+                tag = item
+                stopMapMarkerDecorator.applyStopDirectionToMarker(this, item.orientation)
+                title = textFormattingUtils.formatBusStopNameWithStopCode(
+                        item.stopCode,
+                        item.stopName)
+                setAnchor(0.5f, 1f)
+                isDraggable = false
+                position = item.position
+
+                if (item.isInfoWindowShown) {
+                    marker.showInfoWindow()
+                } else if (marker.isInfoWindowShown) {
+                    marker.hideInfoWindow()
+                }
+            }
+        }
     }
 }

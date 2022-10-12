@@ -137,6 +137,16 @@ interface BusStopsDao {
             serviceFilter: List<String>): Flow<List<StopDetailsWithServices>?>
 
     /**
+     * Return a [Flow] which emits a [List] of [StopDetails], which only contains items which
+     * satisfy the supplied [serviceFilter].
+     *
+     * @param serviceFilter An optional [Set] which contains the service filter.
+     * @return A [Flow] which emits [List]s pf [StopDetails] which satify the supplied
+     * [serviceFilter].
+     */
+    fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?): Flow<List<StopDetails>?>
+
+    /**
      * Return a [Flow] which emits [List]s of [StopSearchResult] objects, based upon the supplied
      * [searchTerm].
      *

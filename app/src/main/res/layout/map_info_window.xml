@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,11 +27,11 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:ignore="SelectableText"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal">
+
     <TextView
         android:id="@+id/txtTitle"
         android:layout_width="match_parent"
@@ -39,11 +39,14 @@
         android:gravity="center_horizontal"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:textColor="#000" />
+        android:textColor="#000"
+        tools:text="Example stop name" />
+
     <TextView
         android:id="@+id/txtSnippet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="14sp"
-        android:textColor="#888888" />
+        android:textColor="#888888"
+        tools:text="1, 2, 3, 4, 5" />
 </LinearLayout>

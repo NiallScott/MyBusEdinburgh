@@ -50,9 +50,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.clustering.Cluster
@@ -60,8 +58,6 @@ import com.google.maps.android.clustering.ClusterManager
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.SelectedStop
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.Stop
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
@@ -74,20 +70,13 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class BusStopMapFragment : Fragment(), OnMapReadyCallback,
-        ClusterManager.OnClusterClickListener<Stop>,
-        ClusterManager.OnClusterItemClickListener<Stop>,
-        ClusterManager.OnClusterItemInfoWindowClickListener<Stop>,
-        GoogleMap.OnInfoWindowCloseListener,
-        StopClusterRenderer.OnItemRenderedListener {
+class BusStopMapFragment : Fragment() {
 
     companion object {
 
         private const val ARG_STOPCODE = "stopCode"
         private const val ARG_LATITUDE = "latitude"
         private const val ARG_LONGITUDE = "longitude"
-
-        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
 
         private const val DIALOG_SERVICES_CHOOSER = "dialogServicesChooser"
         private const val DIALOG_MAP_TYPE_BOTTOM_SHEET = "bottomSheetMapType"
@@ -133,6 +122,8 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     lateinit var viewModelFactory: BusStopMapFragmentViewModelFactory
     @Inject
     lateinit var googleApiAvailability: GoogleApiAvailability
+    @Inject
+    lateinit var stopClusterRendererFactory: StopClusterRendererFactory
 
     private val viewModel: BusStopMapViewModel by viewModels {
         GenericSavedStateViewModelFactory(viewModelFactory, this)
@@ -140,8 +131,7 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
 
     private lateinit var callbacks: Callbacks
     private var map: GoogleMap? = null
-    private var clusterManager: ClusterManager<Stop>? = null
-    private var stopClusterRenderer: StopClusterRenderer? = null
+    private var clusterManager: ClusterManager<UiStopMarker>? = null
     private var routeLines: Map<String, List<Polyline>>? = null
 
     private val viewBinding get() = _viewBinding!!
@@ -189,18 +179,33 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().setTitle(R.string.map_title)
+        val viewLifecycleOwner = viewLifecycleOwner
 
-        savedInstanceState?.let(this::restoreState) ?: doFirstCreate()
+        childFragmentManager.setFragmentResultListener(
+                MapTypeBottomSheetDialogFragment.REQUEST_KEY,
+                viewLifecycleOwner) { _, result ->
+            val mapType = result.getSerializableCompat(
+                    MapTypeBottomSheetDialogFragment.RESULT_CHOSEN_MAP_TYPE)
+                    ?: MapType.NORMAL
+            viewModel.onMapTypeSelected(mapType)
+        }
+
+        childFragmentManager.setFragmentResultListener(
+                ServicesChooserDialogFragment.REQUEST_KEY,
+                viewLifecycleOwner) { _, result ->
+            val selectedServices = result.getStringArray(
+                    ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
+            viewModel.onServicesSelected(selectedServices?.toList())
+        }
+
+        //savedInstanceState?.let(this::restoreState) ?: doFirstCreate()
 
         viewBinding.mapView.apply {
             onCreate(savedInstanceState)
-            getMapAsync(this@BusStopMapFragment)
+            getMapAsync(this@BusStopMapFragment::handleOnMapReady)
         }
 
         viewBinding.layoutError.btnErrorResolve.setText(R.string.busstopmapfragment_button_resolve)
-
-        val viewLifecycleOwner = viewLifecycleOwner
 
         viewModel.requestLocationPermissionsLiveData.observe(viewLifecycleOwner) {
             handleRequestLocationPermissions()
@@ -210,16 +215,24 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         viewModel.isFilterEnabledLiveData.observe(viewLifecycleOwner,
                 this::handleServicesMenuItemEnabledChanged)
         viewModel.showServicesChooserLiveData.observe(viewLifecycleOwner, this::showServicesChooser)
-
-        viewModel.showStopDetails.observe(viewLifecycleOwner, callbacks::onShowBusTimes)
-        viewModel.showSearch.observe(viewLifecycleOwner) {
+        viewModel.stopMarkersLiveData.observe(viewLifecycleOwner, this::handleStopMarkersChanged)
+        viewModel.showStopMarkerInfoWindowLiveData.observe(viewLifecycleOwner,
+                this::handleShowMapMarkerInfoWindow)
+        viewModel.showStopDetailsLiveData.observe(viewLifecycleOwner, callbacks::onShowBusTimes)
+        viewModel.showSearchLiveData.observe(viewLifecycleOwner) {
             showSearch()
         }
+
         viewModel.showMapTypeSelection.observe(viewLifecycleOwner) {
             showMapTypeSelection()
         }
         viewModel.updateTrafficView.observe(viewLifecycleOwner) {
             handleTrafficViewMenuItemSelected()
+        }
+
+        requireActivity().apply {
+            setTitle(R.string.map_title)
+            addMenuProvider(menuProvider, viewLifecycleOwner)
         }
     }
 
@@ -260,8 +273,9 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     override fun onDestroyView() {
         super.onDestroyView()
 
-        viewBinding.mapView.onDestroy()
+        clusterManager = null
         map = null
+        viewBinding.mapView.onDestroy()
         _viewBinding = null
     }
 
@@ -269,103 +283,12 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
         super.onSaveInstanceState(outState)
 
         viewBinding.mapView.onSaveInstanceState(outState)
-        outState.putString(STATE_SELECTED_STOP_CODE, viewModel.showMapMarkerBubble.value?.stopCode)
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
 
         viewBinding.mapView.onLowMemory()
-    }
-
-    override fun onMapReady(map: GoogleMap) {
-        this.map = map
-        val viewLifecycleOwner = viewLifecycleOwner
-        requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner)
-
-        childFragmentManager.setFragmentResultListener(
-                MapTypeBottomSheetDialogFragment.REQUEST_KEY,
-                viewLifecycleOwner) { _, result ->
-            val mapType = result.getSerializableCompat(
-                    MapTypeBottomSheetDialogFragment.RESULT_CHOSEN_MAP_TYPE)
-                    ?: MapType.NORMAL
-            viewModel.onMapTypeSelected(mapType)
-        }
-
-        childFragmentManager.setFragmentResultListener(
-                ServicesChooserDialogFragment.REQUEST_KEY,
-                viewLifecycleOwner) { _, result ->
-            val selectedServices = result.getStringArray(
-                    ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
-            viewModel.onServicesSelected(selectedServices?.toList())
-        }
-
-        map.uiSettings.apply {
-            isMyLocationButtonEnabled = true
-            isZoomControlsEnabled = viewModel.shouldShowZoomControls
-        }
-
-        val context = requireContext()
-        val clusterManager = ClusterManager<Stop>(context, map)
-        val clusterRenderer = StopClusterRenderer(context, map, clusterManager, this, viewModel)
-        clusterManager.renderer = clusterRenderer
-
-        clusterManager.setOnClusterClickListener(this)
-        clusterManager.setOnClusterItemClickListener(this)
-        clusterManager.setOnClusterItemInfoWindowClickListener(this)
-
-        map.setOnCameraIdleListener(clusterManager)
-        map.setOnMarkerClickListener(clusterManager)
-        map.setOnInfoWindowClickListener(clusterManager)
-        map.setOnInfoWindowCloseListener(this)
-        map.setInfoWindowAdapter(MapInfoWindow(requireActivity(), view as ViewGroup))
-        handleMyLocationEnabledChanged(viewModel.isMyLocationFeatureEnabledLiveData.value ?: false)
-        this.clusterManager = clusterManager
-        this.stopClusterRenderer = clusterRenderer
-
-        viewModel.mapType.observe(viewLifecycleOwner, this::handleMapTypeChanged)
-        viewModel.cameraLocation.observe(viewLifecycleOwner, this::handleCameraPositionChanged)
-        viewModel.busStops.observe(viewLifecycleOwner, this::handleStopsChanged)
-        viewModel.routeLines.observe(viewLifecycleOwner, this::handleRouteLinesChanged)
-        viewModel.showMapMarkerBubble.observe(viewLifecycleOwner, this::handleShowMapMarkerBubble)
-    }
-
-    override fun onClusterClick(cluster: Cluster<Stop>): Boolean {
-        map?.let {
-            val position = cluster.position
-            val latitude = position.latitude
-            val longitude = position.longitude
-            val currentZoom = it.cameraPosition.zoom
-            viewModel.onClusterMarkerClicked(latitude, longitude, currentZoom)
-        }
-
-        return true
-    }
-
-    override fun onClusterItemClick(stop: Stop): Boolean {
-        viewModel.onMapMarkerClicked(stop)
-
-        return true
-    }
-
-    override fun onClusterItemInfoWindowClick(stop: Stop) {
-        viewModel.onMarkerBubbleClicked(stop)
-    }
-
-    override fun onInfoWindowClose(marker: Marker) {
-        (marker.tag as? String)?.let {
-            viewModel.onMapMarkerBubbleClosed(it)
-        }
-    }
-
-    override fun onItemRendered(marker: Marker) {
-        val stopCode = marker.tag as? String
-        val selectedStop = viewModel.showMapMarkerBubble.value
-
-        if (stopCode != null && stopCode == selectedStop?.stopCode) {
-            marker.snippet = selectedStop.serviceListing
-            marker.showInfoWindow()
-        }
     }
 
     /**
@@ -453,6 +376,97 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     }
 
     /**
+     * Handle the map being ready.
+     *
+     * @param map Used to control the map.
+     */
+    private fun handleOnMapReady(map: GoogleMap) {
+        this.map = map.apply {
+            uiSettings.apply {
+                isMyLocationButtonEnabled = true
+                isZoomControlsEnabled = viewModel.shouldShowZoomControls
+            }
+
+            setOnInfoWindowCloseListener {
+                viewModel.onInfoWindowClosed()
+            }
+        }
+
+        val context = requireContext()
+        clusterManager = ClusterManager<UiStopMarker>(context, map).apply {
+            renderer = stopClusterRendererFactory.createStopClusterRenderer(context, map, this)
+
+            map.setOnCameraIdleListener(this)
+
+            setOnClusterClickListener(this@BusStopMapFragment::handleOnClusterClicked)
+            setOnClusterItemClickListener(this@BusStopMapFragment::handleOnClusterItemClick)
+            setOnClusterItemInfoWindowClickListener(viewModel::onMarkerBubbleClicked)
+
+            markerCollection.setInfoWindowAdapter(
+                    MapInfoWindow(context, layoutInflater, view as ViewGroup))
+        }
+
+        handleMyLocationEnabledChanged(viewModel.isMyLocationFeatureEnabledLiveData.value ?: false)
+        handleStopMarkersChanged(viewModel.stopMarkersLiveData.value)
+        handleShowMapMarkerInfoWindow(viewModel.showStopMarkerInfoWindowLiveData.value)
+
+        // TODO: move these to onViewCreated()
+        viewModel.mapType.observe(viewLifecycleOwner, this::handleMapTypeChanged)
+        viewModel.cameraLocationLiveData.observe(viewLifecycleOwner,
+                this::handleCameraPositionChanged)
+        viewModel.routeLines.observe(viewLifecycleOwner, this::handleRouteLinesChanged)
+    }
+
+    /**
+     * Handle a cluster marker item being clicked.
+     *
+     * @param cluster The cluster item which was clicked.
+     * @return `true` to tell the callback invoker that the event was handled here.
+     */
+    private fun handleOnClusterClicked(cluster: Cluster<UiStopMarker>): Boolean {
+        map?.let {
+            val position = cluster.position
+            val latitude = position.latitude
+            val longitude = position.longitude
+            val currentZoom = it.cameraPosition.zoom
+            viewModel.onClusterMarkerClicked(latitude, longitude, currentZoom)
+        }
+
+        return true
+    }
+
+    /**
+     * Handle a stop marker being clicked.
+     *
+     * @param stopMarker The stop marker which was clicked.
+     * @return `true` to tell the callback invoker that the event was handled here.
+     */
+    private fun handleOnClusterItemClick(stopMarker: UiStopMarker): Boolean {
+        viewModel.onMapMarkerClicked(stopMarker)
+
+        return true
+    }
+
+    /**
+     * Handle the stop markers being changed, so that the map is updated with the new state.
+     *
+     * @param stopMarkers The new stop marker state.
+     */
+    private fun handleStopMarkersChanged(stopMarkers: List<UiStopMarker>?) {
+        clusterManager?.apply {
+            clearItems()
+
+            stopMarkers?.let {
+                addItems(stopMarkers)
+            }
+
+            cluster()
+
+            handleShowMapMarkerInfoWindow(viewModel.showStopMarkerInfoWindowLiveData.value)
+        }
+    }
+
+    /**
      * Handle whether the My Location layer should be shown on the map. This consists of the
      * device's location being drawn on the map, and the display of location UI controls.
      *
@@ -483,32 +497,6 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
                 else -> viewModel.onFirstCreate()
             }
         } ?: viewModel.onFirstCreate()
-    }
-
-    /**
-     * Restore saved instance state from a given [Bundle].
-     *
-     * @param savedInstanceState Previously saved state.
-     */
-    private fun restoreState(savedInstanceState: Bundle) {
-        viewModel.onRestoreState(savedInstanceState.getString(STATE_SELECTED_STOP_CODE))
-    }
-
-    /**
-     * Handle the collection of stop markers changing.
-     *
-     * @param stops The new stops collection to display.
-     */
-    private fun handleStopsChanged(stops: Map<String, Stop>?) {
-        clusterManager?.apply {
-            clearItems()
-
-            stops?.let {
-                addItems(it.values)
-            }
-
-            cluster()
-        }
     }
 
     /**
@@ -568,19 +556,18 @@ class BusStopMapFragment : Fragment(), OnMapReadyCallback,
     /**
      * Handle a request to show the map marker bubble.
      *
-     * @param stop The stop to show the map marker bubble for.
+     * @param stopCode The stop code to show the marker bubble for.
      */
-    private fun handleShowMapMarkerBubble(stop: SelectedStop?) {
-        stop?.let {
-            val stopData = viewModel.busStops.value?.get(it.stopCode)
+    private fun handleShowMapMarkerInfoWindow(stopCode: String?) {
+        val markers = clusterManager?.markerCollection?.markers ?: return
 
-            if (stopData != null) {
-                val marker = stopClusterRenderer?.getMarker(stopData)
-
-                if (marker != null) {
-                    marker.snippet = stop.serviceListing
-                    marker.showInfoWindow()
-                }
+        stopCode?.let { sc ->
+            markers.firstOrNull {
+                (it.tag as? UiStopMarker)?.stopCode == sc
+            }?.showInfoWindow()
+        } ?: run {
+            markers.forEach {
+                if (it.isInfoWindowShown) it.hideInfoWindow()
             }
         }
     }

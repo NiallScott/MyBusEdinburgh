@@ -36,6 +36,7 @@ import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -414,6 +415,24 @@ internal class AndroidBusStopsDao @Inject constructor(
         }
     }
 
+    override fun getStopDetailsWithServiceFilterFlow(
+            serviceFilter: Set<String>?): Flow<List<StopDetails>?> = callbackFlow {
+        val listener = object : BusStopsDao.OnBusStopsChangedListener {
+            override fun onBusStopsChanged() {
+                launch {
+                    getAndSendStopDetailsWithServiceFilterFlow(serviceFilter)
+                }
+            }
+        }
+
+        addOnBusStopsChangedListener(listener)
+        getAndSendStopDetailsWithServiceFilterFlow(serviceFilter)
+
+        awaitClose {
+            removeOnBusStopsChangedListener(listener)
+        }
+    }
+
     override fun getStopSearchResultsFlow(searchTerm: String) = callbackFlow {
         val listener = object : BusStopsDao.OnBusStopsChangedListener {
             override fun onBusStopsChanged() {
@@ -476,6 +495,17 @@ internal class AndroidBusStopsDao @Inject constructor(
                 maxLatitude,
                 maxLongitude,
                 serviceFilter))
+    }
+
+    /**
+     * Get a [List] of [StopDetails] from the database based on the given [serviceFilter] and send
+     * it to the channel.
+     *
+     * @param serviceFilter A [Set] of service names to filter results by.
+     */
+    private suspend fun ProducerScope<List<StopDetails>?>.
+            getAndSendStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?) {
+        send(getStopDetailsWithServiceFilter(serviceFilter))
     }
 
     /**
@@ -597,6 +627,93 @@ internal class AndroidBusStopsDao @Inject constructor(
                         null,
                         cancellationSignal)
                         ?.use(this@AndroidBusStopsDao::mapCursorToStopDetailsWithServicesListing)
+
+                continuation.resume(result)
+            }
+        }
+    }
+
+    /**
+     * Query the database to return a [List] of [StopDetails] based on the given [serviceFilter].
+     * Will return `null` when there are no results.
+     *
+     * @param serviceFilter A [Set] of service names to filter results by.
+     * @return A [List] of [StopDetails] objects, or `null`.
+     */
+    @VisibleForTesting
+    suspend fun getStopDetailsWithServiceFilter(serviceFilter: Set<String>?): List<StopDetails>? {
+        val cancellationSignal = CancellationSignal()
+
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val selection: String?
+                val selectionArgs: Array<String>?
+
+                if (!serviceFilter.isNullOrEmpty()) {
+                    val inPlaceHolders = Array(serviceFilter.size) { '?' }
+                    selection = "${BusStopsContract.STOP_CODE} IN (" +
+                            "SELECT ${ServiceStopsContract.STOP_CODE} " +
+                            "FROM ${ServiceStopsContract.TABLE_NAME} " +
+                            "WHERE ${ServiceStopsContract.SERVICE_NAME} IN (" +
+                            "${inPlaceHolders.joinToString(",")}))"
+                    selectionArgs = serviceFilter.toTypedArray()
+                } else {
+                    selection = null
+                    selectionArgs = null
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                                BusStopsContract.STOP_CODE,
+                                BusStopsContract.STOP_NAME,
+                                BusStopsContract.LOCALITY,
+                                BusStopsContract.LATITUDE,
+                                BusStopsContract.LONGITUDE,
+                                BusStopsContract.ORIENTATION),
+                        selection,
+                        selectionArgs,
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            val count = it.count
+
+                            if (count > 0) {
+                                val result = mutableListOf<StopDetails>()
+                                val stopCodeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
+                                val stopNameColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
+                                val localityColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
+                                val latitudeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+                                val longitudeColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
+                                val orientationColumn =
+                                        it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
+
+                                while (it.moveToNext()) {
+                                    result += StopDetails(
+                                            it.getString(stopCodeColumn),
+                                            StopName(
+                                                    it.getString(stopNameColumn),
+                                                    it.getString(localityColumn)),
+                                            it.getDouble(latitudeColumn),
+                                            it.getDouble(longitudeColumn),
+                                            it.getInt(orientationColumn))
+                                }
+
+                                result
+                            } else {
+                                null
+                            }
+                        }
 
                 continuation.resume(result)
             }

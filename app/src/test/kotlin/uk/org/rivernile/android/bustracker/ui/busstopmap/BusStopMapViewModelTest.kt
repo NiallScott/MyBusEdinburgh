@@ -34,6 +34,7 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -59,6 +60,10 @@ class BusStopMapViewModelTest {
     @Mock
     private lateinit var servicesRepository: ServicesRepository
     @Mock
+    private lateinit var busStopsRepository: BusStopsRepository
+    @Mock
+    private lateinit var serviceListingRetriever: ServiceListingRetriever
+    @Mock
     private lateinit var isMyLocationEnabledDetector: IsMyLocationEnabledDetector
     @Mock
     private lateinit var repository: BusStopMapRepository
@@ -73,6 +78,8 @@ class BusStopMapViewModelTest {
                 SavedStateHandle(),
                 locationRepository,
                 servicesRepository,
+                busStopsRepository,
+                serviceListingRetriever,
                 isMyLocationEnabledDetector,
                 repository,
                 preferenceManager,

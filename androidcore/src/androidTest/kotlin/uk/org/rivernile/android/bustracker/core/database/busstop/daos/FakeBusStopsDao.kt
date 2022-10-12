@@ -70,5 +70,7 @@ class FakeBusStopsDao : BusStopsDao {
             maxLongitude: Double,
             serviceFilter: List<String>) = flowOf(null)
 
+    override fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?) = flowOf(null)
+
     override fun getStopSearchResultsFlow(searchTerm: String) = flowOf(null)
 }

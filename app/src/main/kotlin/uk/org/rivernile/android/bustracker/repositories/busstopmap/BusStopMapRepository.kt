@@ -42,24 +42,6 @@ class BusStopMapRepository @Inject constructor(
         private val liveDataFactory: BusStopMapLiveDataFactory) {
 
     /**
-     * Get a [ClearableLiveData] instance for getting stops to display on the map.
-     *
-     * @param filteredServices An optional filter to supply. Only stops which are associated with
-     * services in this array are returned.
-     * @return A [ClearableLiveData] instance for getting stops to display on the map.
-     */
-    fun getBusStops(filteredServices: Array<String>?) =
-            liveDataFactory.createBusStopsLiveData(filteredServices)
-
-    /**
-     * Get a [ClearableLiveData] instance for getting data for a given stop.
-     *
-     * @param stopCode The code of the stop to return.
-     * @return A [ClearableLiveData] for getting data for a given stop.
-     */
-    fun getBusStop(stopCode: String) = liveDataFactory.createBusStopLiveData(stopCode)
-
-    /**
      * Get a [ClearableLiveData] instance for getting route lines for given services.
      *
      * @param services The route lines to load services for. Passing `null` here will return no

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,31 +24,43 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.utils
-
-import android.content.Context
-import androidx.annotation.StringRes
-import uk.org.rivernile.android.bustracker.core.utils.OpenForTesting
-import javax.inject.Inject
+package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 /**
- * This class is used to access Android platform strings, in a way that can be mocked in unit
- * testing.
+ * This sealed interface describes the state of loading the service listing for a stop.
  *
- * @property context A [Context] instance.
  * @author Niall Scott
  */
-@OpenForTesting
-class Strings @Inject constructor(private val context: Context) {
+sealed interface UiServiceListing {
 
     /**
-     * @see Context.getString
+     * The stop code for this service listing.
      */
-    fun getString(@StringRes resId: Int): String = context.getString(resId)
+    val stopCode: String
 
     /**
-     * @see Context.getString
+     * The service listing is in progress.
+     *
+     * @property stopCode The stop code the service listing is for.
      */
-    fun getString(@StringRes resId: Int, vararg formatArgs: Any): String =
-            context.getString(resId, *formatArgs)
+    data class InProgress(
+            override val stopCode: String) : UiServiceListing
+
+    /**
+     * The service listing is empty.
+     *
+     * @property stopCode The stop code the service listing is for.
+     */
+    data class Empty(
+            override val stopCode: String) : UiServiceListing
+
+    /**
+     * The service listing was successful.
+     *
+     * @property stopCode The stop code the service listing is for.
+     * @property services The service listing.
+     */
+    data class Success(
+            override val stopCode: String,
+            val services: List<String>) : UiServiceListing
 }

@@ -152,6 +152,17 @@ class BusStopsRepository @Inject internal constructor(
                     maxLongitude)
 
     /**
+     * Return a [Flow] which emits a [List] of [StopDetails], which only contains items which
+     * satisfy the supplied [serviceFilter].
+     *
+     * @param serviceFilter An optional [Set] which contains the service filter.
+     * @return A [Flow] which emits [List]s pf [StopDetails] which satify the supplied
+     * [serviceFilter].
+     */
+    fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?): Flow<List<StopDetails>?> =
+            busStopsDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
+
+    /**
      * Return a [Flow] which emits [List]s of [StopSearchResult] objects for stops which match the
      * given search term.
      *

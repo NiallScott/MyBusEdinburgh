@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,46 +30,49 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.MapInfoWindowBinding
 
 /**
- * The `MapInfoWindow` supplies a custom [View] for an `InfoWindow` when the bus stop marker
+ * This [MapInfoWindow] supplies a custom [View] for an `InfoWindow` when the bus stop marker
  * `InfoWindow` is being shown. This allows the text for services not to ellipsise (i.e. be
  * multi-line).
  *
  * @author Niall Scott
- * @param context A [Context] instance.
- * @param rootView The [View] to inflate against.
+ * @param context The [android.app.Activity] [Context].
+ * @param inflater The [LayoutInflater] instance to inflate the layout with.
+ * @param rootView The root [ViewGroup] to inflate against.
  */
-class MapInfoWindow(context: Context, private val rootView: ViewGroup)
-    : GoogleMap.InfoWindowAdapter {
+class MapInfoWindow(
+        private val context: Context,
+        inflater: LayoutInflater,
+        private val rootView: ViewGroup) : GoogleMap.InfoWindowAdapter {
 
-    private val inflater = LayoutInflater.from(context)
-    private var cachedView: View? = null
-    private lateinit var txtTitle: TextView
-    private lateinit var txtSnippet: TextView
-
-    override fun getInfoWindow(marker: Marker): View? {
-        // Since we don't want to modify the window decoration, return null here so that Google Maps
-        // uses its own implementation.
-        return null
+    private val viewBinding by lazy {
+        MapInfoWindowBinding.inflate(inflater, rootView, false)
     }
 
+    // Since we don't want to modify the window decoration, return null here so that Google Maps
+    // uses its own implementation.
+    override fun getInfoWindow(marker: Marker): View? = null
+
     override fun getInfoContents(marker: Marker): View {
-        if (cachedView == null) {
-            cachedView = inflater.inflate(R.layout.map_info_window, rootView, false)
-                    .also {
-                        txtTitle = it.findViewById(R.id.txtTitle) as TextView
-                        txtSnippet = it.findViewById(R.id.txtSnippet) as TextView
-                    }
-        }
+        return viewBinding.apply {
+            txtTitle.text = marker.title
 
-        txtTitle.text = marker.title
-        txtSnippet.text = marker.snippet
-
-        return cachedView!!
+            txtSnippet.text = (marker.tag as? UiStopMarker)
+                    ?.serviceListing
+                    ?.let {
+                when (it) {
+                    is UiServiceListing.InProgress ->
+                        context.getString(R.string.busstopmapfragment_info_window_services_loading)
+                    is UiServiceListing.Empty ->
+                        context.getString(R.string.busstopmapfragment_info_window_services_empty)
+                    is UiServiceListing.Success -> it.services.joinToString()
+                }
+            }
+        }.root
     }
 }
