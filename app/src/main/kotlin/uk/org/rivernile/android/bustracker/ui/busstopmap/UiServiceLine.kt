@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,38 +24,13 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.repositories.busstopmap
-
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.verify
+package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 /**
- * Tests for [BusStopMapRepository].
+ * This class describes a line within a service to be drawn on the map.
  *
+ * @property points A [List] of [UiLatLon] points which form the line.
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
-class BusStopMapRepositoryTest {
-
-    @Mock
-    lateinit var liveDataFactory: BusStopMapLiveDataFactory
-
-    private lateinit var repository: BusStopMapRepository
-
-    @Before
-    fun setUp() {
-        repository = BusStopMapRepository(liveDataFactory)
-    }
-
-    @Test
-    fun getRouteLinesCreatesRouteLinesLiveData() {
-        repository.getRouteLines(arrayOf("1", "2", "3"))
-
-        verify(liveDataFactory)
-                .createRouteLineLiveData(arrayOf("1", "2", "3"))
-    }
-}
+data class UiServiceLine(
+        val points: List<UiLatLon>)

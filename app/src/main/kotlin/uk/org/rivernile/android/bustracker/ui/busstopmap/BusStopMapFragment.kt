@@ -51,8 +51,6 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
 import dagger.android.support.AndroidSupportInjection
@@ -132,7 +130,7 @@ class BusStopMapFragment : Fragment() {
     private lateinit var callbacks: Callbacks
     private var map: GoogleMap? = null
     private var clusterManager: ClusterManager<UiStopMarker>? = null
-    private var routeLines: Map<String, List<Polyline>>? = null
+    private var routeLineManager: RouteLineManager? = null
 
     private val viewBinding get() = _viewBinding!!
     private var _viewBinding: BusstopmapFragmentBinding? = null
@@ -216,6 +214,7 @@ class BusStopMapFragment : Fragment() {
                 this::handleServicesMenuItemEnabledChanged)
         viewModel.showServicesChooserLiveData.observe(viewLifecycleOwner, this::showServicesChooser)
         viewModel.stopMarkersLiveData.observe(viewLifecycleOwner, this::handleStopMarkersChanged)
+        viewModel.routeLinesLiveData.observe(viewLifecycleOwner, this::handleRouteLinesChanged)
         viewModel.showStopMarkerInfoWindowLiveData.observe(viewLifecycleOwner,
                 this::handleShowMapMarkerInfoWindow)
         viewModel.showStopDetailsLiveData.observe(viewLifecycleOwner, callbacks::onShowBusTimes)
@@ -274,6 +273,7 @@ class BusStopMapFragment : Fragment() {
         super.onDestroyView()
 
         clusterManager = null
+        routeLineManager = null
         map = null
         viewBinding.mapView.onDestroy()
         _viewBinding = null
@@ -406,15 +406,17 @@ class BusStopMapFragment : Fragment() {
                     MapInfoWindow(context, layoutInflater, view as ViewGroup))
         }
 
+        routeLineManager = RouteLineManager(context, map)
+
         handleMyLocationEnabledChanged(viewModel.isMyLocationFeatureEnabledLiveData.value ?: false)
         handleStopMarkersChanged(viewModel.stopMarkersLiveData.value)
+        handleRouteLinesChanged(viewModel.routeLinesLiveData.value)
         handleShowMapMarkerInfoWindow(viewModel.showStopMarkerInfoWindowLiveData.value)
 
         // TODO: move these to onViewCreated()
         viewModel.mapType.observe(viewLifecycleOwner, this::handleMapTypeChanged)
         viewModel.cameraLocationLiveData.observe(viewLifecycleOwner,
                 this::handleCameraPositionChanged)
-        viewModel.routeLines.observe(viewLifecycleOwner, this::handleRouteLinesChanged)
     }
 
     /**
@@ -467,6 +469,15 @@ class BusStopMapFragment : Fragment() {
     }
 
     /**
+     * Handle the route lines being changed, so that the map is updated with the new state.
+     *
+     * @param routeLines The new route lines state.
+     */
+    private fun handleRouteLinesChanged(routeLines: List<UiServiceRoute>?) {
+        routeLineManager?.submitRouteLines(routeLines)
+    }
+
+    /**
      * Handle whether the My Location layer should be shown on the map. This consists of the
      * device's location being drawn on the map, and the display of location UI controls.
      *
@@ -497,25 +508,6 @@ class BusStopMapFragment : Fragment() {
                 else -> viewModel.onFirstCreate()
             }
         } ?: viewModel.onFirstCreate()
-    }
-
-    /**
-     * Handle the collection of route lines changing.
-     *
-     * @param routeLines The new route lines collection to display.
-     */
-    private fun handleRouteLinesChanged(routeLines: Map<String, List<PolylineOptions>>?) {
-        this.routeLines?.forEach { (_, polyLines) ->
-            polyLines.forEach(Polyline::remove)
-        }
-
-        map?.let { map ->
-            this.routeLines = routeLines?.mapValues {
-                it.value.map(map::addPolyline)
-            }
-        } ?: run {
-            this.routeLines = null
-        }
     }
 
     /**

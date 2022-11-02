@@ -56,8 +56,7 @@ class ServicesRepository @Inject internal constructor(
      * services will be returned.
      * @return The [Flow] which emits the service-colour mapping.
      */
-    fun getColoursForServicesFlow(services: Array<String>?)
-            : Flow<Map<String, Int>?> = callbackFlow {
+    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> = callbackFlow {
         val listener = object : ServicesDao.OnServicesChangedListener {
             override fun onServicesChanged() {
                 launch {
@@ -115,7 +114,7 @@ class ServicesRepository @Inject internal constructor(
      */
     private suspend fun getAndSendColoursForServices(
             channel: SendChannel<Map<String, Int>?>,
-            services: Array<String>?) {
+            services: Set<String>?) {
         val serviceColoursFromDao = servicesDao.getColoursForServices(services)
         val serviceColours = if (serviceColourOverride != null) {
             serviceColourOverride.overrideServiceColours(services, serviceColoursFromDao)

@@ -67,7 +67,7 @@ class EdinburghServiceColourOverrideTest {
 
     @Test
     fun overrideServiceColoursReturnsNullWhenServicesIsEmptyAndServiceColoursIsNull() {
-        val result = colourOverride.overrideServiceColours(emptyArray(), null)
+        val result = colourOverride.overrideServiceColours(emptySet(), null)
 
         assertNull(result)
     }
@@ -89,14 +89,14 @@ class EdinburghServiceColourOverrideTest {
                 "1" to 0x000000,
                 "2" to 0xFFFFFF)
 
-        val result = colourOverride.overrideServiceColours(emptyArray(), serviceColours)
+        val result = colourOverride.overrideServiceColours(emptySet(), serviceColours)
 
         assertEquals(serviceColours, result)
     }
 
     @Test
     fun overrideServiceColoursReturnsNullWhenServicesIsPopulatedAndServiceColoursIsEmpty() {
-        val result = colourOverride.overrideServiceColours(arrayOf("1", "2"), emptyMap())
+        val result = colourOverride.overrideServiceColours(setOf("1", "2"), emptyMap())
 
         assertNull(result)
     }
@@ -108,7 +108,7 @@ class EdinburghServiceColourOverrideTest {
                 "2" to 0xFFFFFF,
                 "3" to 0x0000FF)
 
-        val result = colourOverride.overrideServiceColours(arrayOf("1", "2", "3", "4"),
+        val result = colourOverride.overrideServiceColours(setOf("1", "2", "3", "4"),
                 serviceColours)
 
         assertEquals(serviceColours, result)
@@ -121,7 +121,7 @@ class EdinburghServiceColourOverrideTest {
                 "2" to 0xFFFFFF,
                 "N3" to 0x00FF00)
 
-        val result = colourOverride.overrideServiceColours(arrayOf("1", "2", "N3"),
+        val result = colourOverride.overrideServiceColours(setOf("1", "2", "N3"),
                 serviceColours)
 
         assertEquals(serviceColours, result)
@@ -135,7 +135,7 @@ class EdinburghServiceColourOverrideTest {
                 "N2" to COLOUR_NIGHT_SERVICE,
                 "N3" to COLOUR_NIGHT_SERVICE)
 
-        val result = colourOverride.overrideServiceColours(arrayOf("N1", "N2", "N3"), null)
+        val result = colourOverride.overrideServiceColours(setOf("N1", "N2", "N3"), null)
 
         assertEquals(serviceColours, result)
     }
@@ -148,7 +148,7 @@ class EdinburghServiceColourOverrideTest {
                 "N2" to COLOUR_NIGHT_SERVICE,
                 "N3" to COLOUR_NIGHT_SERVICE)
 
-        val result = colourOverride.overrideServiceColours(arrayOf("N1", "N2", "N3"), emptyMap())
+        val result = colourOverride.overrideServiceColours(setOf("N1", "N2", "N3"), emptyMap())
 
         assertEquals(serviceColours, result)
     }
@@ -159,7 +159,7 @@ class EdinburghServiceColourOverrideTest {
         val serviceColours = mapOf(
                 "n1" to COLOUR_NIGHT_SERVICE)
 
-        val result = colourOverride.overrideServiceColours(arrayOf("n1"), null)
+        val result = colourOverride.overrideServiceColours(setOf("n1"), null)
 
         assertEquals(serviceColours, result)
     }
@@ -170,14 +170,14 @@ class EdinburghServiceColourOverrideTest {
         val serviceColours = mapOf(
                 "n1abc" to COLOUR_NIGHT_SERVICE)
 
-        val result = colourOverride.overrideServiceColours(arrayOf("n1abc"), null)
+        val result = colourOverride.overrideServiceColours(setOf("n1abc"), null)
 
         assertEquals(serviceColours, result)
     }
 
     @Test
     fun overrideServiceColoursDoesNotAddNonNightService() {
-        val result = colourOverride.overrideServiceColours(arrayOf("1"), null)
+        val result = colourOverride.overrideServiceColours(setOf("1"), null)
 
         assertNull(result)
     }
@@ -195,7 +195,7 @@ class EdinburghServiceColourOverrideTest {
                 "N3" to 0x00FF00,
                 "N4" to COLOUR_NIGHT_SERVICE)
 
-        val result = colourOverride.overrideServiceColours(arrayOf("1", "2", "N3", "N4"),
+        val result = colourOverride.overrideServiceColours(setOf("1", "2", "N3", "N4"),
                 serviceColours)
 
         assertEquals(expected, result)

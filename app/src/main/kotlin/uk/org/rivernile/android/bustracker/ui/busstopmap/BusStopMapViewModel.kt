@@ -29,12 +29,10 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PolylineOptions
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,14 +50,11 @@ import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
-import uk.org.rivernile.android.bustracker.utils.ClearableLiveData
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
 /**
  * This is a [ViewModel] for presenting the stop map.
  *
- * @param repository The [BusStopMapRepository].
  * @param preferenceManager The [PreferenceManager].
  * @author Niall Scott
  */
@@ -69,8 +64,8 @@ class BusStopMapViewModel(
         servicesRepository: ServicesRepository,
         private val busStopsRepository: BusStopsRepository,
         private val serviceListingRetriever: ServiceListingRetriever,
+        private val routeLineRetriever: RouteLineRetriever,
         isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
-        private val repository: BusStopMapRepository,
         private val preferenceManager: PreferenceManager,
         defaultDispatcher: CoroutineDispatcher)
     : ViewModel() {
@@ -130,9 +125,6 @@ class BusStopMapViewModel(
 
     private val selectedServicesFlow =
             savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
-    // TODO: this is a temporary measure.
-    private val selectedServicesLiveData =
-            selectedServicesFlow.asLiveData(viewModelScope.coroutineContext)
 
     private val selectedStopCodeFlow =
             savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
@@ -151,6 +143,12 @@ class BusStopMapViewModel(
             .flowOn(defaultDispatcher)
             .asLiveData(viewModelScope.coroutineContext)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val routeLinesLiveData = selectedServicesFlow
+            .flatMapLatest(this::loadRouteLines)
+            .flowOn(defaultDispatcher)
+            .asLiveData(viewModelScope.coroutineContext)
+
     val cameraLocationLiveData: LiveData<CameraLocation> get() = cameraLocation
     private val cameraLocation = SingleLiveEvent<CameraLocation>()
 
@@ -159,13 +157,6 @@ class BusStopMapViewModel(
 
     val showSearchLiveData: LiveData<Unit> get() = showSearch
     private val showSearch = SingleLiveEvent<Unit>()
-
-    /**
-     * A [LiveData] which represents route lines shown on the map.
-     */
-    val routeLines: LiveData<Map<String, List<PolylineOptions>>> =
-            Transformations.switchMap(selectedServicesLiveData, this::loadRouteLines)
-    private var _routeLines: ClearableLiveData<Map<String, List<PolylineOptions>>>? = null
 
     /**
      * A [LiveData] representing the type of map to be displayed.
@@ -240,10 +231,6 @@ class BusStopMapViewModel(
     fun onFirstCreate(latitude: Double, longitude: Double) {
         cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
         _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
-    }
-
-    override fun onCleared() {
-        _routeLines?.onCleared()
     }
 
     /**
@@ -404,10 +391,7 @@ class BusStopMapViewModel(
      * @param services A service filter for the route lines.
      */
     private fun loadRouteLines(services: Array<String>?) =
-            repository.getRouteLines(services).also {
-                _routeLines?.onCleared()
-                _routeLines = it
-            }
+            routeLineRetriever.getRouteLinesFlow(services?.toSet())
 
     /**
      * Given an optional [List] of [StopDetails] and an optional [UiServiceListing], map this to a

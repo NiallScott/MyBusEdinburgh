@@ -122,7 +122,7 @@ class LiveTimesRetriever @Inject constructor(
                 ?.services
                 ?.map { it.serviceName }
                 ?.ifEmpty { null }
-                ?.toTypedArray()
+                ?.toSet()
                 ?.let(servicesRepository::getColoursForServicesFlow)
                 ?: createNullColourFlow()
     }

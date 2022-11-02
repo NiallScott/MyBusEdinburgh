@@ -29,7 +29,6 @@ import dagger.Binds
 import dagger.Module
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.features.StopMapFeatureAvailabilityProvider
-import uk.org.rivernile.android.bustracker.dagger.busstopmap.BusStopMapDataModule
 import uk.org.rivernile.android.bustracker.deeplinking.AppDeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilityProvider
 
@@ -39,7 +38,6 @@ import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilit
  * @author Niall Scott
  */
 @Module(includes = [
-    BusStopMapDataModule::class,
     ThirdPartyModule::class,
     ViewModelModule::class
 ])

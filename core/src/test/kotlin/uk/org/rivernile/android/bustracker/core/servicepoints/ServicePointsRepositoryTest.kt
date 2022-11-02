@@ -59,10 +59,10 @@ class ServicePointsRepositoryTest {
     @Test
     fun getServicePointsFlowReturnsFlowInstanceFromDao() {
         val flow = mock<Flow<List<ServicePoint>?>>()
-        whenever(servicePointsDao.getServicePointsFlow(listOf("1", "2", "3")))
+        whenever(servicePointsDao.getServicePointsFlow(setOf("1", "2", "3")))
                 .thenReturn(flow)
 
-        val result = repository.getServicePointsFlow(listOf("1", "2", "3"))
+        val result = repository.getServicePointsFlow(setOf("1", "2", "3"))
 
         assertEquals(flow, result)
     }

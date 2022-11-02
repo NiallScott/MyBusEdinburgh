@@ -145,7 +145,7 @@ class AndroidServicesDaoTest {
             }
         }.also(this@AndroidServicesDaoTest::addMockProvider)
 
-        servicesDao.getColoursForServices(arrayOf())
+        servicesDao.getColoursForServices(emptySet())
     }
 
     @Test
@@ -171,7 +171,7 @@ class AndroidServicesDaoTest {
             }
         }.also(this@AndroidServicesDaoTest::addMockProvider)
 
-        servicesDao.getColoursForServices(arrayOf("1"))
+        servicesDao.getColoursForServices(setOf("1"))
     }
 
     @Test
@@ -197,7 +197,7 @@ class AndroidServicesDaoTest {
             }
         }.also(this@AndroidServicesDaoTest::addMockProvider)
 
-        servicesDao.getColoursForServices(arrayOf("1", "2", "3"))
+        servicesDao.getColoursForServices(setOf("1", "2", "3"))
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,15 @@
  *
  */
 
-package uk.org.rivernile.android.utils;
-
-import androidx.annotation.Nullable;
-
-import uk.org.rivernile.android.bustracker.utils.ClearableLiveData;
+package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 /**
+ * This class represents a lat/lon pair.
+ *
+ * @property latitude The latitude.
+ * @property longitude The longitude.
  * @author Niall Scott
  */
-public class TestableClearableLiveData<T> extends ClearableLiveData<T> {
-
-    @Override
-    public void setValue(@Nullable final T value) {
-        super.setValue(value);
-    }
-
-    @Nullable
-    @Override
-    public T getValue() {
-        return super.getValue();
-    }
-}
+data class UiLatLon(
+        val latitude: Double,
+        val longitude: Double)

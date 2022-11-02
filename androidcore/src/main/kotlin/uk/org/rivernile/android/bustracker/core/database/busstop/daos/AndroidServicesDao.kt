@@ -98,7 +98,7 @@ internal class AndroidServicesDao @Inject constructor(
         }
     }
 
-    override suspend fun getColoursForServices(services: Array<String>?): Map<String, Int>? {
+    override suspend fun getColoursForServices(services: Set<String>?): Map<String, Int>? {
         return withContext(ioDispatcher) {
             suspendCancellableCoroutine { continuation ->
                 val cancellationSignal = CancellationSignal()
@@ -112,7 +112,7 @@ internal class AndroidServicesDao @Inject constructor(
                 val selectionArgs = services?.ifEmpty { null }?.let {
                     selection += " AND ${ServicesContract.NAME} IN " +
                             "(${generateInClausePlaceholders(it.size)})"
-                    services
+                    it.toTypedArray()
                 }
 
                 val result = context.contentResolver.query(

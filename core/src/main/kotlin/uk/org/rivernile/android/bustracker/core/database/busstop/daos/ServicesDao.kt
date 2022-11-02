@@ -60,7 +60,7 @@ interface ServicesDao {
      * @return A [Map] where the service name is the key and the colour for the service is the
      * value. May be `null`.
      */
-    suspend fun getColoursForServices(services: Array<String>?): Map<String, Int>?
+    suspend fun getColoursForServices(services: Set<String>?): Map<String, Int>?
 
     /**
      * Get [ServiceDetails] for the given [services].

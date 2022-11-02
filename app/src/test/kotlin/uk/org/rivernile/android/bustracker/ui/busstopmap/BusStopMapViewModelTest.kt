@@ -39,7 +39,6 @@ import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 
 /**
  * Tests for [BusStopMapViewModel].
@@ -64,9 +63,9 @@ class BusStopMapViewModelTest {
     @Mock
     private lateinit var serviceListingRetriever: ServiceListingRetriever
     @Mock
-    private lateinit var isMyLocationEnabledDetector: IsMyLocationEnabledDetector
+    private lateinit var routeLineRetriever: RouteLineRetriever
     @Mock
-    private lateinit var repository: BusStopMapRepository
+    private lateinit var isMyLocationEnabledDetector: IsMyLocationEnabledDetector
     @Mock
     private lateinit var preferenceManager: PreferenceManager
 
@@ -80,8 +79,8 @@ class BusStopMapViewModelTest {
                 servicesRepository,
                 busStopsRepository,
                 serviceListingRetriever,
+                routeLineRetriever,
                 isMyLocationEnabledDetector,
-                repository,
                 preferenceManager,
                 coroutineRule.testDispatcher)
     }

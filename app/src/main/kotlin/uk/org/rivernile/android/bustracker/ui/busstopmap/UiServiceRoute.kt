@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,24 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.dagger.busstopmap
-
-import dagger.Binds
-import dagger.Module
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.AndroidBusStopMapLiveDataFactory
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapLiveDataFactory
+package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 /**
- * This Dagger [Module] provides classes related to providing data for the bus stop map.
+ * This class describes a route for a service, to be drawn on the map as a route line.
  *
+ * @property serviceName The name of the service.
+ * @property serviceColour The colour of the service.
+ * @property lines A [List] of [UiServiceLine]s which make up the route.
  * @author Niall Scott
  */
-@Module
-interface BusStopMapDataModule {
-
-    @Suppress("unused")
-    @Binds
-    fun bindBusStopMapLiveDataFactory(
-            androidBusStopMapLiveDataFactory: AndroidBusStopMapLiveDataFactory)
-            : BusStopMapLiveDataFactory
-}
+data class UiServiceRoute(
+        val serviceName: String,
+        val serviceColour: Int?,
+        val lines: List<UiServiceLine>)

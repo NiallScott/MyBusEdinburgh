@@ -209,7 +209,7 @@ class AndroidServicePointsDaoTest {
             }
         }.also(this@AndroidServicePointsDaoTest::addMockProvider)
 
-        val result = servicePointsDao.getServicePoints(emptyList())
+        val result = servicePointsDao.getServicePoints(emptySet())
 
         assertNull(result)
     }
@@ -236,7 +236,7 @@ class AndroidServicePointsDaoTest {
             }
         }.also(this@AndroidServicePointsDaoTest::addMockProvider)
 
-        val result = servicePointsDao.getServicePoints(emptyList())
+        val result = servicePointsDao.getServicePoints(emptySet())
 
         assertNull(result)
         assertTrue(cursor.isClosed)
@@ -271,7 +271,7 @@ class AndroidServicePointsDaoTest {
                 ServicePoint("987654", 2000, 2.1, 2.2),
                 ServicePoint("123456", 3000, 3.1, 3.2))
 
-        val result = servicePointsDao.getServicePoints(emptyList())
+        val result = servicePointsDao.getServicePoints(emptySet())
 
         assertEquals(expected, result)
         assertTrue(cursor.isClosed)
@@ -298,7 +298,7 @@ class AndroidServicePointsDaoTest {
             }
         }.also(this@AndroidServicePointsDaoTest::addMockProvider)
 
-        val result = servicePointsDao.getServicePoints(listOf("1", "2", "3"))
+        val result = servicePointsDao.getServicePoints(setOf("1", "2", "3"))
 
         assertNull(result)
     }
@@ -325,7 +325,7 @@ class AndroidServicePointsDaoTest {
             }
         }.also(this@AndroidServicePointsDaoTest::addMockProvider)
 
-        val result = servicePointsDao.getServicePoints(listOf("1", "2", "3"))
+        val result = servicePointsDao.getServicePoints(setOf("1", "2", "3"))
 
         assertNull(result)
         assertTrue(cursor.isClosed)
@@ -360,7 +360,7 @@ class AndroidServicePointsDaoTest {
                 ServicePoint("987654", 2000, 2.1, 2.2),
                 ServicePoint("123456", 3000, 3.1, 3.2))
 
-        val result = servicePointsDao.getServicePoints(listOf("1", "2", "3"))
+        val result = servicePointsDao.getServicePoints(setOf("1", "2", "3"))
 
         assertEquals(expected, result)
         assertTrue(cursor.isClosed)

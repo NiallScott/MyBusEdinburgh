@@ -33,7 +33,6 @@ import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.repositories.busstopmap.BusStopMapRepository
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
 import javax.inject.Inject
 
@@ -45,9 +44,9 @@ import javax.inject.Inject
  * @param servicesRepository Used to access services data.
  * @param busStopsRepository Used to access bus stop data.
  * @param serviceListingRetriever Used to access service listings.
+ * @param routeLineRetriever Used to retrieve route lines for display on the map.
  * @param isMyLocationEnabledDetector Used to detect whether the My Location feature is enabled or
  * not.
- * @param repository The [BusStopMapRepository].
  * @param preferenceManager The [PreferenceManager].
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
@@ -57,8 +56,8 @@ class BusStopMapFragmentViewModelFactory @Inject constructor(
         private val servicesRepository: ServicesRepository,
         private val busStopsRepository: BusStopsRepository,
         private val serviceListingRetriever: ServiceListingRetriever,
+        private val routeLineRetriever: RouteLineRetriever,
         private val isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
-        private val repository: BusStopMapRepository,
         private val preferenceManager: PreferenceManager,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModelSavedStateFactory<BusStopMapViewModel> {
@@ -70,8 +69,8 @@ class BusStopMapFragmentViewModelFactory @Inject constructor(
                     servicesRepository,
                     busStopsRepository,
                     serviceListingRetriever,
+                    routeLineRetriever,
                     isMyLocationEnabledDetector,
-                    repository,
                     preferenceManager,
                     defaultDispatcher)
 }

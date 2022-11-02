@@ -212,7 +212,7 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(Result.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(arrayOf("1")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
                 .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
                 null))
@@ -263,7 +263,7 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(Result.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(arrayOf("1")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
                 .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
                 null))
@@ -316,7 +316,7 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(Result.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(arrayOf("1")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
                 .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
                 null))
@@ -394,7 +394,7 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(Result.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(arrayOf("1", "2", "3")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
                 .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
                 null))
@@ -459,7 +459,7 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(Result.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(servicesRepository.getColoursForServicesFlow(arrayOf("1")))
+        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
                 .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
                 null))

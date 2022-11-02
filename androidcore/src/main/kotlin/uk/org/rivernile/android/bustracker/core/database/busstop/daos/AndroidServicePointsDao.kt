@@ -60,7 +60,7 @@ internal class AndroidServicePointsDao @Inject constructor(
         private val contract: ServicePointsContract,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : ServicePointsDao {
 
-    override fun getServicePointsFlow(serviceNames: List<String>?) = callbackFlow {
+    override fun getServicePointsFlow(serviceNames: Set<String>?) = callbackFlow {
         val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
 
             override fun deliverSelfNotifications() = true
@@ -90,7 +90,7 @@ internal class AndroidServicePointsDao @Inject constructor(
      * @param serviceNames The service names to get the [ServicePoint]s for.
      */
     private suspend fun ProducerScope<List<ServicePoint>?>.getAndSendServicePoints(
-            serviceNames: List<String>?) {
+            serviceNames: Set<String>?) {
         send(getServicePoints(serviceNames))
     }
 
@@ -98,14 +98,14 @@ internal class AndroidServicePointsDao @Inject constructor(
      * Get a [List] of [ServicePoint]s for the given [serviceNames]. `null` may be omitted if
      * there are no results.
      *
-     * @param serviceNames Only [ServicePoint]s for the supplied [List] of service names are
+     * @param serviceNames Only [ServicePoint]s for the supplied [Set] of service names are
      * returned. `null` means all [ServicePoint]s are returned - this could be an expensive
      * operation.
      * @return A [List] of [ServicePoint]s for the given [serviceNames].
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     @VisibleForTesting
-    suspend fun getServicePoints(serviceNames: List<String>?): List<ServicePoint>? {
+    suspend fun getServicePoints(serviceNames: Set<String>?): List<ServicePoint>? {
         val cancellationSignal = CancellationSignal()
 
         return withContext(ioDispatcher) {

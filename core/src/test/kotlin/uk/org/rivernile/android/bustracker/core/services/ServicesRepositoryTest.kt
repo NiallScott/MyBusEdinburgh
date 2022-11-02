@@ -68,11 +68,11 @@ class ServicesRepositoryTest {
         val serviceColours = mapOf(
                 "1" to 0x000000,
                 "2" to 0xFFFFFF)
-        whenever(servicesDao.getColoursForServices(arrayOf("1", "2")))
+        whenever(servicesDao.getColoursForServices(setOf("1", "2")))
                 .thenReturn(serviceColours)
         val repository = ServicesRepository(servicesDao, null)
 
-        val observer = repository.getColoursForServicesFlow(arrayOf("1", "2")).test(this)
+        val observer = repository.getColoursForServicesFlow(setOf("1", "2")).test(this)
         advanceUntilIdle()
         observer.finish()
         advanceUntilIdle()
@@ -91,16 +91,16 @@ class ServicesRepositoryTest {
                 "1" to 0x000000,
                 "2" to 0xFFFFFF,
                 "3" to 0x0000FF)
-        whenever(servicesDao.getColoursForServices(arrayOf("1", "2", "3")))
+        whenever(servicesDao.getColoursForServices(setOf("1", "2", "3")))
                 .thenReturn(initialServiceColours)
-        whenever(serviceColourOverride.overrideServiceColours(arrayOf("1", "2", "3"),
+        whenever(serviceColourOverride.overrideServiceColours(setOf("1", "2", "3"),
                 initialServiceColours))
                 .thenReturn(overriddenServiceColours)
         val repository = ServicesRepository(
                 servicesDao,
                 serviceColourOverride)
 
-        val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3")).test(this)
+        val observer = repository.getColoursForServicesFlow(setOf("1", "2", "3")).test(this)
         advanceUntilIdle()
         observer.finish()
         advanceUntilIdle()
@@ -126,13 +126,13 @@ class ServicesRepositoryTest {
                 "4" to 0x00FF00)
         val serviceColours3 = mapOf(
                 "5" to 0x0000FF)
-        whenever(servicesDao.getColoursForServices(arrayOf("1", "2", "3", "4", "5")))
+        whenever(servicesDao.getColoursForServices(setOf("1", "2", "3", "4", "5")))
                 .thenReturn(serviceColours1, serviceColours2, serviceColours3)
         val repository = ServicesRepository(
                 servicesDao,
                 null)
 
-        val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3", "4", "5"))
+        val observer = repository.getColoursForServicesFlow(setOf("1", "2", "3", "4", "5"))
                 .test(this)
         advanceUntilIdle()
         observer.finish()
@@ -164,22 +164,22 @@ class ServicesRepositoryTest {
                 "4" to 0x00FF00)
         val daoServiceColours3 = mapOf(
                 "5" to 0x0000FF)
-        whenever(servicesDao.getColoursForServices(arrayOf("1", "2", "3", "4", "5")))
+        whenever(servicesDao.getColoursForServices(setOf("1", "2", "3", "4", "5")))
                 .thenReturn(daoServiceColours1, daoServiceColours2, daoServiceColours3)
-        whenever(serviceColourOverride.overrideServiceColours(arrayOf("1", "2", "3", "4", "5"),
+        whenever(serviceColourOverride.overrideServiceColours(setOf("1", "2", "3", "4", "5"),
                 daoServiceColours1))
                 .thenReturn(daoServiceColours1)
-        whenever(serviceColourOverride.overrideServiceColours(arrayOf("1", "2", "3", "4", "5"),
+        whenever(serviceColourOverride.overrideServiceColours(setOf("1", "2", "3", "4", "5"),
                 daoServiceColours2))
                 .thenReturn(overriddenServiceColours2)
-        whenever(serviceColourOverride.overrideServiceColours(arrayOf("1", "2", "3", "4", "5"),
+        whenever(serviceColourOverride.overrideServiceColours(setOf("1", "2", "3", "4", "5"),
                 daoServiceColours3))
                 .thenReturn(null)
         val repository = ServicesRepository(
                 servicesDao,
                 serviceColourOverride)
 
-        val observer = repository.getColoursForServicesFlow(arrayOf("1", "2", "3", "4", "5"))
+        val observer = repository.getColoursForServicesFlow(setOf("1", "2", "3", "4", "5"))
                 .test(this)
         advanceUntilIdle()
         observer.finish()

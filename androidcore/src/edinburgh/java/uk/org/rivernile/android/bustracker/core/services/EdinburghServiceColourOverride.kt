@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,14 +41,14 @@ class EdinburghServiceColourOverride @Inject constructor(
     private val nightServiceRegex = "^N(\\d+).*$".toRegex(RegexOption.IGNORE_CASE)
 
     override fun overrideServiceColours(
-            services: Array<String>?,
+            services: Set<String>?,
             serviceColours: Map<String, Int>?): Map<String, Int>? {
         // We only support constrained service queries.
         return (services?.ifEmpty { null }?.let {
             val nightServiceColour = serviceColourProvider.getNightServiceColour()
             val newServiceColours = serviceColours?.toMutableMap() ?: HashMap()
 
-            it.toMutableList().apply {
+            it.toMutableSet().apply {
                 // So we don't override what's already populated.
                 removeAll(newServiceColours.keys)
             }.filter(nightServiceRegex::matches)

@@ -46,10 +46,10 @@ interface ServicePointsDao {
      * - [ServicePoint.chainage]
      * - Then ordered by an internal ordering value, so the points are in the correct order.
      *
-     * @param serviceNames Only [ServicePoint]s for the supplied [List] of service names are
+     * @param serviceNames Only [ServicePoint]s for the supplied [Set] of service names are
      * returned. `null` means all [ServicePoint]s are returned - this could be an expensive
      * operation.
      * @return A [List] of [ServicePoint]s for the given [serviceNames].
      */
-    fun getServicePointsFlow(serviceNames: List<String>?): Flow<List<ServicePoint>?>
+    fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?>
 }
