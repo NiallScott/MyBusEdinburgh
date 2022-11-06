@@ -30,7 +30,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Rule
@@ -47,6 +49,7 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -289,6 +292,27 @@ class BusStopsRepositoryTest {
         val result = repository.getStopSearchResultsFlow("123456")
 
         assertSame(stopSearchResultsFlow, result)
+    }
+
+    @Test
+    fun getStopLocationReturnsNullWhenDaoReturnsNull() = runTest {
+        whenever(busStopsDao.getLocationForStop("123456"))
+                .thenReturn(null)
+
+        val result = repository.getStopLocation("123456")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getStopLocationReturnsValueFromDao() = runTest {
+        val stopLocation = StopLocation("123456", 1.1, 2.2)
+        whenever(busStopsDao.getLocationForStop("123456"))
+                .thenReturn(stopLocation)
+
+        val result = repository.getStopLocation("123456")
+
+        assertEquals(stopLocation, result)
     }
 
     private fun createStopName() = StopName("Name", "Locality")

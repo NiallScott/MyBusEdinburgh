@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,20 +27,25 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.core.app.launchActivity
+import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
-import androidx.test.espresso.intent.rule.IntentsTestRule
 import androidx.test.filters.LargeTest
 import androidx.test.rule.GrantPermissionRule
 import org.hamcrest.CoreMatchers.allOf
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
 
@@ -53,93 +58,98 @@ import uk.org.rivernile.edinburghbustracker.android.R
 class BusStopMapActivityTest {
 
     @get:Rule
-    val activityRule = IntentsTestRule(BusStopMapActivity::class.java, false, false)
-    @get:Rule
-    val permissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
+    val permissionRule: GrantPermissionRule =
+            GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
+
+    @Before
+    fun setUp() {
+        Intents.init()
+    }
+
+    @After
+    fun tearDown() {
+        Intents.release()
+    }
 
     @Test
     fun startingActivityWithNoArgumentsInIntentDoesNotSetStopCodeOrLatLon() {
-        startActivity(null)
-
-        val fragment = getBusStopMapFragment()
-        assertNull(fragment.arguments)
+        launchActivity<BusStopMapActivity>().use { scenario ->
+            scenario.onActivity { activity ->
+                assertNull(activity.busStopMapFragment.arguments)
+            }
+        }
     }
 
     @Test
     fun startingActivityWithStopCodeArgumentSetsStopCodeInFragment() {
-        val intent = Intent()
+        val intent = Intent(applicationContext, BusStopMapActivity::class.java)
                 .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, "123456")
 
-        startActivity(intent)
-
-        val fragment = getBusStopMapFragment()
-        val arguments = fragment.arguments
-        assertNotNull(arguments)
-        assertEquals("123456", arguments!!.getString("stopCode"))
-        assertFalse(arguments.containsKey("latitude"))
-        assertFalse(arguments.containsKey("longitude"))
+        launchActivity<BusStopMapActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                val arguments = requireNotNull(activity.busStopMapFragment.arguments)
+                assertEquals("123456", arguments.getString("stopCode"))
+                assertFalse(arguments.containsKey("latitude"))
+                assertFalse(arguments.containsKey("longitude"))
+            }
+        }
     }
 
     @Test
     fun startActivityWithLatLonArgumentsSetsLatLonInFragment() {
-        val intent = Intent()
+        val intent = Intent(applicationContext, BusStopMapActivity::class.java)
                 .putExtra(BusStopMapActivity.EXTRA_LATITUDE, 1.0)
                 .putExtra(BusStopMapActivity.EXTRA_LONGITUDE, 2.0)
+        val expectedLocation = UiLatLon(1.0, 2.0)
 
-        startActivity(intent)
-
-        val fragment = getBusStopMapFragment()
-        val arguments = fragment.arguments
-        assertNotNull(arguments)
-        assertFalse(arguments!!.containsKey("stopCode"))
-        assertEquals(1.0, arguments.getDouble("latitude"), 0.0000000001)
-        assertEquals(2.0, arguments.getDouble("longitude"), 0.0000000001)
+        launchActivity<BusStopMapActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                val arguments = requireNotNull(activity.busStopMapFragment.arguments)
+                assertFalse(arguments.containsKey("stopCode"))
+                assertEquals(expectedLocation, arguments.getParcelableCompat("location"))
+            }
+        }
     }
 
     @Test
     fun startingActivityWithLatitudeButNoLongitudeArgumentsIgnoresArguments() {
-        val intent = Intent()
+        val intent = Intent(applicationContext, BusStopMapActivity::class.java)
                 .putExtra(BusStopMapActivity.EXTRA_LATITUDE, 1.0)
 
-        startActivity(intent)
-
-        val fragment = getBusStopMapFragment()
-        assertNull(fragment.arguments)
+        launchActivity<BusStopMapActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                assertNull(activity.busStopMapFragment.arguments)
+            }
+        }
     }
 
     @Test
     fun startingActivityWithLongitudeButNoLatitudeArgumentsIgnoresArguments() {
-        val intent = Intent()
+        val intent = Intent(applicationContext, BusStopMapActivity::class.java)
                 .putExtra(BusStopMapActivity.EXTRA_LONGITUDE, 2.0)
 
-        startActivity(intent)
-
-        val fragment = getBusStopMapFragment()
-        assertNull(fragment.arguments)
+        launchActivity<BusStopMapActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                assertNull(activity.busStopMapFragment.arguments)
+            }
+        }
     }
 
     @Test
     fun showBusTimesLaunchesBusTimesActivity() {
-        startActivity(null)
-
-        activityRule.activity.onShowBusTimes("123456")
+        launchActivity<BusStopMapActivity>().use { scenario ->
+            scenario.onActivity { activity ->
+                activity.onShowBusTimes("123456")
+            }
+        }
 
         intended(allOf(
                 hasComponent(DisplayStopDataActivity::class.java.name),
                 hasExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, "123456")))
     }
 
-    private fun startActivity(intent: Intent?) {
-        activityRule.apply {
-            launchActivity(intent)
-            runOnUiThread {
-                activity.supportFragmentManager.executePendingTransactions()
-            }
-        }
-    }
+    private val applicationContext get() =ApplicationProvider.getApplicationContext<Context>()
 
-    private fun getBusStopMapFragment() = activityRule
-            .activity
-            .supportFragmentManager
-            .findFragmentById(R.id.fragmentContainer) as BusStopMapFragment
+    private val BusStopMapActivity.busStopMapFragment get() =
+            supportFragmentManager.findFragmentById(R.id.fragmentContainer) as BusStopMapFragment
 }

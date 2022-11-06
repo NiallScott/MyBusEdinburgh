@@ -27,6 +27,7 @@ import com.android.build.api.variant.ResValue
 
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-allopen'
 
@@ -121,6 +122,7 @@ dependencies {
     implementation "androidx.core:core-ktx:$androidXCoreVersion"
     implementation "androidx.activity:activity-ktx:$androidXActivityVersion"
     implementation "androidx.fragment:fragment-ktx:$androidXFragmentVersion"
+    debugImplementation "androidx.fragment:fragment-testing:$androidXFragmentVersion"
 
     // Android Architecture Components
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$architectureComponentsVersion"
@@ -143,7 +145,7 @@ dependencies {
 
     // Test dependencies
     androidTestImplementation project(':testutils')
-    androidTestImplementation "androidx.test:core:$androidTestCoreVersion"
+    androidTestImplementation "androidx.test:core-ktx:$androidTestCoreVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "org.hamcrest:hamcrest-library:$hamcrestVersion"

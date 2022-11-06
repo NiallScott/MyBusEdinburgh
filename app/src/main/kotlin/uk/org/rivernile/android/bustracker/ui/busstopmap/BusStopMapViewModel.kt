@@ -44,11 +44,15 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
+import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
@@ -66,8 +70,9 @@ class BusStopMapViewModel(
         private val serviceListingRetriever: ServiceListingRetriever,
         private val routeLineRetriever: RouteLineRetriever,
         isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
+        private val preferenceRepository: PreferenceRepository,
         private val preferenceManager: PreferenceManager,
-        defaultDispatcher: CoroutineDispatcher)
+        private val defaultDispatcher: CoroutineDispatcher)
     : ViewModel() {
 
     companion object {
@@ -77,6 +82,7 @@ class BusStopMapViewModel(
         private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
 
         private const val DEFAULT_ZOOM = 14f
+        private const val STOP_ZOOM = 20f
     }
 
     /**
@@ -149,14 +155,20 @@ class BusStopMapViewModel(
             .flowOn(defaultDispatcher)
             .asLiveData(viewModelScope.coroutineContext)
 
-    val cameraLocationLiveData: LiveData<CameraLocation> get() = cameraLocation
-    private val cameraLocation = SingleLiveEvent<CameraLocation>()
+    val cameraLocationLiveData: LiveData<UiCameraLocation> get() = cameraLocation
+    private val cameraLocation = SingleLiveEvent<UiCameraLocation>()
 
     val showStopDetailsLiveData: LiveData<String> get() = showStopDetails
     private val showStopDetails = SingleLiveEvent<String>()
 
     val showSearchLiveData: LiveData<Unit> get() = showSearch
     private val showSearch = SingleLiveEvent<Unit>()
+
+    var lastCameraLocation: UiCameraLocation
+        get() = mapToUiCameraLocation(preferenceRepository.lastMapCameraLocation)
+        set(value) {
+            preferenceRepository.lastMapCameraLocation = mapToLastMapCameraLocation(value)
+        }
 
     /**
      * A [LiveData] representing the type of map to be displayed.
@@ -184,53 +196,24 @@ class BusStopMapViewModel(
     private val _showMapTypeSelection = SingleLiveEvent<Void>()
     private val _updateTrafficView = SingleLiveEvent<Void>()
 
-    private var searchedBusStop: String? = null
-
     /**
-     * This should be called when state is being restored from the UI.
+     * This is called when a request has been made to move the map camera to the location of the
+     * given [stopCode].
      *
-     * @param selectedStopCode The selected stop code.
+     * @param stopCode The stop to move the camera map location to.
      */
-    fun onRestoreState(selectedStopCode: String?) {
-        cameraLocation.value = CameraLocation(
-                preferenceManager.getLastMapLatitude(),
-                preferenceManager.getLastMapLongitude(),
-                preferenceManager.getLastMapZoomLevel(), false)
-        _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
+    fun showStop(stopCode: String) {
+        savedState[STATE_SELECTED_STOP_CODE] = stopCode
+        moveCameraToStopLocation(stopCode)
     }
 
     /**
-     * This is called when the hosting UI is first created and has no arguments.
-     */
-    fun onFirstCreate() {
-        cameraLocation.value = CameraLocation(
-                preferenceManager.getLastMapLatitude(),
-                preferenceManager.getLastMapLongitude(),
-                preferenceManager.getLastMapZoomLevel(),
-                false)
-        _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
-    }
-
-    /**
-     * This is called when the hosting UI is first created and has a stop code argument.
+     * This is called when a request has been made to move the map camera to the given location.
      *
-     * @param stopCode The supplied stop code.
+     * @param latLon The latitude/longitude of where the map camera should be moved to.
      */
-    fun onFirstCreate(stopCode: String) {
-        searchedBusStop = stopCode
-        _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
-    }
-
-    /**
-     * This is called when the hosting UI is first created and has a latitude/longitude pair as
-     * arguments.
-     *
-     * @param latitude The supplied latitude.
-     * @param longitude The supplied longitude.
-     */
-    fun onFirstCreate(latitude: Double, longitude: Double) {
-        cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
-        _mapType.value = MapType.fromValue(preferenceManager.getLastMapType())
+    fun showLocation(latLon: UiLatLon) {
+        moveCameraToLocation(UiCameraLocation(latLon, DEFAULT_ZOOM))
     }
 
     /**
@@ -275,24 +258,6 @@ class BusStopMapViewModel(
     }
 
     /**
-     * This is called when map parameters should be persisted.
-     *
-     * @param latitude The latitude to be persisted.
-     * @param longitude The longitude to be persisted.
-     * @param zoomLevel The zoom level to be persisted.
-     * @param mapType The map type to be persisted.
-     */
-    fun onPersistMapParameters(latitude: Double, longitude: Double, zoomLevel: Float,
-                               mapType: MapType) {
-        preferenceManager.apply {
-            setLastMapLatitude(latitude)
-            setLastMapLongitude(longitude)
-            setLastMapZoomLevel(zoomLevel)
-            setLastMapType(mapType.value)
-        }
-    }
-
-    /**
      * This is called when a new map type has been selected.
      *
      * @param mapType The selected map type.
@@ -317,17 +282,7 @@ class BusStopMapViewModel(
      */
     fun onStopSearchResult(stopCode: String) {
         savedState[STATE_SELECTED_STOP_CODE] = stopCode
-    }
-
-    /**
-     * This is called when the user has clicked a stop marker cluster.
-     *
-     * @param latitude The latitude of the cluster.
-     * @param longitude The longitude of the cluster.
-     * @param currentZoom The current camera zoom.
-     */
-    fun onClusterMarkerClicked(latitude: Double, longitude: Double, currentZoom: Float) {
-        cameraLocation.value = CameraLocation(latitude, longitude, currentZoom + 1f, true)
+        moveCameraToStopLocation(stopCode)
     }
 
     /**
@@ -337,7 +292,6 @@ class BusStopMapViewModel(
      */
     fun onMapMarkerClicked(stopMarker: UiStopMarker) {
         savedState[STATE_SELECTED_STOP_CODE] = stopMarker.stopCode
-        //_cameraLocation.value = CameraLocation(stop.latitude, stop.longitude, null, true)
     }
 
     /**
@@ -345,16 +299,6 @@ class BusStopMapViewModel(
      */
     fun onInfoWindowClosed() {
         savedState[STATE_SELECTED_STOP_CODE] = null
-    }
-
-    /**
-     * This is called when a new camera location is requested.
-     *
-     * @param latitude The requested latitude.
-     * @param longitude The requested longitude.
-     */
-    fun onRequestCameraLocation(latitude: Double, longitude: Double) {
-        cameraLocation.value = CameraLocation(latitude, longitude, DEFAULT_ZOOM, false)
     }
 
     /**
@@ -394,6 +338,36 @@ class BusStopMapViewModel(
             routeLineRetriever.getRouteLinesFlow(services?.toSet())
 
     /**
+     * Move the map camera to the location of the given [stopCode]. If this stop code is invalid
+     * or there is no location for this stop, no action will be performed.
+     *
+     * @param stopCode The stop code to move the map camera to.
+     */
+    private fun moveCameraToStopLocation(stopCode: String) {
+        viewModelScope.launch {
+            withContext(defaultDispatcher) {
+                busStopsRepository.getStopLocation(stopCode)
+            }?.let {
+                moveCameraToLocation(UiCameraLocation(
+                        UiLatLon(
+                                it.latitude,
+                                it.longitude),
+                        STOP_ZOOM))
+            }
+        }
+    }
+
+    /**
+     * Move the camera to the given [UiCameraLocation].
+     *
+     * @param location The new location for the camera.
+     */
+    private fun moveCameraToLocation(location: UiCameraLocation) {
+        lastCameraLocation = location
+        cameraLocation.value = location
+    }
+
+    /**
      * Given an optional [List] of [StopDetails] and an optional [UiServiceListing], map this to a
      * [List] of [UiStopMarker]. This will be `null` if [stopDetails] is `null` or empty.
      *
@@ -427,4 +401,29 @@ class BusStopMapViewModel(
                     LatLng(stopDetails.latitude, stopDetails.longitude),
                     stopDetails.orientation,
                     serviceListing)
+
+    /**
+     * Given a [LastMapCameraLocation], map it to a [UiCameraLocation].
+     *
+     * @param cameraLocation The last location of the map camera.
+     * @return The [LastMapCameraLocation] as a [UiCameraLocation].
+     */
+    private fun mapToUiCameraLocation(cameraLocation: LastMapCameraLocation) =
+            UiCameraLocation(
+                    UiLatLon(
+                            cameraLocation.latitude,
+                            cameraLocation.longitude),
+                    cameraLocation.zoomLevel)
+
+    /**
+     * Given a [UiCameraLocation], map it to a [LastMapCameraLocation].
+     *
+     * @param cameraLocation The camera location.
+     * @return The [UiCameraLocation] as a [LastMapCameraLocation].
+     */
+    private fun mapToLastMapCameraLocation(cameraLocation: UiCameraLocation) =
+            LastMapCameraLocation(
+                    cameraLocation.latLon.latitude,
+                    cameraLocation.latLon.longitude,
+                    cameraLocation.zoomLevel)
 }

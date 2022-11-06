@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 import javax.inject.Inject
@@ -172,6 +173,16 @@ class BusStopsRepository @Inject internal constructor(
      */
     fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?> =
             busStopsDao.getStopSearchResultsFlow(searchTerm)
+
+    /**
+     * Get a [StopLocation] for a given [stopCode].
+     *
+     * @param stopCode The stop code to get a location for.
+     * @return The [StopLocation] for the given stop code, or `null` if there is no location for
+     * this stop.
+     */
+    suspend fun getStopLocation(stopCode: String): StopLocation? =
+            busStopsDao.getLocationForStop(stopCode)
 
     /**
      * A suspended function which gets [StopName] for the given `stopCode` and sends these details

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
 /**
- * This class represents a lat/lon pair.
+ * A data class which represents a camera location update.
  *
- * @property latitude The latitude.
- * @property longitude The longitude.
+ * @property latLon The lat/lon location of the camera.
+ * @property zoomLevel The zoom level of the camera.
  * @author Niall Scott
  */
-@Parcelize
-data class UiLatLon(
-        val latitude: Double,
-        val longitude: Double) : Parcelable
+data class UiCameraLocation(
+        val latLon: UiLatLon,
+        val zoomLevel: Float)

@@ -37,6 +37,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
@@ -67,6 +68,8 @@ class BusStopMapViewModelTest {
     @Mock
     private lateinit var isMyLocationEnabledDetector: IsMyLocationEnabledDetector
     @Mock
+    private lateinit var preferenceRepository: PreferenceRepository
+    @Mock
     private lateinit var preferenceManager: PreferenceManager
 
     private lateinit var viewModel: BusStopMapViewModel
@@ -81,6 +84,7 @@ class BusStopMapViewModelTest {
                 serviceListingRetriever,
                 routeLineRetriever,
                 isMyLocationEnabledDetector,
+                preferenceRepository,
                 preferenceManager,
                 coroutineRule.testDispatcher)
     }

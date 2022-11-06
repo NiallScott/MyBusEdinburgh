@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.commit
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -67,19 +68,19 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
 
         if (savedInstanceState == null) {
             when {
-                intent.hasExtra(EXTRA_STOP_CODE) -> {
+                intent.hasExtra(EXTRA_STOP_CODE) ->
                     BusStopMapFragment.newInstance(intent.getStringExtra(EXTRA_STOP_CODE))
-                }
                 intent.hasExtra(EXTRA_LATITUDE) && intent.hasExtra(EXTRA_LONGITUDE) -> {
-                    val latitude = intent.getDoubleExtra(EXTRA_LATITUDE, 0.0)
-                    val longitude = intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0)
-                    BusStopMapFragment.newInstance(latitude, longitude)
+                    val location = UiLatLon(
+                            intent.getDoubleExtra(EXTRA_LATITUDE, 0.0),
+                            intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0))
+                    BusStopMapFragment.newInstance(location)
                 }
                 else -> BusStopMapFragment.newInstance()
-            }.also {
-                supportFragmentManager.beginTransaction()
-                        .add(R.id.fragmentContainer, it)
-                        .commit()
+            }.let { fragment ->
+                supportFragmentManager.commit {
+                    add(R.id.fragmentContainer, fragment)
+                }
             }
         }
     }
@@ -89,28 +90,32 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
 
         setIntent(intent)
 
-        val fragment = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
-        (fragment as? BusStopMapFragment)?.let {
+        (currentFragment as? BusStopMapFragment)?.apply {
             when {
-                intent.hasExtra(EXTRA_STOP_CODE) -> {
-                    it.onNewStopCode(
+                intent.hasExtra(EXTRA_STOP_CODE) ->
+                    onNewStopCode(
                             intent.getStringExtra(EXTRA_STOP_CODE) ?: throw IllegalStateException())
-                }
                 intent.hasExtra(EXTRA_LATITUDE) && intent.hasExtra(EXTRA_LONGITUDE) -> {
-                    val latitude = intent.getDoubleExtra(EXTRA_LATITUDE, 0.0)
-                    val longitude = intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0)
-                    it.onRequestCameraLocation(latitude, longitude)
+                    val location = UiLatLon(
+                            intent.getDoubleExtra(EXTRA_LATITUDE, 0.0),
+                            intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0))
+                    onRequestCameraLocation(location)
                 }
             }
         }
     }
 
     override fun onShowBusTimes(stopCode: String) {
-        Intent(this, DisplayStopDataActivity::class.java).also {
-            it.putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
-            startActivity(it)
-        }
+        Intent(this, DisplayStopDataActivity::class.java)
+                .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
+                .let(this::startActivity)
     }
 
     override fun androidInjector() = dispatchingAndroidInjector
+
+    /**
+     * The current [androidx.fragment.app.Fragment] in the container.
+     */
+    private val currentFragment get() =
+        supportFragmentManager.findFragmentById(R.id.fragmentContainer)
 }

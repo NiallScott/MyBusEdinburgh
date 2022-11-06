@@ -32,6 +32,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
 import javax.inject.Inject
@@ -58,6 +59,7 @@ class BusStopMapFragmentViewModelFactory @Inject constructor(
         private val serviceListingRetriever: ServiceListingRetriever,
         private val routeLineRetriever: RouteLineRetriever,
         private val isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
+        private val preferenceRepository: PreferenceRepository,
         private val preferenceManager: PreferenceManager,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModelSavedStateFactory<BusStopMapViewModel> {
@@ -71,6 +73,7 @@ class BusStopMapFragmentViewModelFactory @Inject constructor(
                     serviceListingRetriever,
                     routeLineRetriever,
                     isMyLocationEnabledDetector,
+                    preferenceRepository,
                     preferenceManager,
                     defaultDispatcher)
 }

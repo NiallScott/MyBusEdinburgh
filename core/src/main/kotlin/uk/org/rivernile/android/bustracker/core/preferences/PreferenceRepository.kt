@@ -128,6 +128,22 @@ class PreferenceRepository @Inject constructor(
     }
 
     /**
+     * The last last (most recently recorded) map camera location.
+     */
+    var lastMapCameraLocation: LastMapCameraLocation
+        get() {
+            return LastMapCameraLocation(
+                    preferenceManager.getLastMapLatitude(),
+                    preferenceManager.getLastMapLongitude(),
+                    preferenceManager.getLastMapZoomLevel())
+        }
+        set(value) {
+            preferenceManager.setLastMapLatitude(value.latitude)
+            preferenceManager.setLastMapLongitude(value.longitude)
+            preferenceManager.setLastMapZoomLevel(value.zoomLevel)
+        }
+
+    /**
      * Get a [Flow] which returns the preference value obtained from [block], and identified by the
      * supplied [key], which is observed for changes. Changes will cause further emissions.
      *

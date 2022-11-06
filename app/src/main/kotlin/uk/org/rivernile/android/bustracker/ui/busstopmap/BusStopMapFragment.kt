@@ -54,6 +54,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
 import dagger.android.support.AndroidSupportInjection
+import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
@@ -73,8 +74,7 @@ class BusStopMapFragment : Fragment() {
     companion object {
 
         private const val ARG_STOPCODE = "stopCode"
-        private const val ARG_LATITUDE = "latitude"
-        private const val ARG_LONGITUDE = "longitude"
+        private const val ARG_LOCATION = "location"
 
         private const val DIALOG_SERVICES_CHOOSER = "dialogServicesChooser"
         private const val DIALOG_MAP_TYPE_BOTTOM_SHEET = "bottomSheetMapType"
@@ -95,8 +95,10 @@ class BusStopMapFragment : Fragment() {
          * @return A new instance of [BusStopMapFragment].
          */
         fun newInstance(stopCode: String?) = BusStopMapFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARG_STOPCODE, stopCode)
+            stopCode?.let {
+                arguments = Bundle().apply {
+                    putString(ARG_STOPCODE, it)
+                }
             }
         }
 
@@ -104,14 +106,12 @@ class BusStopMapFragment : Fragment() {
          * Create a new instance of [BusStopMapFragment], specifying the initial latitude/longitude
          * camera location.
          *
-         * @param latitude The initial camera latitude.
-         * @param longitude The initial camera longitude.
+         * @param location The initial camera location.
          * @return A new instance of [BusStopMapFragment].
          */
-        fun newInstance(latitude: Double, longitude: Double) = BusStopMapFragment().apply {
+        fun newInstance(location: UiLatLon) = BusStopMapFragment().apply {
             arguments = Bundle().apply {
-                putDouble(ARG_LATITUDE, latitude)
-                putDouble(ARG_LONGITUDE, longitude)
+                putParcelable(ARG_LOCATION, location)
             }
         }
     }
@@ -163,6 +163,19 @@ class BusStopMapFragment : Fragment() {
         AndroidSupportInjection.inject(this)
 
         super.onCreate(savedInstanceState)
+
+        if (savedInstanceState == null) {
+            arguments?.let { args ->
+                when {
+                    args.containsKey(ARG_STOPCODE) ->
+                        args.getString(ARG_STOPCODE)?.let(viewModel::showStop)
+                    args.containsKey(ARG_LOCATION) ->
+                        args.getParcelableCompat<UiLatLon>(ARG_LOCATION)
+                                ?.let(viewModel::showLocation)
+                    else -> { }
+                }
+            }
+        }
     }
 
     override fun onCreateView(
@@ -221,6 +234,8 @@ class BusStopMapFragment : Fragment() {
         viewModel.showSearchLiveData.observe(viewLifecycleOwner) {
             showSearch()
         }
+        viewModel.cameraLocationLiveData.observe(viewLifecycleOwner,
+                this::handleCameraPositionChanged)
 
         viewModel.showMapTypeSelection.observe(viewLifecycleOwner) {
             showMapTypeSelection()
@@ -259,14 +274,6 @@ class BusStopMapFragment : Fragment() {
         super.onStop()
 
         viewBinding.mapView.onStop()
-
-        map?.let {
-            val position = it.cameraPosition
-            val latLng = position.target
-
-            viewModel.onPersistMapParameters(latLng.latitude, latLng.longitude, position.zoom,
-                    toMapType())
-        }
     }
 
     override fun onDestroyView() {
@@ -282,7 +289,7 @@ class BusStopMapFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        viewBinding.mapView.onSaveInstanceState(outState)
+        _viewBinding?.mapView?.onSaveInstanceState(outState)
     }
 
     override fun onLowMemory() {
@@ -308,11 +315,10 @@ class BusStopMapFragment : Fragment() {
      * [android.app.Activity.onNewIntent]. Set the newly supplied latitude/longitude pair here in
      * this case.
      *
-     * @param latitude The new latitude.
-     * @param longitude The new longitude.
+     * @param location The location to move the camera to.
      */
-    fun onRequestCameraLocation(latitude: Double, longitude: Double) {
-        viewModel.onRequestCameraLocation(latitude, longitude)
+    fun onRequestCameraLocation(location: UiLatLon) {
+        viewModel.showLocation(location)
     }
 
     /**
@@ -396,8 +402,6 @@ class BusStopMapFragment : Fragment() {
         clusterManager = ClusterManager<UiStopMarker>(context, map).apply {
             renderer = stopClusterRendererFactory.createStopClusterRenderer(context, map, this)
 
-            map.setOnCameraIdleListener(this)
-
             setOnClusterClickListener(this@BusStopMapFragment::handleOnClusterClicked)
             setOnClusterItemClickListener(this@BusStopMapFragment::handleOnClusterItemClick)
             setOnClusterItemInfoWindowClickListener(viewModel::onMarkerBubbleClicked)
@@ -408,15 +412,42 @@ class BusStopMapFragment : Fragment() {
 
         routeLineManager = RouteLineManager(context, map)
 
+        map.setOnCameraIdleListener {
+            handleCameraIdle()
+        }
+
         handleMyLocationEnabledChanged(viewModel.isMyLocationFeatureEnabledLiveData.value ?: false)
         handleStopMarkersChanged(viewModel.stopMarkersLiveData.value)
         handleRouteLinesChanged(viewModel.routeLinesLiveData.value)
         handleShowMapMarkerInfoWindow(viewModel.showStopMarkerInfoWindowLiveData.value)
 
+        val lastMapCameraLocation = viewModel.lastCameraLocation
+        CameraUpdateFactory.newLatLngZoom(
+                LatLng(
+                        lastMapCameraLocation.latLon.latitude,
+                        lastMapCameraLocation.latLon.longitude),
+                lastMapCameraLocation.zoomLevel)
+                .let(map::moveCamera)
+
         // TODO: move these to onViewCreated()
         viewModel.mapType.observe(viewLifecycleOwner, this::handleMapTypeChanged)
-        viewModel.cameraLocationLiveData.observe(viewLifecycleOwner,
-                this::handleCameraPositionChanged)
+    }
+
+    /**
+     * Handle the map camera becoming idle.
+     */
+    private fun handleCameraIdle() {
+        // We need to pass the camera idle event through to the ClusterManager so that clustering
+        // occurs.
+        clusterManager?.onCameraIdle()
+
+        map?.cameraPosition?.let {
+            viewModel.lastCameraLocation = UiCameraLocation(
+                    UiLatLon(
+                            it.target.latitude,
+                            it.target.longitude),
+                    it.zoom)
+        }
     }
 
     /**
@@ -426,12 +457,13 @@ class BusStopMapFragment : Fragment() {
      * @return `true` to tell the callback invoker that the event was handled here.
      */
     private fun handleOnClusterClicked(cluster: Cluster<UiStopMarker>): Boolean {
-        map?.let {
-            val position = cluster.position
-            val latitude = position.latitude
-            val longitude = position.longitude
-            val currentZoom = it.cameraPosition.zoom
-            viewModel.onClusterMarkerClicked(latitude, longitude, currentZoom)
+        // Cheat here by invoking the camera animation directly. We avoid lots of needless
+        // complication by doing this.
+        map?.apply {
+            // Move the camera to the cluster's location, and also zoom in by 1 unit.
+            animateCamera(CameraUpdateFactory.newLatLngZoom(
+                    cluster.position,
+                    cameraPosition.zoom + 1f))
         }
 
         return true
@@ -444,6 +476,9 @@ class BusStopMapFragment : Fragment() {
      * @return `true` to tell the callback invoker that the event was handled here.
      */
     private fun handleOnClusterItemClick(stopMarker: UiStopMarker): Boolean {
+        // Cheat here by invoking the camera animation directly. We avoid lots of needless
+        // complication by doing this.
+        map?.animateCamera(CameraUpdateFactory.newLatLng(stopMarker.latLng))
         viewModel.onMapMarkerClicked(stopMarker)
 
         return true
@@ -489,28 +524,6 @@ class BusStopMapFragment : Fragment() {
     }
 
     /**
-     * Do what is required on the first create of this [Fragment]. This occurs when the saved
-     * instance state is `null`.
-     */
-    private fun doFirstCreate() {
-        arguments?.let { args ->
-            when {
-                args.containsKey(ARG_STOPCODE) -> {
-                    args.getString(ARG_STOPCODE)?.let {
-                        viewModel.onFirstCreate(it)
-                    }
-                }
-                args.containsKey(ARG_LATITUDE) && args.containsKey(ARG_LONGITUDE) -> {
-                    val latitude = args.getDouble(ARG_LATITUDE, 0.0)
-                    val longitude = args.getDouble(ARG_LONGITUDE, 0.0)
-                    viewModel.onFirstCreate(latitude, longitude)
-                }
-                else -> viewModel.onFirstCreate()
-            }
-        } ?: viewModel.onFirstCreate()
-    }
-
-    /**
      * Handle the map type being changed.
      *
      * @param mapType The new map type.
@@ -522,25 +535,17 @@ class BusStopMapFragment : Fragment() {
     /**
      * Handle the camera position being changed.
      *
-     * @param cameraLocation The new [CameraLocation].
+     * @param cameraLocation The new [UiCameraLocation].
      */
-    private fun handleCameraPositionChanged(cameraLocation: CameraLocation?) {
-        if (cameraLocation != null) {
-            map?.let {
-                val latLng = LatLng(cameraLocation.latitude, cameraLocation.longitude)
-                val zoom = cameraLocation.zoomLevel
-
-                val cameraUpdate = if (zoom != null) {
-                    CameraUpdateFactory.newLatLngZoom(latLng, zoom)
-                } else {
-                    CameraUpdateFactory.newLatLng(latLng)
-                }
-
-                if (cameraLocation.animate) {
-                    it.animateCamera(cameraUpdate)
-                } else {
-                    it.moveCamera(cameraUpdate)
-                }
+    private fun handleCameraPositionChanged(cameraLocation: UiCameraLocation?) {
+        map?.apply {
+            cameraLocation?.let {
+                CameraUpdateFactory.newLatLngZoom(
+                        LatLng(
+                                it.latLon.latitude,
+                                it.latLon.longitude),
+                        it.zoomLevel)
+                        .let(this::moveCamera)
             }
         }
     }

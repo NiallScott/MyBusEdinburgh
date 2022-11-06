@@ -28,7 +28,22 @@ package uk.org.rivernile.android.bustracker.core.bundle
 
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import java.io.Serializable
+
+/**
+ * Android Tiramisu introduces a new method to obtain a [Parcelable] from a [Bundle] and deprecates
+ * the old way. This extension method allows this to be accessed in a compatible way.
+ *
+ * @param key See [Bundle.getParcelable].
+ * @param T See [Bundle.getParcelable].
+ * @return [Bundle.getParcelable].
+ * @see Bundle.getParcelable
+ */
+inline fun <reified T : Parcelable> Bundle.getParcelableCompat(key: String): T? = when {
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getParcelable(key, T::class.java)
+    else -> @Suppress("DEPRECATION") getParcelable(key) as? T
+}
 
 /**
  * Android Tiramisu introduces a new method to obtain a [Serializable] from a [Bundle] and
