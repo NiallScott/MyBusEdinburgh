@@ -209,8 +209,6 @@ class BusStopMapFragment : Fragment() {
             viewModel.onServicesSelected(selectedServices?.toList())
         }
 
-        //savedInstanceState?.let(this::restoreState) ?: doFirstCreate()
-
         viewBinding.mapView.apply {
             onCreate(savedInstanceState)
             getMapAsync(this@BusStopMapFragment::handleOnMapReady)
@@ -237,12 +235,16 @@ class BusStopMapFragment : Fragment() {
         viewModel.cameraLocationLiveData.observe(viewLifecycleOwner,
                 this::handleCameraPositionChanged)
 
-        viewModel.showMapTypeSelection.observe(viewLifecycleOwner) {
+        viewModel.showMapTypeSelectionLiveData.observe(viewLifecycleOwner) {
             showMapTypeSelection()
         }
-        viewModel.updateTrafficView.observe(viewLifecycleOwner) {
-            handleTrafficViewMenuItemSelected()
+        viewModel.isTrafficViewEnabledLiveData.observe(viewLifecycleOwner) {
+            handleTrafficViewEnabledChanged(it)
+            handleTrafficViewMenuItemChanged(it)
         }
+        viewModel.isZoomControlsVisibleLiveData.observe(viewLifecycleOwner,
+                this::handleZoomControlsVisibilityChanged)
+        viewModel.mapTypeFlow.observe(viewLifecycleOwner, this::handleMapTypeChanged)
 
         requireActivity().apply {
             setTitle(R.string.map_title)
@@ -388,10 +390,10 @@ class BusStopMapFragment : Fragment() {
      */
     private fun handleOnMapReady(map: GoogleMap) {
         this.map = map.apply {
-            uiSettings.apply {
-                isMyLocationButtonEnabled = true
-                isZoomControlsEnabled = viewModel.shouldShowZoomControls
-            }
+            // This is just whether the my location button should be enabled if the my location
+            // feature is enabled. The button disappears when the feature is not enabled regardless
+            // of this setting.
+            uiSettings.isMyLocationButtonEnabled = true
 
             setOnInfoWindowCloseListener {
                 viewModel.onInfoWindowClosed()
@@ -420,6 +422,9 @@ class BusStopMapFragment : Fragment() {
         handleStopMarkersChanged(viewModel.stopMarkersLiveData.value)
         handleRouteLinesChanged(viewModel.routeLinesLiveData.value)
         handleShowMapMarkerInfoWindow(viewModel.showStopMarkerInfoWindowLiveData.value)
+        handleTrafficViewEnabledChanged(viewModel.isTrafficViewEnabledLiveData.value ?: false)
+        handleZoomControlsVisibilityChanged(viewModel.isZoomControlsVisibleLiveData.value ?: false)
+        handleMapTypeChanged(viewModel.mapTypeFlow.value ?: MapType.NORMAL)
 
         val lastMapCameraLocation = viewModel.lastCameraLocation
         CameraUpdateFactory.newLatLngZoom(
@@ -428,9 +433,6 @@ class BusStopMapFragment : Fragment() {
                         lastMapCameraLocation.latLon.longitude),
                 lastMapCameraLocation.zoomLevel)
                 .let(map::moveCamera)
-
-        // TODO: move these to onViewCreated()
-        viewModel.mapType.observe(viewLifecycleOwner, this::handleMapTypeChanged)
     }
 
     /**
@@ -600,11 +602,17 @@ class BusStopMapFragment : Fragment() {
     /**
      * Handle the traffic view menu item being selected.
      */
-    private fun handleTrafficViewMenuItemSelected() {
-        map?.apply {
-            isTrafficEnabled = !isTrafficEnabled
-            configureTrafficViewMenuItem()
-        }
+    private fun handleTrafficViewEnabledChanged(isEnabled: Boolean) {
+        map?.isTrafficEnabled = isEnabled
+    }
+
+    /**
+     * Handle the zoom controls visibility changing.
+     *
+     * @param isVisible Should the zoom controls be visible?
+     */
+    private fun handleZoomControlsVisibilityChanged(isVisible: Boolean) {
+        map?.uiSettings?.isZoomControlsEnabled = isVisible
     }
 
     /**
@@ -619,21 +627,13 @@ class BusStopMapFragment : Fragment() {
     /**
      * Configure the traffic view menu item.
      */
-    private fun configureTrafficViewMenuItem() {
+    private fun handleTrafficViewMenuItemChanged(isTrafficViewEnabled: Boolean) {
         menuItemTrafficView?.apply {
-            map?.let {
-                isEnabled = true
-
-                val titleRes = if (it.isTrafficEnabled) {
-                    R.string.map_menu_mapoverlay_trafficviewoff
-                } else {
-                    R.string.map_menu_mapoverlay_trafficviewon
-                }
-
-                setTitle(titleRes)
-            } ?: run {
-                isEnabled = false
-            }
+            if (isTrafficViewEnabled) {
+                R.string.map_menu_mapoverlay_trafficviewoff
+            } else {
+                R.string.map_menu_mapoverlay_trafficviewon
+            }.let(this::setTitle)
         }
     }
 
@@ -747,7 +747,7 @@ class BusStopMapFragment : Fragment() {
 
         override fun onPrepareMenu(menu: Menu) {
             handleServicesMenuItemEnabledChanged(viewModel.isFilterEnabledLiveData.value ?: false)
-            configureTrafficViewMenuItem()
+            handleTrafficViewMenuItemChanged(viewModel.isTrafficViewEnabledLiveData.value ?: false)
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {

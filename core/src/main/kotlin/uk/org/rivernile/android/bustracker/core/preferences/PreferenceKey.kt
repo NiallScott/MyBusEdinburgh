@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,5 +54,13 @@ enum class PreferenceKey {
      * Key for the preference that specifies the number of departures that should be shown per
      * service.
      */
-    LIVE_TIMES_NUMBER_OF_DEPARTURES
+    LIVE_TIMES_NUMBER_OF_DEPARTURES,
+    /**
+     * Key for the preference that specifies whether the zoom controls should be shown on the map.
+     */
+    STOP_MAP_SHOW_ZOOM_CONTROLS,
+    /**
+     * Key for the preference that specifies what map type should be shown.
+     */
+    STOP_MAP_TYPE
 }

@@ -144,6 +144,31 @@ class PreferenceRepository @Inject constructor(
         }
 
     /**
+     * A [Flow] which emits whether the zoom controls should be visible on the map or not.
+     */
+    val isMapZoomControlsVisibleFLow: Flow<Boolean> get() =
+            getPreferenceFlow(PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS) {
+                preferenceManager.isMapZoomButtonsShown()
+            }
+
+    /**
+     * A [Flow] which emits the last set map type.
+     */
+    val mapTypeFlow: Flow<Int> get() =
+            getPreferenceFlow(PreferenceKey.STOP_MAP_TYPE) {
+                preferenceManager.getLastMapType()
+            }
+
+    /**
+     * The last set map type.
+     */
+    var mapType: Int
+        get() = preferenceManager.getLastMapType()
+        set(value) {
+            preferenceManager.setLastMapType(value)
+        }
+
+    /**
      * Get a [Flow] which returns the preference value obtained from [block], and identified by the
      * supplied [key], which is observed for changes. Changes will cause further emissions.
      *

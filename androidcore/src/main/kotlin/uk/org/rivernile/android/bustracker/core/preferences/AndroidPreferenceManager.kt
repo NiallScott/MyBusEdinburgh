@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -248,6 +248,8 @@ internal class AndroidPreferenceManager @Inject constructor(
         PREF_SERVICE_SORTING -> PreferenceKey.LIVE_TIMES_SORT_BY_TIME
         PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE ->
             PreferenceKey.LIVE_TIMES_NUMBER_OF_DEPARTURES
+        PREF_ZOOM_BUTTONS -> PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS
+        PREF_MAP_LAST_MAP_TYPE -> PreferenceKey.STOP_MAP_TYPE
         else -> null
     }
 

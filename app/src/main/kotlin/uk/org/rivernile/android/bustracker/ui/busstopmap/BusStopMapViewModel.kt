@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
@@ -80,6 +79,7 @@ class BusStopMapViewModel(
         private const val STATE_REQUESTED_LOCATION_PERMISSIONS = "requestedLocationPermissions"
         private const val STATE_SELECTED_SERVICES = "selectedServices"
         private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+        private const val STATE_TRAFFIC_VIEW_ENABLED = "trafficViewEnabled"
 
         private const val DEFAULT_ZOOM = 14f
         private const val STOP_ZOOM = 20f
@@ -170,31 +170,23 @@ class BusStopMapViewModel(
             preferenceRepository.lastMapCameraLocation = mapToLastMapCameraLocation(value)
         }
 
-    /**
-     * A [LiveData] representing the type of map to be displayed.
-     */
-    val mapType: LiveData<MapType>
-        get() = _mapType
-    /**
-     * A [LiveData] representing a request to show the map type selector.
-     */
-    val showMapTypeSelection: LiveData<Void>
-        get() = _showMapTypeSelection
-    /**
-     * A [LiveData] representing a request to update the traffic view.
-     */
-    val updateTrafficView: LiveData<Void>
-        get() = _updateTrafficView
+    val isTrafficViewEnabledLiveData = savedState
+            .getStateFlow(STATE_TRAFFIC_VIEW_ENABLED, false)
+            .asLiveData(viewModelScope.coroutineContext)
 
-    /**
-     * A [LiveData] representing a request to show the zoom controls.
-     */
-    val shouldShowZoomControls: Boolean
-        get() = preferenceManager.isMapZoomButtonsShown()
+    val showMapTypeSelectionLiveData: LiveData<Unit> get() = showMapTypeSelection
+    private val showMapTypeSelection = SingleLiveEvent<Unit>()
 
-    private val _mapType = MutableLiveData<MapType>()
-    private val _showMapTypeSelection = SingleLiveEvent<Void>()
-    private val _updateTrafficView = SingleLiveEvent<Void>()
+    val isZoomControlsVisibleLiveData = preferenceRepository
+            .isMapZoomControlsVisibleFLow
+            .flowOn(defaultDispatcher)
+            .asLiveData(viewModelScope.coroutineContext)
+
+    val mapTypeFlow = preferenceRepository
+            .mapTypeFlow
+            .map(MapType::fromValue)
+            .flowOn(defaultDispatcher)
+            .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This is called when a request has been made to move the map camera to the location of the
@@ -247,14 +239,15 @@ class BusStopMapViewModel(
      * This is called when the map type menu item is clicked.
      */
     fun onMapTypeMenuItemClicked() {
-        _showMapTypeSelection.call()
+        showMapTypeSelection.call()
     }
 
     /**
      * This is called when the traffic view menu item is clicked.
      */
     fun onTrafficViewMenuItemClicked() {
-        _updateTrafficView.call()
+        savedState[STATE_TRAFFIC_VIEW_ENABLED] =
+                !(savedState[STATE_TRAFFIC_VIEW_ENABLED] ?: false)
     }
 
     /**
@@ -263,7 +256,7 @@ class BusStopMapViewModel(
      * @param mapType The selected map type.
      */
     fun onMapTypeSelected(mapType: MapType) {
-        _mapType.value = mapType
+        preferenceRepository.mapType = mapType.value
     }
 
     /**

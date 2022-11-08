@@ -293,4 +293,84 @@ class PreferenceRepositoryTest {
         verify(preferenceManager)
                 .setBusTimesAutoRefreshEnabled(false)
     }
+
+    @Test
+    fun isMapZoomControlsVisibleFlowEmitsInitialValue() = runTest {
+        whenever(preferenceManager.isMapZoomButtonsShown())
+                .thenReturn(true)
+
+        val observer = repository.isMapZoomControlsVisibleFLow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(true)
+        verify(preferenceManager)
+                .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
+    fun isMapZoomControlsVisibleFlowRespondsToPreferenceChange() = runTest {
+        doAnswer {
+            val prefListener = it.getArgument<PreferenceListener>(0)
+            val expectedKeys = setOf(PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS)
+            assertEquals(expectedKeys, prefListener.keys)
+            prefListener.listener.apply {
+                onPreferenceChanged(PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS)
+                onPreferenceChanged(PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS)
+            }
+        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
+        whenever(preferenceManager.isMapZoomButtonsShown())
+                .thenReturn(true, false, true)
+
+        val observer = repository.isMapZoomControlsVisibleFLow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(true, false, true)
+        verify(preferenceManager)
+                .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
+    fun mapTypeFlowEmitsInitialValue() = runTest {
+        whenever(preferenceManager.getLastMapType())
+                .thenReturn(1)
+
+        val observer = repository.mapTypeFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(1)
+        verify(preferenceManager)
+                .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
+    fun mapTypeFlowRespondsToPreferenceChange() = runTest {
+        doAnswer {
+            val prefListener = it.getArgument<PreferenceListener>(0)
+            val expectedKeys = setOf(PreferenceKey.STOP_MAP_TYPE)
+            assertEquals(expectedKeys, prefListener.keys)
+            prefListener.listener.apply {
+                onPreferenceChanged(PreferenceKey.STOP_MAP_TYPE)
+                onPreferenceChanged(PreferenceKey.STOP_MAP_TYPE)
+            }
+        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
+        whenever(preferenceManager.getLastMapType())
+                .thenReturn(1, 2, 3)
+
+        val observer = repository.mapTypeFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(1, 2, 3)
+        verify(preferenceManager)
+                .removeOnPreferenceChangedListener(any())
+    }
+
+    // TODO: test mapType property
 }
