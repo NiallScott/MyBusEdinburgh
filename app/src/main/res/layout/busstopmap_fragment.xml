@@ -24,15 +24,16 @@
 *     software but are simply adaptations to a specific environment are
 *     exempt from clause 2.
 */ -->
-<FrameLayout
+<uk.org.rivernile.android.bustracker.core.widget.ContentView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/contentView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <include
-        android:id="@+id/layoutError"
-        layout="@layout/error_with_resolve_button" />
+    android:layout_height="match_parent"
+    app:progressView="@id/progress"
+    app:contentView="@id/mapView"
+    app:errorView="@id/layoutError"
+    app:contentLayout="progress">
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
@@ -41,4 +42,15 @@
         app:uiCompass="false"
         app:uiRotateGestures="false"
         app:uiMapToolbar="false" />
-</FrameLayout>
+
+    <include
+        android:id="@+id/layoutError"
+        layout="@layout/error_with_resolve_button" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateOnly="true" />
+</uk.org.rivernile.android.bustracker.core.widget.ContentView>

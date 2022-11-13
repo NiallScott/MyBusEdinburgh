@@ -41,6 +41,7 @@ import javax.inject.Inject
  * This is used to create [BusStopMapViewModel]s with its dependencies and access to
  * [SavedStateHandle].
  *
+ * @param playServicesAvailabilityChecker Used to check the availability of Play Services.
  * @param locationRepository Used to access location-related data.
  * @param servicesRepository Used to access services data.
  * @param busStopsRepository Used to access bus stop data.
@@ -48,11 +49,13 @@ import javax.inject.Inject
  * @param routeLineRetriever Used to retrieve route lines for display on the map.
  * @param isMyLocationEnabledDetector Used to detect whether the My Location feature is enabled or
  * not.
+ * @param preferenceRepository A repository for storing user preferences.
  * @param preferenceManager The [PreferenceManager].
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
 class BusStopMapFragmentViewModelFactory @Inject constructor(
+        private val playServicesAvailabilityChecker: PlayServicesAvailabilityChecker,
         private val locationRepository: LocationRepository,
         private val servicesRepository: ServicesRepository,
         private val busStopsRepository: BusStopsRepository,
@@ -67,6 +70,7 @@ class BusStopMapFragmentViewModelFactory @Inject constructor(
     override fun create(handle: SavedStateHandle) =
             BusStopMapViewModel(
                     handle,
+                    playServicesAvailabilityChecker,
                     locationRepository,
                     servicesRepository,
                     busStopsRepository,

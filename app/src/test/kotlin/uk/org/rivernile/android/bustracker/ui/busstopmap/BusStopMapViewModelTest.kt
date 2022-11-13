@@ -56,6 +56,8 @@ class BusStopMapViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     @Mock
+    private lateinit var playServicesAvailabilityChecker: PlayServicesAvailabilityChecker
+    @Mock
     private lateinit var locationRepository: LocationRepository
     @Mock
     private lateinit var servicesRepository: ServicesRepository
@@ -78,6 +80,7 @@ class BusStopMapViewModelTest {
     fun setUp() {
         viewModel = BusStopMapViewModel(
                 SavedStateHandle(),
+                playServicesAvailabilityChecker,
                 locationRepository,
                 servicesRepository,
                 busStopsRepository,

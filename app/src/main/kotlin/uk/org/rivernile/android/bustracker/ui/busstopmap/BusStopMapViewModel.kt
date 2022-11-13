@@ -63,6 +63,7 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  */
 class BusStopMapViewModel(
         private val savedState: SavedStateHandle,
+        playServicesAvailabilityChecker: PlayServicesAvailabilityChecker,
         private val locationRepository: LocationRepository,
         servicesRepository: ServicesRepository,
         private val busStopsRepository: BusStopsRepository,
@@ -103,6 +104,30 @@ class BusStopMapViewModel(
     val requestLocationPermissionsLiveData: LiveData<Unit> get() = requestLocationPermissions
     private val requestLocationPermissions = SingleLiveEvent<Unit>()
 
+    private val playServicesAvailabilityFlow = playServicesAvailabilityChecker
+            .apiAvailabilityFlow
+            .flowOn(defaultDispatcher)
+            .stateIn(
+                    viewModelScope,
+                    SharingStarted.WhileSubscribed(replayExpirationMillis = 0L),
+                    PlayServicesAvailabilityResult.InProgress)
+
+    val uiStateFlow = playServicesAvailabilityFlow
+            .map(this::mapPlayServicesAvailabilityToUiState)
+            .asLiveData(viewModelScope.coroutineContext)
+
+    val playServicesErrorLiveData = playServicesAvailabilityFlow
+            .map(this::mapPlayServicesAvailabilityToError)
+            .asLiveData(viewModelScope.coroutineContext)
+
+    val isErrorResolveButtonVisibleLiveData = playServicesAvailabilityFlow
+            .map { it is PlayServicesAvailabilityResult.Unavailable.Resolvable }
+            .asLiveData(viewModelScope.coroutineContext)
+
+    val showPlayServicesErrorResolutionLiveData: LiveData<Int> get() =
+        showPlayServicesErrorResolution
+    private val showPlayServicesErrorResolution = SingleLiveEvent<Int>()
+
     /**
      * This [LiveData] emits whether the My Location feature is enabled or not.
      */
@@ -115,10 +140,36 @@ class BusStopMapViewModel(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /**
+     * A [LiveData] which emits whether the search menu item is enabled.
+     */
+    val isSearchMenuItemEnabledLiveData = playServicesAvailabilityFlow
+            .map(this::calculateMenuItemEnabled)
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
      * A [LiveData] which emits whether the filter menu item is enabled.
      */
-    val isFilterEnabledLiveData = allServiceNamesFlow
-            .map { !it.isNullOrEmpty() }
+    val isFilterMenuItemEnabledLiveData = combine(
+            allServiceNamesFlow,
+            playServicesAvailabilityFlow,
+            this::calculateFilterMenuItemEnabled)
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * A [LiveData] which emits whether the map type item is enabled.
+     */
+    val isMapTypeMenuItemEnabledLiveData = playServicesAvailabilityFlow
+            .map(this::calculateMenuItemEnabled)
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * A [LiveData] which emits whether the traffic view item is enabled.
+     */
+    val isTrafficViewMenuItemEnabledLiveData = playServicesAvailabilityFlow
+            .map(this::calculateMenuItemEnabled)
             .distinctUntilChanged()
             .asLiveData(viewModelScope.coroutineContext)
 
@@ -187,6 +238,17 @@ class BusStopMapViewModel(
             .map(MapType::fromValue)
             .flowOn(defaultDispatcher)
             .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This is called when the error resolution button has been clicked.
+     */
+    fun onErrorResolveButtonClicked() {
+        val result = playServicesAvailabilityFlow.value
+
+        if (result is PlayServicesAvailabilityResult.Unavailable.Resolvable) {
+            showPlayServicesErrorResolution.value = result.errorCode
+        }
+    }
 
     /**
      * This is called when a request has been made to move the map camera to the location of the
@@ -315,6 +377,32 @@ class BusStopMapViewModel(
     }
 
     /**
+     * Given a [PlayServicesAvailabilityResult], map this to the relevant [UiState].
+     *
+     * @param result The result from determining Play Services availability.
+     * @return The [UiState].
+     */
+    private fun mapPlayServicesAvailabilityToUiState(
+            result: PlayServicesAvailabilityResult): UiState {
+        return when (result) {
+            is PlayServicesAvailabilityResult.InProgress -> UiState.PROGRESS
+            is PlayServicesAvailabilityResult.Available -> UiState.CONTENT
+            else -> UiState.ERROR
+        }
+    }
+
+    /**
+     * Given a [PlayServicesAvailabilityResult], map this to an error code if available.
+     *
+     * @param result The result from determining Play Services availability.
+     * @return The error code for the result, or `null` if this does not apply.
+     */
+    private fun mapPlayServicesAvailabilityToError(
+            result: PlayServicesAvailabilityResult): Int? {
+        return (result as? PlayServicesAvailabilityResult.Unavailable)?.errorCode
+    }
+
+    /**
      * This is called when stops should be loaded.
      *
      * @param filteredServices Filtered services, if any.
@@ -419,4 +507,28 @@ class BusStopMapViewModel(
                     cameraLocation.latLon.latitude,
                     cameraLocation.latLon.longitude,
                     cameraLocation.zoomLevel)
+
+    /**
+     * Calculate whether the filter menu item should be enabled.
+     *
+     * @param serviceNames The loaded service names used for filtering.
+     * @param playServicesAvailabilityResult The Play Services availability result.
+     * @return `true` if the filter menu item should be enabled, otherwise `false`.
+     */
+    private fun calculateFilterMenuItemEnabled(
+            serviceNames: List<String>?,
+            playServicesAvailabilityResult: PlayServicesAvailabilityResult) =
+            !serviceNames.isNullOrEmpty() &&
+                    playServicesAvailabilityResult is PlayServicesAvailabilityResult.Available
+
+    /**
+     * Calculate whether an ordinary menu item should be enabled. This is based on the Play Services
+     * availability result.
+     *
+     * @param playServicesAvailabilityResult The Play Services availability result.
+     * @return `true` if the menu item should be enabled, otherwise `false`.
+     */
+    private fun calculateMenuItemEnabled(
+            playServicesAvailabilityResult: PlayServicesAvailabilityResult) =
+            playServicesAvailabilityResult is PlayServicesAvailabilityResult.Available
 }

@@ -45,6 +45,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -135,7 +136,9 @@ class BusStopMapFragment : Fragment() {
     private val viewBinding get() = _viewBinding!!
     private var _viewBinding: BusstopmapFragmentBinding? = null
 
+    private var menuItemSearch: MenuItem? = null
     private var menuItemServices: MenuItem? = null
+    private var menuItemMapTyoe: MenuItem? = null
     private var menuItemTrafficView: MenuItem? = null
 
     private val requestLocationPermissionsLauncher = registerForActivityResult(
@@ -209,20 +212,40 @@ class BusStopMapFragment : Fragment() {
             viewModel.onServicesSelected(selectedServices?.toList())
         }
 
-        viewBinding.mapView.apply {
-            onCreate(savedInstanceState)
-            getMapAsync(this@BusStopMapFragment::handleOnMapReady)
-        }
+        viewBinding.apply {
+            layoutError.btnErrorResolve.apply {
+                setText(R.string.busstopmapfragment_button_resolve)
+                setOnClickListener {
+                    viewModel.onErrorResolveButtonClicked()
+                }
+            }
 
-        viewBinding.layoutError.btnErrorResolve.setText(R.string.busstopmapfragment_button_resolve)
+            mapView.apply {
+                onCreate(savedInstanceState)
+                getMapAsync(this@BusStopMapFragment::handleOnMapReady)
+            }
+        }
 
         viewModel.requestLocationPermissionsLiveData.observe(viewLifecycleOwner) {
             handleRequestLocationPermissions()
         }
+        viewModel.uiStateFlow.observe(viewLifecycleOwner, this::handleUiStateChanged)
+        viewModel.isErrorResolveButtonVisibleLiveData.observe(viewLifecycleOwner,
+                viewBinding.layoutError.btnErrorResolve::isVisible::set)
+        viewModel.playServicesErrorLiveData.observe(viewLifecycleOwner,
+                this::handlePlayServicesErrorChanged)
+        viewModel.showPlayServicesErrorResolutionLiveData.observe(viewLifecycleOwner,
+                this::handleShowPlayServicesErrorResolution)
         viewModel.isMyLocationFeatureEnabledLiveData.observe(viewLifecycleOwner,
                 this::handleMyLocationEnabledChanged)
-        viewModel.isFilterEnabledLiveData.observe(viewLifecycleOwner,
+        viewModel.isSearchMenuItemEnabledLiveData.observe(viewLifecycleOwner,
+                this::handleSearchMenuItemEnabledChanged)
+        viewModel.isFilterMenuItemEnabledLiveData.observe(viewLifecycleOwner,
                 this::handleServicesMenuItemEnabledChanged)
+        viewModel.isMapTypeMenuItemEnabledLiveData.observe(viewLifecycleOwner,
+                this::handleMapTypeMenuItemEnabledChanged)
+        viewModel.isTrafficViewMenuItemEnabledLiveData.observe(viewLifecycleOwner,
+                this::handleTrafficViewMenuItemEnabledChanged)
         viewModel.showServicesChooserLiveData.observe(viewLifecycleOwner, this::showServicesChooser)
         viewModel.stopMarkersLiveData.observe(viewLifecycleOwner, this::handleStopMarkersChanged)
         viewModel.routeLinesLiveData.observe(viewLifecycleOwner, this::handleRouteLinesChanged)
@@ -255,7 +278,6 @@ class BusStopMapFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-        checkGooglePlayServices()
         viewBinding.mapView.onStart()
     }
 
@@ -381,6 +403,59 @@ class BusStopMapFragment : Fragment() {
         PermissionState.GRANTED
     } else {
         PermissionState.UNGRANTED
+    }
+
+    /**
+     * Handle the UI state being changed.
+     *
+     * @param state The new [UiState].
+     */
+    private fun handleUiStateChanged(state: UiState) {
+        viewBinding.contentView.apply {
+            when (state) {
+                UiState.PROGRESS -> showProgressLayout()
+                UiState.CONTENT -> showContentLayout()
+                UiState.ERROR -> showErrorLayout()
+            }
+        }
+    }
+
+    /**
+     * Handle the Play Services error changing.
+     *
+     * @param errorCode The Play Services error code.
+     */
+    private fun handlePlayServicesErrorChanged(errorCode: Int?) {
+        val errorStringRes = when (errorCode) {
+            ConnectionResult.SERVICE_MISSING ->
+                R.string.busstopmapfragment_error_play_services_missing
+            ConnectionResult.SERVICE_UPDATING ->
+                R.string.busstopmapfragment_error_play_services_updating
+            ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED ->
+                R.string.busstopmapfragment_error_play_services_update_required
+            ConnectionResult.SERVICE_DISABLED ->
+                R.string.busstopmapfragment_error_play_services_disabled
+            ConnectionResult.SERVICE_INVALID ->
+                R.string.busstopmapfragment_error_play_services_invalid
+            else -> R.string.busstopmapfragment_error_play_services_unknown
+        }
+
+        viewBinding.layoutError.txtError.txtError.setText(errorStringRes)
+    }
+
+    /**
+     * Handle a request to show the Play Services error resolution UI.
+     *
+     * @param errorCode The error code to be passed to Play Services.
+     */
+    private fun handleShowPlayServicesErrorResolution(errorCode: Int) {
+        googleApiAvailability.getErrorResolutionPendingIntent(requireContext(), errorCode, 0)?.let {
+            try {
+                it.send()
+            } catch (ignored: PendingIntent.CanceledException) {
+                null
+            }
+        } ?: showFailedToResolvePlayServicesToast()
     }
 
     /**
@@ -616,12 +691,39 @@ class BusStopMapFragment : Fragment() {
     }
 
     /**
+     * Handle a change in the enabled state of the search menu item.
+     *
+     * @param isEnabled Is the search menu item enabled?
+     */
+    private fun handleSearchMenuItemEnabledChanged(isEnabled: Boolean) {
+        menuItemSearch?.isEnabled = isEnabled
+    }
+
+    /**
      * Handle a change in the enabled state of the services menu item.
      *
      * @param isEnabled Is the services menu item enabled?
      */
     private fun handleServicesMenuItemEnabledChanged(isEnabled: Boolean) {
         menuItemServices?.isEnabled = isEnabled
+    }
+
+    /**
+     * Handle a change in the enabled state of the map type menu item.
+     *
+     * @param isEnabled Is the map type menu item enabled?
+     */
+    private fun handleMapTypeMenuItemEnabledChanged(isEnabled: Boolean) {
+        menuItemMapTyoe?.isEnabled = isEnabled
+    }
+
+    /**
+     * Handle a change in the enabled state of the traffic view menu item.
+     *
+     * @param isEnabled Is the traffic view menu item enabled?
+     */
+    private fun handleTrafficViewMenuItemEnabledChanged(isEnabled: Boolean) {
+        menuItemTrafficView?.isEnabled = isEnabled
     }
 
     /**
@@ -662,71 +764,6 @@ class BusStopMapFragment : Fragment() {
     }
 
     /**
-     * Check Google Play Services to ensure it is working correctly on this device. If an error is
-     * returned, then present error UI to the user.
-     *
-     * The error UI may contain a button which helps the user resolve the issue, if Googe Play
-     * Services tells us the error can be resolved.
-     */
-    private fun checkGooglePlayServices() {
-        val context = requireContext()
-        val result = googleApiAvailability.isGooglePlayServicesAvailable(context)
-
-        viewBinding.apply {
-            if (result == ConnectionResult.SUCCESS) {
-                layoutError.layoutError.visibility = View.GONE
-                mapView.visibility = View.VISIBLE
-                layoutError.btnErrorResolve.setOnClickListener(null)
-            } else {
-                mapView.visibility = View.GONE
-                layoutError.layoutError.visibility = View.VISIBLE
-                layoutError.txtError.txtError.setText(getPlayServicesErrorString(result))
-
-                layoutError.btnErrorResolve.apply {
-                    if (googleApiAvailability.isUserResolvableError(result)) {
-                        visibility = View.VISIBLE
-                        setOnClickListener {
-                            val pendingIntent = googleApiAvailability
-                                    .getErrorResolutionPendingIntent(context, result, 0)
-
-                            try {
-                                pendingIntent?.send() ?: showFailedToResolvePlayServicesToast()
-                            } catch (ignored: PendingIntent.CanceledException) {
-                                showFailedToResolvePlayServicesToast()
-                            }
-                        }
-                    } else {
-                        visibility = View.GONE
-                        setOnClickListener(null)
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * When [GoogleApiAvailability.isGooglePlayServicesAvailable] returns a non-success code,
-     * then pass the error code in to this method to obtain the error string resource to display to
-     * the user.
-     *
-     * @param errorCode The error code returned from
-     * [GoogleApiAvailability.isGooglePlayServicesAvailable]. Must not be
-     * [ConnectionResult.SUCCESS].
-     * @return A string resource ID for the error string to display to the user.
-     */
-    private fun getPlayServicesErrorString(errorCode: Int) = when (errorCode) {
-        ConnectionResult.SERVICE_MISSING -> R.string.busstopmapfragment_error_play_services_missing
-        ConnectionResult.SERVICE_UPDATING ->
-            R.string.busstopmapfragment_error_play_services_updating
-        ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED ->
-            R.string.busstopmapfragment_error_play_services_update_required
-        ConnectionResult.SERVICE_DISABLED ->
-            R.string.busstopmapfragment_error_play_services_disabled
-        ConnectionResult.SERVICE_INVALID -> R.string.busstopmapfragment_error_play_services_invalid
-        else -> R.string.busstopmapfragment_error_play_services_unknown
-    }
-
-    /**
      * Show the user a [Toast] message which informs them that the resolution action could not be
      * performed to make Google Play Services work.
      */
@@ -741,12 +778,21 @@ class BusStopMapFragment : Fragment() {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.busstopmap_option_menu, menu)
 
+            menuItemSearch = menu.findItem(R.id.busstopmap_option_menu_search)
             menuItemServices = menu.findItem(R.id.busstopmap_option_menu_services)
+            menuItemMapTyoe = menu.findItem(R.id.busstopmap_option_menu_maptype)
             menuItemTrafficView = menu.findItem(R.id.busstopmap_option_menu_trafficview)
         }
 
         override fun onPrepareMenu(menu: Menu) {
-            handleServicesMenuItemEnabledChanged(viewModel.isFilterEnabledLiveData.value ?: false)
+            handleSearchMenuItemEnabledChanged(
+                    viewModel.isSearchMenuItemEnabledLiveData.value ?: false)
+            handleServicesMenuItemEnabledChanged(
+                    viewModel.isFilterMenuItemEnabledLiveData.value ?: false)
+            handleMapTypeMenuItemEnabledChanged(
+                    viewModel.isMapTypeMenuItemEnabledLiveData.value ?: false)
+            handleTrafficViewMenuItemEnabledChanged(
+                    viewModel.isTrafficViewMenuItemEnabledLiveData.value ?: false)
             handleTrafficViewMenuItemChanged(viewModel.isTrafficViewEnabledLiveData.value ?: false)
         }
 
