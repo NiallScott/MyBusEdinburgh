@@ -34,7 +34,7 @@ package uk.org.rivernile.android.bustracker.core.preferences
  * @property zoomLevel The last zoom level of the camera.
  * @author Niall Scott
  */
-class LastMapCameraLocation(
+data class LastMapCameraLocation(
         val latitude: Double,
         val longitude: Double,
         val zoomLevel: Float)

@@ -31,9 +31,9 @@ import kotlinx.coroutines.CoroutineDispatcher
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.viewmodel.ViewModelSavedStateFactory
 import javax.inject.Inject
 
@@ -50,7 +50,7 @@ import javax.inject.Inject
  * @param isMyLocationEnabledDetector Used to detect whether the My Location feature is enabled or
  * not.
  * @param preferenceRepository A repository for storing user preferences.
- * @param preferenceManager The [PreferenceManager].
+ * @param timeUtils Time utils.
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -63,21 +63,27 @@ class BusStopMapFragmentViewModelFactory @Inject constructor(
         private val routeLineRetriever: RouteLineRetriever,
         private val isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
         private val preferenceRepository: PreferenceRepository,
-        private val preferenceManager: PreferenceManager,
+        private val timeUtils: TimeUtils,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModelSavedStateFactory<BusStopMapViewModel> {
 
-    override fun create(handle: SavedStateHandle) =
-            BusStopMapViewModel(
-                    handle,
-                    playServicesAvailabilityChecker,
-                    locationRepository,
-                    servicesRepository,
-                    busStopsRepository,
-                    serviceListingRetriever,
-                    routeLineRetriever,
-                    isMyLocationEnabledDetector,
-                    preferenceRepository,
-                    preferenceManager,
-                    defaultDispatcher)
+    override fun create(handle: SavedStateHandle): BusStopMapViewModel {
+        val permissionHandler = PermissionHandler(handle, locationRepository, timeUtils)
+        val stopMarkersRetriever = StopMarkersRetriever(
+                handle,
+                busStopsRepository,
+                serviceListingRetriever)
+
+        return BusStopMapViewModel(
+                handle,
+                permissionHandler,
+                playServicesAvailabilityChecker,
+                servicesRepository,
+                busStopsRepository,
+                stopMarkersRetriever,
+                routeLineRetriever,
+                isMyLocationEnabledDetector,
+                preferenceRepository,
+                defaultDispatcher)
+    }
 }

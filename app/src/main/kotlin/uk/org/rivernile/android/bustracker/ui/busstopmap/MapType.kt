@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 /**
  * An enumeration of map types.
  *
+ * @param value The value of the enum instance.
  * @author Niall Scott
  */
 enum class MapType(val value: Int) {

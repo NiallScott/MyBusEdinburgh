@@ -88,18 +88,20 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        setIntent(intent)
-
         (currentFragment as? BusStopMapFragment)?.apply {
             when {
-                intent.hasExtra(EXTRA_STOP_CODE) ->
-                    onNewStopCode(
-                            intent.getStringExtra(EXTRA_STOP_CODE) ?: throw IllegalStateException())
+                intent.hasExtra(EXTRA_STOP_CODE) -> {
+                    intent.getStringExtra(EXTRA_STOP_CODE)?.ifBlank { null }?.let {
+                        onNewStopCode(it)
+                        setIntent(intent)
+                    }
+                }
                 intent.hasExtra(EXTRA_LATITUDE) && intent.hasExtra(EXTRA_LONGITUDE) -> {
                     val location = UiLatLon(
                             intent.getDoubleExtra(EXTRA_LATITUDE, 0.0),
                             intent.getDoubleExtra(EXTRA_LONGITUDE, 0.0))
                     onRequestCameraLocation(location)
+                    setIntent(intent)
                 }
             }
         }

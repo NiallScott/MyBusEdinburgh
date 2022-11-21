@@ -31,10 +31,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -46,38 +44,43 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
+import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
 /**
  * This is a [ViewModel] for presenting the stop map.
  *
- * @param preferenceManager The [PreferenceManager].
+ * @param savedState The saved instance state.
+ * @param permissionHandler Used to handle the permission state changing.
+ * @param playServicesAvailabilityChecker Used to check the availability of Play Services.
+ * @param servicesRepository Used to access services data.
+ * @param busStopsRepository Used to access bus stop data.
+ * @param stopMarkersRetriever Retrieves stop markers to be shown on the map.
+ * @param routeLineRetriever Used to retrieve route lines for display on the map.
+ * @param isMyLocationEnabledDetector Used to detect whether the My Location feature is enabled or
+ * not.
+ * @param preferenceRepository A repository for storing user preferences.
+ * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
 class BusStopMapViewModel(
         private val savedState: SavedStateHandle,
+        private val permissionHandler: PermissionHandler,
         playServicesAvailabilityChecker: PlayServicesAvailabilityChecker,
-        private val locationRepository: LocationRepository,
         servicesRepository: ServicesRepository,
         private val busStopsRepository: BusStopsRepository,
-        private val serviceListingRetriever: ServiceListingRetriever,
+        stopMarkersRetriever: StopMarkersRetriever,
         private val routeLineRetriever: RouteLineRetriever,
         isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
         private val preferenceRepository: PreferenceRepository,
-        private val preferenceManager: PreferenceManager,
         private val defaultDispatcher: CoroutineDispatcher)
     : ViewModel() {
 
     companion object {
 
-        private const val STATE_REQUESTED_LOCATION_PERMISSIONS = "requestedLocationPermissions"
         private const val STATE_SELECTED_SERVICES = "selectedServices"
         private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
         private const val STATE_TRAFFIC_VIEW_ENABLED = "trafficViewEnabled"
@@ -90,19 +93,25 @@ class BusStopMapViewModel(
      * The current state of permissions pertaining to this view.
      */
     var permissionsState: PermissionsState
-        get() = permissionsStateFlow.value ?: PermissionsState()
+        get() = permissionHandler.permissionsState
         set(value) {
-            permissionsStateFlow.value = value
-            handlePermissionsSet(value)
+            permissionHandler.permissionsState = value
         }
 
-    private val permissionsStateFlow = MutableStateFlow<PermissionsState?>(null)
-
     /**
-     * This [LiveData] emits when the user should be asked to grant location permissions.
+     * This property is used to get and set the last [UiCameraLocation].
      */
-    val requestLocationPermissionsLiveData: LiveData<Unit> get() = requestLocationPermissions
-    private val requestLocationPermissions = SingleLiveEvent<Unit>()
+    var lastCameraLocation: UiCameraLocation
+        get() = mapToUiCameraLocation(preferenceRepository.lastMapCameraLocation)
+        set(value) {
+            preferenceRepository.lastMapCameraLocation = mapToLastMapCameraLocation(value)
+        }
+
+    private val selectedServicesFlow =
+            savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
+
+    private val selectedStopCodeFlow =
+            savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
 
     private val playServicesAvailabilityFlow = playServicesAvailabilityChecker
             .apiAvailabilityFlow
@@ -112,32 +121,58 @@ class BusStopMapViewModel(
                     SharingStarted.WhileSubscribed(replayExpirationMillis = 0L),
                     PlayServicesAvailabilityResult.InProgress)
 
-    val uiStateFlow = playServicesAvailabilityFlow
-            .map(this::mapPlayServicesAvailabilityToUiState)
-            .asLiveData(viewModelScope.coroutineContext)
-
-    val playServicesErrorLiveData = playServicesAvailabilityFlow
-            .map(this::mapPlayServicesAvailabilityToError)
-            .asLiveData(viewModelScope.coroutineContext)
-
-    val isErrorResolveButtonVisibleLiveData = playServicesAvailabilityFlow
-            .map { it is PlayServicesAvailabilityResult.Unavailable.Resolvable }
-            .asLiveData(viewModelScope.coroutineContext)
-
-    val showPlayServicesErrorResolutionLiveData: LiveData<Int> get() =
-        showPlayServicesErrorResolution
-    private val showPlayServicesErrorResolution = SingleLiveEvent<Int>()
-
-    /**
-     * This [LiveData] emits whether the My Location feature is enabled or not.
-     */
-    val isMyLocationFeatureEnabledLiveData = isMyLocationEnabledDetector
-            .getIsMyLocationFeatureEnabledFlow(permissionsStateFlow.filterNotNull())
-            .asLiveData(viewModelScope.coroutineContext)
-
     private val allServiceNamesFlow = servicesRepository.allServiceNamesFlow
             .flowOn(defaultDispatcher)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
+    /**
+     * This [LiveData] emits when the user should be asked to grant location permissions.
+     */
+    val requestLocationPermissionsLiveData = permissionHandler
+            .requestLocationPermissionsFlow
+            .map { Event(Unit) }
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the current [UiState].
+     */
+    val uiStateLiveData = playServicesAvailabilityFlow
+            .map(this::mapPlayServicesAvailabilityToUiState)
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the Play Services error code as an `Int`.
+     */
+    val playServicesErrorLiveData = playServicesAvailabilityFlow
+            .map(this::mapPlayServicesAvailabilityToError)
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits whether the Play Services resolve error button is visible.
+     */
+    val isErrorResolveButtonVisibleLiveData = playServicesAvailabilityFlow
+            .map { it is PlayServicesAvailabilityResult.Unavailable.Resolvable }
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits [List]s of [UiStopMarker]s to be shown on the map.
+     */
+    val stopMarkersLiveData = stopMarkersRetriever
+            .stopMarkersFlow
+            .flowOn(defaultDispatcher)
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits [List]s of [UiServiceRoute]s to be show on the map.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val routeLinesLiveData = selectedServicesFlow
+            .flatMapLatest(this::loadRouteLines)
+            .flowOn(defaultDispatcher)
+            .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * A [LiveData] which emits whether the search menu item is enabled.
@@ -174,70 +209,83 @@ class BusStopMapViewModel(
             .asLiveData(viewModelScope.coroutineContext)
 
     /**
+     * This [LiveData] emits [UiCameraLocation]s when the map camera should be moved.
+     */
+    val cameraLocationLiveData: LiveData<UiCameraLocation> get() = cameraLocation
+    private val cameraLocation = SingleLiveEvent<UiCameraLocation>()
+
+    /**
+     * This [LiveData] emits whether the My Location feature is enabled or not.
+     */
+    val isMyLocationFeatureEnabledLiveData by lazy {
+        isMyLocationEnabledDetector
+                .getIsMyLocationFeatureEnabledFlow(
+                        permissionHandler.permissionsStateFlow.filterNotNull())
+                .asLiveData(viewModelScope.coroutineContext)
+    }
+
+    /**
+     * This [LiveData] emits whether the traffic view feature is enabled.
+     */
+    val isTrafficViewEnabledLiveData = savedState
+            .getStateFlow(STATE_TRAFFIC_VIEW_ENABLED, false)
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits whether the map zoom controls should be shown.
+     */
+    val isZoomControlsVisibleLiveData = preferenceRepository
+            .isMapZoomControlsVisibleFLow
+            .flowOn(defaultDispatcher)
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the map type.
+     */
+    val mapTypeLiveData = preferenceRepository
+            .mapTypeFlow
+            .map(MapType::fromValue)
+            .flowOn(defaultDispatcher)
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits an `Int` error code when the Play Services error resolution UI should
+     * be shown.
+     */
+    val showPlayServicesErrorResolutionLiveData: LiveData<Int> get() =
+        showPlayServicesErrorResolution
+    private val showPlayServicesErrorResolution = SingleLiveEvent<Int>()
+
+    /**
+     * This [LiveData] emits when the map type selection UI should be shown.
+     */
+    val showMapTypeSelectionLiveData: LiveData<Unit> get() = showMapTypeSelection
+    private val showMapTypeSelection = SingleLiveEvent<Unit>()
+
+    /**
+     * This [LiveData] emits a stop code when the stop marker info window should be shown.
+     */
+    val showStopMarkerInfoWindowLiveData =
+            selectedStopCodeFlow.asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits a stop code when the stop details UI should be shown.
+     */
+    val showStopDetailsLiveData: LiveData<String> get() = showStopDetails
+    private val showStopDetails = SingleLiveEvent<String>()
+
+    /**
      * When this [LiveData] emits a new item, the services chooser should be shown. The data that is
      * emitted is the parameters which should be passed to the chooser UI.
      */
     val showServicesChooserLiveData: LiveData<ServicesChooserParams> get() = showServicesChooser
     private val showServicesChooser = SingleLiveEvent<ServicesChooserParams>()
 
-    private val selectedServicesFlow =
-            savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
-
-    private val selectedStopCodeFlow =
-            savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val serviceListingFlow get() = selectedStopCodeFlow
-            .flatMapLatest(serviceListingRetriever::getServiceListingFlow)
-
-    val showStopMarkerInfoWindowLiveData =
-            selectedStopCodeFlow.asLiveData(viewModelScope.coroutineContext)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val stopMarkersLiveData = selectedServicesFlow
-            .flatMapLatest(this::loadBusStops)
-            .combine(serviceListingFlow, this::mapToUiStopMarkers)
-            .flowOn(defaultDispatcher)
-            .asLiveData(viewModelScope.coroutineContext)
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val routeLinesLiveData = selectedServicesFlow
-            .flatMapLatest(this::loadRouteLines)
-            .flowOn(defaultDispatcher)
-            .asLiveData(viewModelScope.coroutineContext)
-
-    val cameraLocationLiveData: LiveData<UiCameraLocation> get() = cameraLocation
-    private val cameraLocation = SingleLiveEvent<UiCameraLocation>()
-
-    val showStopDetailsLiveData: LiveData<String> get() = showStopDetails
-    private val showStopDetails = SingleLiveEvent<String>()
-
+    /**
+     * This [LiveData] emits when the search UI should be shown.
+     */
     val showSearchLiveData: LiveData<Unit> get() = showSearch
     private val showSearch = SingleLiveEvent<Unit>()
-
-    var lastCameraLocation: UiCameraLocation
-        get() = mapToUiCameraLocation(preferenceRepository.lastMapCameraLocation)
-        set(value) {
-            preferenceRepository.lastMapCameraLocation = mapToLastMapCameraLocation(value)
-        }
-
-    val isTrafficViewEnabledLiveData = savedState
-            .getStateFlow(STATE_TRAFFIC_VIEW_ENABLED, false)
-            .asLiveData(viewModelScope.coroutineContext)
-
-    val showMapTypeSelectionLiveData: LiveData<Unit> get() = showMapTypeSelection
-    private val showMapTypeSelection = SingleLiveEvent<Unit>()
-
-    val isZoomControlsVisibleLiveData = preferenceRepository
-            .isMapZoomControlsVisibleFLow
-            .flowOn(defaultDispatcher)
-            .asLiveData(viewModelScope.coroutineContext)
-
-    val mapTypeFlow = preferenceRepository
-            .mapTypeFlow
-            .map(MapType::fromValue)
-            .flowOn(defaultDispatcher)
-            .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This is called when the error resolution button has been clicked.
@@ -268,15 +316,6 @@ class BusStopMapViewModel(
      */
     fun showLocation(latLon: UiLatLon) {
         moveCameraToLocation(UiCameraLocation(latLon, DEFAULT_ZOOM))
-    }
-
-    /**
-     * This is called when the marker bubble is clicked.
-     *
-     * @param stopMarker The stop marker that was clicked on.
-     */
-    fun onMarkerBubbleClicked(stopMarker: UiStopMarker) {
-        showStopDetails.value = stopMarker.stopCode
     }
 
     /**
@@ -336,8 +375,7 @@ class BusStopMapViewModel(
      * @param stopCode The selected stop code.
      */
     fun onStopSearchResult(stopCode: String) {
-        savedState[STATE_SELECTED_STOP_CODE] = stopCode
-        moveCameraToStopLocation(stopCode)
+        showStop(stopCode)
     }
 
     /**
@@ -350,30 +388,19 @@ class BusStopMapViewModel(
     }
 
     /**
+     * This is called when the marker bubble is clicked.
+     *
+     * @param stopMarker The stop marker that was clicked on.
+     */
+    fun onMarkerBubbleClicked(stopMarker: UiStopMarker) {
+        showStopDetails.value = stopMarker.stopCode
+    }
+
+    /**
      * This is called when the map marker bubble has been closed.
      */
     fun onInfoWindowClosed() {
         savedState[STATE_SELECTED_STOP_CODE] = null
-    }
-
-    /**
-     * Handle the permissions being updated. The logic in here determines if the user should be
-     * asked to grant permission(s).
-     *
-     * @param permissionsState The newly-set [PermissionsState].
-     */
-    private fun handlePermissionsSet(permissionsState: PermissionsState) {
-        val requestedPermissions: Boolean? = savedState[STATE_REQUESTED_LOCATION_PERMISSIONS]
-
-        if (requestedPermissions != true) {
-            savedState[STATE_REQUESTED_LOCATION_PERMISSIONS] = true
-
-            if (locationRepository.hasLocationFeature &&
-                    permissionsState.fineLocationPermission == PermissionState.UNGRANTED &&
-                    permissionsState.coarseLocationPermission == PermissionState.UNGRANTED) {
-                requestLocationPermissions.call()
-            }
-        }
     }
 
     /**
@@ -401,14 +428,6 @@ class BusStopMapViewModel(
             result: PlayServicesAvailabilityResult): Int? {
         return (result as? PlayServicesAvailabilityResult.Unavailable)?.errorCode
     }
-
-    /**
-     * This is called when stops should be loaded.
-     *
-     * @param filteredServices Filtered services, if any.
-     */
-    private fun loadBusStops(filteredServices: Array<String>?) =
-            busStopsRepository.getStopDetailsWithServiceFilterFlow(filteredServices?.toSet())
 
     /**
      * This is called when route lines should be loaded.
@@ -447,41 +466,6 @@ class BusStopMapViewModel(
         lastCameraLocation = location
         cameraLocation.value = location
     }
-
-    /**
-     * Given an optional [List] of [StopDetails] and an optional [UiServiceListing], map this to a
-     * [List] of [UiStopMarker]. This will be `null` if [stopDetails] is `null` or empty.
-     *
-     * @param stopDetails The [List] of [StopDetails].
-     * @param serviceListing An optional [UiServiceListing] if a stop is currently selected.
-     * @return The mapped [List] of [UiStopMarker], or `null`.
-     */
-    private fun mapToUiStopMarkers(
-            stopDetails: List<StopDetails>?,
-            serviceListing: UiServiceListing?) =
-            stopDetails?.map { sd ->
-                val sl = serviceListing?.takeIf { it.stopCode == sd.stopCode }
-
-                mapToUiStopMarker(sd, sl)
-            }?.ifEmpty { null }
-
-    /**
-     * Given a [StopDetails], map this to a [UiStopMarker]. If [serviceListing] is not `null`, this
-     * means this stop is currently selected.
-     *
-     * @param stopDetails The [StopDetails] to map from.
-     * @param serviceListing The [UiServiceListing] if this stop is currently selected.
-     * @return The mapped [UiStopMarker].
-     */
-    private fun mapToUiStopMarker(
-            stopDetails: StopDetails,
-            serviceListing: UiServiceListing?) =
-            UiStopMarker(
-                    stopDetails.stopCode,
-                    stopDetails.stopName,
-                    LatLng(stopDetails.latitude, stopDetails.longitude),
-                    stopDetails.orientation,
-                    serviceListing)
 
     /**
      * Given a [LastMapCameraLocation], map it to a [UiCameraLocation].

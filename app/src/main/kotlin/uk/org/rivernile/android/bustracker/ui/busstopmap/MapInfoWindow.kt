@@ -40,10 +40,10 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.MapInfoWindowBin
  * `InfoWindow` is being shown. This allows the text for services not to ellipsise (i.e. be
  * multi-line).
  *
- * @author Niall Scott
  * @param context The [android.app.Activity] [Context].
  * @param inflater The [LayoutInflater] instance to inflate the layout with.
  * @param rootView The root [ViewGroup] to inflate against.
+ * @author Niall Scott
  */
 class MapInfoWindow(
         private val context: Context,

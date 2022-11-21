@@ -60,6 +60,7 @@ import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
+import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.BusstopmapFragmentBinding
@@ -74,7 +75,7 @@ class BusStopMapFragment : Fragment() {
 
     companion object {
 
-        private const val ARG_STOPCODE = "stopCode"
+        private const val ARG_STOP_CODE = "stopCode"
         private const val ARG_LOCATION = "location"
 
         private const val DIALOG_SERVICES_CHOOSER = "dialogServicesChooser"
@@ -96,9 +97,9 @@ class BusStopMapFragment : Fragment() {
          * @return A new instance of [BusStopMapFragment].
          */
         fun newInstance(stopCode: String?) = BusStopMapFragment().apply {
-            stopCode?.let {
+            stopCode?.ifBlank { null }?.let {
                 arguments = Bundle().apply {
-                    putString(ARG_STOPCODE, it)
+                    putString(ARG_STOP_CODE, it)
                 }
             }
         }
@@ -138,7 +139,7 @@ class BusStopMapFragment : Fragment() {
 
     private var menuItemSearch: MenuItem? = null
     private var menuItemServices: MenuItem? = null
-    private var menuItemMapTyoe: MenuItem? = null
+    private var menuItemMapType: MenuItem? = null
     private var menuItemTrafficView: MenuItem? = null
 
     private val requestLocationPermissionsLauncher = registerForActivityResult(
@@ -170,8 +171,8 @@ class BusStopMapFragment : Fragment() {
         if (savedInstanceState == null) {
             arguments?.let { args ->
                 when {
-                    args.containsKey(ARG_STOPCODE) ->
-                        args.getString(ARG_STOPCODE)?.let(viewModel::showStop)
+                    args.containsKey(ARG_STOP_CODE) ->
+                        args.getString(ARG_STOP_CODE)?.let(viewModel::showStop)
                     args.containsKey(ARG_LOCATION) ->
                         args.getParcelableCompat<UiLatLon>(ARG_LOCATION)
                                 ?.let(viewModel::showLocation)
@@ -226,10 +227,9 @@ class BusStopMapFragment : Fragment() {
             }
         }
 
-        viewModel.requestLocationPermissionsLiveData.observe(viewLifecycleOwner) {
-            handleRequestLocationPermissions()
-        }
-        viewModel.uiStateFlow.observe(viewLifecycleOwner, this::handleUiStateChanged)
+        viewModel.requestLocationPermissionsLiveData.observe(viewLifecycleOwner,
+                this::handleRequestLocationPermissions)
+        viewModel.uiStateLiveData.observe(viewLifecycleOwner, this::handleUiStateChanged)
         viewModel.isErrorResolveButtonVisibleLiveData.observe(viewLifecycleOwner,
                 viewBinding.layoutError.btnErrorResolve::isVisible::set)
         viewModel.playServicesErrorLiveData.observe(viewLifecycleOwner,
@@ -253,7 +253,7 @@ class BusStopMapFragment : Fragment() {
                 this::handleShowMapMarkerInfoWindow)
         viewModel.showStopDetailsLiveData.observe(viewLifecycleOwner, callbacks::onShowBusTimes)
         viewModel.showSearchLiveData.observe(viewLifecycleOwner) {
-            showSearch()
+            searchStopLauncher.launch()
         }
         viewModel.cameraLocationLiveData.observe(viewLifecycleOwner,
                 this::handleCameraPositionChanged)
@@ -267,7 +267,7 @@ class BusStopMapFragment : Fragment() {
         }
         viewModel.isZoomControlsVisibleLiveData.observe(viewLifecycleOwner,
                 this::handleZoomControlsVisibilityChanged)
-        viewModel.mapTypeFlow.observe(viewLifecycleOwner, this::handleMapTypeChanged)
+        viewModel.mapTypeLiveData.observe(viewLifecycleOwner, this::handleMapTypeChanged)
 
         requireActivity().apply {
             setTitle(R.string.map_title)
@@ -356,12 +356,16 @@ class BusStopMapFragment : Fragment() {
 
     /**
      * Handle asking the user to grant permissions.
+     *
+     * @param event The event.
      */
-    private fun handleRequestLocationPermissions() {
-        requestLocationPermissionsLauncher.launch(
-                arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION))
+    private fun handleRequestLocationPermissions(event: Event<Unit>) {
+        event.getContentIfNotHandled()?.let {
+            requestLocationPermissionsLauncher.launch(
+                    arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
     }
 
     /**
@@ -499,15 +503,8 @@ class BusStopMapFragment : Fragment() {
         handleShowMapMarkerInfoWindow(viewModel.showStopMarkerInfoWindowLiveData.value)
         handleTrafficViewEnabledChanged(viewModel.isTrafficViewEnabledLiveData.value ?: false)
         handleZoomControlsVisibilityChanged(viewModel.isZoomControlsVisibleLiveData.value ?: false)
-        handleMapTypeChanged(viewModel.mapTypeFlow.value ?: MapType.NORMAL)
-
-        val lastMapCameraLocation = viewModel.lastCameraLocation
-        CameraUpdateFactory.newLatLngZoom(
-                LatLng(
-                        lastMapCameraLocation.latLon.latitude,
-                        lastMapCameraLocation.latLon.longitude),
-                lastMapCameraLocation.zoomLevel)
-                .let(map::moveCamera)
+        handleMapTypeChanged(viewModel.mapTypeLiveData.value ?: MapType.NORMAL)
+        handleCameraPositionChanged(viewModel.lastCameraLocation)
     }
 
     /**
@@ -569,11 +566,7 @@ class BusStopMapFragment : Fragment() {
     private fun handleStopMarkersChanged(stopMarkers: List<UiStopMarker>?) {
         clusterManager?.apply {
             clearItems()
-
-            stopMarkers?.let {
-                addItems(stopMarkers)
-            }
-
+            stopMarkers?.let(this::addItems)
             cluster()
 
             handleShowMapMarkerInfoWindow(viewModel.showStopMarkerInfoWindowLiveData.value)
@@ -647,13 +640,6 @@ class BusStopMapFragment : Fragment() {
     }
 
     /**
-     * Show the search UI.
-     */
-    private fun showSearch() {
-        searchStopLauncher.launch()
-    }
-
-    /**
      * Show the services chooser UI.
      *
      * @param params The parameters to start [ServicesChooserDialogFragment] with.
@@ -714,7 +700,7 @@ class BusStopMapFragment : Fragment() {
      * @param isEnabled Is the map type menu item enabled?
      */
     private fun handleMapTypeMenuItemEnabledChanged(isEnabled: Boolean) {
-        menuItemMapTyoe?.isEnabled = isEnabled
+        menuItemMapType?.isEnabled = isEnabled
     }
 
     /**
@@ -780,7 +766,7 @@ class BusStopMapFragment : Fragment() {
 
             menuItemSearch = menu.findItem(R.id.busstopmap_option_menu_search)
             menuItemServices = menu.findItem(R.id.busstopmap_option_menu_services)
-            menuItemMapTyoe = menu.findItem(R.id.busstopmap_option_menu_maptype)
+            menuItemMapType = menu.findItem(R.id.busstopmap_option_menu_maptype)
             menuItemTrafficView = menu.findItem(R.id.busstopmap_option_menu_trafficview)
         }
 

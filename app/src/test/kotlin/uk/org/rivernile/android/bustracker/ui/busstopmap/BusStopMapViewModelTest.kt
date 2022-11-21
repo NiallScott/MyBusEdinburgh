@@ -29,17 +29,30 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.Before
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.location.LocationRepository
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
+import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [BusStopMapViewModel].
@@ -47,8 +60,18 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  * @author Niall Scott
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-//@RunWith(MockitoJUnitRunner::class)
+@RunWith(MockitoJUnitRunner::class)
 class BusStopMapViewModelTest {
+
+    companion object {
+
+        private const val STATE_SELECTED_SERVICES = "selectedServices"
+        private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
+        private const val STATE_TRAFFIC_VIEW_ENABLED = "trafficViewEnabled"
+
+        private const val DEFAULT_ZOOM = 14f
+        private const val STOP_ZOOM = 20f
+    }
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -56,39 +79,932 @@ class BusStopMapViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     @Mock
-    private lateinit var playServicesAvailabilityChecker: PlayServicesAvailabilityChecker
+    private lateinit var permissionHandler: PermissionHandler
     @Mock
-    private lateinit var locationRepository: LocationRepository
+    private lateinit var playServicesAvailabilityChecker: PlayServicesAvailabilityChecker
     @Mock
     private lateinit var servicesRepository: ServicesRepository
     @Mock
     private lateinit var busStopsRepository: BusStopsRepository
     @Mock
-    private lateinit var serviceListingRetriever: ServiceListingRetriever
+    private lateinit var stopMarkersRetriever: StopMarkersRetriever
     @Mock
     private lateinit var routeLineRetriever: RouteLineRetriever
     @Mock
     private lateinit var isMyLocationEnabledDetector: IsMyLocationEnabledDetector
     @Mock
     private lateinit var preferenceRepository: PreferenceRepository
-    @Mock
-    private lateinit var preferenceManager: PreferenceManager
 
-    private lateinit var viewModel: BusStopMapViewModel
+    @Test
+    fun setPermissionsStateSetsValueOnPermissionHandler() {
+        val expected = PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
+        val viewModel = createViewModel()
 
-    @Before
-    fun setUp() {
-        viewModel = BusStopMapViewModel(
-                SavedStateHandle(),
-                playServicesAvailabilityChecker,
-                locationRepository,
-                servicesRepository,
-                busStopsRepository,
-                serviceListingRetriever,
-                routeLineRetriever,
-                isMyLocationEnabledDetector,
-                preferenceRepository,
-                preferenceManager,
-                coroutineRule.testDispatcher)
+        viewModel.permissionsState = expected
+
+        verify(permissionHandler)
+                .permissionsState = expected
     }
+
+    @Test
+    fun getPermissionsStateGetsValueOnPermissionsHandler() {
+        val expected = PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
+        whenever(permissionHandler.permissionsState)
+                .thenReturn(expected)
+        val viewModel = createViewModel()
+
+        val result = viewModel.permissionsState
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun getLastCameraLocationReturnsValueFromPreferenceRepository() {
+        whenever(preferenceRepository.lastMapCameraLocation)
+                .thenReturn(LastMapCameraLocation(1.1, 2.2, 3f))
+        val expected = UiCameraLocation(
+                UiLatLon(1.1, 2.2),
+                3f)
+        val viewModel = createViewModel()
+
+        val result = viewModel.lastCameraLocation
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun setLastCameraLocationSetsValueOnPreferenceRepository() {
+        val expected = LastMapCameraLocation(1.1, 2.2, 3f)
+        val viewModel = createViewModel()
+
+        viewModel.lastCameraLocation = UiCameraLocation(
+                UiLatLon(1.1, 2.2),
+                3f)
+
+        verify(preferenceRepository)
+                .lastMapCameraLocation = expected
+    }
+
+    @Test
+    fun requestLocationPermissionsLiveDataDoesNotEmitWhenPermissionsHandlerDoesNotEmit() = runTest {
+        whenever(permissionHandler.requestLocationPermissionsFlow)
+                .thenReturn(emptyFlow())
+        val viewModel = createViewModel()
+
+        val observer = viewModel.requestLocationPermissionsLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun requestLocationPermissionsLiveDataEmitsWhenPermissionsHandlerEmits() = runTest {
+        whenever(permissionHandler.requestLocationPermissionsFlow)
+                .thenReturn(flowOf(123L))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.requestLocationPermissionsLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertSize(1)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsProgressWhenPlayServicesAvailabilityIsInProgress() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(UiState.PROGRESS)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsContentWhenPlayServicesAvailabilityIsAvailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+                UiState.PROGRESS,
+                UiState.CONTENT)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsErrorWhenPlayServicesAvailabilityIsUnavailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+                UiState.PROGRESS,
+                UiState.ERROR)
+    }
+
+    @Test
+    fun playServicesErrorLiveDataEmitsNullWhenPlayServicesAvailabilityInProgress() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.playServicesErrorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun playServicesErrorLiveDataEmitsNullWhenPlayServicesAvailabilityAvailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.playServicesErrorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun playServicesErrorLiveDataEmitsErrorCodeWhenPlayServicesAvailabilityError() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.playServicesErrorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null, 1)
+    }
+
+    @Test
+    fun isErrorResolveButtonVisibleLiveDataEmitsFalseWhenPlayServicesAvailabilityInProgress() {
+        return runTest {
+            whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                    .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
+            val viewModel = createViewModel()
+
+            val observer = viewModel.isErrorResolveButtonVisibleLiveData.test()
+            advanceUntilIdle()
+
+            observer.assertValues(false)
+        }
+    }
+
+    @Test
+    fun isErrorResolveButtonVisibleLiveDataEmitsFalseWhenPlayServicesAvailabilityAvailable() {
+        return runTest {
+            whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                    .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+            val viewModel = createViewModel()
+
+            val observer = viewModel.isErrorResolveButtonVisibleLiveData.test()
+            advanceUntilIdle()
+
+            observer.assertValues(false)
+        }
+    }
+
+    @Test
+    fun isErrorResolveButtonVisibleLiveDataEmitsFalseWhenPlayServicesAvailabilityUnresolvable() {
+        return runTest {
+            whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                    .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Unresolvable(1)))
+            val viewModel = createViewModel()
+
+            val observer = viewModel.isErrorResolveButtonVisibleLiveData.test()
+            advanceUntilIdle()
+
+            observer.assertValues(false)
+        }
+    }
+
+    @Test
+    fun isErrorResolveButtonVisibleLiveDataEmitsTrueWhenPlayServicesAvailabilityResolvable() {
+        return runTest {
+            whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                    .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
+            val viewModel = createViewModel()
+
+            val observer = viewModel.isErrorResolveButtonVisibleLiveData.test()
+            advanceUntilIdle()
+
+            observer.assertValues(false, true)
+        }
+    }
+
+    @Test
+    fun stopMarkersLiveDataEmitsNullValuesFromStopMarkersRetriever() = runTest {
+        whenever(stopMarkersRetriever.stopMarkersFlow)
+                .thenReturn(flowOf(null))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.stopMarkersLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun stopMarkersLiveDataEmitsValuesFromStopMarkersRetriever() = runTest {
+        val expected = listOf<UiStopMarker>(
+                mock(),
+                mock(),
+                mock())
+        whenever(stopMarkersRetriever.stopMarkersFlow)
+                .thenReturn(flowOf(expected))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.stopMarkersLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(expected)
+    }
+
+    @Test
+    fun routeLinesLiveDataEmitsNullValues() = runTest {
+        whenever(routeLineRetriever.getRouteLinesFlow(null))
+                .thenReturn(flowOf(null))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.routeLinesLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun routeLinesLiveDataEmitsValuesFromRouteLineRetriever() = runTest {
+        val expected = listOf<UiServiceRoute>(
+                mock(),
+                mock(),
+                mock())
+        whenever(routeLineRetriever.getRouteLinesFlow(null))
+                .thenReturn(flowOf(expected))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.routeLinesLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(expected)
+    }
+
+    @Test
+    fun routeLinesLiveDataEmitsValuesFromRouteLineRetrieverWithServicesFromSelected() = runTest {
+        val expected = listOf<UiServiceRoute>(
+                mock(),
+                mock(),
+                mock())
+        whenever(routeLineRetriever.getRouteLinesFlow(null))
+                .thenReturn(flowOf(null))
+        whenever(routeLineRetriever.getRouteLinesFlow(setOf("1", "2", "3")))
+                .thenReturn(flowOf(expected))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.routeLinesLiveData.test()
+        advanceUntilIdle()
+        viewModel.onServicesSelected(listOf("1", "2", "3"))
+        advanceUntilIdle()
+
+        observer.assertValues(null, expected)
+    }
+
+    @Test
+    fun routeLinesLiveDataEmitsValuesFromRouteLineRetrieverWithServicesFromState() = runTest {
+        val expected = listOf<UiServiceRoute>(
+                mock(),
+                mock(),
+                mock())
+        whenever(routeLineRetriever.getRouteLinesFlow(setOf("1", "2", "3")))
+                .thenReturn(flowOf(expected))
+        val viewModel = createViewModel(
+                SavedStateHandle(
+                        mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2", "3"))))
+
+        val observer = viewModel.routeLinesLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(expected)
+    }
+
+    @Test
+    fun isSearchMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesInProgress() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isSearchMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isSearchMenuItemEnabledLiveDataEmitsTrueWhenPlayServicesAvailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isSearchMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false, true)
+    }
+
+    @Test
+    fun isSearchMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesUnavailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isSearchMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenNullServices() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(null))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenEmptyServices() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(emptyList()))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesInProgress() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(listOf("1", "2", "3")))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesUnavailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(listOf("1", "2", "3")))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isFilterMenuItemEnabledLiveDataEmitsTrueWhenPlayServicesAvailableAndHasServices() {
+            return runTest {
+                whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                        .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+                whenever(servicesRepository.allServiceNamesFlow)
+                        .thenReturn(flowOf(listOf("1", "2", "3")))
+                val viewModel = createViewModel()
+
+                val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
+                advanceUntilIdle()
+
+                observer.assertValues(false, true)
+            }
+    }
+
+    @Test
+    fun isMapTypeMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesInProgress() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isMapTypeMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isMapTypeMenuItemEnabledLiveDataEmitsTrueWhenPlayServicesAvailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isMapTypeMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false, true)
+    }
+
+    @Test
+    fun isMapTypeMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesUnavailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isMapTypeMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isTrafficViewMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesInProgress() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isTrafficViewMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isTrafficViewMenuItemEnabledLiveDataEmitsTrueWhenPlayServicesAvailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isTrafficViewMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false, true)
+    }
+
+    @Test
+    fun isTrafficViewMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesUnavailable() = runTest {
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isTrafficViewMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isMyLocationFeatureEnabledLiveDataEmitsValues() = runTest {
+        whenever(isMyLocationEnabledDetector.getIsMyLocationFeatureEnabledFlow(any()))
+                .thenReturn(intervalFlowOf(0L, 0L, false, true, false))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isMyLocationFeatureEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false, true, false)
+    }
+
+    @Test
+    fun isTrafficViewEnabledLiveDataEmitsFalseByDefault() = runTest {
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isTrafficViewEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isTrafficViewEnabledLiveDataEmitsValues() = runTest {
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isTrafficViewEnabledLiveData.test()
+        advanceUntilIdle()
+        viewModel.onTrafficViewMenuItemClicked()
+        advanceUntilIdle()
+        viewModel.onTrafficViewMenuItemClicked()
+        advanceUntilIdle()
+
+        observer.assertValues(false, true, false)
+    }
+
+    @Test
+    fun isTrafficViewEnabledLiveDataEmitsStateValueIfAvailable() = runTest {
+        val viewModel = createViewModel(
+                SavedStateHandle(
+                        mapOf(STATE_TRAFFIC_VIEW_ENABLED to true)))
+
+        val observer = viewModel.isTrafficViewEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(true)
+    }
+
+    @Test
+    fun isZoomControlsVisibleLiveDataEmitsItemsFromPreferenceRepository() = runTest {
+        whenever(preferenceRepository.isMapZoomControlsVisibleFLow)
+                .thenReturn(intervalFlowOf(0L, 10L, false, true, false))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isZoomControlsVisibleLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false, true, false)
+    }
+
+    @Test
+    fun mapTypeLiveDataEmitsItemsFromPreferenceRepository() = runTest {
+        whenever(preferenceRepository.mapTypeFlow)
+                .thenReturn(intervalFlowOf(0L, 10L, 1, 2, 3, 4))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.mapTypeLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+                MapType.NORMAL,
+                MapType.SATELLITE,
+                MapType.HYBRID,
+                MapType.NORMAL)
+    }
+
+    @Test
+    fun showPlayServicesErrorResolutionLiveDataDoesNotEmitWhenPlayServicesAvailabilityInProgress() {
+        return runTest {
+            whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                    .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
+            val viewModel = createViewModel()
+
+            viewModel.isErrorResolveButtonVisibleLiveData.test()
+            val observer = viewModel.showPlayServicesErrorResolutionLiveData.test()
+            advanceUntilIdle()
+            viewModel.onErrorResolveButtonClicked()
+
+            observer.assertEmpty()
+        }
+    }
+
+    @Test
+    fun showPlayServicesErrorResolutionLiveDataDoesNotEmitWhenPlayServicesAvailabilityAvailable() {
+        return runTest {
+            whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                    .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
+            val viewModel = createViewModel()
+
+            viewModel.isErrorResolveButtonVisibleLiveData.test()
+            val observer = viewModel.showPlayServicesErrorResolutionLiveData.test()
+            advanceUntilIdle()
+            viewModel.onErrorResolveButtonClicked()
+
+            observer.assertEmpty()
+        }
+    }
+
+    @Test
+    fun showPlayServicesErrorResolutionLiveDataDoesNotEmitWhenAvailabilityUnresolvable() {
+        return runTest {
+            whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                    .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Unresolvable(1)))
+            val viewModel = createViewModel()
+
+            viewModel.isErrorResolveButtonVisibleLiveData.test()
+            val observer = viewModel.showPlayServicesErrorResolutionLiveData.test()
+            advanceUntilIdle()
+            viewModel.onErrorResolveButtonClicked()
+
+            observer.assertEmpty()
+        }
+    }
+
+    @Test
+    fun showPlayServicesErrorResolutionLiveDataEmitsWhenAvailabilityResolvable() {
+        return runTest {
+            whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+                    .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
+            val viewModel = createViewModel()
+
+            viewModel.isErrorResolveButtonVisibleLiveData.test()
+            val observer = viewModel.showPlayServicesErrorResolutionLiveData.test()
+            advanceUntilIdle()
+            viewModel.onErrorResolveButtonClicked()
+
+            observer.assertValues(1)
+        }
+    }
+
+    @Test
+    fun showMapTypeSelectionLiveDataEmitsWhenMapTypeMenuItemIsClicked() {
+        val viewModel = createViewModel()
+
+        val observer = viewModel.showMapTypeSelectionLiveData.test()
+        viewModel.onMapTypeMenuItemClicked()
+
+        observer.assertSize(1)
+    }
+
+    @Test
+    fun showStopMarkerInfoWindowLiveDataDoesNotEmitByDefault() = runTest {
+        val viewModel = createViewModel()
+
+        val observer = viewModel.showStopMarkerInfoWindowLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun showStopMarkerInfoWindowLiveDataEmitsStopCodeWhenClicked() = runTest {
+        val viewModel = createViewModel()
+        val stopMarker = mock<UiStopMarker>()
+        whenever(stopMarker.stopCode)
+                .thenReturn("123456")
+
+        val observer = viewModel.showStopMarkerInfoWindowLiveData.test()
+        viewModel.onMapMarkerClicked(stopMarker)
+        advanceUntilIdle()
+
+        observer.assertValues("123456")
+    }
+
+    @Test
+    fun showStopMarkerInfoWindowLiveDataEmitsStopCodeWhenInSavedState() = runTest {
+        val viewModel = createViewModel(
+                SavedStateHandle(mapOf(STATE_SELECTED_STOP_CODE to "123456")))
+
+        val observer = viewModel.showStopMarkerInfoWindowLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues("123456")
+    }
+
+    @Test
+    fun showStopMarkerInfoWindowLiveDataEmitsNullWhenInfoWindowClosed() = runTest {
+        val viewModel = createViewModel()
+        val stopMarker = mock<UiStopMarker>()
+        whenever(stopMarker.stopCode)
+                .thenReturn("123456")
+
+        val observer = viewModel.showStopMarkerInfoWindowLiveData.test()
+        viewModel.onMapMarkerClicked(stopMarker)
+        advanceUntilIdle()
+        viewModel.onInfoWindowClosed()
+        advanceUntilIdle()
+
+        observer.assertValues("123456", null)
+    }
+
+    @Test
+    fun showStopDetailsLiveDataEmitsWhenMarkerBubbleHasBeenClicked() {
+        val stopMarker = mock<UiStopMarker>()
+        whenever(stopMarker.stopCode)
+                .thenReturn("123456")
+        val viewModel = createViewModel()
+
+        val observer = viewModel.showStopDetailsLiveData.test()
+        viewModel.onMarkerBubbleClicked(stopMarker)
+
+        observer.assertValues("123456")
+    }
+
+    @Test
+    fun showServicesChooserLiveDataDoesNotEmitWhenServiceNamesIsNull() = runTest {
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(null))
+        val viewModel = createViewModel()
+
+        viewModel.isFilterMenuItemEnabledLiveData.test()
+        val observer = viewModel.showServicesChooserLiveData.test()
+        advanceUntilIdle()
+        viewModel.onServicesMenuItemClicked()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun showServicesChooserLiveDataDoesNotEmitWhenServiceNamesIsEmpty() = runTest {
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(emptyList()))
+        val viewModel = createViewModel()
+
+        viewModel.isFilterMenuItemEnabledLiveData.test()
+        val observer = viewModel.showServicesChooserLiveData.test()
+        advanceUntilIdle()
+        viewModel.onServicesMenuItemClicked()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun showServicesChooserLiveDataEmitsWhenServiceNamesIsPopulated() = runTest {
+        val services = listOf("1", "2", "3")
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(services))
+        val viewModel = createViewModel()
+        val expected = ServicesChooserParams(services, null)
+
+        viewModel.isFilterMenuItemEnabledLiveData.test()
+        val observer = viewModel.showServicesChooserLiveData.test()
+        advanceUntilIdle()
+        viewModel.onServicesMenuItemClicked()
+
+        observer.assertValues(expected)
+    }
+
+    @Test
+    fun showServicesChooserLiveDataEmitsParamsWithSelectedServices() = runTest {
+        val services = listOf("1", "2", "3")
+        val selectedServices = listOf("1", "2")
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(services))
+        val viewModel = createViewModel()
+        val expected = ServicesChooserParams(services, selectedServices)
+
+        viewModel.onServicesSelected(selectedServices)
+        viewModel.isFilterMenuItemEnabledLiveData.test()
+        val observer = viewModel.showServicesChooserLiveData.test()
+        advanceUntilIdle()
+        viewModel.onServicesMenuItemClicked()
+
+        observer.assertValues(expected)
+    }
+
+    @Test
+    fun showServicesChooserLiveDataEmitsParamsWithSelectedServicesFromState() = runTest {
+        val services = listOf("1", "2", "3")
+        val selectedServices = listOf("1", "2")
+        whenever(servicesRepository.allServiceNamesFlow)
+                .thenReturn(flowOf(services))
+        val viewModel = createViewModel(
+                SavedStateHandle(
+                        mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2"))))
+        val expected = ServicesChooserParams(services, selectedServices)
+
+        viewModel.isFilterMenuItemEnabledLiveData.test()
+        val observer = viewModel.showServicesChooserLiveData.test()
+        advanceUntilIdle()
+        viewModel.onServicesMenuItemClicked()
+
+        observer.assertValues(expected)
+    }
+
+    @Test
+    fun showSearchLiveDataEmitsWhenSearchMenuItemIsClicked() {
+        val viewModel = createViewModel()
+
+        val observer = viewModel.showSearchLiveData.test()
+        viewModel.onSearchMenuItemClicked()
+
+        observer.assertSize(1)
+    }
+
+    @Test
+    fun showStopShowsInfoWindowButDoesNotMoveCameraWhenNoStopLocation() = runTest {
+        whenever(busStopsRepository.getStopLocation("123456"))
+                .thenReturn(null)
+        val viewModel = createViewModel()
+
+        val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
+        val cameraLocationObserver = viewModel.cameraLocationLiveData.test()
+        viewModel.showStop("123456")
+        advanceUntilIdle()
+
+        showStopMarkerInfoWindowObserver.assertValues("123456")
+        cameraLocationObserver.assertEmpty()
+        verify(preferenceRepository, never())
+                .lastMapCameraLocation = any()
+    }
+
+    @Test
+    fun showStopShowsInfoWindowAndMovesCameraToStopLocation() = runTest {
+        whenever(busStopsRepository.getStopLocation("123456"))
+                .thenReturn(StopLocation("123456", 1.1, 2.2))
+        val viewModel = createViewModel()
+
+        val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
+        val cameraLocationObserver = viewModel.cameraLocationLiveData.test()
+        viewModel.showStop("123456")
+        advanceUntilIdle()
+
+        showStopMarkerInfoWindowObserver.assertValues("123456")
+        cameraLocationObserver.assertValues(
+                UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
+        verify(preferenceRepository)
+                .lastMapCameraLocation = LastMapCameraLocation(1.1, 2.2, STOP_ZOOM)
+    }
+
+    @Test
+    fun onStopSearchResultShowsInfoWindowButDoesNotMoveCameraWhenNoStopLocation() = runTest {
+        whenever(busStopsRepository.getStopLocation("123456"))
+                .thenReturn(null)
+        val viewModel = createViewModel()
+
+        val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
+        val cameraLocationObserver = viewModel.cameraLocationLiveData.test()
+        viewModel.onStopSearchResult("123456")
+        advanceUntilIdle()
+
+        showStopMarkerInfoWindowObserver.assertValues("123456")
+        cameraLocationObserver.assertEmpty()
+        verify(preferenceRepository, never())
+                .lastMapCameraLocation = any()
+    }
+
+    @Test
+    fun onStopSearchResultShowsInfoWindowAndMovesCameraToStopLocation() = runTest {
+        whenever(busStopsRepository.getStopLocation("123456"))
+                .thenReturn(StopLocation("123456", 1.1, 2.2))
+        val viewModel = createViewModel()
+
+        val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
+        val cameraLocationObserver = viewModel.cameraLocationLiveData.test()
+        viewModel.onStopSearchResult("123456")
+        advanceUntilIdle()
+
+        showStopMarkerInfoWindowObserver.assertValues("123456")
+        cameraLocationObserver.assertValues(
+                UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
+        verify(preferenceRepository)
+                .lastMapCameraLocation = LastMapCameraLocation(1.1, 2.2, STOP_ZOOM)
+    }
+
+    @Test
+    fun showLocationMovesCameraToLocation() = runTest {
+        val viewModel = createViewModel()
+        val latLon = UiLatLon(1.1, 2.2)
+        val expectedLastCameraLocation = LastMapCameraLocation(1.1, 2.2, DEFAULT_ZOOM)
+        val expectedCameraLocation = UiCameraLocation(latLon, DEFAULT_ZOOM)
+
+        val observer = viewModel.cameraLocationLiveData.test()
+        viewModel.showLocation(latLon)
+
+        verify(preferenceRepository)
+                .lastMapCameraLocation = expectedLastCameraLocation
+        observer.assertValues(expectedCameraLocation)
+    }
+
+    @Test
+    fun onMapTypeSelectedWithNormalMapSetsPreference() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onMapTypeSelected(MapType.NORMAL)
+
+        verify(preferenceRepository)
+                .mapType = MapType.NORMAL.value
+    }
+
+    @Test
+    fun onMapTypeSelectedWithSatelliteMapSetsPreference() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onMapTypeSelected(MapType.SATELLITE)
+
+        verify(preferenceRepository)
+                .mapType = MapType.SATELLITE.value
+    }
+
+    @Test
+    fun onMapTypeSelectedWithHybridMapSetsPreference() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.onMapTypeSelected(MapType.HYBRID)
+
+        verify(preferenceRepository)
+                .mapType = MapType.HYBRID.value
+    }
+
+    private fun createViewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) =
+            BusStopMapViewModel(
+                    savedStateHandle,
+                    permissionHandler,
+                    playServicesAvailabilityChecker,
+                    servicesRepository,
+                    busStopsRepository,
+                    stopMarkersRetriever,
+                    routeLineRetriever,
+                    isMyLocationEnabledDetector,
+                    preferenceRepository,
+                    coroutineRule.testDispatcher)
 }
