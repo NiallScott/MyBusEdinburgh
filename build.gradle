@@ -34,25 +34,25 @@ buildscript {
         kotlinVersion = '1.7.20'
         kotlinCoroutinesVersion = '1.6.4'
         androidXCoreVersion = '1.9.0'
-        androidXActivityVersion = '1.6.0'
-        androidXFragmentVersion = '1.5.3'
+        androidXActivityVersion = '1.6.1'
+        androidXFragmentVersion = '1.5.4'
         appCompatVersion = '1.5.1'
-        materialVersion = '1.6.1'
+        materialVersion = '1.7.0'
         recyclerViewVersion = '1.2.1'
         cardViewVersion = '1.0.0'
         viewPager2Version = '1.0.0'
         constraintLayoutVersion = '2.1.4'
         androidXPreferenceVersion = '1.2.0'
         architectureComponentsVersion = '2.5.1'
-        daggerVersion = '2.44'
-        okhttpVersion = '4.9.1'
+        daggerVersion = '2.44.2'
+        okhttpVersion = '4.10.0'
         retrofitVersion = '2.9.0'
         retrofitKotlinSerializationConverterVersion = '0.8.0'
-        kotlinJsonSerialisationVersion = '1.4.0'
+        kotlinJsonSerialisationVersion = '1.4.1'
         gsonVersion = '2.8.9'
         picassoVersion = '2.71828'
         playServicesMapsVersion = '18.1.0'
-        playServicesLocationVersion = '20.0.0'
+        playServicesLocationVersion = '21.0.1'
         googleMapsKtxVersion = '3.4.0'
         googleMapsUtilsVersion = '2.4.0'
         googleMapsUtilsKtxVersion = '3.4.0'
@@ -60,7 +60,7 @@ buildscript {
         // Testing dependency versions
         junitVersion = '4.13.2'
         androidTestCoreVersion = '1.4.0'
-        mockitoVersion = '4.8.0'
+        mockitoVersion = '4.9.0'
         mockitoKotlinVersion = '4.0.0'
         androidXCoreTesting = '2.1.0'
         hamcrestVersion = '2.2'
@@ -73,7 +73,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:7.3.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"

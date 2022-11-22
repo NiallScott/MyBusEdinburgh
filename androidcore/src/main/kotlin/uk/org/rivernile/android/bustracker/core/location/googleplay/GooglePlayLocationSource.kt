@@ -31,6 +31,7 @@ import android.location.Location
 import android.os.Looper
 import androidx.annotation.RequiresPermission
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -69,10 +70,12 @@ internal class GooglePlayLocationSource @Inject constructor(
     }
 
     private val userVisibleLocationRequest by lazy {
-        LocationRequest.create()
-                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                .setInterval(USER_VISIBLE_LOCATION_INTERVAL_MILLIS)
-                .setFastestInterval(USER_VISIBLE_LOCATION_FASTEST_INTERVAL_MILLIS)
+        LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                USER_VISIBLE_LOCATION_INTERVAL_MILLIS)
+                .setMinUpdateIntervalMillis(USER_VISIBLE_LOCATION_FASTEST_INTERVAL_MILLIS)
+                .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+                .build()
     }
 
     override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {

@@ -145,6 +145,7 @@ dependencies {
 
     // Test dependencies
     androidTestImplementation project(':testutils')
+    androidTestImplementation "androidx.test:runner:$androidTestCoreVersion"
     androidTestImplementation "androidx.test:core-ktx:$androidTestCoreVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"

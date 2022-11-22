@@ -135,8 +135,8 @@ dependencies {
     // Test dependencies
     androidTestImplementation project(':testutils')
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
-    androidTestImplementation "androidx.test:core:$androidTestCoreVersion"
     androidTestImplementation "androidx.test:runner:$androidTestCoreVersion"
+    androidTestImplementation "androidx.test:core-ktx:$androidTestCoreVersion"
     androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
     kaptAndroidTest "com.google.dagger:dagger-compiler:$daggerVersion"
     kaptAndroidTest "com.google.dagger:dagger-android-processor:$daggerVersion"
