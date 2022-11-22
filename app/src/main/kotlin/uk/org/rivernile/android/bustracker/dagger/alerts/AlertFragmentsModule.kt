@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.dagger.alerts
 
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
+import uk.org.rivernile.android.bustracker.dagger.serviceschooser.ServicesChooserDialogFragmentModule
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment
@@ -42,7 +43,9 @@ import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogF
 interface AlertFragmentsModule {
 
     @Suppress("unused")
-    @ContributesAndroidInjector
+    @ContributesAndroidInjector(modules = [
+        ServicesChooserDialogFragmentModule::class
+    ])
     fun contributeAddTimeAlertDialogFragment(): AddTimeAlertDialogFragment
 
     @Suppress("unused")

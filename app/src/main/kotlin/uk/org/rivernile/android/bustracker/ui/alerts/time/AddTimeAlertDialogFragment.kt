@@ -35,6 +35,8 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import dagger.android.DispatchingAndroidInjector
+import dagger.android.HasAndroidInjector
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
@@ -49,7 +51,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class AddTimeAlertDialogFragment : DialogFragment() {
+class AddTimeAlertDialogFragment : DialogFragment(), HasAndroidInjector {
 
     companion object {
 
@@ -90,6 +92,8 @@ class AddTimeAlertDialogFragment : DialogFragment() {
                 }
     }
 
+    @Inject
+    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
     @Inject
     lateinit var viewModelFactory: AddTimeAlertDialogFragmentViewModelFactory
     @Inject
@@ -160,6 +164,8 @@ class AddTimeAlertDialogFragment : DialogFragment() {
             }
         }
     }
+
+    override fun androidInjector() = dispatchingAndroidInjector
 
     /**
      * Handle the UI state changing by changing the visible layout.

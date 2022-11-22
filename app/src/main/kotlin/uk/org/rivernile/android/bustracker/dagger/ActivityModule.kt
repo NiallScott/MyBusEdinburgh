@@ -37,6 +37,7 @@ import uk.org.rivernile.android.bustracker.dagger.favourites.FavouriteStopsFragm
 import uk.org.rivernile.android.bustracker.dagger.main.MainFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.neareststops.NearestStopsFragmentsModule
 import uk.org.rivernile.android.bustracker.dagger.news.NewsFragmentsModule
+import uk.org.rivernile.android.bustracker.dagger.serviceschooser.ServicesChooserDialogFragmentModule
 import uk.org.rivernile.android.bustracker.dagger.settings.SettingsFragmentsModule
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
@@ -63,7 +64,8 @@ interface ActivityModule {
         FavouriteFragmentsModule::class,
         MainFragmentsModule::class,
         NearestStopsFragmentsModule::class,
-        NewsFragmentsModule::class
+        NewsFragmentsModule::class,
+        ServicesChooserDialogFragmentModule::class
     ])
     fun contributeMainActivity(): MainActivity
 
@@ -84,7 +86,10 @@ interface ActivityModule {
     fun contributeDisplayStopDataActivity(): DisplayStopDataActivity
 
     @Suppress("unused")
-    @ContributesAndroidInjector(modules = [ BusStopMapFragmentsModule::class ])
+    @ContributesAndroidInjector(modules = [
+        BusStopMapFragmentsModule::class,
+        ServicesChooserDialogFragmentModule::class
+    ])
     fun contributeBusStopMapActivity(): BusStopMapActivity
 
     @Suppress("unused")
