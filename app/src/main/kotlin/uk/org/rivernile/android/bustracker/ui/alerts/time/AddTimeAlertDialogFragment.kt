@@ -67,7 +67,6 @@ class AddTimeAlertDialogFragment : DialogFragment(), HasAndroidInjector {
          * @param stopCode The stop code to add a time alert for.
          * @return A new [AddTimeAlertDialogFragment].
          */
-        @JvmStatic // TODO: remove this annotation when all callers are on Kotlin.
         fun newInstance(stopCode: String) = AddTimeAlertDialogFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOP_CODE, stopCode)
