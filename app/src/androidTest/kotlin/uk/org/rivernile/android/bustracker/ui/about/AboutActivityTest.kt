@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.about
 
-import androidx.test.annotation.UiThreadTest
+import androidx.test.core.app.launchActivity
 import androidx.test.filters.LargeTest
-import androidx.test.rule.ActivityTestRule
 import org.junit.Assert.assertNotNull
-import org.junit.Rule
 import org.junit.Test
 
 /**
@@ -41,32 +39,29 @@ import org.junit.Test
 @LargeTest
 class AboutActivityTest {
 
-    @get:Rule
-    val activityRule = ActivityTestRule(AboutActivity::class.java)
-
     @Test
-    @UiThreadTest
     fun showCreditsCallbackPresentsCreditsDialog() {
-        val activity = activityRule.activity
+        launchActivity<AboutActivity>().use { scenario ->
+            scenario.onActivity { activity ->
+                activity.onShowCredits()
+                activity.supportFragmentManager.executePendingTransactions()
 
-        activity.onShowCredits()
-
-        val fragmentManager = activity.supportFragmentManager
-        fragmentManager.executePendingTransactions()
-        val fragment = fragmentManager.findFragmentByTag("creditsDialog")
-        assertNotNull(fragment as? CreditsDialogFragment)
+                val fragment = activity.supportFragmentManager.findFragmentByTag("creditsDialog")
+                assertNotNull(fragment as? CreditsDialogFragment)
+            }
+        }
     }
 
     @Test
-    @UiThreadTest
     fun showLicencesCallbackPresentsLicencesDialog() {
-        val activity = activityRule.activity
+        launchActivity<AboutActivity>().use { scenario ->
+            scenario.onActivity { activity ->
+                activity.onShowLicences()
+                activity.supportFragmentManager.executePendingTransactions()
 
-        activity.onShowLicences()
-
-        val fragmentManager = activity.supportFragmentManager
-        fragmentManager.executePendingTransactions()
-        val fragment = fragmentManager.findFragmentByTag("licencesDialog")
-        assertNotNull(fragment as? OpenSourceLicenceDialogFragment)
+                val fragment = activity.supportFragmentManager.findFragmentByTag("licencesDialog")
+                assertNotNull(fragment as? OpenSourceLicenceDialogFragment)
+            }
+        }
     }
 }
