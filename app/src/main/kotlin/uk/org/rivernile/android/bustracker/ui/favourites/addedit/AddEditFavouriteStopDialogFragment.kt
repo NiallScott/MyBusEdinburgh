@@ -36,6 +36,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -93,7 +94,7 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.addeditfavouritestopdialog_title_add)
                 .setView(viewBinding.root)
                 .setPositiveButton(R.string.addeditfavouritestopdialog_button_add) { _, _ ->

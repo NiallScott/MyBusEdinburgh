@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -70,7 +70,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="@dimen/padding_double"
                 android:layout_marginEnd="@dimen/padding_double"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:textAppearance="?textAppearanceTitleLarge"
                 android:text="@string/alertmanager_time_title" />
 
             <TextView
@@ -80,7 +80,7 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginStart="@dimen/padding_double"
                 android:layout_marginEnd="@dimen/padding_double"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textAppearance="?textAppearanceBodyMedium"
                 android:textColor="?android:textColorSecondary"
                 tools:text="When any of services 1, 2, 3 are within 5 minutes of Some Stop, Area (12345678)"/>
 
@@ -91,10 +91,10 @@
                 android:layout_marginStart="@dimen/padding_double"
                 android:layout_marginEnd="@dimen/padding_double"
                 android:text="@string/alertmanager_time_blurb"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                android:textAppearance="?textAppearanceBodyMedium" />
 
             <Button
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:id="@+id/btnRemove"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -45,6 +45,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -105,7 +106,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.addproxalertdialog_title)
                 .setView(viewBinding.root)
                 .setPositiveButton(R.string.addproxalertdialog_button_add) { _, _ ->

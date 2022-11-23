@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,6 +25,10 @@
  *     exempt from clause 2.
 */ -->
 <resources>
+
+    <style name="Widget.MyBus.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">?colorPrimary</item>
+    </style>
 
     <style name="AppActionBar" parent="@style/Widget.AppCompat.ActionBar.Solid">
         <item name="displayOptions">showHome|homeAsUp|showTitle</item>

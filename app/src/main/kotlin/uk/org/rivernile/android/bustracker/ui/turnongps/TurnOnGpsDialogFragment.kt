@@ -32,10 +32,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -78,7 +78,7 @@ class TurnOnGpsDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext())
                 .setCancelable(true)
                 .setTitle(R.string.turnongpsdialog_title)
                 .setView(viewBinding.root)

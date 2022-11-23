@@ -24,12 +24,28 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<androidx.fragment.app.FragmentContainerView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragmentAbout"
-    android:name="uk.org.rivernile.android.bustracker.ui.about.AboutFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:layout="@layout/about_fragment"
-    tools:context="uk.org.rivernile.android.bustracker.ui.about.AboutActivity" />
+    android:orientation="vertical"
+    tools:context="uk.org.rivernile.android.bustracker.ui.about.AboutActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:theme="@style/ThemeOverlay.Material3.Dark"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        app:popupTheme="@style/ThemeOverlay.Material3.Light"
+        tools:title="@string/about_title" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentAbout"
+        android:name="uk.org.rivernile.android.bustracker.ui.about.AboutFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:layout="@layout/about_fragment" />
+</LinearLayout>

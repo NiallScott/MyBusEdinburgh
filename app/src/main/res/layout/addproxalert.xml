@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2017 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2017 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,7 +42,7 @@
         app:contentView="@id/layoutContent"
         app:errorView="@id/layoutError"
         app:contentLayout="progress"
-        tools:contentLayout="error">
+        tools:contentLayout="content">
 
         <LinearLayout
             android:id="@+id/layoutContent"
@@ -54,7 +54,7 @@
                 android:id="@+id/txtBlurb"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+                android:textAppearance="?textAppearanceBodyMedium"
                 tools:text="@string/addproxalertdialog_blurb" />
 
             <Spinner
@@ -65,7 +65,7 @@
                 android:entries="@array/addproxalertdialog_distance_array" />
 
             <Button
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:id="@+id/btnLimitations"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -84,11 +84,11 @@
                 android:id="@+id/txtErrorBlurb"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+                android:textAppearance="?textAppearanceBodyMedium"
                 tools:text="@string/addproxalertdialog_error_location_disabled" />
 
             <Button
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:id="@+id/btnErrorResolve"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,11 +24,27 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<androidx.fragment.app.FragmentContainerView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragmentSettings"
-    android:name="uk.org.rivernile.android.bustracker.ui.settings.SettingsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity" />
+    android:orientation="vertical"
+    tools:context="uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:theme="@style/ThemeOverlay.Material3.Dark"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        app:popupTheme="@style/ThemeOverlay.Material3.Light"
+        tools:title="@string/preferences_title" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentSettings"
+        android:name="uk.org.rivernile.android.bustracker.ui.settings.SettingsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

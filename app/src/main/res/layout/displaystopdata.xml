@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,11 +34,14 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="?colorPrimary"
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
+            style="?collapsingToolbarLayoutLargeStyle"
             android:id="@+id/collapsingLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,7 +65,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/displaystopdata_error_unknown_stop_name"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
                     android:maxLines="2"
                     android:ellipsize="end"
                     tools:text="Some Stop, Some Area" />
@@ -72,19 +75,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/displaystopdata_error_stop_code_missing"
-                    android:textAppearance="@style/TextAppearance.MyBus.DisplayStopData.Subheading"
+                    android:textAppearance="?textAppearanceTitleMedium"
+                    android:textColor="?android:textColorSecondary"
                     android:maxLines="1"
                     android:ellipsize="end"
                     tools:text="12345678" />
             </LinearLayout>
 
-            <androidx.appcompat.widget.Toolbar
+            <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:minHeight="?actionBarSize"
                 android:background="@android:color/transparent"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin"
+                app:popupTheme="@style/ThemeOverlay.Material3.Light"
+                tools:menu="@menu/displaystopdata_option_menu" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <com.google.android.material.tabs.TabLayout

@@ -27,9 +27,9 @@ package uk.org.rivernile.android.bustracker.ui.about
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
@@ -46,7 +46,7 @@ class CreditsDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.creditsdialog_title)
                 .setMessage(HtmlCompat.fromHtml(
                         getString(R.string.creditsdialog_body),

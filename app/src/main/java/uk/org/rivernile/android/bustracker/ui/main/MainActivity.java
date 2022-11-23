@@ -120,7 +120,11 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         
         setContentView(R.layout.main_activity);
+        setSupportActionBar(findViewById(R.id.toolbar));
         actionBar = getSupportActionBar();
+
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
         drawerOpenTitle = getTitle();
         
         drawer = findViewById(R.id.drawer);

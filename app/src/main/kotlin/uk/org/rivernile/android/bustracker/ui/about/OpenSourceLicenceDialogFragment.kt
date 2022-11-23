@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 - 2018 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.about
 import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import androidx.appcompat.app.AlertDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
@@ -46,7 +46,7 @@ class OpenSourceLicenceDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.opensourcelicensedialog_title)
                 .setMessage(R.string.open_source_licenses)
                 .setPositiveButton(R.string.close, null)

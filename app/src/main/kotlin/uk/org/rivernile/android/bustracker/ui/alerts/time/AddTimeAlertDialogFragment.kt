@@ -35,6 +35,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import dagger.android.support.AndroidSupportInjection
@@ -120,7 +121,7 @@ class AddTimeAlertDialogFragment : DialogFragment(), HasAndroidInjector {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.addtimealertdialog_title)
                 .setView(viewBinding.root)
                 .setPositiveButton(R.string.addtimealertdialog_button_add) { _, _ ->

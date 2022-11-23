@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-* Copyright (C) 2017 Niall 'Rivernile' Scott
+* Copyright (C) 2017 - 2022 Niall 'Rivernile' Scott
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/padding_double"
         android:text="@string/maptypebottomsheetdialog_title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+        android:textAppearance="?textAppearanceTitleSmall" />
 
     <uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout
         style="@style/MapTypeBottomSheetRow"

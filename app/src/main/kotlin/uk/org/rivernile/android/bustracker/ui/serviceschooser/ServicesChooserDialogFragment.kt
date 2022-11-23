@@ -29,9 +29,9 @@ package uk.org.rivernile.android.bustracker.ui.serviceschooser
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -107,7 +107,7 @@ class ServicesChooserDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext())
+        return MaterialAlertDialogBuilder(requireContext())
                 .setTitle(arguments?.getString(ARG_TITLE))
                 .setMultiChoiceItems(
                         viewModel.services,

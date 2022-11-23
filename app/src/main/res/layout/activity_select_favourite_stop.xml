@@ -24,11 +24,26 @@
   ~
   -->
 
-<TextView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="@dimen/padding_double"
-    android:gravity="center"
-    android:text="@string/stopdetails_no_services"
-    android:textAppearance="?textAppearanceBodyMedium" />
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:theme="@style/ThemeOverlay.Material3.Dark"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        app:popupTheme="@style/ThemeOverlay.Material3.Light"
+        tools:title="@string/favouriteshortcut_title" />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:layout="@layout/favouritestops" />
+</LinearLayout>

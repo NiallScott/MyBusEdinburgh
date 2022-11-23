@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ import androidx.appcompat.app.AppCompatActivity
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.AboutBinding
 import javax.inject.Inject
 
 /**
@@ -54,7 +54,11 @@ class AboutActivity : AppCompatActivity(), HasAndroidInjector, AboutFragment.Cal
 
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.about)
+        val viewBinding = AboutBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
+
+        setSupportActionBar(viewBinding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun androidInjector() = dispatchingAndroidInjector

@@ -61,14 +61,14 @@
             android:id="@android:id/text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
+            android:textAppearance="?textAppearanceBodyLarge"
             tools:text="Example text" />
 
         <TextView
             android:id="@android:id/text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
+            android:textAppearance="?textAppearanceBodyMedium"
             tools:text="Sample subtext" />
     </LinearLayout>
 </LinearLayout>

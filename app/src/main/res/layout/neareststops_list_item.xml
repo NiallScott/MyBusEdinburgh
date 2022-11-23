@@ -62,14 +62,15 @@
             android:id="@android:id/text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.ListItem1"
+            android:textAppearance="?textAppearanceBodyLarge"
             tools:text="Example text" />
 
         <TextView
             android:id="@android:id/text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
+            android:textAppearance="?textAppearanceBodyMedium"
+            android:textColor="?android:textColorSecondary"
             tools:text="Sample subtext" />
     </LinearLayout>
 
@@ -79,6 +80,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/padding_default"
         android:paddingBottom="@dimen/padding_default"
-        android:textAppearance="@style/TextAppearance.AppCompat.ListItem2.Secondary"
+        android:textAppearance="?textAppearanceBodyMedium"
+        android:textColor="?android:textColorSecondary"
         tools:text="300 m"/>
 </LinearLayout>

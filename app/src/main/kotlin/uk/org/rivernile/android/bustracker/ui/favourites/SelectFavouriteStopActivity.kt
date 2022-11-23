@@ -39,6 +39,7 @@ import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.ActivitySelectFavouriteStopBinding
 import javax.inject.Inject
 
 /**
@@ -64,7 +65,11 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
             return
         }
 
-        setContentView(R.layout.single_fragment_container)
+        val viewBinding = ActivitySelectFavouriteStopBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
+
+        setSupportActionBar(viewBinding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState == null) {
             supportFragmentManager.commit {

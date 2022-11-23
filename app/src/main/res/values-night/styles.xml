@@ -24,11 +24,8 @@
   ~
   -->
 
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="@dimen/padding_double"
-    android:gravity="center"
-    android:text="@string/stopdetails_no_services"
-    android:textAppearance="?textAppearanceBodyMedium" />
+<resources>
+    <style name="Widget.MyBus.Toolbar" parent="Widget.Material3.Toolbar">
+        <item name="android:background">?colorSurface</item>
+    </style>
+</resources>

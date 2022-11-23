@@ -45,7 +45,7 @@
         android:label="@string/app_name"
         android:description="@string/app_description"
         android:icon="@drawable/appicon"
-        android:theme="@style/MyBusEdinburgh"
+        android:theme="@style/Theme.MyBus"
         android:allowBackup="true"
         android:fullBackupContent="@xml/autobackup"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -114,7 +114,6 @@
         <!-- DisplayStopDataActivity, to show bus times. -->
         <activity
             android:name="uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity"
-            android:theme="@style/MyBusEdinburgh.NoActionBar"
             android:label="@string/displaystopdata_title"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
             android:exported="true">
@@ -183,7 +182,7 @@
             android:name="uk.org.rivernile.android.bustracker.ui.search.SearchActivity"
             android:label="@string/search_title"
             android:launchMode="singleTop"
-            android:theme="@style/MyBusEdinburgh.NoActionBar.Search"
+            android:theme="@style/Theme.MyBus.Search"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
             android:exported="true">
             <!-- This Activity handles searching. -->

@@ -28,8 +28,8 @@ package uk.org.rivernile.android.bustracker.ui.search
 
 import android.content.Context
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import uk.org.rivernile.edinburghbustracker.android.R
 
 /**
@@ -55,7 +55,7 @@ class InstallBarcodeScannerDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.barcodescannerdialog_title)
                     .setCancelable(true)
                     .setMessage(R.string.barcodescannerdialog_message)

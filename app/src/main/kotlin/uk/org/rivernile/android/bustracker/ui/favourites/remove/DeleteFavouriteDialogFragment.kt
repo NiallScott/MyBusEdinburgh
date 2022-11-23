@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject
@@ -74,7 +75,7 @@ class DeleteFavouriteDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
-            AlertDialog.Builder(requireContext())
+            MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.deletefavouritedialog_title)
                     .setPositiveButton(R.string.okay) { _, _ ->
                         viewModel.onUserConfirmDeletion()

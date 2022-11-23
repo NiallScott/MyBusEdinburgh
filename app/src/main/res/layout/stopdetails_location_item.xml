@@ -35,5 +35,5 @@
     android:layout_marginStart="@dimen/padding_double"
     android:layout_marginEnd="@dimen/padding_double"
     android:gravity="end"
-    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+    android:textAppearance="?textAppearanceBodySmall"
     tools:text="2.4 km away" />

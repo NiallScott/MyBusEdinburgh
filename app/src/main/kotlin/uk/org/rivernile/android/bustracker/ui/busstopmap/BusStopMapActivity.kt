@@ -35,6 +35,7 @@ import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityBusStopMapBinding
 import javax.inject.Inject
 
 /**
@@ -64,7 +65,11 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
 
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.single_fragment_container)
+        val viewBinding = ActivityBusStopMapBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
+
+        setSupportActionBar(viewBinding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (savedInstanceState == null) {
             when {
