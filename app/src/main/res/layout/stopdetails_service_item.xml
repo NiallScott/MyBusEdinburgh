@@ -33,7 +33,7 @@
     android:paddingBottom="@dimen/padding_default"
     android:paddingStart="?attr/listPreferredItemPaddingStart"
     android:paddingEnd="?attr/listPreferredItemPaddingEnd"
-    android:minHeight="?attr/listPreferredItemHeight"
+    android:minHeight="56sp"
     android:orientation="horizontal"
     android:gravity="center_vertical">
 
@@ -50,5 +50,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding_double"
         android:textAppearance="?textAppearanceBodyLarge"
+        android:textColor="?colorOnSurface"
         tools:text="Airport - York Place" />
 </LinearLayout>

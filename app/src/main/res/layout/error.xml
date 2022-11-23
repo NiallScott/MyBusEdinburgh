@@ -35,5 +35,5 @@
     android:gravity="center"
     android:textIsSelectable="true"
     android:textAppearance="?textAppearanceBodyLarge"
-    android:textColor="?android:textColorSecondary"
+    android:textColor="?colorOnSurface"
     tools:text="This is an example error." />

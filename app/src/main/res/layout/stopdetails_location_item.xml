@@ -36,4 +36,5 @@
     android:layout_marginEnd="@dimen/padding_double"
     android:gravity="end"
     android:textAppearance="?textAppearanceBodySmall"
+    android:textColor="?colorOnSurfaceVariant"
     tools:text="2.4 km away" />

@@ -30,8 +30,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="72dp"
-    android:paddingTop="20dp"
-    android:paddingBottom="20dp"
+    android:paddingTop="@dimen/padding_default"
+    android:paddingBottom="@dimen/padding_default"
     android:paddingStart="?attr/listPreferredItemPaddingStart"
     android:paddingEnd="?attr/listPreferredItemPaddingEnd"
     android:orientation="vertical"
@@ -45,6 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?textAppearanceBodyLarge"
+        android:textColor="?colorOnSurface"
         tools:text="Example text" />
 
     <TextView
@@ -52,5 +53,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?textAppearanceBodyMedium"
+        android:textColor="?colorOnSurfaceVariant"
         tools:text="Sample subtext" />
 </LinearLayout>

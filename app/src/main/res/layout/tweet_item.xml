@@ -30,10 +30,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="72dp"
-    android:paddingTop="20dp"
-    android:paddingBottom="20dp"
-    android:paddingStart="?attr/listPreferredItemPaddingLeft"
-    android:paddingEnd="?attr/listPreferredItemPaddingRight"
+    android:paddingTop="@dimen/padding_double"
+    android:paddingBottom="@dimen/padding_double"
+    android:paddingStart="?attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?attr/listPreferredItemPaddingEnd"
     android:orientation="horizontal">
 
     <ImageView
@@ -59,6 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?textAppearanceBodyLarge"
+            android:textColor="?colorOnSurface"
             android:autoLink="web|email|map"
             android:textIsSelectable="true"
             tools:text="Example text" />
@@ -68,6 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?textAppearanceBodyMedium"
+            android:textColor="?colorOnSurfaceVariant"
             tools:text="Sample subtext" />
     </LinearLayout>
 </LinearLayout>

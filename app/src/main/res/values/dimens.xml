@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2017 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,7 @@
     <dimen name="dialog_margin_start_end">24dp</dimen>
 
     <!-- Dimensions for news. -->
-    <dimen name="news_avatar_size">36dp</dimen>
+    <dimen name="news_avatar_size">40dp</dimen>
     <dimen name="news_divider_inset_start">72dp</dimen>
 
     <!-- Dimens for alert manager. -->

@@ -31,9 +31,9 @@
     android:layout_height="wrap_content"
     android:paddingTop="@dimen/padding_default"
     android:paddingBottom="@dimen/padding_default"
-    android:paddingStart="?attr/listPreferredItemPaddingLeft"
-    android:paddingEnd="?attr/listPreferredItemPaddingRight"
-    android:minHeight="?listPreferredItemHeight"
+    android:paddingStart="?attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?attr/listPreferredItemPaddingEnd"
+    android:minHeight="56dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="?selectableItemBackground"
@@ -54,6 +54,7 @@
         android:layout_weight="1"
         android:layout_marginStart="@dimen/padding_double"
         android:textAppearance="?textAppearanceBodyLarge"
+        android:textColor="?colorOnSurface"
         android:maxLines="1"
         tools:text="York Place" />
 
@@ -63,6 +64,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding_double"
         android:textAppearance="?textAppearanceBodyLarge"
+        android:textColor="?colorOnSurface"
         android:maxLines="1"
         tools:text="DUE" />
 

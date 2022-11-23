@@ -32,6 +32,8 @@
     android:minHeight="72dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
+    android:paddingTop="@dimen/padding_default"
+    android:paddingBottom="@dimen/padding_default"
     android:paddingStart="?listPreferredItemPaddingStart"
     android:paddingEnd="?listPreferredItemPaddingEnd"
     android:background="?selectableItemBackground"
@@ -63,6 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?textAppearanceBodyLarge"
+            android:textColor="?colorOnSurface"
             tools:text="Example text" />
 
         <TextView
@@ -70,7 +73,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?textAppearanceBodyMedium"
-            android:textColor="?android:textColorSecondary"
+            android:textColor="?colorOnSurfaceVariant"
             tools:text="Sample subtext" />
     </LinearLayout>
 
@@ -80,7 +83,7 @@
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/padding_default"
         android:paddingBottom="@dimen/padding_default"
-        android:textAppearance="?textAppearanceBodyMedium"
-        android:textColor="?android:textColorSecondary"
-        tools:text="300 m"/>
+        android:textAppearance="?textAppearanceLabelSmall"
+        android:textColor="?colorOnSurfaceVariant"
+        tools:text="300 m" />
 </LinearLayout>

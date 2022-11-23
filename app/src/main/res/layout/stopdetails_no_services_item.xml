@@ -28,7 +28,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="56dp"
     android:padding="@dimen/padding_double"
     android:gravity="center"
     android:text="@string/stopdetails_no_services"
-    android:textAppearance="?textAppearanceBodyMedium" />
+    android:textAppearance="?textAppearanceBodyMedium"
+    android:textColor="?colorOnSurface" />
