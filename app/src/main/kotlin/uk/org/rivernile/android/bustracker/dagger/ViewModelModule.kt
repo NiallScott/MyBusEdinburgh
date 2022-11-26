@@ -37,6 +37,7 @@ import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAl
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivityViewModel
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragmentViewModel
+import uk.org.rivernile.android.bustracker.ui.main.MainActivityViewModel
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragmentViewModel
 import uk.org.rivernile.android.bustracker.ui.search.SearchActivityViewModel
 import uk.org.rivernile.android.bustracker.ui.settings.ClearSearchHistoryDialogFragmentViewModel
@@ -50,6 +51,18 @@ import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragmentV
  */
 @Module
 interface ViewModelModule {
+
+    /**
+     * Inject a [MainActivityViewModel] when requested.
+     *
+     * @param viewModel A [MainActivityViewModel] instance.
+     * @return The [ViewModel] instance.
+     */
+    @Suppress("unused")
+    @Binds
+    @IntoMap
+    @ViewModelKey(MainActivityViewModel::class)
+    fun bindMainActivityViewModel(viewModel: MainActivityViewModel): ViewModel
 
     /**
      * Inject a [DisplayStopDataActivityViewModel] when requested.

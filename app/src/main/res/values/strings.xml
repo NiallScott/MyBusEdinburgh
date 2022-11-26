@@ -149,8 +149,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for MainActivity *
     ****************************
     -->
-    <string name="main_drawer_open">Open application navigation</string>
-    <string name="main_drawer_close">Close application navigation</string>
+    <string name="main_navigation_favourites">Favourites</string>
+    <string name="main_navigation_explore">Explore</string>
+    <string name="main_navigation_updates">Updates</string>
+    <string name="main_navigation_alerts">Alerts</string>
 
     <!--
     ******************************
@@ -650,13 +652,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     ***********************************
     -->
     <string name="search_menu_scan">Scan QR code</string>
-
-    <!--
-    ****************************************
-    * Strings for SectionListFragment menu *
-    ****************************************
-    -->
-    <string name="section_list_menu_search">Search</string>
 
     <!--
     *******************************************
