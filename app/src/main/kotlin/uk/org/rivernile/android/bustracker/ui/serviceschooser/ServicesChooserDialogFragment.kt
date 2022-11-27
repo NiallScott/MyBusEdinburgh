@@ -127,12 +127,9 @@ class ServicesChooserDialogFragment : DialogFragment() {
     /**
      * Dispatch the selected services.
      *
-     * Firstly, this sets the result upon the parent [androidx.fragment.app.FragmentManager] with
-     * the request key of [REQUEST_KEY], containing a [Bundle] with the selected services stored
-     * as an [Array], under the key of [RESULT_CHOSEN_SERVICES].
-     *
-     * Next, if the parent [android.app.Activity] implements [Callbacks], the result will be sent
-     * there too.
+     * This sets the result upon the parent [androidx.fragment.app.FragmentManager] with the request
+     * key of [REQUEST_KEY], containing a [Bundle] with the selected services stored as an [Array],
+     * under the key of [RESULT_CHOSEN_SERVICES].
      */
     private fun dispatchSelectedServices() {
         val selectedServices = viewModel.selectedServices
@@ -142,23 +139,5 @@ class ServicesChooserDialogFragment : DialogFragment() {
         }.let {
             parentFragmentManager.setFragmentResult(REQUEST_KEY, it)
         }
-
-        (activity as? Callbacks)?.onServicesChosen(selectedServices)
-    }
-
-    /**
-     * Any [android.app.Activity] which hosts this [DialogFragment] must implement this interface
-     * to handle navigation events.
-     */
-    interface Callbacks {
-
-        /**
-         * This is called when the user dismisses the service chooser dialog. This will get called
-         * even when no services are chosen, and may not necessarily mean that the user has made a
-         * new selection.
-         *
-         * @param chosenServices A [String] array of chosen services.
-         */
-        fun onServicesChosen(chosenServices: Array<String>?)
     }
 }

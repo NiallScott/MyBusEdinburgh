@@ -326,6 +326,14 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="bustimes_err_api_processing_error">There was an error processing the times for this stop. This is usually temporary.</string>
     <string name="bustimes_err_api_system_maintenance">The live times service is briefly down for maintenance. Try again soon.</string>
     <string name="bustimes_err_api_system_overloaded">The live times service is experiencing a high volume of users. Try again soon.</string>
+
+    <!--
+    *******************************
+    * Strings for ExploreFragment *
+    *******************************
+    -->
+    <string name="explore_tab_map">Map</string>
+    <string name="explore_tab_nearest_stops">Nearest stops</string>
     
     <!--
     **************************************

@@ -26,7 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.ui.explore
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentTransaction
+import androidx.fragment.app.commit
+import com.google.android.material.tabs.TabLayout
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
+import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
+import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentExploreBinding
 
 /**
  * This [Fragment] shows various UI views which allow them to discover stops, such as a map and a
@@ -34,4 +45,91 @@ import androidx.fragment.app.Fragment
  *
  * @author Niall Scott
  */
-class ExploreFragment : Fragment()
+class ExploreFragment : Fragment() {
+
+    companion object {
+
+        private const val FRAGMENT_TAG_MAP = "tagMap"
+        private const val FRAGMENT_TAG_NEAREST_STOPS = "tagNearestStops"
+    }
+
+    private val viewBinding get() = _viewBinding!!
+    private var _viewBinding: FragmentExploreBinding? = null
+
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?): View {
+        _viewBinding = FragmentExploreBinding.inflate(inflater, container, false)
+
+        return viewBinding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewBinding.tabLayout.addOnTabSelectedListener(tabSelectedListener)
+
+        when (childFragmentManager.findFragmentById(R.id.fragmentContainer)) {
+            is NearestStopsFragment -> showItem(1)
+            else -> showItem(0)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _viewBinding = null
+    }
+
+    /**
+     * Show the item at the given position.
+     *
+     * @param position The position of the item to show.
+     */
+    private fun showItem(position: Int) {
+        childFragmentManager.commit {
+            childFragmentManager.findFragmentById(R.id.fragmentContainer)?.let(this::detach)
+
+            when (position) {
+                0 -> {
+                    childFragmentManager.findFragmentByTag(FRAGMENT_TAG_MAP)
+                            ?.let(this::attach)
+                            ?: add(
+                                    R.id.fragmentContainer,
+                                    BusStopMapFragment.newInstance(),
+                                    FRAGMENT_TAG_MAP)
+                }
+                1 -> {
+                    childFragmentManager.findFragmentByTag(FRAGMENT_TAG_NEAREST_STOPS)
+                            ?.let(this::attach)
+                            ?: add(
+                                    R.id.fragmentContainer,
+                                    NearestStopsFragment(),
+                                    FRAGMENT_TAG_NEAREST_STOPS)
+                }
+                else -> return@showItem
+            }
+
+            setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+        }
+
+        viewBinding.tabLayout.apply {
+            selectTab(getTabAt(position))
+        }
+    }
+
+    private val tabSelectedListener = object : TabLayout.OnTabSelectedListener {
+        override fun onTabSelected(tab: TabLayout.Tab) {
+            showItem(tab.position)
+        }
+
+        override fun onTabReselected(tab: TabLayout.Tab) {
+            // Nothing to do here.
+        }
+
+        override fun onTabUnselected(tab: TabLayout.Tab) {
+            // Nothing to do here.
+        }
+    }
+}

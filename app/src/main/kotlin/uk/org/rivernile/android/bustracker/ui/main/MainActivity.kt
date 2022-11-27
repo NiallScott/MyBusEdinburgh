@@ -26,11 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.ui.main
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -48,13 +52,17 @@ import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAl
 import uk.org.rivernile.android.bustracker.ui.alerts.time.AddTimeAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.time.DeleteTimeAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity
+import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.explore.ExploreFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.FavouriteStopsFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavouriteStopDialogFragment
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
+import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragment
+import uk.org.rivernile.android.bustracker.ui.search.InstallBarcodeScannerDialogFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
+import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBinding
@@ -67,7 +75,11 @@ import javax.inject.Inject
  */
 class MainActivity : AppCompatActivity(),
         AlertManagerFragment.Callbacks,
+        BusStopMapFragment.Callbacks,
         FavouriteStopsFragment.Callbacks,
+        InstallBarcodeScannerDialogFragment.Callbacks,
+        NearestStopsFragment.Callbacks,
+        TurnOnGpsDialogFragment.Callbacks,
         HasAndroidInjector {
 
     companion object {
@@ -88,6 +100,10 @@ class MainActivity : AppCompatActivity(),
         private const val DIALOG_DELETE_PROX_ALERT = "dialogDeleteProxAlert"
         private const val DIALOG_DELETE_TIME_ALERT = "dialogDeleteTimeAlert"
         private const val DIALOG_DELETE_FAVOURITE = "dialogDeleteFavourite"
+        private const val DIALOG_TURN_ON_GPS = "dialogTurnOnGps"
+
+        private const val BARCODE_APP_PACKAGE =
+                "market://details?id=com.google.zxing.client.android"
     }
 
     @Inject
@@ -176,6 +192,33 @@ class MainActivity : AppCompatActivity(),
                 .show(supportFragmentManager, DIALOG_DELETE_FAVOURITE)
     }
 
+    override fun onShowSystemLocationPreferences(): Boolean {
+        return try {
+            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .let(this::startActivity)
+            true
+        } catch (ignored: ActivityNotFoundException) {
+            false
+        }
+    }
+
+    override fun onAskTurnOnGps() {
+        TurnOnGpsDialogFragment()
+                .show(supportFragmentManager, DIALOG_TURN_ON_GPS)
+    }
+
+    override fun onShowInstallBarcodeScanner() {
+        try {
+            Intent(Intent.ACTION_VIEW)
+                    .setData(Uri.parse(BARCODE_APP_PACKAGE))
+                    .let(this::startActivity)
+        } catch (ignored: ActivityNotFoundException) {
+            Toast.makeText(this, R.string.barcodescannerdialog_noplaystore, Toast.LENGTH_LONG)
+                    .show()
+        }
+    }
+
     override fun androidInjector() = dispatchingAndroidInjector
 
     /**
@@ -214,7 +257,7 @@ class MainActivity : AppCompatActivity(),
                 R.id.main_navigation_explore -> {
                     supportFragmentManager.findFragmentByTag(FRAGMENT_TAG_EXPLORE)
                             ?.let(this::attach)
-                            ?:  add(
+                            ?: add(
                                     R.id.fragmentContainer,
                                     ExploreFragment(),
                                     FRAGMENT_TAG_EXPLORE)

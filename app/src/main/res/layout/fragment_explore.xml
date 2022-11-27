@@ -24,20 +24,38 @@
   ~
   -->
 
-<menu
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
 
-    <item
-        android:id="@+id/main_option_menu_settings"
-        android:title="@string/preferences_title"
-        android:icon="@drawable/ic_settings"
-        android:orderInCategory="998" />
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabMode="fixed">
 
-    <item
-        android:id="@+id/main_option_menu_about"
-        android:title="@string/about_title"
-        android:icon="@drawable/ic_info"
-        android:orderInCategory="999" />
-</menu>
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/explore_tab_map"
+            android:icon="@drawable/ic_action_map" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/explore_tab_nearest_stops"
+            android:icon="@drawable/ic_my_location" />
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:layout="@layout/busstopmap_fragment" />
+</LinearLayout>
