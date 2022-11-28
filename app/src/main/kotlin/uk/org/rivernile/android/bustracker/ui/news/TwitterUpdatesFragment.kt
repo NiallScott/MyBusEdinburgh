@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,6 +46,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
+import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.TwitterupdatesBinding
 import javax.inject.Inject
@@ -56,7 +57,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class TwitterUpdatesFragment : Fragment() {
+class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -106,10 +107,7 @@ class TwitterUpdatesFragment : Fragment() {
         val lifecycle = viewLifecycleOwner
         viewModel.uiStateLiveData.observe(lifecycle, Observer(this::handleUiStateChanged))
 
-        requireActivity().apply {
-            setTitle(R.string.twitterupdates_title)
-            addMenuProvider(menuProvider, lifecycle)
-        }
+        requireActivity().addMenuProvider(menuProvider, lifecycle)
     }
 
     override fun onDestroyView() {
@@ -117,6 +115,8 @@ class TwitterUpdatesFragment : Fragment() {
 
         _viewBinding = null
     }
+
+    override val scrollableContentIdRes get() = R.id.recyclerView
 
     /**
      * Handle a change in [UiState]. This propagates the change to the UI components held in this

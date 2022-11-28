@@ -57,6 +57,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProxi
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
+import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -72,7 +73,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class NearestStopsFragment : Fragment() {
+class NearestStopsFragment : Fragment(), HasScrollableContent {
 
     companion object {
 
@@ -143,8 +144,6 @@ class NearestStopsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        requireActivity().setTitle(R.string.neareststops_title)
 
         viewBinding.apply {
             recyclerView.apply {
@@ -225,6 +224,8 @@ class NearestStopsFragment : Fragment() {
 
         _viewBinding = null
     }
+
+    override val scrollableContentIdRes get() = R.id.recyclerView
 
     /**
      * Update [NearestStopsFragmentViewModel] with the current state of permissions.

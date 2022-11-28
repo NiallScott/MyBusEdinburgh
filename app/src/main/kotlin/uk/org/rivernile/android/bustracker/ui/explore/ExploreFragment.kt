@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.explore
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,6 +37,7 @@ import androidx.fragment.app.commit
 import com.google.android.material.tabs.TabLayout
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
+import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentExploreBinding
 
@@ -45,7 +47,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentExploreB
  *
  * @author Niall Scott
  */
-class ExploreFragment : Fragment() {
+class ExploreFragment : Fragment(), HasScrollableContent {
 
     companion object {
 
@@ -53,8 +55,21 @@ class ExploreFragment : Fragment() {
         private const val FRAGMENT_TAG_NEAREST_STOPS = "tagNearestStops"
     }
 
+    private lateinit var callbacks: Callbacks
+
     private val viewBinding get() = _viewBinding!!
     private var _viewBinding: FragmentExploreBinding? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        callbacks = try {
+            context as Callbacks
+        } catch (ignored: ClassCastException) {
+            throw IllegalStateException("${context.javaClass.name} does not implement " +
+                    Callbacks::class.java.name)
+        }
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -80,6 +95,12 @@ class ExploreFragment : Fragment() {
         super.onDestroyView()
 
         _viewBinding = null
+    }
+
+    override val scrollableContentIdRes: Int get() {
+        val fragment = childFragmentManager.findFragmentById(R.id.fragmentContainer)
+
+        return (fragment as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
     }
 
     /**
@@ -117,6 +138,8 @@ class ExploreFragment : Fragment() {
         viewBinding.tabLayout.apply {
             selectTab(getTabAt(position))
         }
+
+        callbacks.onExploreTabSwitched()
     }
 
     private val tabSelectedListener = object : TabLayout.OnTabSelectedListener {
@@ -131,5 +154,10 @@ class ExploreFragment : Fragment() {
         override fun onTabUnselected(tab: TabLayout.Tab) {
             // Nothing to do here.
         }
+    }
+
+    interface Callbacks {
+
+        fun onExploreTabSwitched()
     }
 }

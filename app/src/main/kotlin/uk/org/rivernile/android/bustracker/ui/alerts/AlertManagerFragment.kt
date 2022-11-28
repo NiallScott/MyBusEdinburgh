@@ -43,6 +43,7 @@ import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
+import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerBinding
 import javax.inject.Inject
@@ -53,7 +54,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class AlertManagerFragment : Fragment() {
+class AlertManagerFragment : Fragment(), HasScrollableContent {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
@@ -121,8 +122,6 @@ class AlertManagerFragment : Fragment() {
                 this::showRemoveArrivalAlertDialog)
         viewModel.showRemoveProximityAlertLiveData.observe(viewLifecycle,
                 this::showRemoveProximityAlertDialog)
-
-        requireActivity().setTitle(R.string.alertmanager_title)
     }
 
     override fun onDestroyView() {
@@ -130,6 +129,8 @@ class AlertManagerFragment : Fragment() {
 
         _viewBinding = null
     }
+
+    override val scrollableContentIdRes get() = R.id.recyclerView
 
     /**
      * Set the current UI state.

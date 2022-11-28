@@ -269,10 +269,7 @@ class BusStopMapFragment : Fragment() {
                 this::handleZoomControlsVisibilityChanged)
         viewModel.mapTypeLiveData.observe(viewLifecycleOwner, this::handleMapTypeChanged)
 
-        requireActivity().apply {
-            setTitle(R.string.map_title)
-            addMenuProvider(menuProvider, viewLifecycleOwner)
-        }
+        requireActivity().addMenuProvider(menuProvider, viewLifecycleOwner)
     }
 
     override fun onStart() {

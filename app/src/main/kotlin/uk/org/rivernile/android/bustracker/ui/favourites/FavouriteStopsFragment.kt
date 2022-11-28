@@ -48,6 +48,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener
+import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FavouritestopsBinding
@@ -67,7 +68,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class FavouriteStopsFragment : Fragment() {
+class FavouriteStopsFragment : Fragment(), HasScrollableContent {
 
     @Inject
     lateinit var viewModelFactory: FavouriteStopsFragmentViewModelFactory
@@ -124,14 +125,6 @@ class FavouriteStopsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        requireActivity().apply {
-            if (viewModel.isCreateShortcutMode) {
-                setTitle(R.string.favouriteshortcut_title)
-            } else {
-                setTitle(R.string.favouritestops_title)
-            }
-        }
-
         viewBinding.recyclerView.apply {
             setHasFixedSize(true)
             adapter = this@FavouriteStopsFragment.adapter
@@ -173,6 +166,8 @@ class FavouriteStopsFragment : Fragment() {
 
         _viewBinding = null
     }
+
+    override val scrollableContentIdRes get() = R.id.recyclerView
 
     /**
      * Handle a new [UiState] by showing the correct top-level layout.

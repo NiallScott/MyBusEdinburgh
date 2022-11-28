@@ -34,14 +34,19 @@ import android.provider.Settings
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
+import androidx.core.view.WindowCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -60,6 +65,7 @@ import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavourit
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragment
+import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.search.InstallBarcodeScannerDialogFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
@@ -76,6 +82,7 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity(),
         AlertManagerFragment.Callbacks,
         BusStopMapFragment.Callbacks,
+        ExploreFragment.Callbacks,
         FavouriteStopsFragment.Callbacks,
         InstallBarcodeScannerDialogFragment.Callbacks,
         NearestStopsFragment.Callbacks,
@@ -113,19 +120,29 @@ class MainActivity : AppCompatActivity(),
 
     private val viewModel: MainActivityViewModel by viewModels { viewModelFactory }
 
+    private lateinit var viewBinding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
 
         super.onCreate(savedInstanceState)
 
-        val viewBinding = ActivityMainBinding.inflate(layoutInflater)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
 
-        viewBinding.bottomNavigation.setOnItemSelectedListener {
-            showItem(it.itemId, true)
-            true
+        supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
+
+        viewBinding.apply {
+            appBarLayout.statusBarForeground =
+                    MaterialShapeDrawable.createWithElevationOverlay(this@MainActivity)
+
+            bottomNavigation.setOnItemSelectedListener {
+                showItem(it.itemId, true)
+                true
+            }
         }
 
         viewModel.showSettingsLiveData.observe(this) {
@@ -219,6 +236,10 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun onExploreTabSwitched() {
+        viewBinding.appBarLayout.setExpanded(true, true)
+    }
+
     override fun androidInjector() = dispatchingAndroidInjector
 
     /**
@@ -285,6 +306,8 @@ class MainActivity : AppCompatActivity(),
                 setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
             }
         }
+
+        viewBinding.appBarLayout.setExpanded(true, true)
     }
 
     /**
@@ -316,6 +339,13 @@ class MainActivity : AppCompatActivity(),
                 true
             }
             else -> false
+        }
+    }
+
+    private val fragmentLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
+        override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
+            viewBinding.appBarLayout.liftOnScrollTargetViewId =
+                    (f as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
         }
     }
 }
