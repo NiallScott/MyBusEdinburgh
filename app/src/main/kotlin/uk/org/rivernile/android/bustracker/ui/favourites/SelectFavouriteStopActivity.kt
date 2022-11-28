@@ -29,15 +29,21 @@ package uk.org.rivernile.android.bustracker.ui.favourites
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.view.WindowCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
+import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
+import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivitySelectFavouriteStopBinding
 import javax.inject.Inject
@@ -55,6 +61,8 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
+    private lateinit var viewBinding: ActivitySelectFavouriteStopBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
 
@@ -65,11 +73,17 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
             return
         }
 
-        val viewBinding = ActivitySelectFavouriteStopBinding.inflate(layoutInflater)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        viewBinding = ActivitySelectFavouriteStopBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        viewBinding.appBarLayout.statusBarForeground =
+                MaterialShapeDrawable.createWithElevationOverlay(this)
+
+        supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
 
         if (savedInstanceState == null) {
             supportFragmentManager.commit {
@@ -99,4 +113,11 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
     }
 
     override fun androidInjector() = dispatchingAndroidInjector
+
+    private val fragmentLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
+        override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
+            viewBinding.appBarLayout.liftOnScrollTargetViewId =
+                    (f as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
+        }
+    }
 }

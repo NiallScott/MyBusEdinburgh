@@ -28,12 +28,18 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
+import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
+import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityBusStopMapBinding
 import javax.inject.Inject
@@ -60,16 +66,24 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
         const val EXTRA_LONGITUDE = "longitude"
     }
 
+    private lateinit var viewBinding: ActivityBusStopMapBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
 
         super.onCreate(savedInstanceState)
 
-        val viewBinding = ActivityBusStopMapBinding.inflate(layoutInflater)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        viewBinding = ActivityBusStopMapBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        viewBinding.appBarLayout.statusBarForeground =
+                MaterialShapeDrawable.createWithElevationOverlay(this)
+
+        supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
 
         if (savedInstanceState == null) {
             when {
@@ -125,4 +139,11 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
      */
     private val currentFragment get() =
         supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+
+    private val fragmentLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
+        override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
+            viewBinding.appBarLayout.liftOnScrollTargetViewId =
+                    (f as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
+        }
+    }
 }
