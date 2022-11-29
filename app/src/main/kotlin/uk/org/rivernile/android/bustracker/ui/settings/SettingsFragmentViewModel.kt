@@ -49,11 +49,14 @@ class SettingsFragmentViewModel @Inject constructor(
     private val showClearSearchHistory = SingleLiveEvent<Unit>()
 
     /**
-     * Get the currently set number of departures per service.
-     *
-     * @return The currently set number of departures per service.
+     * The currently set app theme.
      */
-    fun getNumberOfDeparturesPerService() =
+    val appTheme get() = preferenceManager.appTheme
+
+    /**
+     * The currently set number of departures per service.
+     */
+    val numberOfDeparturesPerService get() =
             preferenceManager.getBusTimesNumberOfDeparturesToShowPerService()
 
     /**

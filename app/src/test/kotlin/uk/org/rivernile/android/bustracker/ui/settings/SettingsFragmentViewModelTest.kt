@@ -64,7 +64,7 @@ class SettingsFragmentViewModelTest {
         whenever(preferenceManager.getBusTimesNumberOfDeparturesToShowPerService())
                 .thenReturn(4)
 
-        val result = viewModel.getNumberOfDeparturesPerService()
+        val result = viewModel.numberOfDeparturesPerService
 
         assertEquals(4, result)
     }

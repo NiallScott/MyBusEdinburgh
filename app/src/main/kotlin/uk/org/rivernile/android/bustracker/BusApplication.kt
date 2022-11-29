@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
 import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
+import uk.org.rivernile.android.bustracker.startup.AppThemeObserver
 import javax.inject.Inject
 
 /**
@@ -48,6 +49,8 @@ class BusApplication : Application(), HasAndroidInjector {
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
     @Inject
+    lateinit var appThemeObserver: AppThemeObserver
+    @Inject
     lateinit var startUpTask: StartUpTask
 
     override fun attachBaseContext(base: Context) {
@@ -61,6 +64,7 @@ class BusApplication : Application(), HasAndroidInjector {
     override fun onCreate() {
         super.onCreate()
 
+        appThemeObserver.observeAppTheme()
         startUpTask.performStartUpTasks()
     }
 

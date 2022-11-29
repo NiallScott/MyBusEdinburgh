@@ -47,6 +47,7 @@ internal class AndroidPreferenceManager @Inject constructor(
     companion object {
 
         private const val PREF_BUS_STOP_DATABASE_WIFI_ONLY = "pref_bus_stop_database_wifi_only"
+        private const val PREF_APP_THEME = "pref_theme"
         private const val PREF_ALERT_SOUND = "pref_alertsound_state"
         private const val PREF_ALERT_VIBRATE = "pref_alertvibrate_state"
         private const val PREF_ALERT_LED = "pref_alertled_state"
@@ -75,6 +76,9 @@ internal class AndroidPreferenceManager @Inject constructor(
         private const val DEFAULT_LONGITUDE = -3.189
         private const val DEFAULT_MAP_LAST_ZOOM = 11f
         private const val DEFAULT_MAP_LAST_TYPE = 1
+
+        private const val APP_THEME_LIGHT = "light"
+        private const val APP_THEME_DARK = "dark"
     }
 
     private val listeners = mutableListOf<PreferenceListener>()
@@ -103,6 +107,12 @@ internal class AndroidPreferenceManager @Inject constructor(
 
     override fun isBusStopDatabaseUpdateWifiOnly(): Boolean =
             preferences.getBoolean(PREF_BUS_STOP_DATABASE_WIFI_ONLY, DEFAULT_WIFI_ONLY)
+
+    override val appTheme: AppTheme get() = when (preferences.getString(PREF_APP_THEME, null)) {
+        APP_THEME_LIGHT -> AppTheme.LIGHT
+        APP_THEME_DARK -> AppTheme.DARK
+        else -> AppTheme.SYSTEM_DEFAULT
+    }
 
     override fun isNotificationWithSound(): Boolean =
             preferences.getBoolean(PREF_ALERT_SOUND, DEFAULT_ALERT_SOUND)
@@ -243,6 +253,7 @@ internal class AndroidPreferenceManager @Inject constructor(
      */
     private fun mapToPreferenceKey(key: String) = when (key) {
         PREF_BUS_STOP_DATABASE_WIFI_ONLY -> PreferenceKey.DATABASE_UPDATE_WIFI_ONLY
+        PREF_APP_THEME -> PreferenceKey.APP_THEME
         PREF_AUTO_REFRESH -> PreferenceKey.LIVE_TIMES_AUTO_REFRESH_ENABLED
         PREF_SHOW_NIGHT_BUSES -> PreferenceKey.LIVE_TIMES_SHOW_NIGHT_SERVICES
         PREF_SERVICE_SORTING -> PreferenceKey.LIVE_TIMES_SORT_BY_TIME

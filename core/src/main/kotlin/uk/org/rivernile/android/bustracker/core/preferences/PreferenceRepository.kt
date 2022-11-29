@@ -52,6 +52,14 @@ class PreferenceRepository @Inject constructor(
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
     /**
+     * A [Flow] which emits the [AppTheme] and will emit further values when this preference
+     * changes.
+     */
+    val appThemeFlow: Flow<AppTheme> get() = getPreferenceFlow(PreferenceKey.APP_THEME) {
+        preferenceManager.appTheme
+    }
+
+    /**
      * Get a [Flow] which returns whether auto refresh is enabled by default, and will emit further
      * values when this preference changes.
      *

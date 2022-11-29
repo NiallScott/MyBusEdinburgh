@@ -177,6 +177,15 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_general_databaseupdatewifi">Updates via Wi-Fi only</string>
     <string name="preferences_checkbox_general_databaseupdatewifi_summary_ticked">Reduces your data usage over mobile networks. However, bus stop data will be updated less often.</string>
     <string name="preferences_checkbox_general_databaseupdatewifi_summary_unticked">Bus stop data will be updated over both Wi-Fi and mobile networks. This will use some of your mobile data.</string>
+    <string name="preferences_list_theme">Theme</string>
+    <string name="preferences_list_theme_system_default">System default</string>
+    <string name="preferences_list_theme_light">Light</string>
+    <string name="preferences_list_theme_dark">Dark</string>
+    <string-array name="preferences_list_theme_entries">
+        <item>@string/preferences_list_theme_system_default</item>
+        <item>@string/preferences_list_theme_light</item>
+        <item>@string/preferences_list_theme_dark</item>
+    </string-array>
     
     <string name="preferences_category_notifications">Notifications</string>
     <string name="preferences_checkbox_notifications_sound">Use sound</string>
@@ -217,19 +226,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item>8 departures</item>
         <item>9 departures</item>
         <item>10 departures</item>
-    </string-array>
-    
-    <string-array name="preferences_num_departures_entry_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
     </string-array>
     
     <!--

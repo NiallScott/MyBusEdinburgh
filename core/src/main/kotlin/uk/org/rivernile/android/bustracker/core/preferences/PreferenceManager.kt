@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,6 +38,9 @@ interface PreferenceManager {
         /** The name of the preferences file. */
         const val PREF_FILE = "preferences"
 
+        /** The Preference for selecting the app theme. */
+        const val PREF_THEME = "pref_theme"
+
         /** The Preference for clearing the map search history. */
         const val PREF_CLEAR_SEARCH_HISTORY = "pref_clear_search_history"
 
@@ -67,6 +70,11 @@ interface PreferenceManager {
      * @return `true` if the bus stop database should only be updated over Wi-Fi, `false` if not.
      */
     fun isBusStopDatabaseUpdateWifiOnly(): Boolean
+
+    /**
+     * The current app theme.
+     */
+    val appTheme: AppTheme
 
     /**
      * Should system notifications include sound?

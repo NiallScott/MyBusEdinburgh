@@ -71,6 +71,45 @@ class PreferenceRepositoryTest {
     }
 
     @Test
+    fun appThemeFlowEmitsInitialValue() = runTest {
+        whenever(preferenceManager.appTheme)
+                .thenReturn(AppTheme.SYSTEM_DEFAULT)
+
+        val observer = repository.appThemeFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(AppTheme.SYSTEM_DEFAULT)
+        verify(preferenceManager)
+                .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
+    fun appThemeFlowRespondsToPreferenceChange() = runTest {
+        doAnswer {
+            val prefListener = it.getArgument<PreferenceListener>(0)
+            val expectedKeys = setOf(PreferenceKey.APP_THEME)
+            assertEquals(expectedKeys, prefListener.keys)
+            prefListener.listener.apply {
+                onPreferenceChanged(PreferenceKey.APP_THEME)
+                onPreferenceChanged(PreferenceKey.APP_THEME)
+            }
+        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
+        whenever(preferenceManager.appTheme)
+                .thenReturn(AppTheme.SYSTEM_DEFAULT, AppTheme.LIGHT, AppTheme.DARK)
+
+        val observer = repository.appThemeFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(AppTheme.SYSTEM_DEFAULT, AppTheme.LIGHT, AppTheme.DARK)
+        verify(preferenceManager)
+                .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
     fun isLiveTimesAutoRefreshEnabledFlowGetsInitialValue() = runTest {
         whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
                 .thenReturn(true)

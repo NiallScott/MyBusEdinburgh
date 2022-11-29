@@ -37,6 +37,7 @@ import androidx.preference.PreferenceFragmentCompat
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import dagger.android.support.AndroidSupportInjection
+import uk.org.rivernile.android.bustracker.core.preferences.AppTheme
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject
@@ -94,9 +95,20 @@ class SettingsFragment : PreferenceFragmentCompat(), HasAndroidInjector {
      */
     private fun setupSummaries() {
         findPreference<ListPreference>(
+                PreferenceManager.PREF_THEME)
+                ?.setSummaryProvider {
+                    when (viewModel.appTheme) {
+                        AppTheme.SYSTEM_DEFAULT ->
+                            getString(R.string.preferences_list_theme_system_default)
+                        AppTheme.LIGHT -> getString(R.string.preferences_list_theme_light)
+                        AppTheme.DARK -> getString(R.string.preferences_list_theme_dark)
+                    }
+                }
+
+        findPreference<ListPreference>(
                 PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE)
                 ?.setSummaryProvider {
-                    val numberOfDepartures = viewModel.getNumberOfDeparturesPerService()
+                    val numberOfDepartures = viewModel.numberOfDeparturesPerService
                     val strings = resources.getStringArray(
                             R.array.preferences_num_departures_entries)
                     strings[numberOfDepartures - 1]

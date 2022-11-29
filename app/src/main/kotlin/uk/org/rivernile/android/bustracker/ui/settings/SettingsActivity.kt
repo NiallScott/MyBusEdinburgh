@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.ui.settings
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -49,11 +51,15 @@ class SettingsActivity : AppCompatActivity(), HasAndroidInjector {
 
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         val viewBinding = SettingsBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        viewBinding.appBarLayout.statusBarForeground =
+                MaterialShapeDrawable.createWithElevationOverlay(this)
     }
 
     override fun androidInjector() = dispatchingAndroidInjector
