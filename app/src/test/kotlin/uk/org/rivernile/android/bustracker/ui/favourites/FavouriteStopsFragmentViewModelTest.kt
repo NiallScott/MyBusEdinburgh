@@ -665,6 +665,20 @@ class FavouriteStopsFragmentViewModelTest {
     }
 
     @Test
+    fun onFavouriteStopClickedWhenInNormalModeAndStopSelectedDoesNotShowStopData() {
+        val viewModel = createViewModel()
+        viewModel.isCreateShortcutMode = false
+        viewModel.onFavouriteStopLongClicked("123456")
+
+        val createShortcutObserver = viewModel.createShortcutLiveData.test()
+        val showStopDataObserver = viewModel.showStopDataLiveData.test()
+        viewModel.onFavouriteStopClicked(FavouriteStop(1L, "123456", "Stop name"))
+
+        createShortcutObserver.assertEmpty()
+        showStopDataObserver.assertEmpty()
+    }
+
+    @Test
     fun onFavouriteStopClickedWhenInNormalModeCallsShowStopData() {
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false

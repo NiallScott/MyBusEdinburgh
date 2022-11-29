@@ -249,7 +249,9 @@ class FavouriteStopsFragmentViewModel(
         if (isCreateShortcutMode) {
             createShortcut.value = favourite
         } else {
-            showStopData.value = favourite.stopCode
+            if (selectedStopCodeLiveData.value?.ifEmpty { null } == null) {
+                showStopData.value = favourite.stopCode
+            }
         }
     }
 

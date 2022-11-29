@@ -39,6 +39,14 @@
     <!-- BusTimesFragment -->
     <color name="bus_times_fragment_last_refresh_background">#525252</color>
 
+    <!--
+    * Material 3 colours
+    *
+    * Primary: #C41411
+    * Secondary: #AE8882
+    * Tertiary: #6D3465
+    * Neutral: #998E8D
+    -->
     <color name="seed">#C41411</color>
     <color name="md_theme_light_primary">#BE0D0D</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>

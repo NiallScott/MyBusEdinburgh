@@ -125,10 +125,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewBinding.recyclerView.apply {
-            setHasFixedSize(true)
-            adapter = this@FavouriteStopsFragment.adapter
-        }
+        viewBinding.recyclerView.adapter = adapter
 
         val lifecycle = viewLifecycleOwner
         viewModel.uiStateLiveData.observe(lifecycle, this::handleUiState)

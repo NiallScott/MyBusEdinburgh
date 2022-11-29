@@ -704,6 +704,23 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
+    fun onNearestStopClickedDoesNotShowStopDataWhenSelectedStopExists() {
+        val viewModel = createViewModel()
+        val nearestStop = UiNearestStop(
+                "123456",
+                null,
+                null,
+                0,
+                0)
+
+        viewModel.onNearestStopLongClicked("123456")
+        val observer = viewModel.showStopDataLiveData.test()
+        viewModel.onNearestStopClicked(nearestStop)
+
+        observer.assertEmpty()
+    }
+
+    @Test
     fun onNearestStopClickedShowsStopData() {
         val viewModel = createViewModel()
         val nearestStop = UiNearestStop(

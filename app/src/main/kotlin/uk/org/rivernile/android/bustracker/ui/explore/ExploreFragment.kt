@@ -31,6 +31,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
@@ -101,6 +102,15 @@ class ExploreFragment : Fragment(), HasScrollableContent {
         val fragment = childFragmentManager.findFragmentById(R.id.fragmentContainer)
 
         return (fragment as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
+    }
+
+    /**
+     * Set whether the tab bar is visible or not.
+     *
+     * @param isVisible The tab bar visibility.
+     */
+    fun setTabBarVisible(isVisible: Boolean) {
+        viewBinding.tabLayout.isVisible = isVisible
     }
 
     /**

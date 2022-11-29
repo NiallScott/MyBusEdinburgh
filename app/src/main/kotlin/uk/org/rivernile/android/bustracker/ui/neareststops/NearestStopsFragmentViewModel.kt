@@ -350,7 +350,9 @@ class NearestStopsFragmentViewModel(
      * @param nearestStop The nearest stop that the user clicked on.
      */
     fun onNearestStopClicked(nearestStop: UiNearestStop) {
-        showStopData.value = nearestStop.stopCode
+        if (selectedStopCode == null) {
+            showStopData.value = nearestStop.stopCode
+        }
     }
 
     /**

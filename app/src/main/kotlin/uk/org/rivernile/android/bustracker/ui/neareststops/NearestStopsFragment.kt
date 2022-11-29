@@ -146,10 +146,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
         super.onViewCreated(view, savedInstanceState)
 
         viewBinding.apply {
-            recyclerView.apply {
-                setHasFixedSize(true)
-                adapter = this@NearestStopsFragment.adapter
-            }
+            recyclerView.adapter = adapter
 
             layoutError.btnErrorResolve.setOnClickListener {
                 viewModel.onResolveErrorButtonClicked()

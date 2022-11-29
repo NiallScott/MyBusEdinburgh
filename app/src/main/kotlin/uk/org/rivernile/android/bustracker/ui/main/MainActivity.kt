@@ -39,8 +39,10 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
 import androidx.core.view.MenuProvider
 import androidx.core.view.WindowCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -167,6 +169,20 @@ class MainActivity : AppCompatActivity(),
         handleIntent(intent)
     }
 
+    override fun onSupportActionModeStarted(mode: ActionMode) {
+        super.onSupportActionModeStarted(mode)
+
+        viewBinding.bottomNavigation.isVisible = false
+        (currentFragment as? ExploreFragment)?.setTabBarVisible(false)
+    }
+
+    override fun onSupportActionModeFinished(mode: ActionMode) {
+        super.onSupportActionModeFinished(mode)
+
+        viewBinding.bottomNavigation.isVisible = true
+        (currentFragment as? ExploreFragment)?.setTabBarVisible(true)
+    }
+
     override fun onShowAddEditFavouriteStop(stopCode: String) {
         AddEditFavouriteStopDialogFragment.newInstance(stopCode)
                 .show(supportFragmentManager, DIALOG_ADD_FAVOURITE)
@@ -264,7 +280,7 @@ class MainActivity : AppCompatActivity(),
      */
     private fun showItem(@IdRes itemId: Int, animate: Boolean) {
         supportFragmentManager.commit {
-            supportFragmentManager.findFragmentById(R.id.fragmentContainer)?.let(this::detach)
+            currentFragment?.let(this::detach)
 
             when (itemId) {
                 R.id.main_navigation_favourites -> {
@@ -323,6 +339,12 @@ class MainActivity : AppCompatActivity(),
     private fun showAbout() {
         startActivity(Intent(this, AboutActivity::class.java))
     }
+
+    /**
+     * The current [Fragment] attached to the [FragmentManager].
+     */
+    private val currentFragment get() =
+        supportFragmentManager.findFragmentById(R.id.fragmentContainer)
 
     private val menuProvider = object : MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
