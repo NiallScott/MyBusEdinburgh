@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-  ~ Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2022 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -26,8 +25,5 @@
   -->
 
 <resources>
-    <bool name="translucent_navigation_bar">true</bool>
-
-    <bool name="preferences_legacy_notifications">true</bool>
-    <bool name="preferences_notification_channels">false</bool>
+    <bool name="translucent_navigation_bar">false</bool>
 </resources>

@@ -26,7 +26,14 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import android.os.Bundle
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
+import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
@@ -54,11 +61,28 @@ class AboutActivity : AppCompatActivity(), HasAndroidInjector, AboutFragment.Cal
 
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         val viewBinding = AboutBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        viewBinding.appBarLayout.statusBarForeground =
+                MaterialShapeDrawable.createWithElevationOverlay(this)
+        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.bottom
+                leftMargin = insets.left
+                rightMargin = insets.right
+            }
+
+            windowInsets
+        }
     }
 
     override fun androidInjector() = dispatchingAndroidInjector

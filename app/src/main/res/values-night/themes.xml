@@ -24,7 +24,9 @@
   ~
   -->
 
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools">
+
     <style name="Theme.MyBus" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/md_theme_dark_primary</item>
         <item name="colorOnPrimary">@color/md_theme_dark_onPrimary</item>
@@ -54,8 +56,8 @@
         <item name="colorPrimaryInverse">@color/md_theme_dark_inversePrimary</item>
 
         <item name="android:statusBarColor">@android:color/transparent</item>
-
-        <item name="toolbarStyle">@style/Widget.MyBus.Toolbar</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeCloseDrawable">@drawable/ic_action_close</item>
     </style>

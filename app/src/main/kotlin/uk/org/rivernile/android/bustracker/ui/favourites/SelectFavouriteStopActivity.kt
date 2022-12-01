@@ -30,14 +30,19 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
+import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
@@ -82,6 +87,19 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
 
         viewBinding.appBarLayout.statusBarForeground =
                 MaterialShapeDrawable.createWithElevationOverlay(this)
+        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.bottom
+                leftMargin = insets.left
+                rightMargin = insets.right
+            }
+
+            windowInsets
+        }
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
 
