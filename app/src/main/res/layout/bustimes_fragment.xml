@@ -59,10 +59,11 @@
                 android:paddingStart="@dimen/padding_double"
                 android:paddingEnd="@dimen/padding_double"
                 android:drawablePadding="@dimen/padding_double"
-                android:background="@color/bus_times_fragment_last_refresh_background"
-                android:elevation="@dimen/bus_times_fragment_last_refresh_elevation"
+                android:background="?colorSurfaceInverse"
                 android:gravity="center_vertical"
-                android:textAppearance="@style/TextAppearance.Design.Snackbar.Message"
+                android:textAppearance="?textAppearanceBodyMedium"
+                android:textColor="?colorOnSurfaceInverse"
+                app:drawableTint="?colorOnSurfaceInverse"
                 tools:text="Last refreshed less than a minute ago" />
 
             <androidx.recyclerview.widget.RecyclerView

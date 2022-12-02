@@ -64,7 +64,6 @@
     -->
 
     <!-- BusTimesFragment -->
-    <dimen name="bus_times_fragment_last_refresh_elevation">2dp</dimen>
     <dimen name="bus_times_fragment_last_refresh_min_height">48dp</dimen>
 
     <!-- DisplayStopDataActivity -->

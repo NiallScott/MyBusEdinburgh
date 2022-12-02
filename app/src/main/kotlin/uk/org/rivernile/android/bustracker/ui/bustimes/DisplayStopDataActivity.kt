@@ -33,13 +33,20 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.MarginPageTransformer
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
@@ -116,9 +123,6 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
         super.onCreate(savedInstanceState)
 
-        viewBinding = DisplaystopdataBinding.inflate(layoutInflater)
-        setContentView(viewBinding.root)
-
         intent.let {
             viewModel.stopCode = if (Intent.ACTION_VIEW == it.action) {
                 it.data?.getQueryParameter(DEEPLINK_QUERY_PARAMETER_STOP_CODE)
@@ -127,26 +131,42 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             }
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+
+        viewBinding = DisplaystopdataBinding.inflate(layoutInflater)
+        setContentView(viewBinding.root)
+
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
         }
 
+        setUpWindowInsets()
+
         viewBinding.apply {
             val pagerAdapter = StopDataPagerAdapter(
                     this@DisplayStopDataActivity,
                     viewModel.stopCode)
-            viewPager.adapter = pagerAdapter
-            viewPager.setPageTransformer(MarginPageTransformer(
-                    resources.getDimensionPixelSize(R.dimen.padding_default)))
-            viewPager.offscreenPageLimit = 1
+
+            viewPager.apply {
+                adapter = pagerAdapter
+                setPageTransformer(MarginPageTransformer(
+                        resources.getDimensionPixelSize(R.dimen.padding_default)))
+                offscreenPageLimit = 1
+            }
 
             TabLayoutMediator(tabLayout, viewPager) { tab, position ->
                 tab.text = getString(pagerAdapter.getPageTitleRes(position))
             }.attach()
 
-            appBarLayout.addOnOffsetChangedListener(appBarOffsetChangedListener)
+            appBarLayout.apply {
+                background = SurfaceColors.SURFACE_2
+                        .getColor(this@DisplayStopDataActivity)
+                        .toDrawable()
+                addOnOffsetChangedListener(appBarOffsetChangedListener)
+            }
         }
 
         viewModel.distinctStopCodeLiveData.observe(this, this::handleStopCode)
@@ -172,6 +192,23 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     }
 
     override fun androidInjector() = dispatchingAndroidInjector
+
+    /**
+     * Set up the window insets.
+     */
+    private fun setUpWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.bottom
+                leftMargin = insets.left
+                rightMargin = insets.right
+            }
+
+            windowInsets
+        }
+    }
 
     /**
      * Handle a change to the stop code. This sets any UI which displays the stop code.
@@ -387,9 +424,19 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
     private val appBarOffsetChangedListener =
             AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-        supportActionBar?.setDisplayShowTitleEnabled(
-                abs(verticalOffset) >= viewBinding.collapsingLayout.scrimVisibleHeightTrigger)
-    }
+                // verticalOffset is 0 when fully expended, and is a negative integer while
+                // collapsing (and when fully collapsed).
+                viewBinding.apply {
+                    val collapsePoint = collapsingLayout.let {
+                        it.height - it.scrimVisibleHeightTrigger
+                    }
+                    val absVerticalOffset = abs(verticalOffset)
+                    val isCollapsed = absVerticalOffset > collapsePoint
+
+                    supportActionBar?.setDisplayShowTitleEnabled(isCollapsed)
+                    layoutTitle.alpha = 1f - (absVerticalOffset.toFloat() / collapsePoint.toFloat())
+                }
+            }
 
     private val menuProvider = object : MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
