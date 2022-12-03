@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.content.Context
-import android.net.ConnectivityManager
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
@@ -51,7 +50,7 @@ import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepositor
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
-import uk.org.rivernile.android.bustracker.core.networking.V29ConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.networking.V24ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.LegacyAppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotificationChannels
@@ -121,20 +120,14 @@ class CoreModule {
         }
     }
 
-    /**
-     * Provide a [ConnectivityChecker] instance.
-     *
-     * @param connectivityManager The system [ConnectivityManager].
-     * @return A [ConnectivityChecker] instance.
-     */
     @Provides
     internal fun provideConnectivityChecker(
-            context: Provider<Context>,
-            connectivityManager: ConnectivityManager): ConnectivityChecker {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            V29ConnectivityChecker(connectivityManager)
+            legacyConnectivityChecker: Provider<LegacyConnectivityChecker>,
+            v24ConnectivityChecker: Provider<V24ConnectivityChecker>): ConnectivityChecker {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            v24ConnectivityChecker.get()
         } else {
-            LegacyConnectivityChecker(context.get(), connectivityManager)
+            legacyConnectivityChecker.get()
         }
     }
 

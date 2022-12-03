@@ -26,58 +26,162 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-import org.junit.Assert.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import okhttp3.ResponseBody.Companion.toResponseBody
+import okio.IOException
+import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import retrofit2.Call
+import retrofit2.Response
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
-import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.LatestTweetsResponse
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [ApiTwitterEndpoint].
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ApiTwitterEndpointTest {
+
+    companion object {
+
+        private const val MOCK_API_KEY = "apiKey"
+    }
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var twitterService: TwitterService
     @Mock
-    private lateinit var connectivityChecker: ConnectivityChecker
+    private lateinit var connectivityRepository: ConnectivityRepository
     @Mock
     private lateinit var apiKeyGenerator: ApiKeyGenerator
     private val appName = "TEST"
     @Mock
     private lateinit var tweetsMapper: TweetsMapper
 
-    @Mock
-    private lateinit var latestTweetsCall: Call<List<JsonTweet>>
-
     private lateinit var endpoint: ApiTwitterEndpoint
 
     @Before
     fun setUp() {
-        endpoint = ApiTwitterEndpoint(twitterService, connectivityChecker, apiKeyGenerator,
-                appName, tweetsMapper)
+        endpoint = ApiTwitterEndpoint(
+                twitterService,
+                connectivityRepository,
+                apiKeyGenerator,
+                appName,
+                tweetsMapper)
     }
 
     @Test
-    fun createLatestTweetsRequestCreatesCorrectRequestObject() {
+    fun getLatestTweetsWithNoInternetConnectivityReturnsNoInternetConnectivity() = runTest {
+        givenHasInternetConnectivity(false)
+
+        val result = endpoint.getLatestTweets()
+
+        assertEquals(LatestTweetsResponse.Error.NoConnectivity, result)
+    }
+
+    @Test
+    fun getLatestTweetsThrowsIoExceptionReturnsIoError() = runTest {
+        givenHasInternetConnectivity(true)
+        givenHasGeneratedHashedApiKey()
+        val exception = IOException()
+        whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
+                .thenAnswer { throw exception }
+
+        val result = endpoint.getLatestTweets()
+
+        assertEquals(LatestTweetsResponse.Error.Io(exception), result)
+    }
+
+    @Test
+    fun getLatestTweetsWithUnrecognisedServerErrorReturnsUnrecognisedServerError() = runTest {
+        givenHasInternetConnectivity(true)
+        givenHasGeneratedHashedApiKey()
+        whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
+                .thenReturn(Response.error(500, "Server error".toResponseBody()))
+
+        val result = endpoint.getLatestTweets()
+
+        assertEquals(LatestTweetsResponse.Error.UnrecognisedServerError, result)
+    }
+
+    @Test
+    fun getLatestTweetsWith401ErrorReturnsAuthenticationError() = runTest {
+        givenHasInternetConnectivity(true)
+        givenHasGeneratedHashedApiKey()
+        whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
+                .thenReturn(Response.error(401, "Unauthorized".toResponseBody()))
+
+        val result = endpoint.getLatestTweets()
+
+        assertEquals(LatestTweetsResponse.Error.Authentication, result)
+    }
+
+    @Test
+    fun getLatestTweetsWithSuccessAndNullTweetsReturnsSuccess() = runTest {
+        givenHasInternetConnectivity(true)
+        givenHasGeneratedHashedApiKey()
+        whenever(tweetsMapper.mapTweets(null))
+                .thenReturn(null)
+        whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
+                .thenReturn(Response.success(null))
+
+        val result = endpoint.getLatestTweets()
+
+        assertEquals(LatestTweetsResponse.Success(null), result)
+    }
+
+    @Test
+    fun getLatestTweetsWithSuccessAndEmptyTweetsReturnsSuccess() = runTest {
+        givenHasInternetConnectivity(true)
+        givenHasGeneratedHashedApiKey()
+        whenever(tweetsMapper.mapTweets(emptyList()))
+                .thenReturn(null)
+        whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
+                .thenReturn(Response.success(emptyList()))
+
+        val result = endpoint.getLatestTweets()
+
+        assertEquals(LatestTweetsResponse.Success(null), result)
+    }
+
+    @Test
+    fun getLatestTweetsWithSuccessAndPopulatedTweetsReturnsSuccess() = runTest {
+        givenHasInternetConnectivity(true)
+        givenHasGeneratedHashedApiKey()
+        val jsonTweets = listOf<JsonTweet>(mock(), mock(), mock())
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(tweetsMapper.mapTweets(jsonTweets))
+                .thenReturn(tweets)
+        whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
+                .thenReturn(Response.success(jsonTweets))
+
+        val result = endpoint.getLatestTweets()
+
+        assertEquals(LatestTweetsResponse.Success(tweets), result)
+    }
+
+    private fun givenHasInternetConnectivity(hasInternetConnectivity: Boolean) {
+        whenever(connectivityRepository.hasInternetConnectivity)
+                .thenReturn(hasInternetConnectivity)
+    }
+
+    private fun givenHasGeneratedHashedApiKey() {
         whenever(apiKeyGenerator.generateHashedApiKey())
-                .thenReturn("API_KEY")
-        whenever(twitterService.getLatestTweets("API_KEY", appName))
-                .thenReturn(latestTweetsCall)
-
-        val result = endpoint.createLatestTweetsRequest()
-
-        assertTrue(result is LatestTweetsTwitterRequest)
-        verify(twitterService)
-                .getLatestTweets("API_KEY", appName)
+                .thenReturn(MOCK_API_KEY)
     }
 }

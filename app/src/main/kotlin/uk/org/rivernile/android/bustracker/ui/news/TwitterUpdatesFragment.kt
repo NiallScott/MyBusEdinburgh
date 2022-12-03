@@ -41,12 +41,12 @@ import androidx.annotation.StringRes
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
+import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.TwitterupdatesBinding
 import javax.inject.Inject
@@ -80,11 +80,13 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
         adapter = TweetAdapter(requireContext(), avatarImageLoader, this::handleItemClicked)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = TwitterupdatesBinding.inflate(inflater, container, false)
-
-        return viewBinding.root
+        return TwitterupdatesBinding.inflate(inflater, container, false).also {
+            _viewBinding = it
+        }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -105,7 +107,17 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
         }
 
         val lifecycle = viewLifecycleOwner
-        viewModel.uiStateLiveData.observe(lifecycle, Observer(this::handleUiStateChanged))
+        viewModel.tweetsLiveData.observe(lifecycle, adapter::submitList)
+        viewModel.uiStateLiveData.observe(lifecycle, this::handleUiStateChanged)
+        viewModel.errorLiveData.observe(lifecycle, this::handleError)
+        viewModel.snackbarErrorLiveData.observe(lifecycle, this::handleSnackbarError)
+        viewModel.isRefreshMenuItemEnabledLiveData.observe(lifecycle,
+                this::handleIsRefreshMenuItemEnabled)
+        viewModel.isRefreshMenuItemRefreshingLiveData.observe(lifecycle,
+                this::handleIsRefreshMenuItemRefreshing)
+        viewModel.isSwipeToRefreshRefreshingLiveData.observe(lifecycle) {
+            viewBinding.swipeRefreshLayout.isRefreshing = it
+        }
 
         requireActivity().addMenuProvider(menuProvider, lifecycle)
     }
@@ -119,78 +131,69 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
     override val scrollableContentIdRes get() = R.id.recyclerView
 
     /**
-     * Handle a change in [UiState]. This propagates the change to the UI components held in this
-     * [Fragment].
+     * Handle a change in [UiState].
      *
      * @param uiState The new [UiState] to apply.
      */
     private fun handleUiStateChanged(uiState: UiState) {
-        setRefreshActionItemLoadingState(uiState)
-
-        when (uiState) {
-            is UiState.ShowEmptyProgress -> handleShowEmptyProgress()
-            is UiState.ShowPopulatedProgress -> handleShowPopulatedProgress()
-            is UiState.ShowContent -> handleShowContent(uiState.tweets)
-            is UiState.ShowEmptyError -> handleShowEmptyError(uiState.error)
-            is UiState.ShowRefreshError -> handleShowRefreshError(uiState.error)
+        viewBinding.contentView.apply {
+            when (uiState) {
+                UiState.PROGRESS -> showProgressLayout()
+                UiState.CONTENT -> showContentLayout()
+                UiState.ERROR -> showErrorLayout()
+            }
         }
     }
 
     /**
-     * Handle a new state of showing the empty state progress.
+     * Handle a new error state.
+     *
+     * @param error The [Error] to handle.
      */
-    private fun handleShowEmptyProgress() {
-        adapter.submitList(null)
-
-        viewBinding.apply {
-            contentView.showProgressLayout()
-            swipeRefreshLayout.isRefreshing = true
+    private fun handleError(error: Error?) {
+        viewBinding.txtError.apply {
+            error?.let {
+                setText(mapToErrorString(it))
+            } ?: run {
+                text = null
+            }
         }
     }
 
     /**
-     * Handle a new state of showing the populated state progress.
-     */
-    private fun handleShowPopulatedProgress() {
-        viewBinding.swipeRefreshLayout.isRefreshing = true
-    }
-
-    /**
-     * Handle a new state of showing the content.
+     * Handle a new snackbar error.
      *
-     * @param tweets The [List] of [Tweet]s to show.
+     * @param event The event.
      */
-    private fun handleShowContent(tweets: List<Tweet>) {
-        viewBinding.swipeRefreshLayout.isRefreshing = false
-        adapter.submitList(tweets)
-        viewBinding.contentView.showContentLayout()
-    }
-
-    /**
-     * Handle a new state of showing an error to the user, when the previous state was empty.
-     *
-     * @param error The error to show to the user.
-     */
-    private fun handleShowEmptyError(error: Error) {
-        viewBinding.swipeRefreshLayout.isRefreshing = false
-        adapter.submitList(null)
-
-        viewBinding.apply {
-            contentView.showErrorLayout()
-            txtError.setText(mapToErrorString(error))
+    private fun handleSnackbarError(event: Event<Error>) {
+        event.getContentIfNotHandled()?.let {
+            Snackbar.make(viewBinding.root, mapToErrorString(it), Snackbar.LENGTH_SHORT)
+                    .show()
         }
     }
 
     /**
-     * Handle a new state of showing an error to the user, when the previous state was a populated
-     * list.
+     * Handle the refresh menu item enabled state changing.
      *
-     * @param error The error to show to the user.
+     * @param isEnabled Is the refresh menu item enabled?
      */
-    private fun handleShowRefreshError(error: Error) {
-        viewBinding.swipeRefreshLayout.isRefreshing = false
-        Snackbar.make(viewBinding.root, mapToErrorString(error), Snackbar.LENGTH_SHORT)
-                .show()
+    private fun handleIsRefreshMenuItemEnabled(isEnabled: Boolean) {
+        refreshMenuItem?.isEnabled = isEnabled
+    }
+
+    /**
+     * Handle the refresh menu item refresh state changing.
+     *
+     * @param isRefreshing Is the refresh menu item refreshing?
+     */
+    private fun handleIsRefreshMenuItemRefreshing(isRefreshing: Boolean) {
+        refreshMenuItem?.apply {
+            if (isRefreshing) {
+                setActionView(R.layout.actionbar_indeterminate_progress)
+            } else {
+                actionView = null
+            }
+        }
     }
 
     /**
@@ -208,41 +211,23 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
     }
 
     /**
-     * Set the status of the refresh [MenuItem] based on the current [UiState].
-     *
-     * @param uiState The current [UiState].
-     */
-    private fun setRefreshActionItemLoadingState(uiState: UiState?) {
-        refreshMenuItem?.let {
-            if (uiState == UiState.ShowEmptyProgress || uiState == UiState.ShowPopulatedProgress) {
-                it.isEnabled = false
-                it.setActionView(R.layout.actionbar_indeterminate_progress)
-            } else {
-                it.isEnabled = true
-                it.setActionView(null)
-            }
-        }
-    }
-
-    /**
      * Handle the avatar in an item being clicked.
      *
      * @param tweet The [Tweet] which was clicked.
      */
     private fun handleItemClicked(tweet: Tweet) {
-        Intent(Intent.ACTION_VIEW)
+        val intent = Intent(Intent.ACTION_VIEW)
                 .setData(Uri.parse(tweet.profileUrl))
-                .let {
-                    try {
-                        startActivity(it)
-                    } catch (ignored: ActivityNotFoundException) {
-                        Toast.makeText(
-                                requireContext(),
-                                R.string.twitterupdates_err_no_activity_for_click,
-                                Toast.LENGTH_SHORT)
-                                .show()
-                    }
-                }
+
+        try {
+            startActivity(intent)
+        } catch (ignored: ActivityNotFoundException) {
+            Toast.makeText(
+                    requireContext(),
+                    R.string.twitterupdates_err_no_activity_for_click,
+                    Toast.LENGTH_SHORT)
+                    .show()
+        }
     }
 
     private val menuProvider = object : MenuProvider {
@@ -252,7 +237,10 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
         }
 
         override fun onPrepareMenu(menu: Menu) {
-            setRefreshActionItemLoadingState(viewModel.uiStateLiveData.value)
+            handleIsRefreshMenuItemEnabled(
+                    viewModel.isRefreshMenuItemEnabledLiveData.value ?: false)
+            handleIsRefreshMenuItemRefreshing(
+                    viewModel.isRefreshMenuItemRefreshingLiveData.value ?: false)
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {

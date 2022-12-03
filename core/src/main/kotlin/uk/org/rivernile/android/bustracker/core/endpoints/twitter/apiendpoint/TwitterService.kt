@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -42,10 +42,10 @@ interface TwitterService {
      *
      * @param apiKey The API key.
      * @param appName The app name, so the server knows which Tweets to return.
-     * @return A Retrofit [Call] object.
+     * @return A Retrofit [Response] object.
      */
     @GET("TwitterStatuses")
-    fun getLatestTweets(
+    suspend fun getLatestTweets(
             @Query("key") apiKey: String,
-            @Query("appName") appName: String): Call<List<JsonTweet>>
+            @Query("appName") appName: String): Response<List<JsonTweet>?>
 }

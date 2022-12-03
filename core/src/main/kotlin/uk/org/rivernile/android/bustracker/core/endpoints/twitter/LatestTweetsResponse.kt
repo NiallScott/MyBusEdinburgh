@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,24 +27,47 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter
 
 /**
- * An instance of this request describes a single, immutable request against the Twitter endpoint.
+ * This sealed interface and its children define the possible responses from requesting the latest
+ * tweets.
  *
- * @param T The type of data returned from the endpoint.
  * @author Niall Scott
  */
-interface TwitterRequest<out T> {
+sealed interface LatestTweetsResponse {
 
     /**
-     * Perform the request and return the result. This method is blocking.
+     * The response was successful.
      *
-     * @return The result of the request.
-     * @throws TwitterException When there was a problem with the request.
+     * @property tweets The tweet data.
      */
-    @Throws(TwitterException::class)
-    fun performRequest(): T
+    data class Success(
+            val tweets: List<Tweet>?) : LatestTweetsResponse
 
     /**
-     * Cancel the request.
+     * This interface describes errors which can arise from getting the latest tweets.
      */
-    fun cancel()
+    sealed interface Error : LatestTweetsResponse {
+
+        /**
+         * This response was not successful due to no connectivity.
+         */
+        object NoConnectivity : Error
+
+        /**
+         * This response was not successful due to an IO error.
+         *
+         * @property throwable The [Throwable] which caused this error.
+         */
+        data class Io(
+                val throwable: Throwable) : Error
+
+        /**
+         * This response was not successful because authentication failed against the endpoint.
+         */
+        object Authentication : Error
+
+        /**
+         * This response was not successful due to some unrecognised server error.
+         */
+        object UnrecognisedServerError : Error
+    }
 }

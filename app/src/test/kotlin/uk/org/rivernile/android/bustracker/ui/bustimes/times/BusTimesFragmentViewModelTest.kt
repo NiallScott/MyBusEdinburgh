@@ -107,7 +107,7 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun hasConnectivityLiveDataEmitsFromFlow() = runTest {
-        whenever(connectivityRepository.hasInternetConnectivityFlow())
+        whenever(connectivityRepository.hasInternetConnectivityFlow)
                 .thenReturn(flowOf(true, false, true))
 
         val observer = viewModel.hasConnectivityLiveData.test()
@@ -118,7 +118,7 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun hasConnectivityLiveDataOnlyEmitsDistinctValues() = runTest {
-        whenever(connectivityRepository.hasInternetConnectivityFlow())
+        whenever(connectivityRepository.hasInternetConnectivityFlow)
                 .thenReturn(flowOf(true, true, false, false, true))
 
         val observer = viewModel.hasConnectivityLiveData.test()

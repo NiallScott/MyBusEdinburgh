@@ -26,14 +26,12 @@
 
 package uk.org.rivernile.android.bustracker.core.networking
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.shareIn
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,45 +40,28 @@ import javax.inject.Singleton
  *
  * @param connectivityChecker Used to check device connectivity, and to register for events to
  * listen for connectivity changes.
- * @param defaultDispatcher A [CoroutineDispatcher] for processing in the background.
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @author Niall Scott
  */
 @Singleton
 class ConnectivityRepository @Inject internal constructor(
         private val connectivityChecker: ConnectivityChecker,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope) {
 
     /**
-     * Get a [Flow] which returns the device connectivity status. Any updates to the status will
-     * be emitted from the returned [Flow] until cancelled.
-     *
-     * @return The [Flow] which emits device connectivity status.
+     * Is there internet connectivity available?
      */
-    fun hasInternetConnectivityFlow(): Flow<Boolean> = callbackFlow {
-        val listener = object : ConnectivityChecker.OnConnectivityChangedListener {
-            override fun onConnectivityChanged() {
-                launch {
-                    getAndSendHasInternetConnectivity(channel)
-                }
-            }
-        }
-
-        connectivityChecker.addOnConnectivityChangedListener(listener)
-        getAndSendHasInternetConnectivity(channel)
-
-        awaitClose {
-            connectivityChecker.removeOnConnectivityChangedListener(listener)
-        }
-    }
+    val hasInternetConnectivity: Boolean get() = connectivityChecker.hasInternetConnectivity
 
     /**
-     * A suspend function which obtains the device connectivity status and then sends it to the
-     * given [channel].
-     *
-     * @param channel The [SendChannel] that emissions should be sent to.
+     * A [Flow] which emits the device internet connectivity status.
      */
-    private suspend fun getAndSendHasInternetConnectivity(
-            channel: SendChannel<Boolean>) = withContext(defaultDispatcher) {
-        channel.send(connectivityChecker.hasInternetConnectivity())
+    val hasInternetConnectivityFlow: Flow<Boolean> by lazy {
+        connectivityChecker.hasInternetConnectivityFlow
+                .distinctUntilChanged()
+                .shareIn(
+                        applicationCoroutineScope,
+                        SharingStarted.WhileSubscribed(replayExpirationMillis = 0L),
+                        1)
     }
 }
