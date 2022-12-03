@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2014 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,9 +28,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/action_button_min_size"
     android:layout_height="@dimen/action_button_min_size">
+
     <ProgressBar
+        style="?indeterminateProgressStyle"
         android:layout_width="@dimen/indeterminate_progress_size"
         android:layout_height="@dimen/indeterminate_progress_size"
-        android:layout_gravity="center"
-        style="?indeterminateProgressStyle" />
+        android:layout_gravity="center" />
 </FrameLayout>

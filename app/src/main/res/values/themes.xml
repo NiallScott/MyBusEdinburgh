@@ -63,22 +63,9 @@
         <item name="android:windowTranslucentNavigation">@bool/translucent_navigation_bar</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeCloseDrawable">@drawable/ic_action_close</item>
-    </style>
 
-    <style name="MyBusEdinburgh" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="actionModeBackground">@color/colorContextualActionBarBackground</item>
-        <item name="actionBarStyle">@style/AppActionBar</item>
         <item name="contentViewStyle">@style/Widget.AndroidCore.ContentView</item>
         <item name="expandCollapseIndicatorStyle">@style/Widget.MyBus.ExpandCollapseIndicator</item>
-    </style>
-
-    <style name="MyBusEdinburgh.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="toolbarStyle">@style/Widget.MyBusEdinburgh.Toolbar</item>
     </style>
 
     <style name="Theme.MyBus.Search">

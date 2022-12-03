@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,19 +26,23 @@
 */ -->
 <layer-list
     xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item>
         <shape
             android:shape="oval">
+
             <solid
-                android:color="@color/colorAccent" />
+                android:color="?colorTertiary" />
+
             <size
                 android:width="@dimen/news_avatar_size"
                 android:height="@dimen/news_avatar_size" />
         </shape>
     </item>
-    <item>
-        <bitmap
-            android:src="@drawable/ic_person"
-            android:gravity="center" />
-    </item>
+
+    <item
+        android:drawable="@drawable/ic_person"
+        android:width="24dp"
+        android:height="24dp"
+        android:gravity="center" />
 </layer-list>

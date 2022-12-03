@@ -26,19 +26,6 @@
 */ -->
 <resources>
 
-    <style name="Widget.MyBus.Toolbar" parent="Widget.Material3.Toolbar">
-        <item name="android:background">?colorPrimary</item>
-    </style>
-
-    <style name="AppActionBar" parent="@style/Widget.AppCompat.ActionBar.Solid">
-        <item name="displayOptions">showHome|homeAsUp|showTitle</item>
-    </style>
-
-    <style name="Widget.MyBusEdinburgh.Toolbar" parent="Widget.AppCompat.Toolbar">
-        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
-        <item name="android:background">?colorPrimary</item>
-    </style>
-
     <style name="Widget.MyBus.ExpandCollapseIndicator" parent="@android:style/Widget">
         <item name="android:contentDescription">@null</item>
         <item name="expandedState">collapsed</item>
@@ -48,26 +35,6 @@
 
     <style name="TextAppearance.AppCompat.ListItem1" >
         <item name="android:textSize">@dimen/list_item_1_text_size</item>
-    </style>
-
-    <style name="TextAppearance.AppCompat.ListItem2" >
-        <item name="android:textSize">@dimen/list_item_2_text_size</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-    </style>
-
-    <style name="TextAppearance.AppCompat.ListItem2.Secondary" >
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-    </style>
-
-    <style name="TextAppearance.AppCompat.Subheader">
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?android:textColorSecondary</item>
-        <item name="android:fontFamily">@string/fontFamilyMedium</item>
-    </style>
-
-    <style name="TextAppearance.MyBus.DisplayStopData.Subheading"
-           parent="TextAppearance.AppCompat.Subhead">
-        <item name="android:textColor">?android:textColorSecondary</item>
     </style>
 
     <style name="TextAppearance.MyBus.DisplayStopData.ServiceName" parent="">

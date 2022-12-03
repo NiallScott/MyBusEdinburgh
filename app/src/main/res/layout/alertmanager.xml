@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2011 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2011 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,7 @@
     app:contentView="@id/recyclerView"
     app:errorView="@id/txtError"
     app:contentLayout="progress"
-    tools:contentLayout="content">
+    tools:contentLayout="error">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -60,5 +60,7 @@
         android:padding="@dimen/padding_double"
         android:gravity="center"
         android:textIsSelectable="true"
+        android:textAppearance="?textAppearanceBodyLarge"
+        android:textColor="?colorOnSurface"
         android:text="@string/alertmanager_empty" />
 </uk.org.rivernile.android.bustracker.core.widget.ContentView>

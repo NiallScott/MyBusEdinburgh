@@ -27,17 +27,10 @@
 <resources>
     <!-- App theme colours. -->
     <color name="colorPrimary">#C41411</color>
-    <color name="colorPrimaryDark">#B0120A</color>
     <color name="colorAccent">#607D8B</color>
-    <color name="colorContextualStatusBarBackground">#616161</color>
-    <color name="colorContextualActionBarBackground">#757575</color>
 
-    <color name="sectionlist_text_default">#212121</color>
     <color name="map_range_ring_stroke">@color/colorPrimary</color>
     <color name="map_range_ring_fill">#1AC41411</color>
-
-    <!-- BusTimesFragment -->
-    <color name="bus_times_fragment_last_refresh_background">#525252</color>
 
     <!--
     * Material 3 colours

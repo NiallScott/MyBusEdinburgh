@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-* Copyright (C) 2010 - 2020 Niall 'Rivernile' Scott
+* Copyright (C) 2010 - 2022 Niall 'Rivernile' Scott
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -38,7 +39,8 @@
         app:progressView="@id/progress"
         app:contentView="@id/recyclerView"
         app:errorView="@id/txtError"
-        app:contentLayout="progress">
+        app:contentLayout="progress"
+        tools:contentLayout="content">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -49,7 +51,8 @@
             android:scrollbars="vertical"
             android:clipToPadding="false"
             android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/tweet_item" />
 
         <ProgressBar
             android:id="@+id/progress"
