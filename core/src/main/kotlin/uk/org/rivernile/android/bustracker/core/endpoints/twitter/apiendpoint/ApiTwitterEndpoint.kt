@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,12 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
+import okio.IOException
 import uk.org.rivernile.android.bustracker.core.di.ForApi
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.LatestTweetsResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterRequest
-import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,7 +40,7 @@ import javax.inject.Singleton
  * This class represents a [TwitterEndpoint] that actually uses the API endpoint to obtain tweets.
  *
  * @param twitterService The Retrofit service for accessing Tweets.
- * @param connectivityChecker Used to check internet connectivity prior to initiating a request.
+ * @param connectivityRepository Used to check internet connectivity prior to initiating a request.
  * @param apiKeyGenerator An implementation to generate API keys.
  * @param appName The app name to identify this app on the server.
  * @param tweetsMapper An implementation to map the response to [Tweet]s.
@@ -48,15 +49,31 @@ import javax.inject.Singleton
 @Singleton
 class ApiTwitterEndpoint @Inject constructor(
         private val twitterService: TwitterService,
-        private val connectivityChecker: ConnectivityChecker,
+        private val connectivityRepository: ConnectivityRepository,
         private val apiKeyGenerator: ApiKeyGenerator,
         @ForApi private val appName: String,
         private val tweetsMapper: TweetsMapper) : TwitterEndpoint {
 
-    override fun createLatestTweetsRequest(): TwitterRequest<List<Tweet>?> {
-        val hashedApiKey = apiKeyGenerator.generateHashedApiKey()
-        val call = twitterService.getLatestTweets(hashedApiKey, appName)
+    override suspend fun getLatestTweets(): LatestTweetsResponse {
+        return if (connectivityRepository.hasInternetConnectivity) {
+            try {
+                val response = twitterService.getLatestTweets(
+                        apiKeyGenerator.generateHashedApiKey(),
+                        appName)
 
-        return LatestTweetsTwitterRequest(call, connectivityChecker, tweetsMapper)
+                if (response.isSuccessful) {
+                    LatestTweetsResponse.Success(tweetsMapper.mapTweets(response.body()))
+                } else {
+                    when (response.code()) {
+                        401 -> LatestTweetsResponse.Error.Authentication
+                        else -> LatestTweetsResponse.Error.UnrecognisedServerError
+                    }
+                }
+            } catch (e: IOException) {
+                LatestTweetsResponse.Error.Io(e)
+            }
+        } else {
+            LatestTweetsResponse.Error.NoConnectivity
+        }
     }
 }

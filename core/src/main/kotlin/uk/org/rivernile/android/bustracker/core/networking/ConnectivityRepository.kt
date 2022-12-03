@@ -51,6 +51,11 @@ class ConnectivityRepository @Inject internal constructor(
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
     /**
+     * Is there internet connectivity available?
+     */
+    val hasInternetConnectivity: Boolean get() = connectivityChecker.hasInternetConnectivity()
+
+    /**
      * Get a [Flow] which returns the device connectivity status. Any updates to the status will
      * be emitted from the returned [Flow] until cancelled.
      *

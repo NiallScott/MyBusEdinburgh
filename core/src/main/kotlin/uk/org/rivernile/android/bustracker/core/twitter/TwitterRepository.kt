@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,57 +26,45 @@
 
 package uk.org.rivernile.android.bustracker.core.twitter
 
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.LatestTweetsResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterException
 import javax.inject.Inject
 
 /**
  * This repository is used to access Tweets.
  *
  * @param twitterEndpoint The endpoint to receive [Tweet]s from.
- * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
  * @author Niall Scott
  */
 class TwitterRepository @Inject internal constructor(
-        private val twitterEndpoint: TwitterEndpoint,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+        private val twitterEndpoint: TwitterEndpoint) {
 
     /**
-     * Get a [Flow] object which contains the [Result] of loading the latest [Tweet]s.
+     * A [Flow] object which emits the [LatestTweetsResult] of loading the latest [Tweet]s.
      *
      * This instance will have loading events propagated to it, including the in-progress state,
      * success state and the error states.
-     *
-     * @return A [Flow] object containing the [Result] of loading the latest [Tweet]s.
      */
-    fun getLatestTweets(): Flow<Result<List<Tweet>?>> = flow {
-        emit(Result.InProgress)
+    val latestTweetsFlow: Flow<LatestTweetsResult> get() = flow {
+        emit(LatestTweetsResult.InProgress)
         emit(fetchLatestTweets())
     }
 
     /**
-     * This suspending function, executed on the IO [CoroutineDispatcher], fetches the latest
-     * [Tweet]s and returns the appropriate [Result] object.
+     * This suspending function fetches the latest [Tweet]s and returns the appropriate
+     * [LatestTweetsResult] object.
      *
-     * @return A [Result] object encapsulating the result of the request.
+     * @return A [LatestTweetsResult] object encapsulating the result of the request.
      */
-    private suspend fun fetchLatestTweets(): Result<List<Tweet>?> = withContext(ioDispatcher) {
-        val request = twitterEndpoint.createLatestTweetsRequest()
-
-        try {
-            Result.Success(request.performRequest())
-        } catch (e: TwitterException) {
-            Result.Error(e)
-        } catch (e: CancellationException) {
-            request.cancel()
-            throw e
+    private suspend fun fetchLatestTweets(): LatestTweetsResult {
+        return when (val response = twitterEndpoint.getLatestTweets()) {
+            is LatestTweetsResponse.Success -> LatestTweetsResult.Success(response.tweets)
+            is LatestTweetsResponse.Error.NoConnectivity -> LatestTweetsResult.Error.NoConnectivity
+            is LatestTweetsResponse.Error.Io -> LatestTweetsResult.Error.Io(response.throwable)
+            else -> LatestTweetsResult.Error.Server
         }
     }
 }

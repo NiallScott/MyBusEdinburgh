@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,9 +34,9 @@ package uk.org.rivernile.android.bustracker.core.endpoints.twitter
 interface TwitterEndpoint {
 
     /**
-     * Create a [TwitterRequest] which can be used to obtain the latest [Tweet]s.
+     * Get the latest tweets.
      *
-     * @return A [TwitterRequest] which can be used to obtain the latest [Tweet]s.
+     * @return The [LatestTweetsResponse] which describes the response.
      */
-    fun createLatestTweetsRequest(): TwitterRequest<List<Tweet>?>
+    suspend fun getLatestTweets(): LatestTweetsResponse
 }

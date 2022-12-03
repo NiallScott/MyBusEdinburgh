@@ -31,6 +31,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import okio.IOException
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,16 +41,12 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.AuthenticationException
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.NetworkException
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.NoConnectivityException
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.UnrecognisedServerErrorException
-import uk.org.rivernile.android.bustracker.core.twitter.Result
+import uk.org.rivernile.android.bustracker.core.twitter.LatestTweetsResult
 import uk.org.rivernile.android.bustracker.core.twitter.TwitterRepository
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
-import java.io.IOException
 
 /**
  * Tests for [TwitterUpdatesFragmentViewModel].
@@ -66,134 +64,592 @@ class TwitterUpdatesFragmentViewModelTest {
 
     @Mock
     private lateinit var twitterRepository: TwitterRepository
-
-    private val tweets = listOf(mock<Tweet>())
+    @Mock
+    private lateinit var timeUtils: TimeUtils
 
     private lateinit var viewModel: TwitterUpdatesFragmentViewModel
 
     @Before
     fun setUp() {
-        viewModel = TwitterUpdatesFragmentViewModel(twitterRepository)
+        viewModel = TwitterUpdatesFragmentViewModel(
+                twitterRepository,
+                timeUtils,
+                coroutineRule.testDispatcher)
     }
 
     @Test
-    fun initialStateBeginsLoadingTweets() = runTest {
-        whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flowOf(Result.InProgress))
+    fun tweetsLiveDataEmitsNullByDefault() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.InProgress))
 
-        val observer = viewModel.uiStateLiveData.test()
+        val observer = viewModel.tweetsLiveData.test()
         advanceUntilIdle()
 
-        observer.assertValues(UiState.ShowEmptyProgress)
+        observer.assertValues(null)
     }
 
     @Test
-    fun errorAfterInitialStateShowsEmptyErrorState() = runTest {
-        whenever(twitterRepository.getLatestTweets())
+    fun tweetsLiveDataDoesNotEmitOnError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
                 .thenReturn(flowOf(
-                        Result.InProgress,
-                        Result.Error(NoConnectivityException())))
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Error.NoConnectivity))
 
-        val observer = viewModel.uiStateLiveData.test()
+        val observer = viewModel.tweetsLiveData.test()
         advanceUntilIdle()
 
-        observer.assertValues(
-                UiState.ShowEmptyProgress,
-                UiState.ShowEmptyError(Error.NO_CONNECTIVITY))
+        observer.assertValues(null)
     }
 
     @Test
-    fun nullSuccessAfterInitialStateShowsEmptyErrorState() = runTest {
-        whenever(twitterRepository.getLatestTweets())
+    fun tweetsLiveDataEmitsOnSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
                 .thenReturn(flowOf(
-                        Result.InProgress,
-                        Result.Success(null)))
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Success(tweets)))
 
-        val observer = viewModel.uiStateLiveData.test()
+        val observer = viewModel.tweetsLiveData.test()
         advanceUntilIdle()
-
-        observer.assertValues(
-                UiState.ShowEmptyProgress,
-                UiState.ShowEmptyError(Error.NO_DATA))
+        observer.assertValues(null, tweets)
     }
 
     @Test
-    fun emptySuccessAfterInitialStateShowsEmptyErrorState() = runTest {
-        whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flowOf(
-                        Result.InProgress,
-                        Result.Success(emptyList())))
+    fun tweetsLiveDataEmitsNullSuccessAfterPreviousSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(null)))
 
-        val observer = viewModel.uiStateLiveData.test()
-        advanceUntilIdle()
-
-        observer.assertValues(
-                UiState.ShowEmptyProgress,
-                UiState.ShowEmptyError(Error.NO_DATA))
-    }
-
-    @Test
-    fun nonEmptySuccessAfterInitialStateShowsContentState() = runTest {
-        whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flowOf(
-                        Result.InProgress,
-                        Result.Success(tweets)))
-
-        val observer = viewModel.uiStateLiveData.test()
-        advanceUntilIdle()
-
-        observer.assertValues(
-                UiState.ShowEmptyProgress,
-                UiState.ShowContent(tweets))
-    }
-
-    @Test
-    fun successiveErrorsAfterInitialStateContinuesToShowEmptyErrorState() = runTest {
-        val flow1 = flowOf(
-                Result.InProgress,
-                Result.Error(NoConnectivityException()))
-        val flow2 = flowOf(
-                Result.InProgress,
-                Result.Error(NetworkException(IOException())))
-        val flow3 = flowOf(
-                Result.InProgress,
-                Result.Error(UnrecognisedServerErrorException()))
-        val flow4 = flowOf(
-                Result.InProgress,
-                Result.Error(AuthenticationException()))
-        whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow1, flow2, flow3, flow4)
-
-        val observer = viewModel.uiStateLiveData.test()
-        advanceUntilIdle()
-        viewModel.onRefreshMenuItemClicked()
+        val observer = viewModel.tweetsLiveData.test()
         advanceUntilIdle()
         viewModel.onSwipeToRefresh()
         advanceUntilIdle()
-        viewModel.onRefreshMenuItemClicked()
-        advanceUntilIdle()
 
-        observer.assertValues(
-                UiState.ShowEmptyProgress,
-                UiState.ShowEmptyError(Error.NO_CONNECTIVITY),
-                UiState.ShowEmptyProgress,
-                UiState.ShowEmptyError(Error.COMMUNICATION),
-                UiState.ShowEmptyProgress,
-                UiState.ShowEmptyError(Error.SERVER),
-                UiState.ShowEmptyProgress,
-                UiState.ShowEmptyError(Error.SERVER))
+        observer.assertValues(null, tweets, null)
     }
 
     @Test
-    fun errorAfterContentShownShowsRefreshErrorState() = runTest {
-        val flow1 = flowOf(
-                Result.InProgress,
-                Result.Success(tweets))
-        val flow2 = flowOf(
-                Result.InProgress,
-                Result.Error(NoConnectivityException()))
-        whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow1, flow2)
+    fun tweetsLiveDataEmitsNullSuccessAfterPreviousSuccessWhenResultIsEmptyList() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(emptyList())))
+
+        val observer = viewModel.tweetsLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+
+        observer.assertValues(null, tweets, null)
+    }
+
+    @Test
+    fun tweetsLiveDataDoesNotEmitNewValueWhenResultIsErrorAfterPreviousSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.tweetsLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+
+        observer.assertValues(null, tweets)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsProgressByDefault() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.InProgress))
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(UiState.PROGRESS)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsErrorWhenTransitioningFromProgressOnError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(UiState.PROGRESS, UiState.ERROR)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsErrorWhenNullData() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Success(null)))
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(UiState.PROGRESS, UiState.ERROR)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsErrorWhenEmptyData() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Success(emptyList())))
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(UiState.PROGRESS, UiState.ERROR)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsContentWhenDataAvailable() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(UiState.PROGRESS, UiState.CONTENT)
+    }
+
+    @Test
+    fun uiStateLiveDataDoesNotEmitWhenErrorAfterSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+
+        observer.assertValues(UiState.PROGRESS, UiState.CONTENT)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsContentWhenSuccessAfterError() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.NoConnectivity),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+
+        observer.assertValues(
+                UiState.PROGRESS,
+                UiState.ERROR,
+                UiState.PROGRESS,
+                UiState.CONTENT)
+    }
+
+    @Test
+    fun uiStateLiveDataDoesNotEmitFurtherContentOnSubsequentSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+
+        observer.assertValues(
+                UiState.PROGRESS,
+                UiState.CONTENT)
+    }
+
+    @Test
+    fun errorLiveDataEmitsNullByDefault() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.InProgress))
+
+        val observer = viewModel.errorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun errorLiveDataEmitsNullOnSuccessWithTweets() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.errorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null)
+    }
+
+    @Test
+    fun errorLiveDataEmitsNoDataOnSuccessWithNullData() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Success(null)))
+
+        val observer = viewModel.errorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null, Error.NO_DATA)
+    }
+
+    @Test
+    fun errorLiveDataEmitsNoDataOnSuccessWithEmptyData() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Success(emptyList())))
+
+        val observer = viewModel.errorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null, Error.NO_DATA)
+    }
+
+    @Test
+    fun errorLiveDataEmitsNoConnectivityOnNoConnectivityError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.errorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null, Error.NO_CONNECTIVITY)
+    }
+
+    @Test
+    fun errorLiveDataEmitsCommunicationErrorOnIoError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Error.Io(IOException())))
+
+        val observer = viewModel.errorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null, Error.COMMUNICATION)
+    }
+
+    @Test
+    fun errorLiveDataEmitsServerErrorOnServerError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Error.Server))
+
+        val observer = viewModel.errorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(null, Error.SERVER)
+    }
+
+    @Test
+    fun snackbarErrorLiveDataDoesNotEmitByDefault() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.InProgress))
+
+        val observer = viewModel.snackbarErrorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun snackbarErrorLiveDataDoesNotEmitOnSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.snackbarErrorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun snackbarErrorLiveDataDoesNotEmitAfterInitialError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(
+                        LatestTweetsResult.InProgress,
+                        LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.snackbarErrorLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun snackbarErrorLiveDataEmitsNoConnectivityWhenErrorAfterSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.snackbarErrorLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+        val result = observer.observedValues
+
+        assertEquals(1, result.size)
+        assertEquals(Error.NO_CONNECTIVITY, result[0].peek())
+    }
+
+    @Test
+    fun snackbarErrorLiveDataEmitsCommunicationErrorWhenErrorAfterSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.Io(IOException())))
+
+        val observer = viewModel.snackbarErrorLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+        val result = observer.observedValues
+
+        assertEquals(1, result.size)
+        assertEquals(Error.COMMUNICATION, result[0].peek())
+    }
+
+    @Test
+    fun snackbarErrorLiveDataEmitsServerErrorWhenErrorAfterSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.Server))
+
+        val observer = viewModel.snackbarErrorLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+        val result = observer.observedValues
+
+        assertEquals(1, result.size)
+        assertEquals(Error.SERVER, result[0].peek())
+    }
+
+    @Test
+    fun snackbarErrorLiveDataDoesNotEmitWhenErrorFollowsError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.NoConnectivity),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.Server))
+
+        val observer = viewModel.snackbarErrorLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun snackbarErrorLiveDataDoesNotEmitWhenSuccessFollowsSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.snackbarErrorLiveData.test()
+        advanceUntilIdle()
+        viewModel.onSwipeToRefresh()
+        advanceUntilIdle()
+
+        observer.assertEmpty()
+    }
+
+    @Test
+    fun isRefreshMenuItemEnabledLiveDataEmitsFalseWhenRefreshing() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.InProgress))
+
+        val observer = viewModel.isRefreshMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isRefreshMenuItemEnabledLiveDataEmitsTrueWhenSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.isRefreshMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(true)
+    }
+
+    @Test
+    fun isRefreshMenuItemEnabledLiveDataEmitsTrueWhenError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.isRefreshMenuItemEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(true)
+    }
+
+    @Test
+    fun isRefreshMenuItemRefreshingLiveDataEmitsTrueWhenRefreshing() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.InProgress))
+
+        val observer = viewModel.isRefreshMenuItemRefreshingLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(true)
+    }
+
+    @Test
+    fun isRefreshMenuItemRefreshingLiveDataEmitsFalseWhenSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.isRefreshMenuItemRefreshingLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isRefreshMenuItemRefreshingLiveDataEmitsFalseWhenError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.isRefreshMenuItemRefreshingLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isSwipeToRefreshRefreshingLiveDataEmitsTrueWhenRefreshing() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.InProgress))
+
+        val observer = viewModel.isSwipeToRefreshRefreshingLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(true)
+    }
+
+    @Test
+    fun isSwipeToRefreshRefreshingLiveDataEmitsFalseWhenSuccess() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.Success(tweets)))
+
+        val observer = viewModel.isSwipeToRefreshRefreshingLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isSwipeToRefreshRefreshingLiveDataEmitsFalseWhenError() = runTest {
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(flowOf(LatestTweetsResult.Error.NoConnectivity))
+
+        val observer = viewModel.isSwipeToRefreshRefreshingLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun onRefreshMenuItemClickedCausesRefresh() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.NoConnectivity),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)))
 
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
@@ -201,22 +657,23 @@ class TwitterUpdatesFragmentViewModelTest {
         advanceUntilIdle()
 
         observer.assertValues(
-                UiState.ShowEmptyProgress,
-                UiState.ShowContent(tweets),
-                UiState.ShowPopulatedProgress,
-                UiState.ShowRefreshError(Error.NO_CONNECTIVITY))
+                UiState.PROGRESS,
+                UiState.ERROR,
+                UiState.PROGRESS,
+                UiState.CONTENT)
     }
 
     @Test
-    fun noDataErrorAfterContentShownContinuesToShowContentAndDisplaysError() = runTest {
-        val flow1 = flowOf(
-                Result.InProgress,
-                Result.Success(tweets))
-        val flow2 = flowOf(
-                Result.InProgress,
-                Result.Success(null))
-        whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow1, flow2)
+    fun onSwipeToRefreshCausesRefresh() = runTest {
+        val tweets = listOf<Tweet>(mock(), mock(), mock())
+        whenever(twitterRepository.latestTweetsFlow)
+                .thenReturn(
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Error.NoConnectivity),
+                        flowOf(
+                                LatestTweetsResult.InProgress,
+                                LatestTweetsResult.Success(tweets)))
 
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
@@ -224,32 +681,9 @@ class TwitterUpdatesFragmentViewModelTest {
         advanceUntilIdle()
 
         observer.assertValues(
-                UiState.ShowEmptyProgress,
-                UiState.ShowContent(tweets),
-                UiState.ShowPopulatedProgress,
-                UiState.ShowRefreshError(Error.NO_DATA))
-    }
-
-    @Test
-    fun successAfterSuccessContinuesToShowSuccess() = runTest {
-        val flow1 = flowOf(
-                Result.InProgress,
-                Result.Success(tweets))
-        val flow2 = flowOf(
-                Result.InProgress,
-                Result.Success(tweets))
-        whenever(twitterRepository.getLatestTweets())
-                .thenReturn(flow1, flow2)
-
-        val observer = viewModel.uiStateLiveData.test()
-        advanceUntilIdle()
-        viewModel.onRefreshMenuItemClicked()
-        advanceUntilIdle()
-
-        observer.assertValues(
-                UiState.ShowEmptyProgress,
-                UiState.ShowContent(tweets),
-                UiState.ShowPopulatedProgress,
-                UiState.ShowContent(tweets))
+                UiState.PROGRESS,
+                UiState.ERROR,
+                UiState.PROGRESS,
+                UiState.CONTENT)
     }
 }

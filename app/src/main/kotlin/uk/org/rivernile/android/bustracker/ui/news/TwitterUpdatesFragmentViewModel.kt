@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,43 +27,112 @@
 package uk.org.rivernile.android.bustracker.ui.news
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.map
-import androidx.lifecycle.switchMap
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.AuthenticationException
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.NetworkException
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.NoConnectivityException
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterException
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.UnrecognisedServerErrorException
-import uk.org.rivernile.android.bustracker.core.twitter.Result
+import uk.org.rivernile.android.bustracker.core.twitter.LatestTweetsResult
 import uk.org.rivernile.android.bustracker.core.twitter.TwitterRepository
+import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.utils.Event
 import javax.inject.Inject
 
 /**
  * This [ViewModel] is used by [TwitterUpdatesFragment].
  *
  * @param twitterRepository The repository which is used to obtain [Tweet]s.
+ * @param timeUtils Time utilities.
+ * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
 class TwitterUpdatesFragmentViewModel @Inject constructor(
-        private val twitterRepository: TwitterRepository): ViewModel() {
+        private val twitterRepository: TwitterRepository,
+        private val timeUtils: TimeUtils,
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
+    : ViewModel() {
 
-    private val refreshTweets = MutableLiveData(Unit)
-    private val loadTweets = refreshTweets.switchMap {
-        twitterRepository.getLatestTweets().asLiveData()
-    }
+    private val refreshTweetsFlow = MutableStateFlow(-1L)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val tweetDataFlow = refreshTweetsFlow
+            .flatMapLatest { twitterRepository.latestTweetsFlow }
+            .flowOn(defaultDispatcher)
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    private val tweetsFlow = tweetDataFlow
+            .filterIsInstance<LatestTweetsResult.Success>()
+            .map { it.tweets?.ifEmpty { null } }
+            .onStart { emit(null) }
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    private val uiStateFlow = tweetDataFlow
+            .combine(tweetsFlow, this::calculateUiState)
+            .distinctUntilChanged()
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     /**
-     * This [LiveData] is used to expose the current UI state.
+     * This [LiveData] emits the current tweet data.
      */
-    val uiStateLiveData: LiveData<UiState> by lazy {
-        loadTweets.map {
-            calculateNewUiState(uiStateLiveData.value, it)
-        }
-    }
+    val tweetsLiveData = tweetsFlow.asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the current [UiState].
+     */
+    val uiStateLiveData = uiStateFlow.asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the current error.
+     */
+    val errorLiveData = tweetDataFlow
+            .combine(tweetsFlow, this::calculateError)
+            .onStart { emit(null) }
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the error to be shown by the snackbar.
+     */
+    val snackbarErrorLiveData = tweetDataFlow
+            .combine(uiStateFlow, this::calculateSnackbarError)
+            .filterNotNull()
+            .map { Event(it) }
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the enabled state of the refresh menu item.
+     */
+    val isRefreshMenuItemEnabledLiveData = tweetDataFlow
+            .map { it !is LatestTweetsResult.InProgress }
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the refresh state of the refresh menu item.
+     */
+    val isRefreshMenuItemRefreshingLiveData = tweetDataFlow
+            .map { it is LatestTweetsResult.InProgress }
+            .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the current refreshing state of swipe to refresh.
+     */
+    val isSwipeToRefreshRefreshingLiveData = tweetDataFlow
+            .map { it is LatestTweetsResult.InProgress }
+            .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * Called when the refresh menu item has been clicked.
@@ -83,91 +152,62 @@ class TwitterUpdatesFragmentViewModel @Inject constructor(
      * Causes a refresh to happen.
      */
     private fun refreshTweets() {
-        refreshTweets.value = Unit
+        refreshTweetsFlow.value = timeUtils.getCurrentTimeMillis()
     }
 
     /**
-     * Given the previous [UiState] and the newly loaded [Result], calculate the new state which
-     * should be applied on the UI.
+     * Calculate the overall [UiState].
      *
-     * @param oldState The old [UiState] to base the calculation on.
-     * @param result The result of loading the latest data.
-     * @return The new [UiState] which should be applied.
+     * @param tweetData The current [LatestTweetsResult].
+     * @param tweets The current [List] of [Tweet]s.
      */
-    private fun calculateNewUiState(oldState: UiState?, result: Result<List<Tweet>?>): UiState {
-        return when (result) {
-            is Result.InProgress -> calculateInProgressState(oldState)
-            is Result.Success -> calculateSuccessState(oldState, result.result)
-            is Result.Error -> calculateErrorState(oldState, result.exception)
+    private fun calculateUiState(tweetData: LatestTweetsResult, tweets: List<Tweet>?): UiState {
+        return when  {
+            tweets != null -> UiState.CONTENT
+            tweetData is LatestTweetsResult.Error -> UiState.ERROR
+            tweetData is LatestTweetsResult.Success &&
+                    tweetData.tweets?.ifEmpty { null } == null -> UiState.ERROR
+            else -> UiState.PROGRESS
         }
     }
 
     /**
-     * Given a [Result] which represents an in-progress request, calculate the new UI state.
+     * Calculate the error to show to the user.
      *
-     * @param oldState The old state to base the calculation on to arrive at the new state.
-     * @return The new [UiState].
+     * @param tweetData The current [LatestTweetsResult].
+     * @param tweets The current [List] of [Tweet]s.
+     * @return The [Error] to be shown to the user, or `null` if no error is to be shown.
      */
-    private fun calculateInProgressState(oldState: UiState?): UiState {
-        return if (oldState is UiState.ShowPopulatedProgress ||
-                oldState is UiState.ShowContent ||
-                oldState is UiState.ShowRefreshError) {
-            UiState.ShowPopulatedProgress
-        } else {
-            UiState.ShowEmptyProgress
+    private fun calculateError(tweetData: LatestTweetsResult, tweets: List<Tweet>?): Error? {
+        return when {
+            tweetData is LatestTweetsResult.Success && tweets == null -> Error.NO_DATA
+            tweetData is LatestTweetsResult.Error.NoConnectivity -> Error.NO_CONNECTIVITY
+            tweetData is LatestTweetsResult.Error.Io -> Error.COMMUNICATION
+            tweetData is LatestTweetsResult.Error.Server -> Error.SERVER
+            else -> null
         }
     }
 
     /**
-     * Given a [Result] which represents a successful request, calculate the new UI state.
+     * Calculate the error which should be shown by the snackbar. `null` means no error should be
+     * shown.
      *
-     * @param oldState The old state to base the calculation on to arrive at the new state.
-     * @param tweets The newly loaded [List] of [Tweet]s.
-     * @return The new [UiState].
+     * @param tweetData The current [LatestTweetsResult].
+     * @param uiState The current [UiState].
+     * @return The [Error] to be shown by the snackbar, or `null` if no error is to be shown.
      */
-    private fun calculateSuccessState(oldState: UiState?, tweets: List<Tweet>?): UiState {
-        return if (tweets?.isNotEmpty() == true) {
-            UiState.ShowContent(tweets)
-        } else {
-            if (oldState is UiState.ShowContent ||
-                    oldState is UiState.ShowPopulatedProgress ||
-                    oldState is UiState.ShowRefreshError) {
-                UiState.ShowRefreshError(Error.NO_DATA)
-            } else {
-                UiState.ShowEmptyError(Error.NO_DATA)
+    private fun calculateSnackbarError(
+            tweetData: LatestTweetsResult,
+            uiState: UiState): Error? {
+        return if (uiState == UiState.CONTENT) {
+            when (tweetData) {
+                is LatestTweetsResult.Error.NoConnectivity -> Error.NO_CONNECTIVITY
+                is LatestTweetsResult.Error.Io -> Error.COMMUNICATION
+                is LatestTweetsResult.Error.Server -> Error.SERVER
+                else -> null
             }
+        } else {
+            null
         }
-    }
-
-    /**
-     * Given a [Result] which represents a failed request, calculate the new UI state.
-     *
-     * @param oldState The old state to base the calculation on to arrive at the new state.
-     * @param error The error which caused this state.
-     * @return The new [UiState].
-     */
-    private fun calculateErrorState(oldState: UiState?, error: TwitterException): UiState {
-        return mapTwitterExceptionToError(error).let {
-            if (oldState is UiState.ShowContent ||
-                    oldState is UiState.ShowPopulatedProgress ||
-                    oldState is UiState.ShowRefreshError) {
-                UiState.ShowRefreshError(it)
-            } else {
-                UiState.ShowEmptyError(it)
-            }
-        }
-    }
-
-    /**
-     * Given a [TwitterException], map it to an [Error].
-     *
-     * @param error The [TwitterException] to be mapped.
-     * @return The [Error] representing the [TwitterException].
-     */
-    private fun mapTwitterExceptionToError(error: TwitterException) = when (error) {
-        is NoConnectivityException -> Error.NO_CONNECTIVITY
-        is NetworkException -> Error.COMMUNICATION
-        is UnrecognisedServerErrorException -> Error.SERVER
-        is AuthenticationException -> Error.SERVER
     }
 }

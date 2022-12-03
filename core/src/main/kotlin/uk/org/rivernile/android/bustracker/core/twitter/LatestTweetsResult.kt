@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,33 +26,49 @@
 
 package uk.org.rivernile.android.bustracker.core.twitter
 
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterException
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 
 /**
- * This class encapsulates a result from the [TwitterRepository].
+ * This sealed interface encapsulates the result types when obtaining the latest tweets.
  *
- * @param T The type of data returned in the success condition.
  * @author Niall Scott
  */
-sealed class Result<out T> {
+sealed interface LatestTweetsResult {
 
     /**
-     * This represents a request currently in progress.
+     * The request is in progress.
      */
-    object InProgress : Result<Nothing>()
+    object InProgress : LatestTweetsResult
 
     /**
-     * This represents a request which was successful.
+     * The result is successful.
      *
-     * @param T The type of data returned.
-     * @property result The success data.
+     * @property tweets The tweet data.
      */
-    data class Success<out T>(val result: T) : Result<T>()
+    data class Success(
+            val tweets: List<Tweet>?) : LatestTweetsResult
 
     /**
-     * This represents a request which failed.
-     *
-     * @property exception The [TwitterException] which caused the failure.
+     * This interface describes errors which can arise from getting the latest tweets.
      */
-    data class Error(val exception: TwitterException) : Result<Nothing>()
+    sealed interface Error : LatestTweetsResult {
+
+        /**
+         * The result is not successful due to no connectivity.
+         */
+        object NoConnectivity : Error
+
+        /**
+         * The result is not successful due to an IO error.
+         *
+         * @property throwable The [Throwable] which caused this error.
+         */
+        data class Io(
+                val throwable: Throwable) : Error
+
+        /**
+         * The result is not successful because of a server error.
+         */
+        object Server : Error
+    }
 }
