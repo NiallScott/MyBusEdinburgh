@@ -146,12 +146,12 @@ class SingleLiveTimesRequestTest {
     }
 
     private fun givenHasNoConnectivity() {
-        whenever(connectivityChecker.hasInternetConnectivity())
+        whenever(connectivityChecker.hasInternetConnectivity)
                 .thenReturn(false)
     }
 
     private fun givenHasConnectivity() {
-        whenever(connectivityChecker.hasInternetConnectivity())
+        whenever(connectivityChecker.hasInternetConnectivity)
                 .thenReturn(true)
     }
 

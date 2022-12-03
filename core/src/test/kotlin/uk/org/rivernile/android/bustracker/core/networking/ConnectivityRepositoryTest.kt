@@ -29,17 +29,17 @@ package uk.org.rivernile.android.bustracker.core.networking
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
@@ -61,42 +61,38 @@ class ConnectivityRepositoryTest {
 
     @Before
     fun setUp() {
-        repository = ConnectivityRepository(connectivityChecker, coroutineRule.testDispatcher)
+        repository = ConnectivityRepository(connectivityChecker, coroutineRule.scope)
     }
 
     @Test
-    fun hasInternetConnectivityFlowGetsInitialValue() = runTest {
-        whenever(connectivityChecker.hasInternetConnectivity())
+    fun hasInternetConnectivityReturnsFalseWhenConnectivityCheckerReturnsFalse() {
+        whenever(connectivityChecker.hasInternetConnectivity)
+                .thenReturn(false)
+
+        val result = repository.hasInternetConnectivity
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun hasInternetConnectivityReturnsTrueWhenConnectivityCheckerReturnsTrue() {
+        whenever(connectivityChecker.hasInternetConnectivity)
                 .thenReturn(true)
 
-        val observer = repository.hasInternetConnectivityFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        val result = repository.hasInternetConnectivity
 
-        observer.assertValues(true)
-        verify(connectivityChecker)
-                .removeOnConnectivityChangedListener(any())
+        assertTrue(result)
     }
 
     @Test
-    fun hasInternetConnectivityFlowResponseToConnectivityChanges() = runTest {
-        doAnswer {
-            it.getArgument<ConnectivityChecker.OnConnectivityChangedListener>(0).let { listener ->
-                listener.onConnectivityChanged()
-                listener.onConnectivityChanged()
-            }
-        }.whenever(connectivityChecker).addOnConnectivityChangedListener(any())
-        whenever(connectivityChecker.hasInternetConnectivity())
-                .thenReturn(false, true, false)
+    fun hasInternetConnectivityFlowEmitsValuesFromConnectivityChecker() = runTest {
+        whenever(connectivityChecker.hasInternetConnectivityFlow)
+                .thenReturn(intervalFlowOf(0L, 10L, false, true, true, false, false, true))
 
-        val observer = repository.hasInternetConnectivityFlow().test(this)
+        val observer = repository.hasInternetConnectivityFlow.test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(false, true, false)
-        verify(connectivityChecker)
-                .removeOnConnectivityChangedListener(any())
+        observer.assertValues(false, true, false, true)
     }
 }

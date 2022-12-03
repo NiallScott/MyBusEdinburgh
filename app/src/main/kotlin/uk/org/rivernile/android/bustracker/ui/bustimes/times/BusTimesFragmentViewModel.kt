@@ -78,7 +78,7 @@ class BusTimesFragmentViewModel(
      * distinct values.
      */
     val hasConnectivityLiveData by lazy {
-        connectivityRepository.hasInternetConnectivityFlow()
+        connectivityRepository.hasInternetConnectivityFlow
                 .distinctUntilChanged() // Prevent unnecessary processing
                 .asLiveData(viewModelScope.coroutineContext)
     }
