@@ -24,35 +24,39 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="uk.org.rivernile.android.bustracker.ui.search.SearchActivity">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize">
+        android:fitsSystemWindows="true">
 
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchView"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:iconifiedByDefault="false"
-            app:searchIcon="@null" />
-    </com.google.android.material.appbar.MaterialToolbar>
+            android:layout_height="?actionBarSize">
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/searchView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:iconifiedByDefault="false"
+                app:searchIcon="@null" />
+        </com.google.android.material.appbar.MaterialToolbar>
+    </com.google.android.material.appbar.AppBarLayout>
 
     <uk.org.rivernile.android.bustracker.core.widget.ContentView
         android:id="@+id/contentView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:progressView="@id/progress"
         app:contentView="@id/recyclerView"
         app:errorView="@id/layoutError"
@@ -79,4 +83,4 @@
             android:id="@+id/layoutError"
             layout="@layout/error" />
     </uk.org.rivernile.android.bustracker.core.widget.ContentView>
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

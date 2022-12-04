@@ -34,13 +34,20 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.launch
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuProvider
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
@@ -97,16 +104,27 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
 
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         viewBinding = SearchBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-            if (callingActivity != null) {
-                setHomeAsUpIndicator(R.drawable.ic_action_close)
+        viewBinding.appBarLayout.statusBarForeground =
+                MaterialShapeDrawable.createWithElevationOverlay(this)
+        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = insets.bottom
+                leftMargin = insets.left
+                rightMargin = insets.right
             }
+
+            windowInsets
         }
 
         adapter = SearchAdapter(
