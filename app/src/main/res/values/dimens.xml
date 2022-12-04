@@ -43,18 +43,6 @@
     <dimen name="map_range_ring_stroke">1dp</dimen>
 
     <!--
-    *************************
-    * Text appearance sizes *
-    *************************
-    -->
-
-    <!-- Default list item sizes -->
-    <dimen name="list_item_1_text_size">16sp</dimen>
-
-    <!-- DisplayStopDataActivity -->
-    <dimen name="display_stop_data_service_name_text_size">@dimen/list_item_1_text_size</dimen>
-
-    <!--
     ********************************
     * Specific instance dimensions *
     ********************************

@@ -53,48 +53,16 @@
         <item name="android:maxLines">1</item>
     </style>
 
-    <style name="TextAppearance.AppCompat.ListItem1" >
-        <item name="android:textSize">@dimen/list_item_1_text_size</item>
-    </style>
-
-    <style name="TextAppearance.MyBus.MapTypeChooser.ItemText"
-           parent="TextAppearance.AppCompat.ListItem1">
-        <item name="android:textColor">@color/maptype_bottomsheet_item_text</item>
-    </style>
-
-    <style name="MapTypeBottomSheetRow">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:minHeight">48dp</item>
-        <item name="android:paddingTop">@dimen/padding_default</item>
-        <item name="android:paddingBottom">@dimen/padding_default</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:background">?selectableItemBackground</item>
-    </style>
-
-    <style name="MapTypeBottomSheetTickIcon">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">@dimen/padding_double</item>
-        <item name="android:layout_marginStart">@dimen/padding_double</item>
-        <item name="android:duplicateParentState">true</item>
-        <item name="android:src">@drawable/maptype_bottomsheet_tick_icon</item>
-        <item name="android:tint">?colorAccent</item>
-        <item name="android:contentDescription">@null</item>
-    </style>
-
-    <style name="MapTypeBottomSheetTextItem">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_marginLeft">32dp</item>
-        <item name="android:layout_marginStart">32dp</item>
-        <item name="android:layout_marginRight">@dimen/padding_double</item>
-        <item name="android:layout_marginEnd">@dimen/padding_double</item>
-        <item name="android:duplicateParentState">true</item>
-        <item name="android:textAppearance">@style/TextAppearance.MyBus.MapTypeChooser.ItemText</item>
+    <style name="Widget.MyBus.TextView.Map.MapType" parent="Widget.Material3.CheckedTextView">
+        <item name="android:minWidth">?minTouchTargetSize</item>
+        <item name="android:minHeight">?minTouchTargetSize</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textAppearance">?textAppearanceBodyMedium</item>
+        <item name="android:textColor">@color/maptype_item</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:drawablePadding">@dimen/padding_default</item>
+        <item name="android:drawableTint">@color/maptype_item</item>
     </style>
 </resources>

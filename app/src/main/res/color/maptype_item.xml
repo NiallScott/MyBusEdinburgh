@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-* Copyright (C) 2017 Niall 'Rivernile' Scott
+* Copyright (C) 2017 - 2022 Niall 'Rivernile' Scott
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors or contributors be held liable for
@@ -29,8 +29,8 @@
 
     <item
         android:state_checked="true"
-        android:color="@color/colorAccent" />
+        android:color="?colorPrimary" />
 
     <item
-        android:color="#DE000000" />
+        android:color="?colorControlNormal" />
 </selector>

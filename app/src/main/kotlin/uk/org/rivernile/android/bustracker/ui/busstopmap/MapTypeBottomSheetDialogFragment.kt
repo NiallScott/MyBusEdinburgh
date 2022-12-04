@@ -78,15 +78,15 @@ class MapTypeBottomSheetDialogFragment : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewBinding.apply {
-            layoutNormal.setOnClickListener {
+            txtMapTypeNormal.setOnClickListener {
                 handleItemClicked(MapType.NORMAL)
             }
 
-            layoutSatellite.setOnClickListener {
+            txtMapTypeSatellite.setOnClickListener {
                 handleItemClicked(MapType.SATELLITE)
             }
 
-            layoutHybrid.setOnClickListener {
+            txtMapTypeHybrid.setOnClickListener {
                 handleItemClicked(MapType.HYBRID)
             }
         }
@@ -106,9 +106,9 @@ class MapTypeBottomSheetDialogFragment : BottomSheetDialogFragment() {
         val mapType = arguments?.getSerializableCompat(ARG_MAP_TYPE) ?: MapType.NORMAL
 
         viewBinding.apply {
-            layoutNormal.isChecked = mapType == MapType.NORMAL
-            layoutSatellite.isChecked = mapType == MapType.SATELLITE
-            layoutHybrid.isChecked = mapType == MapType.HYBRID
+            txtMapTypeNormal.isChecked = mapType == MapType.NORMAL
+            txtMapTypeSatellite.isChecked = mapType == MapType.SATELLITE
+            txtMapTypeHybrid.isChecked = mapType == MapType.HYBRID
         }
     }
 

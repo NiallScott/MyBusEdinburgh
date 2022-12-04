@@ -26,52 +26,51 @@
 */ -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="?dialogPreferredPadding">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/padding_double"
         android:text="@string/maptypebottomsheetdialog_title"
-        android:textAppearance="?textAppearanceTitleSmall" />
+        android:textAppearance="?textAppearanceHeadlineSmall"
+        android:textColor="?colorOnSurface" />
 
-    <uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout
-        style="@style/MapTypeBottomSheetRow"
-        android:id="@+id/layoutNormal">
-
-        <uk.org.rivernile.android.bustracker.ui.widgets.CheckableImageView
-            style="@style/MapTypeBottomSheetTickIcon" />
-
-        <CheckedTextView
-            style="@style/MapTypeBottomSheetTextItem"
-            android:text="@string/maptypebottomsheetdialog_type_normal"/>
-    </uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout>
-
-    <uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout
-        style="@style/MapTypeBottomSheetRow"
-        android:id="@+id/layoutSatellite">
-
-        <uk.org.rivernile.android.bustracker.ui.widgets.CheckableImageView
-            style="@style/MapTypeBottomSheetTickIcon" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_double"
+        android:orientation="horizontal">
 
         <CheckedTextView
-            style="@style/MapTypeBottomSheetTextItem"
+            style="@style/Widget.MyBus.TextView.Map.MapType"
+            android:id="@+id/txtMapTypeNormal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/maptypebottomsheetdialog_type_normal"
+            android:drawableTop="@drawable/ic_maptype_map"
+            tools:checked="true" />
+
+        <CheckedTextView
+            style="@style/Widget.MyBus.TextView.Map.MapType"
+            android:id="@+id/txtMapTypeSatellite"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/maptypebottomsheetdialog_type_satellite"
-            android:textAppearance="@style/TextAppearance.AppCompat.ListItem1" />
-    </uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout>
-
-    <uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout
-        style="@style/MapTypeBottomSheetRow"
-        android:id="@+id/layoutHybrid"
-        android:layout_marginBottom="@dimen/padding_default">
-
-        <uk.org.rivernile.android.bustracker.ui.widgets.CheckableImageView
-            style="@style/MapTypeBottomSheetTickIcon" />
+            android:drawableTop="@drawable/ic_maptype_satellite" />
 
         <CheckedTextView
-            style="@style/MapTypeBottomSheetTextItem"
-            android:text="@string/maptypebottomsheetdialog_type_hybrid" />
-    </uk.org.rivernile.android.bustracker.ui.widgets.CheckableLinearLayout>
+            style="@style/Widget.MyBus.TextView.Map.MapType"
+            android:id="@+id/txtMapTypeHybrid"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/maptypebottomsheetdialog_type_hybrid"
+            android:drawableTop="@drawable/ic_maptype_hybrid" />
+    </LinearLayout>
 </LinearLayout>
