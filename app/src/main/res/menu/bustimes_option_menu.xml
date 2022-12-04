@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,5 +42,5 @@
     <item
         android:id="@+id/bustimes_option_menu_autorefresh"
         android:title="@string/bustimes_menu_turnautorefreshon"
-        android:icon="@drawable/ic_menu_autorefresh" />
+        android:icon="@drawable/ic_autorenew" />
 </menu>
