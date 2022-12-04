@@ -41,6 +41,7 @@
 
     <item
         android:id="@+id/bustimes_option_menu_autorefresh"
-        android:title="@string/bustimes_menu_turnautorefreshon"
-        android:icon="@drawable/ic_autorenew" />
+        android:title="@string/bustimes_menu_turnautorefresh"
+        android:icon="@drawable/ic_autorenew"
+        android:checkable="true" />
 </menu>

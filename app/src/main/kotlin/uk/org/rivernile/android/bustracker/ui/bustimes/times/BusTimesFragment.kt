@@ -303,12 +303,7 @@ class BusTimesFragment : Fragment() {
     private fun setAutoRefreshActionItemState(autoRefreshEnabled: Boolean?) {
         menuItemAutoRefresh?.apply {
             isEnabled = autoRefreshEnabled != null
-
-            if (autoRefreshEnabled == true) {
-                setTitle(R.string.bustimes_menu_turnautorefreshoff)
-            } else {
-                setTitle(R.string.bustimes_menu_turnautorefreshon)
-            }
+            isChecked = autoRefreshEnabled ?: false
         }
     }
 
