@@ -27,8 +27,8 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
 import android.content.res.ColorStateList
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.color.MaterialColors
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsServiceItemBinding
 
@@ -42,8 +42,7 @@ class ServiceViewHolder(
         private val viewBinding: StopdetailsServiceItemBinding)
     : RecyclerView.ViewHolder(viewBinding.root) {
 
-    private val defaultBackground =
-            ContextCompat.getColor(viewBinding.root.context, R.color.colorAccent)
+    private val defaultBackground = MaterialColors.getColor(viewBinding.root, R.attr.colorTertiary)
 
     /**
      * Populate this [RecyclerView.ViewHolder] with the contents of [newItem].

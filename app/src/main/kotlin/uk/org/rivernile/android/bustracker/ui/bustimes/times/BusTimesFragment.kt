@@ -38,6 +38,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -116,7 +117,7 @@ class BusTimesFragment : Fragment() {
             recyclerView.adapter = adapter
 
             swipeRefreshLayout.apply {
-                setColorSchemeResources(R.color.colorAccent)
+                setColorSchemeColors(MaterialColors.getColor(this, R.attr.colorPrimary))
                 setOnRefreshListener {
                     viewModel.onSwipeToRefresh()
                 }

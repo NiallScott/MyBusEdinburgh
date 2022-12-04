@@ -27,10 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import android.content.Context
-import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
+import com.google.android.material.color.MaterialColors
 import com.google.maps.android.ktx.model.polylineOptions
 import uk.org.rivernile.edinburghbustracker.android.R
 
@@ -45,7 +45,7 @@ class RouteLineManager(
         context: Context,
         private val map: GoogleMap) {
 
-    private val defaultColour = ContextCompat.getColor(context, R.color.colorAccent)
+    private val defaultColour = MaterialColors.getColor(context, R.attr.colorTertiary, null)
 
     private var polylines: List<Polyline>? = null
 

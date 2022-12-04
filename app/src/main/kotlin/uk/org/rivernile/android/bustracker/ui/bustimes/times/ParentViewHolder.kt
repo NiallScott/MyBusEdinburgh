@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,8 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import android.content.res.ColorStateList
 import android.view.View
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.color.MaterialColors
 import uk.org.rivernile.android.bustracker.widget.ExpandCollapseIndicator
 import uk.org.rivernile.edinburghbustracker.android.R
 
@@ -57,7 +57,7 @@ class ParentViewHolder(
     private val txtTime: TextView = itemView.findViewById(R.id.txtTime)
     private val imgArrow: ExpandCollapseIndicator = itemView.findViewById(R.id.imgArrow)
 
-    private val defaultBackground = ContextCompat.getColor(itemView.context, R.color.colorAccent)
+    private val defaultBackground = MaterialColors.getColor(itemView, R.attr.colorTertiary)
 
     private var item: UiLiveTimesItem? = null
 

@@ -42,6 +42,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
@@ -100,7 +101,8 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
                 adapter = this@TwitterUpdatesFragment.adapter
             }
 
-            swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent)
+            swipeRefreshLayout.setColorSchemeColors(
+                    MaterialColors.getColor(swipeRefreshLayout, R.attr.colorPrimary))
             swipeRefreshLayout.setOnRefreshListener {
                 viewModel.onSwipeToRefresh()
             }
