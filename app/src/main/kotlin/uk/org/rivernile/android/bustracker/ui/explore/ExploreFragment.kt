@@ -28,11 +28,13 @@ package uk.org.rivernile.android.bustracker.ui.explore
 
 import android.content.Context
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import com.google.android.material.tabs.TabLayout
@@ -70,6 +72,12 @@ class ExploreFragment : Fragment(), HasScrollableContent {
             throw IllegalStateException("${context.javaClass.name} does not implement " +
                     Callbacks::class.java.name)
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        childFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, false)
     }
 
     override fun onCreateView(
@@ -152,6 +160,20 @@ class ExploreFragment : Fragment(), HasScrollableContent {
         callbacks.onExploreTabSwitched()
     }
 
+    /**
+     * This property gets the action bar size for the currently set theme.
+     */
+    private val actionBarSize: Int get() {
+        val typedValue = TypedValue()
+        val theme = requireContext().theme
+
+        return if (theme.resolveAttribute(R.attr.actionBarSize, typedValue, true)) {
+            TypedValue.complexToDimensionPixelSize(typedValue.data, resources.displayMetrics)
+        } else {
+            0
+        }
+    }
+
     private val tabSelectedListener = object : TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: TabLayout.Tab) {
             showItem(tab.position)
@@ -163,6 +185,18 @@ class ExploreFragment : Fragment(), HasScrollableContent {
 
         override fun onTabUnselected(tab: TabLayout.Tab) {
             // Nothing to do here.
+        }
+    }
+
+    private val fragmentLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
+        override fun onFragmentViewCreated(
+                fm: FragmentManager,
+                f: Fragment,
+                v: View,
+                savedInstanceState: Bundle?) {
+            if (f is BusStopMapFragment) {
+                f.mapBottomPadding = actionBarSize
+            }
         }
     }
 

@@ -342,6 +342,17 @@ class BusStopMapFragment : Fragment() {
     }
 
     /**
+     * This can be set by the parent [android.app.Activity] or [Fragment] to offset the map controls
+     * from the bottom of the container.
+     */
+    var mapBottomPadding: Int = 0
+        set(value) {
+            field = value
+
+            map?.setPadding(0, 0, 0, value)
+        }
+
+    /**
      * Update [BusStopMapViewModel] with the current state of permissions.
      */
     private fun updatePermissions() {
@@ -469,6 +480,7 @@ class BusStopMapFragment : Fragment() {
             // feature is enabled. The button disappears when the feature is not enabled regardless
             // of this setting.
             uiSettings.isMyLocationButtonEnabled = true
+            setPadding(0, 0, 0, mapBottomPadding)
 
             setOnInfoWindowCloseListener {
                 viewModel.onInfoWindowClosed()
@@ -712,13 +724,7 @@ class BusStopMapFragment : Fragment() {
      * Configure the traffic view menu item.
      */
     private fun handleTrafficViewMenuItemChanged(isTrafficViewEnabled: Boolean) {
-        menuItemTrafficView?.apply {
-            if (isTrafficViewEnabled) {
-                R.string.map_menu_mapoverlay_trafficviewoff
-            } else {
-                R.string.map_menu_mapoverlay_trafficviewon
-            }.let(this::setTitle)
-        }
+        menuItemTrafficView?.isChecked = isTrafficViewEnabled
     }
 
     /**
