@@ -53,7 +53,6 @@ class DeleteTimeAlertDialogFragment : DialogFragment() {
          *
          * @param stopCode The stop code to remove the arrival alert for.
          */
-        @JvmStatic // TODO: remove when all callers are on Kotlin.
         fun newInstance(stopCode: String) = DeleteTimeAlertDialogFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOP_CODE, stopCode)

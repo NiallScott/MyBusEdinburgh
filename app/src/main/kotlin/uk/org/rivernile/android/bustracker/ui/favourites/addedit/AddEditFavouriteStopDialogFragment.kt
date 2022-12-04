@@ -64,7 +64,6 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
          * @param stopCode The stop to add or edit the favourite details for.
          * @return A new instance of this [DialogFragment].
          */
-        @JvmStatic // TODO: remove this annotation when all callers are on Kotlin.
         fun newInstance(stopCode: String) = AddEditFavouriteStopDialogFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOPCODE, stopCode)

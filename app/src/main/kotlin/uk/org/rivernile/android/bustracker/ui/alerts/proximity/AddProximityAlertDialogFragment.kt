@@ -73,7 +73,6 @@ class AddProximityAlertDialogFragment : DialogFragment() {
          * @param stopCode The stop code to add a proximity alert for.
          * @return A new instance of this [DialogFragment].
          */
-        @JvmStatic // TODO: remove this annotation when all callers are on Kotlin.
         fun newInstance(stopCode: String) = AddProximityAlertDialogFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOP_CODE, stopCode)

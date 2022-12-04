@@ -53,7 +53,6 @@ class DeleteProximityAlertDialogFragment : DialogFragment() {
          *
          * @param stopCode The stop code to delete the proximity alert for.
          */
-        @JvmStatic // TODO: remove when all callers are on Kotlin.
         fun newInstance(stopCode: String) = DeleteProximityAlertDialogFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOP_CODE, stopCode)

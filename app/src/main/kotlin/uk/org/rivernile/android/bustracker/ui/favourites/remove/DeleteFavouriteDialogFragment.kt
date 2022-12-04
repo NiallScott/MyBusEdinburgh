@@ -53,7 +53,6 @@ class DeleteFavouriteDialogFragment : DialogFragment() {
          *
          * @param stopCode The stop code to delete the favourite for.
          */
-        @JvmStatic // TODO: remove when all callers are on Kotlin.
         fun newInstance(stopCode: String) = DeleteFavouriteDialogFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_STOP_CODE, stopCode)

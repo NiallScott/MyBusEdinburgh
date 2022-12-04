@@ -82,7 +82,6 @@ class AddTimeAlertDialogFragment : DialogFragment(), HasAndroidInjector {
          * @param defaultServices Services that are to be selected by default.
          * @return A new [AddTimeAlertDialogFragment].
          */
-        @JvmStatic // TODO: remove this annotation when all callers are on Kotlin.
         fun newInstance(stopCode: String, defaultServices: Array<String>?) =
                 AddTimeAlertDialogFragment().apply {
                     arguments = Bundle().apply {

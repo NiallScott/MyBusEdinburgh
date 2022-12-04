@@ -86,7 +86,6 @@ class BusStopMapFragment : Fragment() {
          *
          * @return A new instance of [BusStopMapFragment].
          */
-        @JvmStatic
         fun newInstance() = BusStopMapFragment()
 
         /**
