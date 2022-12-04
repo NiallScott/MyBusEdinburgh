@@ -38,24 +38,20 @@
     android:gravity="center_vertical">
 
     <TextView
+        style="@style/Widget.MyBus.TextView.DisplayStopData.Item"
         android:id="@+id/txtDestination"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="@dimen/display_stop_data_child_destination_margin"
-        android:textAppearance="?textAppearanceBodyLarge"
-        android:textColor="?colorOnSurface"
-        android:maxLines="1"
         tools:text="York Place" />
 
     <TextView
+        style="@style/Widget.MyBus.TextView.DisplayStopData.Item"
         android:id="@+id/txtTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/padding_double"
         android:layout_marginEnd="@dimen/display_stop_data_child_time_margin"
-        android:textAppearance="?textAppearanceBodyLarge"
-        android:textColor="?colorOnSurface"
-        android:maxLines="1"
         tools:text="DUE" />
 </LinearLayout>

@@ -26,6 +26,11 @@
 */ -->
 <resources>
 
+    <!--
+    *****************
+    * Widget styles *
+    *****************
+    -->
     <style name="Widget.MyBus.ExpandCollapseIndicator" parent="@android:style/Widget">
         <item name="android:contentDescription">@null</item>
         <item name="expandedState">collapsed</item>
@@ -33,40 +38,28 @@
         <item name="expandedContentDescription">@string/expandcollapseindicator_contentdescription_expanded</item>
     </style>
 
-    <style name="TextAppearance.AppCompat.ListItem1" >
-        <item name="android:textSize">@dimen/list_item_1_text_size</item>
+    <style name="Widget.MyBus.TextView.ServiceName" parent="Widget.AppCompat.TextView">
+        <item name="android:minWidth">@dimen/display_stop_data_service_name_min_width</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">?textAppearanceTitleMedium</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/bus_service_rounded_background</item>
+        <item name="android:maxLines">1</item>
     </style>
 
-    <style name="TextAppearance.MyBus.DisplayStopData.ServiceName" parent="">
-        <item name="android:textSize">@dimen/display_stop_data_service_name_text_size</item>
-        <item name="android:textColor">@android:color/white</item>
+    <style name="Widget.MyBus.TextView.DisplayStopData.Item" parent="Widget.AppCompat.TextView">
+        <item name="android:textAppearance">?textAppearanceBodyLarge</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="TextAppearance.AppCompat.ListItem1" >
+        <item name="android:textSize">@dimen/list_item_1_text_size</item>
     </style>
 
     <style name="TextAppearance.MyBus.MapTypeChooser.ItemText"
            parent="TextAppearance.AppCompat.ListItem1">
         <item name="android:textColor">@color/maptype_bottomsheet_item_text</item>
-    </style>
-
-    <style name="Card">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">@dimen/padding_double</item>
-        <item name="android:layout_marginRight">@dimen/padding_double</item>
-        <item name="android:layout_gravity">center_horizontal</item>
-        <item name="cardElevation">2dp</item>
-        <item name="cardBackgroundColor">@android:color/white</item>
-        <item name="cardCornerRadius">2dp</item>
-    </style>
-
-    <style name="Card.Default">
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <style name="ServiceName">
-        <item name="android:minWidth">@dimen/display_stop_data_service_name_min_width</item>
-        <item name="android:gravity">center</item>
-        <item name="android:textAppearance">@style/TextAppearance.MyBus.DisplayStopData.ServiceName</item>
-        <item name="android:background">@drawable/bus_service_rounded_background</item>
-        <item name="android:maxLines">1</item>
     </style>
 
     <style name="MapTypeBottomSheetRow">
