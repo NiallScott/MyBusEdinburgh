@@ -41,6 +41,7 @@ import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -52,6 +53,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
@@ -139,6 +141,8 @@ class MainActivity : AppCompatActivity(),
 
         setSupportActionBar(viewBinding.toolbar)
 
+        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
 
         viewBinding.apply {
@@ -187,15 +191,29 @@ class MainActivity : AppCompatActivity(),
     override fun onSupportActionModeStarted(mode: ActionMode) {
         super.onSupportActionModeStarted(mode)
 
+        window.statusBarColor = SurfaceColors.SURFACE_2.getColor(this)
         viewBinding.bottomNavigation.isVisible = false
         (currentFragment as? ExploreFragment)?.setTabBarVisible(false)
+
+        ViewCompat.getRootWindowInsets(viewBinding.root)
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+                ?.let {
+                    viewBinding.fragmentContainer.updateLayoutParams<MarginLayoutParams> {
+                        bottomMargin = it.bottom
+                    }
+                }
     }
 
     override fun onSupportActionModeFinished(mode: ActionMode) {
         super.onSupportActionModeFinished(mode)
 
+        window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
         viewBinding.bottomNavigation.isVisible = true
         (currentFragment as? ExploreFragment)?.setTabBarVisible(true)
+
+        viewBinding.fragmentContainer.updateLayoutParams<MarginLayoutParams> {
+            bottomMargin = 0
+        }
     }
 
     override fun onShowAddEditFavouriteStop(stopCode: String) {

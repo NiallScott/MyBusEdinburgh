@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import uk.org.rivernile.edinburghbustracker.android.databinding.SimpleListItem2Binding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemFavouriteStopBinding
 
 /**
  * This [ListAdapter] populates each row for the user's favourite stops.
@@ -55,7 +55,7 @@ class FavouriteStopsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             FavouriteStopViewHolder(
-                    SimpleListItem2Binding.inflate(inflater, parent, false),
+                    ListItemFavouriteStopBinding.inflate(inflater, parent, false),
                     clickListener,
                     isCreateShortcutMode)
 

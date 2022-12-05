@@ -30,7 +30,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -62,7 +61,7 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @author Niall Scott
  */
 class FavouriteStopsFragmentViewModel(
-        savedState: SavedStateHandle,
+        private val savedState: SavedStateHandle,
         favouriteStopsRetriever: FavouriteStopsRetriever,
         private val alertsRepository: AlertsRepository,
         featureRepository: FeatureRepository,
@@ -73,6 +72,14 @@ class FavouriteStopsFragmentViewModel(
         private const val STATE_SELECTED_STOP_CODE = "selectedStopCode"
     }
 
+    private val selectedStopCodeFlow =
+            savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
+    private var selectedStopCode
+        get() = selectedStopCodeFlow.value?.ifEmpty { null }
+        set(value) {
+            savedState[STATE_SELECTED_STOP_CODE] = value
+        }
+
     /**
      * Are we in the create shortcut mode? If we are, then the user selecting a favourite stop
      * causes a shortcut to be created (normally it shows live times). Also, when in the create
@@ -81,6 +88,7 @@ class FavouriteStopsFragmentViewModel(
     var isCreateShortcutMode = false
 
     private val favouritesFlow = favouriteStopsRetriever.favouriteStopsFlow
+            .combine(selectedStopCodeFlow, this::applySelectedState)
             .flowOn(defaultDispatcher)
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
@@ -95,12 +103,6 @@ class FavouriteStopsFragmentViewModel(
     val uiStateLiveData = favouritesFlow
             .map(this::calculateUiState)
             .asLiveData(viewModelScope.coroutineContext)
-
-    private val selectedStopCodeLiveData =
-            savedState.getLiveData<String?>(STATE_SELECTED_STOP_CODE, null)
-    private val selectedStopCodeFlow = selectedStopCodeLiveData.asFlow()
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
-    private val selectedStopCode get() = selectedStopCodeLiveData.value?.ifEmpty { null }
 
     /**
      * This [LiveData] emits the current visibility state of the context menu.
@@ -249,7 +251,7 @@ class FavouriteStopsFragmentViewModel(
         if (isCreateShortcutMode) {
             createShortcut.value = favourite
         } else {
-            if (selectedStopCodeLiveData.value?.ifEmpty { null } == null) {
+            if (selectedStopCode == null) {
                 showStopData.value = favourite.stopCode
             }
         }
@@ -266,10 +268,8 @@ class FavouriteStopsFragmentViewModel(
      * Otherwise, `false`.
      */
     fun onFavouriteStopLongClicked(stopCode: String): Boolean {
-        return if (!isCreateShortcutMode &&
-                stopCode.isNotEmpty() &&
-                selectedStopCodeLiveData.value?.ifEmpty { null } == null) {
-            selectedStopCodeLiveData.value = stopCode
+        return if (!isCreateShortcutMode && stopCode.isNotEmpty()) {
+            selectedStopCode = stopCode
 
             true
         } else {
@@ -368,6 +368,22 @@ class FavouriteStopsFragmentViewModel(
     } ?: false
 
     /**
+     * Given a [List] of [UiFavouriteStop]s, apply the correct selected state to all items in the
+     * [List] based upon the [selectedStopCode] value.
+     *
+     * @param favouriteStops The [List] of favourite stops.
+     * @param selectedStopCode The currently selected stop code.
+     * @return [favouriteStops] mapped with the correct selected state for all items.
+     */
+    private fun applySelectedState(
+            favouriteStops: List<UiFavouriteStop>?,
+            selectedStopCode: String?): List<UiFavouriteStop>? {
+        return favouriteStops?.map {
+            it.copy(isSelected = it.favouriteStop.stopCode == selectedStopCode)
+        }
+    }
+
+    /**
      * Based on the loaded [List] of [UiFavouriteStop]s, calculate the high-level state of the UI.
      *
      * @param favouriteStops The currently loaded [List] of [UiFavouriteStop]s.
@@ -435,6 +451,6 @@ class FavouriteStopsFragmentViewModel(
      * Close the context menu by scrubbing out the currently set selected stop code.
      */
     private fun closeContextMenu() {
-        selectedStopCodeLiveData.value = null
+        selectedStopCode = null
     }
 }

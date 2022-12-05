@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,10 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Favou
  *
  * @property favouriteStop The saved favourite data for this stop.
  * @property services The service listing for this stop code.
+ * @property isSelected Is this stop currently selected on the UI?
  * @author Niall Scott
  */
 data class UiFavouriteStop(
         val favouriteStop: FavouriteStop,
-        val services: List<String>?)
+        val services: List<String>?,
+        val isSelected: Boolean)

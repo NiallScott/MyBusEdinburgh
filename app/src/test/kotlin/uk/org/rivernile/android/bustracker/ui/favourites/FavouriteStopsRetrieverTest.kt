@@ -107,9 +107,9 @@ class FavouriteStopsRetrieverTest {
                 FavouriteStop(2L, "222222", "Favourite 2"),
                 FavouriteStop(3L, "333333", "Favourite 3"))
         val expected = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), null),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), null),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), null))
+                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), null, false),
+                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), null, false),
+                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), null, false))
         whenever(favouritesRepository.favouriteStopsFlow)
                 .thenReturn(flowOf(favouriteStops))
         whenever(serviceStopsRepository.getServicesForStopsFlow(any()))
@@ -129,9 +129,9 @@ class FavouriteStopsRetrieverTest {
                 FavouriteStop(2L, "222222", "Favourite 2"),
                 FavouriteStop(3L, "333333", "Favourite 3"))
         val expected = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), null),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), null),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), null))
+                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), null, false),
+                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), null, false),
+                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), null, false))
         whenever(favouritesRepository.favouriteStopsFlow)
                 .thenReturn(flowOf(favouriteStops))
         whenever(serviceStopsRepository.getServicesForStopsFlow(any()))
@@ -151,9 +151,18 @@ class FavouriteStopsRetrieverTest {
                 FavouriteStop(2L, "222222", "Favourite 2"),
                 FavouriteStop(3L, "333333", "Favourite 3"))
         val expected = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), listOf("1", "2", "3")),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), null),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), listOf("1")))
+                UiFavouriteStop(
+                        FavouriteStop(1L, "111111", "Favourite 1"),
+                        listOf("1", "2", "3"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(2L, "222222", "Favourite 2"),
+                        null,
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(3L, "333333", "Favourite 3"),
+                        listOf("1"),
+                        false))
         whenever(favouritesRepository.favouriteStopsFlow)
                 .thenReturn(flowOf(favouriteStops))
         val stopCodes = setOf("111111", "222222", "333333")
@@ -183,16 +192,40 @@ class FavouriteStopsRetrieverTest {
                 FavouriteStop(1L, "111111", "Favourite 1"),
                 FavouriteStop(2L, "222222", "Favourite 2"))
         val expected1 = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), listOf("1", "2")),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), listOf("3", "4")),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), listOf("5", "6")))
+                UiFavouriteStop(
+                        FavouriteStop(1L, "111111", "Favourite 1"),
+                        listOf("1", "2"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(2L, "222222", "Favourite 2"),
+                        listOf("3", "4"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(3L, "333333", "Favourite 3"),
+                        listOf("5", "6"),
+                        false))
         val expected2 = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), listOf("1", "2")),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), listOf("5", "6")))
+                UiFavouriteStop(
+                        FavouriteStop(1L, "111111", "Favourite 1"),
+                        listOf("1", "2"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(3L, "333333", "Favourite 3"),
+                        listOf("5", "6"),
+                        false))
         val expected3 = listOf(
-                UiFavouriteStop(FavouriteStop(4L, "444444", "Favourite 4"), listOf("7", "8")),
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), listOf("1", "2")),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), listOf("3", "4")))
+                UiFavouriteStop(
+                        FavouriteStop(4L, "444444", "Favourite 4"),
+                        listOf("7", "8"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(1L, "111111", "Favourite 1"),
+                        listOf("1", "2"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(2L, "222222", "Favourite 2"),
+                        listOf("3", "4"),
+                        false))
         whenever(favouritesRepository.favouriteStopsFlow)
                 .thenReturn(flow {
                     emit(favouriteStops1)
@@ -222,17 +255,44 @@ class FavouriteStopsRetrieverTest {
                 FavouriteStop(2L, "222222", "Favourite 2"),
                 FavouriteStop(3L, "333333", "Favourite 3"))
         val expected1 = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), listOf("1", "2")),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), listOf("3", "4")),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), listOf("5", "6")))
+                UiFavouriteStop(
+                        FavouriteStop(1L, "111111", "Favourite 1"),
+                        listOf("1", "2"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(2L, "222222", "Favourite 2"),
+                        listOf("3", "4"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(3L, "333333", "Favourite 3"),
+                        listOf("5", "6"),
+                        false))
         val expected2 = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), listOf("1", "2")),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), listOf("7", "8")),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), listOf("5", "6")))
+                UiFavouriteStop(
+                        FavouriteStop(1L, "111111", "Favourite 1"),
+                        listOf("1", "2"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(2L, "222222", "Favourite 2"),
+                        listOf("7", "8"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(3L, "333333", "Favourite 3"),
+                        listOf("5", "6"),
+                        false))
         val expected3 = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Favourite 1"), listOf("9", "10")),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Favourite 2"), listOf("7", "8")),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Favourite 3"), listOf("5", "6")))
+                UiFavouriteStop(
+                        FavouriteStop(1L, "111111", "Favourite 1"),
+                        listOf("9", "10"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(2L, "222222", "Favourite 2"),
+                        listOf("7", "8"),
+                        false),
+                UiFavouriteStop(
+                        FavouriteStop(3L, "333333", "Favourite 3"),
+                        listOf("5", "6"),
+                        false))
         whenever(favouritesRepository.favouriteStopsFlow)
                 .thenReturn(flowOf(favouriteStops))
         val stopCodes = setOf("111111", "222222", "333333")

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.favourites
 
 import androidx.recyclerview.widget.RecyclerView
-import uk.org.rivernile.edinburghbustracker.android.databinding.SimpleListItem2Binding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemFavouriteStopBinding
 
 /**
  * This class represents a single row, which is a single favourite stop item.
@@ -39,7 +39,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.SimpleListItem2B
  * @author Niall Scott
  */
 class FavouriteStopViewHolder(
-        private val viewBinding: SimpleListItem2Binding,
+        private val viewBinding: ListItemFavouriteStopBinding,
         private val clickListener: OnFavouriteItemClickListener,
         isCreateShortcutMode: Boolean)
     : RecyclerView.ViewHolder(viewBinding.root) {
@@ -73,11 +73,13 @@ class FavouriteStopViewHolder(
 
         viewBinding.apply {
             favouriteStop?.let {
-                text1.text = it.favouriteStop.stopName
-                text2.text = it.services?.joinToString(", ")
+                root.isChecked = it.isSelected
+                txtFavouriteName.text = it.favouriteStop.stopName
+                txtServiceListing.text = it.services?.joinToString(", ")
             } ?: run {
-                text1.text = null
-                text2.text = null
+                root.isChecked = false
+                txtFavouriteName.text = null
+                txtServiceListing.text = null
             }
         }
     }

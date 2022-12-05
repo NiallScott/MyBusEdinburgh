@@ -94,6 +94,7 @@ class FavouriteStopsRetriever @Inject constructor(
             favouriteStops.map {
                 UiFavouriteStop(
                         it,
-                        stopServices?.get(it.stopCode))
+                        stopServices?.get(it.stopCode),
+                        false)
             }
 }
