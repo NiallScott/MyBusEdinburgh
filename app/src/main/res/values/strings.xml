@@ -27,7 +27,9 @@
 
 This version of strings.xml is in the developer's locale (en_GB) -->
 <resources
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:locale="en">
+
     <!-- 
     ***********************
     * Application strings *
@@ -65,14 +67,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="favourite_rem">Remove favourite</string>
     
     <!--
-    ******************************************
-    * Strings for bus stop database updating *
-    ******************************************
-    -->
-    <string name="bus_stop_db_updated">My Bus Edinburgh: The stop database has been updated to the latest version.</string>
-    <string name="bus_stop_db_no_updates">My Bus Edinburgh: No stop database updates found.</string>
-    
-    <!--
     ***************************
     * String related to times *
     ***************************
@@ -84,14 +78,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
         <item quantity="other">%d minutes ago</item> <!-- %d = number of minutes. -->
     </plurals>
     <string name="times_greaterthanhour">more than 1 hour ago</string>
-    
-    <!--
-    ******************************************
-    * Strings for formatting bus stop names. *
-    ******************************************
-    -->
-    <string name="busstop" tools:ignore="MissingTranslation">%1$s (%2$s)</string>
-    <string name="busstop_locality" tools:ignore="MissingTranslation">%1$s, %2$s (%3$s)</string>
 
     <!--
     ****************
@@ -136,13 +122,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="displaystopdata_error_unknown_stop_name">Unknown stop name</string>
     <string name="displaystopdata_error_stop_code_missing">Unknown stop code</string>
     <string name="displaystopdata_error_street_view_missing">Street View not installed</string>
-
-    <!--
-    **************************************
-    * Strings for FavouriteStopsActivity *
-    **************************************
-    -->
-    <string name="favouritestops_title">Favourite stops</string>
     
     <!--
     ****************************
@@ -161,7 +140,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="search_title">Search</string>
     <string name="search_item_no_services">No known services</string>
-    <string name="search_scan_error">There was a problem reading the QR code data</string>
     <string name="search_invalid_qrcode">The scanned QR code does not contain stop data</string>
     <string name="search_error_empty">Type your search term or enter a stop code to begin</string>
     <string name="search_error_no_results">No results</string>
@@ -262,7 +240,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for AlertManagerFragment *
     ************************************
     -->
-    <string name="alertmanager_title">Alerts</string>
     <string name="alertmanager_empty"><b>You currently have no alerts set.</b>\nYou can add time and proximity alerts from your favourite stops listing, the stop map, the nearby stops list and when viewing arrival times for a stop.</string>
     <string name="alertmanager_prox_title">Proximity alert</string>
     <string name="alertmanager_prox_subtitle">When within %1$dm of %2$s</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
@@ -302,7 +279,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for BusTimesFragment *
     ********************************
     -->
-    <string name="bustimes_btn_error_retry">Retry</string>
     <string name="bustimes_diverted">diverted</string>
     <string name="bustimes_diverted_with_destination">%s (diverted)</string> <!-- %s = destination. -->
     <string name="bustimes_due">DUE</string>
@@ -311,12 +287,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
 
     <string name="bustimes_err_unknown">An error has occurred, but we\'re not quite sure what it is</string>
     <string name="bustimes_err_nocode">No stop code was provided</string>
-    <string name="bustimes_err_parseerr">Data was received, but it could not be understood</string>
     <string name="bustimes_err_noconn">No internet connection</string>
     <string name="bustimes_err_connection_issue">Connection failed</string>
     <string name="bustimes_err_noresolv">Unable to find live times service</string>
     <string name="bustimes_err_nodata">There are no departures from this stop in the near future</string>
-    <string name="bustimes_err_urlmismatch">Sign in to the Wi-Fi network through your web browser and try again</string>
 
     <string name="bustimes_err_api_invalid_key">Check the date and time is correct in the system systems</string>
     <string name="bustimes_err_api_processing_error">There was an error processing the times for this stop. This is usually temporary.</string>
@@ -338,14 +312,12 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="favouritestops_nosavedstops"><b>You have no saved favourite stops.</b>\nYou can add a new favourite from various places in the application, such as from the stop map or from the nearest stops list. If you have a backup of your favourite stops, you can restore them from Settings.</string>
     <string name="favouriteshortcut_title">Select favourite stop</string>
-    <string name="favouriteshortcut_label">Favourite stop</string>
     
     <!--
     ************************************
     * Strings for NearestStopsFragment *
     ************************************
     -->
-    <string name="neareststops_title">Nearest stops</string>
     <string name="neareststops_error_empty">There are no nearby stops which match your selected filter</string>
     <string name="neareststops_error_location_unknown">Your location is unknown</string>
     <string name="neareststops_error_no_location_feature">This device does not have the necessary location services to be able to determine your nearest stops</string>
@@ -374,7 +346,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for TwitterUpdatesFragment *
     **************************************
     -->
-    <string name="twitterupdates_title">Travel updates</string>
     <string name="twitterupdates_err_no_connectivity">No internet connectivity</string>
     <string name="twitterupdates_err_nodata">There are currently no items to display</string>
     <string name="twitterupdates_err_connection">There was a connectivity issue while trying to load the data</string>
@@ -661,22 +632,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     *******************************************
     -->
     <string name="twitterupdates_menu_refresh">Refresh</string>
-    
-    <!--
-    **************
-    **************
-    ** Services **
-    **************
-    **************
-    -->
-    
-    <!--
-    *************************
-    * DatabaseUpdateService *
-    *************************
-    -->
-    <string name="databaseservice_title">Stop database updater</string>
-    
+
     <!--
     *******************
     *******************

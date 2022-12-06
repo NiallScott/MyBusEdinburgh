@@ -24,13 +24,8 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<resources>
-    <!-- App theme colours. -->
-    <color name="colorPrimary">#C41411</color>
-    <color name="colorAccent">#607D8B</color>
-
-    <color name="map_range_ring_stroke">@color/colorPrimary</color>
-    <color name="map_range_ring_fill">#1AC41411</color>
+<resources
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!--
     * Material 3 colours
@@ -40,7 +35,7 @@
     * Tertiary: #6D3465
     * Neutral: #998E8D
     -->
-    <color name="seed">#C41411</color>
+    <color name="seed" tools:ignore="UnusedResources">#C41411</color>
     <color name="md_theme_light_primary">#BE0D0D</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
     <color name="md_theme_light_primaryContainer">#FFDAD5</color>
@@ -67,10 +62,10 @@
     <color name="md_theme_light_inverseOnSurface">#FBEEEC</color>
     <color name="md_theme_light_inverseSurface">#362F2E</color>
     <color name="md_theme_light_inversePrimary">#FFB4A9</color>
-    <color name="md_theme_light_shadow">#000000</color>
-    <color name="md_theme_light_surfaceTint">#BE0D0D</color>
-    <color name="md_theme_light_outlineVariant">#D8C2BE</color>
-    <color name="md_theme_light_scrim">#000000</color>
+    <color name="md_theme_light_shadow" tools:ignore="UnusedResources">#000000</color>
+    <color name="md_theme_light_surfaceTint" tools:ignore="UnusedResources">#BE0D0D</color>
+    <color name="md_theme_light_outlineVariant" tools:ignore="UnusedResources">#D8C2BE</color>
+    <color name="md_theme_light_scrim" tools:ignore="UnusedResources">#000000</color>
     <color name="md_theme_dark_primary">#FFB4A9</color>
     <color name="md_theme_dark_onPrimary">#690002</color>
     <color name="md_theme_dark_primaryContainer">#930004</color>
@@ -97,8 +92,16 @@
     <color name="md_theme_dark_inverseOnSurface">#201A19</color>
     <color name="md_theme_dark_inverseSurface">#EDE0DE</color>
     <color name="md_theme_dark_inversePrimary">#BE0D0D</color>
-    <color name="md_theme_dark_shadow">#000000</color>
-    <color name="md_theme_dark_surfaceTint">#FFB4A9</color>
-    <color name="md_theme_dark_outlineVariant">#534341</color>
-    <color name="md_theme_dark_scrim">#000000</color>
+    <color name="md_theme_dark_shadow" tools:ignore="UnusedResources">#000000</color>
+    <color name="md_theme_dark_surfaceTint" tools:ignore="UnusedResources">#FFB4A9</color>
+    <color name="md_theme_dark_outlineVariant" tools:ignore="UnusedResources">#534341</color>
+    <color name="md_theme_dark_scrim" tools:ignore="UnusedResources">#000000</color>
+
+    <!-- Map range ring -->
+    <color name="map_range_ring_stroke">@color/md_theme_light_primary</color>
+    <color name="map_range_ring_fill">#1AC41411</color>
+
+    <!-- Map info window -->
+    <color name="map_info_window_title_text">@color/md_theme_light_onSurface</color>
+    <color name="map_info_window_snippet_text">@color/md_theme_light_onSurfaceVariant</color>
 </resources>

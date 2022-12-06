@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2013 Niall 'Rivernile' Scott
+ * Copyright (C) 2013 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,15 +24,15 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
  */ -->
-<resources
-    xmlns:tools="http://schemas.android.com/tools" >
-    <string name="open_source_licenses" tools:ignore="MissingTranslation"><![CDATA[
+<resources>
+
+    <string name="open_source_licenses" translatable="false"><![CDATA[
 \nThis project includes the Alphanumeric Comparator algorithm library code by David Koelle.\n
 \n
         GNU LESSER GENERAL PUBLIC LICENSE\n
 Version 3, 29 June 2007\n
 \n
-Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>\n
+Copyright © 2007 Free Software Foundation, Inc. <http://fsf.org/>\n
 \n
 Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.\n
 \n

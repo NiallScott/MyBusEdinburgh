@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:textAppearance="?textAppearanceTitleMedium"
-        android:textColor="@color/md_theme_light_onSurface"
+        android:textColor="@color/map_info_window_title_text"
         android:maxLines="2"
         android:ellipsize="end"
         tools:text="Example stop name" />
@@ -55,6 +55,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/padding_half"
         android:textAppearance="?textAppearanceBodyMedium"
-        android:textColor="@color/md_theme_light_onSurfaceVariant"
+        android:textColor="@color/map_info_window_snippet_text"
         tools:text="1, 2, 3, 4, 5" />
 </LinearLayout>
