@@ -43,7 +43,7 @@ import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.AddtimealertBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.DialogAddTimeAlertBinding
 import javax.inject.Inject
 
 /**
@@ -108,7 +108,9 @@ class AddTimeAlertDialogFragment : DialogFragment(), HasAndroidInjector {
         GenericSavedStateViewModelFactory(viewModelFactory, this, defaultArgs)
     }
 
-    private val viewBinding by lazy { AddtimealertBinding.inflate(layoutInflater, null, false) }
+    private val viewBinding by lazy {
+        DialogAddTimeAlertBinding.inflate(layoutInflater, null, false)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidSupportInjection.inject(this)

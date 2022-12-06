@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
-* Copyright (C) 2009 - 2021 Niall 'Rivernile' Scott
+* Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
 *
 * This software is provided 'as-is', without any express or implied
 * warranty.  In no event will the authors or contributors be held liable for
@@ -47,7 +47,7 @@
         android:clipToPadding="false"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/simple_list_item_2" />
+        tools:listitem="@layout/list_item_favourite_stop" />
 
     <include
         layout="@layout/indeterminate_progress" />

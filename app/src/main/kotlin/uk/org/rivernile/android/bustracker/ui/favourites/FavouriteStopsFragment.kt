@@ -51,7 +51,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDe
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.FavouritestopsBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentFavouriteStopsBinding
 import javax.inject.Inject
 
 /**
@@ -83,7 +83,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
     private var createShortcutCallbacks: CreateShortcutCallbacks? = null
     private lateinit var adapter: FavouriteStopsAdapter
 
-    private var _viewBinding: FavouritestopsBinding? = null
+    private var _viewBinding: FragmentFavouriteStopsBinding? = null
     private val viewBinding get() = _viewBinding!!
 
     private var actionMode: ActionMode? = null
@@ -117,7 +117,7 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = FavouritestopsBinding.inflate(inflater, container, false)
+        _viewBinding = FragmentFavouriteStopsBinding.inflate(inflater, container, false)
 
         return viewBinding.root
     }

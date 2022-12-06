@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="uk.org.rivernile.android.bustracker.ui.search.SearchActivity">
+    tools:context="uk.org.rivernile.android.bustracker.ui.about.AboutActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -41,46 +41,15 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize">
-
-            <androidx.appcompat.widget.SearchView
-                android:id="@+id/searchView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:iconifiedByDefault="false"
-                app:searchIcon="@null" />
-        </com.google.android.material.appbar.MaterialToolbar>
+            android:layout_height="?actionBarSize"
+            tools:title="@string/about_title" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <uk.org.rivernile.android.bustracker.core.widget.ContentView
-        android:id="@+id/contentView"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentAbout"
+        android:name="uk.org.rivernile.android.bustracker.ui.about.AboutFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:progressView="@id/progress"
-        app:contentView="@id/recyclerView"
-        app:errorView="@id/layoutError"
-        app:contentLayout="error"
-        tools:contentLayout="content">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="@dimen/padding_default"
-            android:paddingBottom="@dimen/padding_default"
-            android:scrollbars="vertical"
-            android:clipToPadding="false"
-            android:visibility="gone"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/search_list_item" />
-
-        <include
-            layout="@layout/indeterminate_progress" />
-
-        <include
-            android:id="@+id/layoutError"
-            layout="@layout/error" />
-    </uk.org.rivernile.android.bustracker.core.widget.ContentView>
+        tools:layout="@layout/fragment_about" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

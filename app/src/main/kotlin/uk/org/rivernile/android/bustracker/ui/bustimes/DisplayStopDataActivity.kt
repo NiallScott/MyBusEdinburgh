@@ -63,7 +63,7 @@ import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavourit
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.DisplaystopdataBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityDisplayStopDataBinding
 import javax.inject.Inject
 import kotlin.math.abs
 
@@ -111,7 +111,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
     private val viewModel: DisplayStopDataActivityViewModel by viewModels { viewModelFactory }
 
-    private lateinit var viewBinding: DisplaystopdataBinding
+    private lateinit var viewBinding: ActivityDisplayStopDataBinding
 
     private var favouriteMenuItem: MenuItem? = null
     private var arrivalAlertMenuItem: MenuItem? = null
@@ -134,7 +134,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
 
-        viewBinding = DisplaystopdataBinding.inflate(layoutInflater)
+        viewBinding = ActivityDisplayStopDataBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)

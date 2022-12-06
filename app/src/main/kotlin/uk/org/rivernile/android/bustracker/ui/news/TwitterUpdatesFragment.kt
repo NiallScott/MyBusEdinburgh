@@ -49,7 +49,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.TwitterupdatesBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentTwitterUpdatesBinding
 import javax.inject.Inject
 
 /**
@@ -68,7 +68,7 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
     private val viewModel: TwitterUpdatesFragmentViewModel by viewModels { viewModelFactory }
     private lateinit var adapter: TweetAdapter
 
-    private var _viewBinding: TwitterupdatesBinding? = null
+    private var _viewBinding: FragmentTwitterUpdatesBinding? = null
     private val viewBinding get() = _viewBinding!!
 
     private var refreshMenuItem: MenuItem? = null
@@ -85,7 +85,7 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        return TwitterupdatesBinding.inflate(inflater, container, false).also {
+        return FragmentTwitterUpdatesBinding.inflate(inflater, container, false).also {
             _viewBinding = it
         }.root
     }

@@ -34,7 +34,7 @@ import androidx.recyclerview.widget.ListAdapter
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.SearchListItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemSearchResultBinding
 
 /**
  * This [ListAdapter] populates each row of search results.
@@ -61,7 +61,7 @@ class SearchAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             SearchResultViewHolder(
-                    SearchListItemBinding.inflate(inflater, parent, false),
+                    ListItemSearchResultBinding.inflate(inflater, parent, false),
                     clickListener,
                     stopMapMarkerDecorator,
                     textFormattingUtils,

@@ -41,7 +41,7 @@ import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsFragmentBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentStopDetailsBinding
 import javax.inject.Inject
 
 /**
@@ -80,7 +80,7 @@ class StopDetailsFragment : Fragment() {
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: StopDetailsAdapter
 
-    private var _viewBinding: StopdetailsFragmentBinding? = null
+    private var _viewBinding: FragmentStopDetailsBinding? = null
     private val viewBinding get() = _viewBinding!!
 
     private val requestLocationPermissionsLauncher =
@@ -114,7 +114,7 @@ class StopDetailsFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = StopdetailsFragmentBinding.inflate(inflater, container, false)
+        _viewBinding = FragmentStopDetailsBinding.inflate(inflater, container, false)
 
         return viewBinding.root
     }

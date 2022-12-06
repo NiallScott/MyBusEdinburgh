@@ -39,7 +39,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.TurnOnGpsBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.DialogTurnOnGpsBinding
 import javax.inject.Inject
 
 /**
@@ -58,7 +58,7 @@ class TurnOnGpsDialogFragment : DialogFragment() {
 
     private lateinit var callbacks: Callbacks
 
-    private val viewBinding by lazy { TurnOnGpsBinding.inflate(layoutInflater, null, false) }
+    private val viewBinding by lazy { DialogTurnOnGpsBinding.inflate(layoutInflater, null, false) }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

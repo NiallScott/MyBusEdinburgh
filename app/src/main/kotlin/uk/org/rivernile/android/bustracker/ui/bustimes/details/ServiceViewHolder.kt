@@ -30,7 +30,7 @@ import android.content.res.ColorStateList
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsServiceItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsServiceBinding
 
 /**
  * This [RecyclerView.ViewHolder] shows a row for a service and its route description.
@@ -39,7 +39,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsServi
  * @author Niall Scott
  */
 class ServiceViewHolder(
-        private val viewBinding: StopdetailsServiceItemBinding)
+        private val viewBinding: ListItemStopDetailsServiceBinding)
     : RecyclerView.ViewHolder(viewBinding.root) {
 
     private val defaultBackground = MaterialColors.getColor(viewBinding.root, R.attr.colorTertiary)

@@ -37,7 +37,7 @@ import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.android.AndroidInjection
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
-import uk.org.rivernile.edinburghbustracker.android.databinding.AboutBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityAboutBinding
 import javax.inject.Inject
 
 /**
@@ -62,7 +62,7 @@ class AboutActivity : AppCompatActivity(), HasAndroidInjector, AboutFragment.Cal
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val viewBinding = AboutBinding.inflate(layoutInflater)
+        val viewBinding = ActivityAboutBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)

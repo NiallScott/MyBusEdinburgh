@@ -42,7 +42,7 @@ import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.AddeditfavouritestopBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.DialogAddEditFavouriteStopBinding
 import javax.inject.Inject
 
 /**
@@ -81,7 +81,7 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
     }
 
     private val viewBinding by lazy {
-        AddeditfavouritestopBinding.inflate(layoutInflater, null, false)
+        DialogAddEditFavouriteStopBinding.inflate(layoutInflater, null, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

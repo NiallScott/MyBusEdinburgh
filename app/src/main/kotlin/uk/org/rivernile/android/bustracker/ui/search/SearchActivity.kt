@@ -53,7 +53,7 @@ import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.SearchBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ActivitySearchBinding
 import javax.inject.Inject
 
 /**
@@ -91,7 +91,7 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
 
     private lateinit var adapter: SearchAdapter
 
-    private lateinit var viewBinding: SearchBinding
+    private lateinit var viewBinding: ActivitySearchBinding
 
     private var menuItemScan: MenuItem? = null
 
@@ -105,7 +105,7 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        viewBinding = SearchBinding.inflate(layoutInflater)
+        viewBinding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.toolbar)

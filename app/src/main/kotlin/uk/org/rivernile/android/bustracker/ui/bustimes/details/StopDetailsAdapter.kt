@@ -33,10 +33,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsLocationItemBinding
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsMapItemBinding
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsNoServicesItemBinding
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsServiceItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsLocationBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsMapBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsNoServicesBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsServiceBinding
 
 /**
  * This [ListAdapter] displays application information for a stop, which may include a map, the
@@ -70,15 +70,16 @@ class StopDetailsAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
         ITEM_TYPE_MAP ->
             MapViewHolder(
-                    StopdetailsMapItemBinding.inflate(inflater, parent, false),
+                    ListItemStopDetailsMapBinding.inflate(inflater, parent, false),
                     stopMapMarkerDecorator,
                     clickListener)
         ITEM_TYPE_DISTANCE ->
-            DistanceViewHolder(StopdetailsLocationItemBinding.inflate(inflater, parent, false))
+            DistanceViewHolder(ListItemStopDetailsLocationBinding.inflate(inflater, parent, false))
         ITEM_TYPE_SERVICE ->
-            ServiceViewHolder(StopdetailsServiceItemBinding.inflate(inflater, parent, false))
+            ServiceViewHolder(ListItemStopDetailsServiceBinding.inflate(inflater, parent, false))
         ITEM_TYPE_NO_SERVICES ->
-            NoServicesViewHolder(StopdetailsNoServicesItemBinding.inflate(inflater, parent, false))
+            NoServicesViewHolder(
+                    ListItemStopDetailsNoServicesBinding.inflate(inflater, parent, false))
         else -> throw IllegalStateException("Unknown viewType: $viewType")
     }
 

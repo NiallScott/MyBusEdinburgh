@@ -61,7 +61,7 @@ import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.NeareststopsBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentNearestStopsBinding
 import javax.inject.Inject
 
 /**
@@ -95,7 +95,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
     private lateinit var adapter: NearestStopsAdapter
 
     private val viewBinding get() = _viewBinding!!
-    private var _viewBinding: NeareststopsBinding? = null
+    private var _viewBinding: FragmentNearestStopsBinding? = null
 
     private val requestLocationPermissionsLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions(),
@@ -137,7 +137,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = NeareststopsBinding.inflate(inflater, container, false)
+        _viewBinding = FragmentNearestStopsBinding.inflate(inflater, container, false)
 
         return viewBinding.root
     }

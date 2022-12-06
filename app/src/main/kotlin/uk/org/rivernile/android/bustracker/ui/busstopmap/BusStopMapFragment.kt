@@ -63,7 +63,7 @@ import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDia
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.BusstopmapFragmentBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentBusStopMapBinding
 import javax.inject.Inject
 
 /**
@@ -134,7 +134,7 @@ class BusStopMapFragment : Fragment() {
     private var routeLineManager: RouteLineManager? = null
 
     private val viewBinding get() = _viewBinding!!
-    private var _viewBinding: BusstopmapFragmentBinding? = null
+    private var _viewBinding: FragmentBusStopMapBinding? = null
 
     private var menuItemSearch: MenuItem? = null
     private var menuItemServices: MenuItem? = null
@@ -185,7 +185,7 @@ class BusStopMapFragment : Fragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = BusstopmapFragmentBinding.inflate(inflater, container, false)
+        _viewBinding = FragmentBusStopMapBinding.inflate(inflater, container, false)
 
         return viewBinding.root
     }

@@ -32,7 +32,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
-import uk.org.rivernile.edinburghbustracker.android.databinding.MaptypeBottomsheetBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.BottomSheetMapTypeBinding
 
 /**
  * This shows a bottom sheet which allows the user to select a map type.
@@ -63,13 +63,13 @@ class MapTypeBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private val viewBinding get() = _viewBinding!!
-    private var _viewBinding: MaptypeBottomsheetBinding? = null
+    private var _viewBinding: BottomSheetMapTypeBinding? = null
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = MaptypeBottomsheetBinding.inflate(layoutInflater, container, false)
+        _viewBinding = BottomSheetMapTypeBinding.inflate(layoutInflater, container, false)
 
         return viewBinding.root
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerProximityItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertProximityBinding
 
 /**
  * This is a [RecyclerView.ViewHolder] to show a [UiAlert.ProximityAlert].
@@ -51,7 +51,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerProx
  * @author Niall Scott
  */
 class ProximityAlertViewHolder(
-        private val viewBinding: AlertmanagerProximityItemBinding,
+        private val viewBinding: ListItemAlertProximityBinding,
         private val textFormattingUtils: TextFormattingUtils,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
         private val clickListener: OnAlertItemClickListener)

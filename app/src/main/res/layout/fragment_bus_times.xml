@@ -77,7 +77,7 @@
                 android:clipToPadding="false"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/bustimes_parent_item" />
+                tools:listitem="@layout/list_item_bus_times_parent" />
         </LinearLayout>
 
         <include

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemBusTimesChildBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemBusTimesParentBinding
 
 typealias OnParentClickedListener = (serviceName: String) -> Unit
 
@@ -69,10 +70,13 @@ class LiveTimesAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == ITEM_TYPE_PARENT) {
-            ParentViewHolder(inflater.inflate(R.layout.bustimes_parent_item, parent, false),
-                    populator, parentClickedListener)
+            ParentViewHolder(
+                    ListItemBusTimesParentBinding.inflate(inflater, parent, false),
+                    populator,
+                    parentClickedListener)
         } else {
-            ChildViewHolder(inflater.inflate(R.layout.bustimes_child_item, parent, false),
+            ChildViewHolder(
+                    ListItemBusTimesChildBinding.inflate(inflater, parent, false),
                     populator)
         }
     }

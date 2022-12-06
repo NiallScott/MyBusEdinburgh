@@ -33,7 +33,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsMapItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsMapBinding
 
 /**
  * This [RecyclerView.ViewHolder] shows a [GoogleMap] for a stop, with the map camera centered on
@@ -45,7 +45,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsMapIt
  * @author Niall Scott
  */
 class MapViewHolder(
-        viewBinding: StopdetailsMapItemBinding,
+        viewBinding: ListItemStopDetailsMapBinding,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
         private val clickListener: OnDetailItemClickListener)
     : RecyclerView.ViewHolder(viewBinding.root) {

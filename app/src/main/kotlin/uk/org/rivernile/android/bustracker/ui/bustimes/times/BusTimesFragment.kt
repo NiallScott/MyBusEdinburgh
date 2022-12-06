@@ -44,7 +44,7 @@ import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.BustimesFragmentBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentBusTimesBinding
 import javax.inject.Inject
 
 /**
@@ -82,7 +82,7 @@ class BusTimesFragment : Fragment() {
     }
     private lateinit var adapter: LiveTimesAdapter
 
-    private var _viewBinding: BustimesFragmentBinding? = null
+    private var _viewBinding: FragmentBusTimesBinding? = null
     private val viewBinding get() = _viewBinding!!
 
     private var errorSnackbar: Snackbar? = null
@@ -104,7 +104,7 @@ class BusTimesFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = BustimesFragmentBinding.inflate(inflater, container, false)
+        _viewBinding = FragmentBusTimesBinding.inflate(inflater, container, false)
 
         return viewBinding.root
     }

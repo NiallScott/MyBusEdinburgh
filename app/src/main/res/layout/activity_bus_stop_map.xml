@@ -29,7 +29,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context="uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
@@ -49,5 +50,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:layout="@layout/busstopmap_fragment" />
+        tools:layout="@layout/fragment_bus_stop_map" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

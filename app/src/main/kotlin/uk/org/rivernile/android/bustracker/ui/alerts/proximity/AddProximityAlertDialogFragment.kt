@@ -50,7 +50,7 @@ import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.AddproxalertBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.DialogAddProxAlertBinding
 import javax.inject.Inject
 
 /**
@@ -89,7 +89,9 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         viewModelFactory
     }
 
-    private val viewBinding by lazy { AddproxalertBinding.inflate(layoutInflater, null, false) }
+    private val viewBinding by lazy {
+        DialogAddProxAlertBinding.inflate(layoutInflater, null, false)
+    }
 
     private val requestLocationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission(),

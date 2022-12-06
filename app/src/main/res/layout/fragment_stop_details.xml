@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2011 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,7 +23,7 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
+ */ -->
 <uk.org.rivernile.android.bustracker.core.widget.ContentView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -33,34 +33,20 @@
     android:layout_height="match_parent"
     app:progressView="@id/progress"
     app:contentView="@id/recyclerView"
-    app:errorView="@id/txtError"
     app:contentLayout="progress"
-    tools:contentLayout="error">
+    tools:contentLayout="content">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="@dimen/padding_half"
-        android:paddingBottom="36dp"
-        android:clipToPadding="false"
+        android:paddingBottom="@dimen/padding_default"
         android:scrollbars="vertical"
+        android:clipToPadding="false"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/alertmanager_time_item" />
+        tools:listitem="@layout/list_item_stop_details_service" />
 
     <include
         layout="@layout/indeterminate_progress" />
-
-    <TextView
-        android:id="@+id/txtError"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:padding="@dimen/padding_double"
-        android:gravity="center"
-        android:textIsSelectable="true"
-        android:textAppearance="?textAppearanceBodyLarge"
-        android:textColor="?colorOnSurface"
-        android:text="@string/alertmanager_empty" />
 </uk.org.rivernile.android.bustracker.core.widget.ContentView>

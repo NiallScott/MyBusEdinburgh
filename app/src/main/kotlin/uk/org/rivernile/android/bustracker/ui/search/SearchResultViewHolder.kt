@@ -30,7 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.SearchListItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemSearchResultBinding
 
 /**
  * A [RecyclerView.ViewHolder] which shows search result items.
@@ -44,7 +44,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.SearchListItemBi
  * @author Niall Scott
  */
 class SearchResultViewHolder(
-        private val viewBinding: SearchListItemBinding,
+        private val viewBinding: ListItemSearchResultBinding,
         private val clickListener: OnItemClickedListener,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
         private val textFormattingUtils: TextFormattingUtils,

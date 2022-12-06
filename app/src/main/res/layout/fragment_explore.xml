@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+<!--
   ~ Copyright (C) 2022 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
@@ -57,5 +58,5 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        tools:layout="@layout/busstopmap_fragment" />
+        tools:layout="@layout/fragment_bus_stop_map" />
 </LinearLayout>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.TweetItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemTweetBinding
 import java.lang.ref.WeakReference
 import java.text.DateFormat
 
@@ -44,7 +44,7 @@ import java.text.DateFormat
  * @author Niall Scott
  */
 class TweetViewHolder(
-        private val viewBinding: TweetItemBinding,
+        private val viewBinding: ListItemTweetBinding,
         private val tweetAvatarImageLoader: TweetAvatarImageLoader,
         private val dateFormat: DateFormat,
         private val clickListenerRef: WeakReference<OnItemClickedListener>)

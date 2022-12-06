@@ -40,7 +40,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.AboutFragmentBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentAboutBinding
 import javax.inject.Inject
 
 /**
@@ -61,7 +61,7 @@ class AboutFragment : Fragment() {
     private lateinit var adapter: AboutAdapter
 
     private val viewBinding get() = _viewBinding!!
-    private var _viewBinding: AboutFragmentBinding? = null
+    private var _viewBinding: FragmentAboutBinding? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -86,7 +86,7 @@ class AboutFragment : Fragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = AboutFragmentBinding.inflate(inflater, container, false)
+        _viewBinding = FragmentAboutBinding.inflate(inflater, container, false)
 
         return viewBinding.root
     }

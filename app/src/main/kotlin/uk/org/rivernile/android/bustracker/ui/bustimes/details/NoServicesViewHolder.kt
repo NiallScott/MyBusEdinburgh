@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
 import androidx.recyclerview.widget.RecyclerView
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsNoServicesItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsNoServicesBinding
 
 /**
  * This [RecyclerView.ViewHolder] is shown when there are no known services for a stop.
@@ -36,4 +36,4 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsNoSer
  * @author Niall Scott
  */
 class NoServicesViewHolder(
-    viewBinding: StopdetailsNoServicesItemBinding) : RecyclerView.ViewHolder(viewBinding.root)
+    viewBinding: ListItemStopDetailsNoServicesBinding) : RecyclerView.ViewHolder(viewBinding.root)

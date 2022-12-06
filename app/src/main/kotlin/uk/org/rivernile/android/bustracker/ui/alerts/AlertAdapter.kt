@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,8 +34,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
-import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerProximityItemBinding
-import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerTimeItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertProximityBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertTimeBinding
 
 /**
  * This [ListAdapter] shows the user's currently set alerts.
@@ -70,13 +70,13 @@ class AlertAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
         VIEW_TYPE_ARRIVAL_ALERT ->
             ArrivalAlertViewHolder(
-                    AlertmanagerTimeItemBinding.inflate(inflater, parent, false),
+                    ListItemAlertTimeBinding.inflate(inflater, parent, false),
                     textFormattingUtils,
                     stopMapMarkerDecorator,
                     clickListener)
         VIEW_TYPE_PROXIMITY_ALERT ->
             ProximityAlertViewHolder(
-                    AlertmanagerProximityItemBinding.inflate(inflater, parent, false),
+                    ListItemAlertProximityBinding.inflate(inflater, parent, false),
                     textFormattingUtils,
                     stopMapMarkerDecorator,
                     clickListener)

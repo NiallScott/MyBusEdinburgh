@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,24 +27,21 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import android.view.View
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemBusTimesChildBinding
 
 /**
  * This [RecyclerView.ViewHolder] shows a child live times item. A child item is one where the
  * service name is not displayed because it belongs to a parent further up the list which does.
  *
- * @param itemView The root [View] of this [RecyclerView.ViewHolder].
+ * @param viewBinding The root [View] of this [RecyclerView.ViewHolder].
  * @param populator An implementation used to populate the fields.
  * @author Niall Scott
  */
 class ChildViewHolder(
-        itemView: View,
-        private val populator: ViewHolderFieldPopulator) : RecyclerView.ViewHolder(itemView) {
-
-    private val txtDestination: TextView = itemView.findViewById(R.id.txtDestination)
-    private val txtTime: TextView = itemView.findViewById(R.id.txtTime)
+        private val viewBinding: ListItemBusTimesChildBinding,
+        private val populator: ViewHolderFieldPopulator)
+    : RecyclerView.ViewHolder(viewBinding.root) {
 
     /**
      * Populate this [RecyclerView.ViewHolder] with the given [UiLiveTimesItem] data.
@@ -52,7 +49,9 @@ class ChildViewHolder(
      * @param item The data to use to populate this item.
      */
     fun populate(item: UiLiveTimesItem?) {
-        populator.populateDestination(txtDestination, item)
-        populator.populateTime(txtTime, item)
+        viewBinding.apply {
+            populator.populateDestination(txtDestination, item)
+            populator.populateTime(txtTime, item)
+        }
     }
 }

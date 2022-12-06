@@ -45,7 +45,7 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProxi
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.AlertmanagerBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentAlertManagerBinding
 import javax.inject.Inject
 
 /**
@@ -69,7 +69,7 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
 
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: AlertAdapter
-    private var _viewBinding: AlertmanagerBinding? = null
+    private var _viewBinding: FragmentAlertManagerBinding? = null
     private val viewBinding get() = _viewBinding!!
 
     override fun onAttach(context: Context) {
@@ -99,7 +99,7 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = AlertmanagerBinding.inflate(inflater, container, false)
+        _viewBinding = FragmentAlertManagerBinding.inflate(inflater, container, false)
 
         return viewBinding.root
     }

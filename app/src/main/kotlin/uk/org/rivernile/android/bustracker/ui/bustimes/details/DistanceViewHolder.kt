@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsLocationItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsLocationBinding
 
 /**
  * This [RecyclerView.ViewHolder] shows the distance between a stop and the device. If the distance
@@ -40,7 +40,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.StopdetailsLocat
  * @author Niall Scott
  */
 class DistanceViewHolder(
-        private val viewBinding: StopdetailsLocationItemBinding)
+        private val viewBinding: ListItemStopDetailsLocationBinding)
     : RecyclerView.ViewHolder(viewBinding.root) {
 
     /**

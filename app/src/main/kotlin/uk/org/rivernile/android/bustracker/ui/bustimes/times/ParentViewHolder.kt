@@ -28,11 +28,10 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import android.content.res.ColorStateList
 import android.view.View
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
-import uk.org.rivernile.android.bustracker.widget.ExpandCollapseIndicator
 import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemBusTimesParentBinding
 
 /**
  * This [RecyclerView.ViewHolder] shows a parent live times item. A parent item is one which has all
@@ -41,21 +40,16 @@ import uk.org.rivernile.edinburghbustracker.android.R
  *
  * Also, the row is clickable to allow for expansion and collapsing.
  *
- * @param itemView The root [View] of this [RecyclerView.ViewHolder].
+ * @param viewBinding The root [View] of this [RecyclerView.ViewHolder].
  * @param populator An implementation used to populate the fields.
  * @param clickListener Where click events should be sent to.
  * @author Niall Scott
  */
 class ParentViewHolder(
-        itemView: View,
+        private val viewBinding: ListItemBusTimesParentBinding,
         private val populator: ViewHolderFieldPopulator,
         private val clickListener: OnParentClickedListener)
-    : RecyclerView.ViewHolder(itemView) {
-
-    private val txtServiceName: TextView = itemView.findViewById(R.id.txtServiceName)
-    private val txtDestination: TextView = itemView.findViewById(R.id.txtDestination)
-    private val txtTime: TextView = itemView.findViewById(R.id.txtTime)
-    private val imgArrow: ExpandCollapseIndicator = itemView.findViewById(R.id.imgArrow)
+    : RecyclerView.ViewHolder(viewBinding.root) {
 
     private val defaultBackground = MaterialColors.getColor(itemView, R.attr.colorTertiary)
 
@@ -75,11 +69,14 @@ class ParentViewHolder(
      */
     fun populate(oldItem: UiLiveTimesItem?, newItem: UiLiveTimesItem?) {
         this.item = newItem
-        populateServiceName(newItem)
-        populateServiceBackground(oldItem, newItem)
-        populator.populateDestination(txtDestination, newItem)
-        populator.populateTime(txtTime, newItem)
-        populateExpandCollapseIndicator(oldItem, newItem)
+
+        viewBinding.apply {
+            populateServiceName(newItem)
+            populateServiceBackground(oldItem, newItem)
+            populator.populateDestination(txtDestination, newItem)
+            populator.populateTime(txtTime, newItem)
+            populateExpandCollapseIndicator(oldItem, newItem)
+        }
     }
 
     /**
@@ -89,7 +86,7 @@ class ParentViewHolder(
      * to `null`.
      */
     private fun populateServiceName(item: UiLiveTimesItem?) {
-        txtServiceName.text = item?.serviceName
+        viewBinding.txtServiceName.text = item?.serviceName
     }
 
     /**
@@ -99,13 +96,15 @@ class ParentViewHolder(
      * @param newItem The new item containing the service colour to populate.
      */
     private fun populateServiceBackground(oldItem: UiLiveTimesItem?, newItem: UiLiveTimesItem?) {
-        newItem?.also {
-            if (oldItem == null || oldItem.serviceColour != it.serviceColour) {
-                val backgroundColour = it.serviceColour ?: defaultBackground
-                txtServiceName.backgroundTintList = ColorStateList.valueOf(backgroundColour)
+        viewBinding.apply {
+            newItem?.also {
+                if (oldItem == null || oldItem.serviceColour != it.serviceColour) {
+                    val backgroundColour = it.serviceColour ?: defaultBackground
+                    txtServiceName.backgroundTintList = ColorStateList.valueOf(backgroundColour)
+                }
+            } ?: run {
+                txtServiceName.backgroundTintList = ColorStateList.valueOf(defaultBackground)
             }
-        } ?: run {
-            txtServiceName.backgroundTintList = ColorStateList.valueOf(defaultBackground)
         }
     }
 
@@ -118,22 +117,24 @@ class ParentViewHolder(
     private fun populateExpandCollapseIndicator(
             oldItem: UiLiveTimesItem?,
             newItem: UiLiveTimesItem?) {
-        newItem?.also {
-            val oldState = oldItem?.expanded ?: it.expanded
-            val newState = it.expanded
+        viewBinding.apply {
+            newItem?.also {
+                val oldState = oldItem?.expanded ?: it.expanded
+                val newState = it.expanded
 
-            if (oldState) {
-                imgArrow.expand(false)
-            } else {
-                imgArrow.collapse(false)
-            }
+                if (oldState) {
+                    imgArrow.expand(false)
+                } else {
+                    imgArrow.collapse(false)
+                }
 
-            if (newState) {
-                imgArrow.expand(true)
-            } else {
-                imgArrow.collapse(true)
-            }
-        } ?: imgArrow.collapse(false)
+                if (newState) {
+                    imgArrow.expand(true)
+                } else {
+                    imgArrow.collapse(true)
+                }
+            } ?: imgArrow.collapse(false)
+        }
     }
 
     /**
