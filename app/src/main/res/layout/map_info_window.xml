@@ -32,21 +32,29 @@
     android:orientation="vertical"
     android:gravity="center_horizontal">
 
+    <!--
+    Because we're not customising the info window background (thus have no control over it), and
+    Google Maps doesn't theme the info window background correctly for the device day/night state,
+    we hardcode the text colours to the "light" versions so that it still renders correctly in dark
+    mode, as the background is light in both day and night modes.
+    -->
     <TextView
         android:id="@+id/txtTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:textColor="#000"
+        android:textAppearance="?textAppearanceTitleMedium"
+        android:textColor="@color/md_theme_light_onSurface"
+        android:maxLines="2"
+        android:ellipsize="end"
         tools:text="Example stop name" />
 
     <TextView
         android:id="@+id/txtSnippet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="#888888"
+        android:layout_marginTop="@dimen/padding_half"
+        android:textAppearance="?textAppearanceBodyMedium"
+        android:textColor="@color/md_theme_light_onSurfaceVariant"
         tools:text="1, 2, 3, 4, 5" />
 </LinearLayout>

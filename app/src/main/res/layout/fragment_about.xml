@@ -37,4 +37,4 @@
     android:clipToPadding="false"
     android:orientation="vertical"
     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-    tools:listitem="@layout/simple_list_item_2" />
+    tools:listitem="@layout/list_item_about_2_line" />

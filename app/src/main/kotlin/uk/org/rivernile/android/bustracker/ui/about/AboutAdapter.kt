@@ -31,8 +31,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import uk.org.rivernile.edinburghbustracker.android.databinding.SimpleListItem1Binding
-import uk.org.rivernile.edinburghbustracker.android.databinding.SimpleListItem2Binding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAbout1LineBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAbout2LineBinding
 
 /**
  * This adapter populates a list of 'about' items in a [RecyclerView].
@@ -61,11 +61,11 @@ internal class AboutAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
         VIEW_TYPE_SINGLE ->
             OneLineItemViewHolder(
-                    SimpleListItem1Binding.inflate(inflater, parent, false),
+                    ListItemAbout1LineBinding.inflate(inflater, parent, false),
                     clickListener)
         VIEW_TYPE_DOUBLE ->
             TwoLinesItemViewHolder(
-                    SimpleListItem2Binding.inflate(inflater, parent, false),
+                    ListItemAbout2LineBinding.inflate(inflater, parent, false),
                     clickListener)
         else -> throw IllegalStateException("Unrecognised viewType: $viewType")
     }

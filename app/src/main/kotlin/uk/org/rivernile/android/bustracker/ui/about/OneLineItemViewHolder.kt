@@ -29,7 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.about
 import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.SimpleListItem1Binding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAbout1LineBinding
 
 /**
  * This [RecyclerView.ViewHolder] shows a single line 'about' item.
@@ -39,7 +39,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.SimpleListItem1B
  * @author Niall Scott
  */
 class OneLineItemViewHolder(
-        private val viewBinding: SimpleListItem1Binding,
+        private val viewBinding: ListItemAbout1LineBinding,
         private val itemClickedListener: OnItemClickedListener)
     : RecyclerView.ViewHolder(viewBinding.root) {
 

@@ -29,7 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.about
 import androidx.annotation.StringRes
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.SimpleListItem2Binding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAbout2LineBinding
 import java.text.DateFormat
 
 /**
@@ -40,7 +40,7 @@ import java.text.DateFormat
  * @author Niall Scott
  */
 class TwoLinesItemViewHolder(
-        private val viewBinding: SimpleListItem2Binding,
+        private val viewBinding: ListItemAbout2LineBinding,
         private val itemClickedListener: OnItemClickedListener)
     : RecyclerView.ViewHolder(viewBinding.root) {
 
