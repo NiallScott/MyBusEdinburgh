@@ -119,7 +119,34 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun itemsLiveDataEmitsItemsWhenUiStateIsSuccess() = runTest {
-        val items = listOf<UiNearestStop>(mock(), mock(), mock())
+        val items = listOf(
+                UiNearestStop(
+                        "111111",
+                        StopName(
+                                "Stop name 1",
+                                "Locality 1"),
+                        "1, 2, 3",
+                        1,
+                        1,
+                        false),
+                UiNearestStop(
+                        "222222",
+                        StopName(
+                                "Stop name 2",
+                                "Locality 3"),
+                        "1, 2, 3",
+                        2,
+                        2,
+                        false),
+                UiNearestStop(
+                        "333333",
+                        StopName(
+                                "Stop name 3",
+                                "Locality 3"),
+                        "1, 2, 3",
+                        3,
+                        3,
+                        false))
         whenever(uiStateRetriever.getUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.Success(items)))
         val viewModel = createViewModel()
@@ -130,6 +157,82 @@ class NearestStopsFragmentViewModelTest {
         observer.assertValues(
                 null,
                 items)
+    }
+
+    @Test
+    fun itemsLiveDataEmitsItemsWhenUiStateIsSuccessAndStopIsSelected() = runTest {
+        val items1 = listOf(
+                UiNearestStop(
+                        "111111",
+                        StopName(
+                                "Stop name 1",
+                                "Locality 1"),
+                        "1, 2, 3",
+                        1,
+                        1,
+                        false),
+                UiNearestStop(
+                        "222222",
+                        StopName(
+                                "Stop name 2",
+                                "Locality 3"),
+                        "1, 2, 3",
+                        2,
+                        2,
+                        false),
+                UiNearestStop(
+                        "333333",
+                        StopName(
+                                "Stop name 3",
+                                "Locality 3"),
+                        "1, 2, 3",
+                        3,
+                        3,
+                        false))
+        val items2 = listOf(
+                UiNearestStop(
+                        "111111",
+                        StopName(
+                                "Stop name 1",
+                                "Locality 1"),
+                        "1, 2, 3",
+                        1,
+                        1,
+                        false),
+                UiNearestStop(
+                        "222222",
+                        StopName(
+                                "Stop name 2",
+                                "Locality 3"),
+                        "1, 2, 3",
+                        2,
+                        2,
+                        true),
+                UiNearestStop(
+                        "333333",
+                        StopName(
+                                "Stop name 3",
+                                "Locality 3"),
+                        "1, 2, 3",
+                        3,
+                        3,
+                        false))
+        whenever(uiStateRetriever.getUiStateFlow(any(), any()))
+                .thenReturn(flowOf(UiState.Success(items1)))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.itemsLiveData.test()
+        advanceUntilIdle()
+        viewModel.onNearestStopLongClicked("222222")
+        advanceUntilIdle()
+        viewModel.onNearestStopUnselected()
+        advanceUntilIdle()
+
+        observer.assertValues(
+                null,
+                items1,
+                items2,
+                items1)
     }
 
     @Test
@@ -435,7 +538,7 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun showContextMenuLiveDataReturnsFalseWhenAlreadyHasSelectedStop() = runTest {
+    fun showContextMenuLiveDataReturnsTrueWhenAlreadyHasSelectedStop() = runTest {
         val viewModel = createViewModel()
 
         val observer = viewModel.showContextMenuLiveData.test()
@@ -445,7 +548,7 @@ class NearestStopsFragmentViewModelTest {
         val result = viewModel.onNearestStopLongClicked("987654")
         advanceUntilIdle()
 
-        assertFalse(result)
+        assertTrue(result)
         observer.assertValues(false, true)
     }
 
@@ -711,7 +814,8 @@ class NearestStopsFragmentViewModelTest {
                 null,
                 null,
                 0,
-                0)
+                0,
+                false)
 
         viewModel.onNearestStopLongClicked("123456")
         val observer = viewModel.showStopDataLiveData.test()
@@ -728,7 +832,8 @@ class NearestStopsFragmentViewModelTest {
                 null,
                 null,
                 0,
-                0)
+                0,
+                false)
 
         val observer = viewModel.showStopDataLiveData.test()
         viewModel.onNearestStopClicked(nearestStop)
@@ -763,7 +868,7 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun onNearestStopLongClickedReturnsFalseWhenStopAlreadySelected() = runTest {
+    fun onNearestStopLongClickedReturnsTrueWhenNewStopIsSelected() = runTest {
         val viewModel = createViewModel()
 
         val observer = viewModel.showContextMenuLiveData.test()
@@ -773,7 +878,7 @@ class NearestStopsFragmentViewModelTest {
         val result = viewModel.onNearestStopLongClicked("987654")
         advanceUntilIdle()
 
-        assertFalse(result)
+        assertTrue(result)
         observer.assertValues(false, true)
     }
 

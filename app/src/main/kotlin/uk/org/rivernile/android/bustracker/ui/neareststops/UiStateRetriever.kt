@@ -213,7 +213,8 @@ class UiStateRetriever @Inject constructor(
                 stop.stopName,
                 stop.serviceListing,
                 distanceBetween.absoluteValue.toInt(),
-                stop.orientation)
+                stop.orientation,
+                false)
     }
 
     /**

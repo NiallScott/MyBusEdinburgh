@@ -34,6 +34,7 @@
     android:layout_marginEnd="@dimen/padding_default"
     android:background="?selectableItemBackground"
     android:clickable="true"
+    android:longClickable="true"
     android:focusable="true"
     android:checkable="true"
     app:checkedIcon="@null"

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty.  In no event will the authors or contributors be held liable for
+ * any damages arising from the use of this software.
+ *
+ * The aforementioned copyright holder(s) hereby grant you a
+ * non-transferrable right to use this software for any purpose (including
+ * commercial applications), and to modify it and redistribute it, subject to
+ * the following conditions:
+ *
+ *  1. This notice may not be removed or altered from any file it appears in.
+ *
+ *  2. Any modifications made to this software, except those defined in
+ *     clause 3 of this agreement, must be released under this license, and
+ *     the source code of any modifications must be made available on a
+ *     publically accessible (and locateable) website, or sent to the
+ *     original author of this software.
+ *
+ *  3. Software modifications that do not alter the functionality of the
+ *     software but are simply adaptations to a specific environment are
+ *     exempt from clause 2.
+*/ -->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="@dimen/padding_default"
+    android:layout_marginEnd="@dimen/padding_default"
+    android:background="?selectableItemBackground"
+    android:clickable="true"
+    android:longClickable="true"
+    android:focusable="true"
+    android:checkable="true"
+    app:checkedIcon="@null"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="72dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="@dimen/padding_default"
+        android:paddingBottom="@dimen/padding_default"
+        android:paddingStart="@dimen/padding_default"
+        android:paddingEnd="@dimen/padding_default">
+
+        <ImageView
+            android:id="@+id/imgDirection"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="center"
+            android:contentDescription="@null"
+            tools:src="@drawable/mapmarker_n" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@android:id/text1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?textAppearanceBodyLarge"
+                android:textColor="?colorOnSurface"
+                tools:text="Example text" />
+
+            <TextView
+                android:id="@android:id/text2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?textAppearanceBodyMedium"
+                android:textColor="?colorOnSurfaceVariant"
+                tools:text="Sample subtext" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/padding_default"
+            android:paddingBottom="@dimen/padding_default"
+            android:textAppearance="?textAppearanceLabelSmall"
+            android:textColor="?colorOnSurfaceVariant"
+            tools:text="300 m" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -298,19 +298,22 @@ class UiStateRetrieverTest {
                                         StopName("Name 3", null),
                                         null,
                                         1,
-                                        3),
+                                        3,
+                                        false),
                                 UiNearestStop(
                                         "111111",
                                         StopName("Name 1", "Locality 1"),
                                         "1, 2, 3",
                                         2,
-                                        1),
+                                        1,
+                                        false),
                                 UiNearestStop(
                                         "222222",
                                         StopName("Name 2", "Locality 2"),
                                         "4, 5, 6",
                                         3,
-                                        2))))
+                                        2,
+                                        false))))
     }
 
     @Test
@@ -381,19 +384,22 @@ class UiStateRetrieverTest {
                                         StopName("Name 3", null),
                                         null,
                                         1,
-                                        3),
+                                        3,
+                                        false),
                                 UiNearestStop(
                                         "111111",
                                         StopName("Name 1", "Locality 1"),
                                         "1, 2, 3",
                                         2,
-                                        1),
+                                        1,
+                                        false),
                                 UiNearestStop(
                                         "222222",
                                         StopName("Name 2", "Locality 2"),
                                         "4, 5, 6",
                                         3,
-                                        2))))
+                                        2,
+                                        false))))
     }
 
     @Test
@@ -464,19 +470,22 @@ class UiStateRetrieverTest {
                                         StopName("Name 3", null),
                                         null,
                                         1,
-                                        3),
+                                        3,
+                                        false),
                                 UiNearestStop(
                                         "111111",
                                         StopName("Name 1", "Locality 1"),
                                         "1, 2, 3",
                                         2,
-                                        1),
+                                        1,
+                                        false),
                                 UiNearestStop(
                                         "222222",
                                         StopName("Name 2", "Locality 2"),
                                         "4, 5, 6",
                                         3,
-                                        2))))
+                                        2,
+                                        false))))
     }
 
     private fun givenHasLocationFeature() {

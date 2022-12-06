@@ -38,6 +38,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -47,7 +48,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -116,11 +116,13 @@ class NearestStopsFragmentViewModel(
 
     private val permissionsStateFlow = MutableStateFlow<PermissionsState?>(null)
 
-    private val selectedStopCodeLiveData =
-            savedState.getLiveData<String?>(STATE_SELECTED_STOP_CODE, null)
-    private val selectedStopCodeFlow = selectedStopCodeLiveData.asFlow()
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
-    private val selectedStopCode get() = selectedStopCodeLiveData.value?.ifEmpty { null }
+    private val selectedStopCodeFlow =
+            savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
+    private var selectedStopCode
+        get() = selectedStopCodeFlow.value?.ifEmpty { null }
+        set(value) {
+            savedState[STATE_SELECTED_STOP_CODE] = value
+        }
 
     /**
      * This [LiveData] emits the user's selected services.
@@ -145,7 +147,7 @@ class NearestStopsFragmentViewModel(
      * This [LiveData] emits the [UiNearestStop] items to display on the UI.
      */
     val itemsLiveData = uiStateFlow
-            .map(this::mapToItems)
+            .combine(selectedStopCodeFlow, this::mapToItems)
             .distinctUntilChanged()
             .asLiveData(viewModelScope.coroutineContext, LIVE_DATA_TIMEOUT)
 
@@ -363,12 +365,8 @@ class NearestStopsFragmentViewModel(
      * Otherwise, `false`.
      */
     fun onNearestStopLongClicked(stopCode: String): Boolean {
-        if (stopCode.isEmpty()) {
-            return false
-        }
-
-        return if (selectedStopCodeLiveData.value == null) {
-            selectedStopCodeLiveData.value = stopCode
+        return if (stopCode.isNotEmpty()) {
+            selectedStopCode = stopCode
 
             true
         } else {
@@ -529,12 +527,17 @@ class NearestStopsFragmentViewModel(
      * Map the given [UiState] in to a [List] of [UiNearestStop]s.
      *
      * @param state The state to map.
+     * @param selectedStopCode The currently selected stop code.
      * @return The [List] of [UiNearestStop]s. This will be non-`null` when the [UiState] is a
      * [UiState.Success], otherwise `null` is returned here.
      */
-    private fun mapToItems(state: UiState): List<UiNearestStop>? {
+    private fun mapToItems(
+            state: UiState,
+            selectedStopCode: String?): List<UiNearestStop>? {
         return if (state is UiState.Success) {
-            state.nearestStops
+            state.nearestStops.map {
+                it.copy(isSelected = it.stopCode == selectedStopCode)
+            }
         } else {
             null
         }
@@ -571,6 +574,6 @@ class NearestStopsFragmentViewModel(
      * Close the context menu by scrubbing out the currently set selected stop code.
      */
     private fun closeContextMenu() {
-        selectedStopCodeLiveData.value = null
+        selectedStopCode = null
     }
 }

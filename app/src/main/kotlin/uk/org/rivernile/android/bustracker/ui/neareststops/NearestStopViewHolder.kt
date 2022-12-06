@@ -30,7 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.NeareststopsListItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemNearestStopBinding
 
 /**
  * A [RecyclerView.ViewHolder] which shows nearest stop items.
@@ -44,7 +44,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.NeareststopsList
  * @author Niall Scott
  */
 class NearestStopViewHolder(
-        private val viewBinding: NeareststopsListItemBinding,
+        private val viewBinding: ListItemNearestStopBinding,
         private val clickListener: OnNearStopItemClickListener,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
         private val textFormattingUtils: TextFormattingUtils,
@@ -75,6 +75,7 @@ class NearestStopViewHolder(
 
         viewBinding.apply {
             item?.let {
+                root.isChecked = it.isSelected
                 val orientation = it.orientation
 
                 imgDirection.setImageResource(
@@ -97,6 +98,7 @@ class NearestStopViewHolder(
                     viewBinding.root.context.getString(R.string.orientation_unknown)
                 }.let(imgDirection::setContentDescription)
             } ?: run {
+                root.isChecked = false
                 imgDirection.setImageResource(0)
                 imgDirection.contentDescription = null
                 text1.text = null

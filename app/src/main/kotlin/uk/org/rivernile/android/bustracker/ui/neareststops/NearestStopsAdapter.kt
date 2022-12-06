@@ -34,7 +34,7 @@ import androidx.recyclerview.widget.ListAdapter
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
-import uk.org.rivernile.edinburghbustracker.android.databinding.NeareststopsListItemBinding
+import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemNearestStopBinding
 
 /**
  * This [ListAdapter] populates each row of the nearest stops.
@@ -61,7 +61,7 @@ class NearestStopsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             NearestStopViewHolder(
-                    NeareststopsListItemBinding.inflate(inflater, parent, false),
+                    ListItemNearestStopBinding.inflate(inflater, parent, false),
                     clickListener,
                     stopMapMarkerDecorator,
                     textFormattingUtils,

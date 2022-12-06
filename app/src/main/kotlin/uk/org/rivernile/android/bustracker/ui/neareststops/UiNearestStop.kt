@@ -36,6 +36,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopNa
  * @property services The service listing for this stop.
  * @property distance The computed distance between the device and the stop.
  * @property orientation The orientation of the stop.
+ * @property isSelected Is the stop currently selected on the UI?
  * @author Niall Scott
  */
 data class UiNearestStop(
@@ -43,4 +44,5 @@ data class UiNearestStop(
         val stopName: StopName?,
         val services: String?,
         val distance: Int,
-        val orientation: Int)
+        val orientation: Int,
+        val isSelected: Boolean)
