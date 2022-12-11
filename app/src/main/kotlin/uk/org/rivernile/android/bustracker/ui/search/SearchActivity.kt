@@ -209,12 +209,21 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
         viewBinding.apply {
             when (state) {
                 is UiState.EmptySearchTerm -> {
-                    layoutError.txtError.setText(R.string.search_error_empty)
+                    txtError.apply {
+                        setText(R.string.search_error_empty)
+                        setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_error_search, 0, 0)
+                    }
+
                     contentView.showErrorLayout()
                 }
                 is UiState.InProgress -> contentView.showProgressLayout()
                 is UiState.NoResults -> {
-                    layoutError.txtError.setText(R.string.search_error_no_results)
+                    txtError.apply {
+                        setText(R.string.search_error_no_results)
+                        setCompoundDrawablesWithIntrinsicBounds(
+                                0, R.drawable.ic_error_directions_bus, 0, 0)
+                    }
+
                     contentView.showErrorLayout()
                 }
                 is UiState.Content -> contentView.showContentLayout()

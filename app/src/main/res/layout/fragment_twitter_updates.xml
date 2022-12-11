@@ -62,12 +62,14 @@
             android:indeterminateOnly="true" />
 
         <TextView
+            style="@style/Widget.MyBus.TextView.Error"
             android:id="@+id/txtError"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/error_bottom_margin"
             android:padding="@dimen/padding_double"
-            android:gravity="center"
-            android:textIsSelectable="true" />
+            tools:text="@string/twitterupdates_err_nodata"
+            tools:drawableTopCompat="@drawable/ic_error_newspaper" />
     </uk.org.rivernile.android.bustracker.core.widget.ContentView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

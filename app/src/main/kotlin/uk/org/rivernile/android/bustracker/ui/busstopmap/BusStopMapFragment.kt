@@ -213,11 +213,8 @@ class BusStopMapFragment : Fragment() {
         }
 
         viewBinding.apply {
-            layoutError.btnErrorResolve.apply {
-                setText(R.string.busstopmapfragment_button_resolve)
-                setOnClickListener {
-                    viewModel.onErrorResolveButtonClicked()
-                }
+            btnErrorResolve.setOnClickListener {
+                viewModel.onErrorResolveButtonClicked()
             }
 
             mapView.apply {
@@ -230,7 +227,7 @@ class BusStopMapFragment : Fragment() {
                 this::handleRequestLocationPermissions)
         viewModel.uiStateLiveData.observe(viewLifecycleOwner, this::handleUiStateChanged)
         viewModel.isErrorResolveButtonVisibleLiveData.observe(viewLifecycleOwner,
-                viewBinding.layoutError.btnErrorResolve::isVisible::set)
+                viewBinding.btnErrorResolve::isVisible::set)
         viewModel.playServicesErrorLiveData.observe(viewLifecycleOwner,
                 this::handlePlayServicesErrorChanged)
         viewModel.showPlayServicesErrorResolutionLiveData.observe(viewLifecycleOwner,
@@ -451,7 +448,7 @@ class BusStopMapFragment : Fragment() {
             else -> R.string.busstopmapfragment_error_play_services_unknown
         }
 
-        viewBinding.layoutError.txtError.txtError.setText(errorStringRes)
+        viewBinding.txtError.setText(errorStringRes)
     }
 
     /**

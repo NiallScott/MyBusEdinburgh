@@ -59,7 +59,7 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:progressView="@id/progress"
         app:contentView="@id/recyclerView"
-        app:errorView="@id/layoutError"
+        app:errorView="@id/txtError"
         app:contentLayout="error"
         tools:contentLayout="content">
 
@@ -79,8 +79,15 @@
         <include
             layout="@layout/indeterminate_progress" />
 
-        <include
-            android:id="@+id/layoutError"
-            layout="@layout/error" />
+        <TextView
+            style="@style/Widget.MyBus.TextView.Error"
+            android:id="@+id/txtError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/error_bottom_margin"
+            android:padding="@dimen/padding_double"
+            tools:text="@string/search_error_empty"
+            tools:drawableTopCompat="@drawable/ic_error_search" />
     </uk.org.rivernile.android.bustracker.core.widget.ContentView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

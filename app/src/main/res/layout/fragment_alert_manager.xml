@@ -35,7 +35,7 @@
     app:contentView="@id/recyclerView"
     app:errorView="@id/txtError"
     app:contentLayout="progress"
-    tools:contentLayout="error">
+    tools:contentLayout="content">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -53,14 +53,13 @@
         layout="@layout/indeterminate_progress" />
 
     <TextView
+        style="@style/Widget.MyBus.TextView.Error"
         android:id="@+id/txtError"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/error_bottom_margin"
         android:padding="@dimen/padding_double"
-        android:gravity="center"
-        android:textIsSelectable="true"
-        android:textAppearance="?textAppearanceBodyLarge"
-        android:textColor="?colorOnSurface"
-        android:text="@string/alertmanager_empty" />
+        android:text="@string/alertmanager_empty"
+        app:drawableTopCompat="@drawable/ic_error_notifications" />
 </uk.org.rivernile.android.bustracker.core.widget.ContentView>

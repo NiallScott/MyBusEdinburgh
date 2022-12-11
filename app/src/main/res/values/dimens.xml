@@ -32,6 +32,8 @@
 
     <dimen name="max_card_width">568dp</dimen>
 
+    <dimen name="error_bottom_margin">32dp</dimen>
+
     <dimen name="action_button_min_size">48dp</dimen>
     <dimen name="indeterminate_progress_size">24dp</dimen>
 

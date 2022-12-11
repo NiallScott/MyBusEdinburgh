@@ -27,13 +27,14 @@
 <uk.org.rivernile.android.bustracker.core.widget.ContentView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/contentView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:progressView="@id/progress"
     app:contentView="@id/mapView"
     app:errorView="@id/layoutError"
-    app:contentLayout="progress">
+    app:contentLayout="error">
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
@@ -43,9 +44,34 @@
         app:uiRotateGestures="false"
         app:uiMapToolbar="false" />
 
-    <include
+    <LinearLayout
         android:id="@+id/layoutError"
-        layout="@layout/error_with_resolve_button" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/error_bottom_margin"
+        android:padding="@dimen/padding_double"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            style="@style/Widget.MyBus.TextView.Error"
+            android:id="@+id/txtError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:drawableTopCompat="@drawable/ic_error_perm_device_information"
+            tools:text="@string/busstopmapfragment_error_play_services_update_required" />
+
+        <Button
+            style="@style/Widget.Material3.Button.TextButton"
+            android:id="@+id/btnErrorResolve"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_default"
+            android:visibility="gone"
+            android:text="@string/busstopmapfragment_button_resolve"
+            tools:visibility="visible" />
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progress"

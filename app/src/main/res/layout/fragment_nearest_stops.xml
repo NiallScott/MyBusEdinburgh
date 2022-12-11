@@ -54,7 +54,32 @@
         android:visibility="visible"
         tools:visibility="gone" />
 
-    <include
+    <LinearLayout
         android:id="@+id/layoutError"
-        layout="@layout/error_with_resolve_button" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/error_bottom_margin"
+        android:padding="@dimen/padding_double"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            style="@style/Widget.MyBus.TextView.Error"
+            android:id="@+id/txtError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="@string/neareststops_error_permission_required"
+            tools:drawableTopCompat="@drawable/ic_error_perm_device_information" />
+
+        <Button
+            style="@style/Widget.Material3.Button.TextButton"
+            android:id="@+id/btnErrorResolve"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/padding_default"
+            android:visibility="gone"
+            tools:text="@string/neareststops_error_permission_required_button"
+            tools:visibility="visible" />
+    </LinearLayout>
 </uk.org.rivernile.android.bustracker.core.widget.ContentView>

@@ -33,6 +33,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -194,7 +195,10 @@ class BusTimesFragment : Fragment() {
      * @param error The error to display.
      */
     private fun handleError(error: ErrorType?) {
-        mapErrorToStringResource(error).let(viewBinding.layoutError.txtError.txtError::setText)
+        viewBinding.txtError.apply {
+            setText(mapErrorToStringResource(error))
+            setCompoundDrawablesWithIntrinsicBounds(0, mapErrorToDrawableResource(error), 0, 0)
+        }
     }
 
     /**
@@ -326,6 +330,19 @@ class BusTimesFragment : Fragment() {
         ErrorType.SYSTEM_OVERLOADED -> R.string.bustimes_err_api_system_overloaded
         ErrorType.DOWN_FOR_MAINTENANCE -> R.string.bustimes_err_api_system_maintenance
         else -> R.string.bustimes_err_unknown
+    }
+
+    /**
+     * Given an [ErrorType] return the drawable resource for this error.
+     *
+     * @param error The error to return a drawable resource for.
+     * @return A drawable resource ID for the given [error].
+     */
+    @DrawableRes
+    private fun mapErrorToDrawableResource(error: ErrorType?) = when (error) {
+        ErrorType.NO_CONNECTIVITY -> R.drawable.ic_error_cloud_off
+        ErrorType.NO_DATA -> R.drawable.ic_error_directions_bus
+        else -> R.drawable.ic_error_generic
     }
 
     /**

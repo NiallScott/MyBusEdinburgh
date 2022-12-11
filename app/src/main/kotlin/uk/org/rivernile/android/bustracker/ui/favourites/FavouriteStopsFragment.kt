@@ -172,14 +172,11 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
      * @param state The new [UiState].
      */
     private fun handleUiState(state: UiState) {
-        viewBinding.apply {
+        viewBinding.contentView.apply {
             when (state) {
-                UiState.PROGRESS -> contentView.showProgressLayout()
-                UiState.CONTENT -> contentView.showContentLayout()
-                UiState.ERROR -> {
-                    viewBinding.layoutError.txtError.setText(R.string.favouritestops_nosavedstops)
-                    contentView.showErrorLayout()
-                }
+                UiState.PROGRESS -> showProgressLayout()
+                UiState.CONTENT -> showContentLayout()
+                UiState.ERROR -> showErrorLayout()
             }
         }
     }

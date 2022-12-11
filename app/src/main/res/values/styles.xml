@@ -38,6 +38,14 @@
         <item name="expandedContentDescription">@string/expandcollapseindicator_contentdescription_expanded</item>
     </style>
 
+    <style name="Widget.MyBus.TextView.Error" parent="Widget.AppCompat.TextView">
+        <item name="android:textAppearance">?textAppearanceBodyLarge</item>
+        <item name="android:textColor">?colorOnSurface</item>
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:drawablePadding">@dimen/padding_double</item>
+        <item name="android:gravity">center</item>
+    </style>
+
     <style name="Widget.MyBus.TextView.ServiceName" parent="Widget.AppCompat.TextView">
         <item name="android:minWidth">@dimen/display_stop_data_service_name_min_width</item>
         <item name="android:gravity">center</item>

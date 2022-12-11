@@ -142,7 +142,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="search_item_no_services">No known services</string>
     <string name="search_invalid_qrcode">The scanned QR code does not contain stop data</string>
     <string name="search_error_empty">Type your search term or enter a stop code to begin</string>
-    <string name="search_error_no_results">No results</string>
+    <string name="search_error_no_results">No results match your search term</string>
 
     <!--
     ********************************
@@ -240,7 +240,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for AlertManagerFragment *
     ************************************
     -->
-    <string name="alertmanager_empty"><b>You currently have no alerts set.</b>\nYou can add time and proximity alerts from your favourite stops listing, the stop map, the nearby stops list and when viewing arrival times for a stop.</string>
+    <string name="alertmanager_empty"><b>You have no alerts set</b>\nArrival and proximity alerts can be added while viewing arrival times for a stop</string>
     <string name="alertmanager_prox_title">Proximity alert</string>
     <string name="alertmanager_prox_subtitle">When within %1$dm of %2$s</string> <!-- %1$d = number of meters. %2$s = bus stop name and code. -->
     <string name="alertmanager_prox_blurb">For the most accurate results, turn on GPS. This alert is removed after 1 hour or if the device is restarted.</string>
@@ -290,10 +290,10 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="bustimes_err_noconn">No internet connection</string>
     <string name="bustimes_err_connection_issue">Connection failed</string>
     <string name="bustimes_err_noresolv">Unable to find live times service</string>
-    <string name="bustimes_err_nodata">There are no departures from this stop in the near future</string>
+    <string name="bustimes_err_nodata">There are no known departures from this stop in the near future</string>
 
-    <string name="bustimes_err_api_invalid_key">Check the date and time is correct in the system systems</string>
-    <string name="bustimes_err_api_processing_error">There was an error processing the times for this stop. This is usually temporary.</string>
+    <string name="bustimes_err_api_invalid_key">Could not load live departures - please check the device date, time and timezone is correct in system systems</string>
+    <string name="bustimes_err_api_processing_error">There was an error processing the times for this stop. This is usually temporary. Check back again soon.</string>
     <string name="bustimes_err_api_system_maintenance">The live times service is briefly down for maintenance. Try again soon.</string>
     <string name="bustimes_err_api_system_overloaded">The live times service is experiencing a high volume of users. Try again soon.</string>
 
@@ -310,7 +310,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for FavouriteStopsFragment *
     **************************************
     -->
-    <string name="favouritestops_nosavedstops"><b>You have no saved favourite stops.</b>\nYou can add a new favourite from various places in the application, such as from the stop map or from the nearest stops list. If you have a backup of your favourite stops, you can restore them from Settings.</string>
+    <string name="favouritestops_nosavedstops"><b>You have no saved favourite stops</b>\nTo begin, find a stop from the stop map or nearest stops list</string>
     <string name="favouriteshortcut_title">Select favourite stop</string>
     
     <!--
@@ -321,9 +321,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="neareststops_error_empty">There are no nearby stops which match your selected filter</string>
     <string name="neareststops_error_location_unknown">Your location is unknown</string>
     <string name="neareststops_error_no_location_feature">This device does not have the necessary location services to be able to determine your nearest stops</string>
-    <string name="neareststops_error_permission_required"><b>Permission required.</b>\nTo show the nearest stops, you need to grant access to your location.</string>
+    <string name="neareststops_error_permission_required"><b>Permission required</b>\nTo show the nearest stops, you need to grant access to your location</string>
     <string name="neareststops_error_permission_required_button">Grant permission</string>
-    <string name="neareststops_error_location_sources"><b>Location services disabled.</b>\nPlease enable location services from the system settings.</string>
+    <string name="neareststops_error_location_sources"><b>Location services disabled</b>\nPlease enable location services from the system settings</string>
     <string name="neareststops_error_location_sources_button">Open settings</string>
     <string name="neareststops_error_no_location_settings">System location settings does not exist on this device</string>
     <string name="neareststops_service_chooser_title">Select service(s) to filter</string>

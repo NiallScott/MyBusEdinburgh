@@ -148,7 +148,7 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
         viewBinding.apply {
             recyclerView.adapter = adapter
 
-            layoutError.btnErrorResolve.setOnClickListener {
+            btnErrorResolve.setOnClickListener {
                 viewModel.onResolveErrorButtonClicked()
             }
         }
@@ -556,34 +556,52 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
         actionMode = null
 
         viewBinding.apply {
-            layoutError.btnErrorResolve.visibility = if (error.showResolveButton) {
+            btnErrorResolve.visibility = if (error.showResolveButton) {
                 View.VISIBLE
             } else {
                 View.GONE
             }
 
             when (error) {
-                is UiState.Error.NoLocationFeature ->
-                    layoutError.txtError.txtError
-                            .setText(R.string.neareststops_error_no_location_feature)
+                is UiState.Error.NoLocationFeature -> {
+                    txtError.apply {
+                        setText(R.string.neareststops_error_no_location_feature)
+                        setCompoundDrawablesWithIntrinsicBounds(
+                                0, R.drawable.ic_error_location_disabled, 0, 0)
+                    }
+                }
                 is UiState.Error.InsufficientLocationPermissions -> {
-                    layoutError.txtError.txtError
-                            .setText(R.string.neareststops_error_permission_required)
-                    layoutError.btnErrorResolve
-                            .setText(R.string.neareststops_error_permission_required_button)
+                    txtError.apply {
+                        setText(R.string.neareststops_error_permission_required)
+                        setCompoundDrawablesWithIntrinsicBounds(
+                                0, R.drawable.ic_error_perm_device_information, 0, 0)
+                    }
+
+                    btnErrorResolve.setText(R.string.neareststops_error_permission_required_button)
                 }
                 is UiState.Error.LocationOff -> {
-                    layoutError.txtError.txtError
-                            .setText(R.string.neareststops_error_location_sources)
-                    layoutError.btnErrorResolve
-                            .setText(R.string.neareststops_error_location_sources_button)
+                    txtError.apply {
+                        setText(R.string.neareststops_error_location_sources)
+                        setCompoundDrawablesWithIntrinsicBounds(
+                                0, R.drawable.ic_error_location_disabled, 0, 0)
+                    }
+
+                    btnErrorResolve.setText(R.string.neareststops_error_location_sources_button)
                 }
                 is UiState.Error.LocationUnknown -> {
-                    layoutError.txtError.txtError
-                            .setText(R.string.neareststops_error_location_unknown)
+                    txtError.apply {
+                        setText(R.string.neareststops_error_location_unknown)
+                        setCompoundDrawablesWithIntrinsicBounds(
+                                0, R.drawable.ic_error_location_disabled, 0, 0)
+                    }
                 }
-                is UiState.Error.NoNearestStops ->
-                    layoutError.txtError.txtError.setText(R.string.neareststops_error_empty)
+                is UiState.Error.NoNearestStops -> {
+                    txtError.apply {
+                        setText(R.string.neareststops_error_empty)
+                        setCompoundDrawablesWithIntrinsicBounds(
+                                0, R.drawable.ic_error_my_location, 0, 0)
+                    }
+                }
             }
         }
     }

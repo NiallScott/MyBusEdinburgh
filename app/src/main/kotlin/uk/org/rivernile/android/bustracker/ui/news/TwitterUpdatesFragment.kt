@@ -37,6 +37,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -156,6 +157,7 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
         viewBinding.txtError.apply {
             error?.let {
                 setText(mapToErrorString(it))
+                setCompoundDrawablesWithIntrinsicBounds(0, mapToErrorDrawable(it), 0, 0)
             } ?: run {
                 text = null
             }
@@ -210,6 +212,19 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
         Error.NO_DATA -> R.string.twitterupdates_err_nodata
         Error.COMMUNICATION -> R.string.twitterupdates_err_connection
         Error.SERVER -> R.string.twitterupdates_err_server
+    }
+
+    /**
+     * Given an [Error], map it to the relevent drawable resource.
+     *
+     * @param error The [Error] to map.
+     * @return The drawable resource for the given [Error].
+     */
+    @DrawableRes
+    private fun mapToErrorDrawable(error: Error) = when (error) {
+        Error.NO_CONNECTIVITY -> R.drawable.ic_error_cloud_off
+        Error.NO_DATA -> R.drawable.ic_error_newspaper
+        else -> R.drawable.ic_error_generic
     }
 
     /**
