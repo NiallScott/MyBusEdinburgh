@@ -39,15 +39,58 @@
         android:fitsSystemWindows="true"
         tools:background="?colorSurfaceVariant">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            style="?collapsingToolbarLayoutMediumStyle"
+            android:id="@+id/collapsingLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="?actionBarSize"
-            android:background="@android:color/transparent"
-            tools:title="Bus Stop Name, Locality"
-            tools:subtitle="12345678"
-            tools:menu="@menu/displaystopdata_option_menu" />
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap"
+            app:titleEnabled="false">
+
+            <LinearLayout
+                android:id="@+id/layoutTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="?actionBarSize"
+                android:layout_marginBottom="@dimen/padding_double"
+                android:layout_marginStart="@dimen/padding_double"
+                android:layout_marginEnd="@dimen/padding_double"
+                android:layout_gravity="bottom"
+                android:paddingTop="@dimen/padding_double"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtStopName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/displaystopdata_error_unknown_stop_name"
+                    android:textAppearance="?textAppearanceHeadlineSmall"
+                    android:textColor="?colorOnSurface"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    tools:text="Some Stop, Some Area" />
+
+                <TextView
+                    android:id="@+id/txtStopCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/displaystopdata_error_stop_code_missing"
+                    android:textAppearance="?textAppearanceTitleMedium"
+                    android:textColor="?colorOnSurfaceVariant"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="12345678" />
+            </LinearLayout>
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="?actionBarSize"
+                android:background="@android:color/transparent"
+                app:layout_collapseMode="pin"
+                tools:menu="@menu/displaystopdata_option_menu" />
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         <com.google.android.material.tabs.TabLayout
             style="@style/Widget.Material3.TabLayout.OnSurface"

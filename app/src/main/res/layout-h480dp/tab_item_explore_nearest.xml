@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2022 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
@@ -25,32 +24,9 @@
   ~
   -->
 
-<LinearLayout
+<com.google.android.material.tabs.TabItem
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tabMode="fixed">
-
-        <include
-            layout="@layout/tab_item_explore_map" />
-
-        <include
-            layout="@layout/tab_item_explore_nearest" />
-    </com.google.android.material.tabs.TabLayout>
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragmentContainer"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:layout="@layout/fragment_bus_stop_map" />
-</LinearLayout>
+    android:text="@string/explore_tab_nearest_stops"
+    android:icon="@drawable/ic_my_location" />

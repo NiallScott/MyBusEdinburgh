@@ -140,7 +140,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(false)
+            setDisplayShowTitleEnabled(viewBinding.collapsingLayout == null)
         }
 
         setUpWindowInsets()
@@ -165,7 +165,10 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
                 background = SurfaceColors.SURFACE_2
                         .getColor(this@DisplayStopDataActivity)
                         .toDrawable()
-                addOnOffsetChangedListener(appBarOffsetChangedListener)
+
+                if (collapsingLayout != null) {
+                    addOnOffsetChangedListener(appBarOffsetChangedListener)
+                }
             }
         }
 
@@ -219,7 +222,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         (stopCode?.ifEmpty { null }?.let {
             stopCode
         } ?: getString(R.string.displaystopdata_error_stop_code_missing)).let {
-            viewBinding.txtStopCode.text = it
+            viewBinding.txtStopCode?.text = it
             supportActionBar?.subtitle = it
         }
     }
@@ -234,7 +237,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         (details?.let {
             textFormattingUtils.formatBusStopName(it.stopName)
         } ?: getString(R.string.displaystopdata_error_unknown_stop_name)).let {
-            viewBinding.txtStopName.text = it
+            viewBinding.txtStopName?.text = it
             supportActionBar?.title = it
         }
 
@@ -422,21 +425,23 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         }
     }
 
-    private val appBarOffsetChangedListener =
-            AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
-                // verticalOffset is 0 when fully expended, and is a negative integer while
-                // collapsing (and when fully collapsed).
-                viewBinding.apply {
-                    val collapsePoint = collapsingLayout.let {
-                        it.height - it.scrimVisibleHeightTrigger
-                    }
-                    val absVerticalOffset = abs(verticalOffset)
-                    val isCollapsed = absVerticalOffset > collapsePoint
+    private val appBarOffsetChangedListener by lazy {
+        AppBarLayout.OnOffsetChangedListener { _, verticalOffset ->
+            // verticalOffset is 0 when fully expended, and is a negative integer while
+            // collapsing (and when fully collapsed).
+            viewBinding.apply {
+                val collapsePoint = collapsingLayout?.let {
+                    it.height - it.scrimVisibleHeightTrigger
+                } ?: return@OnOffsetChangedListener
 
-                    supportActionBar?.setDisplayShowTitleEnabled(isCollapsed)
-                    layoutTitle.alpha = 1f - (absVerticalOffset.toFloat() / collapsePoint.toFloat())
-                }
+                val absVerticalOffset = abs(verticalOffset)
+                val isCollapsed = absVerticalOffset > collapsePoint
+
+                supportActionBar?.setDisplayShowTitleEnabled(isCollapsed)
+                layoutTitle?.alpha = 1f - (absVerticalOffset.toFloat() / collapsePoint.toFloat())
             }
+        }
+    }
 
     private val menuProvider = object : MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
