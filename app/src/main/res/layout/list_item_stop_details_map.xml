@@ -24,26 +24,16 @@
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
 */ -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.google.android.gms.maps.MapView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mapView"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintDimensionRatio="H,16:9"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        map:liteMode="true"
-        map:mapType="normal"
-        map:cameraZoom="17"
-        map:uiCompass="false"
-        map:uiMapToolbar="false"
-        tools:background="@android:color/holo_green_light" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+    android:layout_height="144dp"
+    map:liteMode="true"
+    map:mapType="normal"
+    map:cameraZoom="17"
+    map:uiCompass="false"
+    map:uiMapToolbar="false"
+    tools:background="@android:color/holo_green_light" />
