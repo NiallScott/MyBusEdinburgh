@@ -39,6 +39,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
+import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentStopDetailsBinding
@@ -72,6 +73,8 @@ class StopDetailsFragment : Fragment() {
     lateinit var viewModelFactory: StopDetailsFragmentViewModelFactory
     @Inject
     lateinit var stopMapMarkerDecorator: StopMapMarkerDecorator
+    @Inject
+    lateinit var mapStyleApplicator: MapStyleApplicator
 
     private val viewModel: StopDetailsFragmentViewModel by viewModels {
         GenericSavedStateViewModelFactory(viewModelFactory, this)
@@ -105,7 +108,8 @@ class StopDetailsFragment : Fragment() {
 
         adapter = StopDetailsAdapter(
                 requireContext(),
-                stopMapMarkerDecorator) {
+                stopMapMarkerDecorator,
+                mapStyleApplicator) {
             viewModel.onMapClicked()
         }
 

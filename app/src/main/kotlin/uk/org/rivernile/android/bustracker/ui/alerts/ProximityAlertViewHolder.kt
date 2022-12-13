@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
+import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertProximityBinding
@@ -47,6 +48,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertPro
  * @param viewBinding The view binding for this [RecyclerView.ViewHolder].
  * @param textFormattingUtils Used to format the stop name.
  * @param stopMapMarkerDecorator Used to populate the stop icon on the map.
+ * @param mapStyleApplicator Used to style the map correctly.
  * @param clickListener Where click events should be sent to.
  * @author Niall Scott
  */
@@ -54,6 +56,7 @@ class ProximityAlertViewHolder(
         private val viewBinding: ListItemAlertProximityBinding,
         private val textFormattingUtils: TextFormattingUtils,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+        private val mapStyleApplicator: MapStyleApplicator,
         private val clickListener: OnAlertItemClickListener)
     : RecyclerView.ViewHolder(viewBinding.root) {
 
@@ -83,6 +86,7 @@ class ProximityAlertViewHolder(
             mapView.onCreate(null)
             mapView.getMapAsync { map ->
                 this@ProximityAlertViewHolder.map = map
+                mapStyleApplicator.applyMapStyle(mapView.context, map)
                 populateMap(map, alert)
             }
         }

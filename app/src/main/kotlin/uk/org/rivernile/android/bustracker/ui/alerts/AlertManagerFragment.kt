@@ -40,6 +40,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
+import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
@@ -62,6 +63,8 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
     lateinit var textFormattingUtils: TextFormattingUtils
     @Inject
     lateinit var stopMapMarkerDecorator: StopMapMarkerDecorator
+    @Inject
+    lateinit var mapStyleApplicator: MapStyleApplicator
 
     private val viewModel: AlertManagerFragmentViewModel by viewModels {
         viewModelFactory
@@ -92,6 +95,7 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
                 requireContext(),
                 textFormattingUtils,
                 stopMapMarkerDecorator,
+                mapStyleApplicator,
                 alertItemClickListener)
     }
 

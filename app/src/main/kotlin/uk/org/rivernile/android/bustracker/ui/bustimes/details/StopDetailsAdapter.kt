@@ -32,6 +32,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsLocationBinding
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsMapBinding
@@ -44,12 +45,14 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDeta
  *
  * @param context The [android.app.Activity] [Context].
  * @param stopMapMarkerDecorator An implementation used to decorate map marker items.
+ * @param mapStyleApplicator Used to apply the correct style to the map.
  * @param clickListener Where item click events should be sent to.
  * @author Niall Scott
  */
 class StopDetailsAdapter(
         context: Context,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+        private val mapStyleApplicator: MapStyleApplicator,
         private val clickListener: OnDetailItemClickListener)
     : ListAdapter<UiItem, RecyclerView.ViewHolder>(ItemEquator()) {
 
@@ -72,6 +75,7 @@ class StopDetailsAdapter(
             MapViewHolder(
                     ListItemStopDetailsMapBinding.inflate(inflater, parent, false),
                     stopMapMarkerDecorator,
+                    mapStyleApplicator,
                     clickListener)
         ITEM_TYPE_DISTANCE ->
             DistanceViewHolder(ListItemStopDetailsLocationBinding.inflate(inflater, parent, false))

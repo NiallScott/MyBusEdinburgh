@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
+import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertProximityBinding
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertTimeBinding
@@ -44,6 +45,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemAlertTim
  * @param textFormattingUtils Used within the [RecyclerView.ViewHolder]s to populate the stop name.
  * @param stopMapMarkerDecorator Used within the [RecyclerView.ViewHolder]s to properly create the
  * stop markers on the map.
+ * @param mapStyleApplicator Used within the [RecyclerView.ViewHolder]s to style the map correctly.
  * @param clickListener This listener is called when various click items have been clicked by the
  * user.
  * @author Niall Scott
@@ -52,6 +54,7 @@ class AlertAdapter(
         context: Context,
         private val textFormattingUtils: TextFormattingUtils,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+        private val mapStyleApplicator: MapStyleApplicator,
         private val clickListener: OnAlertItemClickListener)
     : ListAdapter<UiAlert, RecyclerView.ViewHolder>(ItemEquator()) {
 
@@ -73,12 +76,14 @@ class AlertAdapter(
                     ListItemAlertTimeBinding.inflate(inflater, parent, false),
                     textFormattingUtils,
                     stopMapMarkerDecorator,
+                    mapStyleApplicator,
                     clickListener)
         VIEW_TYPE_PROXIMITY_ALERT ->
             ProximityAlertViewHolder(
                     ListItemAlertProximityBinding.inflate(inflater, parent, false),
                     textFormattingUtils,
                     stopMapMarkerDecorator,
+                    mapStyleApplicator,
                     clickListener)
         else -> throw IllegalStateException("Unrecognised viewType: $viewType")
     }

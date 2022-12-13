@@ -32,6 +32,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDetailsMapBinding
 
@@ -41,12 +42,14 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDeta
  *
  * @param viewBinding An object holding the view objects.
  * @param stopMapMarkerDecorator Used to correctly decorate the stop marker.
+ * @param mapStyleApplicator Used to apply the correct style to the map.
  * @param clickListener Where click events should be sent.
  * @author Niall Scott
  */
 class MapViewHolder(
         viewBinding: ListItemStopDetailsMapBinding,
         private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+        private val mapStyleApplicator: MapStyleApplicator,
         private val clickListener: OnDetailItemClickListener)
     : RecyclerView.ViewHolder(viewBinding.root) {
 
@@ -62,6 +65,8 @@ class MapViewHolder(
                 map.setOnMapClickListener {
                     handleMapClicked()
                 }
+
+                mapStyleApplicator.applyMapStyle(context, map)
 
                 populateMap(map, item)
             }

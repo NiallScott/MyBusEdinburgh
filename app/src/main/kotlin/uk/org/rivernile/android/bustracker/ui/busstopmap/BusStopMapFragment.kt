@@ -58,6 +58,7 @@ import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
+import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -123,6 +124,8 @@ class BusStopMapFragment : Fragment() {
     lateinit var googleApiAvailability: GoogleApiAvailability
     @Inject
     lateinit var stopClusterRendererFactory: StopClusterRendererFactory
+    @Inject
+    lateinit var mapStyleApplicator: MapStyleApplicator
 
     private val viewModel: BusStopMapViewModel by viewModels {
         GenericSavedStateViewModelFactory(viewModelFactory, this)
@@ -472,6 +475,8 @@ class BusStopMapFragment : Fragment() {
      * @param map Used to control the map.
      */
     private fun handleOnMapReady(map: GoogleMap) {
+        val context = requireContext()
+
         this.map = map.apply {
             // This is just whether the my location button should be enabled if the my location
             // feature is enabled. The button disappears when the feature is not enabled regardless
@@ -482,9 +487,10 @@ class BusStopMapFragment : Fragment() {
             setOnInfoWindowCloseListener {
                 viewModel.onInfoWindowClosed()
             }
+
+            mapStyleApplicator.applyMapStyle(context, this)
         }
 
-        val context = requireContext()
         clusterManager = ClusterManager<UiStopMarker>(context, map).apply {
             renderer = stopClusterRendererFactory.createStopClusterRenderer(context, map, this)
 
