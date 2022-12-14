@@ -48,11 +48,17 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class SettingsFragment : PreferenceFragmentCompat(), HasAndroidInjector {
+class SettingsFragment : PreferenceFragmentCompat(),
+        PreferenceFragmentCompat.OnPreferenceDisplayDialogCallback,
+        HasAndroidInjector {
 
     companion object {
 
         private const val DIALOG_CLEAR_SEARCH_HISTORY = "dialogClearSearchHistory"
+
+        // Copied from the super class, so that our workaround uses the same Fragment tag.
+        // Remove if/when the workaround is no longer required.
+        private const val DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
     }
 
     @Inject
@@ -84,6 +90,18 @@ class SettingsFragment : PreferenceFragmentCompat(), HasAndroidInjector {
 
         viewModel.showClearSearchHistoryLiveData.observe(viewLifecycleOwner) {
             showClearSearchHistoryDialog()
+        }
+    }
+
+    override fun onPreferenceDisplayDialog(
+            caller: PreferenceFragmentCompat,
+            pref: Preference): Boolean {
+        return if (pref is ListPreference) {
+            showListPreferenceDialog(pref)
+
+            true
+        } else {
+            false
         }
     }
 
@@ -132,5 +150,23 @@ class SettingsFragment : PreferenceFragmentCompat(), HasAndroidInjector {
     private fun showClearSearchHistoryDialog() {
         ClearSearchHistoryDialogFragment()
                 .show(childFragmentManager, DIALOG_CLEAR_SEARCH_HISTORY)
+    }
+
+    /**
+     * Show a [MaterialListPreferenceDialogFragmentCompat] for a given [ListPreference]. This is a
+     * workaround because the androidx.preference library currently does not support Material3
+     * theming, and this allows Material3 themed dialogs to be shown.
+     *
+     * @param preference The [ListPreference] to show the
+     * [MaterialListPreferenceDialogFragmentCompat] for.
+     */
+    @Suppress("deprecation")
+    private fun showListPreferenceDialog(preference: ListPreference) {
+        if (parentFragmentManager.findFragmentByTag(DIALOG_FRAGMENT_TAG) == null) {
+            MaterialListPreferenceDialogFragmentCompat.newInstance(preference.key).apply {
+                setTargetFragment(this@SettingsFragment, 0)
+                show(this@SettingsFragment.parentFragmentManager, DIALOG_FRAGMENT_TAG)
+            }
+        }
     }
 }

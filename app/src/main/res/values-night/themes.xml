@@ -61,6 +61,8 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="actionModeCloseDrawable">@drawable/ic_action_close</item>
 
+        <item name="preferenceTheme">@style/ThemeOverlay.Preference.MyBus</item>
+
         <item name="contentViewStyle">@style/Widget.AndroidCore.ContentView</item>
         <item name="expandCollapseIndicatorStyle">@style/Widget.MyBus.ExpandCollapseIndicator</item>
     </style>

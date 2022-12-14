@@ -73,4 +73,10 @@
         <item name="android:drawablePadding">@dimen/padding_default</item>
         <item name="android:drawableTint">@color/maptype_item</item>
     </style>
+
+    <style
+        name="Preference.SwitchPreferenceCompat.MyBus"
+        parent="Preference.SwitchPreferenceCompat.Material">
+        <item name="android:widgetLayout">@layout/preference_widget_material_switch</item>
+    </style>
 </resources>
