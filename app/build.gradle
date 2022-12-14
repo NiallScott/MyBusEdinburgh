@@ -25,11 +25,13 @@ import com.android.build.api.variant.ResValue
  *     exempt from clause 2.
  */
 
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-allopen'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
+    id 'kotlin-kapt'
+    id 'kotlin-allopen'
+}
 
 android {
     namespace 'uk.org.rivernile.edinburghbustracker.android'
@@ -39,7 +41,7 @@ android {
     defaultConfig {
         minSdkVersion androidMinSdkVersion
         targetSdkVersion androidTargetSdkVersion
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     buildTypes {
@@ -47,26 +49,25 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
         debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
             testCoverageEnabled true
         }
     }
 
-    flavorDimensions "city"
+    flavorDimensions 'city'
 
     productFlavors {
         edinburgh {
-            dimension "city"
+            dimension 'city'
 
-            applicationId "uk.org.rivernile.edinburghbustracker.android"
+            applicationId 'uk.org.rivernile.edinburghbustracker.android'
             versionCode 15
-            versionName "3.0 development"
+            versionName '3.0'
+            archivesBaseName = "MyBusEdinburgh-$versionName"
         }
-    }
-
-    lint {
-        // TODO: fix lint errors and remove this.
-        abortOnError false
     }
 
     sourceSets {

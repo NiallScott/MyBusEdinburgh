@@ -24,15 +24,12 @@
  *
  */
 
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+plugins {
+    id 'java-library'
+    id 'kotlin'
 }
 
-jar {
+java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 

@@ -24,16 +24,13 @@
  *
  */
 
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
-apply plugin: 'kotlinx-serialization'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'kotlinx-serialization'
 }
 
-jar {
+java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 
