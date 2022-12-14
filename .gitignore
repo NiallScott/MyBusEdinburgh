@@ -4,5 +4,6 @@
 build/
 captures/
 .DS_Store
+google-services.json
 jacoco.exec
 local.properties

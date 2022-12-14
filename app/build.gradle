@@ -31,6 +31,8 @@ plugins {
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
     id 'kotlin-allopen'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -134,6 +136,10 @@ dependencies {
     implementation "com.google.maps.android:maps-ktx:$googleMapsKtxVersion"
     implementation "com.google.maps.android:android-maps-utils:$googleMapsUtilsVersion"
     implementation "com.google.maps.android:maps-utils-ktx:$googleMapsUtilsKtxVersion"
+
+    // Firebase
+    implementation platform("com.google.firebase:firebase-bom:$firebaseBomVersion")
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     // Dagger 2
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
