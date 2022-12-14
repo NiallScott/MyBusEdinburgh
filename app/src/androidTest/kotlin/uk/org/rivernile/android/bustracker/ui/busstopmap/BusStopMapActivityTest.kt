@@ -148,7 +148,7 @@ class BusStopMapActivityTest {
                 hasExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, "123456")))
     }
 
-    private val applicationContext get() =ApplicationProvider.getApplicationContext<Context>()
+    private val applicationContext get() = ApplicationProvider.getApplicationContext<Context>()
 
     private val BusStopMapActivity.busStopMapFragment get() =
             supportFragmentManager.findFragmentById(R.id.fragmentContainer) as BusStopMapFragment
