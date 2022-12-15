@@ -17,10 +17,11 @@ jobs:
         run: |
           mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburgh/
           echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburgh/google-services.json
-          echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> $GITHUB_ENV
         shell: bash
       - name: Write debug keystore
-        run: echo ${{ secrets.KEYSTORE_FILE_BASE64 }} | base64 --decode > $KEYSTORE_FILE
+        run: |
+          echo ${{ secrets.KEYSTORE_FILE_BASE64 }} | base64 --decode > $KEYSTORE_FILE
+          echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> $GITHUB_ENV
         shell: bash
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/debug.keystore
