@@ -26,6 +26,7 @@ jobs:
       - name: Build and test
         run: >
           ./gradlew
+          -Porg.gradle.jvmargs=-Xmx4096M
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
           -Pmybus.edinburgh.debug.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
           -Pmybus.keystore.debug.file=$KEYSTORE_FILE
@@ -37,7 +38,7 @@ jobs:
           :app:lint
           assembleDebug
         env:
-          JAVA_OPTS: '-Xmx2048m -XX:MaxPermSize=2048m'
+          JAVA_OPTS: '-Xmx4096m'
       - name: Store APKs
         uses: actions/upload-artifact@v3
         with:
