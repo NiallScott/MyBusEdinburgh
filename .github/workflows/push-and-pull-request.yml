@@ -28,8 +28,8 @@ jobs:
           -Pmybus.edinburgh.debug.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
           -Pmybus.keystore.debug.file=$KEYSTORE_FILE
           -Pmybus.keystore.debug.storePassword=${{ secrets.KEYSTORE_PASSWORD }}
-          -Pmybus.keystore.debug.keyAlias=${{ KEYSTORE_ALIAS }}
-          -Pmybus.keystore.debug.keyPassword=${{ KEYSTORE_ALIAS_PASSWORD }}
+          -Pmybus.keystore.debug.keyAlias=${{ secrets.KEYSTORE_ALIAS }}
+          -Pmybus.keystore.debug.keyPassword=${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
           clean
           test
           :app:lint
