@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/NiallScott/MyBusEdinburgh/tree/development.svg?style=svg)](https://circleci.com/gh/NiallScott/MyBusEdinburgh/tree/development)
+[![Development branch](https://github.com/NiallScott/MyBusEdinburgh/actions/workflows/push-and-pull-request.yml/badge.svg?branch=development)](https://github.com/NiallScott/MyBusEdinburgh/actions/workflows/push-and-pull-request.yml)
 
 My Bus Edinburgh
 ================
