@@ -15,8 +15,8 @@ jobs:
           cache: gradle
       - name: Write Google Services file
         run: >
-          mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburghDebug/ &&
-          echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburghDebug/google-services.json
+          mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburgh/ &&
+          echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburgh/google-services.json
         shell: bash
       - name: Write debug keystore
         run: echo ${{ secrets.KEYSTORE_FILE_BASE64 }} | base64 --decode > $KEYSTORE_FILE
