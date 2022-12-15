@@ -26,7 +26,6 @@ jobs:
       - name: Build and test
         run: >
           ./gradlew
-          -Porg.gradle.jvmargs=-Xmx4096M
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
           -Pmybus.edinburgh.debug.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
           -Pmybus.keystore.debug.file=$KEYSTORE_FILE
