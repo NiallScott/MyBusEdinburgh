@@ -14,9 +14,10 @@ jobs:
           java-version: '11'
           cache: gradle
       - name: Write Google Services file
-        run: >
-          mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburgh/ &&
+        run: |
+          mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburgh/
           echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburgh/google-services.json
+          echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> $GITHUB_ENV
         shell: bash
       - name: Write debug keystore
         run: echo ${{ secrets.KEYSTORE_FILE_BASE64 }} | base64 --decode > $KEYSTORE_FILE
