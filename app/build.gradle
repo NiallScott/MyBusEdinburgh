@@ -33,6 +33,7 @@ plugins {
     id 'kotlin-allopen'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
+    id 'com.google.firebase.appdistribution'
 }
 
 android {
@@ -44,6 +45,11 @@ android {
         minSdkVersion androidMinSdkVersion
         targetSdkVersion androidTargetSdkVersion
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+        firebaseAppDistribution {
+            artifactType = 'APK'
+            groups = 'testers'
+        }
     }
 
     signingConfigs {

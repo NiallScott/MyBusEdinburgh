@@ -1,8 +1,11 @@
-name: Push and pull request
-on: [pull_request, push]
+name: Deploy staging
+on:
+  push:
+    branches:
+      - staging
 jobs:
   build-and-test:
-    name: Build and test
+    name: Build, test and deploy
     runs-on: ubuntu-latest
     environment: development
     steps:
@@ -15,8 +18,8 @@ jobs:
           cache: gradle
       - name: Write Google Services file
         run: |
-          mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburgh/
-          echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburgh/google-services.json
+          mkdir -p ${GITHUB_WORKSPACE}/app/src/edinburghDebug/
+          echo ${{ secrets.EDINBURGH_GOOGLE_SERVICES_BASE64 }} | base64 --decode > ${GITHUB_WORKSPACE}/app/src/edinburghDebug/google-services.json
         shell: bash
       - name: Write debug keystore
         run: |
@@ -25,7 +28,14 @@ jobs:
         shell: bash
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/debug.keystore
-      - name: Build and test
+      - name: Write Firebase Service Credentials File
+        run: |
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS" >> $GITHUB_ENV
+          echo ${{ secrets.EDINBURGH_FIREBASE_SERVICE_ACCOUNT_TOKEN_BASE64 }} | base64 --decode > $GOOGLE_APPLICATION_CREDENTIALS
+        shell: bash
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account-token.json
+      - name: Build, test and deploy
         run: >
           ./gradlew
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
@@ -35,9 +45,13 @@ jobs:
           -Pmybus.keystore.debug.keyAlias=${{ secrets.KEYSTORE_ALIAS }}
           -Pmybus.keystore.debug.keyPassword=${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
           clean
-          test
-          :app:lint
-          assembleDebug
+          :core:test
+          :edinburgh:test
+          :androidcore:testEdinburghDebugUnitTest
+          :app:testEdinburghDebugUnitTest
+          :app:lintEdinburghDebug
+          :app:assembleDebug
+          :app:appDistributionUploadEdinburghDebug
         env:
           JAVA_OPTS: '-Xmx4096m'
       - name: Store APKs
