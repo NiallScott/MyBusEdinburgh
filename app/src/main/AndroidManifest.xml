@@ -57,12 +57,12 @@
              to the package name. -->
         <meta-data
             android:name="com.google.android.backup.api_key"
-            android:value="AEdPqrEAAAAIgfw_r8tIY0nyXAflwrdH6DJ1K38Gwog80pGrPw" />
+            android:value="unused" />
         
         <!-- The API key for Google Maps Android API v2. -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAv1VYsySkSWNqZ9UQ5jA2TEitLk2lIKIM" />
+            android:value="${googleMapsApiKey}" />
         
         <!-- This is required by Google Play Services. -->
         <meta-data

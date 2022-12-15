@@ -46,16 +46,19 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    signingConfigs {
+        globalDebug {
+            storeFile file(project.findProperty('mybus.keystore.debug.file') ?: '/dev/null')
+            storePassword project.findProperty('mybus.keystore.debug.storePassword') ?: 'not_set'
+            keyAlias project.findProperty('mybus.keystore.debug.keyAlias') ?: 'not_set'
+            keyPassword project.findProperty('mybus.keystore.debug.keyPassword') ?: 'not_set'
         }
 
-        debug {
-            applicationIdSuffix '.debug'
-            versionNameSuffix '-debug'
-            testCoverageEnabled true
+        edinburgh {
+            storeFile file(project.findProperty('mybus.keystore.release.file') ?: '/dev/null')
+            storePassword project.findProperty('mybus.keystore.release.storePassword') ?: 'not_set'
+            keyAlias project.findProperty('mybus.keystore.release.keyAlias') ?: 'not_set'
+            keyPassword project.findProperty('mybus.keystore.release.keyPassword') ?: 'not_set'
         }
     }
 
@@ -69,6 +72,35 @@ android {
             versionCode 15
             versionName '3.0'
             archivesBaseName = "MyBusEdinburgh-$versionName"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            productFlavors {
+                edinburgh {
+                    signingConfig signingConfigs.edinburgh
+                    manifestPlaceholders += [
+                            googleMapsApiKey: project.findProperty('mybus.edinburgh.release.mapsKey')
+                                    ?: "undefined"
+                    ]
+                }
+            }
+        }
+
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+            testCoverageEnabled true
+            signingConfig signingConfigs.globalDebug
+
+            productFlavors.edinburgh.manifestPlaceholders += [
+                    googleMapsApiKey: project.findProperty('mybus.edinburgh.debug.mapsKey')
+                            ?: "undefined"
+            ]
         }
     }
 
