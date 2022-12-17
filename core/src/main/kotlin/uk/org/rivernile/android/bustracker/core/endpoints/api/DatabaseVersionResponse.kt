@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.di
-
-import javax.inject.Qualifier
-import kotlin.annotation.MustBeDocumented
-import kotlin.annotation.Retention
+package uk.org.rivernile.android.bustracker.core.endpoints.api
 
 /**
- * This annotation defines a Dagger qualifier for no backup dependencies.
+ * This sealed interface and its children define the possible response from requesting the database
+ * version.
  *
  * @author Niall Scott
  */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ForNoBackup
+sealed interface DatabaseVersionResponse {
+
+    /**
+     * The response was successful.
+     *
+     * @property databaseVersion The database version properties.
+     */
+    data class Success(
+            val databaseVersion: DatabaseVersion) : DatabaseVersionResponse
+
+    /**
+     * This interface describes error which can arise from getting the database version.
+     */
+    sealed interface Error : DatabaseVersionResponse {
+
+        /**
+         * This response was not successful due to an IO error.
+         *
+         * @property throwable The [Throwable] which caused this error.
+         */
+        data class Io(
+                val throwable: Throwable) : Error
+
+        /**
+         * There was an error from the server.
+         */
+        object ServerError : Error
+    }
+}

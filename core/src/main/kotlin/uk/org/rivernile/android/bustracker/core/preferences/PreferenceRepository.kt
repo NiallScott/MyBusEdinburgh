@@ -52,6 +52,20 @@ class PreferenceRepository @Inject constructor(
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
     /**
+     * Should database updates be over Wi-Fi only?
+     */
+    val isDatabaseUpdateWifiOnly: Boolean get() =
+        preferenceManager.isBusStopDatabaseUpdateWifiOnly()
+
+    /**
+     * A [Flow] which emits whether database updates should be over Wi-Fi only.
+     */
+    val isDatabaseUpdateWifiOnlyFlow get() =
+        getPreferenceFlow(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY) {
+            preferenceManager.isBusStopDatabaseUpdateWifiOnly()
+        }
+
+    /**
      * A [Flow] which emits the [AppTheme] and will emit further values when this preference
      * changes.
      */

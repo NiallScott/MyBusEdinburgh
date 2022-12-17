@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -33,20 +34,20 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
 import uk.org.rivernile.android.bustracker.core.di.ForApi
+import uk.org.rivernile.android.bustracker.core.di.ForApiAppName
+import uk.org.rivernile.android.bustracker.core.di.ForApiSchemaName
 import uk.org.rivernile.android.bustracker.core.di.ForKotlinJsonSerialization
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
-import uk.org.rivernile.android.bustracker.core.endpoints.api.json.ApiServiceFactory
 import uk.org.rivernile.android.bustracker.core.endpoints.api.json.JsonApiEndpoint
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 /**
  * This Dagger module provides dependencies for the API.
  *
  * @author Niall Scott
  */
-@Module
+@Module(includes = [ ApiModule.Bindings::class ])
 internal class ApiModule {
 
     /**
@@ -55,23 +56,12 @@ internal class ApiModule {
      * @return The API app name.
      */
     @Provides
-    @Singleton
-    @ForApi
-    fun provideApiAppName() = BuildConfig.API_APP_NAME
+    @ForApiAppName
+    fun provideApiAppName(): String = BuildConfig.API_APP_NAME
 
-    /**
-     * Provide the [ApiEndpoint] implementation.
-     *
-     * @param apiServiceFactory An [ApiServiceFactory] instance.
-     * @param apiKeyGenerator An [ApiKeyGenerator] instance.
-     * @return The [ApiEndpoint] implementation.
-     */
     @Provides
-    @Singleton
-    fun provideApiEndpoint(
-            apiServiceFactory: ApiServiceFactory,
-            apiKeyGenerator: ApiKeyGenerator): ApiEndpoint =
-            JsonApiEndpoint(apiServiceFactory, apiKeyGenerator, BuildConfig.SCHEMA_NAME)
+    @ForApiSchemaName
+    fun provideApiSchemaName(): String = BuildConfig.SCHEMA_NAME
 
     /**
      * Provide the [ApiKeyGenerator] implementation.
@@ -79,7 +69,7 @@ internal class ApiModule {
      * @return The [ApiKeyGenerator] implementation.
      */
     @Provides
-    fun provideApiKeyGenerator() = ApiKeyGenerator(BuildConfig.API_KEY)
+    fun provideApiKeyGenerator(): ApiKeyGenerator = ApiKeyGenerator(BuildConfig.API_KEY)
 
     /**
      * Provide the [Retrofit] instance for the API.
@@ -114,4 +104,12 @@ internal class ApiModule {
                     .writeTimeout(30, TimeUnit.SECONDS)
                     .followRedirects(false)
                     .build()
+
+    @Module
+    interface Bindings {
+
+        @Suppress("unused")
+        @Binds
+        fun bindApiEndpoint(jsonApiEndpoint: JsonApiEndpoint): ApiEndpoint
+    }
 }

@@ -27,9 +27,12 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -46,11 +49,15 @@ import javax.inject.Singleton
 internal class AndroidBusStopDatabaseRepository @Inject constructor(
         private val context: Context,
         private val contract: BusStopDatabaseContract,
-        private val databaseInformationDao: DatabaseInformationDao): BusStopDatabaseRepository {
+        private val databaseInformationDao: DatabaseInformationDao,
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher)
+    : BusStopDatabaseRepository {
 
-    override fun replaceDatabase(newDatabase: File) {
-        context.contentResolver.call(contract.getContentUri(),
-                BusStopDatabaseContract.METHOD_REPLACE_DATABASE, newDatabase.absolutePath, null)
+    override suspend fun replaceDatabase(newDatabase: File) {
+        withContext(ioDispatcher) {
+            context.contentResolver.call(contract.getContentUri(),
+                    BusStopDatabaseContract.METHOD_REPLACE_DATABASE, newDatabase.absolutePath, null)
+        }
     }
 
     override val databaseMetadataFlow: Flow<DatabaseMetadata?> get() =

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,9 +28,11 @@ package uk.org.rivernile.android.bustracker.core.database
 
 import android.content.Context
 import android.database.sqlite.SQLiteException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import java.io.File
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * This class is an Android specific implementation of [DatabaseUtils].
@@ -38,23 +40,25 @@ import javax.inject.Singleton
  * @param context The application [Context].
  * @author Niall Scott
  */
-@Singleton
 internal class AndroidDatabaseUtils @Inject constructor(
-        private val context: Context): DatabaseUtils {
+        private val context: Context,
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): DatabaseUtils {
 
     companion object {
 
         private const val TEMP_DB = "temp.db"
     }
 
-    override fun ensureDatabasePathExists() {
-        try {
-            context.openOrCreateDatabase(TEMP_DB, Context.MODE_PRIVATE, null).close()
-        } catch (ignored: SQLiteException) {
-            // Nothing to do here.
-        }
+    override suspend fun ensureDatabasePathExists() {
+        withContext(ioDispatcher) {
+            try {
+                context.openOrCreateDatabase(TEMP_DB, Context.MODE_PRIVATE, null).close()
+            } catch (ignored: SQLiteException) {
+                // Nothing to do here.
+            }
 
-        context.deleteDatabase(TEMP_DB)
+            context.deleteDatabase(TEMP_DB)
+        }
     }
 
     override fun getDatabasePath(dbFileName: String): File = context.getDatabasePath(dbFileName)

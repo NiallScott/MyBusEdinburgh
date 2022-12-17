@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.preferences
 
 import android.content.SharedPreferences
-import uk.org.rivernile.android.bustracker.core.di.ForNoBackup
 import java.lang.NumberFormatException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,13 +35,11 @@ import javax.inject.Singleton
  * This is the Android-specific implementation of [PreferenceManager].
  *
  * @param preferences The Android [SharedPreferences] instance.
- * @param noBackupPreferences Where preferences that shouldn't be backed up are stored.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidPreferenceManager @Inject constructor(
-        private val preferences: SharedPreferences,
-        @ForNoBackup private val noBackupPreferences: SharedPreferences) : PreferenceManager {
+        private val preferences: SharedPreferences) : PreferenceManager {
 
     companion object {
 
@@ -60,7 +57,6 @@ internal class AndroidPreferenceManager @Inject constructor(
         private const val PREF_MAP_LAST_LONGITUDE = "pref_map_last_longitude"
         private const val PREF_MAP_LAST_ZOOM = "pref_map_last_zoom"
         private const val PREF_MAP_LAST_MAP_TYPE = "pref_map_last_map_type"
-        private const val PREF_DATABASE_UPDATE_LAST_CHECK = "pref_database_update_last_check"
 
         private const val DEFAULT_WIFI_ONLY = false
         private const val DEFAULT_ALERT_SOUND = true
@@ -215,15 +211,6 @@ internal class AndroidPreferenceManager @Inject constructor(
     override fun setLastMapType(mapType: Int) {
         preferences.edit()
                 .putInt(PREF_MAP_LAST_MAP_TYPE, mapType)
-                .apply()
-    }
-
-    override fun getBusStopDatabaseUpdateLastCheckTimestamp(): Long =
-            noBackupPreferences.getLong(PREF_DATABASE_UPDATE_LAST_CHECK, 0L)
-
-    override fun setBusStopDatabaseUpdateLastCheckTimestamp(timestamp: Long) {
-        noBackupPreferences.edit()
-                .putLong(PREF_DATABASE_UPDATE_LAST_CHECK, timestamp)
                 .apply()
     }
 

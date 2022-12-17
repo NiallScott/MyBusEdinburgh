@@ -42,7 +42,7 @@ interface BusStopDatabaseRepository {
      *
      * @param newDatabase The [File] to replace the current database with.
      */
-    fun replaceDatabase(newDatabase: File)
+    suspend fun replaceDatabase(newDatabase: File)
 
     /**
      * A [Flow] which emits database metadata.

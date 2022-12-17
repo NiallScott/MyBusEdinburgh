@@ -44,6 +44,7 @@ buildscript {
         constraintLayoutVersion = '2.1.4'
         androidXPreferenceVersion = '1.2.0'
         architectureComponentsVersion = '2.5.1'
+        workManagerVersion = '2.8.0-rc01'
         daggerVersion = '2.44.2'
         okhttpVersion = '4.10.0'
         retrofitVersion = '2.9.0'

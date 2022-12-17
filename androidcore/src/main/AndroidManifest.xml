@@ -46,10 +46,6 @@
         android:backupAgent="uk.org.rivernile.android.bustracker.core.backup.BusTrackerBackupAgent">
 
         <service
-            android:name="uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseUpdateJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
             android:name="uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService"
             android:exported="false" />
 

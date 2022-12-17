@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,26 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.job
+package uk.org.rivernile.android.bustracker.core.di
 
-import android.app.job.JobParameters
-import android.net.Network
-import android.os.Build
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This extension function on [JobParameters] allows the caller to retrieve the [Network] a job
- * should perform networking over in a backwards compatible way. This API was introduced in
- * [Build.VERSION_CODES.P]. On the supported SDK versions, this function will return the value
- * returned by [JobParameters.getNetwork], otherwise `null` will be returned.
+ * This annotation defines a Dagger qualifier for the API schema name.
  *
- * @return The [Network] as provided by [JobParameters.getNetwork] if on a suitable platform
- * version, otherwise `null`.
- * @see JobParameters.getNetwork
  * @author Niall Scott
  */
-fun JobParameters.getNetworkCompat(): Network? =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            network
-        } else {
-            null
-        }
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForApiSchemaName

@@ -41,7 +41,7 @@ interface DatabaseInformationDao {
      *
      * @return The current topology ID of the database.
      */
-    fun getTopologyId(): String?
+    suspend fun getTopologyId(): String?
 
     /**
      * A [Flow] which emits database metadata.

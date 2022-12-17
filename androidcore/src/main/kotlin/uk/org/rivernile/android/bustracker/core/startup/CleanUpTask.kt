@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,8 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.startup
 
-import androidx.annotation.WorkerThread
-
 /**
  * This interface defines a process which cleans up data from old versions of the application. For
  * example, old databases and files may need to be removed from the file system. This interface can
@@ -38,9 +36,7 @@ import androidx.annotation.WorkerThread
 interface CleanUpTask {
 
     /**
-     * Perform a clean-up of data left behind from old versions of the app. This method is called
-     * on a background thread.
+     * Perform a clean-up of data left behind from old versions of the app.
      */
-    @WorkerThread
-    fun performCleanUp()
+    suspend fun performCleanUp()
 }

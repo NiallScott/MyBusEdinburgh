@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,41 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.http
+package uk.org.rivernile.android.bustracker.core.di
 
-import java.io.IOException
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This [IOException] is thrown when there was an issue downloading a file.
+ * This annotation defines a Dagger qualifier for the API app name.
  *
  * @author Niall Scott
  */
-class FileDownloadException : IOException {
-
-    /**
-     * Default constructor with empty message and no causes.
-     */
-    internal constructor() : super()
-
-    /**
-     * Constructor which specifies a message and no cause.
-     *
-     * @param message The exception message.
-     */
-    internal constructor(message: String?) : super(message)
-
-    /**
-     * Constructor which specifies a message and a cause.
-     *
-     * @param message The exception message.
-     * @param cause The causing [Throwable].
-     */
-    internal constructor(message: String?, cause: Throwable?) : super(message, cause)
-
-    /**
-     * Constructor which specifies a cause but no message.
-     *
-     * @param cause The causing [Throwable].
-     */
-    internal constructor(cause: Throwable?) : super(cause)
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForApiAppName

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.create
 import uk.org.rivernile.android.bustracker.core.di.ForApi
 import javax.inject.Inject
 import javax.net.SocketFactory
@@ -58,18 +59,17 @@ class ApiServiceFactory @Inject constructor(
      * @param socketFactory The optional [SocketFactory] instance to use for network calls.
      * @return The [ApiService] instance to use to contact the service.
      */
-    fun getApiInstance(socketFactory: SocketFactory? = null): ApiService =
-            if (socketFactory != null) {
-                val newOkHttpClient = okHttpClient.newBuilder()
-                        .socketFactory(socketFactory)
-                        .build()
-                val newRetrofit = retrofit.newBuilder()
-                        .client(newOkHttpClient)
-                        .build()
-                createApiService(newRetrofit)
-            } else {
-                defaultInstance
-            }
+    fun getApiInstance(socketFactory: SocketFactory? = null): ApiService {
+        return socketFactory?.let { sf ->
+            val newOkHttpClient = okHttpClient.newBuilder()
+                    .socketFactory(sf)
+                    .build()
+            val newRetrofit = retrofit.newBuilder()
+                    .client(newOkHttpClient)
+                    .build()
+            createApiService(newRetrofit)
+        } ?: defaultInstance
+    }
 
     /**
      * Given a [Retrofit] instance, create the [ApiService] instance for this.
@@ -77,5 +77,5 @@ class ApiServiceFactory @Inject constructor(
      * @param retrofit The [Retrofit] instance to use.
      * @return A new [ApiService] instance, created from the provided [Retrofit] instance.
      */
-    private fun createApiService(retrofit: Retrofit) = retrofit.create(ApiService::class.java)
+    private fun createApiService(retrofit: Retrofit) = retrofit.create<ApiService>()
 }

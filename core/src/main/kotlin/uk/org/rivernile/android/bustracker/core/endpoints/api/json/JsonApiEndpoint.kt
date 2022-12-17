@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
+import okio.IOException
+import uk.org.rivernile.android.bustracker.core.di.ForApiSchemaName
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
+import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersionResponse
+import javax.inject.Inject
+import javax.inject.Singleton
 import javax.net.SocketFactory
 
 /**
@@ -40,17 +44,49 @@ import javax.net.SocketFactory
  * @property schemaType The schema type.
  * @author Niall Scott
  */
-class JsonApiEndpoint(
+@Singleton
+class JsonApiEndpoint @Inject internal constructor(
         private val apiServiceFactory: ApiServiceFactory,
         private val apiKeyGenerator: ApiKeyGenerator,
-        private val schemaType: String) : ApiEndpoint {
+        @ForApiSchemaName private val schemaType: String) : ApiEndpoint {
 
-    override fun createDatabaseVersionRequest(socketFactory: SocketFactory?)
-            : ApiRequest<DatabaseVersion> {
-        val hashedApiKey = apiKeyGenerator.generateHashedApiKey()
-        val call = apiServiceFactory.getApiInstance(socketFactory)
-                .getDatabaseVersion(hashedApiKey, schemaType)
+    override suspend fun getDatabaseVersion(
+            socketFactory: SocketFactory?): DatabaseVersionResponse {
+        return try {
+            val response = apiServiceFactory.getApiInstance(socketFactory)
+                    .getDatabaseVersion(apiKeyGenerator.generateHashedApiKey(), schemaType)
 
-        return DatabaseVersionApiRequest(call)
+            if (response.isSuccessful) {
+                mapToDatabaseVersion(response.body())?.let {
+                    DatabaseVersionResponse.Success(it)
+                } ?: DatabaseVersionResponse.Error.ServerError
+            } else {
+                DatabaseVersionResponse.Error.ServerError
+            }
+        } catch (e: IOException) {
+            DatabaseVersionResponse.Error.Io(e)
+        }
+    }
+
+    /**
+     * Map a [JsonDatabaseVersion] to a [DatabaseVersion]. Returns `null` when the input is `null`.
+     *
+     * @param jsonDatabaseVersion The JSON representation of the database version.
+     * @return A [DatabaseVersion] of the mapped JSON, or `null` if the root object or expected
+     * fields are `null`.
+     */
+    private fun mapToDatabaseVersion(jsonDatabaseVersion: JsonDatabaseVersion?): DatabaseVersion? {
+        return jsonDatabaseVersion?.let {
+            val schemaVersion = it.schemaVersion ?: return null
+            val topologyId = it.topologyId ?: return null
+            val databaseUrl = it.databaseUrl ?: return null
+            val checksum = it.checksum ?: return null
+
+            DatabaseVersion(
+                    schemaVersion,
+                    topologyId,
+                    databaseUrl,
+                    checksum)
+        }
     }
 }

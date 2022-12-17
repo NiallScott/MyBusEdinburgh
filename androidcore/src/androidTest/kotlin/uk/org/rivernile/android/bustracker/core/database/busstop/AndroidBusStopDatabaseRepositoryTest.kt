@@ -90,14 +90,15 @@ class AndroidBusStopDatabaseRepositoryTest {
         database = AndroidBusStopDatabaseRepository(
                 mockContext,
                 contract,
-                databaseInformationDao)
+                databaseInformationDao,
+                coroutineRule.testDispatcher)
 
         whenever(contract.getContentUri())
                 .thenReturn(contentUri)
     }
 
     @Test
-    fun replaceDatabaseCallsCorrectParametersOnContentResolver() {
+    fun replaceDatabaseCallsCorrectParametersOnContentResolver() = runTest {
         val fakeFile = File("/fake/file/path.db")
         val mockContentProvider = object : MockContentProvider() {
             override fun call(method: String,

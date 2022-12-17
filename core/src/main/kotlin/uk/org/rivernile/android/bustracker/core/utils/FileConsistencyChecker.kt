@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.core.utils
 
-import java.io.BufferedInputStream
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import okio.HashingSink
+import okio.blackholeSink
+import okio.buffer
+import okio.source
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import java.io.File
 import java.io.IOException
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import javax.inject.Inject
 
 /**
@@ -38,7 +42,8 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class FileConsistencyChecker @Inject constructor() {
+class FileConsistencyChecker @Inject internal constructor(
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
      * Calculate the hash of a given file and compare it with the expected hash.
@@ -49,7 +54,7 @@ class FileConsistencyChecker @Inject constructor() {
      * @throws IOException When there was an issue reading the file.
      */
     @Throws(IOException::class)
-    fun checkFileMatchesHash(file: File, expectedHash: String): Boolean {
+    suspend fun checkFileMatchesHash(file: File, expectedHash: String): Boolean {
         val fileHash = calculateFileConsistencyHash(file)
 
         return fileHash == expectedHash
@@ -59,43 +64,19 @@ class FileConsistencyChecker @Inject constructor() {
      * Create a checksum for a [File]. This could be used to check that a file is of correct
      * consistency.
      *
-     * See: http://vyshemirsky.blogspot.com/2007/08/computing-md5-digest-checksum-in-java.html
-     *
-     * This has been slightly modified. And now updated for Kotlin.
-     *
      * @param file The file to run the MD5 checksum against.
      * @return The MD5 checksum string.
-     * @throws IOException When there was an issue reading the file.
+     * @throws IOException When there was an issue readin the file.
      */
     @Throws(IOException::class)
-    private fun calculateFileConsistencyHash(file: File): String {
-        val hasher = try {
-            MessageDigest.getInstance("MD5")
-        } catch (ignored: NoSuchAlgorithmException) {
-            return ""
-        }
-
-        BufferedInputStream(file.inputStream()).use {
-            val buffer = ByteArray(1024)
-
-            do {
-                val bytesRead = it.read(buffer)
-
-                if (bytesRead > 0) {
-                    hasher.update(buffer, 0, bytesRead)
+    private suspend fun calculateFileConsistencyHash(file: File): String {
+        return withContext(ioDispatcher) {
+            file.source().buffer().use { source ->
+                HashingSink.md5(blackholeSink()).use { sink ->
+                    source.readAll(sink)
+                    sink.hash.hex()
                 }
-            } while (bytesRead != -1)
-        }
-
-        return hasher.digest()?.let { bytes ->
-            val sb = StringBuilder()
-
-            bytes.forEach { byte ->
-                val str = Integer.toString((byte.toInt() and 0xFF) + 0x100, 16).substring(1)
-                sb.append(str)
             }
-
-            sb.toString()
-        } ?: ""
+        }
     }
 }

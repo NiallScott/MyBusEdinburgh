@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,34 +26,39 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import android.content.Context
+import androidx.work.Configuration
+import androidx.work.DelegatingWorkerFactory
+import androidx.work.WorkManager
+import androidx.work.WorkerFactory
 import dagger.Module
-import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService
-import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRunnerService
+import dagger.Provides
+import uk.org.rivernile.android.bustracker.core.work.CoreWorkerFactory
+import javax.inject.Singleton
 
 /**
- * This [Module] is used to inject [android.app.Service] instances in this application.
+ * This Dagger module provides dependencies relating to Android Work Manager.
  *
  * @author Niall Scott
  */
 @Module
-internal interface ServiceModule {
+internal class WorkModule {
 
-    /**
-     * Presents an instance of [ArrivalAlertRunnerService] as an item to be injected.
-     *
-     * @return An instance of [ArrivalAlertRunnerService] to be injected.
-     */
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeArrivalAlertRunnerService(): ArrivalAlertRunnerService
+    @Provides
+    fun provideWorkerFactory(
+            coreWorkerFactory: CoreWorkerFactory): WorkerFactory =
+            DelegatingWorkerFactory().apply {
+                addFactory(coreWorkerFactory)
+            }
 
-    /**
-     * Presents an instance of [ProximityAlertRunnerService] as an item to be injected.
-     *
-     * @return An instance of [ProximityAlertRunnerService] to be injected.
-     */
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeProximityAlertRunnerService(): ProximityAlertRunnerService
+    @Provides
+    fun provideWorkManagerConfiguration(
+            workerFactory: WorkerFactory): Configuration =
+            Configuration.Builder()
+                    .setWorkerFactory(workerFactory)
+                    .build()
+
+    @Singleton
+    @Provides
+    fun provideWorkManager(context: Context): WorkManager = WorkManager.getInstance(context)
 }

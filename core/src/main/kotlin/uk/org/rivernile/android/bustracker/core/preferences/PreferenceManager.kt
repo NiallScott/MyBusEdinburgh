@@ -215,18 +215,4 @@ interface PreferenceManager {
      * @param mapType The last known map type.
      */
     fun setLastMapType(mapType: Int)
-
-    /**
-     * Get the timestamp of when the last check was for a bus stop database update.
-     *
-     * @return The timestamp of when the last check was for a bus stop database update.
-     */
-    fun getBusStopDatabaseUpdateLastCheckTimestamp(): Long
-
-    /**
-     * Set the timestamp of when the last check was for a bus stop database update.
-     *
-     * @param timestamp The timestamp of when the last check was for a bus stop database update.
-     */
-    fun setBusStopDatabaseUpdateLastCheckTimestamp(timestamp: Long)
 }

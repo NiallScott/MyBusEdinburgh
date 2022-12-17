@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
-import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -42,10 +42,10 @@ interface ApiService {
      *
      * @param apiKey The API key.
      * @param schemaType The schema type.
-     * @return A Retrofit [Call] object.
+     * @return A Retrofit [Response] object.
      */
     @GET("DatabaseVersion")
-    fun getDatabaseVersion(
+    suspend fun getDatabaseVersion(
             @Query("key") apiKey: String,
-            @Query("schemaType") schemaType: String): Call<JsonDatabaseVersion>
+            @Query("schemaType") schemaType: String): Response<JsonDatabaseVersion>
 }

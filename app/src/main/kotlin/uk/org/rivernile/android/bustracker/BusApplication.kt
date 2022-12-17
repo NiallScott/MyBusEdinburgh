@@ -27,6 +27,7 @@ package uk.org.rivernile.android.bustracker
 
 import android.app.Application
 import android.content.Context
+import androidx.work.Configuration
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector
 import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
@@ -44,14 +45,16 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class BusApplication : Application(), HasAndroidInjector {
+class BusApplication : Application(), HasAndroidInjector, Configuration.Provider {
 
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
     @Inject
+    lateinit var workerConfiguration: Configuration
+    @Inject
     lateinit var appThemeObserver: AppThemeObserver
     @Inject
-    lateinit var startUpTask: StartUpTask
+    lateinit var startUpTask: dagger.Lazy<StartUpTask>
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
@@ -65,8 +68,10 @@ class BusApplication : Application(), HasAndroidInjector {
         super.onCreate()
 
         appThemeObserver.observeAppTheme()
-        startUpTask.performStartUpTasks()
+        startUpTask.get().performStartUpTasks()
     }
 
     override fun androidInjector() = dispatchingAndroidInjector
+
+    override fun getWorkManagerConfiguration() = workerConfiguration
 }

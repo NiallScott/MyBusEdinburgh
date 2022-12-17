@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
 import okio.IOException
-import uk.org.rivernile.android.bustracker.core.di.ForApi
+import uk.org.rivernile.android.bustracker.core.di.ForApiAppName
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.LatestTweetsResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
@@ -51,7 +51,7 @@ class ApiTwitterEndpoint @Inject constructor(
         private val twitterService: TwitterService,
         private val connectivityRepository: ConnectivityRepository,
         private val apiKeyGenerator: ApiKeyGenerator,
-        @ForApi private val appName: String,
+        @ForApiAppName private val appName: String,
         private val tweetsMapper: TweetsMapper) : TwitterEndpoint {
 
     override suspend fun getLatestTweets(): LatestTweetsResponse {

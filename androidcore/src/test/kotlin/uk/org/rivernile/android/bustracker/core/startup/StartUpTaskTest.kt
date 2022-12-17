@@ -37,7 +37,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.inOrder
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.backup.BackupObserver
-import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
+import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseWorkScheduler
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
@@ -58,7 +58,7 @@ class StartUpTaskTest {
     @Mock
     private lateinit var backupObserver: BackupObserver
     @Mock
-    private lateinit var busStopDatabaseJobScheduler: UpdateBusStopDatabaseJobScheduler
+    private lateinit var busStopDatabaseJobScheduler: UpdateBusStopDatabaseWorkScheduler
     @Mock
     private lateinit var cleanUpTask: CleanUpTask
     @Mock

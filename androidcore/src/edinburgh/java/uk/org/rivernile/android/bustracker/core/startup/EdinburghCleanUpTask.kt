@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.startup
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import javax.inject.Inject
 
 /**
@@ -35,16 +38,19 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class EdinburghCleanUpTask @Inject constructor(
-        private val databaseUtils: DatabaseUtils) : CleanUpTask {
+        private val databaseUtils: DatabaseUtils,
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : CleanUpTask {
 
-    override fun performCleanUp() {
-        arrayOf(
-                databaseUtils.getDatabasePath("busstops.db"),
-                databaseUtils.getDatabasePath("busstops.db-journal"),
-                databaseUtils.getDatabasePath("busstops2.db"),
-                databaseUtils.getDatabasePath("busstops2.db-journal"),
-                databaseUtils.getDatabasePath("busstops8.db"),
-                databaseUtils.getDatabasePath("busstops8.db-journal")
-        ).forEach { it.delete() }
+    override suspend fun performCleanUp() {
+        withContext(ioDispatcher) {
+            arrayOf(
+                    databaseUtils.getDatabasePath("busstops.db"),
+                    databaseUtils.getDatabasePath("busstops.db-journal"),
+                    databaseUtils.getDatabasePath("busstops2.db"),
+                    databaseUtils.getDatabasePath("busstops2.db-journal"),
+                    databaseUtils.getDatabasePath("busstops8.db"),
+                    databaseUtils.getDatabasePath("busstops8.db-journal")
+            ).forEach { it.delete() }
+        }
     }
 }

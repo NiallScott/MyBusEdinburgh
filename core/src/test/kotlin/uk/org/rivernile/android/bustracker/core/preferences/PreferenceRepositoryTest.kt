@@ -71,6 +71,65 @@ class PreferenceRepositoryTest {
     }
 
     @Test
+    fun isDatabaseUpdateWifiOnlyReturnsFalseWhenPreferenceManagerReturnsFalse() {
+        whenever(preferenceManager.isBusStopDatabaseUpdateWifiOnly())
+                .thenReturn(false)
+
+        val result = repository.isDatabaseUpdateWifiOnly
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun isDatabaseUpdateWifiOnlyReturnsTrueWhenPreferenceManagerReturnsTrue() {
+        whenever(preferenceManager.isBusStopDatabaseUpdateWifiOnly())
+                .thenReturn(true)
+
+        val result = repository.isDatabaseUpdateWifiOnly
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun isDatabaseUpdateWifiOnlyFlowEmitsInitialValue() = runTest {
+        whenever(preferenceManager.isBusStopDatabaseUpdateWifiOnly())
+                .thenReturn(false)
+
+        val observer = repository.isDatabaseUpdateWifiOnlyFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+        verify(preferenceManager)
+                .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
+    fun isDatabaseUpdateWifiOnlyFlowRespondsToPreferenceChange() = runTest {
+        doAnswer {
+            val prefListener = it.getArgument<PreferenceListener>(0)
+            val expectedKeys = setOf(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY)
+            assertEquals(expectedKeys, prefListener.keys)
+            prefListener.listener.apply {
+                onPreferenceChanged(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY)
+                onPreferenceChanged(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY)
+            }
+        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
+        whenever(preferenceManager.isBusStopDatabaseUpdateWifiOnly())
+                .thenReturn(false, true, false)
+
+        val observer = repository.isDatabaseUpdateWifiOnlyFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(false, true, false)
+        verify(preferenceManager)
+                .removeOnPreferenceChangedListener(any())
+    }
+
+    @Test
     fun appThemeFlowEmitsInitialValue() = runTest {
         whenever(preferenceManager.appTheme)
                 .thenReturn(AppTheme.SYSTEM_DEFAULT)

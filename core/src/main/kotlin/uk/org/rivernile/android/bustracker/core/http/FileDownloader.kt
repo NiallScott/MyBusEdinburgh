@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,37 +26,75 @@
 
 package uk.org.rivernile.android.bustracker.core.http
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okio.IOException
+import okio.buffer
+import okio.sink
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import java.io.File
 import javax.inject.Inject
 import javax.net.SocketFactory
 
 /**
- * This class is used to create new [FileDownloadSession]s.
+ * This class is used to download files.
  *
  * @param okHttpClient The HTTP implementation.
+ * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
-class FileDownloader @Inject constructor(private val okHttpClient: OkHttpClient) {
+class FileDownloader @Inject internal constructor(
+        private val okHttpClient: OkHttpClient,
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
-     * Create a new [FileDownloadSession] to download a file to a location.
+     * Download a file from the given [url] to [toLocation]. If [socketFactory] is not-`null`, this
+     * is used to provide what socket the connection should be made from, i.e. network interface
+     * binding.
      *
-     * @param url The URL of the file, as a [String].
-     * @param toLocation A [File] object describing the location to download the file to.
-     * @param socketFactory The [SocketFactory] to use to create connections.
+     * @param url The URL of the file to download.
+     * @param toLocation The location where the file should be downloaded to.
+     * @param socketFactory An optional [SocketFactory] to create sockets. This is used for network
+     * interface binding.
+     * @return The response from performing this download, to indicate status.
      */
-    fun createFileDownloadSession(url: String,
-                                  toLocation: File,
-                                  socketFactory: SocketFactory? = null): FileDownloadSession {
-        val okHttpClient = if (socketFactory != null) {
+    suspend fun downloadFile(
+            url: String,
+            toLocation: File,
+            socketFactory: SocketFactory? = null): FileDownloadResponse {
+        val okHttpClient = socketFactory?.let {
             this.okHttpClient.newBuilder()
-                    .socketFactory(socketFactory)
+                    .socketFactory(it)
                     .build()
-        } else {
-            this.okHttpClient
-        }
+        } ?: this.okHttpClient
 
-        return FileDownloadSession(okHttpClient, url, toLocation)
+        return withContext(ioDispatcher) {
+            try {
+                toLocation.sink().buffer()
+            } catch (e: IOException) {
+                return@withContext FileDownloadResponse.Error.IoError(e)
+            }.use { fileSink ->
+                val request = Request.Builder()
+                        .url(url)
+                        .build()
+
+                try {
+                    val response = okHttpClient.newCall(request).executeAsync()
+
+                    if (response.isSuccessful) {
+                        response.body?.let {
+                            fileSink.writeAll(it.source())
+                            FileDownloadResponse.Success
+                        } ?: FileDownloadResponse.Error.ServerError
+                    } else {
+                        FileDownloadResponse.Error.ServerError
+                    }
+                } catch (e: IOException) {
+                    FileDownloadResponse.Error.IoError(e)
+                }
+            }
+        }
     }
 }

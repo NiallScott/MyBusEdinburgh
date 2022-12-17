@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,9 +41,17 @@ import java.util.TimeZone
  */
 class ApiKeyGenerator(private val unhashedKey: String) {
 
+    @Suppress("SimpleDateFormat")
     private val dateFormatter = SimpleDateFormat("yyyyMMddHH").also {
         it.timeZone = TimeZone.getTimeZone("UTC")
     }
+
+    /**
+     * Generated a hashed version of the key, using the current time.
+     *
+     * @return A hashed version of the key, or empty [String] if there was an issue.
+     */
+    fun generateHashedApiKey() = generateHashedApiKey(Date())
 
     /**
      * Generate a hashed version of the key.
@@ -51,7 +59,7 @@ class ApiKeyGenerator(private val unhashedKey: String) {
      * @param time A [Date] object representing the time the key should be hashed for.
      * @return A hashed version of the key, or empty [String] if there was an issue.
      */
-    fun generateHashedApiKey(time: Date): String {
+    private fun generateHashedApiKey(time: Date): String {
         val combinedKey = unhashedKey + dateFormatter.format(time)
 
         return try {
@@ -68,11 +76,4 @@ class ApiKeyGenerator(private val unhashedKey: String) {
             ""
         }
     }
-
-    /**
-     * Generated a hashed version of the key, using the current time.
-     *
-     * @return A hashed version of the key, or empty [String] if there was an issue.
-     */
-    fun generateHashedApiKey() = generateHashedApiKey(Date())
 }

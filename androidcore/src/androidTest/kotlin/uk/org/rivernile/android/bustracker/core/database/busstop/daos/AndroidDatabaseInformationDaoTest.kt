@@ -96,7 +96,7 @@ class AndroidDatabaseInformationDaoTest {
     }
 
     @Test
-    fun checkGetTopologyIdSendsThroughCorrectParametersForQuery() {
+    fun checkGetTopologyIdSendsThroughCorrectParametersForQuery() = runTest {
         object : MockContentProvider() {
             override fun query(uri: Uri,
                                projection: Array<String>?,
@@ -119,7 +119,7 @@ class AndroidDatabaseInformationDaoTest {
     }
 
     @Test
-    fun getTopologyIdReturnsNullCursorWhenContentProviderQueryReturnsNull() {
+    fun getTopologyIdReturnsNullCursorWhenContentProviderQueryReturnsNull() = runTest {
         object : MockContentProvider() {
             override fun query(uri: Uri,
                                projection: Array<String>?,
@@ -136,7 +136,7 @@ class AndroidDatabaseInformationDaoTest {
     }
 
     @Test
-    fun getTopologyIdReturnsNullWhenAnEmptyCursorIsReturned() {
+    fun getTopologyIdReturnsNullWhenAnEmptyCursorIsReturned() = runTest {
         val columns = arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
         val cursor = MatrixCursor(columns)
         object : MockContentProvider() {
@@ -156,7 +156,7 @@ class AndroidDatabaseInformationDaoTest {
     }
 
     @Test
-    fun getTopologyIdReturnsTopologyIdWhenPopulatedCursorIsReturned() {
+    fun getTopologyIdReturnsTopologyIdWhenPopulatedCursorIsReturned() = runTest {
         val columns = arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
         val cursor = MatrixCursor(columns)
         cursor.addRow(arrayOf("testTopoId"))

@@ -80,7 +80,8 @@ import javax.inject.Singleton
     LocationModule::class,
     HttpModule::class,
     ServiceModule::class,
-    TwitterModule::class
+    TwitterModule::class,
+    WorkModule::class
 ])
 class CoreModule {
 

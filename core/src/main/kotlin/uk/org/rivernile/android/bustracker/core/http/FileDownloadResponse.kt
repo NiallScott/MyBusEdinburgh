@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,26 +24,37 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.http
 
 /**
- * Instances of this class represent a single API request.
+ * This sealed interface and its children define the possible responses from performing a file
+ * download.
  *
  * @author Niall Scott
  */
-interface ApiRequest<out T> {
+sealed interface FileDownloadResponse {
 
     /**
-     * Perform the request and return the result. This method is blocking.
-     *
-     * @return The result of the request.
-     * @throws ApiException When there was a problem with the request.
+     * The response was successful.
      */
-    @Throws(ApiException::class)
-    fun performRequest(): T
+    object Success : FileDownloadResponse
 
     /**
-     * Cancel the request.
+     * This interface describes errors which can arise from downloading a file.
      */
-    fun cancel()
+    sealed interface Error : FileDownloadResponse {
+
+        /**
+         * This response was not successful due to an IO error.
+         *
+         * @property throwable The [Throwable] which causes this error.
+         */
+        data class IoError(
+                val throwable: Throwable) : Error
+
+        /**
+         * The file download failed due to an error from the server.
+         */
+        object ServerError : Error
+    }
 }

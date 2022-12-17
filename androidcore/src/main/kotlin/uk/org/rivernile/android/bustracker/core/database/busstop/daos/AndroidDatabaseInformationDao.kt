@@ -60,19 +60,35 @@ internal class AndroidDatabaseInformationDao @Inject constructor(
         private val contract: DatabaseInformationContract,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): DatabaseInformationDao {
 
-    override fun getTopologyId() = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID),
-            null,
-            null,
-            null)?.use {
-        // Fill the Cursor window.
-        it.count
+    override suspend fun getTopologyId(): String? {
+        val cancellationSignal = CancellationSignal()
 
-        if (it.moveToFirst()) {
-            it.getString(it.getColumnIndexOrThrow(DatabaseInformationContract.CURRENT_TOPOLOGY_ID))
-        } else {
-            null
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
+
+                val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID),
+                        null,
+                        null,
+                        null)?.use {
+                    // Fill the Cursor window.
+                    it.count
+
+                    if (it.moveToFirst()) {
+                        it.getString(
+                                it.getColumnIndexOrThrow(
+                                        DatabaseInformationContract.CURRENT_TOPOLOGY_ID))
+                    } else {
+                        null
+                    }
+                }
+
+                continuation.resume(result)
+            }
         }
     }
 

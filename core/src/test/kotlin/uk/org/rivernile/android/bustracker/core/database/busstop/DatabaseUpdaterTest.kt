@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,37 +26,43 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
-import uk.org.rivernile.android.bustracker.core.http.FileDownloadException
-import uk.org.rivernile.android.bustracker.core.http.FileDownloadSession
+import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import java.io.File
 import java.io.IOException
-import javax.net.SocketFactory
 
 /**
- * Unit tests for [DatabaseUpdaterSession].
+ * Tests for [DatabaseUpdater].
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
-class DatabaseUpdaterSessionTest {
+class DatabaseUpdaterTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var databaseUtils: DatabaseUtils
@@ -70,58 +76,59 @@ class DatabaseUpdaterSessionTest {
     private lateinit var timeUtils: TimeUtils
 
     @Mock
-    private lateinit var downloadSession: FileDownloadSession
-    @Mock
     private lateinit var downloadFile: File
-    @Mock
-    private lateinit var socketFactory: SocketFactory
 
     private val databaseVersion = DatabaseVersion("MBE", "abc123", "http://host/db.db", "xyz789")
 
+    private lateinit var updater: DatabaseUpdater
+
     @Before
     fun setUp() {
+        updater = DatabaseUpdater(
+                databaseUtils,
+                fileDownloader,
+                fileConsistencyChecker,
+                databaseRepository,
+                timeUtils,
+                coroutineRule.testDispatcher)
+
         whenever(databaseUtils.getDatabasePath(any()))
                 .thenReturn(downloadFile)
-        whenever(fileDownloader.createFileDownloadSession(any(), any(), eq(socketFactory)))
-                .thenReturn(downloadSession)
     }
 
     @Test
-    fun usesTemporaryFilenameForDownloadFileLocation() {
-        val session = createSession(databaseVersion)
+    fun usesTemporaryFilenameForDownloadFileLocation() = runTest {
         whenever(timeUtils.getCurrentTimeMillis())
                 .thenReturn(123L)
 
-        session.updateDatabase()
+        updater.updateDatabase(databaseVersion, null)
 
         verify(databaseUtils)
                 .getDatabasePath("busstops.123.db_temp")
     }
 
     @Test
-    fun ensuresDatabasePathExistsBeforeCommencingDownload() {
-        val session = createSession(databaseVersion)
+    fun ensuresDatabasePathExistsBeforeCommencingDownload() = runTest {
+        updater.updateDatabase(databaseVersion, null)
 
-        session.updateDatabase()
-
-        val inOrder = inOrder(databaseUtils, downloadSession)
-        inOrder.verify(databaseUtils)
-                .ensureDatabasePathExists()
-        inOrder.verify(downloadSession)
-                .downloadFile()
+        inOrder(databaseUtils, fileDownloader) {
+            verify(databaseUtils)
+                    .ensureDatabasePathExists()
+            verify(fileDownloader)
+                    .downloadFile(any(), any(), anyOrNull())
+        }
     }
 
     @Test
-    fun returnsFalseAndDeletesDownloadFileWhenDownloadFails() {
-        val session = createSession(databaseVersion)
-        whenever(downloadSession.downloadFile())
-                .thenThrow(FileDownloadException::class.java)
+    fun returnsFalseAndDeletesDownloadFileWhenDownloadFails() = runTest {
+        whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
+                .thenReturn(FileDownloadResponse.Error.ServerError)
 
-        val result = session.updateDatabase()
+        val result = updater.updateDatabase(databaseVersion, null)
 
         assertFalse(result)
-        verify(downloadSession)
-                .downloadFile()
+        verify(fileDownloader)
+                .downloadFile(any(), any(), anyOrNull())
         verify(downloadFile)
                 .delete()
         verify(databaseRepository, never())
@@ -129,12 +136,13 @@ class DatabaseUpdaterSessionTest {
     }
 
     @Test
-    fun returnsFalseAndDeletesDownloadFileWhenFileConsistencyFailsToReadFile() {
-        val session = createSession(databaseVersion)
+    fun returnsFalseAndDeletesDownloadFileWhenFileConsistencyFailsToReadFile() = runTest {
+        whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
+                .thenReturn(FileDownloadResponse.Success)
         whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
                 .thenThrow(IOException::class.java)
 
-        val result = session.updateDatabase()
+        val result = updater.updateDatabase(databaseVersion, null)
 
         assertFalse(result)
         verify(fileConsistencyChecker)
@@ -146,12 +154,13 @@ class DatabaseUpdaterSessionTest {
     }
 
     @Test
-    fun returnsFalseAndDeletesDownloadWhenFileConsistencyDoesNotPass() {
-        val session = createSession(databaseVersion)
+    fun returnsFalseAndDeletesDownloadWhenFileConsistencyDoesNotPass() = runTest {
+        whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
+                .thenReturn(FileDownloadResponse.Success)
         whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
                 .thenReturn(false)
 
-        val result = session.updateDatabase()
+        val result = updater.updateDatabase(databaseVersion, null)
 
         assertFalse(result)
         verify(fileConsistencyChecker)
@@ -163,12 +172,13 @@ class DatabaseUpdaterSessionTest {
     }
 
     @Test
-    fun returnsTrueAndReplacesDatabaseWhenDownloadIsSuccessfulAndFileConsistencyPasses() {
-        val session = createSession(databaseVersion)
+    fun returnsTrueAndReplacesDatabaseWhenDownloadIsSuccessfulAndFileConsistencyPasses() = runTest {
+        whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
+                .thenReturn(FileDownloadResponse.Success)
         whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
                 .thenReturn(true)
 
-        val result = session.updateDatabase()
+        val result = updater.updateDatabase(databaseVersion, null)
 
         assertTrue(result)
         verify(downloadFile, never())
@@ -176,31 +186,4 @@ class DatabaseUpdaterSessionTest {
         verify(databaseRepository)
                 .replaceDatabase(downloadFile)
     }
-
-    @Test
-    fun cancellingASessionAttemptToCancelFileDownload() {
-        val session = createSession(databaseVersion)
-        whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
-                .thenReturn(true)
-
-        session.updateDatabase()
-        session.cancel()
-
-        verify(downloadSession)
-                .cancel()
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun throwsIoExceptionWhenAttemptingToStartAnAlreadyRunSession() {
-        val session = createSession(databaseVersion)
-        whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
-                .thenReturn(true)
-
-        session.updateDatabase()
-        session.updateDatabase()
-    }
-
-    private fun createSession(databaseVersion: DatabaseVersion) =
-            DatabaseUpdaterSession(databaseUtils, fileDownloader, fileConsistencyChecker,
-                    databaseRepository, timeUtils, databaseVersion, socketFactory)
 }

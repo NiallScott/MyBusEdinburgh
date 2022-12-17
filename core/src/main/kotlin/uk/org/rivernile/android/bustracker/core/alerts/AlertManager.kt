@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,7 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Arriv
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
 /**
@@ -107,18 +106,16 @@ class AlertManager @Inject internal constructor(
      * Ensure that tasks required to fulfil alerts are running.
      */
     suspend fun ensureTasksRunningIfAlertsExists() = supervisorScope {
-        val arrivalAlertTask = async {
+        launch {
             if (alertsDao.getArrivalAlertCount() > 0) {
                 arrivalAlertTaskLauncher.launchArrivalAlertTask()
             }
         }
 
-        val proximityAlertTask = async {
+        launch {
             if (alertsDao.getProximityAlertCount() > 0) {
                 proximityAlertTaskLauncher.launchProximityAlertTask()
             }
         }
-
-        awaitAll(arrivalAlertTask, proximityAlertTask)
     }
 }

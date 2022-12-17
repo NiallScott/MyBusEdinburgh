@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,12 +28,11 @@ package uk.org.rivernile.android.bustracker.core.startup
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
 import uk.org.rivernile.android.bustracker.core.backup.BackupObserver
-import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseJobScheduler
+import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseWorkScheduler
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
@@ -46,6 +45,8 @@ import javax.inject.Inject
  * The task is begun in [performStartUpTasks] and this is executed on another thread.
  *
  * @param appNotificationChannels Implementation to set up notification channels.
+ * @param backupObserver Used to observe data changes in the app to then inform the backup manager
+ * as a hint that data should be backed up.
  * @param busStopDatabaseUpdateJobScheduler Implementation to schedule updates to the bus stop
  * database.
  * @param cleanUpTask Implementation to perform clean up of app data - usually to remove data from
@@ -58,15 +59,14 @@ import javax.inject.Inject
 class StartUpTask @Inject internal constructor(
         private val appNotificationChannels: AppNotificationChannels,
         private val backupObserver: BackupObserver,
-        private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseJobScheduler,
+        private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseWorkScheduler,
         private val cleanUpTask: CleanUpTask?,
         private val alertManager: AlertManager,
         @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
     /**
-     * Run the app startup tasks. The tasks will be executed on a background thread so that the UI
-     * is not blocked.
+     * Run the app startup tasks. The tasks will be executed on the default [CoroutineDispatcher].
      */
     fun performStartUpTasks() {
         applicationCoroutineScope.launch(defaultDispatcher) {
@@ -75,40 +75,38 @@ class StartUpTask @Inject internal constructor(
             appNotificationChannels.createNotificationChannels()
             backupObserver.beginObserving()
 
-            awaitAll(
-                    launchScheduleUpdateBusStopDatabaseAsync(this),
-                    launchPerformCleanupAsync(this),
-                    launchEnsureAlertTasksRunningAsync(this))
+            supervisorScope {
+                launchScheduleUpdateBusStopDatabaseAsync()
+                launchPerformCleanupAsync()
+                launchEnsureAlertTasksRunningAsync()
+            }
         }
     }
 
     /**
      * Launch the async task to schedule updates to the bus stop database.
      *
-     * @param scope The [CoroutineScope] to execute the async task under.
      * @return The deferred task.
      */
-    private fun launchScheduleUpdateBusStopDatabaseAsync(scope: CoroutineScope) = scope.async {
+    private fun CoroutineScope.launchScheduleUpdateBusStopDatabaseAsync() = launch {
         busStopDatabaseUpdateJobScheduler.scheduleUpdateBusStopDatabaseJob()
     }
 
     /**
      * Launch the async task to perform app cleanup.
      *
-     * @param scope The [CoroutineScope] to execute the async task under.
      * @return The deferred task.
      */
-    private fun launchPerformCleanupAsync(scope: CoroutineScope) = scope.async {
+    private fun CoroutineScope.launchPerformCleanupAsync() = launch {
         cleanUpTask?.performCleanUp()
     }
 
     /**
      * Launch the async task to start alert tasks, if required.
      *
-     * @param scope The [CoroutineScope] to execute the async task under.
      * @return The deferred task.
      */
-    private fun launchEnsureAlertTasksRunningAsync(scope: CoroutineScope) = scope.async {
+    private fun CoroutineScope.launchEnsureAlertTasksRunningAsync() = launch {
         alertManager.ensureTasksRunningIfAlertsExists()
     }
 }

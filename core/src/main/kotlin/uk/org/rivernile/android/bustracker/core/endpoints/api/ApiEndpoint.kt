@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,11 +36,10 @@ import javax.net.SocketFactory
 interface ApiEndpoint {
 
     /**
-     * Create a new [ApiRequest] to obtain the latest database version.
+     * Get the database version.
      *
-     * @param socketFactory An optional [SocketFactory] to use to create connections.
-     * @return A new [ApiRequest] to obtain the latest database version.
+     * @param socketFactory An optional [SocketFactory] to perform the request with.
+     * @return The result of performing this request.
      */
-    fun createDatabaseVersionRequest(socketFactory: SocketFactory? = null):
-            ApiRequest<DatabaseVersion>
+    suspend fun getDatabaseVersion(socketFactory: SocketFactory? = null): DatabaseVersionResponse
 }

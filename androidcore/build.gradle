@@ -118,6 +118,9 @@ dependencies {
     // Android Architecture Components
     api "androidx.lifecycle:lifecycle-livedata-ktx:$architectureComponentsVersion"
 
+    // WorkManager
+    api "androidx.work:work-runtime-ktx:$workManagerVersion"
+
     // Dagger 2
     api "com.google.dagger:dagger-android:$daggerVersion"
     api "com.google.dagger:dagger-android-support:$daggerVersion"

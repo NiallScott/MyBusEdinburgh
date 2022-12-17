@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,39 +24,37 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api
+package uk.org.rivernile.android.bustracker.core.http
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Response
+import java.io.IOException
+import kotlin.coroutines.resumeWithException
 
 /**
- * This [Exception] is thrown when there was an issue communicating with the API.
+ * Execute an Okhttp [Call] within a coroutine.
  *
+ * @return The [Response] from executing the call.
  * @author Niall Scott
  */
-class ApiException : Exception {
+@OptIn(ExperimentalCoroutinesApi::class)
+suspend fun Call.executeAsync(): Response = suspendCancellableCoroutine { continuation ->
+    continuation.invokeOnCancellation {
+        cancel()
+    }
 
-    /**
-     * Default constructor.
-     */
-    constructor() : super()
+    enqueue(object : Callback {
+        override fun onFailure(call: Call, e: IOException) {
+            continuation.resumeWithException(e)
+        }
 
-    /**
-     * Constructor that specifies a message.
-     *
-     * @param message Exception message.
-     */
-    constructor(message: String) : super(message)
-
-    /**
-     * Constructor that specifies a cause [Throwable].
-     *
-     * @param throwable The cause [Throwable].
-     */
-    constructor(throwable: Throwable) : super(throwable)
-
-    /**
-     * Constructor that specifies a message and a cause [Throwable].
-     *
-     * @param message Exception message.
-     * @param throwable The cause [Throwable].
-     */
-    constructor(message: String, throwable: Throwable) : super(message, throwable)
+        override fun onResponse(call: Call, response: Response) {
+            continuation.resume(response) {
+                call.cancel()
+            }
+        }
+    })
 }

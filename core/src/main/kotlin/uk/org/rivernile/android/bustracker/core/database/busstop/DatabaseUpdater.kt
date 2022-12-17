@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import okio.IOException
 import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
+import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import java.io.File
 import javax.inject.Inject
 import javax.net.SocketFactory
 
 /**
- * This class will create new [DatabaseUpdaterSession] object which will perform the action of
- * updating the database.
+ * This class updates the database with a new version which has been downloaded from the API server.
  *
  * @param databaseUtils Utilities for dealing with databases.
  * @param fileDownloader An implementation for downloading files to a path.
@@ -45,23 +50,69 @@ import javax.net.SocketFactory
  * @param timeUtils Used to access timestamps.
  * @author Niall Scott
  */
-class DatabaseUpdater @Inject constructor(
+class DatabaseUpdater @Inject internal constructor(
         private val databaseUtils: DatabaseUtils,
         private val fileDownloader: FileDownloader,
         private val fileConsistencyChecker: FileConsistencyChecker,
         private val databaseRepository: BusStopDatabaseRepository,
-        private val timeUtils: TimeUtils) {
+        private val timeUtils: TimeUtils,
+        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
-     * Create a new database update session.
+     * Given a [DatabaseVersion] descriptor object, which supplies the database URL and expected
+     * hash checksum, update the database.
      *
-     * @param databaseVersion Metadata describing the database to update to.
-     * @param socketFactory A [SocketFactory] to create a socket on the correct interface to
-     * download the database update.
-     * @return A [DatabaseUpdaterSession] object.
+     * @return `true` when the update succeeded, otherwise `false`.
      */
-    fun createNewSession(databaseVersion: DatabaseVersion,
-                         socketFactory: SocketFactory? = null) =
-            DatabaseUpdaterSession(databaseUtils, fileDownloader, fileConsistencyChecker,
-                    databaseRepository, timeUtils, databaseVersion, socketFactory)
+    suspend fun updateDatabase(
+            databaseVersion: DatabaseVersion,
+            socketFactory: SocketFactory? = null): Boolean {
+        val downloadFile = databaseUtils.getDatabasePath(
+                "busstops.${timeUtils.getCurrentTimeMillis()}.db_temp")
+        databaseUtils.ensureDatabasePathExists()
+
+        if (fileDownloader.downloadFile(
+                        databaseVersion.databaseUrl,
+                        downloadFile,
+                        socketFactory) !is FileDownloadResponse.Success) {
+            downloadFile.deleteSuspend()
+
+            return false
+        }
+
+        if (!doesPassConsistencyCheck(downloadFile, databaseVersion.checksum)) {
+            downloadFile.deleteSuspend()
+
+            return false
+        }
+
+        databaseRepository.replaceDatabase(downloadFile)
+
+        return true
+    }
+
+    /**
+     * Does the downloaded [File] pass the file consistency check?
+     *
+     * @param downloadFile A [File] object describing the downloaded file.
+     * @param checksum The expected checksum to check for.
+     * @return `true` if the file consistency check passes, otherwise `false`.
+     */
+    private suspend fun doesPassConsistencyCheck(downloadFile: File, checksum: String) = try {
+        fileConsistencyChecker.checkFileMatchesHash(downloadFile, checksum)
+    } catch (ignored: IOException) {
+        false
+    }
+
+    /**
+     * Deletes the [File] from the filesystem while being executed on the Coroutines IO
+     * [CoroutineDispatcher].
+     *
+     * @see File.delete
+     */
+    private suspend fun File.deleteSuspend() {
+        withContext(ioDispatcher) {
+            delete()
+        }
+    }
 }

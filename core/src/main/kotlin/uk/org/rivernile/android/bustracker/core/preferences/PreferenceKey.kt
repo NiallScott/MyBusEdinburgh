@@ -38,7 +38,6 @@ enum class PreferenceKey {
      * only.
      */
     DATABASE_UPDATE_WIFI_ONLY,
-
     /**
      * Key for the preferences that specifies the app theme.
      */
