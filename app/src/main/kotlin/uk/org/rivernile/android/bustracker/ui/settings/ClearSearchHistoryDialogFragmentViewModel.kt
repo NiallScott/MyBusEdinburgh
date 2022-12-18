@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.settings
 
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -43,6 +44,7 @@ import javax.inject.Inject
  * @param defaultDispatcher The default [CoroutineDispatcher] to dispatch on.
  * @author Niall Scott
  */
+@HiltViewModel
 class ClearSearchHistoryDialogFragmentViewModel @Inject constructor(
         private val searchHistoryRepository: SearchHistoryRepository,
         @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,

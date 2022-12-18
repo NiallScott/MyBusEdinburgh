@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
 
@@ -36,6 +37,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@HiltViewModel
 class MainActivityViewModel @Inject constructor() : ViewModel() {
 
     /**

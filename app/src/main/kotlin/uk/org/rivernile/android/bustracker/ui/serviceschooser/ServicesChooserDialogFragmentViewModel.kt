@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 /**
  * This is the [ViewModel] for [ServicesChooserDialogFragment].
@@ -35,7 +37,8 @@ import androidx.lifecycle.ViewModel
  * @param savedState Used to access the saved instance state.
  * @author Niall Scott
  */
-class ServicesChooserDialogFragmentViewModel(
+@HiltViewModel
+class ServicesChooserDialogFragmentViewModel @Inject constructor(
         private val savedState: SavedStateHandle) : ViewModel() {
 
     companion object {

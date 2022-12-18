@@ -34,6 +34,7 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +51,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -57,6 +59,7 @@ import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
+import javax.inject.Inject
 
 /**
  * This [ViewModel] is used by [NearestStopsFragment].
@@ -73,7 +76,8 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-class NearestStopsFragmentViewModel(
+@HiltViewModel
+class NearestStopsFragmentViewModel @Inject constructor(
         private val savedState: SavedStateHandle,
         servicesRepository: ServicesRepository,
         private val busStopsRepository: BusStopsRepository,
@@ -83,7 +87,7 @@ class NearestStopsFragmentViewModel(
         private val locationRepository: LocationRepository,
         private val preferenceRepository: PreferenceRepository,
         uiStateRetriever: UiStateRetriever,
-        private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
 

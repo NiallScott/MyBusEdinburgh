@@ -27,13 +27,13 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import android.content.Context
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import androidx.work.DelegatingWorkerFactory
 import androidx.work.WorkManager
-import androidx.work.WorkerFactory
 import dagger.Module
 import dagger.Provides
-import uk.org.rivernile.android.bustracker.core.work.CoreWorkerFactory
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
@@ -41,21 +41,15 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
+@InstallIn(SingletonComponent::class)
 @Module
 internal class WorkModule {
 
     @Provides
-    fun provideWorkerFactory(
-            coreWorkerFactory: CoreWorkerFactory): WorkerFactory =
-            DelegatingWorkerFactory().apply {
-                addFactory(coreWorkerFactory)
-            }
-
-    @Provides
     fun provideWorkManagerConfiguration(
-            workerFactory: WorkerFactory): Configuration =
+            hiltWorkerFactory: HiltWorkerFactory): Configuration =
             Configuration.Builder()
-                    .setWorkerFactory(workerFactory)
+                    .setWorkerFactory(hiltWorkerFactory)
                     .build()
 
     @Singleton

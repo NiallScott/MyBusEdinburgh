@@ -35,25 +35,18 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.shape.MaterialShapeDrawable
-import dagger.android.AndroidInjection
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivitySettingsBinding
-import javax.inject.Inject
 
 /**
  * This [AppCompatActivity] is used to host a [SettingsFragment].
  *
  * @author Niall Scott
  */
-class SettingsActivity : AppCompatActivity(), HasAndroidInjector {
-
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
+@AndroidEntryPoint
+class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -79,6 +72,4 @@ class SettingsActivity : AppCompatActivity(), HasAndroidInjector {
             windowInsets
         }
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 }

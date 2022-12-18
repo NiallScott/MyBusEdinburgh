@@ -30,6 +30,8 @@ import com.davekoelle.alphanum.AlphanumComparator
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.config.BuildConfiguration
 import uk.org.rivernile.android.bustracker.core.config.EdinburghBuildConfiguration
 import uk.org.rivernile.android.bustracker.core.livetimes.EdinburghIsNightServiceDetector
@@ -44,15 +46,14 @@ import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    EdinburghBusTrackerModule::class,
-    FlavourModule.Bindings::class
-])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class FlavourModule {
 
     @Provides
     fun provideServiceComparator(): Comparator<String> = AlphanumComparator()
 
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

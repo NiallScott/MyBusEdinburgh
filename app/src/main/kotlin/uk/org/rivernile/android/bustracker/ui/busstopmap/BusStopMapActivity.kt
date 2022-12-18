@@ -40,14 +40,11 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.shape.MaterialShapeDrawable
-import dagger.android.AndroidInjection
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityBusStopMapBinding
-import javax.inject.Inject
 
 /**
  * This [android.app.Activity] displays the stop map to the user. This is usually hosted by
@@ -59,10 +56,8 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, HasAndroidInjector {
-
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
+@AndroidEntryPoint
+class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
 
     companion object {
 
@@ -74,8 +69,6 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
     private lateinit var viewBinding: ActivityBusStopMapBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -149,8 +142,6 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks, Ha
                 .putExtra(DisplayStopDataActivity.EXTRA_STOP_CODE, stopCode)
                 .let(this::startActivity)
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 
     /**
      * The current [androidx.fragment.app.Fragment] in the container.

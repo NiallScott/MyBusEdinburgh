@@ -37,8 +37,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
@@ -55,10 +54,9 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class AlertManagerFragment : Fragment(), HasScrollableContent {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
     @Inject
@@ -66,9 +64,7 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
     @Inject
     lateinit var mapStyleApplicator: MapStyleApplicator
 
-    private val viewModel: AlertManagerFragmentViewModel by viewModels {
-        viewModelFactory
-    }
+    private val viewModel: AlertManagerFragmentViewModel by viewModels()
 
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: AlertAdapter
@@ -87,8 +83,6 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         adapter = AlertAdapter(

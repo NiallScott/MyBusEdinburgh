@@ -37,6 +37,7 @@ import androidx.lifecycle.liveData
 import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -44,10 +45,12 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.livedata.DistinctLiveData
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.utils.Event
+import javax.inject.Inject
 
 /**
  * This is the [ViewModel] for [BusTimesFragment].
@@ -64,14 +67,15 @@ import uk.org.rivernile.android.bustracker.utils.Event
  * @param defaultDispatcher Computation is run on this [CoroutineDispatcher].
  * @author Niall Scott
  */
-class BusTimesFragmentViewModel(
+@HiltViewModel
+class BusTimesFragmentViewModel @Inject constructor(
         private val expandedServicesTracker: ExpandedServicesTracker,
         private val liveTimesFlowFactory: LiveTimesFlowFactory,
         private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
         private val refreshController: RefreshController,
         private val preferenceRepository: PreferenceRepository,
         connectivityRepository: ConnectivityRepository,
-        private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     /**
      * This [LiveData] exposes whether the device currently has connectivity or not. This will emit

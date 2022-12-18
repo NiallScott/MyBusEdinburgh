@@ -32,6 +32,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,8 +48,10 @@ import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
+import javax.inject.Inject
 
 /**
  * This is the [ViewModel] for [FavouriteStopsFragment].
@@ -60,12 +63,13 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-class FavouriteStopsFragmentViewModel(
+@HiltViewModel
+class FavouriteStopsFragmentViewModel @Inject constructor(
         private val savedState: SavedStateHandle,
         favouriteStopsRetriever: FavouriteStopsRetriever,
         private val alertsRepository: AlertsRepository,
         featureRepository: FeatureRepository,
-        private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
 

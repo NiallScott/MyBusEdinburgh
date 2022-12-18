@@ -36,12 +36,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
-import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.DialogAddTimeAlertBinding
 import javax.inject.Inject
@@ -52,12 +49,14 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class AddTimeAlertDialogFragment : DialogFragment(), HasAndroidInjector {
+@AndroidEntryPoint
+class AddTimeAlertDialogFragment : DialogFragment() {
 
     companion object {
 
-        private const val ARG_STOP_CODE = "stopCode"
-        private const val ARG_DEFAULT_SERVICES = "defaultServices"
+        private const val ARG_STOP_CODE = AddTimeAlertDialogFragmentViewModel.STATE_STOP_CODE
+        private const val ARG_DEFAULT_SERVICES =
+                AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES
 
         private const val DIALOG_SELECT_SERVICES = "selectServicesDialog"
         private const val DIALOG_TIME_ALERT_LIMITATIONS = "timeLimitationsDialog"
@@ -92,33 +91,18 @@ class AddTimeAlertDialogFragment : DialogFragment(), HasAndroidInjector {
     }
 
     @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
-    @Inject
-    lateinit var viewModelFactory: AddTimeAlertDialogFragmentViewModelFactory
-    @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: AddTimeAlertDialogFragmentViewModel by viewModels {
-        val defaultArgs = arguments?.getStringArray(ARG_DEFAULT_SERVICES)?.let {
-            Bundle().apply {
-                putStringArray(AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES, it)
-            }
-        }
-
-        GenericSavedStateViewModelFactory(viewModelFactory, this, defaultArgs)
-    }
+    private val viewModel: AddTimeAlertDialogFragmentViewModel by viewModels()
 
     private val viewBinding by lazy {
         DialogAddTimeAlertBinding.inflate(layoutInflater, null, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         isCancelable = true
-        viewModel.stopCode = arguments?.getString(ARG_STOP_CODE)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -165,8 +149,6 @@ class AddTimeAlertDialogFragment : DialogFragment(), HasAndroidInjector {
             }
         }
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 
     /**
      * Handle the UI state changing by changing the visible layout.

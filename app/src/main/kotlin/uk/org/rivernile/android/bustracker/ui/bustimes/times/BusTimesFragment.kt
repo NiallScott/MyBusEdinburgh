@@ -41,9 +41,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.utils.Event
-import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentBusTimesBinding
 import javax.inject.Inject
@@ -53,6 +52,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class BusTimesFragment : Fragment() {
 
     companion object {
@@ -74,13 +74,9 @@ class BusTimesFragment : Fragment() {
     }
 
     @Inject
-    lateinit var viewModelFactory: BusTimesFragmentViewModelFactory
-    @Inject
     lateinit var viewHolderFieldPopulator: ViewHolderFieldPopulator
 
-    private val viewModel: BusTimesFragmentViewModel by viewModels {
-        GenericSavedStateViewModelFactory(viewModelFactory, this)
-    }
+    private val viewModel: BusTimesFragmentViewModel by viewModels()
     private lateinit var adapter: LiveTimesAdapter
 
     private var _viewBinding: FragmentBusTimesBinding? = null
@@ -93,8 +89,6 @@ class BusTimesFragment : Fragment() {
     private var menuItemAutoRefresh: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         viewModel.stopCode = arguments?.getString(EXTRA_STOP_CODE)

@@ -26,52 +26,33 @@
 package uk.org.rivernile.android.bustracker
 
 import android.app.Application
-import android.content.Context
 import androidx.work.Configuration
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
+import dagger.hilt.android.HiltAndroidApp
 import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
-import uk.org.rivernile.android.bustracker.dagger.DaggerApplicationComponent
 import uk.org.rivernile.android.bustracker.startup.AppThemeObserver
 import javax.inject.Inject
 
 /**
- * This code is the very first code that will be executed when the application is started. It is
- * used to register the BugSense handler and check for bus stop database updates.
- *
- * The Android developer documentation discourages the usage of this class, but as it is
- * unpredictable where the user will enter the application the code is put here as this class is
- * always instantiated when this application's process is created.
+ * This code is the very first code that will be executed when the application is started.
  *
  * @author Niall Scott
  */
-class BusApplication : Application(), HasAndroidInjector, Configuration.Provider {
+@HiltAndroidApp
+class BusApplication : Application(), Configuration.Provider {
 
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
     @Inject
     lateinit var workerConfiguration: Configuration
     @Inject
     lateinit var appThemeObserver: AppThemeObserver
     @Inject
-    lateinit var startUpTask: dagger.Lazy<StartUpTask>
-
-    override fun attachBaseContext(base: Context) {
-        super.attachBaseContext(base)
-
-        DaggerApplicationComponent.factory()
-                .newApplicationComponent(this)
-                .inject(this)
-    }
+    lateinit var startUpTask: StartUpTask
 
     override fun onCreate() {
         super.onCreate()
 
         appThemeObserver.observeAppTheme()
-        startUpTask.get().performStartUpTasks()
+        startUpTask.performStartUpTasks()
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 
     override fun getWorkManagerConfiguration() = workerConfiguration
 }

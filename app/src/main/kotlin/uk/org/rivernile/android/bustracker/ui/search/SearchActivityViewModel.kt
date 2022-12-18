@@ -31,6 +31,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,6 +64,7 @@ import javax.inject.Inject
  * @param applicationCoroutineScope The application [CoroutineScope].
  * @author Niall Scott
  */
+@HiltViewModel
 class SearchActivityViewModel @Inject constructor(
         featureRepository: FeatureRepository,
         private val busStopsRepository: BusStopsRepository,

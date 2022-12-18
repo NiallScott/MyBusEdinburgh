@@ -54,7 +54,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -62,7 +62,6 @@ import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.android.bustracker.utils.Event
-import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentBusStopMapBinding
 import javax.inject.Inject
@@ -72,6 +71,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class BusStopMapFragment : Fragment() {
 
     companion object {
@@ -117,9 +117,6 @@ class BusStopMapFragment : Fragment() {
             }
         }
     }
-
-    @Inject
-    lateinit var viewModelFactory: BusStopMapFragmentViewModelFactory
     @Inject
     lateinit var googleApiAvailability: GoogleApiAvailability
     @Inject
@@ -127,9 +124,7 @@ class BusStopMapFragment : Fragment() {
     @Inject
     lateinit var mapStyleApplicator: MapStyleApplicator
 
-    private val viewModel: BusStopMapViewModel by viewModels {
-        GenericSavedStateViewModelFactory(viewModelFactory, this)
-    }
+    private val viewModel: BusStopMapViewModel by viewModels()
 
     private lateinit var callbacks: Callbacks
     private var map: GoogleMap? = null
@@ -166,8 +161,6 @@ class BusStopMapFragment : Fragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null) {

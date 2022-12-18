@@ -42,10 +42,9 @@ import androidx.annotation.StringRes
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -59,14 +58,13 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-    @Inject
     lateinit var avatarImageLoader: TweetAvatarImageLoader
 
-    private val viewModel: TwitterUpdatesFragmentViewModel by viewModels { viewModelFactory }
+    private val viewModel: TwitterUpdatesFragmentViewModel by viewModels()
     private lateinit var adapter: TweetAdapter
 
     private var _viewBinding: FragmentTwitterUpdatesBinding? = null
@@ -75,8 +73,6 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
     private var refreshMenuItem: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         adapter = TweetAdapter(requireContext(), avatarImageLoader, this::handleItemClicked)

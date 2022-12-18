@@ -34,13 +34,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dagger.android.support.AndroidSupportInjection
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.DialogTurnOnGpsBinding
-import javax.inject.Inject
 
 /**
  * This [DialogFragment] asks the user if they wish to turn on the GPS receiver on their device.
@@ -51,10 +48,7 @@ import javax.inject.Inject
  */
 class TurnOnGpsDialogFragment : DialogFragment() {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private val viewModel: TurnOnGpsDialogFragmentViewModel by viewModels { viewModelFactory }
+    private val viewModel: TurnOnGpsDialogFragmentViewModel by viewModels()
 
     private lateinit var callbacks: Callbacks
 
@@ -69,12 +63,6 @@ class TurnOnGpsDialogFragment : DialogFragment() {
             throw IllegalStateException("${context.javaClass.name} does not implement " +
                     Callbacks::class.java.name)
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
-        super.onCreate(savedInstanceState)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

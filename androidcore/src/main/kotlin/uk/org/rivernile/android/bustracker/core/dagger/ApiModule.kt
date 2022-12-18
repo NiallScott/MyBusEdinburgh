@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
@@ -47,14 +49,10 @@ import java.util.concurrent.TimeUnit
  *
  * @author Niall Scott
  */
-@Module(includes = [ ApiModule.Bindings::class ])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class ApiModule {
 
-    /**
-     * Provide the API app name, used to identify this app on the API server.
-     *
-     * @return The API app name.
-     */
     @Provides
     @ForApiAppName
     fun provideApiAppName(): String = BuildConfig.API_APP_NAME
@@ -63,21 +61,9 @@ internal class ApiModule {
     @ForApiSchemaName
     fun provideApiSchemaName(): String = BuildConfig.SCHEMA_NAME
 
-    /**
-     * Provide the [ApiKeyGenerator] implementation.
-     *
-     * @return The [ApiKeyGenerator] implementation.
-     */
     @Provides
     fun provideApiKeyGenerator(): ApiKeyGenerator = ApiKeyGenerator(BuildConfig.API_KEY)
 
-    /**
-     * Provide the [Retrofit] instance for the API.
-     *
-     * @param okHttpClient The [OkHttpClient] to use for requests.
-     * @param jsonConverterFactory The [Converter.Factory] for Kotlin JSON.
-     * @return The [Retrofit] instance.
-     */
     @Provides
     @ForApi
     fun provideRetrofit(
@@ -89,12 +75,6 @@ internal class ApiModule {
                     .addConverterFactory(jsonConverterFactory)
                     .build()
 
-    /**
-     * Provide the [OkHttpClient] instance for the API.
-     *
-     * @param okHttpClient The base [OkHttpClient] to build upon.
-     * @return The [OkHttpClient] instance for the API.
-     */
     @Provides
     @ForApi
     fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
@@ -105,6 +85,7 @@ internal class ApiModule {
                     .followRedirects(false)
                     .build()
 
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

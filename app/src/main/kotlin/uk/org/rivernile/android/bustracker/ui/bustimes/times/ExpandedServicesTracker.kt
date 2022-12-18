@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import dagger.hilt.android.scopes.ViewModelScoped
+import javax.inject.Inject
 
 /**
  * We want to track the user's service expand/collapse state over configuration changes and UI
@@ -51,7 +53,8 @@ import androidx.lifecycle.SavedStateHandle
  * persist to here.
  * @author Niall Scott
  */
-class ExpandedServicesTracker(
+@ViewModelScoped
+class ExpandedServicesTracker @Inject constructor(
         private val handle: SavedStateHandle) {
 
     companion object {
@@ -86,6 +89,6 @@ class ExpandedServicesTracker(
         }
 
         expandedServices.value = HashSet(expandedItems)
-        handle.set(STATE_KEY_EXPANDED_SERVICES, ArrayList(expandedItems))
+        handle[STATE_KEY_EXPANDED_SERVICES] = ArrayList(expandedItems)
     }
 }

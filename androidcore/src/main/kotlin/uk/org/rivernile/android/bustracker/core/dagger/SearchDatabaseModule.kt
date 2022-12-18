@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,8 @@ import android.content.Context
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.database.search.daos.AndroidSearchHistoryDao
 import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
 import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
@@ -40,9 +42,8 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    SearchDatabaseModule.Bindings::class
-])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class SearchDatabaseModule {
 
     @Provides
@@ -50,6 +51,7 @@ internal class SearchDatabaseModule {
     @ForSearchDatabase
     fun provideAuthority(context: Context) = "${context.packageName}.SearchSuggestionsProvider"
 
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

@@ -31,6 +31,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,11 +45,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
+import javax.inject.Inject
 
 /**
  * This is a [ViewModel] for presenting the stop map.
@@ -66,7 +69,8 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-class BusStopMapViewModel(
+@HiltViewModel
+class BusStopMapViewModel @Inject constructor(
         private val savedState: SavedStateHandle,
         private val permissionHandler: PermissionHandler,
         playServicesAvailabilityChecker: PlayServicesAvailabilityChecker,
@@ -76,7 +80,7 @@ class BusStopMapViewModel(
         private val routeLineRetriever: RouteLineRetriever,
         isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
         private val preferenceRepository: PreferenceRepository,
-        private val defaultDispatcher: CoroutineDispatcher)
+        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModel() {
 
     companion object {

@@ -37,7 +37,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowAddEditFavouriteStopListener
@@ -49,7 +49,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProxi
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDeletionListener
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
-import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentFavouriteStopsBinding
 import javax.inject.Inject
@@ -68,16 +67,13 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class FavouriteStopsFragment : Fragment(), HasScrollableContent {
 
     @Inject
-    lateinit var viewModelFactory: FavouriteStopsFragmentViewModelFactory
-    @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: FavouriteStopsFragmentViewModel by viewModels {
-        GenericSavedStateViewModelFactory(viewModelFactory, this)
-    }
+    private val viewModel: FavouriteStopsFragmentViewModel by viewModels()
 
     private var callbacks: Callbacks? = null
     private var createShortcutCallbacks: CreateShortcutCallbacks? = null
@@ -100,8 +96,6 @@ class FavouriteStopsFragment : Fragment(), HasScrollableContent {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         val isCreateShortcutMode = createShortcutCallbacks != null

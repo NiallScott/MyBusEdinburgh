@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
@@ -45,29 +47,14 @@ import uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint.Tw
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    TwitterModule.Bindings::class
-])
+@InstallIn(SingletonComponent::class)
+@Module
 class TwitterModule {
 
-    /**
-     * Provide the Retrofit service for the Twitter API.
-     *
-     * @param retrofit The [Retrofit] instance.
-     * @return The [TwitterService] instance.
-     */
     @Provides
     fun provideTwitterService(@ForTwitter retrofit: Retrofit): TwitterService =
             retrofit.create(TwitterService::class.java)
 
-    /**
-     * Provide the [Retrofit] instance for the Twitter API.
-     *
-     * @param okHttpClient The [OkHttpClient] to use for requests. This intentionally re-uses the
-     * API [OkHttpClient] as the current implementation uses the same endpoint.
-     * @param jsonConverterFactory The [Converter.Factory] instance for Kotlin JSON.
-     * @return The [Retrofit] instance.
-     */
     @Provides
     @ForTwitter
     fun provideRetrofit(
@@ -79,6 +66,7 @@ class TwitterModule {
                     .addConverterFactory(jsonConverterFactory)
                     .build()
 
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

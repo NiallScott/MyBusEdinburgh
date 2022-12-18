@@ -30,17 +30,13 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.preferences.AppTheme
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.edinburghbustracker.android.R
-import javax.inject.Inject
 
 /**
  * This [SettingsFragment] shows the app's settings to the user and allows them to change their
@@ -48,9 +44,9 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class SettingsFragment : PreferenceFragmentCompat(),
-        PreferenceFragmentCompat.OnPreferenceDisplayDialogCallback,
-        HasAndroidInjector {
+        PreferenceFragmentCompat.OnPreferenceDisplayDialogCallback {
 
     companion object {
 
@@ -61,20 +57,7 @@ class SettingsFragment : PreferenceFragmentCompat(),
         private const val DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
     }
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
-
-    private val viewModel: SettingsFragmentViewModel by viewModels {
-        viewModelFactory
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
-        super.onCreate(savedInstanceState)
-    }
+    private val viewModel: SettingsFragmentViewModel by viewModels()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceManager.sharedPreferencesName = PreferenceManager.PREF_FILE
@@ -104,8 +87,6 @@ class SettingsFragment : PreferenceFragmentCompat(),
             false
         }
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 
     /**
      * Set up the binding of preference summaries. These are used when the summary is dynamic based

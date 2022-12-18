@@ -37,10 +37,9 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.utils.Event
-import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.DialogAddEditFavouriteStopBinding
 import javax.inject.Inject
@@ -52,6 +51,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class AddEditFavouriteStopDialogFragment : DialogFragment() {
 
     companion object {
@@ -72,21 +72,15 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
     }
 
     @Inject
-    lateinit var viewModelFactory: AddEditFavouriteStopDialogFragmentViewModelFactory
-    @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: AddEditFavouriteStopDialogFragmentViewModel by viewModels {
-        GenericSavedStateViewModelFactory(viewModelFactory, this)
-    }
+    private val viewModel: AddEditFavouriteStopDialogFragmentViewModel by viewModels()
 
     private val viewBinding by lazy {
         DialogAddEditFavouriteStopBinding.inflate(layoutInflater, null, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         viewModel.stopCode = arguments?.getString(ARG_STOPCODE)

@@ -33,6 +33,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
@@ -49,6 +50,7 @@ import javax.inject.Inject
  * @param alertsRepository The repository to obtain alert details from.
  * @author Niall Scott
  */
+@HiltViewModel
 class DisplayStopDataActivityViewModel @Inject constructor(
         private val busStopsRepository: BusStopsRepository,
         private val favouritesRepository: FavouritesRepository,

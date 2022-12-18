@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.turnongps
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -38,6 +39,7 @@ import javax.inject.Inject
  * @param preferenceRepository The preference repository.
  * @author Niall Scott
  */
+@HiltViewModel
 class TurnOnGpsDialogFragmentViewModel @Inject constructor(
         private val preferenceRepository: PreferenceRepository) : ViewModel() {
 

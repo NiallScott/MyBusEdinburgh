@@ -28,12 +28,14 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.android.gms.maps.model.LatLng
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import javax.inject.Inject
 
 /**
  * This class is used to retriever stop markers for display on the map.
@@ -43,7 +45,8 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDe
  * @param serviceListingRetriever Used to retrieve the service listing for selected stops.
  * @author Niall Scott
  */
-class StopMarkersRetriever(
+@ViewModelScoped
+class StopMarkersRetriever @Inject constructor(
         private val savedState: SavedStateHandle,
         private val busStopsRepository: BusStopsRepository,
         private val serviceListingRetriever: ServiceListingRetriever) {

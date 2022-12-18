@@ -45,10 +45,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.shape.MaterialShapeDrawable
-import dagger.android.AndroidInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
@@ -62,6 +61,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.Callbacks {
 
     companion object {
@@ -79,15 +79,13 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
     }
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-    @Inject
     lateinit var searchManager: SearchManager
     @Inject
     lateinit var stopMapMarkerDecorator: StopMapMarkerDecorator
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: SearchActivityViewModel by viewModels { viewModelFactory }
+    private val viewModel: SearchActivityViewModel by viewModels()
 
     private lateinit var adapter: SearchAdapter
 
@@ -100,8 +98,6 @@ class SearchActivity : AppCompatActivity(), InstallBarcodeScannerDialogFragment.
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)

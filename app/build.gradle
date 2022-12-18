@@ -31,6 +31,7 @@ plugins {
     id 'kotlin-parcelize'
     id 'kotlin-kapt'
     id 'kotlin-allopen'
+    id 'com.google.dagger.hilt.android'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
     id 'com.google.firebase.appdistribution'
@@ -150,6 +151,10 @@ dependencies {
 
     implementation project(':androidcore')
 
+    // Hilt (dependency injection)
+    implementation "com.google.dagger:hilt-android:$hiltVersion"
+    kapt "com.google.dagger:hilt-compiler:$hiltVersion"
+
     // AndroidX and support libraries
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
@@ -178,10 +183,6 @@ dependencies {
     // Firebase
     implementation platform("com.google.firebase:firebase-bom:$firebaseBomVersion")
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
-
-    // Dagger 2
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
-    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     implementation 'uk.org.rivernile.android.fetchutils:fetchutils-library:1.1.1'
 

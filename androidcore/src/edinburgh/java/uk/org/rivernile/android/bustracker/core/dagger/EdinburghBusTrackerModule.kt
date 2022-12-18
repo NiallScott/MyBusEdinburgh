@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -46,26 +48,14 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module(includes = [ EdinburghBusTrackerModule.Bindings::class ])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class EdinburghBusTrackerModule {
 
-    /**
-     * Provide the [EdinburghBusTrackerApi] instance.
-     *
-     * @param retrofit The [Retrofit] instance to create the [EdinburghBusTrackerApi] instance from.
-     * @return A new [EdinburghBusTrackerApi] instance.
-     */
     @Provides
     fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghBusTrackerApi =
             retrofit.create(EdinburghBusTrackerApi::class.java)
 
-    /**
-     * Provide the [Retrofit] instance for the API.
-     *
-     * @param okHttpClient The [OkHttpClient] to use for requests.
-     * @param gsonConverterFactory The [GsonConverterFactory] instance.
-     * @return The [Retrofit] instance.
-     */
     @Provides
     @ForTracker
     fun provideRetrofit(@ForTracker okHttpClient: OkHttpClient,
@@ -76,12 +66,6 @@ internal class EdinburghBusTrackerModule {
                     .addConverterFactory(gsonConverterFactory)
                     .build()
 
-    /**
-     * Provide the [OkHttpClient] instance for the API.
-     *
-     * @param okHttpClient The base [OkHttpClient] to build upon.
-     * @return The [OkHttpClient] instance for the API.
-     */
     @Provides
     @ForTracker
     fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
@@ -92,18 +76,11 @@ internal class EdinburghBusTrackerModule {
                     .followRedirects(false)
                     .build()
 
-    /**
-     * Provide an [ApiKeyGenerator] instance.
-     *
-     * @return An [ApiKeyGenerator] instance.
-     */
     @Provides
     @Singleton
     fun provideApiKeyGenerator() = ApiKeyGenerator(BuildConfig.API_KEY)
 
-    /**
-     * This interface contains Dagger bindings for pre-provided types.
-     */
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

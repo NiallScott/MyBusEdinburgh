@@ -27,12 +27,14 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import androidx.lifecycle.SavedStateHandle
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import javax.inject.Inject
 
 /**
  * This class handles permission state for [BusStopMapViewModel].
@@ -42,7 +44,8 @@ import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
  * @param timeUtils Time utils.
  * @author Niall Scott
  */
-class PermissionHandler(
+@ViewModelScoped
+class PermissionHandler @Inject constructor(
         private val savedState: SavedStateHandle,
         private val locationRepository: LocationRepository,
         private val timeUtils: TimeUtils) {

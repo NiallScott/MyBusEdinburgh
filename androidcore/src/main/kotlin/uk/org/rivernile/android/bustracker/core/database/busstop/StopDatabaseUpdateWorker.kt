@@ -28,8 +28,11 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
 import android.os.Build
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import javax.net.SocketFactory
 
 /**
@@ -42,9 +45,10 @@ import javax.net.SocketFactory
  * database.
  * @author Niall Scott
  */
-class StopDatabaseUpdateWorker(
-        context: Context,
-        private val params: WorkerParameters,
+@HiltWorker
+class StopDatabaseUpdateWorker @AssistedInject constructor(
+        @Assisted context: Context,
+        @Assisted private val params: WorkerParameters,
         private val updateChecker: DatabaseUpdateChecker)
     : CoroutineWorker(context, params) {
 

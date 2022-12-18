@@ -32,10 +32,8 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dagger.android.support.AndroidSupportInjection
-import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.edinburghbustracker.android.R
-import javax.inject.Inject
 
 /**
  * This [DialogFragment] allows the user to select services from a list and then return the user's
@@ -44,6 +42,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class ServicesChooserDialogFragment : DialogFragment() {
 
     companion object {
@@ -87,16 +86,9 @@ class ServicesChooserDialogFragment : DialogFragment() {
         }
     }
 
-    @Inject
-    lateinit var viewModelFactory: ServicesChooserDialogFragmentViewModelFactory
-
-    private val viewModel: ServicesChooserDialogFragmentViewModel by viewModels {
-        GenericSavedStateViewModelFactory(viewModelFactory, this)
-    }
+    private val viewModel: ServicesChooserDialogFragmentViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         viewModel.services = arguments?.getStringArray(ARG_SERVICES)

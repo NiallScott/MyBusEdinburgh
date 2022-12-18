@@ -34,18 +34,16 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.shape.MaterialShapeDrawable
-import dagger.android.AndroidInjection
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityAboutBinding
-import javax.inject.Inject
 
 /**
  * This [android.app.Activity] hosts [AboutFragment] to show application 'about' information.
  *
  * @author Niall Scott
  */
-class AboutActivity : AppCompatActivity(), HasAndroidInjector, AboutFragment.Callbacks {
+@AndroidEntryPoint
+class AboutActivity : AppCompatActivity(), AboutFragment.Callbacks {
 
     companion object {
 
@@ -53,12 +51,7 @@ class AboutActivity : AppCompatActivity(), HasAndroidInjector, AboutFragment.Cal
         private const val DIALOG_LICENCES = "licencesDialog"
     }
 
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
-
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -84,8 +77,6 @@ class AboutActivity : AppCompatActivity(), HasAndroidInjector, AboutFragment.Cal
             windowInsets
         }
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 
     override fun onShowCredits() {
         CreditsDialogFragment().show(supportFragmentManager, DIALOG_CREDITS)

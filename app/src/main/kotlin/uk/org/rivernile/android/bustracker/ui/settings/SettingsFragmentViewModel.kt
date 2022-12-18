@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.settings
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -37,6 +38,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@HiltViewModel
 class SettingsFragmentViewModel @Inject constructor(
         private val preferenceManager: PreferenceManager): ViewModel() {
 

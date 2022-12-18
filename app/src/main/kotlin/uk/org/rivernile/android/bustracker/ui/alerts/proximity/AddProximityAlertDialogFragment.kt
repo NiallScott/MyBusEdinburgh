@@ -44,9 +44,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -59,6 +58,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class AddProximityAlertDialogFragment : DialogFragment() {
 
     companion object {
@@ -81,13 +81,9 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     }
 
     @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-    @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: AddProximityAlertDialogFragmentViewModel by viewModels {
-        viewModelFactory
-    }
+    private val viewModel: AddProximityAlertDialogFragmentViewModel by viewModels()
 
     private val viewBinding by lazy {
         DialogAddProxAlertBinding.inflate(layoutInflater, null, false)
@@ -98,8 +94,6 @@ class AddProximityAlertDialogFragment : DialogFragment() {
                     this::handleLocationPermissionState)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         isCancelable = true

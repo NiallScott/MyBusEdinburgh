@@ -36,26 +36,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentAboutBinding
-import javax.inject.Inject
 
 /**
  * This [Fragment] will show the user 'about' information for the application as a list of items.
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class AboutFragment : Fragment() {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private val viewModel: AboutViewModel by viewModels {
-        viewModelFactory
-    }
+    private val viewModel: AboutViewModel by viewModels()
 
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: AboutAdapter
@@ -75,8 +69,6 @@ class AboutFragment : Fragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         adapter = AboutAdapter(requireContext(), viewModel::onItemClicked)

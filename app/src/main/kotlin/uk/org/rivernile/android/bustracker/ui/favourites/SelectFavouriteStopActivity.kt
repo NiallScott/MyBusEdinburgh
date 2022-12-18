@@ -44,14 +44,11 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.shape.MaterialShapeDrawable
-import dagger.android.AndroidInjection
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivitySelectFavouriteStopBinding
-import javax.inject.Inject
 
 /**
  * This [android.app.Activity] displays the user's saved favourite stops and allows them to select
@@ -60,17 +57,13 @@ import javax.inject.Inject
  * @author Niall Scott
  * @see FavouriteStopsFragment
  */
+@AndroidEntryPoint
 class SelectFavouriteStopActivity : AppCompatActivity(),
-        FavouriteStopsFragment.CreateShortcutCallbacks, HasAndroidInjector {
-
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
+        FavouriteStopsFragment.CreateShortcutCallbacks {
 
     private lateinit var viewBinding: ActivitySelectFavouriteStopBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         if (Intent.ACTION_CREATE_SHORTCUT != intent.action) {
@@ -129,8 +122,6 @@ class SelectFavouriteStopActivity : AppCompatActivity(),
         setResult(Activity.RESULT_OK, result)
         finish()
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 
     private val fragmentLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
         override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {

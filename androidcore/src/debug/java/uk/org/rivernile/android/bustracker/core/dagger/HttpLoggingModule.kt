@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,8 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import android.util.Log
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.logging.HttpLoggingInterceptor
 import uk.org.rivernile.android.bustracker.core.di.ForHttpLogging
@@ -41,22 +43,15 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
+@InstallIn(SingletonComponent::class)
 @Module
 internal class HttpLoggingModule {
 
     companion object {
 
-        /**
-         * The log tag to use for [HttpLoggingInterceptor].
-         */
         private const val HTTP_LOG_TAG = "MyBusHttp"
     }
 
-    /**
-     * As this is in debug mode, provide the [HttpLoggingInterceptor] as an [Interceptor].
-     *
-     * @return A configured [HttpLoggingInterceptor].
-     */
     @Provides
     @Singleton
     @ForHttpLogging

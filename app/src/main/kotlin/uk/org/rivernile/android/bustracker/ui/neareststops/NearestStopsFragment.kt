@@ -44,7 +44,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
@@ -59,7 +59,6 @@ import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmFavouriteDe
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
-import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentNearestStopsBinding
 import javax.inject.Inject
@@ -73,6 +72,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class NearestStopsFragment : Fragment(), HasScrollableContent {
 
     companion object {
@@ -81,15 +81,11 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
     }
 
     @Inject
-    lateinit var viewModelFactory: NearestStopsFragmentViewModelFactory
-    @Inject
     lateinit var stopMapMarkerDecorator: StopMapMarkerDecorator
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: NearestStopsFragmentViewModel by viewModels {
-        GenericSavedStateViewModelFactory(viewModelFactory, this)
-    }
+    private val viewModel: NearestStopsFragmentViewModel by viewModels()
 
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: NearestStopsAdapter
@@ -122,8 +118,6 @@ class NearestStopsFragment : Fragment(), HasScrollableContent {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         adapter = NearestStopsAdapter(

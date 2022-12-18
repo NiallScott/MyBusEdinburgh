@@ -33,6 +33,7 @@ buildscript {
         // Dependency versions
         kotlinVersion = '1.7.20'
         kotlinCoroutinesVersion = '1.6.4'
+        hiltVersion = '2.44.2'
         androidXCoreVersion = '1.9.0'
         androidXActivityVersion = '1.6.1'
         androidXFragmentVersion = '1.5.5'
@@ -45,7 +46,6 @@ buildscript {
         androidXPreferenceVersion = '1.2.0'
         architectureComponentsVersion = '2.5.1'
         workManagerVersion = '2.8.0-rc01'
-        daggerVersion = '2.44.2'
         okhttpVersion = '4.10.0'
         retrofitVersion = '2.9.0'
         retrofitKotlinSerializationConverterVersion = '0.8.0'
@@ -62,7 +62,7 @@ buildscript {
         // Testing dependency versions
         junitVersion = '4.13.2'
         androidTestCoreVersion = '1.4.0'
-        mockitoVersion = '4.9.0'
+        mockitoVersion = '4.10.0'
         mockitoKotlinVersion = '4.1.0'
         androidXCoreTesting = '2.1.0'
         hamcrestVersion = '2.2'
@@ -79,6 +79,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hiltVersion"
         classpath 'com.google.gms:google-services:4.3.14'
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.2'
         classpath 'com.google.firebase:firebase-appdistribution-gradle:3.1.1'

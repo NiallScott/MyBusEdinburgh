@@ -52,12 +52,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.shape.MaterialShapeDrawable
-import dagger.android.AndroidInjection
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
@@ -80,13 +77,13 @@ import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBinding
-import javax.inject.Inject
 
 /**
  * This [android.app.Activity] is the root Activity of the app.
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(),
         AlertManagerFragment.Callbacks,
         BusStopMapFragment.Callbacks,
@@ -94,8 +91,7 @@ class MainActivity : AppCompatActivity(),
         FavouriteStopsFragment.Callbacks,
         InstallBarcodeScannerDialogFragment.Callbacks,
         NearestStopsFragment.Callbacks,
-        TurnOnGpsDialogFragment.Callbacks,
-        HasAndroidInjector {
+        TurnOnGpsDialogFragment.Callbacks {
 
     companion object {
 
@@ -121,18 +117,11 @@ class MainActivity : AppCompatActivity(),
                 "market://details?id=com.google.zxing.client.android"
     }
 
-    @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private val viewModel: MainActivityViewModel by viewModels { viewModelFactory }
+    private val viewModel: MainActivityViewModel by viewModels()
 
     private lateinit var viewBinding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -288,8 +277,6 @@ class MainActivity : AppCompatActivity(),
     override fun onExploreTabSwitched() {
         viewBinding.appBarLayout.setExpanded(true, true)
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 
     /**
      * Handle a new [Intent] sent to this [android.app.Activity].

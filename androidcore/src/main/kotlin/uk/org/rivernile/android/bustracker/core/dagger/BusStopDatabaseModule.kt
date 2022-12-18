@@ -30,6 +30,8 @@ import android.content.Context
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.di.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
@@ -50,23 +52,16 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module(includes = [ BusStopDatabaseModule.Bindings::class ])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class BusStopDatabaseModule {
 
-    /**
-     * Provide the bus stop database authority URI [String].
-     *
-     * @param context The application [Context].
-     * @return The bus stop database authority URI [String].
-     */
     @Provides
     @Singleton
     @ForBusStopDatabase
     fun provideAuthority(context: Context) = "${context.packageName}.provider.busstop"
 
-    /**
-     * This interface contains Dagger bindings for pre-provided types.
-     */
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

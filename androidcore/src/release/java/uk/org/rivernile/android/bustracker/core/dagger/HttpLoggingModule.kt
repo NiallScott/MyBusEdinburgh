@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.core.dagger
 
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import uk.org.rivernile.android.bustracker.core.di.ForHttpLogging
 import javax.inject.Singleton
@@ -38,6 +40,7 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
+@InstallIn(SingletonComponent::class)
 @Module
 internal class HttpLoggingModule {
 

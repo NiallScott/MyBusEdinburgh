@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,8 +29,10 @@ package uk.org.rivernile.android.bustracker.core.database.search
 import android.content.SearchRecentSuggestionsProvider
 import android.database.Cursor
 import android.net.Uri
-import dagger.android.AndroidInjection
-import javax.inject.Inject
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 
 /**
  * This [android.content.ContentProvider] provides suggested search items when the user begins
@@ -40,15 +42,20 @@ import javax.inject.Inject
  */
 class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
 
-    @Inject
-    internal lateinit var databaseContract: SearchDatabaseContract
-    @Inject
-    internal lateinit var suggestionsFetcher: SuggestionsFetcher
+    private val hiltEntryPoint by lazy {
+        EntryPointAccessors.fromApplication(
+                context?.applicationContext ?: throw IllegalStateException(),
+                SearchSuggestionsProviderEntryPoint::class.java).also {
+            setupSuggestions(it.databaseContract().authority, SearchDatabaseContract.MODE)
+        }
+    }
 
     override fun onCreate(): Boolean {
-        AndroidInjection.inject(this)
-
-        setupSuggestions(databaseContract.authority, SearchDatabaseContract.MODE)
+        // This onCreate() is called before Application.onCreate() due to the way ContentProviders
+        // work, meaning that inject will not work yet. But we're manded to call setupSuggestions()
+        // before calling super.onCreate(). So we will pass in a temporary authority for now and
+        // call this method again when we're ready.
+        setupSuggestions("temporary.authority", SearchDatabaseContract.MODE)
 
         return super.onCreate()
     }
@@ -59,6 +66,7 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
             selection: String?,
             selectionArgs: Array<out String>?,
             sortOrder: String?): Cursor? {
+        val entryPoint = hiltEntryPoint
         val recentCursor = super.query(uri, projection, selection, selectionArgs, sortOrder)
 
         // If a search term exists, fetch and merge the suggestions Cursor. Otherwise, just return
@@ -67,7 +75,26 @@ class SearchSuggestionsProvider : SearchRecentSuggestionsProvider() {
                 ?.firstOrNull()
                 ?.ifEmpty { null }
                 ?.let {
-                    suggestionsFetcher.fetchAndMergeSuggestions(recentCursor, it)
+                    entryPoint.suggestionsFetcher().fetchAndMergeSuggestions(recentCursor, it)
                 } ?: recentCursor
+    }
+
+    /**
+     * This is the Hilt [EntryPoint] to allow dependencies to be supplied to this
+     * [android.content.ContentProvider].
+     */
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    internal interface SearchSuggestionsProviderEntryPoint {
+
+        /**
+         * The [SearchDatabaseContract] dependency.
+         */
+        fun databaseContract(): SearchDatabaseContract
+
+        /**
+         * The [SuggestionsFetcher] dependency.
+         */
+        fun suggestionsFetcher(): SuggestionsFetcher
     }
 }

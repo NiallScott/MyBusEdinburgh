@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import android.app.Application
 import android.app.SearchManager
 import android.app.backup.BackupManager
-import android.app.job.JobScheduler
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -40,6 +39,8 @@ import androidx.core.app.NotificationManagerCompat
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.database.search.SearchDatabaseContract
 import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
@@ -50,113 +51,51 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module(includes = [ AndroidModule.Bindings::class ])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class AndroidModule {
 
-    /**
-     * Provide the [BackupManager].
-     *
-     * @param context The application [Context].
-     * @return The [BackupManager].
-     */
     @Provides
     @Singleton
-    fun provideBackupManager(context: Context) = BackupManager(context)
+    fun provideBackupManager(context: Context): BackupManager = BackupManager(context)
 
-    /**
-     * Provide the [ConnectivityManager].
-     *
-     * @param context The application [Context].
-     * @return The [ConnectivityManager] instance.
-     */
     @Provides
     @Singleton
     fun provideConnectivityManager(context: Context): ConnectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    /**
-     * Provide the [JobScheduler].
-     *
-     * @param context The application [Context].
-     * @return The [JobScheduler] instance.
-     */
-    @Provides
-    @Singleton
-    fun provideJobScheduler(context: Context): JobScheduler =
-            context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
-
-    /**
-     * Provide the [LocationManager].
-     *
-     * @param context The application [Context].
-     * @return The [LocationManager] instance.
-     */
     @Provides
     @Singleton
     fun provideLocationManager(context: Context): LocationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-    /**
-     * Provide the [NotificationManagerCompat].
-     *
-     * @param context The application [Context].
-     * @return The [NotificationManagerCompat] instance.
-     */
     @Provides
     @Singleton
     fun provideNotificationManagerCompat(context: Context): NotificationManagerCompat =
             NotificationManagerCompat.from(context)
 
-    /**
-     * Provide the [SharedPreferences].
-     *
-     * @param context The application [Context].
-     * @return The [SharedPreferences] instance.
-     */
     @Provides
     @Singleton
     fun provideSharedPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
 
-    /**
-     * Provide the [SearchRecentSuggestions] implementation, provided by the Android platform,
-     * which manages the user's recent search items.
-     *
-     * @param context The application [Context].
-     * @param authority The authority of the search database.
-     * @return The [SearchRecentSuggestions] instance.
-     */
     @Provides
     @Singleton
     fun provideSearchRecentSuggestions(
             context: Context,
-            @ForSearchDatabase authority: String) =
+            @ForSearchDatabase authority: String): SearchRecentSuggestions =
             SearchRecentSuggestions(context, authority, SearchDatabaseContract.MODE)
 
-    /**
-     * Provide the [PackageManager].
-     *
-     * @param context The application [Context].
-     * @return The [PackageManager] instance.
-     */
     @Provides
     @Singleton
     fun providePackageManager(context: Context): PackageManager = context.packageManager
 
-    /**
-     * Provide the [SearchManager].
-     *
-     * @param context The application [Context].
-     * @return The [SearchManager] instance.
-     */
     @Provides
     @Singleton
     fun provideSearchManager(context: Context): SearchManager =
             context.getSystemService(Context.SEARCH_SERVICE) as SearchManager
 
-    /**
-     * This interface contains Dagger bindings for pre-provided types.
-     */
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

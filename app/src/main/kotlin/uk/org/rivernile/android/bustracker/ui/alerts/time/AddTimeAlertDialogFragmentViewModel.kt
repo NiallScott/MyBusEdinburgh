@@ -33,10 +33,10 @@ import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -54,6 +54,7 @@ import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
+import javax.inject.Inject
 
 /**
  * This is the [ViewModel] for [AddTimeAlertDialogFragment].
@@ -67,7 +68,8 @@ import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-class AddTimeAlertDialogFragmentViewModel(
+@HiltViewModel
+class AddTimeAlertDialogFragmentViewModel @Inject constructor(
         private val savedState: SavedStateHandle,
         private val busStopsRepository: BusStopsRepository,
         private val serviceStopsRepository: ServiceStopsRepository,
@@ -77,6 +79,11 @@ class AddTimeAlertDialogFragmentViewModel(
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
+
+        /**
+         * This constant contains the key where the stop code is stored in the saved state.
+         */
+        const val STATE_STOP_CODE = "stopCode"
 
         /**
          * This constant contains the key where the selected services are stored in the saved state.
@@ -89,9 +96,9 @@ class AddTimeAlertDialogFragmentViewModel(
      * for.
      */
     var stopCode: String?
-        get() = stopCodeFlow.value
+        get() = savedState[STATE_STOP_CODE]
         set(value) {
-            stopCodeFlow.value = value
+            savedState[STATE_STOP_CODE] = value
         }
 
     /**
@@ -103,7 +110,7 @@ class AddTimeAlertDialogFragmentViewModel(
             savedState[STATE_SELECTED_SERVICES] = value?.ifEmpty { null }?.toTypedArray()
         }
 
-    private val stopCodeFlow = MutableStateFlow<String?>(null)
+    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val stopDetailsFlow = stopCodeFlow.flatMapLatest {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,52 +26,48 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
-import android.app.Application
-import android.content.Context
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import kotlinx.coroutines.SupervisorJob
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
 import javax.inject.Singleton
 
 /**
- * A module for providing fake implementations of core module resources.
+ * A [Module] for providing Coroutines dependencies.
  *
- * @param applicationCoroutineScope The instance of [CoroutineScope] to represent the application
- * scope.
- * @param defaultDispatcher The [CoroutineDispatcher] to use to represent the default dispatcher.
  * @author Niall Scott
  */
-@Module(includes = [
-    FakeCoreModule.Bindings::class
-])
-class FakeCoreModule @OptIn(DelicateCoroutinesApi::class) constructor(
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope =
-                GlobalScope,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher =
-                Dispatchers.Default) {
+@InstallIn(SingletonComponent::class)
+@Module
+internal class CoroutinesModule {
 
     @Provides
     @Singleton
     @ForApplicationCoroutineScope
-    fun provideApplicationCoroutineScope() = applicationCoroutineScope
+    fun provideApplicationCoroutineScope(
+            @ForDefaultDispatcher defaultDispatcher: CoroutineDispatcher): CoroutineScope =
+            CoroutineScope(SupervisorJob() + defaultDispatcher)
+
+    @Provides
+    @Singleton
+    @ForMainDispatcher
+    fun provideCoroutineMainDispatcher(): CoroutineDispatcher = Dispatchers.Main.immediate
 
     @Provides
     @Singleton
     @ForDefaultDispatcher
-    fun provideDefaultDispatcher() = defaultDispatcher
+    fun provideCoroutineDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
-    @Module
-    interface Bindings {
-
-        @Suppress("unused")
-        @Binds
-        fun bindApplicationContext(application: Application): Context
-    }
+    @Provides
+    @Singleton
+    @ForIoDispatcher
+    fun provideCoroutineIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }

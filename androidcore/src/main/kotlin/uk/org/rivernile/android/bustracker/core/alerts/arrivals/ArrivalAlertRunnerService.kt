@@ -32,7 +32,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import dagger.android.AndroidInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
@@ -43,6 +43,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class ArrivalAlertRunnerService : Service() {
 
     companion object {
@@ -54,12 +55,6 @@ class ArrivalAlertRunnerService : Service() {
     lateinit var timeAlertRunner: TimeAlertRunner
     @Inject
     lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
-
-    override fun onCreate() {
-        AndroidInjection.inject(this)
-
-        super.onCreate()
-    }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())

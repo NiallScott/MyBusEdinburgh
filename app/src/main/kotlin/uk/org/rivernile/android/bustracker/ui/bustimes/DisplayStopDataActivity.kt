@@ -43,14 +43,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.MarginPageTransformer
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.tabs.TabLayoutMediator
-import dagger.android.AndroidInjection
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasAndroidInjector
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
@@ -73,8 +70,8 @@ import kotlin.math.abs
  *
  * @author Niall Scott
  */
-class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbacks,
-        HasAndroidInjector {
+@AndroidEntryPoint
+class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbacks {
 
     companion object {
 
@@ -103,13 +100,9 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     }
 
     @Inject
-    lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-    @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: DisplayStopDataActivityViewModel by viewModels { viewModelFactory }
+    private val viewModel: DisplayStopDataActivityViewModel by viewModels()
 
     private lateinit var viewBinding: ActivityDisplayStopDataBinding
 
@@ -119,8 +112,6 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     private var streetViewMenuItem: MenuItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         intent.let {
@@ -193,8 +184,6 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
                 .putExtra(BusStopMapActivity.EXTRA_STOP_CODE, stopCode)
                 .let(this::startActivity)
     }
-
-    override fun androidInjector() = dispatchingAndroidInjector
 
     /**
      * Set up the window insets.

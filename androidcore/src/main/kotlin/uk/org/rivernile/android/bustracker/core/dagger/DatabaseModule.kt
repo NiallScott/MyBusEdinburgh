@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,8 @@ package uk.org.rivernile.android.bustracker.core.dagger
 
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
 import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 
@@ -36,11 +38,8 @@ import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    BusStopDatabaseModule::class,
-    SearchDatabaseModule::class,
-    SettingsDatabaseModule::class
-])
+@InstallIn(SingletonComponent::class)
+@Module
 internal interface DatabaseModule {
 
     @Suppress("unused")

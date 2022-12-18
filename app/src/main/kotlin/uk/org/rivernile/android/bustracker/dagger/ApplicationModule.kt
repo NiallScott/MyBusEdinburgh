@@ -27,6 +27,8 @@ package uk.org.rivernile.android.bustracker.dagger
 
 import dagger.Binds
 import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.features.StopMapFeatureAvailabilityProvider
 import uk.org.rivernile.android.bustracker.deeplinking.AppDeeplinkIntentFactory
@@ -37,10 +39,9 @@ import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilit
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    ThirdPartyModule::class,
-    ViewModelModule::class
-])
+@Suppress("unused")
+@InstallIn(SingletonComponent::class)
+@Module
 interface ApplicationModule {
 
     @Suppress("unused")

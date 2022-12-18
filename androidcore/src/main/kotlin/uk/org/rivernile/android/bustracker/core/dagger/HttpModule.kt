@@ -30,6 +30,8 @@ import com.google.gson.Gson
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
@@ -46,7 +48,8 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module(includes = [ HttpLoggingModule::class ])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class HttpModule {
 
     /**

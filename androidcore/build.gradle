@@ -29,6 +29,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'kotlin-allopen'
+    id 'com.google.dagger.hilt.android'
 }
 
 android {
@@ -115,17 +116,20 @@ dependencies {
     // City implementations
     edinburghApi project(':edinburgh')
 
+    // Hilt (dependency injection)
+    implementation "com.google.dagger:hilt-android:$hiltVersion"
+    kapt "com.google.dagger:hilt-compiler:$hiltVersion"
+    api 'androidx.hilt:hilt-work:1.0.0'
+    kapt 'androidx.hilt:hilt-compiler:1.0.0'
+
+    // AppCompat
+    implementation "androidx.appcompat:appcompat:$appCompatVersion"
+
     // Android Architecture Components
     api "androidx.lifecycle:lifecycle-livedata-ktx:$architectureComponentsVersion"
 
     // WorkManager
     api "androidx.work:work-runtime-ktx:$workManagerVersion"
-
-    // Dagger 2
-    api "com.google.dagger:dagger-android:$daggerVersion"
-    api "com.google.dagger:dagger-android-support:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
-    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
 
     // Okhttp
     debugImplementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
@@ -143,8 +147,8 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$androidTestCoreVersion"
     androidTestImplementation "androidx.test:core-ktx:$androidTestCoreVersion"
     androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
-    kaptAndroidTest "com.google.dagger:dagger-compiler:$daggerVersion"
-    kaptAndroidTest "com.google.dagger:dagger-android-processor:$daggerVersion"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hiltVersion"
+    kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hiltVersion"
 
     testImplementation project(':testutils')
     testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"

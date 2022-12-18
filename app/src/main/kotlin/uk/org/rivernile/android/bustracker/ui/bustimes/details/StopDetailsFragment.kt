@@ -37,11 +37,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import dagger.android.support.AndroidSupportInjection
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
-import uk.org.rivernile.android.bustracker.viewmodel.GenericSavedStateViewModelFactory
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentStopDetailsBinding
 import javax.inject.Inject
 
@@ -50,6 +49,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class StopDetailsFragment : Fragment() {
 
     companion object {
@@ -70,15 +70,11 @@ class StopDetailsFragment : Fragment() {
     }
 
     @Inject
-    lateinit var viewModelFactory: StopDetailsFragmentViewModelFactory
-    @Inject
     lateinit var stopMapMarkerDecorator: StopMapMarkerDecorator
     @Inject
     lateinit var mapStyleApplicator: MapStyleApplicator
 
-    private val viewModel: StopDetailsFragmentViewModel by viewModels {
-        GenericSavedStateViewModelFactory(viewModelFactory, this)
-    }
+    private val viewModel: StopDetailsFragmentViewModel by viewModels()
 
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: StopDetailsAdapter
@@ -102,8 +98,6 @@ class StopDetailsFragment : Fragment() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidSupportInjection.inject(this)
-
         super.onCreate(savedInstanceState)
 
         adapter = StopDetailsAdapter(

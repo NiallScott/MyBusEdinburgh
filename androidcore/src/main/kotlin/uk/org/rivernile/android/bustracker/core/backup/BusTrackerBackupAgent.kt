@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,10 +32,12 @@ import android.app.backup.BackupDataOutput
 import android.app.backup.FileBackupHelper
 import android.app.backup.SharedPreferencesBackupHelper
 import android.os.ParcelFileDescriptor
-import uk.org.rivernile.android.bustracker.core.dagger.inject
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import java.io.File
-import javax.inject.Inject
 
 /**
  * This extends [BackupAgentHelper] which defines what is backed up and restored when the system
@@ -56,15 +58,13 @@ class BusTrackerBackupAgent : BackupAgentHelper() {
         private const val FAVOURITES_FILE_NAME = "favourites.backup"
     }
 
-    // This could be `null` if this instance lives in the restricted mode, as documented in
-    // https://developer.android.com/guide/topics/data/autobackup
-    @Inject
-    @JvmField
-    internal var backupRestoreTask: BackupRestoreTask? = null
+    private val entryPoint by lazy {
+        EntryPointAccessors.fromApplication(
+                applicationContext,
+                BusTrackerBackupAgentEntryPoint::class.java)
+    }
 
     override fun onCreate() {
-        inject(this)
-
         addHelper(
                 KEY_PREFERENCES_BACKUP,
                 SharedPreferencesBackupHelper(this, PreferenceManager.PREF_FILE))
@@ -75,7 +75,7 @@ class BusTrackerBackupAgent : BackupAgentHelper() {
 
     override fun onBackup(oldState: ParcelFileDescriptor, data: BackupDataOutput,
             newState: ParcelFileDescriptor) {
-        backupRestoreTask?.let {
+        entryPoint.backupRestoreTask()?.let {
             val output = getSettingsBackupFile()
             it.serialiseFavouriteStops(output)
             super.onBackup(oldState, data, newState)
@@ -87,7 +87,9 @@ class BusTrackerBackupAgent : BackupAgentHelper() {
             newState: ParcelFileDescriptor) {
         super.onRestore(data, appVersionCode, newState)
 
-        backupRestoreTask?.let {
+        // This could be `null` if this instance lives in the restricted mode, as documented in
+        // https://developer.android.com/guide/topics/data/autobackup
+        entryPoint.backupRestoreTask()?.let {
             val input = getSettingsBackupFile()
             it.restoreFavouriteStops(input)
             input.delete()
@@ -100,4 +102,17 @@ class BusTrackerBackupAgent : BackupAgentHelper() {
      * @return The [File] where settings are backed up to or restored from.
      */
     private fun getSettingsBackupFile() = File(filesDir, FAVOURITES_FILE_NAME)
+
+    /**
+     * This is the entry point for Hilt dependencies.
+     */
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    internal interface BusTrackerBackupAgentEntryPoint {
+
+        /**
+         * Provides the [BackupRestoreTask] dependency.
+         */
+        fun backupRestoreTask(): BackupRestoreTask?
+    }
 }

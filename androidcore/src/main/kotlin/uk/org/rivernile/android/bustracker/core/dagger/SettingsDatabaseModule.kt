@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,8 @@ import android.content.Context
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.database.settings.AndroidSettingsDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.database.settings.SettingsDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.di.ForSettingsDatabase
@@ -44,23 +46,16 @@ import javax.inject.Singleton
  *
  * @author Niall Scott
  */
-@Module(includes = [ SettingsDatabaseModule.Bindings::class ])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class SettingsDatabaseModule {
 
-    /**
-     * Provide the settings database authority URI [String].
-     *
-     * @param context The application [Context].
-     * @return The settings database authority URI [String].
-     */
     @Provides
     @Singleton
     @ForSettingsDatabase
     fun provideAuthority(context: Context) = "${context.packageName}.provider.settings"
 
-    /**
-     * This interface contains Dagger bindings for pre-provided types.
-     */
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

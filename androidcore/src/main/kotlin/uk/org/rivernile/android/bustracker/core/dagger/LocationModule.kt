@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,8 @@ import com.google.android.gms.common.GoogleApiAvailability
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.location.AndroidLocationSupport
@@ -53,7 +55,8 @@ import javax.inject.Provider
  *
  * @author Niall Scott
  */
-@Module(includes = [ LocationModule.Bindings::class ])
+@InstallIn(SingletonComponent::class)
+@Module
 internal class LocationModule {
 
     @Provides
@@ -84,6 +87,7 @@ internal class LocationModule {
         }
     }
 
+    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

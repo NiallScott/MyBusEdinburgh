@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,19 +26,28 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
+import com.google.gson.Gson
 import dagger.Module
-import dagger.android.ContributesAndroidInjector
-import uk.org.rivernile.android.bustracker.core.backup.BusTrackerBackupAgent
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kotlinx.serialization.json.Json
+import javax.inject.Singleton
 
 /**
- * This [Module] defines Android backup components which should be dependency injected.
+ * A [Module] for providing serialisation dependencies.
  *
  * @author Niall Scott
  */
+@InstallIn(SingletonComponent::class)
 @Module
-internal interface BackupAgentModule {
+class SerialisationModule {
 
-    @Suppress("unused")
-    @ContributesAndroidInjector
-    fun contributeBusTrackerBackupAgent(): BusTrackerBackupAgent
+    @Provides
+    @Singleton
+    fun provideGson() = Gson()
+
+    @Provides
+    @Singleton
+    fun provideKotlinJsonSerialisation() = Json { ignoreUnknownKeys = true }
 }
