@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.os.Build
 import dagger.Binds
@@ -44,7 +44,6 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertT
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidGeofencingManager
 import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
 import uk.org.rivernile.android.bustracker.core.di.ForProximityAlerts
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -71,12 +70,14 @@ internal class AlertsModule {
 
     @Provides
     fun provideNotificationPreferences(
-            preferenceManager: Provider<PreferenceManager>): NotificationPreferences? =
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                LegacyNotificationPreferences(preferenceManager.get())
-            } else {
-                null
-            }
+            legacyNotificationPreferences: Provider<LegacyNotificationPreferences>)
+    : NotificationPreferences? {
+        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            legacyNotificationPreferences.get()
+        } else {
+            null
+        }
+    }
 
     @InstallIn(SingletonComponent::class)
     @Module

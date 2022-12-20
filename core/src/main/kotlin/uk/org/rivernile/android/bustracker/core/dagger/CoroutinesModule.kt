@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,37 +26,42 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
-import android.content.Context
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.database.search.daos.AndroidSearchHistoryDao
-import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
-import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
 import javax.inject.Singleton
 
 /**
- * This is a Dagger [Module] to provide dependencies for the search database.
+ * This [Module] provides dependencies for Kotlin Coroutines.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
 @Module
-internal class SearchDatabaseModule {
+internal class CoroutinesModule {
 
     @Provides
     @Singleton
-    @ForSearchDatabase
-    fun provideAuthority(context: Context) = "${context.packageName}.SearchSuggestionsProvider"
+    @ForApplicationCoroutineScope
+    fun provideApplicationCoroutineScope(
+            @ForDefaultDispatcher defaultDispatcher: CoroutineDispatcher): CoroutineScope =
+            CoroutineScope(SupervisorJob() + defaultDispatcher)
 
-    @InstallIn(SingletonComponent::class)
-    @Module
-    interface Bindings {
+    @Provides
+    @ForMainDispatcher
+    fun provideCoroutineMainDispatcher(): CoroutineDispatcher = Dispatchers.Main.immediate
 
-        @Suppress("unused")
-        @Binds
-        fun bindSearchHistoryDao(androidSearchHistoryDao: AndroidSearchHistoryDao): SearchHistoryDao
-    }
+    @Provides
+    @ForDefaultDispatcher
+    fun provideCoroutineDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    @Provides
+    @ForIoDispatcher
+    fun provideCoroutineIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.alerts
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import androidx.core.app.NotificationCompat
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
-import javax.inject.Inject
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
+import uk.org.rivernile.android.bustracker.core.di.ForApi
+import uk.org.rivernile.android.bustracker.core.di.ForApiAppName
+import uk.org.rivernile.android.bustracker.core.di.ForApiKey
+import uk.org.rivernile.android.bustracker.core.di.ForApiSchemaName
 
 /**
- * The legacy implementation of [NotificationPreferences].
+ * This Dagger module provides dependencies for the API.
  *
  * @author Niall Scott
  */
-internal class LegacyNotificationPreferences @Inject constructor(
-        private val preferenceManager: PreferenceManager) : NotificationPreferences {
+@InstallIn(SingletonComponent::class)
+@Module
+internal class ApiModule {
 
-    override fun applyNotificationPreferences(builder: NotificationCompat.Builder) {
-        var defaults = 0
+    @Provides
+    @ForApi
+    fun provideApiBaseUrl(): String = BuildConfig.API_BASE_URL
 
-        if (preferenceManager.isNotificationWithSound()) {
-            defaults = defaults or NotificationCompat.DEFAULT_SOUND
-        }
+    @Provides
+    @ForApiKey
+    fun provideApiKey(): String = BuildConfig.API_KEY
 
-        if (preferenceManager.isNotificationWithVibration()) {
-            defaults = defaults or NotificationCompat.DEFAULT_VIBRATE
-        }
+    @Provides
+    @ForApiAppName
+    fun provideApiAppName(): String = BuildConfig.API_APP_NAME
 
-        if (preferenceManager.isNotificationWithLed()) {
-            defaults = defaults or NotificationCompat.DEFAULT_LIGHTS
-        }
-
-        builder.setDefaults(defaults)
-    }
+    @Provides
+    @ForApiSchemaName
+    fun provideApiSchemaName(): String = BuildConfig.SCHEMA_NAME
 }

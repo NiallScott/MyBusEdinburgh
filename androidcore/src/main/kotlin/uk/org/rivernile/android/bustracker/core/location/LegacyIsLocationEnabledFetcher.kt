@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.provider.Settings
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import javax.inject.Inject
 
 /**
  * This is a legacy implementation of [IsLocationEnabledFetcher].
@@ -44,7 +45,7 @@ import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
-internal class LegacyIsLocationEnabledFetcher(
+internal class LegacyIsLocationEnabledFetcher @Inject constructor(
         private val context: Context,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : IsLocationEnabledFetcher {

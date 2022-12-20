@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -202,7 +202,7 @@ class EdinburghServiceColourOverrideTest {
     }
 
     private fun givenServiceColourProviderReturnsColourForNightService() {
-        whenever(serviceColourProvider.getNightServiceColour())
+        whenever(serviceColourProvider.nightServiceColour)
                 .thenReturn(COLOUR_NIGHT_SERVICE)
     }
 }

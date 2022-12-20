@@ -26,12 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.api
 
+import uk.org.rivernile.android.bustracker.core.di.ForApiKey
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.TimeZone
+import javax.inject.Inject
 
 /**
  * This class is used to generate API keys for the API.
@@ -39,7 +41,8 @@ import java.util.TimeZone
  * @property unhashedKey The unhashed version of the key.
  * @author Niall Scott
  */
-class ApiKeyGenerator(private val unhashedKey: String) {
+internal class ApiKeyGenerator @Inject constructor(
+        @ForApiKey private val unhashedKey: String) {
 
     @Suppress("SimpleDateFormat")
     private val dateFormatter = SimpleDateFormat("yyyyMMddHH").also {

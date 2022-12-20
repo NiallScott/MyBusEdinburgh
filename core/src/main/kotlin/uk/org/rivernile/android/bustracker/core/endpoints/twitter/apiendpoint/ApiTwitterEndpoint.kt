@@ -47,7 +47,7 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Singleton
-class ApiTwitterEndpoint @Inject constructor(
+internal class ApiTwitterEndpoint @Inject constructor(
         private val twitterService: TwitterService,
         private val connectivityRepository: ConnectivityRepository,
         private val apiKeyGenerator: ApiKeyGenerator,

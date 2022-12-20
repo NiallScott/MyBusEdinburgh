@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.alerts
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import androidx.core.app.NotificationCompat
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
-import javax.inject.Inject
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
+import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 
 /**
- * The legacy implementation of [NotificationPreferences].
+ * This is a Dagger [Module] for database dependencies.
  *
  * @author Niall Scott
  */
-internal class LegacyNotificationPreferences @Inject constructor(
-        private val preferenceManager: PreferenceManager) : NotificationPreferences {
+@InstallIn(SingletonComponent::class)
+@Module
+internal interface DatabaseModule {
 
-    override fun applyNotificationPreferences(builder: NotificationCompat.Builder) {
-        var defaults = 0
-
-        if (preferenceManager.isNotificationWithSound()) {
-            defaults = defaults or NotificationCompat.DEFAULT_SOUND
-        }
-
-        if (preferenceManager.isNotificationWithVibration()) {
-            defaults = defaults or NotificationCompat.DEFAULT_VIBRATE
-        }
-
-        if (preferenceManager.isNotificationWithLed()) {
-            defaults = defaults or NotificationCompat.DEFAULT_LIGHTS
-        }
-
-        builder.setDefaults(defaults)
-    }
+    @Suppress("unused")
+    @Binds
+    fun bindDatabaseUtils(androidDatabaseUtils: AndroidDatabaseUtils): DatabaseUtils
 }

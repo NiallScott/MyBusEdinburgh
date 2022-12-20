@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import com.google.gson.Gson
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -39,6 +39,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.converter.gson.GsonConverterFactory
+import uk.org.rivernile.android.bustracker.core.di.ForGsonSerialization
 import uk.org.rivernile.android.bustracker.core.di.ForHttpLogging
 import uk.org.rivernile.android.bustracker.core.di.ForKotlinJsonSerialization
 import javax.inject.Singleton
@@ -78,7 +79,8 @@ internal class HttpModule {
      */
     @Provides
     @Singleton
-    fun provideGsonConverterFactory(gson: Gson): GsonConverterFactory =
+    @ForGsonSerialization
+    fun provideGsonConverterFactory(gson: Gson): Converter.Factory =
             GsonConverterFactory.create(gson)
 
     /**

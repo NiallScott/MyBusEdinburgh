@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.content.Context
 import dagger.Binds
@@ -32,28 +32,24 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.database.settings.AndroidSettingsDatabaseRepository
-import uk.org.rivernile.android.bustracker.core.database.settings.SettingsDatabaseRepository
-import uk.org.rivernile.android.bustracker.core.di.ForSettingsDatabase
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidAlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidFavouritesDao
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.FavouritesDao
+import uk.org.rivernile.android.bustracker.core.database.search.daos.AndroidSearchHistoryDao
+import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
+import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
 import javax.inject.Singleton
 
 /**
- * This is a Dagger [Module] to provide dependencies for the settings database.
+ * This is a Dagger [Module] to provide dependencies for the search database.
  *
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
 @Module
-internal class SettingsDatabaseModule {
+internal class SearchDatabaseModule {
 
     @Provides
     @Singleton
-    @ForSettingsDatabase
-    fun provideAuthority(context: Context) = "${context.packageName}.provider.settings"
+    @ForSearchDatabase
+    fun provideAuthority(context: Context) = "${context.packageName}.SearchSuggestionsProvider"
 
     @InstallIn(SingletonComponent::class)
     @Module
@@ -61,16 +57,6 @@ internal class SettingsDatabaseModule {
 
         @Suppress("unused")
         @Binds
-        fun bindSettingsDatabaseRepository(
-                androidSettingsDatabaseRepository: AndroidSettingsDatabaseRepository)
-                : SettingsDatabaseRepository
-
-        @Suppress("unused")
-        @Binds
-        fun bindAlertsDao(androidAlertsDao: AndroidAlertsDao): AlertsDao
-
-        @Suppress("unused")
-        @Binds
-        fun bindFavouritesDao(androidFavouritesDao: AndroidFavouritesDao): FavouritesDao
+        fun bindSearchHistoryDao(androidSearchHistoryDao: AndroidSearchHistoryDao): SearchHistoryDao
     }
 }

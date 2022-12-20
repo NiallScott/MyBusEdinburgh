@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,28 +24,14 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.api.json
+package uk.org.rivernile.android.bustracker.core.di
 
-import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Query
+import javax.inject.Qualifier
 
 /**
- * This interface defines a Retrofit interface for accessing the API.
- *
- * @author Niall Scott
+ * This annotation defines a Dagger qualifier for Kotlin JSON serialisation.
  */
-internal interface ApiService {
-
-    /**
-     * Get the database version.
-     *
-     * @param apiKey The API key.
-     * @param schemaType The schema type.
-     * @return A Retrofit [Response] object.
-     */
-    @GET("DatabaseVersion")
-    suspend fun getDatabaseVersion(
-            @Query("key") apiKey: String,
-            @Query("schemaType") schemaType: String): Response<JsonDatabaseVersion>
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForGsonSerialization

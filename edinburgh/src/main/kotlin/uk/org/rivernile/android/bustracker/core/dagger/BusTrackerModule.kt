@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,39 +29,42 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
+import retrofit2.create
+import uk.org.rivernile.android.bustracker.core.di.ForApiKey
+import uk.org.rivernile.android.bustracker.core.di.ForGsonSerialization
 import uk.org.rivernile.android.bustracker.core.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 /**
  * This [Module] provides dependencies for the Edinburgh Bus Tracker API.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-internal class EdinburghBusTrackerModule {
+@Module(includes = [ BusTrackerModule.Bindings::class ])
+internal class BusTrackerModule {
+
+    @Provides
+    fun provideApiKeyGenerator(@ForApiKey apiKey: String): ApiKeyGenerator = ApiKeyGenerator(apiKey)
 
     @Provides
     fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghBusTrackerApi =
-            retrofit.create(EdinburghBusTrackerApi::class.java)
+            retrofit.create()
 
     @Provides
     @ForTracker
-    fun provideRetrofit(@ForTracker okHttpClient: OkHttpClient,
-                        gsonConverterFactory: GsonConverterFactory): Retrofit =
+    fun provideRetrofit(
+            @ForTracker baseUrl: String,
+            @ForTracker okHttpClient: OkHttpClient,
+            @ForGsonSerialization gsonConverterFactory: Converter.Factory): Retrofit =
             Retrofit.Builder()
-                    .baseUrl(BuildConfig.TRACKER_BASE_URL)
+                    .baseUrl(baseUrl)
                     .client(okHttpClient)
                     .addConverterFactory(gsonConverterFactory)
                     .build()
@@ -76,11 +79,6 @@ internal class EdinburghBusTrackerModule {
                     .followRedirects(false)
                     .build()
 
-    @Provides
-    @Singleton
-    fun provideApiKeyGenerator() = ApiKeyGenerator(BuildConfig.API_KEY)
-
-    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 

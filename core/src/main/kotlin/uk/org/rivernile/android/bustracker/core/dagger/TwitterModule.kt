@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,68 +29,45 @@ package uk.org.rivernile.android.bustracker.core.dagger
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
-import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
+import retrofit2.create
 import uk.org.rivernile.android.bustracker.core.di.ForApi
-import uk.org.rivernile.android.bustracker.core.di.ForApiAppName
-import uk.org.rivernile.android.bustracker.core.di.ForApiSchemaName
 import uk.org.rivernile.android.bustracker.core.di.ForKotlinJsonSerialization
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
-import uk.org.rivernile.android.bustracker.core.endpoints.api.json.JsonApiEndpoint
-import java.util.concurrent.TimeUnit
+import uk.org.rivernile.android.bustracker.core.di.ForTwitter
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint.ApiTwitterEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint.TwitterService
 
 /**
- * This Dagger module provides dependencies for the API.
+ * This [Module] provides dependencies relating to the the tweets API.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-internal class ApiModule {
+@Module(includes = [ TwitterModule.Bindings::class ])
+internal class TwitterModule {
 
     @Provides
-    @ForApiAppName
-    fun provideApiAppName(): String = BuildConfig.API_APP_NAME
+    fun provideTwitterService(@ForTwitter retrofit: Retrofit): TwitterService = retrofit.create()
 
     @Provides
-    @ForApiSchemaName
-    fun provideApiSchemaName(): String = BuildConfig.SCHEMA_NAME
-
-    @Provides
-    fun provideApiKeyGenerator(): ApiKeyGenerator = ApiKeyGenerator(BuildConfig.API_KEY)
-
-    @Provides
-    @ForApi
+    @ForTwitter
     fun provideRetrofit(
+            @ForApi baseUrl: String,
             @ForApi okHttpClient: OkHttpClient,
             @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory): Retrofit =
             Retrofit.Builder()
-                    .baseUrl(BuildConfig.API_BASE_URL)
+                    .baseUrl(baseUrl)
                     .client(okHttpClient)
                     .addConverterFactory(jsonConverterFactory)
                     .build()
 
-    @Provides
-    @ForApi
-    fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
-            okHttpClient.newBuilder()
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .writeTimeout(30, TimeUnit.SECONDS)
-                    .followRedirects(false)
-                    .build()
-
-    @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
 
         @Suppress("unused")
         @Binds
-        fun bindApiEndpoint(jsonApiEndpoint: JsonApiEndpoint): ApiEndpoint
+        fun bindTwitterEndpoint(apiTwitterEndpoint: ApiTwitterEndpoint): TwitterEndpoint
     }
 }

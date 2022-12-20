@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.content.Context
 import dagger.Binds

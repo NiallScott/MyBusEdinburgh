@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,35 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.alerts
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import androidx.core.app.NotificationCompat
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
-import javax.inject.Inject
+import android.content.Context
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
+import androidx.work.WorkManager
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 /**
- * The legacy implementation of [NotificationPreferences].
+ * This Dagger module provides dependencies relating to Android Work Manager.
  *
  * @author Niall Scott
  */
-internal class LegacyNotificationPreferences @Inject constructor(
-        private val preferenceManager: PreferenceManager) : NotificationPreferences {
+@InstallIn(SingletonComponent::class)
+@Module
+internal class WorkModule {
 
-    override fun applyNotificationPreferences(builder: NotificationCompat.Builder) {
-        var defaults = 0
+    @Provides
+    fun provideWorkManagerConfiguration(
+            hiltWorkerFactory: HiltWorkerFactory): Configuration =
+            Configuration.Builder()
+                    .setWorkerFactory(hiltWorkerFactory)
+                    .build()
 
-        if (preferenceManager.isNotificationWithSound()) {
-            defaults = defaults or NotificationCompat.DEFAULT_SOUND
-        }
-
-        if (preferenceManager.isNotificationWithVibration()) {
-            defaults = defaults or NotificationCompat.DEFAULT_VIBRATE
-        }
-
-        if (preferenceManager.isNotificationWithLed()) {
-            defaults = defaults or NotificationCompat.DEFAULT_LIGHTS
-        }
-
-        builder.setDefaults(defaults)
-    }
+    @Singleton
+    @Provides
+    fun provideWorkManager(context: Context): WorkManager = WorkManager.getInstance(context)
 }

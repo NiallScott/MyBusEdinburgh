@@ -24,34 +24,36 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import com.davekoelle.alphanum.AlphanumComparator
+import android.content.Context
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.config.BuildConfiguration
-import uk.org.rivernile.android.bustracker.core.config.EdinburghBuildConfiguration
-import uk.org.rivernile.android.bustracker.core.livetimes.EdinburghIsNightServiceDetector
-import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
-import uk.org.rivernile.android.bustracker.core.services.EdinburghServiceColourOverride
-import uk.org.rivernile.android.bustracker.core.services.ServiceColourOverride
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+import uk.org.rivernile.android.bustracker.core.database.settings.AndroidSettingsDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.database.settings.SettingsDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.di.ForSettingsDatabase
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidAlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidFavouritesDao
+import uk.org.rivernile.android.bustracker.core.database.settings.daos.FavouritesDao
+import javax.inject.Singleton
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This is a Dagger [Module] to provide dependencies for the settings database.
  *
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
 @Module
-internal class FlavourModule {
+internal class SettingsDatabaseModule {
 
     @Provides
-    fun provideServiceComparator(): Comparator<String> = AlphanumComparator()
+    @Singleton
+    @ForSettingsDatabase
+    fun provideAuthority(context: Context) = "${context.packageName}.provider.settings"
 
     @InstallIn(SingletonComponent::class)
     @Module
@@ -59,23 +61,16 @@ internal class FlavourModule {
 
         @Suppress("unused")
         @Binds
-        fun bindCleanUpTask(edinburghCleanUpTask: EdinburghCleanUpTask): CleanUpTask
+        fun bindSettingsDatabaseRepository(
+                androidSettingsDatabaseRepository: AndroidSettingsDatabaseRepository)
+                : SettingsDatabaseRepository
 
         @Suppress("unused")
         @Binds
-        fun bindIsNightServiceDetector(
-                edinburghIsNightServiceDetector: EdinburghIsNightServiceDetector)
-                : IsNightServiceDetector
+        fun bindAlertsDao(androidAlertsDao: AndroidAlertsDao): AlertsDao
 
         @Suppress("unused")
         @Binds
-        fun bindServiceColourOverride(
-                edinburghServiceColourOverride: EdinburghServiceColourOverride)
-                : ServiceColourOverride
-
-        @Suppress("unused")
-        @Binds
-        fun bindBuildConfiguration(
-                edinburghBuildConfiguration: EdinburghBuildConfiguration): BuildConfiguration
+        fun bindFavouritesDao(androidFavouritesDao: AndroidFavouritesDao): FavouritesDao
     }
 }

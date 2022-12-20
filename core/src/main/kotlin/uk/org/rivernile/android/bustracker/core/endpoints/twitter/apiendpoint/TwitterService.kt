@@ -35,7 +35,7 @@ import retrofit2.http.Query
  *
  * @author Niall Scott
  */
-interface TwitterService {
+internal interface TwitterService {
 
     /**
      * Get the latest Tweets.

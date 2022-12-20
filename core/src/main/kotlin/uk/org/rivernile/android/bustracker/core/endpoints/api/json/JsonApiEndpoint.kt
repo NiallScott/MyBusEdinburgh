@@ -45,7 +45,7 @@ import javax.net.SocketFactory
  * @author Niall Scott
  */
 @Singleton
-class JsonApiEndpoint @Inject internal constructor(
+internal class JsonApiEndpoint @Inject constructor(
         private val apiServiceFactory: ApiServiceFactory,
         private val apiKeyGenerator: ApiKeyGenerator,
         @ForApiSchemaName private val schemaType: String) : ApiEndpoint {

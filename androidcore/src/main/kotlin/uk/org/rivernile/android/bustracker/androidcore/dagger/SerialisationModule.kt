@@ -24,50 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 /**
- * A [Module] for providing Coroutines dependencies.
+ * A [Module] for providing serialisation dependencies.
  *
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
 @Module
-internal class CoroutinesModule {
+class SerialisationModule {
 
     @Provides
     @Singleton
-    @ForApplicationCoroutineScope
-    fun provideApplicationCoroutineScope(
-            @ForDefaultDispatcher defaultDispatcher: CoroutineDispatcher): CoroutineScope =
-            CoroutineScope(SupervisorJob() + defaultDispatcher)
+    fun provideGson() = Gson()
 
     @Provides
     @Singleton
-    @ForMainDispatcher
-    fun provideCoroutineMainDispatcher(): CoroutineDispatcher = Dispatchers.Main.immediate
-
-    @Provides
-    @Singleton
-    @ForDefaultDispatcher
-    fun provideCoroutineDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
-
-    @Provides
-    @Singleton
-    @ForIoDispatcher
-    fun provideCoroutineIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
+    fun provideKotlinJsonSerialisation() = Json { ignoreUnknownKeys = true }
 }

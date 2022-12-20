@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,10 +24,9 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.content.Context
-import android.location.LocationManager
 import android.os.Build
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -36,8 +35,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.location.AndroidLocationSupport
 import uk.org.rivernile.android.bustracker.core.location.DistanceCalculator
 import uk.org.rivernile.android.bustracker.core.location.HasLocationFeatureDetector
@@ -61,16 +58,13 @@ internal class LocationModule {
 
     @Provides
     fun provideIsLocationEnabledFetcher(
-            locationManagerProvider: Provider<LocationManager>,
-            contextProvider: Provider<Context>,
-            @ForDefaultDispatcher defaultDispatcherProvider: Provider<CoroutineDispatcher>)
+            legacyIsLocationEnabledFetcher: Provider<LegacyIsLocationEnabledFetcher>,
+            v28IsLocationEnabledFetcher: Provider<V28IsLocationEnabledFetcher>)
             : IsLocationEnabledFetcher {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            V28IsLocationEnabledFetcher(locationManagerProvider.get())
+            v28IsLocationEnabledFetcher.get()
         } else {
-            LegacyIsLocationEnabledFetcher(
-                    contextProvider.get(),
-                    defaultDispatcherProvider.get())
+            legacyIsLocationEnabledFetcher.get()
         }
     }
 

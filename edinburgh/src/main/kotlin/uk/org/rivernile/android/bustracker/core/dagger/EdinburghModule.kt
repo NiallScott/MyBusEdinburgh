@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.di
+package uk.org.rivernile.android.bustracker.core.dagger
 
-import javax.inject.Qualifier
-import kotlin.annotation.MustBeDocumented
-import kotlin.annotation.Retention
+import dagger.Module
 
 /**
- * This annotation defines a Dagger qualifier for Twitter API dependencies.
+ * This [Module] is the root module for the Edinburgh library.
  *
  * @author Niall Scott
  */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ForTwitter
+@Module(includes = [
+    BusTrackerModule::class,
+    UtilModule::class
+])
+interface EdinburghModule

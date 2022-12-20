@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,26 +24,27 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.services
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.content.Context
-import androidx.core.content.ContextCompat
-import uk.org.rivernile.android.bustracker.androidcore.R
-import javax.inject.Inject
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 /**
- * This provides colours for services when they have not been defined in the database.
+ * This Dagger module provides Google Play Services dependencies.
  *
- * @param context The application [Context].
  * @author Niall Scott
  */
-class ServiceColourProvider @Inject constructor(
-        private val context: Context) {
+@InstallIn(SingletonComponent::class)
+@Module
+internal class GooglePlayServicesModule {
 
-    /**
-     * Get the colour to use for night services.
-     *
-     * @return The colour to use for night services.
-     */
-    fun getNightServiceColour() = ContextCompat.getColor(context, R.color.service_colour_night_bus)
+    @Provides
+    fun provideFusedLocationProviderClient(
+            context: Context): FusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(context)
 }

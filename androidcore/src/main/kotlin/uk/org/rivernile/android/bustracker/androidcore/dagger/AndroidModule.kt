@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.app.Application
 import android.app.SearchManager
@@ -60,12 +60,10 @@ internal class AndroidModule {
     fun provideBackupManager(context: Context): BackupManager = BackupManager(context)
 
     @Provides
-    @Singleton
     fun provideConnectivityManager(context: Context): ConnectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     @Provides
-    @Singleton
     fun provideLocationManager(context: Context): LocationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
@@ -87,11 +85,9 @@ internal class AndroidModule {
             SearchRecentSuggestions(context, authority, SearchDatabaseContract.MODE)
 
     @Provides
-    @Singleton
     fun providePackageManager(context: Context): PackageManager = context.packageManager
 
     @Provides
-    @Singleton
     fun provideSearchManager(context: Context): SearchManager =
             context.getSystemService(Context.SEARCH_SERVICE) as SearchManager
 

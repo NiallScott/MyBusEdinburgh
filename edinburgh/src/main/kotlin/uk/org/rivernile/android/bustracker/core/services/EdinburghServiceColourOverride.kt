@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,7 @@ import javax.inject.Inject
  * @param serviceColourProvider Used to provide service colours when added by this implementation.
  * @author Niall Scott
  */
-class EdinburghServiceColourOverride @Inject constructor(
+internal class EdinburghServiceColourOverride @Inject constructor(
         private val serviceColourProvider: ServiceColourProvider) : ServiceColourOverride {
 
     private val nightServiceRegex = "^N(\\d+).*$".toRegex(RegexOption.IGNORE_CASE)
@@ -45,7 +45,7 @@ class EdinburghServiceColourOverride @Inject constructor(
             serviceColours: Map<String, Int>?): Map<String, Int>? {
         // We only support constrained service queries.
         return (services?.ifEmpty { null }?.let {
-            val nightServiceColour = serviceColourProvider.getNightServiceColour()
+            val nightServiceColour = serviceColourProvider.nightServiceColour
             val newServiceColours = serviceColours?.toMutableMap() ?: HashMap()
 
             it.toMutableSet().apply {

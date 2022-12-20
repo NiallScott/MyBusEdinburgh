@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.di
 
-import android.content.Context
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This Dagger module provides Google Play Services dependencies.
+ * This annotation defines a Dagger qualifier for Twitter API dependencies.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-internal class GooglePlayServicesModule {
-
-    @Provides
-    fun provideFusedLocationProviderClient(
-            context: Context): FusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(context)
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForTwitter

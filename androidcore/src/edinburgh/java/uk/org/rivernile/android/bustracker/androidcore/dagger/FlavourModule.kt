@@ -24,35 +24,33 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import android.content.Context
-import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
-import androidx.work.WorkManager
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import uk.org.rivernile.android.bustracker.core.dagger.EdinburghModule
+import uk.org.rivernile.android.bustracker.core.services.AndroidServiceColourProvider
+import uk.org.rivernile.android.bustracker.core.services.ServiceColourProvider
+import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
+import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
 
 /**
- * This Dagger module provides dependencies relating to Android Work Manager.
+ * Any dependencies which are flavour-specific should go here.
  *
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module
-internal class WorkModule {
+@Module(includes = [ EdinburghModule::class ])
+internal interface FlavourModule {
 
-    @Provides
-    fun provideWorkManagerConfiguration(
-            hiltWorkerFactory: HiltWorkerFactory): Configuration =
-            Configuration.Builder()
-                    .setWorkerFactory(hiltWorkerFactory)
-                    .build()
+    @Suppress("unused")
+    @Binds
+    fun bindCleanUpTask(edinburghCleanUpTask: EdinburghCleanUpTask): CleanUpTask
 
-    @Singleton
-    @Provides
-    fun provideWorkManager(context: Context): WorkManager = WorkManager.getInstance(context)
+    @Suppress("unused")
+    @Binds
+    fun bindServiceColourProvider(
+            androidServiceColourProvider: AndroidServiceColourProvider): ServiceColourProvider
 }

@@ -41,7 +41,7 @@ import javax.net.SocketFactory
  * @param okHttpClient The base [OkHttpClient] instance to use for the [ApiService] instance.
  * @author Niall Scott
  */
-class ApiServiceFactory @Inject constructor(
+internal class ApiServiceFactory @Inject constructor(
         @ForApi private val retrofit: Retrofit,
         @ForApi private val okHttpClient: OkHttpClient) {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.content.Context
 import android.os.Build
@@ -38,6 +38,7 @@ import uk.org.rivernile.android.bustracker.core.app.AndroidAppRepository
 import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
 import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
+import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
@@ -58,8 +59,8 @@ import javax.inject.Provider
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module
-class CoreModule {
+@Module(includes = [ CoreModule::class ])
+class AndroidCoreModule {
 
     @Provides
     internal fun provideAppNotificationChannels(

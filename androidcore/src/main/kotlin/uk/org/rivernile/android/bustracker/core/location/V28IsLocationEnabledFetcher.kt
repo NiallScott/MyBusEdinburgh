@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.location
 import android.location.LocationManager
 import android.os.Build
 import androidx.annotation.RequiresApi
+import javax.inject.Inject
 
 /**
  * This is the [Build.VERSION_CODES.P] and above implementation of [IsLocationEnabledFetcher].
@@ -40,7 +41,7 @@ import androidx.annotation.RequiresApi
  * @author Niall Scott
  */
 @RequiresApi(Build.VERSION_CODES.P)
-internal class V28IsLocationEnabledFetcher(
+internal class V28IsLocationEnabledFetcher @Inject constructor(
         private val locationManager: LocationManager) : IsLocationEnabledFetcher {
 
     override suspend fun isLocationEnabled() = locationManager.isLocationEnabled

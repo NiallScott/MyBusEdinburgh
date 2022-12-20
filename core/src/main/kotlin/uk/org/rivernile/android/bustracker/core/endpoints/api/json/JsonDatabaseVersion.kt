@@ -39,7 +39,7 @@ import kotlinx.serialization.Serializable
  * @author Niall Scott
  */
 @Serializable
-data class JsonDatabaseVersion(
+internal data class JsonDatabaseVersion(
         @SerialName("db_schema_version") val schemaVersion: String? = null,
         @SerialName("topo_id") val topologyId: String? = null,
         @SerialName("db_url") val databaseUrl: String? = null,
