@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity.android
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -76,11 +77,15 @@ class AndroidGeofencingManager @Inject constructor(
      *
      * @param alertId The ID of the alert.
      */
+    @SuppressLint("InlinedApi")
     private fun createPendingIntent(alertId: Int) =
             Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
                     .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, alertId)
                     .let {
-                        PendingIntent.getBroadcast(context, alertId, it,
-                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                        PendingIntent.getBroadcast(
+                                context,
+                                alertId,
+                                it,
+                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
                     }
 }
