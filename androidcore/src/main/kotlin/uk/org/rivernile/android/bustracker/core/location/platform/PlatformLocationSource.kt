@@ -34,6 +34,7 @@ import android.os.Bundle
 import android.os.Looper
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
@@ -42,7 +43,7 @@ import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
-import uk.org.rivernile.android.bustracker.core.permission.PermissionChecker
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import javax.inject.Inject
 
 /**
@@ -56,7 +57,7 @@ import javax.inject.Inject
  */
 internal class PlatformLocationSource @Inject constructor(
         private val locationManager: LocationManager,
-        private val permissionChecker: PermissionChecker) : LocationSource {
+        private val permissionChecker: AndroidPermissionChecker) : LocationSource {
 
     companion object {
 
@@ -66,72 +67,77 @@ internal class PlatformLocationSource @Inject constructor(
         private const val USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS = 10f
     }
 
-    override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {
-        callbackFlow {
-            // Before registering for location updates, immediately obtain the last location from
-            // the OS and send it to the channel. This may be null if there is no previous location.
-            getBestInitialLocation()?.let {
-                channel.send(it)
-            }
+    override val userVisibleLocationFlow: Flow<DeviceLocation> get() {
+        return if (permissionChecker.checkHasEitherFineOrCoarseLocationPermission()) {
+            callbackFlow {
+                // Before registering for location updates, immediately obtain the last location
+                // from the OS and send it to the channel. This may be null if there is no previous
+                // location.
+                getBestInitialLocation()?.let {
+                    send(it)
+                }
 
-            val locationListener = object : LocationListener {
-                override fun onLocationChanged(location: Location) {
-                    launch {
-                        channel.send(location)
+                val locationListener = object : LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        launch {
+                            send(location)
+                        }
+                    }
+
+                    @Deprecated("Deprecated in Java")
+                    override fun onStatusChanged(provider: String, status: Int, extras: Bundle?) {
+                        // This is deprecated in Android Q and above. But we don't need anything
+                        // from this callback anyway.
+                    }
+
+                    override fun onProviderEnabled(provider: String) {
+                        // We don't need to concern ourselves about this, as the listener is
+                        // registered against each provider, irrespective of its enabled state.
+                        // Android will deliver new locations for the provider in
+                        // onLocationChanged() when it's enabled, and won't when it's disabled. We
+                        // just register the listener against each provider we're interested in and
+                        // Android does the rest, until we later unregister.
+                    }
+
+                    override fun onProviderDisabled(provider: String) {
+                        // See comment in onProviderEnabled() - it applies here too.
                     }
                 }
 
-                @Deprecated("Deprecated in Java")
-                override fun onStatusChanged(provider: String, status: Int, extras: Bundle?) {
-                    // This is deprecated in Android Q and above. But we don't need anything from
-                    // this callback anyway.
+                // Android S introduces LocationManager.hasProvider(), but for backwards
+                // compatibility, we need to loop through all providers to determine existence.
+                locationManager.allProviders.forEach {
+                    if (it == LocationManager.NETWORK_PROVIDER ||
+                            it == LocationManager.GPS_PROVIDER) {
+                        // Request location updates from both network and GPS providers. We'll only
+                        // get location updates from active providers, but we can just ignore their
+                        // active state as the OS will deal with that for us.
+                        //
+                        // Location updates will be delivered on the main thread, but this is fine
+                        // as a coroutine is immediately launched from there, thus not blocking the
+                        // thread.
+                        locationManager.requestLocationUpdates(
+                                it,
+                                USER_VISIBLE_LOCATION_MIN_TIME_MILLIS,
+                                USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS,
+                                locationListener,
+                                Looper.getMainLooper())
+                    }
                 }
 
-                override fun onProviderEnabled(provider: String) {
-                    // We don't need to concern ourselves about this, as the listener is registered
-                    // against each provider, irrespective of its enabled state. Android will
-                    // deliver new locations for the provider in onLocationChanged() when it's
-                    // enabled, and won't when it's disabled. We just register the listener against
-                    // each provider we're interested in and Android does the rest, until we later
-                    // unregister.
+                awaitClose {
+                    locationManager.removeUpdates(locationListener)
                 }
-
-                override fun onProviderDisabled(provider: String) {
-                    // See comment in onProviderEnabled() - it applies here too.
+            }.scan<Location, Location?>(null) { accumulator, value ->
+                value.takeIf { isBetterLocation(it, accumulator) } ?: accumulator
+            }.mapNotNull { location ->
+                location?.let {
+                    DeviceLocation(it.latitude, it.longitude)
                 }
-            }
-
-            // Android S introduces LocationManager.hasProvider(), but for backwards compatibility,
-            // we need to loop through all providers to determine existence.
-            locationManager.allProviders.forEach {
-                if (it == LocationManager.NETWORK_PROVIDER || it == LocationManager.GPS_PROVIDER) {
-                    // Request location updates from both network and GPS providers. We'll only get
-                    // location updates from active providers, but we can just ignored their active
-                    // state as the OS will deal with that for us.
-                    //
-                    // Location updates will be delivered on the main thread, but this is fine as
-                    // a coroutine is immediately launched from there, thus not blocking the thread.
-                    locationManager.requestLocationUpdates(
-                            it,
-                            USER_VISIBLE_LOCATION_MIN_TIME_MILLIS,
-                            USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS,
-                            locationListener,
-                            Looper.getMainLooper())
-                }
-            }
-
-            awaitClose {
-                locationManager.removeUpdates(locationListener)
-            }
-        }.scan<Location, Location?>(null) { accumulator, value ->
-            value.takeIf { isBetterLocation(it, accumulator) } ?: accumulator
-        }.mapNotNull { location ->
-            location?.let {
-                DeviceLocation(it.latitude, it.longitude)
-            }
-        }.distinctUntilChanged() // Prevent unnecessary downstream processing.
-    } else {
-        emptyFlow()
+            }.distinctUntilChanged() // Prevent unnecessary downstream processing.
+        } else {
+            emptyFlow()
+        }
     }
 
     /**

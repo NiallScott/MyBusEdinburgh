@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,16 +33,51 @@ import androidx.core.content.ContextCompat
 import javax.inject.Inject
 
 /**
- * The Android implementation of [PermissionChecker].
+ * A convenience class to check permissions.
+ *
+ * The methods in here are named in the convention of `check*Permission`. This means that Lint picks
+ * our convenience methods up as checking a permission and does not add a warning at the call site
+ * claiming the permission has not been checked.
  *
  * @param context The application [Context].
  * @author Niall Scott
  */
-internal class AndroidPermissionChecker @Inject constructor(
-        private val context: Context) : PermissionChecker {
+class AndroidPermissionChecker @Inject internal constructor(
+        private val context: Context,
+        private val notificationPermissionChecker: NotificationPermissionChecker) {
 
-    override fun checkLocationPermission() =
-            hasCoarseLocationPermission() && hasFineLocationPermission()
+    /**
+     * Has [Manifest.permission.ACCESS_FINE_LOCATION] been granted to us?
+     *
+     * @return `true` if [Manifest.permission.ACCESS_FINE_LOCATION] has been granted to us,
+     * otherwise `false`.
+     */
+    fun checkFineLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
+     * Has either [Manifest.permission.ACCESS_FINE_LOCATION] or
+     * [Manifest.permission.ACCESS_COARSE_LOCATION] been granted to us?
+     *
+     * @return `true` if [Manifest.permission.ACCESS_FINE_LOCATION] or
+     * [Manifest.permission.ACCESS_COARSE_LOCATION] has been granted to us, otherwise `false`.
+     */
+    fun checkHasEitherFineOrCoarseLocationPermission() =
+            checkFineLocationPermission() || checkCoarseLocationPermission()
+
+    /**
+     * Do we have permission to post notifications? Prior to API level 33 this will always return
+     * `true`. From API level 33+, this will return whether [Manifest.permission.POST_NOTIFICATIONS]
+     * is granted or not.
+     *
+     * @return Always `true` prior to API level 33. From API level 33+, `true` if
+     * [Manifest.permission.POST_NOTIFICATIONS] has been granted to us, otherwise `false`.
+     */
+    fun checkPostNotificationPermission() =
+            notificationPermissionChecker.checkPostNotificationPermission()
 
     /**
      * Has [Manifest.permission.ACCESS_COARSE_LOCATION] been granted?
@@ -50,17 +85,7 @@ internal class AndroidPermissionChecker @Inject constructor(
      * @return `true` if [Manifest.permission.ACCESS_COARSE_LOCATION] has been granted, otherwise
      * `false`.
      */
-    private fun hasCoarseLocationPermission() =
+    private fun checkCoarseLocationPermission() =
             ContextCompat.checkSelfPermission(context, Manifest.permission
                     .ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-
-    /**
-     * Has [Manifest.permission.ACCESS_FINE_LOCATION] been granted?
-     *
-     * @return `true` if [Manifest.permission.ACCESS_FINE_LOCATION] has been granted, otherwise
-     * `false`.
-     */
-    private fun hasFineLocationPermission() =
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                    PackageManager.PERMISSION_GRANTED
 }

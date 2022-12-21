@@ -37,15 +37,16 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
-import uk.org.rivernile.android.bustracker.core.permission.PermissionChecker
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -60,7 +61,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 internal class GooglePlayLocationSource @Inject constructor(
         private val fusedLocationProviderClient: FusedLocationProviderClient,
-        private val permissionChecker: PermissionChecker) : LocationSource {
+        private val permissionChecker: AndroidPermissionChecker) : LocationSource {
 
     companion object {
 
@@ -78,20 +79,22 @@ internal class GooglePlayLocationSource @Inject constructor(
                 .build()
     }
 
-    override val userVisibleLocationFlow get() = if (permissionChecker.checkLocationPermission()) {
-        callbackFlow {
-            getLastLocation()?.let {
-                channel.send(it)
-            }
+    override val userVisibleLocationFlow: Flow<DeviceLocation> get() {
+        return if (permissionChecker.checkHasEitherFineOrCoarseLocationPermission()) {
+            callbackFlow {
+                getLastLocation()?.let {
+                    send(it)
+                }
 
-            // As getLastLocation() is not cancellable and can be long running, make sure we're
-            // still active here.
-            if (isActive) {
+                // As getLastLocation() is not cancellable and can be long running, make sure we're
+                // still active here.
+                ensureActive()
+
                 val callback = object : LocationCallback() {
                     override fun onLocationResult(result: LocationResult) {
                         launch {
                             mapToDeviceLocation(result.lastLocation)?.let {
-                                channel.send(it)
+                                send(it)
                             }
                         }
                     }
@@ -105,10 +108,10 @@ internal class GooglePlayLocationSource @Inject constructor(
                 awaitClose {
                     fusedLocationProviderClient.removeLocationUpdates(callback)
                 }
-            }
-        }.distinctUntilChanged() // Prevent unnecessary downstream processing.
-    } else {
-        emptyFlow()
+            }.distinctUntilChanged() // Prevent unnecessary downstream processing.
+        } else {
+            emptyFlow()
+        }
     }
 
     /**

@@ -32,7 +32,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.GeofencingManager
-import uk.org.rivernile.android.bustracker.core.permission.PermissionChecker
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import javax.inject.Inject
 
 /**
@@ -47,7 +47,7 @@ import javax.inject.Inject
 class AndroidGeofencingManager @Inject constructor(
         private val context: Context,
         private val locationManager: LocationManager,
-        private val permissionChecker: PermissionChecker) : GeofencingManager {
+        private val permissionChecker: AndroidPermissionChecker) : GeofencingManager {
 
     override fun addGeofence(
             id: Int,
@@ -55,7 +55,7 @@ class AndroidGeofencingManager @Inject constructor(
             longitude: Double,
             radius: Float,
             duration: Long) {
-        if (permissionChecker.checkLocationPermission()) {
+        if (permissionChecker.checkFineLocationPermission()) {
             createPendingIntent(id).let {
                 locationManager.addProximityAlert(latitude, longitude, radius, duration, it)
             }
@@ -63,7 +63,7 @@ class AndroidGeofencingManager @Inject constructor(
     }
 
     override fun removeGeofence(id: Int) {
-        if (permissionChecker.checkLocationPermission()) {
+        if (permissionChecker.checkFineLocationPermission()) {
             createPendingIntent(id).let {
                 locationManager.removeProximityAlert(it)
                 it.cancel()
