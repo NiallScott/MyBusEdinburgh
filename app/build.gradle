@@ -1,7 +1,7 @@
 import com.android.build.api.variant.ResValue
 
 /*
- * Copyright (C) 2014 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2014 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -128,6 +128,11 @@ android {
 
     buildFeatures {
         viewBinding true
+    }
+
+    lintOptions {
+        // FIXME: Temporary workaround until notification permission is implemented.
+        disable 'NotificationPermission'
     }
 
     useLibrary 'android.test.mock'
