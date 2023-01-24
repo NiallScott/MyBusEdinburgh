@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -68,6 +68,8 @@ class UiStopMarker(
     override fun getTitle(): String? = null
 
     override fun getSnippet(): String? = null
+
+    override fun getZIndex(): Float? = null
 
     /**
      * Should the info window be shown?

@@ -56,7 +56,7 @@ buildscript {
         playServicesMapsVersion = '18.1.0'
         playServicesLocationVersion = '21.0.1'
         googleMapsKtxVersion = '3.4.0'
-        googleMapsUtilsVersion = '2.4.0'
+        googleMapsUtilsVersion = '3.3.0'
         googleMapsUtilsKtxVersion = '3.4.0'
         firebaseBomVersion = '31.2.0'
 
