@@ -126,11 +126,6 @@ android {
         viewBinding true
     }
 
-    lintOptions {
-        // FIXME: Temporary workaround until notification permission is implemented.
-        disable 'NotificationPermission'
-    }
-
     useLibrary 'android.test.mock'
 }
 

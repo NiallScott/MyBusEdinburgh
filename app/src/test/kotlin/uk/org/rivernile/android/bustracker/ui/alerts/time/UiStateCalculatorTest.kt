@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -61,11 +62,13 @@ class UiStateCalculatorTest {
         val stopCodeFlow = flowOf<String?>(null)
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         val availableServicesFlow = flowOf<List<String>?>(null)
+        val permissionsFlow = flowOf(PermissionsState())
 
         val observer = calculator.createUiStateFlow(
                 stopCodeFlow,
                 stopDetailsFlow,
-                availableServicesFlow).test(this)
+                availableServicesFlow,
+                permissionsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -77,11 +80,13 @@ class UiStateCalculatorTest {
         val stopCodeFlow = flowOf<String?>("")
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         val availableServicesFlow = flowOf<List<String>?>(null)
+        val permissionsFlow = flowOf(PermissionsState())
 
         val observer = calculator.createUiStateFlow(
                 stopCodeFlow,
                 stopDetailsFlow,
-                availableServicesFlow).test(this)
+                availableServicesFlow,
+                permissionsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -89,15 +94,71 @@ class UiStateCalculatorTest {
     }
 
     @Test
-    fun createUiStateFlowEmitsProgressWhenStopDetailsIsNullAndAvailableServicesIsNull() = runTest {
+    fun createUiStateFlowEmitsPermissionDeniedWhenPermissionIsDenied() = runTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         val availableServicesFlow = flowOf<List<String>?>(null)
+        val permissionsFlow = flowOf(PermissionsState(PermissionState.DENIED))
 
         val observer = calculator.createUiStateFlow(
                 stopCodeFlow,
                 stopDetailsFlow,
-                availableServicesFlow).test(this)
+                availableServicesFlow,
+                permissionsFlow).test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(UiState.ERROR_PERMISSION_DENIED)
+    }
+
+    @Test
+    fun createUiStateFlowEmitsPermissionRequiredWhenPermissionIsUngranted() = runTest {
+        val stopCodeFlow = flowOf<String?>("123456")
+        val stopDetailsFlow = flowOf<StopDetails?>(null)
+        val availableServicesFlow = flowOf<List<String>?>(null)
+        val permissionsFlow = flowOf(PermissionsState(PermissionState.UNGRANTED))
+
+        val observer = calculator.createUiStateFlow(
+                stopCodeFlow,
+                stopDetailsFlow,
+                availableServicesFlow,
+                permissionsFlow).test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(UiState.ERROR_PERMISSION_REQUIRED)
+    }
+
+    @Test
+    fun createUiStateFlowEmitsPermissionRequiredWhenPermissionIsShowRationale() = runTest {
+        val stopCodeFlow = flowOf<String?>("123456")
+        val stopDetailsFlow = flowOf<StopDetails?>(null)
+        val availableServicesFlow = flowOf<List<String>?>(null)
+        val permissionsFlow = flowOf(PermissionsState(PermissionState.SHOW_RATIONALE))
+
+        val observer = calculator.createUiStateFlow(
+                stopCodeFlow,
+                stopDetailsFlow,
+                availableServicesFlow,
+                permissionsFlow).test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(UiState.ERROR_PERMISSION_REQUIRED)
+    }
+
+    @Test
+    fun createUiStateFlowEmitsProgressWhenStopDetailsIsNullAndAvailableServicesIsNull() = runTest {
+        val stopCodeFlow = flowOf<String?>("123456")
+        val stopDetailsFlow = flowOf<StopDetails?>(null)
+        val availableServicesFlow = flowOf<List<String>?>(null)
+        val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
+
+        val observer = calculator.createUiStateFlow(
+                stopCodeFlow,
+                stopDetailsFlow,
+                availableServicesFlow,
+                permissionsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -110,11 +171,13 @@ class UiStateCalculatorTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf<StopDetails?>(null)
         val availableServicesFlow = flowOf(listOf("1", "2", "3"))
+        val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         val observer = calculator.createUiStateFlow(
                 stopCodeFlow,
                 stopDetailsFlow,
-                availableServicesFlow).test(this)
+                availableServicesFlow,
+                permissionsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -127,11 +190,13 @@ class UiStateCalculatorTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
         val availableServicesFlow = flowOf<List<String>?>(null)
+        val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         val observer = calculator.createUiStateFlow(
                 stopCodeFlow,
                 stopDetailsFlow,
-                availableServicesFlow).test(this)
+                availableServicesFlow,
+                permissionsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -143,11 +208,13 @@ class UiStateCalculatorTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
         val availableServicesFlow = flowOf<List<String>?>(emptyList())
+        val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         val observer = calculator.createUiStateFlow(
                 stopCodeFlow,
                 stopDetailsFlow,
-                availableServicesFlow).test(this)
+                availableServicesFlow,
+                permissionsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -159,11 +226,13 @@ class UiStateCalculatorTest {
         val stopCodeFlow = flowOf<String?>("123456")
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
         val availableServicesFlow = flowOf(listOf("1", "2", "3"))
+        val permissionsFlow = flowOf(PermissionsState(PermissionState.GRANTED))
 
         val observer = calculator.createUiStateFlow(
                 stopCodeFlow,
                 stopDetailsFlow,
-                availableServicesFlow).test(this)
+                availableServicesFlow,
+                permissionsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -189,16 +258,24 @@ class UiStateCalculatorTest {
             delay(100L)
             emit(listOf("1", "2", "3"))
         }
+        val permissionFlow = flow {
+            emit(PermissionsState(PermissionState.UNGRANTED))
+            delay(150L)
+            emit(PermissionsState(PermissionState.GRANTED))
+        }
 
         val observer = calculator.createUiStateFlow(
                 stopCodeFlow,
                 stopDetailsFlow,
-                availableServicesFlow).test(this)
+                availableServicesFlow,
+                permissionFlow)
+                .test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
                 UiState.ERROR_NO_STOP_CODE,
+                UiState.ERROR_PERMISSION_REQUIRED,
                 UiState.PROGRESS,
                 UiState.ERROR_NO_SERVICES,
                 UiState.CONTENT)

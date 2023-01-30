@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.time
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -92,8 +97,14 @@ class AddTimeAlertDialogFragment : DialogFragment() {
 
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
+    @Inject
+    lateinit var permissionChecker: AndroidPermissionChecker
 
     private val viewModel: AddTimeAlertDialogFragmentViewModel by viewModels()
+
+    private val requestPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission(),
+            this::handleRequestPermissionResult)
 
     private val viewBinding by lazy {
         DialogAddTimeAlertBinding.inflate(layoutInflater, null, false)
@@ -128,6 +139,9 @@ class AddTimeAlertDialogFragment : DialogFragment() {
             handleServicesChosen(result)
         }
 
+        viewModel.requestPermissionsLiveData.observe(viewLifecycle) {
+            handleRequestPermissions()
+        }
         viewModel.uiStateLiveData.observe(viewLifecycle, this::handleUiStateChanged)
         viewModel.stopDetailsLiveData.observe(viewLifecycle, this::handleStopDetailsLoaded)
         viewModel.selectedServicesLiveData.observe(viewLifecycle,
@@ -140,6 +154,10 @@ class AddTimeAlertDialogFragment : DialogFragment() {
         }
 
         viewBinding.apply {
+            btnGrantPermission.setOnClickListener {
+                viewModel.onGrantPermissionClicked()
+            }
+
             btnSelectServices.setOnClickListener {
                 viewModel.onSelectServicesClicked()
             }
@@ -148,6 +166,37 @@ class AddTimeAlertDialogFragment : DialogFragment() {
                 viewModel.onLimitationsButtonClicked()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        updatePermissionState()
+    }
+
+    /**
+     * Update the current permission state in [AddTimeAlertDialogFragmentViewModel].
+     */
+    private fun updatePermissionState() {
+        viewModel.onPermissionsUpdated(
+                UiPermissionsState(permissionChecker.checkPostNotificationPermission()))
+    }
+
+    /**
+     * This is called when the permission request result is returned.
+     *
+     * @param isGranted Was the permission granted?
+     */
+    private fun handleRequestPermissionResult(isGranted: Boolean) {
+        viewModel.onPermissionsResult(UiPermissionsState(isGranted))
+    }
+
+    /**
+     * This is called when the permissions should be requested from the user.
+     */
+    @SuppressLint("InlinedApi")
+    private fun handleRequestPermissions() {
+        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     /**
@@ -162,6 +211,7 @@ class AddTimeAlertDialogFragment : DialogFragment() {
                 UiState.CONTENT -> contentView.showContentLayout()
                 UiState.ERROR_NO_STOP_CODE -> {
                     txtErrorBlurb.setText(R.string.addtimealertdialog_error_no_stop_code)
+                    btnGrantPermission.isVisible = false
                     contentView.showErrorLayout()
                 }
                 UiState.ERROR_NO_SERVICES -> {
@@ -172,8 +222,19 @@ class AddTimeAlertDialogFragment : DialogFragment() {
                         txtErrorBlurb.text =
                                 getString(R.string.addtimealertdialog_error_no_services,
                                         formattedName)
+                        btnGrantPermission.isVisible = false
                         contentView.showErrorLayout()
                     } ?: contentView.showProgressLayout() // This should never happen.
+                }
+                UiState.ERROR_PERMISSION_REQUIRED -> {
+                    txtErrorBlurb.setText(R.string.addtimealertdialog_error_request_permissions)
+                    btnGrantPermission.isVisible = true
+                    contentView.showErrorLayout()
+                }
+                UiState.ERROR_PERMISSION_DENIED -> {
+                    txtErrorBlurb.setText(R.string.addtimealertdialog_error_permission_denied)
+                    btnGrantPermission.isVisible = false
+                    contentView.showErrorLayout()
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,6 +42,16 @@ enum class UiState {
      * There are no known services for the stop.
      */
     ERROR_NO_SERVICES,
+    /**
+     * There are insufficient permissions enabled for this feature to work and the user should be
+     * asked to grant them.
+     */
+    ERROR_PERMISSION_REQUIRED,
+    /**
+     * There are insufficient permissions enabled for this feature to work and the user has denied
+     * us the permissions.
+     */
+    ERROR_PERMISSION_DENIED,
     /**
      * Show progress while required content is loading.
      */

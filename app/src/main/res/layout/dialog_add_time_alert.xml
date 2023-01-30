@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2017 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2017 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,7 @@
         android:layout_marginEnd="?dialogPreferredPadding"
         app:progressView="@id/progress"
         app:contentView="@id/layoutContent"
-        app:errorView="@id/txtErrorBlurb"
+        app:errorView="@id/layoutError"
         app:contentLayout="progress"
         tools:contentLayout="content">
 
@@ -112,12 +112,30 @@
                 android:text="@string/addtimealertdialog_button_limitations" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/txtErrorBlurb"
+        <LinearLayout
+            android:id="@+id/layoutError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?textAppearanceBodyMedium"
-            tools:text="@string/addtimealertdialog_error_no_stop_code" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtErrorBlurb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?textAppearanceBodyMedium"
+                tools:text="@string/addtimealertdialog_error_no_stop_code" />
+
+            <Button
+                style="@style/Widget.Material3.Button.TextButton"
+                android:id="@+id/btnGrantPermission"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/padding_default"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/addtimealertdialog_error_btn_grant_permission"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
 
         <include
             layout="@layout/indeterminate_progress"

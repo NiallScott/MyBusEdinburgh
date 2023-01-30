@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,6 +54,7 @@ import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
 import uk.org.rivernile.android.bustracker.testutils.test
+import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
 /**
  * Tests for [AddTimeAlertDialogFragmentViewModel].
@@ -69,6 +71,8 @@ class AddTimeAlertDialogFragmentViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     @Mock
+    private lateinit var permissionsTracker: PermissionsTracker
+    @Mock
     private lateinit var busStopsRepository: BusStopsRepository
     @Mock
     private lateinit var serviceStopsRepository: ServiceStopsRepository
@@ -79,6 +83,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun selectedServicesLiveDataEmitsNullAsInitialState() {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         val observer = LiveDataTestObserver<List<String>?>()
 
@@ -89,6 +94,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun selectedServicesLiveDataEmitsNullWhenInitialStateIsNull() {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val initialState = mapOf(
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to null)
         val savedState = SavedStateHandle(initialState)
@@ -101,6 +107,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun selectedServicesLiveDataEmitsNullWhenInitialStateIsEmpty() {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val initialState = mapOf(
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to emptyArray<String>())
         val savedState = SavedStateHandle(initialState)
@@ -113,6 +120,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun selectedServicesLiveDataEmitsInitialStateWhenSet() {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val initialState = mapOf(
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to arrayOf("1", "2"))
         val savedState = SavedStateHandle(initialState)
@@ -125,6 +133,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun selectedServicesLiveDataEmitsChanges() {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
 
         val observer = viewModel.selectedServicesLiveData.test()
@@ -140,7 +149,21 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
+    fun requestPermissionsLiveDataReturnsLiveDataFromPermissionsTracker() {
+        givenPermissionsTrackerFlowHasPermissionsState()
+        val expected = SingleLiveEvent<Unit>()
+        whenever(permissionsTracker.requestPermissionsLiveData)
+                .thenReturn(expected)
+        val viewModel = createViewModel()
+
+        val result = viewModel.requestPermissionsLiveData
+
+        assertSame(expected, result)
+    }
+
+    @Test
     fun stopDetailsLiveDataEmitsNullWhenNoStopCodeIsSet() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
 
         val observer = viewModel.stopDetailsLiveData.test()
@@ -151,6 +174,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun stopDetailsLiveDataEmitsNullWhenStopCodeIsSetAsNull() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
 
         val observer = viewModel.stopDetailsLiveData.test()
@@ -162,6 +186,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun stopDetailsLiveDataEmitsStopDetailsWithNullNameWhenRepositoryReturnsNullName() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(null))
@@ -177,6 +202,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(StopName("Name", "Locality")))
@@ -193,6 +219,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun stopDetailsLiveDataEmitsCorrectDataOnChanges() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flow{
@@ -221,9 +248,14 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun uiStateLiveDataEmitsCalculatedState() = runTest {
-        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any()))
+        givenPermissionsTrackerFlowHasPermissionsState()
+        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any(), any()))
                 .thenReturn(flow {
                     emit(UiState.ERROR_NO_STOP_CODE)
+                    delay(100L)
+                    emit(UiState.ERROR_PERMISSION_REQUIRED)
+                    delay(100L)
+                    emit(UiState.ERROR_PERMISSION_DENIED)
                     delay(100L)
                     emit(UiState.ERROR_NO_SERVICES)
                     delay(100L)
@@ -237,6 +269,8 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
         observer.assertValues(
                 UiState.ERROR_NO_STOP_CODE,
+                UiState.ERROR_PERMISSION_REQUIRED,
+                UiState.ERROR_PERMISSION_DENIED,
                 UiState.ERROR_NO_SERVICES,
                 UiState.PROGRESS,
                 UiState.CONTENT)
@@ -244,16 +278,19 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun uiStateCalculatorIsPassedCorrectFlowObjects() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val stopCodeFlow = FlowTestObserver<String?>(this)
         val stopDetailsFlow = FlowTestObserver<StopDetails?>(this)
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
+        val permissionsStateFlow = FlowTestObserver<PermissionsState>(this)
         doAnswer {
             stopCodeFlow.observe(it.getArgument(0))
             stopDetailsFlow.observe(it.getArgument(1))
             availableServicesFlow.observe(it.getArgument(2))
+            permissionsStateFlow.observe(it.getArgument(3))
 
             flowOf(UiState.CONTENT)
-        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
+        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(StopName("Name 1", "Locality 1")))
         whenever(busStopsRepository.getNameForStopFlow("987654"))
@@ -273,6 +310,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
         stopCodeFlow.finish()
         stopDetailsFlow.finish()
         availableServicesFlow.finish()
+        permissionsStateFlow.finish()
 
         stopCodeFlow.assertValues(null, "123456", "987654")
         stopDetailsFlow.assertValues(
@@ -290,8 +328,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun addButtonEnabledLiveDataEmitsFalseWhenSelectedServicesIsNull() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val uiStateFlow = flow {
             emit(UiState.ERROR_NO_STOP_CODE)
+            delay(100L)
+            emit(UiState.ERROR_PERMISSION_REQUIRED)
+            delay(100L)
+            emit(UiState.ERROR_PERMISSION_DENIED)
             delay(100L)
             emit(UiState.ERROR_NO_SERVICES)
             delay(100L)
@@ -299,7 +342,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
             delay(100L)
             emit(UiState.CONTENT)
         }
-        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any()))
+        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any(), any()))
                 .thenReturn(uiStateFlow)
         val viewModel = createViewModel()
 
@@ -312,8 +355,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun addButtonEnabledLiveDataEmitsFalseWhenSelectedServicesIsEmpty() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val uiStateFlow = flow {
             emit(UiState.ERROR_NO_STOP_CODE)
+            delay(100L)
+            emit(UiState.ERROR_PERMISSION_REQUIRED)
+            delay(100L)
+            emit(UiState.ERROR_PERMISSION_DENIED)
             delay(100L)
             emit(UiState.ERROR_NO_SERVICES)
             delay(100L)
@@ -321,7 +369,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
             delay(100L)
             emit(UiState.CONTENT)
         }
-        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any()))
+        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any(), any()))
                 .thenReturn(uiStateFlow)
         val viewModel = createViewModel()
 
@@ -335,8 +383,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
     @Test
     fun addButtonEnabledLiveDataEmitsTrueWhenSelectedServicesPopulatedAndShowingContent() =
             runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val uiStateFlow = flow {
             emit(UiState.ERROR_NO_STOP_CODE)
+            delay(100L)
+            emit(UiState.ERROR_PERMISSION_REQUIRED)
+            delay(100L)
+            emit(UiState.ERROR_PERMISSION_DENIED)
             delay(100L)
             emit(UiState.ERROR_NO_SERVICES)
             delay(100L)
@@ -350,7 +403,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
             delay(100L)
             emit(UiState.CONTENT)
         }
-        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any()))
+        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any(), any()))
                 .thenReturn(uiStateFlow)
         val viewModel = createViewModel()
 
@@ -363,6 +416,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onLimitationsButtonClickedShowsLimitations() {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
 
         val observer = viewModel.showLimitationsLiveData.test()
@@ -373,12 +427,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onSelectServicesClickedDoesNotShowServicesSelectionWhenAvailableServicesIsNull() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
-        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
+        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(null))
         val viewModel = createViewModel()
@@ -396,12 +451,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
     @Test
     fun onSelectServicesClickedDoesNotShowServicesSelectionWhenAvailableServicesIsEmpty() =
             runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
-        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
+        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(emptyList()))
         val viewModel = createViewModel()
@@ -418,12 +474,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onSelectServicesClickedShowsServicesSelectionWithNullSelectedServicesFirstTime() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
-        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
+        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
         val viewModel = createViewModel()
@@ -441,12 +498,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onSelectServicesClickedShowsServicesSelectionWithInitialStateSelectedServices() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
-        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
+        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
         val initialState = mapOf(
@@ -468,12 +526,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onSelectServicesClickedShowsServicesSelectionWithSelectedServicesSet() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
-        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
+        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
         val viewModel = createViewModel()
@@ -494,12 +553,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onSelectServicesClickedShowsServicesSelectionWithRepresentativeExample() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val availableServicesFlow = FlowTestObserver<List<String>?>(this)
         doAnswer {
             availableServicesFlow.observe(it.getArgument(2))
 
             flowOf(UiState.CONTENT)
-        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any())
+        }.whenever(uiStateCalculator).createUiStateFlow(any(), any(), any(), any())
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
                 .thenReturn(flowOf(listOf("1", "2", "3")))
         val initialState = mapOf(
@@ -525,7 +585,43 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
+    fun onPermissionsUpdatedUpdatesStateInPermissionsTracker() {
+        givenPermissionsTrackerFlowHasPermissionsState()
+        val viewModel = createViewModel()
+        val expected = UiPermissionsState(true)
+
+        viewModel.onPermissionsUpdated(expected)
+
+        verify(permissionsTracker)
+                .permissionsState = expected
+    }
+
+    @Test
+    fun onPermissionsResultUpdatesStateInPermissionsTracker() {
+        givenPermissionsTrackerFlowHasPermissionsState()
+        val viewModel = createViewModel()
+        val expected = UiPermissionsState(true)
+
+        viewModel.onPermissionsResult(expected)
+
+        verify(permissionsTracker)
+                .permissionsState = expected
+    }
+
+    @Test
+    fun onGrantPermissionClickedPassesEventToPermissionsTracker() {
+        givenPermissionsTrackerFlowHasPermissionsState()
+        val viewModel = createViewModel()
+
+        viewModel.onGrantPermissionClicked()
+
+        verify(permissionsTracker)
+                .onRequestPermissionsClicked()
+    }
+
+    @Test
     fun onAddClickedDoesNotAddAlertWhenStopCodeIsNull() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         viewModel.stopCode = null
         viewModel.selectedServices = listOf("1", "2", "3")
@@ -539,6 +635,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         viewModel.stopCode = ""
         viewModel.selectedServices = listOf("1", "2", "3")
@@ -552,6 +649,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onAddClickedDoesNotAddAlertWhenSelectedServicesIsNull() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         viewModel.stopCode = "123456"
         viewModel.selectedServices = null
@@ -565,6 +663,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onAddClickedDoesNotAddAlertWhenSelectedServicesIsEmpty() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         viewModel.stopCode = "123456"
         viewModel.selectedServices = listOf()
@@ -578,6 +677,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
 
     @Test
     fun onAddClickedAddsAlertsWhenConditionsAreSatisfied() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
         viewModel.stopCode = "123456"
         viewModel.selectedServices = listOf("1", "2", "3")
@@ -591,9 +691,15 @@ class AddTimeAlertDialogFragmentViewModelTest {
                 .addArrivalAlert(expected)
     }
 
+    private fun givenPermissionsTrackerFlowHasPermissionsState() {
+        whenever(permissionsTracker.permissionsStateFlow)
+                .thenReturn(flowOf(PermissionsState()))
+    }
+
     private fun createViewModel(savedState: SavedStateHandle = SavedStateHandle()) =
             AddTimeAlertDialogFragmentViewModel(
                     savedState,
+                    permissionsTracker,
                     busStopsRepository,
                     serviceStopsRepository,
                     uiStateCalculator,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,31 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.permission
+package uk.org.rivernile.android.bustracker.ui.alerts.time
+
+import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 
 /**
- * This enumeration encapsulates the permission states.
+ * This class encapsulates the permissions that the Add Time Alert dialog would like to have, and
+ * their current state.
  *
+ * @property postNotificationsPermission The state of the post notifications permission.
  * @author Niall Scott
  */
-enum class PermissionState {
-
-    /**
-     * The permission has been granted to the app and we're free to use the capabilities it enables.
-     */
-    GRANTED,
-    /**
-     * Show the user the permission rationale before asking them to grant us the permission.
-     */
-    SHOW_RATIONALE,
-    /**
-     * The permission has not yet been granted to us.
-     */
-    UNGRANTED,
-    /**
-     * The user has denied the permission to us and we're unable to ask the user for the permission
-     * again using the normal method. The only way for the user to now grant it is in the system
-     * settings.
-     */
-    DENIED
-}
+data class PermissionsState(
+        val postNotificationsPermission: PermissionState = PermissionState.UNGRANTED)

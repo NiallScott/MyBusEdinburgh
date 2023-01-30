@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,6 +39,7 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Proxi
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import javax.inject.Inject
 
@@ -59,6 +60,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
         private val notificationManager: NotificationManagerCompat,
         private val notificationPreferences: NotificationPreferences?,
         private val busStopsDao: BusStopsDao,
+        private val permissionChecker: AndroidPermissionChecker,
         private val deeplinkIntentFactory: DeeplinkIntentFactory,
         private val textFormattingUtils: TextFormattingUtils) : AlertNotificationDispatcher {
 
@@ -70,56 +72,61 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
         private const val TIMEOUT_ALERT_MILLIS = 1800000L // 30 minutes
     }
 
-    override fun dispatchTimeAlertNotification(arrivalAlert: ArrivalAlert,
-                                               qualifyingServices: List<Service>) {
-        val title = context.getString(R.string.arrival_alert_notification_title)
-        val summary = createAlertSummaryString(arrivalAlert, qualifyingServices)
-        val pendingIntent = createArrivalAlertPendingIntent(arrivalAlert.stopCode)
+    override fun dispatchTimeAlertNotification(
+            arrivalAlert: ArrivalAlert,
+            qualifyingServices: List<Service>) {
+        if (permissionChecker.checkPostNotificationPermission()) {
+            val title = context.getString(R.string.arrival_alert_notification_title)
+            val summary = createAlertSummaryString(arrivalAlert, qualifyingServices)
+            val pendingIntent = createArrivalAlertPendingIntent(arrivalAlert.stopCode)
 
-        NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_ARRIVAL_ALERTS)
-                .apply {
-                    setSmallIcon(R.drawable.ic_directions_bus_black)
-                    setContentTitle(title)
-                    setContentText(summary)
-                    setTicker(summary)
-                    setStyle(NotificationCompat.BigTextStyle().bigText(summary))
-                    priority = NotificationCompat.PRIORITY_HIGH
-                    setCategory(NotificationCompat.CATEGORY_ALARM)
-                    setContentIntent(pendingIntent)
-                    setAutoCancel(true)
-                    setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
-                    notificationPreferences?.applyNotificationPreferences(this)
-                }
-                .let {
-                    notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
-                }
+            NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_ARRIVAL_ALERTS)
+                    .apply {
+                        setSmallIcon(R.drawable.ic_directions_bus_black)
+                        setContentTitle(title)
+                        setContentText(summary)
+                        setTicker(summary)
+                        setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                        priority = NotificationCompat.PRIORITY_HIGH
+                        setCategory(NotificationCompat.CATEGORY_ALARM)
+                        setContentIntent(pendingIntent)
+                        setAutoCancel(true)
+                        setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+                        notificationPreferences?.applyNotificationPreferences(this)
+                    }
+                    .let {
+                        notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
+                    }
+        }
     }
 
     override fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert) {
-        val stopName = getDisplayableStopName(proximityAlert.stopCode)
-        val title = context.getString(R.string.proximity_alert_notification_title, stopName)
-        val ticker = context.getString(R.string.proximity_alert_notification_ticker, stopName)
-        val summary = context.getString(R.string.proximity_alert_notification_summary,
-                proximityAlert.distanceFrom, stopName)
-        val pendingIntent = createProximityAlertPendingIntent(proximityAlert.stopCode)
+        if (permissionChecker.checkPostNotificationPermission()) {
+            val stopName = getDisplayableStopName(proximityAlert.stopCode)
+            val title = context.getString(R.string.proximity_alert_notification_title, stopName)
+            val ticker = context.getString(R.string.proximity_alert_notification_ticker, stopName)
+            val summary = context.getString(R.string.proximity_alert_notification_summary,
+                    proximityAlert.distanceFrom, stopName)
+            val pendingIntent = createProximityAlertPendingIntent(proximityAlert.stopCode)
 
-        NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_PROXIMITY_ALERTS)
-                .apply {
-                    setSmallIcon(R.drawable.ic_directions_bus_black)
-                    setContentTitle(title)
-                    setContentText(summary)
-                    setTicker(ticker)
-                    setStyle(NotificationCompat.BigTextStyle().bigText(summary))
-                    priority = NotificationCompat.PRIORITY_HIGH
-                    setCategory(NotificationCompat.CATEGORY_NAVIGATION)
-                    setContentIntent(pendingIntent)
-                    setAutoCancel(true)
-                    setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
-                    notificationPreferences?.applyNotificationPreferences(this)
-                }
-                .let {
-                    notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())
-                }
+            NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_PROXIMITY_ALERTS)
+                    .apply {
+                        setSmallIcon(R.drawable.ic_directions_bus_black)
+                        setContentTitle(title)
+                        setContentText(summary)
+                        setTicker(ticker)
+                        setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                        priority = NotificationCompat.PRIORITY_HIGH
+                        setCategory(NotificationCompat.CATEGORY_NAVIGATION)
+                        setContentIntent(pendingIntent)
+                        setAutoCancel(true)
+                        setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+                        notificationPreferences?.applyNotificationPreferences(this)
+                    }
+                    .let {
+                        notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())
+                    }
+        }
     }
 
     /**

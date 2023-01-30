@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -60,6 +60,7 @@ import javax.inject.Inject
  * This is the [ViewModel] for [AddTimeAlertDialogFragment].
  *
  * @param savedState The saved state to obtain state from previous instances.
+ * @param permissionsTracker Used to track the state of the user permissions.
  * @param busStopsRepository Used to get stop details.
  * @param serviceStopsRepository Used to get the services for the selected stop code.
  * @param uiStateCalculator Used to calculate the current [UiState].
@@ -71,6 +72,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddTimeAlertDialogFragmentViewModel @Inject constructor(
         private val savedState: SavedStateHandle,
+        private val permissionsTracker: PermissionsTracker,
         private val busStopsRepository: BusStopsRepository,
         private val serviceStopsRepository: ServiceStopsRepository,
         uiStateCalculator: UiStateCalculator,
@@ -110,6 +112,11 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
             savedState[STATE_SELECTED_SERVICES] = value?.ifEmpty { null }?.toTypedArray()
         }
 
+    /**
+     * This [LiveData] emits when permissions should be requested from the user.
+     */
+    val requestPermissionsLiveData get() = permissionsTracker.requestPermissionsLiveData
+
     private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -138,7 +145,8 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     private val uiStateFlow = uiStateCalculator.createUiStateFlow(
             stopCodeFlow,
             stopDetailsFlow,
-            availableServicesFlow)
+            availableServicesFlow,
+            permissionsTracker.permissionsStateFlow)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.ERROR_NO_STOP_CODE)
     /**
      * This [LiveData] emits the current [UiState].
@@ -166,6 +174,31 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
      */
     val showServicesChooserLiveData: LiveData<ServicesChooserParams> get() = showServicesChooser
     private val showServicesChooser = SingleLiveEvent<ServicesChooserParams>()
+
+    /**
+     * This is called when the permissions have been updated.
+     *
+     * @param permissionsState The current permission state.
+     */
+    fun onPermissionsUpdated(permissionsState: UiPermissionsState) {
+        permissionsTracker.permissionsState = permissionsState
+    }
+
+    /**
+     * This is called when the result comes back from requesting permissions from the user.
+     *
+     * @param permissionsState The new permission state.
+     */
+    fun onPermissionsResult(permissionsState: UiPermissionsState) {
+        permissionsTracker.permissionsState = permissionsState
+    }
+
+    /**
+     * This is called when the user has clicked the button to grant permission.
+     */
+    fun onGrantPermissionClicked() {
+        permissionsTracker.onRequestPermissionsClicked()
+    }
 
     /**
      * Handle the user clicking on the 'Show limitations' button.
