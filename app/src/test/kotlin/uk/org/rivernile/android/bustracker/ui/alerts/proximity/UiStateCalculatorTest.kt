@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -71,11 +71,10 @@ class UiStateCalculatorTest {
     fun createUiStateFlowEmitsNoLocationFeatureWhenNoLocationFeature() = runTest {
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(false)
-        val locationPermissionFlow = flowOf(PermissionState.GRANTED)
+        val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
-                .test(this)
+        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -88,11 +87,10 @@ class UiStateCalculatorTest {
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
-        val locationPermissionFlow = flowOf(PermissionState.UNGRANTED)
+        val permissionStateFlow = flowOf(PermissionState.UNGRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
-                .test(this)
+        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -105,11 +103,10 @@ class UiStateCalculatorTest {
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
-        val locationPermissionFlow = flowOf(PermissionState.DENIED)
+        val permissionStateFlow = flowOf(PermissionState.DENIED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
-                .test(this)
+        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -122,11 +119,10 @@ class UiStateCalculatorTest {
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
-        val locationPermissionFlow = flowOf(PermissionState.GRANTED)
+        val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(null)
 
-        val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
-                .test(this)
+        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -139,11 +135,10 @@ class UiStateCalculatorTest {
                 .thenReturn(true)
         whenever(locationRepository.isLocationEnabledFlow)
                 .thenReturn(flowOf(true))
-        val locationPermissionFlow = flowOf(PermissionState.GRANTED)
+        val permissionStateFlow = flowOf(PermissionState.GRANTED)
         val stopDetailsFlow = flowOf(StopDetails("123456", null))
 
-        val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
-                .test(this)
+        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -160,7 +155,7 @@ class UiStateCalculatorTest {
                     delay(300L)
                     emit(true)
                 })
-        val locationPermissionFlow = flow {
+        val permissionStateFlow = flow {
             emit(PermissionState.UNGRANTED)
             delay(100L)
             emit(PermissionState.DENIED)
@@ -175,8 +170,7 @@ class UiStateCalculatorTest {
             emit(StopDetails("123456", StopName("Name", "Locality")))
         }
 
-        val observer = calculator.createUiStateFlow(locationPermissionFlow, stopDetailsFlow)
-                .test(this)
+        val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 

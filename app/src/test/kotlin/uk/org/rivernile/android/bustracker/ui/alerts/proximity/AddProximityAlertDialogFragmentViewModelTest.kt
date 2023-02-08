@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,13 +27,14 @@
 package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
+import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -52,6 +53,7 @@ import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
+import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
 /**
  * Tests for [AddProximityAlertDialogFragmentViewModel].
@@ -68,26 +70,18 @@ class AddProximityAlertDialogFragmentViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     @Mock
+    private lateinit var permissionsTracker: PermissionsTracker
+    @Mock
     private lateinit var busStopsRepository: BusStopsRepository
     @Mock
     private lateinit var uiStateCalculator: UiStateCalculator
     @Mock
     private lateinit var alertsRepository: AlertsRepository
 
-    private lateinit var viewModel: AddProximityAlertDialogFragmentViewModel
-
-    @Before
-    fun setUp() {
-        viewModel = AddProximityAlertDialogFragmentViewModel(
-                busStopsRepository,
-                uiStateCalculator,
-                alertsRepository,
-                coroutineRule.scope,
-                coroutineRule.testDispatcher)
-    }
-
     @Test
     fun stopDetailsLiveDataEmitsNullWhenNoStopCodeIsSet() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val viewModel = createViewModel()
         val observer = viewModel.stopDetailsLiveData.test()
         advanceUntilIdle()
 
@@ -96,6 +90,8 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun stopDetailsLiveDataEmitsNullWhenStopCodeIsSetAsNull() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val viewModel = createViewModel()
         val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = null
@@ -106,9 +102,11 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun stopDetailsLiveDataEmitsStopDetailsWithNullNameWhenRepositoryReturnsNullName() = runTest {
-        val observer = viewModel.stopDetailsLiveData.test()
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(null))
+        val viewModel = createViewModel()
+        val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
@@ -118,9 +116,11 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() = runTest {
-        val observer = viewModel.stopDetailsLiveData.test()
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(StopName("Name", "Locality")))
+        val viewModel = createViewModel()
+        val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
@@ -130,6 +130,7 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun stopDetailsLiveDataEmitsCorrectDataOnChanges() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flow {
                     emit(StopName("Name", "Locality"))
@@ -138,6 +139,7 @@ class AddProximityAlertDialogFragmentViewModelTest {
                 })
         whenever(busStopsRepository.getNameForStopFlow("987654"))
                 .thenReturn(flowOf(StopName("Name 3", "Locality 3")))
+        val viewModel = createViewModel()
 
         val observer = viewModel.stopDetailsLiveData.test()
         viewModel.stopCode = "123456"
@@ -155,11 +157,13 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun uiStateLiveDataEmitsCalculatedState() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(
                         UiState.ERROR_PERMISSION_UNGRANTED,
                         UiState.PROGRESS,
                         UiState.CONTENT))
+        val viewModel = createViewModel()
 
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
@@ -172,10 +176,11 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun uiStateCalculatorIsPassedCorrectFlowObjects() = runTest {
-        val locationPermissionObserver = FlowTestObserver<PermissionState>(this)
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val permissionsObserver = FlowTestObserver<PermissionState>(this)
         val stopDetailsObserver = FlowTestObserver<StopDetails?>(this)
         doAnswer {
-            locationPermissionObserver.observe(it.getArgument(0))
+            permissionsObserver.observe(it.getArgument(0))
             stopDetailsObserver.observe(it.getArgument(1))
 
             flowOf(UiState.CONTENT)
@@ -184,24 +189,17 @@ class AddProximityAlertDialogFragmentViewModelTest {
                 .thenReturn(flowOf(null))
         whenever(busStopsRepository.getNameForStopFlow("987654"))
                 .thenReturn(flowOf(null))
+        val viewModel = createViewModel()
 
         viewModel.uiStateLiveData.test()
-        advanceUntilIdle()
-        viewModel.locationPermissionState = PermissionState.DENIED
-        advanceUntilIdle()
-        viewModel.locationPermissionState = PermissionState.GRANTED
         advanceUntilIdle()
         viewModel.stopCode = "123456"
         advanceUntilIdle()
         viewModel.stopCode = "987654"
         advanceUntilIdle()
-        locationPermissionObserver.finish()
+        permissionsObserver.finish()
         stopDetailsObserver.finish()
 
-        locationPermissionObserver.assertValues(
-                PermissionState.UNGRANTED,
-                PermissionState.DENIED,
-                PermissionState.GRANTED)
         stopDetailsObserver.assertValues(
                 null,
                 StopDetails("123456", null),
@@ -211,6 +209,7 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun addButtonEnabledLiveDataOnlyEmitsTrueWhenShowingContent() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(
                         UiState.ERROR_NO_LOCATION_FEATURE,
@@ -220,6 +219,7 @@ class AddProximityAlertDialogFragmentViewModelTest {
                         UiState.PROGRESS,
                         UiState.CONTENT,
                         UiState.PROGRESS))
+        val viewModel = createViewModel()
 
         val observer = viewModel.addButtonEnabledLiveData.test()
         advanceUntilIdle()
@@ -229,6 +229,8 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun onLimitationsButtonClickedShowsLimitations() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val viewModel = createViewModel()
         val observer = viewModel.showLimitationsLiveData.test()
         viewModel.onLimitationsButtonClicked()
         advanceUntilIdle()
@@ -237,12 +239,56 @@ class AddProximityAlertDialogFragmentViewModelTest {
     }
 
     @Test
+    fun requestPermissionsLiveDataReturnsLiveDataFromPermissionsTracker() {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val expected = SingleLiveEvent<Unit>()
+        whenever(permissionsTracker.requestPermissionsLiveData)
+                .thenReturn(expected)
+        val viewModel = createViewModel()
+
+        val result = viewModel.requestPermissionsLiveData
+
+        assertSame(expected, result)
+    }
+
+    @Test
+    fun onPermissionsUpdatedUpdatesStateInPermissionsTracker() {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val viewModel = createViewModel()
+        val expected = UiPermissionsState(
+                hasCoarseLocationPermission = true,
+                hasFineLocationPermission = true,
+                hasPostNotificationsPermission = true)
+
+        viewModel.onPermissionsUpdated(expected)
+
+        verify(permissionsTracker)
+                .permissionsState = expected
+    }
+
+    @Test
+    fun onPermissionsResultUpdatesStateInPermissionsTracker() {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val viewModel = createViewModel()
+        val expected = UiPermissionsState(
+                hasCoarseLocationPermission = true,
+                hasFineLocationPermission = true,
+                hasPostNotificationsPermission = true)
+
+        viewModel.onPermissionsResult(expected)
+
+        verify(permissionsTracker)
+                .permissionsState = expected
+    }
+
+    @Test
     fun onResolveErrorButtonClickedDoesNotTriggerEventWhenNotHandled() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.CONTENT))
+        val viewModel = createViewModel()
         val uiStateObserver = viewModel.uiStateLiveData.test()
         val locationSettingsObserver = viewModel.showLocationSettingsLiveData.test()
-        val requestLocationPermissionObserver = viewModel.requestLocationPermissionLiveData.test()
         val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
         viewModel.onResolveErrorButtonClicked()
@@ -250,17 +296,19 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
         uiStateObserver.assertValues(UiState.CONTENT)
         locationSettingsObserver.assertEmpty()
-        requestLocationPermissionObserver.assertEmpty()
         showAppSettingsObserver.assertEmpty()
+        verify(permissionsTracker, never())
+                .onRequestPermissionsClicked()
     }
 
     @Test
     fun onResolveErrorButtonClickedShowsLocationSettingsWhenLocationDisabled() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.ERROR_LOCATION_DISABLED))
+        val viewModel = createViewModel()
         val uiStateObserver = viewModel.uiStateLiveData.test()
         val locationSettingsObserver = viewModel.showLocationSettingsLiveData.test()
-        val requestLocationPermissionObserver = viewModel.requestLocationPermissionLiveData.test()
         val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
         advanceUntilIdle()
@@ -269,18 +317,19 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
         uiStateObserver.assertValues(UiState.ERROR_LOCATION_DISABLED)
         locationSettingsObserver.assertSize(1)
-        requestLocationPermissionObserver.assertEmpty()
         showAppSettingsObserver.assertEmpty()
+        verify(permissionsTracker, never())
+                .onRequestPermissionsClicked()
     }
 
     @Test
-    fun onResolveErrorButtonClickedShowsRequestLocationPermissionWhenLocationPermissionUngranted() =
-            runTest {
+    fun onResolveErrorButtonClickedShowsRequestPermissionsWhenPermissionsUngranted() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.ERROR_PERMISSION_UNGRANTED))
+        val viewModel = createViewModel()
         val uiStateObserver = viewModel.uiStateLiveData.test()
         val locationSettingsObserver = viewModel.showLocationSettingsLiveData.test()
-        val requestLocationPermissionObserver = viewModel.requestLocationPermissionLiveData.test()
         val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
         advanceUntilIdle()
@@ -289,17 +338,19 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
         uiStateObserver.assertValues(UiState.ERROR_PERMISSION_UNGRANTED)
         locationSettingsObserver.assertEmpty()
-        requestLocationPermissionObserver.assertSize(1)
         showAppSettingsObserver.assertEmpty()
+        verify(permissionsTracker)
+                .onRequestPermissionsClicked()
     }
 
     @Test
     fun onResolveErrorButtonClickedShowsAppSettingsWhenLocationPermissionDenied() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.ERROR_PERMISSION_DENIED))
+        val viewModel = createViewModel()
         val uiStateObserver = viewModel.uiStateLiveData.test()
         val locationSettingsObserver = viewModel.showLocationSettingsLiveData.test()
-        val requestLocationPermissionObserver = viewModel.requestLocationPermissionLiveData.test()
         val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
         advanceUntilIdle()
@@ -308,12 +359,15 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
         uiStateObserver.assertValues(UiState.ERROR_PERMISSION_DENIED)
         locationSettingsObserver.assertEmpty()
-        requestLocationPermissionObserver.assertEmpty()
         showAppSettingsObserver.assertSize(1)
+        verify(permissionsTracker, never())
+                .onRequestPermissionsClicked()
     }
 
     @Test
     fun handleAddClickedDoesNotAddAlertWhenStopCodeIsNull() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val viewModel = createViewModel()
         viewModel.stopCode = null
 
         viewModel.handleAddClicked(250)
@@ -325,6 +379,8 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun handleAddClickedDoesNotAddAlertWhenStopCodeIsEmpty() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val viewModel = createViewModel()
         viewModel.stopCode = ""
 
         viewModel.handleAddClicked(250)
@@ -336,6 +392,8 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
     @Test
     fun handleAddClickedAddsAlertWhenStopCodeIsPopulated() = runTest {
+        givenPermissionsTrackerFlowHasDefaultPermissionState()
+        val viewModel = createViewModel()
         viewModel.stopCode = "123456"
 
         viewModel.handleAddClicked(250)
@@ -344,4 +402,19 @@ class AddProximityAlertDialogFragmentViewModelTest {
         verify(alertsRepository)
                 .addProximityAlert(ProximityAlertRequest("123456", 250))
     }
+
+    private fun givenPermissionsTrackerFlowHasDefaultPermissionState() {
+        whenever(permissionsTracker.permissionsStateFlow)
+                .thenReturn(flowOf(PermissionState.UNGRANTED))
+    }
+
+    private fun createViewModel(savedState: SavedStateHandle = SavedStateHandle()) =
+            AddProximityAlertDialogFragmentViewModel(
+                    savedState,
+                    permissionsTracker,
+                    busStopsRepository,
+                    uiStateCalculator,
+                    alertsRepository,
+                    coroutineRule.scope,
+                    coroutineRule.testDispatcher)
 }

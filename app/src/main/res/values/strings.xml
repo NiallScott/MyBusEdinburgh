@@ -392,9 +392,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addproxalertdialog_error_location_disabled">Location services need to be enabled for this feature to determine proximity</string>
     <string name="addproxalertdialog_error_location_disabled_button">Location settings</string>
     <string name="addproxalertdialog_error_no_location_settings">Unable to show system location settings</string>
-    <string name="addproxalertdialog_error_no_location_permission">To use the proximity alert feature, the location permission needs to be granted</string>
+    <string name="addproxalertdialog_error_insufficient_permissions">This feature works by monitoring your location and then showing you a notification when you are near your selected stop. Before you can add a proximity alert, you need to grant the app access to accurate locations.</string>
     <string name="addproxalertdialog_error_grant_permission_button">Grant permission</string>
-    <string name="addproxalertdialog_error_permission_denied">The proximity alert feature requires location permission, but this has been previously denied to this app. To use this feature, enable the location permission from the system settings for this app.</string>
+    <string name="addproxalertdialog_error_permission_denied">This feature works by monitoring your location and then showing you a notification when you are near your selected stop. Because the accurate location permission has been denied, this feature is unable to function. This can be fixed by changing the permission access for this app inside system settings.</string>
     <string name="addproxalertdialog_error_permission_denied_button">App settings</string>
     <string name="addproxalertdialog_error_no_app_settings">Unable to show app settings</string>
 
@@ -425,7 +425,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addtimealertdialog_error_no_stop_code">No stop code has been supplied</string>
     <string name="addtimealertdialog_error_no_services">There are no known services for stop %s</string>
     <string name="addtimealertdialog_error_request_permissions">This feature works by showing you a notification when your arrival alert criteria are met. Before you can add an arrival alert, you need to grant the notification permission to this app.</string>
-    <string name="addtimealertdialog_error_permission_denied">This feature works by showing you a notification when your arrival alert criteria are met. Because the notification permission has been denied, this feature is unable to function.</string>
+    <string name="addtimealertdialog_error_permission_denied">This feature works by showing you a notification when your arrival alert criteria are met. Because the notification permission has been denied, this feature is unable to function. This can be fixed by changing the permission access for this app inside system settings.</string>
     <string name="addtimealertdialog_error_btn_grant_permission">Grant permission</string>
 
     <!--

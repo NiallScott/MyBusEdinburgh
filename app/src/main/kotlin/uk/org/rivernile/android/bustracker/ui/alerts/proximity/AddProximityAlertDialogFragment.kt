@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,12 +27,13 @@
 package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
@@ -41,12 +42,11 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import uk.org.rivernile.android.bustracker.core.permission.PermissionState
+import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.DialogAddProxAlertBinding
@@ -63,7 +63,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
 
     companion object {
 
-        private const val ARG_STOP_CODE = "stopCode"
+        private const val ARG_STOP_CODE = AddProximityAlertDialogFragmentViewModel.STATE_STOP_CODE
 
         private const val DIALOG_PROXIMITY_LIMITATIONS = "dialogProximityLimitations"
 
@@ -82,6 +82,8 @@ class AddProximityAlertDialogFragment : DialogFragment() {
 
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
+    @Inject
+    lateinit var permissionChecker: AndroidPermissionChecker
 
     private val viewModel: AddProximityAlertDialogFragmentViewModel by viewModels()
 
@@ -89,15 +91,14 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         DialogAddProxAlertBinding.inflate(layoutInflater, null, false)
     }
 
-    private val requestLocationPermissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission(),
-                    this::handleLocationPermissionState)
+    private val requestPermissionsLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions(),
+            this::handleRequestPermissionsResult)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         isCancelable = true
-        viewModel.stopCode = arguments?.getString(ARG_STOP_CODE)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -130,8 +131,8 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         viewModel.showLocationSettingsLiveData.observe(viewLifecycle) {
             showLocationSettings()
         }
-        viewModel.requestLocationPermissionLiveData.observe(viewLifecycle) {
-            requestLocationPermission()
+        viewModel.requestPermissionsLiveData.observe(viewLifecycle) {
+            handleRequestPermissions()
         }
         viewModel.showAppSettingsLiveData.observe(viewLifecycle) {
             showAppSettings()
@@ -148,10 +149,42 @@ class AddProximityAlertDialogFragment : DialogFragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
+    override fun onResume() {
+        super.onResume()
 
-        checkLocationPermissionState()
+        updatePermissionState()
+    }
+
+    /**
+     * Update the current permission state in [AddProximityAlertDialogFragmentViewModel].
+     */
+    private fun updatePermissionState() {
+        viewModel.onPermissionsUpdated(
+                UiPermissionsState(
+                        permissionChecker.checkCoarseLocationPermission(),
+                        permissionChecker.checkFineLocationPermission(),
+                        permissionChecker.checkPostNotificationPermission()))
+    }
+
+    /**
+     * This is called when the permission request result is returned.
+     *
+     * @param result The permission grant results as a [Map].
+     */
+    @SuppressLint("InlinedApi")
+    private fun handleRequestPermissionsResult(result: Map<String, Boolean>) {
+        val hasCoarseLocationPermission = result[Manifest.permission.ACCESS_COARSE_LOCATION]
+                ?: permissionChecker.checkCoarseLocationPermission()
+        val hasFineLocationPermission = result[Manifest.permission.ACCESS_FINE_LOCATION]
+                ?: permissionChecker.checkFineLocationPermission()
+        val hasPostNotificationsPermission = result[Manifest.permission.POST_NOTIFICATIONS]
+                ?: permissionChecker.checkPostNotificationPermission()
+
+        viewModel.onPermissionsResult(
+                UiPermissionsState(
+                        hasCoarseLocationPermission,
+                        hasFineLocationPermission,
+                        hasPostNotificationsPermission))
     }
 
     /**
@@ -190,7 +223,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
                     contentView.showErrorLayout()
                 }
                 UiState.ERROR_PERMISSION_UNGRANTED -> {
-                    txtErrorBlurb.setText(R.string.addproxalertdialog_error_no_location_permission)
+                    txtErrorBlurb.setText(R.string.addproxalertdialog_error_insufficient_permissions)
                     btnErrorResolve.apply {
                         setText(R.string.addproxalertdialog_error_grant_permission_button)
                         visibility = View.VISIBLE
@@ -228,33 +261,6 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     }
 
     /**
-     * Get the current state of the location permission and update the
-     * [AddProximityAlertDialogFragmentViewModel] with the state.
-     */
-    private fun checkLocationPermissionState() {
-        val isGranted = ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        handleLocationPermissionState(isGranted)
-    }
-
-    /**
-     * Handle the detected granted state of the location permission for this app. This updates the
-     * [AddProximityAlertDialogFragmentViewModel].
-     *
-     * @param isGranted Is the location permission granted?
-     */
-    private fun handleLocationPermissionState(isGranted: Boolean) {
-        when {
-            isGranted -> PermissionState.GRANTED
-            !shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) ->
-                PermissionState.UNGRANTED
-            else -> PermissionState.DENIED
-        }.let {
-            viewModel.locationPermissionState = it
-        }
-    }
-
-    /**
      * Show a [Dialog] to the user which describes the limitations of the proximity alert feature.
      */
     private fun showLimitationsDialog() {
@@ -284,10 +290,19 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     }
 
     /**
-     * Request location permission from the user.
+     * This is called when permissions should be requested from the user.
      */
-    private fun requestLocationPermission() {
-        requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    private fun handleRequestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION)
+        }.let(requestPermissionsLauncher::launch)
     }
 
     /**

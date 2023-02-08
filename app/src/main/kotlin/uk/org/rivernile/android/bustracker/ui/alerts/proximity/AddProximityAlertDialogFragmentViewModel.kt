@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
@@ -36,7 +37,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -51,13 +51,14 @@ import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
 
 /**
  * This is the [ViewModel] for [AddProximityAlertDialogFragment].
  *
+ * @param savedState The saved state to obtain state from previous instances.
+ * @param permissionsTracker Used to track the state of required permissions.
  * @param busStopsRepository Used to get stop details.
  * @param uiStateCalculator Used to calculate the current [UiState].
  * @param alertsRepository Used to add the proximity alert.
@@ -67,32 +68,32 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AddProximityAlertDialogFragmentViewModel @Inject constructor(
+        private val savedState: SavedStateHandle,
+        private val permissionsTracker: PermissionsTracker,
         private val busStopsRepository: BusStopsRepository,
         private val uiStateCalculator: UiStateCalculator,
         private val alertsRepository: AlertsRepository,
         @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
+    companion object {
+
+        /**
+         * This constant contains the key where the stop code is stored in the saved state.
+         */
+        const val STATE_STOP_CODE = "stopCode"
+    }
+
     /**
      * This property is used to get and set the stop code the proximity alert should be added for.
      */
     var stopCode: String?
-        get() = stopCodeFlow.value
+        get() = savedState[STATE_STOP_CODE]
         set(value) {
-            stopCodeFlow.value = value
+            savedState[STATE_STOP_CODE] = value
         }
 
-    /**
-     * The UI layer calls this method to update the status of the location permission.
-     */
-    var locationPermissionState: PermissionState
-        get() = locationPermissionStateFlow.value
-        set(value) {
-            locationPermissionStateFlow.value = value
-        }
-
-    private val stopCodeFlow = MutableStateFlow<String?>(null)
-    private val locationPermissionStateFlow = MutableStateFlow(PermissionState.UNGRANTED)
+    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val stopDetailsFlow = stopCodeFlow.flatMapLatest {
@@ -109,7 +110,7 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
      */
     val uiStateLiveData by lazy {
         uiStateCalculator.createUiStateFlow(
-                locationPermissionStateFlow,
+                permissionsTracker.permissionsStateFlow,
                 stopDetailsFlow)
                 .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
     }
@@ -136,17 +137,33 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     private val showLocationSettings = SingleLiveEvent<Unit>()
 
     /**
-     * When this [LiveData] emits a new item, the request location permission system dialog should
-     * be shown.
+     * When this [LiveData] emits a new item, the request permission system dialog should be shown.
      */
-    val requestLocationPermissionLiveData: LiveData<Unit> get() = requestLocationPermission
-    private val requestLocationPermission = SingleLiveEvent<Unit>()
+    val requestPermissionsLiveData get() = permissionsTracker.requestPermissionsLiveData
 
     /**
      * When this [LiveData] emits a new item, the app settings screen should be shown.
      */
     val showAppSettingsLiveData: LiveData<Unit> get() = showAppSettings
     private val showAppSettings = SingleLiveEvent<Unit>()
+
+    /**
+     * This is called when the permissions have been updated.
+     *
+     * @param permissionsState The current permission state.
+     */
+    fun onPermissionsUpdated(permissionsState: UiPermissionsState) {
+        permissionsTracker.permissionsState = permissionsState
+    }
+
+    /**
+     * This is called when the result comes back from requesting permissions from the user.
+     *
+     * @param permissionsState The new permission state.
+     */
+    fun onPermissionsResult(permissionsState: UiPermissionsState) {
+        permissionsTracker.permissionsState = permissionsState
+    }
 
     /**
      * Handle the user clicking on the 'Show limitations' button.
@@ -161,7 +178,7 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     fun onResolveErrorButtonClicked() {
         when (uiStateLiveData.value) {
             UiState.ERROR_LOCATION_DISABLED -> showLocationSettings.call()
-            UiState.ERROR_PERMISSION_UNGRANTED -> requestLocationPermission.call()
+            UiState.ERROR_PERMISSION_UNGRANTED -> permissionsTracker.onRequestPermissionsClicked()
             UiState.ERROR_PERMISSION_DENIED -> showAppSettings.call()
             else -> { }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -59,6 +59,18 @@ class AndroidPermissionChecker @Inject internal constructor(
     }
 
     /**
+     * Has [Manifest.permission.ACCESS_COARSE_LOCATION] been granted?
+     *
+     * @return `true` if [Manifest.permission.ACCESS_COARSE_LOCATION] has been granted, otherwise
+     * `false`.
+     */
+     fun checkCoarseLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /**
      * Has either [Manifest.permission.ACCESS_FINE_LOCATION] or
      * [Manifest.permission.ACCESS_COARSE_LOCATION] been granted to us?
      *
@@ -78,14 +90,4 @@ class AndroidPermissionChecker @Inject internal constructor(
      */
     fun checkPostNotificationPermission() =
             notificationPermissionChecker.checkPostNotificationPermission()
-
-    /**
-     * Has [Manifest.permission.ACCESS_COARSE_LOCATION] been granted?
-     *
-     * @return `true` if [Manifest.permission.ACCESS_COARSE_LOCATION] has been granted, otherwise
-     * `false`.
-     */
-    private fun checkCoarseLocationPermission() =
-            ContextCompat.checkSelfPermission(context, Manifest.permission
-                    .ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
 }
