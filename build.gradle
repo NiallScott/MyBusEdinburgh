@@ -37,7 +37,7 @@ buildscript {
         androidXCoreVersion = '1.9.0'
         androidXActivityVersion = '1.6.1'
         androidXFragmentVersion = '1.5.5'
-        appCompatVersion = '1.6.0'
+        appCompatVersion = '1.6.1'
         materialVersion = '1.8.0'
         recyclerViewVersion = '1.2.1'
         cardViewVersion = '1.0.0'
@@ -45,7 +45,7 @@ buildscript {
         constraintLayoutVersion = '2.1.4'
         androidXPreferenceVersion = '1.2.0'
         architectureComponentsVersion = '2.5.1'
-        workManagerVersion = '2.8.0-rc01'
+        workManagerVersion = '2.8.0'
         daggerVersion = '2.44.2'
         okhttpVersion = '4.10.0'
         retrofitVersion = '2.9.0'
@@ -76,7 +76,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.0'
+        classpath 'com.android.tools.build:gradle:7.4.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
