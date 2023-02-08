@@ -63,7 +63,7 @@ buildscript {
         // Testing dependency versions
         junitVersion = '4.13.2'
         androidTestCoreVersion = '1.4.0'
-        mockitoVersion = '4.10.0'
+        mockitoVersion = '5.1.1'
         mockitoKotlinVersion = '4.1.0'
         androidXCoreTesting = '2.1.0'
         hamcrestVersion = '2.2'
