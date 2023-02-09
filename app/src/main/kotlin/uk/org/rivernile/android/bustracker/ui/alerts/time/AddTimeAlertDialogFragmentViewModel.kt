@@ -176,6 +176,12 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     private val showServicesChooser = SingleLiveEvent<ServicesChooserParams>()
 
     /**
+     * When this [LiveData] emits a new item, the app settings screen should be shown.
+     */
+    val showAppSettingsLiveData: LiveData<Unit> get() = showAppSettings
+    private val showAppSettings = SingleLiveEvent<Unit>()
+
+    /**
      * This is called when the permissions have been updated.
      *
      * @param permissionsState The current permission state.
@@ -194,10 +200,14 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     }
 
     /**
-     * This is called when the user has clicked the button to grant permission.
+     * This is called when the user has clicked the resolve button.
      */
-    fun onGrantPermissionClicked() {
-        permissionsTracker.onRequestPermissionsClicked()
+    fun onResolveButtonClicked() {
+        when (uiStateFlow.value) {
+            UiState.ERROR_PERMISSION_REQUIRED -> permissionsTracker.onRequestPermissionsClicked()
+            UiState.ERROR_PERMISSION_DENIED -> showAppSettings.call()
+            else -> { }
+        }
     }
 
     /**

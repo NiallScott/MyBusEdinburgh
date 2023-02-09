@@ -29,11 +29,16 @@ package uk.org.rivernile.android.bustracker.ui.alerts.time
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.ActivityNotFoundException
 import android.content.DialogInterface
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -152,10 +157,13 @@ class AddTimeAlertDialogFragment : DialogFragment() {
         viewModel.showLimitationsLiveData.observe(viewLifecycle) {
             showLimitationsDialog()
         }
+        viewModel.showAppSettingsLiveData.observe(viewLifecycle) {
+            showAppSettings()
+        }
 
         viewBinding.apply {
-            btnGrantPermission.setOnClickListener {
-                viewModel.onGrantPermissionClicked()
+            btnResolve.setOnClickListener {
+                viewModel.onResolveButtonClicked()
             }
 
             btnSelectServices.setOnClickListener {
@@ -211,7 +219,7 @@ class AddTimeAlertDialogFragment : DialogFragment() {
                 UiState.CONTENT -> contentView.showContentLayout()
                 UiState.ERROR_NO_STOP_CODE -> {
                     txtErrorBlurb.setText(R.string.addtimealertdialog_error_no_stop_code)
-                    btnGrantPermission.isVisible = false
+                    btnResolve.isVisible = false
                     contentView.showErrorLayout()
                 }
                 UiState.ERROR_NO_SERVICES -> {
@@ -222,18 +230,24 @@ class AddTimeAlertDialogFragment : DialogFragment() {
                         txtErrorBlurb.text =
                                 getString(R.string.addtimealertdialog_error_no_services,
                                         formattedName)
-                        btnGrantPermission.isVisible = false
+                        btnResolve.isVisible = false
                         contentView.showErrorLayout()
                     } ?: contentView.showProgressLayout() // This should never happen.
                 }
                 UiState.ERROR_PERMISSION_REQUIRED -> {
                     txtErrorBlurb.setText(R.string.addtimealertdialog_error_request_permissions)
-                    btnGrantPermission.isVisible = true
+                    btnResolve.apply {
+                        isVisible = true
+                        setText(R.string.addtimealertdialog_error_btn_grant_permission)
+                    }
                     contentView.showErrorLayout()
                 }
                 UiState.ERROR_PERMISSION_DENIED -> {
                     txtErrorBlurb.setText(R.string.addtimealertdialog_error_permission_denied)
-                    btnGrantPermission.isVisible = false
+                    btnResolve.apply {
+                        isVisible = true
+                        setText(R.string.addtimealertdialog_error_btn_permission_denied)
+                    }
                     contentView.showErrorLayout()
                 }
             }
@@ -315,6 +329,29 @@ class AddTimeAlertDialogFragment : DialogFragment() {
     private fun showLimitationsDialog() {
         TimeLimitationsDialogFragment.newInstance()
                 .show(childFragmentManager, DIALOG_TIME_ALERT_LIMITATIONS)
+    }
+
+    /**
+     * Show the application settings by deep-linking the user in to the system settings app, to
+     * show settings for this application.
+     *
+     * If the [Intent] used to deep-link the user is unresolvable, a [Toast] with an error will be
+     * shown instead (extremely unlikely scenario).
+     */
+    private fun showAppSettings() {
+        val context = requireContext()
+
+        try {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    .setData(Uri.fromParts("package", context.packageName, null))
+                    .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                    .let(this::startActivity)
+        } catch (ignored: ActivityNotFoundException) {
+            Toast.makeText(context,
+                    R.string.addproxalertdialog_error_no_app_settings,
+                    Toast.LENGTH_SHORT)
+                    .show()
+        }
     }
 
     /**

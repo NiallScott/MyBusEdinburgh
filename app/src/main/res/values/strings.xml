@@ -427,6 +427,8 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addtimealertdialog_error_request_permissions">This feature works by showing you a notification when your arrival alert criteria are met. Before you can add an arrival alert, you need to grant the notification permission to this app.</string>
     <string name="addtimealertdialog_error_permission_denied">This feature works by showing you a notification when your arrival alert criteria are met. Because the notification permission has been denied, this feature is unable to function. This can be fixed by changing the permission access for this app inside system settings.</string>
     <string name="addtimealertdialog_error_btn_grant_permission">Grant permission</string>
+    <string name="addtimealertdialog_error_btn_permission_denied">App settings</string>
+    <string name="addtimealertdialog_error_no_app_settings">Unable to show app settings</string>
 
     <!--
     ************************************************

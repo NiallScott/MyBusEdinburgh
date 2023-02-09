@@ -609,14 +609,54 @@ class AddTimeAlertDialogFragmentViewModelTest {
     }
 
     @Test
-    fun onGrantPermissionClickedPassesEventToPermissionsTracker() {
+    fun onResolveButtonClickedDoesNotTriggerEventWhenNotHandled() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
+        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any(), any()))
+                .thenReturn(flowOf(UiState.CONTENT))
         val viewModel = createViewModel()
+        viewModel.uiStateLiveData.test()
+        val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
 
-        viewModel.onGrantPermissionClicked()
+        advanceUntilIdle()
+        viewModel.onResolveButtonClicked()
+
+        verify(permissionsTracker, never())
+                .onRequestPermissionsClicked()
+        showAppSettingsObserver.assertEmpty()
+    }
+
+    @Test
+    fun onResolveButtonClickedRequestsPermissionsWhenPermissionRequired() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
+        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any(), any()))
+                .thenReturn(flowOf(UiState.ERROR_PERMISSION_REQUIRED))
+        val viewModel = createViewModel()
+        viewModel.uiStateLiveData.test()
+        val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
+
+        advanceUntilIdle()
+        viewModel.onResolveButtonClicked()
 
         verify(permissionsTracker)
                 .onRequestPermissionsClicked()
+        showAppSettingsObserver.assertEmpty()
+    }
+
+    @Test
+    fun onResolveButtonClickedShowsAppSettingsWhenPermissionDenied() = runTest {
+        givenPermissionsTrackerFlowHasPermissionsState()
+        whenever(uiStateCalculator.createUiStateFlow(any(), any(), any(), any()))
+                .thenReturn(flowOf(UiState.ERROR_PERMISSION_DENIED))
+        val viewModel = createViewModel()
+        viewModel.uiStateLiveData.test()
+        val showAppSettingsObserver = viewModel.showAppSettingsLiveData.test()
+
+        advanceUntilIdle()
+        viewModel.onResolveButtonClicked()
+
+        verify(permissionsTracker, never())
+                .onRequestPermissionsClicked()
+        showAppSettingsObserver.assertSize(1)
     }
 
     @Test
