@@ -31,6 +31,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -120,9 +121,9 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val stopDetailsFlow = stopCodeFlow.flatMapLatest {
-        loadStopDetails(it)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    private val stopDetailsFlow = stopCodeFlow
+        .flatMapLatest(this::loadStopDetails)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val availableServicesFlow = stopCodeFlow.flatMapLatest {
@@ -140,7 +141,9 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits the current [StopDetails] for the given stop code.
      */
-    val stopDetailsLiveData = stopDetailsFlow.asLiveData(viewModelScope.coroutineContext)
+    val stopDetailsLiveData = stopDetailsFlow
+        .asLiveData(viewModelScope.coroutineContext)
+        .distinctUntilChanged()
 
     private val uiStateFlow = uiStateCalculator.createUiStateFlow(
             stopCodeFlow,
@@ -151,8 +154,9 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits the current [UiState].
      */
-    val uiStateLiveData =
-            uiStateFlow.asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
+    val uiStateLiveData = uiStateFlow
+        .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
+        .distinctUntilChanged()
 
     /**
      * This [LiveData] emits the enabled state of the 'Add' button.

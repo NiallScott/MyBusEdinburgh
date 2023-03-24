@@ -96,14 +96,16 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
     private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val stopDetailsFlow = stopCodeFlow.flatMapLatest {
-        loadStopDetails(it)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    private val stopDetailsFlow = stopCodeFlow
+        .flatMapLatest(this::loadStopDetails)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /**
      * This [LiveData] emits the current [StopDetails] for the given stop code.
      */
-    val stopDetailsLiveData = stopDetailsFlow.asLiveData(viewModelScope.coroutineContext)
+    val stopDetailsLiveData = stopDetailsFlow
+        .asLiveData(viewModelScope.coroutineContext)
+        .distinctUntilChanged()
 
     /**
      * This [LiveData] emits the current [UiState].

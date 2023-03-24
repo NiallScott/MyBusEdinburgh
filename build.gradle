@@ -33,37 +33,37 @@ buildscript {
         // Dependency versions
         kotlinVersion = '1.8.0'
         kotlinCoroutinesVersion = '1.6.4'
-        hiltVersion = '2.44.2'
+        hiltVersion = '2.45'
         androidXCoreVersion = '1.9.0'
-        androidXActivityVersion = '1.6.1'
-        androidXFragmentVersion = '1.5.5'
+        androidXActivityVersion = '1.7.0'
+        androidXFragmentVersion = '1.5.6'
         appCompatVersion = '1.6.1'
         materialVersion = '1.8.0'
-        recyclerViewVersion = '1.2.1'
+        recyclerViewVersion = '1.3.0'
         cardViewVersion = '1.0.0'
         viewPager2Version = '1.0.0'
         constraintLayoutVersion = '2.1.4'
         androidXPreferenceVersion = '1.2.0'
-        architectureComponentsVersion = '2.5.1'
+        architectureComponentsVersion = '2.6.1'
         workManagerVersion = '2.8.0'
-        daggerVersion = '2.44.2'
+        daggerVersion = '2.45'
         okhttpVersion = '4.10.0'
         retrofitVersion = '2.9.0'
         retrofitKotlinSerializationConverterVersion = '0.8.0'
-        kotlinJsonSerialisationVersion = '1.4.1'
+        kotlinJsonSerialisationVersion = '1.5.0'
         gsonVersion = '2.8.9'
         picassoVersion = '2.71828'
         playServicesMapsVersion = '18.1.0'
         playServicesLocationVersion = '21.0.1'
         googleMapsKtxVersion = '3.4.0'
-        googleMapsUtilsVersion = '3.3.0'
+        googleMapsUtilsVersion = '3.4.0'
         googleMapsUtilsKtxVersion = '3.4.0'
-        firebaseBomVersion = '31.2.0'
+        firebaseBomVersion = '31.2.3'
 
         // Testing dependency versions
         junitVersion = '4.13.2'
         androidTestCoreVersion = '1.4.0'
-        mockitoVersion = '5.1.1'
+        mockitoVersion = '5.2.0'
         mockitoKotlinVersion = '4.1.0'
         androidXCoreTesting = '2.1.0'
         hamcrestVersion = '2.2'
@@ -76,14 +76,14 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.1'
+        classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hiltVersion"
         classpath 'com.google.gms:google-services:4.3.15'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.2'
-        classpath 'com.google.firebase:firebase-appdistribution-gradle:3.2.0'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.4'
+        classpath 'com.google.firebase:firebase-appdistribution-gradle:4.0.0'
     }
 }
 
