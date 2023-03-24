@@ -65,7 +65,7 @@ buildscript {
         androidTestCoreVersion = '1.4.0'
         mockitoVersion = '5.2.0'
         mockitoKotlinVersion = '4.1.0'
-        androidXCoreTesting = '2.1.0'
+        androidXCoreTesting = '2.2.0'
         hamcrestVersion = '2.2'
         espressoVersion = '3.4.0'
     }
