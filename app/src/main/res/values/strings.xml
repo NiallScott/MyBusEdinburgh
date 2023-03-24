@@ -132,6 +132,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="main_navigation_explore">Explore</string>
     <string name="main_navigation_updates">Updates</string>
     <string name="main_navigation_alerts">Alerts</string>
+    <string name="main_search_bar_hint">Search stops</string>
 
     <!--
     ******************************

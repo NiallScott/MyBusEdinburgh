@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,7 @@ import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteProximityAlertListener
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowConfirmDeleteTimeAlertListener
-import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
+import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentAlertManagerBinding
 import javax.inject.Inject

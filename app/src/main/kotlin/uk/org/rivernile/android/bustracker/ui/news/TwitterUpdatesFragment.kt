@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,7 +46,7 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
-import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
+import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentTwitterUpdatesBinding

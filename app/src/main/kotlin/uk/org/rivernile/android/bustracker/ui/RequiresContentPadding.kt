@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,21 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.scroll
-
-import androidx.annotation.IdRes
+package uk.org.rivernile.android.bustracker.ui
 
 /**
- * Top-level [androidx.fragment.app.Fragment]s which have scrollable content should implement this
- * interface. This allows for correct behaviour of the lift state of AppBarLayout.
+ * [androidx.fragment.app.Fragment]s which need to have their content padded should implement this
+ * interface.
  *
  * @author Niall Scott
  */
-interface HasScrollableContent {
+interface RequiresContentPadding {
 
     /**
-     * The ID resource of the scrollable content [android.view.View].
+     * The bottom padding to apply to content should the content not be scrollable and the bottom
+     * inset needs to be known.
      */
-    @get:IdRes
-    val scrollableContentIdRes: Int
+    var contentBottomPadding: Int
 }

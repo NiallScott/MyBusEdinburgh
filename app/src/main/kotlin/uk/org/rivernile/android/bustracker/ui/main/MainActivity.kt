@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,6 +37,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -46,6 +47,7 @@ import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
@@ -53,8 +55,10 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.search.SearchView
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.ui.RequiresContentPadding
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
@@ -70,7 +74,8 @@ import uk.org.rivernile.android.bustracker.ui.favourites.addedit.AddEditFavourit
 import uk.org.rivernile.android.bustracker.ui.favourites.remove.DeleteFavouriteDialogFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragment
-import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
+import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
+import uk.org.rivernile.android.bustracker.ui.HasTabBar
 import uk.org.rivernile.android.bustracker.ui.search.InstallBarcodeScannerDialogFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
@@ -117,7 +122,7 @@ class MainActivity : AppCompatActivity(),
                 "market://details?id=com.google.zxing.client.android"
     }
 
-    private val viewModel: MainActivityViewModel by viewModels()
+    private val viewModel by viewModels<MainActivityViewModel>()
 
     private lateinit var viewBinding: ActivityMainBinding
 
@@ -125,35 +130,25 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
-        setSupportActionBar(viewBinding.toolbar)
-
-        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
-
-        supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
+        setSupportActionBar(viewBinding.searchBar)
 
         viewBinding.apply {
             appBarLayout.statusBarForeground =
                     MaterialShapeDrawable.createWithElevationOverlay(this@MainActivity)
 
-            bottomNavigation.setOnItemSelectedListener {
-                showItem(it.itemId, true)
-                true
-            }
-
-            ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-
-                view.updateLayoutParams<MarginLayoutParams> {
-                    leftMargin = insets.left
-                    rightMargin = insets.right
-                }
-
-               windowInsets
-            }
+            setupHorizontalInsets()
+            setupBottomNavigation()
+            setupSearch()
         }
+
+        supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, true)
+        addMenuProvider(menuProvider)
+        onBackPressedDispatcher.addCallback(this, backPressedCallback)
 
         viewModel.showSettingsLiveData.observe(this) {
             showSettings()
@@ -161,8 +156,6 @@ class MainActivity : AppCompatActivity(),
         viewModel.showAboutLiveData.observe(this) {
             showAbout()
         }
-
-        addMenuProvider(menuProvider)
 
         if (savedInstanceState == null) {
             if (!handleIntent(intent)) {
@@ -181,8 +174,12 @@ class MainActivity : AppCompatActivity(),
         super.onSupportActionModeStarted(mode)
 
         window.statusBarColor = SurfaceColors.SURFACE_2.getColor(this)
-        viewBinding.bottomNavigation.isVisible = false
-        (currentFragment as? ExploreFragment)?.setTabBarVisible(false)
+        viewBinding.apply {
+            appBarLayout.isInvisible = true
+            bottomNavigation.isVisible = false
+        }
+
+        (currentFragment as? HasTabBar)?.isTabBarVisible = false
 
         ViewCompat.getRootWindowInsets(viewBinding.root)
                 ?.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -197,11 +194,15 @@ class MainActivity : AppCompatActivity(),
         super.onSupportActionModeFinished(mode)
 
         window.statusBarColor = ContextCompat.getColor(this, android.R.color.transparent)
-        viewBinding.bottomNavigation.isVisible = true
-        (currentFragment as? ExploreFragment)?.setTabBarVisible(true)
+        viewBinding.apply {
+            appBarLayout.isInvisible = false
+            bottomNavigation.isVisible = true
+        }
+
+        (currentFragment as? HasTabBar)?.isTabBarVisible = true
 
         viewBinding.fragmentContainer.updateLayoutParams<MarginLayoutParams> {
-            bottomMargin = 0
+            bottomMargin = viewBinding.bottomNavigation.height
         }
     }
 
@@ -276,6 +277,69 @@ class MainActivity : AppCompatActivity(),
 
     override fun onExploreTabSwitched() {
         viewBinding.appBarLayout.setExpanded(true, true)
+    }
+
+    /**
+     * Setup the horizontal insets on the root [View] so that our UI takes account of system UI.
+     */
+    private fun ActivityMainBinding.setupHorizontalInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            view.updateLayoutParams<MarginLayoutParams> {
+                leftMargin = insets.left
+                rightMargin = insets.right
+            }
+
+            windowInsets
+        }
+    }
+
+    /**
+     * Setup the bottom navigation [View].
+     */
+    private fun ActivityMainBinding.setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener {
+            showItem(it.itemId, true)
+            true
+        }
+
+        bottomNavigation.addOnLayoutChangeListener { _, _, top, _, bottom, _, _, _, _ ->
+            fragmentContainer.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = bottom - top
+            }
+        }
+    }
+
+    /**
+     * Setup the search [View]s.
+     */
+    private fun ActivityMainBinding.setupSearch() {
+        searchView.addTransitionListener { _, _, newState ->
+            updateBackPressedCallbackState(newState)
+        }
+
+        updateBackPressedCallbackState(searchView.currentTransitionState)
+
+        searchBar.addOnLayoutChangeListener { v, _, top, _, bottom, _, _, _, _ ->
+            val marginParams = v.layoutParams as MarginLayoutParams
+            val contentBottomPadding = bottom - top + marginParams.topMargin +
+                    marginParams.bottomMargin
+            applyBottomContentPadding(supportFragmentManager, contentBottomPadding)
+        }
+
+        searchView.inflateMenu(R.menu.search_option_menu)
+    }
+
+    /**
+     * Update the state on [backPressedCallback] based upon the [SearchView.TransitionState].
+     *
+     * @param newState The new [SearchView.TransitionState].
+     */
+    private fun updateBackPressedCallbackState(newState: SearchView.TransitionState) {
+        backPressedCallback.isEnabled =
+            newState == SearchView.TransitionState.SHOWN ||
+                    newState == SearchView.TransitionState.SHOWING
     }
 
     /**
@@ -366,6 +430,27 @@ class MainActivity : AppCompatActivity(),
     private val currentFragment get() =
         supportFragmentManager.findFragmentById(R.id.fragmentContainer)
 
+    /**
+     * Apply the bottom content padding to all [Fragment]s owned by the supplied [FragmentManager].
+     * This method recursively calls itself to make sure the padding is passed down to all
+     * child [FragmentManager]s.
+     *
+     * @param fragmentManager The [FragmentManager] to query for [Fragment]s to apply bottom content
+     * padding on.
+     * @param bottomContentPadding The bottom content padding to apply.
+     */
+    private fun applyBottomContentPadding(
+        fragmentManager: FragmentManager,
+        bottomContentPadding: Int) {
+        fragmentManager.fragments.forEach { fragment ->
+            if (fragment is RequiresContentPadding) {
+                fragment.contentBottomPadding = bottomContentPadding
+            } else {
+                applyBottomContentPadding(fragment.childFragmentManager, bottomContentPadding)
+            }
+        }
+    }
+
     private val menuProvider = object : MenuProvider {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.main_option_menu, menu)
@@ -385,9 +470,28 @@ class MainActivity : AppCompatActivity(),
     }
 
     private val fragmentLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
+        override fun onFragmentViewCreated(
+            fm: FragmentManager,
+            f: Fragment,
+            v: View,
+            savedInstanceState: Bundle?) {
+            if (f is RequiresContentPadding) {
+                val marginParams = viewBinding.searchBar.layoutParams as MarginLayoutParams
+                f.contentBottomPadding = viewBinding.searchBar.height +
+                        marginParams.topMargin +
+                        marginParams.bottomMargin
+            }
+        }
+
         override fun onFragmentResumed(fm: FragmentManager, f: Fragment) {
             viewBinding.appBarLayout.liftOnScrollTargetViewId =
                     (f as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
+        }
+    }
+
+    private val backPressedCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            viewBinding.searchView.hide()
         }
     }
 }

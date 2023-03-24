@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,6 +55,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.ui.RequiresContentPadding
 import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -72,7 +73,7 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 @AndroidEntryPoint
-class BusStopMapFragment : Fragment() {
+class BusStopMapFragment : Fragment(), RequiresContentPadding {
 
     companion object {
 
@@ -334,14 +335,9 @@ class BusStopMapFragment : Fragment() {
         viewModel.showLocation(location)
     }
 
-    /**
-     * This can be set by the parent [android.app.Activity] or [Fragment] to offset the map controls
-     * from the bottom of the container.
-     */
-    var mapBottomPadding: Int = 0
+    override var contentBottomPadding = 0
         set(value) {
             field = value
-
             map?.setPadding(0, 0, 0, value)
         }
 
@@ -475,7 +471,7 @@ class BusStopMapFragment : Fragment() {
             // feature is enabled. The button disappears when the feature is not enabled regardless
             // of this setting.
             uiSettings.isMyLocationButtonEnabled = true
-            setPadding(0, 0, 0, mapBottomPadding)
+            setPadding(0, 0, 0, contentBottomPadding)
 
             setOnInfoWindowCloseListener {
                 viewModel.onInfoWindowClosed()

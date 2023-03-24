@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,19 +28,18 @@ package uk.org.rivernile.android.bustracker.ui.explore
 
 import android.content.Context
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import com.google.android.material.tabs.TabLayout
 import uk.org.rivernile.android.bustracker.ui.busstopmap.BusStopMapFragment
 import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
-import uk.org.rivernile.android.bustracker.ui.scroll.HasScrollableContent
+import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
+import uk.org.rivernile.android.bustracker.ui.HasTabBar
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentExploreBinding
 
@@ -50,7 +49,7 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentExploreB
  *
  * @author Niall Scott
  */
-class ExploreFragment : Fragment(), HasScrollableContent {
+class ExploreFragment : Fragment(), HasTabBar, HasScrollableContent {
 
     companion object {
 
@@ -74,19 +73,13 @@ class ExploreFragment : Fragment(), HasScrollableContent {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        childFragmentManager.registerFragmentLifecycleCallbacks(fragmentLifecycleCallbacks, false)
-    }
-
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?): View {
-        _viewBinding = FragmentExploreBinding.inflate(inflater, container, false)
-
-        return viewBinding.root
+        return FragmentExploreBinding.inflate(inflater, container, false).also {
+            _viewBinding = it
+        }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -94,7 +87,7 @@ class ExploreFragment : Fragment(), HasScrollableContent {
 
         viewBinding.tabLayout.addOnTabSelectedListener(tabSelectedListener)
 
-        when (childFragmentManager.findFragmentById(R.id.fragmentContainer)) {
+        when (currentFragment) {
             is NearestStopsFragment -> showItem(1)
             else -> showItem(0)
         }
@@ -106,20 +99,14 @@ class ExploreFragment : Fragment(), HasScrollableContent {
         _viewBinding = null
     }
 
-    override val scrollableContentIdRes: Int get() {
-        val fragment = childFragmentManager.findFragmentById(R.id.fragmentContainer)
+    override var isTabBarVisible: Boolean
+        get() = viewBinding.tabLayout.isVisible
+        set(value) {
+            viewBinding.tabLayout.isVisible = value
+        }
 
-        return (fragment as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
-    }
-
-    /**
-     * Set whether the tab bar is visible or not.
-     *
-     * @param isVisible The tab bar visibility.
-     */
-    fun setTabBarVisible(isVisible: Boolean) {
-        viewBinding.tabLayout.isVisible = isVisible
-    }
+    override val scrollableContentIdRes get() =
+        (currentFragment as? HasScrollableContent)?.scrollableContentIdRes ?: View.NO_ID
 
     /**
      * Show the item at the given position.
@@ -128,7 +115,7 @@ class ExploreFragment : Fragment(), HasScrollableContent {
      */
     private fun showItem(position: Int) {
         childFragmentManager.commit {
-            childFragmentManager.findFragmentById(R.id.fragmentContainer)?.let(this::detach)
+            currentFragment?.let(this::detach)
 
             when (position) {
                 0 -> {
@@ -161,18 +148,10 @@ class ExploreFragment : Fragment(), HasScrollableContent {
     }
 
     /**
-     * This property gets the action bar size for the currently set theme.
+     * This property is the currently attached [Fragment].
      */
-    private val actionBarSize: Int get() {
-        val typedValue = TypedValue()
-        val theme = requireContext().theme
-
-        return if (theme.resolveAttribute(R.attr.actionBarSize, typedValue, true)) {
-            TypedValue.complexToDimensionPixelSize(typedValue.data, resources.displayMetrics)
-        } else {
-            0
-        }
-    }
+    private val currentFragment get() =
+        childFragmentManager.findFragmentById(R.id.fragmentContainer)
 
     private val tabSelectedListener = object : TabLayout.OnTabSelectedListener {
         override fun onTabSelected(tab: TabLayout.Tab) {
@@ -188,20 +167,14 @@ class ExploreFragment : Fragment(), HasScrollableContent {
         }
     }
 
-    private val fragmentLifecycleCallbacks = object : FragmentManager.FragmentLifecycleCallbacks() {
-        override fun onFragmentViewCreated(
-                fm: FragmentManager,
-                f: Fragment,
-                v: View,
-                savedInstanceState: Bundle?) {
-            if (f is BusStopMapFragment) {
-                f.mapBottomPadding = actionBarSize
-            }
-        }
-    }
-
+    /**
+     * Any [android.app.Activity] which hosts this [Fragment] should implement this interface.
+     */
     interface Callbacks {
 
+        /**
+         * This is called when a tab has been switched on this [Fragment].
+         */
         fun onExploreTabSwitched()
     }
 }
