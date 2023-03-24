@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -158,7 +159,9 @@ class NearestStopsFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits the current [UiState].
      */
-    val uiStateLiveData = uiStateFlow.asLiveData(viewModelScope.coroutineContext, LIVE_DATA_TIMEOUT)
+    val uiStateLiveData = uiStateFlow
+        .asLiveData(viewModelScope.coroutineContext, LIVE_DATA_TIMEOUT)
+        .distinctUntilChanged()
 
     private val hasLocationFeature by lazy { locationRepository.hasLocationFeature }
 

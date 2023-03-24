@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -746,7 +746,7 @@ class BusStopMapViewModelTest {
         viewModel.onMapMarkerClicked(stopMarker)
         advanceUntilIdle()
 
-        observer.assertValues("123456")
+        observer.assertValues(null, "123456")
     }
 
     @Test
@@ -773,7 +773,7 @@ class BusStopMapViewModelTest {
         viewModel.onInfoWindowClosed()
         advanceUntilIdle()
 
-        observer.assertValues("123456", null)
+        observer.assertValues(null, "123456", null)
     }
 
     @Test
@@ -891,7 +891,7 @@ class BusStopMapViewModelTest {
         viewModel.showStop("123456")
         advanceUntilIdle()
 
-        showStopMarkerInfoWindowObserver.assertValues("123456")
+        showStopMarkerInfoWindowObserver.assertValues(null, "123456")
         cameraLocationObserver.assertEmpty()
         verify(preferenceRepository, never())
                 .lastMapCameraLocation = any()
@@ -908,7 +908,7 @@ class BusStopMapViewModelTest {
         viewModel.showStop("123456")
         advanceUntilIdle()
 
-        showStopMarkerInfoWindowObserver.assertValues("123456")
+        showStopMarkerInfoWindowObserver.assertValues(null, "123456")
         cameraLocationObserver.assertValues(
                 UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
         verify(preferenceRepository)
@@ -926,7 +926,7 @@ class BusStopMapViewModelTest {
         viewModel.onStopSearchResult("123456")
         advanceUntilIdle()
 
-        showStopMarkerInfoWindowObserver.assertValues("123456")
+        showStopMarkerInfoWindowObserver.assertValues(null, "123456")
         cameraLocationObserver.assertEmpty()
         verify(preferenceRepository, never())
                 .lastMapCameraLocation = any()
@@ -943,7 +943,7 @@ class BusStopMapViewModelTest {
         viewModel.onStopSearchResult("123456")
         advanceUntilIdle()
 
-        showStopMarkerInfoWindowObserver.assertValues("123456")
+        showStopMarkerInfoWindowObserver.assertValues(null, "123456")
         cameraLocationObserver.assertValues(
                 UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
         verify(preferenceRepository)

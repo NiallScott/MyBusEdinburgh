@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -234,6 +235,7 @@ class BusStopMapViewModel @Inject constructor(
     val isTrafficViewEnabledLiveData = savedState
             .getStateFlow(STATE_TRAFFIC_VIEW_ENABLED, false)
             .asLiveData(viewModelScope.coroutineContext)
+            .distinctUntilChanged()
 
     /**
      * This [LiveData] emits whether the map zoom controls should be shown.
@@ -269,8 +271,9 @@ class BusStopMapViewModel @Inject constructor(
     /**
      * This [LiveData] emits a stop code when the stop marker info window should be shown.
      */
-    val showStopMarkerInfoWindowLiveData =
-            selectedStopCodeFlow.asLiveData(viewModelScope.coroutineContext)
+    val showStopMarkerInfoWindowLiveData = selectedStopCodeFlow
+        .asLiveData(viewModelScope.coroutineContext)
+        .distinctUntilChanged()
 
     /**
      * This [LiveData] emits a stop code when the stop details UI should be shown.
