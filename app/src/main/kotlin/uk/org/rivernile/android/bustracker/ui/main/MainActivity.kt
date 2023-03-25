@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.main
 
+import android.app.SearchManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -359,8 +360,7 @@ class MainActivity : AppCompatActivity(),
         searchView.setOnMenuItemClickListener(this@MainActivity::handleSearchViewMenuItemClicked)
 
         searchView.editText.doAfterTextChanged {
-            (supportFragmentManager.findFragmentById(R.id.fragmentSearch) as SearchFragment)
-                .searchTerm = it?.toString()
+            performSearch(it?.toString())
         }
     }
 
@@ -384,6 +384,13 @@ class MainActivity : AppCompatActivity(),
     private fun handleIntent(intent: Intent) = when (intent.action) {
         ACTION_MANAGE_ALERTS -> {
             showItem(R.id.main_navigation_alerts, false)
+            true
+        }
+        Intent.ACTION_SEARCH -> {
+            viewBinding.searchView.apply {
+                show()
+                setText(intent.getStringExtra(SearchManager.QUERY))
+            }
             true
         }
         else -> false
@@ -441,6 +448,16 @@ class MainActivity : AppCompatActivity(),
         }
 
         viewBinding.appBarLayout.setExpanded(true, true)
+    }
+
+    /**
+     * Given the supplied [searchTerm], perform a search.
+     *
+     * @param searchTerm The user's search term.
+     */
+    private fun performSearch(searchTerm: String?) {
+        (supportFragmentManager.findFragmentById(R.id.fragmentSearch) as SearchFragment)
+            .searchTerm = searchTerm
     }
 
     /**
