@@ -51,6 +51,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -77,6 +78,7 @@ import uk.org.rivernile.android.bustracker.ui.neareststops.NearestStopsFragment
 import uk.org.rivernile.android.bustracker.ui.news.TwitterUpdatesFragment
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.ui.HasTabBar
+import uk.org.rivernile.android.bustracker.ui.search.SearchFragment
 import uk.org.rivernile.android.bustracker.ui.settings.SettingsActivity
 import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
@@ -96,6 +98,7 @@ class MainActivity : AppCompatActivity(),
         FavouriteStopsFragment.Callbacks,
         InstallBarcodeScannerDialogFragment.Callbacks,
         NearestStopsFragment.Callbacks,
+        SearchFragment.Callbacks,
         TurnOnGpsDialogFragment.Callbacks {
 
     companion object {
@@ -354,6 +357,11 @@ class MainActivity : AppCompatActivity(),
         menuItemScan = searchView.toolbar.menu.findItem(R.id.search_option_menu_scan)
         handleIsScanMenuItemVisible(viewModel.isScanMenuItemVisibleLiveData.value ?: false)
         searchView.setOnMenuItemClickListener(this@MainActivity::handleSearchViewMenuItemClicked)
+
+        searchView.editText.doAfterTextChanged {
+            (supportFragmentManager.findFragmentById(R.id.fragmentSearch) as SearchFragment)
+                .searchTerm = it?.toString()
+        }
     }
 
     /**

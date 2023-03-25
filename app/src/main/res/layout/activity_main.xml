@@ -58,7 +58,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:hint="@string/main_search_bar_hint"
-        app:layout_anchor="@id/searchBar" />
+        app:layout_anchor="@id/searchBar">
+
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragmentSearch"
+            android:name="uk.org.rivernile.android.bustracker.ui.search.SearchFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_search" />
+    </com.google.android.material.search.SearchView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
