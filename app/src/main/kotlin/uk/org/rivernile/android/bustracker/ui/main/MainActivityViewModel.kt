@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,8 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.main
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
 
@@ -38,7 +40,38 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 @HiltViewModel
-class MainActivityViewModel @Inject constructor() : ViewModel() {
+class MainActivityViewModel @Inject constructor(
+    featureRepository: FeatureRepository) : ViewModel() {
+
+    /**
+     * This [LiveData] emits when the stop details should be shown.
+     */
+    val showStopLiveData: LiveData<String> get() = showStop
+    private val showStop = SingleLiveEvent<String>()
+
+    /**
+     * This [LiveData] emits the current visibility status of the scan menu item.
+     */
+    val isScanMenuItemVisibleLiveData: LiveData<Boolean> =
+        MutableLiveData(featureRepository.hasCameraFeature)
+
+    /**
+     * This [LiveData] emits when the QR code scanner should be shown.
+     */
+    val showQrCodeScannerLiveData: LiveData<Unit> get() = showQrCodeScanner
+    private val showQrCodeScanner = SingleLiveEvent<Unit>()
+
+    /**
+     * This [LiveData] emits when the install QR scanner dialog should be shown.
+     */
+    val showInstallQrScannerDialogLiveData: LiveData<Unit> get() = showInstallQrScannerDialog
+    private val showInstallQrScannerDialog = SingleLiveEvent<Unit>()
+
+    /**
+     * This [LiveData] emits when the invalid QR code error should be shown.
+     */
+    val showInvalidQrCodeErrorLiveData: LiveData<Unit> get() = showInvalidQrCodeError
+    private val showInvalidQrCodeError = SingleLiveEvent<Unit>()
 
     /**
      * This [LiveData] emits when settings should be shown.
@@ -53,6 +86,13 @@ class MainActivityViewModel @Inject constructor() : ViewModel() {
     private val showAbout = SingleLiveEvent<Unit>()
 
     /**
+     * This is called when the scan menu item has been clicked.
+     */
+    fun onScanMenuItemClicked() {
+        showQrCodeScanner.call()
+    }
+
+    /**
      * This is called when the settings menu item has been clicked.
      */
     fun onSettingsMenuItemClicked() {
@@ -64,5 +104,28 @@ class MainActivityViewModel @Inject constructor() : ViewModel() {
      */
     fun onAboutMenuItemClicked() {
         showAbout.call()
+    }
+
+    /**
+     * This is called when the QR scanner application was not found.
+     */
+    fun onQrScannerNotFound() {
+        showInstallQrScannerDialog.call()
+    }
+
+    /**
+     * This is called when the QR code has been scanned, with the resulting stop code.
+     *
+     * @param result The result from scanning the QR code.
+     */
+    fun onQrScanned(result: ScanQrCodeResult) {
+        if (result is ScanQrCodeResult.Success) {
+            result.stopCode
+                ?.ifBlank { null }
+                ?.let {
+                    showStop.value = it
+                }
+                ?: showInvalidQrCodeError.call()
+        }
     }
 }

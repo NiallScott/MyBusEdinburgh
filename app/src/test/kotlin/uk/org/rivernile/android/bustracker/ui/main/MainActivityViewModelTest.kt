@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,13 @@
 package uk.org.rivernile.android.bustracker.ui.main
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
@@ -37,21 +41,110 @@ import uk.org.rivernile.android.bustracker.testutils.test
  *
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner::class)
 class MainActivityViewModelTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private lateinit var viewModel: MainActivityViewModel
+    @Mock
+    private lateinit var featureRepository: FeatureRepository
 
-    @Before
-    fun setUp() {
-        viewModel = MainActivityViewModel()
+    @Test
+    fun isScanMenuItemVisibleEmitsFalseWhenNoCameraFeature() {
+        whenever(featureRepository.hasCameraFeature)
+            .thenReturn(false)
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isScanMenuItemVisibleLiveData.test()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isScanMenuItemVisibleEmitsTrueWhenHasCameraFeature() {
+        whenever(featureRepository.hasCameraFeature)
+            .thenReturn(true)
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isScanMenuItemVisibleLiveData.test()
+
+        observer.assertValues(true)
+    }
+
+    @Test
+    fun onScanMenuItemClickedShowsQrCodeScanner() {
+        val viewModel = createViewModel()
+
+        val observer = viewModel.showQrCodeScannerLiveData.test()
+        viewModel.onScanMenuItemClicked()
+
+        observer.assertSize(1)
+    }
+
+    @Test
+    fun onQrScannerNotFoundShowsInstallQrScannerDialog() {
+        val viewModel = createViewModel()
+
+        val observer = viewModel.showInstallQrScannerDialogLiveData.test()
+        viewModel.onQrScannerNotFound()
+
+        observer.assertSize(1)
+    }
+
+    @Test
+    fun onQrScannedWithErrorPerformsNoAction() {
+        val viewModel = createViewModel()
+
+        val showStopObserver = viewModel.showStopLiveData.test()
+        val showInvalidQrCodeErrorObserver = viewModel.showInvalidQrCodeErrorLiveData.test()
+        viewModel.onQrScanned(ScanQrCodeResult.Error)
+
+        showStopObserver.assertEmpty()
+        showInvalidQrCodeErrorObserver.assertEmpty()
+    }
+
+    @Test
+    fun onQrScannedWithNullStopCodeShowsInvalidQrCodeError() {
+        val viewModel = createViewModel()
+
+        val showStopObserver = viewModel.showStopLiveData.test()
+        val showInvalidQrCodeErrorObserver = viewModel.showInvalidQrCodeErrorLiveData.test()
+        viewModel.onQrScanned(ScanQrCodeResult.Success(null))
+
+        showStopObserver.assertEmpty()
+        showInvalidQrCodeErrorObserver.assertSize(1)
+    }
+
+    @Test
+    fun onQrScannedWithEmptyStopCodeShowsInvalidQrCodeError() {
+        val viewModel = createViewModel()
+
+        val showStopObserver = viewModel.showStopLiveData.test()
+        val showInvalidQrCodeErrorObserver = viewModel.showInvalidQrCodeErrorLiveData.test()
+        viewModel.onQrScanned(ScanQrCodeResult.Success(""))
+
+        showStopObserver.assertEmpty()
+        showInvalidQrCodeErrorObserver.assertSize(1)
+    }
+
+    @Test
+    fun onQrScannedWithPopulatedStopCodeShowsStopDetails() {
+        val viewModel = createViewModel()
+
+        val showStopObserver = viewModel.showStopLiveData.test()
+        val showInvalidQrCodeErrorObserver = viewModel.showInvalidQrCodeErrorLiveData.test()
+        viewModel.onQrScanned(ScanQrCodeResult.Success("123456"))
+
+        showStopObserver.assertValues("123456")
+        showInvalidQrCodeErrorObserver.assertEmpty()
     }
 
     @Test
     fun onSettingsMenuItemClickedShowsSettings() {
+        val viewModel = createViewModel()
         val observer = viewModel.showSettingsLiveData.test()
+
         viewModel.onSettingsMenuItemClicked()
 
         observer.assertSize(1)
@@ -59,9 +152,13 @@ class MainActivityViewModelTest {
 
     @Test
     fun onAboutMenuItemClickedShowsAbout() {
+        val viewModel = createViewModel()
         val observer = viewModel.showAboutLiveData.test()
+
         viewModel.onAboutMenuItemClicked()
 
         observer.assertSize(1)
     }
+
+    private fun createViewModel() = MainActivityViewModel(featureRepository)
 }
