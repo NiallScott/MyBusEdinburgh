@@ -180,14 +180,6 @@ class BusStopMapViewModel @Inject constructor(
             .asLiveData(viewModelScope.coroutineContext)
 
     /**
-     * A [LiveData] which emits whether the search menu item is enabled.
-     */
-    val isSearchMenuItemEnabledLiveData = playServicesAvailabilityFlow
-            .map(this::calculateMenuItemEnabled)
-            .distinctUntilChanged()
-            .asLiveData(viewModelScope.coroutineContext)
-
-    /**
      * A [LiveData] which emits whether the filter menu item is enabled.
      */
     val isFilterMenuItemEnabledLiveData = combine(
@@ -289,12 +281,6 @@ class BusStopMapViewModel @Inject constructor(
     private val showServicesChooser = SingleLiveEvent<ServicesChooserParams>()
 
     /**
-     * This [LiveData] emits when the search UI should be shown.
-     */
-    val showSearchLiveData: LiveData<Unit> get() = showSearch
-    private val showSearch = SingleLiveEvent<Unit>()
-
-    /**
      * This is called when the error resolution button has been clicked.
      */
     fun onErrorResolveButtonClicked() {
@@ -323,13 +309,6 @@ class BusStopMapViewModel @Inject constructor(
      */
     fun showLocation(latLon: UiLatLon) {
         moveCameraToLocation(UiCameraLocation(latLon, DEFAULT_ZOOM))
-    }
-
-    /**
-     * This is called when the search menu item is clicked.
-     */
-    fun onSearchMenuItemClicked() {
-        showSearch.call()
     }
 
     /**

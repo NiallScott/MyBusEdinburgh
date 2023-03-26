@@ -396,42 +396,6 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun isSearchMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesInProgress() = runTest {
-        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
-                .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
-        val viewModel = createViewModel()
-
-        val observer = viewModel.isSearchMenuItemEnabledLiveData.test()
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-    }
-
-    @Test
-    fun isSearchMenuItemEnabledLiveDataEmitsTrueWhenPlayServicesAvailable() = runTest {
-        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
-                .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
-        val viewModel = createViewModel()
-
-        val observer = viewModel.isSearchMenuItemEnabledLiveData.test()
-        advanceUntilIdle()
-
-        observer.assertValues(false, true)
-    }
-
-    @Test
-    fun isSearchMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesUnavailable() = runTest {
-        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
-                .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
-        val viewModel = createViewModel()
-
-        val observer = viewModel.isSearchMenuItemEnabledLiveData.test()
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-    }
-
-    @Test
     fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenNullServices() = runTest {
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
                 .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
@@ -868,16 +832,6 @@ class BusStopMapViewModelTest {
         viewModel.onServicesMenuItemClicked()
 
         observer.assertValues(expected)
-    }
-
-    @Test
-    fun showSearchLiveDataEmitsWhenSearchMenuItemIsClicked() {
-        val viewModel = createViewModel()
-
-        val observer = viewModel.showSearchLiveData.test()
-        viewModel.onSearchMenuItemClicked()
-
-        observer.assertSize(1)
     }
 
     @Test

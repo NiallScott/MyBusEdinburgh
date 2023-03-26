@@ -42,7 +42,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
@@ -135,7 +134,6 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     private val viewBinding get() = _viewBinding!!
     private var _viewBinding: FragmentBusStopMapBinding? = null
 
-    private var menuItemSearch: MenuItem? = null
     private var menuItemServices: MenuItem? = null
     private var menuItemMapType: MenuItem? = null
     private var menuItemTrafficView: MenuItem? = null
@@ -143,12 +141,6 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     private val requestLocationPermissionsLauncher = registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions(),
             this::handleLocationPermissionsResult)
-
-    private val searchStopLauncher = registerForActivityResult(SearchStop()) { stopCode ->
-        stopCode?.let {
-            viewModel.onStopSearchResult(it)
-        }
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -231,8 +223,6 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
                 this::handleShowPlayServicesErrorResolution)
         viewModel.isMyLocationFeatureEnabledLiveData.observe(viewLifecycleOwner,
                 this::handleMyLocationEnabledChanged)
-        viewModel.isSearchMenuItemEnabledLiveData.observe(viewLifecycleOwner,
-                this::handleSearchMenuItemEnabledChanged)
         viewModel.isFilterMenuItemEnabledLiveData.observe(viewLifecycleOwner,
                 this::handleServicesMenuItemEnabledChanged)
         viewModel.isMapTypeMenuItemEnabledLiveData.observe(viewLifecycleOwner,
@@ -245,9 +235,6 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
         viewModel.showStopMarkerInfoWindowLiveData.observe(viewLifecycleOwner,
                 this::handleShowMapMarkerInfoWindow)
         viewModel.showStopDetailsLiveData.observe(viewLifecycleOwner, callbacks::onShowBusTimes)
-        viewModel.showSearchLiveData.observe(viewLifecycleOwner) {
-            searchStopLauncher.launch()
-        }
         viewModel.cameraLocationLiveData.observe(viewLifecycleOwner,
                 this::handleCameraPositionChanged)
 
@@ -677,15 +664,6 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     }
 
     /**
-     * Handle a change in the enabled state of the search menu item.
-     *
-     * @param isEnabled Is the search menu item enabled?
-     */
-    private fun handleSearchMenuItemEnabledChanged(isEnabled: Boolean) {
-        menuItemSearch?.isEnabled = isEnabled
-    }
-
-    /**
      * Handle a change in the enabled state of the services menu item.
      *
      * @param isEnabled Is the services menu item enabled?
@@ -758,15 +736,12 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
         override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
             menuInflater.inflate(R.menu.busstopmap_option_menu, menu)
 
-            menuItemSearch = menu.findItem(R.id.busstopmap_option_menu_search)
             menuItemServices = menu.findItem(R.id.busstopmap_option_menu_services)
             menuItemMapType = menu.findItem(R.id.busstopmap_option_menu_maptype)
             menuItemTrafficView = menu.findItem(R.id.busstopmap_option_menu_trafficview)
         }
 
         override fun onPrepareMenu(menu: Menu) {
-            handleSearchMenuItemEnabledChanged(
-                    viewModel.isSearchMenuItemEnabledLiveData.value ?: false)
             handleServicesMenuItemEnabledChanged(
                     viewModel.isFilterMenuItemEnabledLiveData.value ?: false)
             handleMapTypeMenuItemEnabledChanged(
@@ -777,10 +752,6 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {
-            R.id.busstopmap_option_menu_search -> {
-                viewModel.onSearchMenuItemClicked()
-                true
-            }
             R.id.busstopmap_option_menu_services -> {
                 viewModel.onServicesMenuItemClicked()
                 true
