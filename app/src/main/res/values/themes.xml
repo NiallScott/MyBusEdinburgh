@@ -70,10 +70,6 @@
         <item name="expandCollapseIndicatorStyle">@style/Widget.MyBus.ExpandCollapseIndicator</item>
     </style>
 
-    <style name="Theme.MyBus.Search">
-        <item name="searchViewStyle">@style/Widget.AppCompat.SearchView.ActionBar</item>
-    </style>
-
     <style name="ThemeOverlay.Preference.MyBus" parent="PreferenceThemeOverlay">
         <item name="switchPreferenceCompatStyle">@style/Preference.SwitchPreferenceCompat.MyBus</item>
     </style>

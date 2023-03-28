@@ -85,6 +85,10 @@
                 <action android:name="android.intent.action.SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
         
         <activity-alias
@@ -180,21 +184,6 @@
             android:name="uk.org.rivernile.android.bustracker.ui.about.AboutActivity"
             android:label="@string/about_title"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
-
-        <!-- SearchActivity, the single place in the application where the user can search for
-             content based on a search term. -->
-        <activity
-            android:name="uk.org.rivernile.android.bustracker.ui.search.SearchActivity"
-            android:label="@string/search_title"
-            android:launchMode="singleTop"
-            android:theme="@style/Theme.MyBus.Search"
-            android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity"
-            android:exported="true">
-
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
 
         <!-- SettingsProvider, to provide the user's saved favourite stops and active alerts. -->
         <provider
