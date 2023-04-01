@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.ui.favourites.remove
 
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,25 +50,20 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 @RunWith(MockitoJUnitRunner::class)
 class DeleteFavouriteDialogFragmentViewModelTest {
 
+    companion object {
+
+        private const val STATE_STOP_CODE = "stopCode"
+    }
+
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var favouritesRepository: FavouritesRepository
 
-    private lateinit var viewModel: DeleteFavouriteDialogFragmentViewModel
-
-    @Before
-    fun setUp() {
-        viewModel = DeleteFavouriteDialogFragmentViewModel(
-                favouritesRepository,
-                coroutineRule.scope,
-                coroutineRule.testDispatcher)
-    }
-
     @Test
     fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsNull() = runTest {
-        viewModel.stopCode = null
+        val viewModel = createViewModel(null)
 
         viewModel.onUserConfirmDeletion()
 
@@ -78,7 +73,7 @@ class DeleteFavouriteDialogFragmentViewModelTest {
 
     @Test
     fun onUserConfirmDeletionDoesNotCauseDeletionWhenStopCodeIsEmpty() = runTest {
-        viewModel.stopCode = ""
+        val viewModel = createViewModel("")
 
         viewModel.onUserConfirmDeletion()
 
@@ -88,12 +83,24 @@ class DeleteFavouriteDialogFragmentViewModelTest {
 
     @Test
     fun onUserConfirmDeletionCausesDeletionWhenStopCodeIsPopulated() = runTest {
-        viewModel.stopCode = "123456"
+        val viewModel = createViewModel("123456")
 
         viewModel.onUserConfirmDeletion()
         advanceUntilIdle()
 
         verify(favouritesRepository)
                 .removeFavouriteStop("123456")
+    }
+
+    private fun createViewModel(stopCode: String?): DeleteFavouriteDialogFragmentViewModel {
+        val savedState = SavedStateHandle(
+            mapOf(
+                STATE_STOP_CODE to stopCode))
+
+        return DeleteFavouriteDialogFragmentViewModel(
+            savedState,
+            favouritesRepository,
+            coroutineRule.scope,
+            coroutineRule.testDispatcher)
     }
 }

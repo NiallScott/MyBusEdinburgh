@@ -63,8 +63,6 @@ class AddProximityAlertDialogFragment : DialogFragment() {
 
     companion object {
 
-        private const val ARG_STOP_CODE = AddProximityAlertDialogFragmentViewModel.STATE_STOP_CODE
-
         private const val DIALOG_PROXIMITY_LIMITATIONS = "dialogProximityLimitations"
 
         /**
@@ -75,7 +73,7 @@ class AddProximityAlertDialogFragment : DialogFragment() {
          */
         fun newInstance(stopCode: String) = AddProximityAlertDialogFragment().apply {
             arguments = Bundle().apply {
-                putString(ARG_STOP_CODE, stopCode)
+                putString(AddProximityAlertDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
             }
         }
     }

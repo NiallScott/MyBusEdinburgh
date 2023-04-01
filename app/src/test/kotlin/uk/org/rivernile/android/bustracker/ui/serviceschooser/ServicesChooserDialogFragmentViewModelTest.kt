@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,15 +40,17 @@ class ServicesChooserDialogFragmentViewModelTest {
 
     companion object {
 
+        private const val STATE_SERVICES = "services"
         private const val STATE_SELECTED_SERVICES = "selectedServices"
     }
 
     @Test
     fun setServicesSetsServices() {
-        val viewModel = createViewModel()
         val services = arrayOf("1", "2", "3")
-
-        viewModel.services = services
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_SERVICES to services)))
 
         assertArrayEquals(services, viewModel.services)
     }
@@ -93,19 +95,22 @@ class ServicesChooserDialogFragmentViewModelTest {
 
     @Test
     fun checkBoxesIsNullWhenServicesIsEmpty() {
-        val viewModel = createViewModel()
-
-        viewModel.services = emptyArray()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_SERVICES to emptyArray<String>())))
 
         assertNull(viewModel.checkBoxes)
     }
 
     @Test
     fun checkBoxesHasArrayOfFalseByDefaultWhenServicesExist() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_SERVICES to arrayOf("1", "2", "3"))))
         val expected = booleanArrayOf(false, false, false)
 
-        viewModel.services = arrayOf("1", "2", "3")
         val result = viewModel.checkBoxes
 
         assertArrayEquals(expected, result)
@@ -115,10 +120,11 @@ class ServicesChooserDialogFragmentViewModelTest {
     fun checkBoxesHasPopulatedArrayWhenServicesExistAndSelectedServicesInSavedState() {
         val viewModel = createViewModel(
                 SavedStateHandle(
-                        mapOf(STATE_SELECTED_SERVICES to arrayOf("2", "4"))))
+                        mapOf(
+                            STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"),
+                            STATE_SELECTED_SERVICES to arrayOf("2", "4"))))
         val expected = booleanArrayOf(false, true, false, true, false)
 
-        viewModel.services = arrayOf("1", "2", "3", "4", "5")
         val result = viewModel.checkBoxes
 
         assertArrayEquals(expected, result)
@@ -126,10 +132,12 @@ class ServicesChooserDialogFragmentViewModelTest {
 
     @Test
     fun checkBoxesHasPopulatedArrayWhenServicesExistAndSelectedServices() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
         val expected = booleanArrayOf(false, true, false, true, false)
 
-        viewModel.services = arrayOf("1", "2", "3", "4", "5")
         viewModel.selectedServices = arrayOf("2", "4")
         val result = viewModel.checkBoxes
 
@@ -147,10 +155,12 @@ class ServicesChooserDialogFragmentViewModelTest {
 
     @Test
     fun onItemClickedAndIsCheckedAddsSelectedService() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
         val expected = arrayOf("3")
 
-        viewModel.services = arrayOf("1", "2", "3", "4", "5")
         viewModel.onItemClicked(2, true)
 
         assertArrayEquals(expected, viewModel.selectedServices)
@@ -158,10 +168,12 @@ class ServicesChooserDialogFragmentViewModelTest {
 
     @Test
     fun onItemClickedAndIsCheckedOnlyAddsServiceOnce() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
         val expected = arrayOf("3")
 
-        viewModel.services = arrayOf("1", "2", "3", "4", "5")
         viewModel.onItemClicked(2, true)
         viewModel.onItemClicked(2, true)
 
@@ -170,10 +182,12 @@ class ServicesChooserDialogFragmentViewModelTest {
 
     @Test
     fun onItemClickedWithMultipleServices() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
         val expected = arrayOf("2", "4")
 
-        viewModel.services = arrayOf("1", "2", "3", "4", "5")
         viewModel.onItemClicked(1, true)
         viewModel.onItemClicked(3, true)
 
@@ -182,10 +196,12 @@ class ServicesChooserDialogFragmentViewModelTest {
 
     @Test
     fun onItemClickedAndIsNotCheckedRemovesService() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
         val expected = arrayOf("4")
 
-        viewModel.services = arrayOf("1", "2", "3", "4", "5")
         viewModel.onItemClicked(1, true)
         viewModel.onItemClicked(3, true)
         viewModel.onItemClicked(1, false)

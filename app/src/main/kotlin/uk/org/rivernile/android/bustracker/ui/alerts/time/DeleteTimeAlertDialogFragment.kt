@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,8 +45,6 @@ class DeleteTimeAlertDialogFragment : DialogFragment() {
 
     companion object {
 
-        private const val ARG_STOP_CODE = "stopCode"
-
         /**
          * Create a new instance of [DeleteTimeAlertDialogFragment].
          *
@@ -54,19 +52,17 @@ class DeleteTimeAlertDialogFragment : DialogFragment() {
          */
         fun newInstance(stopCode: String) = DeleteTimeAlertDialogFragment().apply {
             arguments = Bundle().apply {
-                putString(ARG_STOP_CODE, stopCode)
+                putString(DeleteTimeAlertDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
             }
         }
     }
 
-    private val viewModel: DeleteTimeAlertDialogFragmentViewModel by viewModels()
+    private val viewModel by viewModels<DeleteTimeAlertDialogFragmentViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         isCancelable = true
-
-        viewModel.stopCode = arguments?.getString(ARG_STOP_CODE)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =

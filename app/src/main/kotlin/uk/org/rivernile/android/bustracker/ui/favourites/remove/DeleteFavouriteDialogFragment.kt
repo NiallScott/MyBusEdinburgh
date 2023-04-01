@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,8 +45,6 @@ class DeleteFavouriteDialogFragment : DialogFragment() {
 
     companion object {
 
-        private const val ARG_STOP_CODE = "stopCode"
-
         /**
          * Create a new instance of [DeleteFavouriteDialogFragment].
          *
@@ -54,18 +52,12 @@ class DeleteFavouriteDialogFragment : DialogFragment() {
          */
         fun newInstance(stopCode: String) = DeleteFavouriteDialogFragment().apply {
             arguments = Bundle().apply {
-                putString(ARG_STOP_CODE, stopCode)
+                putString(DeleteFavouriteDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
             }
         }
     }
 
-    private val viewModel: DeleteFavouriteDialogFragmentViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        viewModel.stopCode = arguments?.getString(ARG_STOP_CODE)
-    }
+    private val viewModel by viewModels<DeleteFavouriteDialogFragmentViewModel>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?) =
             MaterialAlertDialogBuilder(requireContext())

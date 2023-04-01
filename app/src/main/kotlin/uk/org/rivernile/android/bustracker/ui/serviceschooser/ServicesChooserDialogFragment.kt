@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,12 +56,6 @@ class ServicesChooserDialogFragment : DialogFragment() {
          */
         const val RESULT_CHOSEN_SERVICES = "chosenServices"
 
-        /** The argument name for services.  */
-        private const val ARG_SERVICES = "services"
-
-        /** The argument name for the default selected services.  */
-        private const val ARG_SELECTED_SERVICES = "selectedServices"
-
         /** The argument name for the dialog title.  */
         private const val ARG_TITLE = "dialogTitle"
 
@@ -79,24 +73,15 @@ class ServicesChooserDialogFragment : DialogFragment() {
                 selectedServices: Array<String>?,
                 dialogTitle: String) = ServicesChooserDialogFragment().apply {
             arguments = Bundle().apply {
-                putStringArray(ARG_SERVICES, services)
-                putStringArray(ARG_SELECTED_SERVICES, selectedServices)
+                putStringArray(ServicesChooserDialogFragmentViewModel.STATE_SERVICES, services)
+                putStringArray(ServicesChooserDialogFragmentViewModel.STATE_SELECTED_SERVICES,
+                    selectedServices)
                 putString(ARG_TITLE, dialogTitle)
             }
         }
     }
 
-    private val viewModel: ServicesChooserDialogFragmentViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        viewModel.services = arguments?.getStringArray(ARG_SERVICES)
-
-        if (savedInstanceState == null) {
-            viewModel.selectedServices = arguments?.getStringArray(ARG_SELECTED_SERVICES)
-        }
-    }
+    private val viewModel by viewModels<ServicesChooserDialogFragmentViewModel>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return MaterialAlertDialogBuilder(requireContext())

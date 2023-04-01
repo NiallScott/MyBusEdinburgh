@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,13 +43,20 @@ class ServicesChooserDialogFragmentViewModel @Inject constructor(
 
     companion object {
 
-        private const val STATE_SELECTED_SERVICES = "selectedServices"
+        /**
+         * State key for services.
+         */
+        const val STATE_SERVICES = "services"
+        /**
+         * State key for selected services.
+         */
+        const val STATE_SELECTED_SERVICES = "selectedServices"
     }
 
     /**
      * This property hold the [Array] of services which the user can select from.
      */
-    var services: Array<String>? = null
+    val services: Array<String>? get() = savedState[STATE_SERVICES]
 
     /**
      * This property holds the services which the user has selected.

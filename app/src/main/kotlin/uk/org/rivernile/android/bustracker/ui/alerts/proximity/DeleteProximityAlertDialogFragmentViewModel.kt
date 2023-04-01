@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts.proximity
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -39,6 +40,7 @@ import javax.inject.Inject
 /**
  * This is the [ViewModel] for [DeleteProximityAlertDialogFragment].
  *
+ * @param savedState The saved state.
  * @param alertsRepository The [AlertsRepository], used to interface with the lower-level
  * architecture layers to handle alerts.
  * @param applicationCoroutineScope The application [CoroutineScope].
@@ -47,14 +49,23 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class DeleteProximityAlertDialogFragmentViewModel @Inject constructor(
+        private val savedState: SavedStateHandle,
         private val alertsRepository: AlertsRepository,
         @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
+    companion object {
+
+        /**
+         * State key for stop code.
+         */
+        const val STATE_STOP_CODE = "stopCode"
+    }
+
     /**
      * This property contains the stop code for which the proximity alert should be deleted.
      */
-    var stopCode: String? = null
+    private val stopCode: String? get() = savedState[STATE_STOP_CODE]
 
     /**
      * This is called when the user has confirmed they wish to delete the proximity alert.

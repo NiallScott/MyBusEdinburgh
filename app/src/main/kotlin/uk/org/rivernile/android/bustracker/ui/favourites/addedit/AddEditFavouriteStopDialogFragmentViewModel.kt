@@ -75,21 +75,25 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
 
     companion object {
 
+        /**
+         * State key for stop code.
+         */
+        const val STATE_STOP_CODE = "stopCode"
         private const val STATE_PRE_POPULATED_STOP_CODE = "prePopulatedStopCode"
     }
 
-    /**
-     * This property is used to get and set the stop code for this favourite.
-     */
-    var stopCode: String?
-        get() = stopCodeFlow.value
-        set(value) {
-            stopCodeFlow.value = value
-        }
-
-    private val stopCodeFlow = MutableStateFlow<String?>(null)
+    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     private val stopNameFlow = MutableStateFlow<String?>(null)
+
+    /**
+     * The stop name.
+     */
+    var stopName: String?
+        get() = stopNameFlow.value
+        set(value) {
+            stopNameFlow.value = value
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val uiStateFlow = stopCodeFlow
@@ -107,7 +111,8 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
     /**
      * Should the Dialog's positive button be enabled or not?
      */
-    val isPositiveButtonEnabledLiveData = stopNameFlow.map { it?.isNotEmpty() == true }
+    val isPositiveButtonEnabledLiveData = stopNameFlow
+            .map { it?.isNotEmpty() == true }
             .asLiveData(viewModelScope.coroutineContext)
 
     /**
@@ -120,15 +125,6 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
             .filter(this::shouldPrePopulateName)
             .map(this::getPrePopulatedName)
             .asLiveData(viewModelScope.coroutineContext)
-
-    /**
-     * Update the internal state of what the current contents of the editable stop name field are.
-     *
-     * @param stopName The current contents of the stop name field.
-     */
-    fun updateStopName(stopName: String?) {
-        stopNameFlow.value = stopName
-    }
 
     /**
      * The submit button has been clicked.
@@ -172,7 +168,7 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
      * @param mode The [UiState.Mode.Add] mode.
      */
     private fun addFavouriteStop(mode: UiState.Mode.Add) {
-        stopNameFlow.value?.ifEmpty { null }?.let { stopName ->
+        stopName?.ifEmpty { null }?.let { stopName ->
             val favouriteStop = FavouriteStop(
                     stopCode = mode.stopCode,
                     stopName = stopName)
@@ -194,7 +190,7 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
      * @param mode The [UiState.Mode.Edit] mode.
      */
     private fun editFavouriteStop(mode: UiState.Mode.Edit) {
-        stopNameFlow.value?.ifEmpty { null }?.let { stopName ->
+        stopName?.ifEmpty { null }?.let { stopName ->
             val favouriteStop = mode.favouriteStop.copy(stopName = stopName)
 
             applicationCoroutineScope.launch(defaultDispatcher) {

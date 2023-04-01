@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,8 +56,6 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
 
     companion object {
 
-        private const val ARG_STOPCODE = "stopCode"
-
         /**
          * Create a new instance of this [DialogFragment] with the given stop code.
          *
@@ -66,7 +64,7 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
          */
         fun newInstance(stopCode: String) = AddEditFavouriteStopDialogFragment().apply {
             arguments = Bundle().apply {
-                putString(ARG_STOPCODE, stopCode)
+                putString(AddEditFavouriteStopDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
             }
         }
     }
@@ -78,12 +76,6 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
 
     private val viewBinding by lazy {
         DialogAddEditFavouriteStopBinding.inflate(layoutInflater, null, false)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        viewModel.stopCode = arguments?.getString(ARG_STOPCODE)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -112,10 +104,10 @@ class AddEditFavouriteStopDialogFragment : DialogFragment() {
         viewModel.prePopulateNameLiveData.observe(viewLifecycle, this::handleResetEditableName)
 
         // Sync ViewModel with what has been restored from saved state.
-        viewModel.updateStopName(viewBinding.editName.text.toString())
+        viewModel.stopName = viewBinding.editName.text.toString()
 
         viewBinding.editName.doAfterTextChanged {
-            viewModel.updateStopName(it?.toString())
+            viewModel.stopName = it?.toString()
         }
     }
 

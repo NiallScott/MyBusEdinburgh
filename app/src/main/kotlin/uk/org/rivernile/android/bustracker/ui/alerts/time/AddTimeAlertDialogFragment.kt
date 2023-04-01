@@ -64,10 +64,6 @@ class AddTimeAlertDialogFragment : DialogFragment() {
 
     companion object {
 
-        private const val ARG_STOP_CODE = AddTimeAlertDialogFragmentViewModel.STATE_STOP_CODE
-        private const val ARG_DEFAULT_SERVICES =
-                AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES
-
         private const val DIALOG_SELECT_SERVICES = "selectServicesDialog"
         private const val DIALOG_TIME_ALERT_LIMITATIONS = "timeLimitationsDialog"
 
@@ -79,7 +75,7 @@ class AddTimeAlertDialogFragment : DialogFragment() {
          */
         fun newInstance(stopCode: String) = AddTimeAlertDialogFragment().apply {
             arguments = Bundle().apply {
-                putString(ARG_STOP_CODE, stopCode)
+                putString(AddTimeAlertDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
             }
         }
 
@@ -94,8 +90,10 @@ class AddTimeAlertDialogFragment : DialogFragment() {
         fun newInstance(stopCode: String, defaultServices: Array<String>?) =
                 AddTimeAlertDialogFragment().apply {
                     arguments = Bundle().apply {
-                        putString(ARG_STOP_CODE, stopCode)
-                        putStringArray(ARG_DEFAULT_SERVICES, defaultServices)
+                        putString(AddTimeAlertDialogFragmentViewModel.STATE_STOP_CODE, stopCode)
+                        putStringArray(
+                            AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES,
+                            defaultServices)
                     }
                 }
     }
@@ -105,7 +103,7 @@ class AddTimeAlertDialogFragment : DialogFragment() {
     @Inject
     lateinit var permissionChecker: AndroidPermissionChecker
 
-    private val viewModel: AddTimeAlertDialogFragmentViewModel by viewModels()
+    private val viewModel by viewModels<AddTimeAlertDialogFragmentViewModel>()
 
     private val requestPermissionLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission(),
