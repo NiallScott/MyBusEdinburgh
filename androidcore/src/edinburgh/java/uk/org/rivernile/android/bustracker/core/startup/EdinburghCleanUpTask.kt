@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,6 +44,8 @@ internal class EdinburghCleanUpTask @Inject constructor(
     override suspend fun performCleanUp() {
         withContext(ioDispatcher) {
             arrayOf(
+                    databaseUtils.getDatabasePath("suggestions.db"),
+                    databaseUtils.getDatabasePath("suggestions.db-journal"),
                     databaseUtils.getDatabasePath("busstops.db"),
                     databaseUtils.getDatabasePath("busstops.db-journal"),
                     databaseUtils.getDatabasePath("busstops2.db"),

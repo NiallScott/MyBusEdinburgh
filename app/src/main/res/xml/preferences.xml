@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -149,7 +149,11 @@
 
     <!-- Privacy -->
     <PreferenceCategory
-        android:title="@string/preference_category_privacy">
+        android:title="@string/preference_category_privacy"
+        app:isPreferenceVisible="false">
+        <!--
+        This preference category is invisible for now as the search history feature is turned off.
+        -->
 
         <Preference
             android:key="pref_clear_search_history"

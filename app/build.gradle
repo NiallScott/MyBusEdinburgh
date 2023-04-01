@@ -133,8 +133,6 @@ androidComponents {
     onVariants(selector().all(), { variant ->
         variant.resValues[variant.makeResValueKey('string', 'package_name')] =
                 new ResValue("${variant.applicationId.get()}", null)
-        variant.resValues[variant.makeResValueKey('string', 'search_authority')] =
-                new ResValue("${variant.applicationId.get()}.SearchSuggestionsProvider", null)
     })
 }
 

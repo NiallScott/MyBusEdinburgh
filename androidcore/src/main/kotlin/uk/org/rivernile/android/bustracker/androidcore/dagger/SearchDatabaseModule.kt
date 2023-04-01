@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,12 @@
 
 package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import android.content.Context
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.database.search.daos.AndroidSearchHistoryDao
 import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
-import uk.org.rivernile.android.bustracker.core.di.ForSearchDatabase
-import javax.inject.Singleton
 
 /**
  * This is a Dagger [Module] to provide dependencies for the search database.
@@ -44,19 +40,9 @@ import javax.inject.Singleton
  */
 @InstallIn(SingletonComponent::class)
 @Module
-internal class SearchDatabaseModule {
+internal interface SearchDatabaseModule {
 
-    @Provides
-    @Singleton
-    @ForSearchDatabase
-    fun provideAuthority(context: Context) = "${context.packageName}.SearchSuggestionsProvider"
-
-    @InstallIn(SingletonComponent::class)
-    @Module
-    interface Bindings {
-
-        @Suppress("unused")
-        @Binds
-        fun bindSearchHistoryDao(androidSearchHistoryDao: AndroidSearchHistoryDao): SearchHistoryDao
-    }
+    @Suppress("unused")
+    @Binds
+    fun bindSearchHistoryDao(androidSearchHistoryDao: AndroidSearchHistoryDao): SearchHistoryDao
 }

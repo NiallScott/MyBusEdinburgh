@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,34 +26,24 @@
 
 package uk.org.rivernile.android.bustracker.core.database.search.daos
 
-import android.provider.SearchRecentSuggestions
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * This is an Android-specific implementation of [SearchHistoryDao].
  *
- * @param recentSuggestions An instance of the utility class in the Android platform to manage the
- * user's recent search history.
- * @param ioDispatcher The IO [CoroutineDispatcher].
+ * This class is currently a no-op until a new solution is implemented.
+ *
  * @author Niall Scott
  */
 @Singleton
-internal class AndroidSearchHistoryDao @Inject constructor(
-        private val recentSuggestions: SearchRecentSuggestions,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : SearchHistoryDao {
+internal class AndroidSearchHistoryDao @Inject constructor() : SearchHistoryDao {
 
     override suspend fun addSearchTerm(searchTerm: String) {
-        // As documented in SearchRecentSuggestions.saveRecentQuery(), this method call returns
-        // straight away as it starts its own thread, so no need to run this on the IO
-        // CoroutineDispatcher.
-        recentSuggestions.saveRecentQuery(searchTerm, null)
+        // NO-OP for now.
     }
 
-    override suspend fun clearSearchHistory() = withContext(ioDispatcher) {
-        recentSuggestions.clearHistory()
+    override suspend fun clearSearchHistory() {
+        // NO-OP for now.
     }
 }
