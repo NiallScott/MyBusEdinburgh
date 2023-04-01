@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.ui.search
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -42,6 +41,7 @@ import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
@@ -52,6 +52,11 @@ import uk.org.rivernile.android.bustracker.testutils.test
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class SearchFragmentViewModelTest {
+
+    companion object {
+
+        private const val SEARCH_PROGRESS_DELAY_MILLIS = 250L
+    }
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -127,7 +132,7 @@ class SearchFragmentViewModelTest {
     @Test
     fun uiStateFlowEmitsNoResultsWhenResultIsNull() = runTest {
         whenever(busStopsRepository.getStopSearchResultsFlow("abc"))
-            .thenReturn(flowOf(null))
+            .thenReturn(intervalFlowOf(SEARCH_PROGRESS_DELAY_MILLIS + 1L, 0L, null))
         val viewModel = createViewModel()
 
         val uiStateObserver = viewModel.uiStateLiveData.test()
@@ -145,15 +150,17 @@ class SearchFragmentViewModelTest {
     fun uiStateFlowEmitsContentWhenResultIsNotNull() = runTest {
         whenever(busStopsRepository.getStopSearchResultsFlow("abc"))
             .thenReturn(
-                flowOf(
-                listOf(
-                    StopSearchResult(
-                        "123456",
-                        StopName(
-                            "Name 1",
-                            "Locality 1"),
-                        1,
-                        "1, 2, 3")
+                intervalFlowOf(
+                    SEARCH_PROGRESS_DELAY_MILLIS + 1,
+                    0L,
+                    listOf(
+                        StopSearchResult(
+                            "123456",
+                            StopName(
+                                "Name 1",
+                                "Locality 1"),
+                            1,
+                            "1, 2, 3")
                 ))
             )
         val viewModel = createViewModel()
@@ -197,11 +204,12 @@ class SearchFragmentViewModelTest {
             "4, 5, 6")
         whenever(busStopsRepository.getStopSearchResultsFlow("abc"))
             .thenReturn(
-                flowOf(
-                listOf(searchResult1),
-                null,
-                listOf(searchResult1, searchResult2))
-            )
+                intervalFlowOf(
+                    SEARCH_PROGRESS_DELAY_MILLIS + 1L,
+                    SEARCH_PROGRESS_DELAY_MILLIS + 1L,
+                    listOf(searchResult1),
+                    null,
+                    listOf(searchResult1, searchResult2)))
         val viewModel = createViewModel()
         val expectedResult1 = UiSearchResult(
             "123456",
@@ -254,9 +262,11 @@ class SearchFragmentViewModelTest {
             2,
             "4, 5, 6")
         whenever(busStopsRepository.getStopSearchResultsFlow("abc"))
-            .thenReturn(flowOf(listOf(searchResult1)))
+            .thenReturn(
+                intervalFlowOf(SEARCH_PROGRESS_DELAY_MILLIS + 1L, 0L, listOf(searchResult1)))
         whenever(busStopsRepository.getStopSearchResultsFlow("def"))
-            .thenReturn(flowOf(listOf(searchResult2)))
+            .thenReturn(
+                intervalFlowOf(SEARCH_PROGRESS_DELAY_MILLIS - 1L, 0L, listOf(searchResult2)))
         val viewModel = createViewModel()
         val expectedResult1 = UiSearchResult(
             "123456",
@@ -285,12 +295,10 @@ class SearchFragmentViewModelTest {
         uiStateObserver.assertValues(
             UiState.InProgress,
             UiState.Content(expectedResults1),
-            UiState.InProgress,
             UiState.Content(expectedResults2))
         searchResultsObserver.assertValues(
             null,
             expectedResults1,
-            null,
             expectedResults2)
     }
 

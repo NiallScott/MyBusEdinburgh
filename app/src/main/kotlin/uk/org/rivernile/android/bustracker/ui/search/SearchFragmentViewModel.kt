@@ -34,7 +34,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -42,6 +45,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.transformLatest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
@@ -67,6 +71,8 @@ class SearchFragmentViewModel @Inject constructor(
         private const val STATE_SEARCH_TERM = "searchTerm"
 
         private const val SEARCH_TERM_MIN_LENGTH = 3
+        private const val SEARCH_TERM_DEBOUNCE_PERIOD_MILLIS = 250L
+        private const val SEARCH_PROGRESS_DELAY_MILLIS = 250L
     }
 
     /**
@@ -80,9 +86,26 @@ class SearchFragmentViewModel @Inject constructor(
 
     private val searchTermFlow = savedState.getStateFlow<String?>(STATE_SEARCH_TERM, null)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     private val uiStateFlow = searchTermFlow
+        .debounce { searchTerm ->
+            // If the search term is empty, we don't want to debounce - we want to go straight back
+            // to the empty search term state.
+            searchTerm
+                ?.takeIf(this::isSearchTermNotEmpty)
+                ?.let { SEARCH_TERM_DEBOUNCE_PERIOD_MILLIS }
+                ?: 0L
+        }
         .flatMapLatest(this::loadSearchResults)
+        .transformLatest {
+            // If the progress layout is to be shown, we watch to delay the dispatch of this so that
+            // the UI doesn't appear to flicker.
+            if (it is UiState.InProgress) {
+                delay(SEARCH_PROGRESS_DELAY_MILLIS)
+            }
+
+            emit(it)
+        }
         .flowOn(defaultDispatcher)
         .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
@@ -125,12 +148,21 @@ class SearchFragmentViewModel @Inject constructor(
      * @return A [kotlinx.coroutines.flow.Flow] with the [UiState] of loading the search results.
      */
     private fun loadSearchResults(searchTerm: String?) = searchTerm
-        ?.takeIf { it.length >= SEARCH_TERM_MIN_LENGTH }
+        ?.takeIf(this::isSearchTermNotEmpty)
         ?.let {
             busStopsRepository.getStopSearchResultsFlow(it)
                 .map(this::mapToSearchResults)
                 .onStart { emit(UiState.InProgress) }
         } ?: flowOf(UiState.EmptySearchTerm)
+
+    /**
+     * Is the search term considered not empty?
+     *
+     * @param searchTerm The search term.
+     * @return `true` if the search term is considered not empty, otherwise `false`.
+     */
+    private fun isSearchTermNotEmpty(searchTerm: String) =
+        searchTerm.length >= SEARCH_TERM_MIN_LENGTH
 
     /**
      * Given a [List] of [StopSearchResult]s, either map it to a [UiState.Content] if the [List]
