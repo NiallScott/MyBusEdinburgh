@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ import androidx.lifecycle.SavedStateHandle
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [ExpandedServicesTracker].
@@ -48,16 +48,14 @@ class ExpandedServicesTrackerTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val expandedServicesObserver = LiveDataTestObserver<Set<String>>()
-
     @Test
     fun initialStateWithNoPreviousStateIsEmpty() {
         val handle = SavedStateHandle()
         val tracker = ExpandedServicesTracker(handle)
 
-        tracker.expandedServicesLiveData.observeForever(expandedServicesObserver)
+        val observer = tracker.expandedServicesLiveData.test()
 
-        expandedServicesObserver.assertValues(emptySet())
+        observer.assertValues(emptySet())
     }
 
     @Test
@@ -67,9 +65,9 @@ class ExpandedServicesTrackerTest {
                         STATE_KEY_EXPANDED_SERVICES to arrayListOf<String>()))
         val tracker = ExpandedServicesTracker(handle)
 
-        tracker.expandedServicesLiveData.observeForever(expandedServicesObserver)
+        val observer = tracker.expandedServicesLiveData.test()
 
-        expandedServicesObserver.assertValues(emptySet())
+        observer.assertValues(emptySet())
     }
 
     @Test
@@ -79,9 +77,9 @@ class ExpandedServicesTrackerTest {
                         STATE_KEY_EXPANDED_SERVICES to arrayListOf("1", "2", "3")))
         val tracker = ExpandedServicesTracker(handle)
 
-        tracker.expandedServicesLiveData.observeForever(expandedServicesObserver)
+        val observer = tracker.expandedServicesLiveData.test()
 
-        expandedServicesObserver.assertValues(setOf("1", "2", "3"))
+        observer.assertValues(setOf("1", "2", "3"))
     }
 
     @Test
@@ -89,13 +87,13 @@ class ExpandedServicesTrackerTest {
         val handle = SavedStateHandle()
         val tracker = ExpandedServicesTracker(handle)
 
-        tracker.expandedServicesLiveData.observeForever(expandedServicesObserver)
+        val observer = tracker.expandedServicesLiveData.test()
         tracker.onServiceClicked("1")
 
-        expandedServicesObserver.assertValues(
+        observer.assertValues(
                 emptySet(),
                 setOf("1"))
-        assertEquals(listOf("1"), handle.get(STATE_KEY_EXPANDED_SERVICES))
+        assertEquals(listOf("1"), handle[STATE_KEY_EXPANDED_SERVICES])
     }
 
     @Test
@@ -105,13 +103,13 @@ class ExpandedServicesTrackerTest {
                         STATE_KEY_EXPANDED_SERVICES to arrayListOf("1")))
         val tracker = ExpandedServicesTracker(handle)
 
-        tracker.expandedServicesLiveData.observeForever(expandedServicesObserver)
+        val observer = tracker.expandedServicesLiveData.test()
         tracker.onServiceClicked("1")
 
-        expandedServicesObserver.assertValues(
+        observer.assertValues(
                 setOf("1"),
                 emptySet())
-        assertEquals(arrayListOf<String>(), handle.get(STATE_KEY_EXPANDED_SERVICES))
+        assertEquals(arrayListOf<String>(), handle[STATE_KEY_EXPANDED_SERVICES])
     }
 
     @Test
@@ -121,7 +119,7 @@ class ExpandedServicesTrackerTest {
                         STATE_KEY_EXPANDED_SERVICES to arrayListOf("1")))
         val tracker = ExpandedServicesTracker(handle)
 
-        tracker.expandedServicesLiveData.observeForever(expandedServicesObserver)
+        val observer = tracker.expandedServicesLiveData.test()
         tracker.onServiceClicked("2")
         tracker.onServiceClicked("3")
         tracker.onServiceClicked("1")
@@ -130,7 +128,7 @@ class ExpandedServicesTrackerTest {
         tracker.onServiceClicked("4")
         tracker.onServiceClicked("2")
 
-        expandedServicesObserver.assertValues(
+        observer.assertValues(
                 setOf("1"),
                 setOf("1", "2"),
                 setOf("1", "2", "3"),
@@ -139,6 +137,6 @@ class ExpandedServicesTrackerTest {
                 setOf("2", "3"),
                 setOf("2", "3", "4"),
                 setOf("3", "4"))
-        assertEquals(listOf("3", "4"), handle.get(STATE_KEY_EXPANDED_SERVICES))
+        assertEquals(listOf("3", "4"), handle[STATE_KEY_EXPANDED_SERVICES])
     }
 }

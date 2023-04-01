@@ -52,6 +52,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopNa
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.testutils.test
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
@@ -159,16 +160,21 @@ class AddProximityAlertDialogFragmentViewModelTest {
     fun uiStateLiveDataEmitsCalculatedState() = runTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
-                .thenReturn(flowOf(
+                .thenReturn(
+                    intervalFlowOf(
+                        0L,
+                        1L,
                         UiState.ERROR_PERMISSION_UNGRANTED,
                         UiState.PROGRESS,
-                        UiState.CONTENT))
+                        UiState.CONTENT)
+                )
         val viewModel = createViewModel()
 
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
         observer.assertValues(
+                UiState.PROGRESS,
                 UiState.ERROR_PERMISSION_UNGRANTED,
                 UiState.PROGRESS,
                 UiState.CONTENT)
@@ -211,14 +217,18 @@ class AddProximityAlertDialogFragmentViewModelTest {
     fun addButtonEnabledLiveDataOnlyEmitsTrueWhenShowingContent() = runTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(uiStateCalculator.createUiStateFlow(any(), any()))
-                .thenReturn(flowOf(
+                .thenReturn(
+                    intervalFlowOf(
+                        0L,
+                        1L,
                         UiState.ERROR_NO_LOCATION_FEATURE,
                         UiState.ERROR_PERMISSION_UNGRANTED,
                         UiState.ERROR_PERMISSION_DENIED,
                         UiState.ERROR_LOCATION_DISABLED,
                         UiState.PROGRESS,
                         UiState.CONTENT,
-                        UiState.PROGRESS))
+                        UiState.PROGRESS)
+                )
         val viewModel = createViewModel()
 
         val observer = viewModel.addButtonEnabledLiveData.test()
@@ -294,7 +304,9 @@ class AddProximityAlertDialogFragmentViewModelTest {
         viewModel.onResolveErrorButtonClicked()
         advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.CONTENT)
+        uiStateObserver.assertValues(
+            UiState.PROGRESS,
+            UiState.CONTENT)
         locationSettingsObserver.assertEmpty()
         showAppSettingsObserver.assertEmpty()
         verify(permissionsTracker, never())
@@ -315,7 +327,9 @@ class AddProximityAlertDialogFragmentViewModelTest {
         viewModel.onResolveErrorButtonClicked()
         advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.ERROR_LOCATION_DISABLED)
+        uiStateObserver.assertValues(
+            UiState.PROGRESS,
+            UiState.ERROR_LOCATION_DISABLED)
         locationSettingsObserver.assertSize(1)
         showAppSettingsObserver.assertEmpty()
         verify(permissionsTracker, never())
@@ -336,7 +350,9 @@ class AddProximityAlertDialogFragmentViewModelTest {
         viewModel.onResolveErrorButtonClicked()
         advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.ERROR_PERMISSION_UNGRANTED)
+        uiStateObserver.assertValues(
+            UiState.PROGRESS,
+            UiState.ERROR_PERMISSION_UNGRANTED)
         locationSettingsObserver.assertEmpty()
         showAppSettingsObserver.assertEmpty()
         verify(permissionsTracker)
@@ -357,7 +373,9 @@ class AddProximityAlertDialogFragmentViewModelTest {
         viewModel.onResolveErrorButtonClicked()
         advanceUntilIdle()
 
-        uiStateObserver.assertValues(UiState.ERROR_PERMISSION_DENIED)
+        uiStateObserver.assertValues(
+            UiState.PROGRESS,
+            UiState.ERROR_PERMISSION_DENIED)
         locationSettingsObserver.assertEmpty()
         showAppSettingsObserver.assertSize(1)
         verify(permissionsTracker, never())

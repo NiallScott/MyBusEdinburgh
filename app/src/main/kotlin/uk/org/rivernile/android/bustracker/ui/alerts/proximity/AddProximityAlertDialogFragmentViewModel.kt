@@ -31,16 +31,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -107,24 +108,27 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
         .asLiveData(viewModelScope.coroutineContext)
         .distinctUntilChanged()
 
+    private val uiStateFlow = uiStateCalculator
+        .createUiStateFlow(
+            permissionsTracker.permissionsStateFlow,
+            stopDetailsFlow)
+        .flowOn(defaultDispatcher)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.PROGRESS)
+
     /**
      * This [LiveData] emits the current [UiState].
      */
-    val uiStateLiveData by lazy {
-        uiStateCalculator.createUiStateFlow(
-                permissionsTracker.permissionsStateFlow,
-                stopDetailsFlow)
-                .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
-    }
+    val uiStateLiveData = uiStateFlow
+        .asLiveData(viewModelScope.coroutineContext)
+        .distinctUntilChanged()
 
     /**
      * This [LiveData] emits the enabled state of the 'Add' button.
      */
-    val addButtonEnabledLiveData by lazy {
-        uiStateLiveData.map {
-            it == UiState.CONTENT
-        }.distinctUntilChanged()
-    }
+    val addButtonEnabledLiveData = uiStateFlow
+        .map { it == UiState.CONTENT }
+        .distinctUntilChanged()
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * When this [LiveData] emits a new item, the limitations dialog should be shown.
@@ -178,7 +182,7 @@ class AddProximityAlertDialogFragmentViewModel @Inject constructor(
      * Handle the user clicking on the resolution button when an error state is being shown.
      */
     fun onResolveErrorButtonClicked() {
-        when (uiStateLiveData.value) {
+        when (uiStateFlow.value) {
             UiState.ERROR_LOCATION_DISABLED -> showLocationSettings.call()
             UiState.ERROR_PERMISSION_UNGRANTED -> permissionsTracker.onRequestPermissionsClicked()
             UiState.ERROR_PERMISSION_DENIED -> showAppSettings.call()

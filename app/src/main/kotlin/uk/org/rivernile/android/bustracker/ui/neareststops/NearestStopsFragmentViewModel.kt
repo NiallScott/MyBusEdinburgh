@@ -33,7 +33,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -114,10 +113,13 @@ class NearestStopsFragmentViewModel @Inject constructor(
      * This property is used to get and set the current selected services.
      */
     var selectedServices: List<String>?
-        get() = savedState.get<Array<String>?>(STATE_SELECTED_SERVICES)?.ifEmpty { null }?.toList()
+        get() = selectedServicesFlow.value?.ifEmpty { null }?.toList()
         set(value) {
             savedState[STATE_SELECTED_SERVICES] = value?.ifEmpty { null }?.toTypedArray()
         }
+
+    private val selectedServicesFlow =
+        savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
 
     private val permissionsStateFlow = MutableStateFlow<PermissionsState?>(null)
 
@@ -132,10 +134,9 @@ class NearestStopsFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits the user's selected services.
      */
-    private val selectedServicesLiveData =
-            savedState.getLiveData<Array<String>?>(STATE_SELECTED_SERVICES, null).map {
-                it?.ifEmpty { null }?.asList()
-            }
+    private val selectedServicesLiveData = selectedServicesFlow
+            .map { it?.ifEmpty { null }?.asList() }
+            .asLiveData(viewModelScope.coroutineContext)
 
     private val allServiceNamesFlow = servicesRepository.allServiceNamesFlow
             .flowOn(defaultDispatcher)

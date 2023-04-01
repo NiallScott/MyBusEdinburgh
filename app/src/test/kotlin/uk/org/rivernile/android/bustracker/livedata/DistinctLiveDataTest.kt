@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [DistinctLiveData].
@@ -42,8 +42,6 @@ class DistinctLiveDataTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private val observer = LiveDataTestObserver<String>()
-
     private lateinit var liveData: DistinctLiveData<String>
 
     @Before
@@ -53,7 +51,7 @@ class DistinctLiveDataTest {
 
     @Test
     fun distinctLiveDataOnlyEmitsChangedItems() {
-        liveData.observeForever(observer)
+        val observer = liveData.test()
         liveData.setValue("one")
         liveData.setValue("two")
         liveData.setValue("two")

@@ -32,7 +32,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,6 +43,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
@@ -126,17 +126,17 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val availableServicesFlow = stopCodeFlow.flatMapLatest {
-        loadServicesForStop(it)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+    private val availableServicesFlow = stopCodeFlow
+        .flatMapLatest(this::loadServicesForStop)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /**
      * This [LiveData] emits the user's selected services.
      */
-    val selectedServicesLiveData =
-            savedState.getLiveData<Array<String>?>(STATE_SELECTED_SERVICES, null).map {
-                it?.ifEmpty { null }?.asList()
-            }
+    val selectedServicesLiveData = savedState
+        .getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
+        .map { it?.ifEmpty { null }?.asList() }
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] emits the current [StopDetails] for the given stop code.

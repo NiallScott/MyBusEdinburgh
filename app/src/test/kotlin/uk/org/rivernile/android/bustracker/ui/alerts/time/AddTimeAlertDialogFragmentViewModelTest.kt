@@ -52,7 +52,6 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopNa
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.testutils.LiveDataTestObserver
 import uk.org.rivernile.android.bustracker.testutils.test
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 
@@ -82,18 +81,18 @@ class AddTimeAlertDialogFragmentViewModelTest {
     private lateinit var alertsRepository: AlertsRepository
 
     @Test
-    fun selectedServicesLiveDataEmitsNullAsInitialState() {
+    fun selectedServicesLiveDataEmitsNullAsInitialState() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
-        val observer = LiveDataTestObserver<List<String>?>()
 
-        viewModel.selectedServicesLiveData.observeForever(observer)
+        val observer = viewModel.selectedServicesLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun selectedServicesLiveDataEmitsNullWhenInitialStateIsNull() {
+    fun selectedServicesLiveDataEmitsNullWhenInitialStateIsNull() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val initialState = mapOf(
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to null)
@@ -101,12 +100,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
         val viewModel = createViewModel(savedState)
 
         val observer = viewModel.selectedServicesLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun selectedServicesLiveDataEmitsNullWhenInitialStateIsEmpty() {
+    fun selectedServicesLiveDataEmitsNullWhenInitialStateIsEmpty() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val initialState = mapOf(
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to emptyArray<String>())
@@ -114,12 +114,13 @@ class AddTimeAlertDialogFragmentViewModelTest {
         val viewModel = createViewModel(savedState)
 
         val observer = viewModel.selectedServicesLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(null)
     }
 
     @Test
-    fun selectedServicesLiveDataEmitsInitialStateWhenSet() {
+    fun selectedServicesLiveDataEmitsInitialStateWhenSet() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val initialState = mapOf(
                 AddTimeAlertDialogFragmentViewModel.STATE_SELECTED_SERVICES to arrayOf("1", "2"))
@@ -127,19 +128,24 @@ class AddTimeAlertDialogFragmentViewModelTest {
         val viewModel = createViewModel(savedState)
 
         val observer = viewModel.selectedServicesLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(listOf("1", "2"))
     }
 
     @Test
-    fun selectedServicesLiveDataEmitsChanges() {
+    fun selectedServicesLiveDataEmitsChanges() = runTest {
         givenPermissionsTrackerFlowHasPermissionsState()
         val viewModel = createViewModel()
 
         val observer = viewModel.selectedServicesLiveData.test()
+        advanceUntilIdle()
         viewModel.selectedServices = listOf("1")
+        advanceUntilIdle()
         viewModel.selectedServices = emptyList()
+        advanceUntilIdle()
         viewModel.selectedServices = listOf("1", "2")
+        advanceUntilIdle()
 
         observer.assertValues(
                 null,
@@ -723,6 +729,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
         viewModel.selectedServices = listOf("1", "2", "3")
         val expected = ArrivalAlertRequest("123456", listOf("1", "2", "3"), 10)
         viewModel.selectedServicesLiveData.test()
+        advanceUntilIdle()
 
         viewModel.onAddClicked(10)
         advanceUntilIdle()
