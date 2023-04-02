@@ -323,7 +323,7 @@ internal class LiveTimesMapperTest {
     }
 
     private fun givenTimeUtilsReturnsTestTimestamp() {
-        whenever(timeUtils.getCurrentTimeMillis())
+        whenever(timeUtils.currentTimeMills)
                 .thenReturn(TEST_TIMESTAMP)
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -87,7 +87,7 @@ class LastRefreshTimeCalculatorTest {
 
     @Test
     fun getLastRefreshTimeFlowWithNegativeNumberOfMinutesEmitsNever() = runTest {
-        whenever(timeUtils.getCurrentTimeMillis())
+        whenever(timeUtils.currentTimeMills)
                 .thenReturn(350000L)
 
         val observer = calculator.getLastRefreshTimeFlow(3600000L).test(this)
@@ -99,7 +99,7 @@ class LastRefreshTimeCalculatorTest {
 
     @Test
     fun getLastRefreshTimeFlowWithTimeProgressingEmitsExpectedElements() = runTest {
-        whenever(timeUtils.getCurrentTimeMillis())
+        whenever(timeUtils.currentTimeMills)
                 .thenReturn(50001L, 600001L, 600002L, 1800001L, 3540001L, 3700001L)
 
         val observer = calculator.getLastRefreshTimeFlow(1L).test(this)
@@ -116,7 +116,7 @@ class LastRefreshTimeCalculatorTest {
 
     @Test
     fun getLastRefreshTimeFlowWithCancellationEmitsExpectedItems() = runTest {
-        whenever(timeUtils.getCurrentTimeMillis())
+        whenever(timeUtils.currentTimeMills)
                 .thenReturn(50001L, 600001L, 600002L, 1800001L, 3540001L, 3700001L)
 
         val observer = calculator.getLastRefreshTimeFlow(1L).test(this)

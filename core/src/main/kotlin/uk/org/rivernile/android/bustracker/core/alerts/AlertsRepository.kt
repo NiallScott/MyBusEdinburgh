@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -111,7 +111,7 @@ class AlertsRepository @Inject internal constructor(
     suspend fun addArrivalAlert(request: ArrivalAlertRequest) {
         val alert = ArrivalAlert(
                 0,
-                timeUtils.getCurrentTimeMillis(),
+                timeUtils.currentTimeMills,
                 request.stopCode,
                 request.serviceNames,
                 request.timeTrigger)
@@ -126,7 +126,7 @@ class AlertsRepository @Inject internal constructor(
     suspend fun addProximityAlert(request: ProximityAlertRequest) {
         val alert = ProximityAlert(
                 0,
-                timeUtils.getCurrentTimeMillis(),
+                timeUtils.currentTimeMills,
                 request.stopCode,
                 request.distanceFrom)
         alertManager.addProximityAlert(alert)

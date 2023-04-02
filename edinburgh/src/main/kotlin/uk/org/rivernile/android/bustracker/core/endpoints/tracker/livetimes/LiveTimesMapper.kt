@@ -57,7 +57,7 @@ internal class LiveTimesMapper @Inject constructor(
             return it
         }
 
-        val receiveTime = timeUtils.getCurrentTimeMillis()
+        val receiveTime = timeUtils.currentTimeMills
         var globalDisruption = false
 
         return (busTimes.busTimes?.let {
@@ -108,7 +108,7 @@ internal class LiveTimesMapper @Inject constructor(
      */
     fun emptyLiveTimes(): LiveTimesResponse =
         LiveTimesResponse.Success(
-            emptyLiveTimes(timeUtils.getCurrentTimeMillis(), false))
+            emptyLiveTimes(timeUtils.currentTimeMills, false))
 
     /**
      * Produce an instance of [LiveTimes] which does not contain any live departures. That is, its

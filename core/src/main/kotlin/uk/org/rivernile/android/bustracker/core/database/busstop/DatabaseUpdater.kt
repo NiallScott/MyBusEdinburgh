@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -68,7 +68,7 @@ class DatabaseUpdater @Inject internal constructor(
             databaseVersion: DatabaseVersion,
             socketFactory: SocketFactory? = null): Boolean {
         val downloadFile = databaseUtils.getDatabasePath(
-                "busstops.${timeUtils.getCurrentTimeMillis()}.db_temp")
+                "busstops.${timeUtils.currentTimeMills}.db_temp")
         databaseUtils.ensureDatabasePathExists()
 
         if (fileDownloader.downloadFile(

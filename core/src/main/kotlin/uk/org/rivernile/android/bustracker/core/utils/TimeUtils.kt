@@ -39,14 +39,6 @@ import javax.inject.Singleton
 class TimeUtils @Inject constructor() {
 
     /**
-     * Get the current wall time in milliseconds with the UNIX epoch. This merely proxies through to
-     * [System.currentTimeMillis].
-     *
-     * @return Get the current wall time in milliseconds since the UNIX epoch.
-     */
-    fun getCurrentTimeMillis() = System.currentTimeMillis()
-
-    /**
      * The current wall time in milliseconds with the UNIX epoch. This merely proxies through to
      * [System.currentTimeMillis].
      */

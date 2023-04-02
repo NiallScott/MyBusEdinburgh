@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -150,7 +150,7 @@ class AlertsRepositoryTest {
 
     @Test
     fun addArrivalAlertAddsArrivalAlertToAlertManager() = runTest {
-        whenever(timeUtils.getCurrentTimeMillis())
+        whenever(timeUtils.currentTimeMills)
                 .thenReturn(123L)
         val expected = ArrivalAlert(0, 123L, "123456", listOf("1", "2", "3"), 5)
 
@@ -165,7 +165,7 @@ class AlertsRepositoryTest {
 
     @Test
     fun addProximityAlertAddsProximityAlertToAlertManager() = runTest {
-        whenever(timeUtils.getCurrentTimeMillis())
+        whenever(timeUtils.currentTimeMills)
                 .thenReturn(123L)
         val expected = ProximityAlert(0, 123L, "123456", 250)
 

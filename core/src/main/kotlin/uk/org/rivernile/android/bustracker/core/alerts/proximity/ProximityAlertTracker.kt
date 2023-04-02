@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -61,7 +61,7 @@ internal class ProximityAlertTracker @Inject constructor(
             busStopsDao.getLocationForStop(alert.stopCode)
                     ?.let {
                         val duration = (alert.timeAdded + MAX_DURATION_MILLIS) -
-                                timeUtils.getCurrentTimeMillis()
+                                timeUtils.currentTimeMills
 
                         if (duration > 0) {
                             geofencingManager.addGeofence(alert.id, it.latitude, it.longitude,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -98,7 +98,7 @@ class DatabaseUpdaterTest {
 
     @Test
     fun usesTemporaryFilenameForDownloadFileLocation() = runTest {
-        whenever(timeUtils.getCurrentTimeMillis())
+        whenever(timeUtils.currentTimeMills)
                 .thenReturn(123L)
 
         updater.updateDatabase(databaseVersion, null)

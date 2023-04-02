@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -109,7 +109,7 @@ class LastRefreshTimeCalculator @Inject constructor(
      * @return The number of minutes between now and the refresh time.
      */
     private fun calculateNumberOfMinutes(refreshTime: Long): Int {
-        val timeDiff = timeUtils.getCurrentTimeMillis() - refreshTime
+        val timeDiff = timeUtils.currentTimeMills - refreshTime
 
         return (timeDiff / 60000).toInt()
     }
