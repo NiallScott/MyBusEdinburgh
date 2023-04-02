@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
@@ -35,6 +34,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 import uk.org.rivernile.edinburghbustrackerapi.FaultCode
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import java.net.HttpURLConnection
@@ -74,8 +74,7 @@ class ErrorMapperTest {
 
         val result = errorMapper.extractError(busTimes)
 
-        assertNotNull(result)
-        assertEquals(UnrecognisedServerErrorException::class.java, result?.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Other("Fault code = unknown"), result)
     }
 
     @Test
@@ -85,8 +84,7 @@ class ErrorMapperTest {
 
         val result = errorMapper.extractError(busTimes)
 
-        assertNotNull(result)
-        assertEquals(AuthenticationException::class.java, result?.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Authentication, result)
     }
 
     @Test
@@ -96,8 +94,7 @@ class ErrorMapperTest {
 
         val result = errorMapper.extractError(busTimes)
 
-        assertNotNull(result)
-        assertEquals(UnrecognisedServerErrorException::class.java, result?.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Other("INVALID_PARAMETER"), result)
     }
 
     @Test
@@ -107,8 +104,7 @@ class ErrorMapperTest {
 
         val result = errorMapper.extractError(busTimes)
 
-        assertNotNull(result)
-        assertEquals(UnrecognisedServerErrorException::class.java, result?.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Other("PROCESSING_ERROR"), result)
     }
 
     @Test
@@ -118,8 +114,7 @@ class ErrorMapperTest {
 
         val result = errorMapper.extractError(busTimes)
 
-        assertNotNull(result)
-        assertEquals(MaintenanceException::class.java, result?.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Maintenance, result)
     }
 
     @Test
@@ -129,49 +124,48 @@ class ErrorMapperTest {
 
         val result = errorMapper.extractError(busTimes)
 
-        assertNotNull(result)
-        assertEquals(SystemOverloadedException::class.java, result?.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.SystemOverloaded, result)
     }
 
     @Test
     fun unauthorisedHttpStatusCodeMapsToAuthenticationException() {
         val result = errorMapper.mapHttpStatusCode(HttpURLConnection.HTTP_UNAUTHORIZED)
 
-        assertEquals(AuthenticationException::class.java, result.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Authentication, result)
     }
 
     @Test
     fun forbiddenHttpStatusCodeMapsToAuthenticationException() {
         val result = errorMapper.mapHttpStatusCode(HttpURLConnection.HTTP_FORBIDDEN)
 
-        assertEquals(AuthenticationException::class.java, result.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Authentication, result)
     }
 
     @Test
     fun http500StatusCodeMapsToServerErrorException() {
         val result = errorMapper.mapHttpStatusCode(500)
 
-        assertEquals(UnrecognisedServerErrorException::class.java, result.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Other("Server error: 500"), result)
     }
 
     @Test
     fun http599StatusCodeMapsToServerErrorException() {
         val result = errorMapper.mapHttpStatusCode(599)
 
-        assertEquals(UnrecognisedServerErrorException::class.java, result.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Other("Server error: 599"), result)
     }
 
     @Test
     fun randomStatusCodeMapsToGenericTrackerException() {
         val result = errorMapper.mapHttpStatusCode(499)
 
-        assertEquals(UnrecognisedServerErrorException::class.java, result.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Other("Server error: 499"), result)
     }
 
     @Test
     fun randomStatusCode2MapsToGenericTrackerException() {
         val result = errorMapper.mapHttpStatusCode(600)
 
-        assertEquals(UnrecognisedServerErrorException::class.java, result.javaClass)
+        assertEquals(LiveTimesResponse.Error.ServerError.Other("Server error: 600"), result)
     }
 }

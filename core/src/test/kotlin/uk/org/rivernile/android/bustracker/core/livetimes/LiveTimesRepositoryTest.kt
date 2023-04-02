@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.livetimes
 
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -36,14 +35,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NoConnectivityException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -61,63 +57,34 @@ class LiveTimesRepositoryTest {
 
     @Mock
     private lateinit var trackerEndpoint: TrackerEndpoint
-
     @Mock
-    private lateinit var trackerRequest: TrackerRequest<LiveTimes>
-    @Mock
-    private lateinit var timeUtils: TimeUtils
-    @Mock
-    private lateinit var liveTimes: LiveTimes
+    private lateinit var liveTimesMapper: LiveTimesMapper
 
     private lateinit var repository: LiveTimesRepository
 
     @Before
     fun setUp() {
-        repository = LiveTimesRepository(trackerEndpoint, timeUtils, coroutineRule.testDispatcher)
-
-        whenever(trackerEndpoint.createLiveTimesRequest(any<String>(), any()))
-                .thenReturn(trackerRequest)
+        repository = LiveTimesRepository(
+            trackerEndpoint,
+            liveTimesMapper)
     }
 
     @Test
-    fun getLiveTimesFlowWithNoExceptionProducesSuccessfulResult() = runTest {
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
-
-        val observer = repository.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(Result.InProgress, Result.Success(liveTimes))
-    }
-
-    @Test
-    fun getLiveTimesFlowWithExceptionProducesErrorResult() = runTest {
-        val exception = NoConnectivityException()
-        whenever(trackerRequest.performRequest())
-                .thenThrow(exception)
-        whenever(timeUtils.getCurrentTimeMillis())
-                .thenReturn(123L)
+    fun getLiveTimesFlowEmitsExpectedValues() = runTest {
+        val liveTimes = mock<LiveTimes>()
+        val response = LiveTimesResponse.Success(liveTimes)
+        val expected = LiveTimesResult.Success(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes("123456", 4))
+            .thenReturn(response)
+        whenever(liveTimesMapper.mapToLiveTimesResult(response))
+            .thenReturn(expected)
 
         val observer = repository.getLiveTimesFlow("123456", 4).test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                Result.InProgress,
-                Result.Error(123L, exception))
-    }
-
-    @Test
-    fun getLiveTimesFlowWithCancellationCausesCancellationEvent() = runTest {
-        whenever(trackerRequest.performRequest())
-                .thenThrow(CancellationException::class.java)
-
-        val observer = repository.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        verify(trackerRequest)
-                .cancel()
+            LiveTimesResult.InProgress,
+            expected)
     }
 }

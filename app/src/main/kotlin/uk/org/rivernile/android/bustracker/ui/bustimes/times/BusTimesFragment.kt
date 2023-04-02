@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -76,7 +76,8 @@ class BusTimesFragment : Fragment() {
     @Inject
     lateinit var viewHolderFieldPopulator: ViewHolderFieldPopulator
 
-    private val viewModel: BusTimesFragmentViewModel by viewModels()
+    private val viewModel by viewModels<BusTimesFragmentViewModel>()
+
     private lateinit var adapter: LiveTimesAdapter
 
     private var _viewBinding: FragmentBusTimesBinding? = null

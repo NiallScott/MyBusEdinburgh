@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,17 +29,11 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.AuthenticationException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.MaintenanceException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NetworkException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NoConnectivityException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.SystemOverloadedException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.UnrecognisedServerErrorException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
-import uk.org.rivernile.android.bustracker.core.livetimes.Result
+import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.Date
@@ -62,14 +56,17 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithProgressMapsToUiProgress() {
-        val result = mapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress, null)
+        val result = mapper.mapLiveTimesAndColoursToUiResult(
+            "123456",
+            LiveTimesResult.InProgress,
+            null)
 
         assertEquals(UiResult.InProgress, result)
     }
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithNoConnectivityErrorReturnsError() {
-        val liveTimesResult = Result.Error(123L, NoConnectivityException())
+        val liveTimesResult = LiveTimesResult.Error.NoConnectivity(123L)
         val expected = UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -79,8 +76,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithUnknownHostErrorReturnsError() {
-        val exception = NetworkException(UnknownHostException())
-        val liveTimesResult = Result.Error(123L, exception)
+        val liveTimesResult = LiveTimesResult.Error.Io(123L, UnknownHostException())
         val expected = UiResult.Error(123L, ErrorType.UNKNOWN_HOST)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -90,8 +86,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithCommunicationErrorReturnsError() {
-        val exception = NetworkException(SocketTimeoutException())
-        val liveTimesResult = Result.Error(123L, exception)
+        val liveTimesResult = LiveTimesResult.Error.Io(123L, SocketTimeoutException())
         val expected = UiResult.Error(123L, ErrorType.COMMUNICATION)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -101,7 +96,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithUnrecognisedServerErrorReturnsError() {
-        val liveTimesResult = Result.Error(123L, UnrecognisedServerErrorException())
+        val liveTimesResult = LiveTimesResult.Error.ServerError.Other(123L)
         val expected = UiResult.Error(123L, ErrorType.SERVER_ERROR)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -111,7 +106,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithAuthenticationErrorReturnsError() {
-        val liveTimesResult = Result.Error(123L, AuthenticationException())
+        val liveTimesResult = LiveTimesResult.Error.ServerError.Authentication(123L)
         val expected = UiResult.Error(123L, ErrorType.AUTHENTICATION)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -121,7 +116,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithMaintenanceErrorReturnsError() {
-        val liveTimesResult = Result.Error(123L, MaintenanceException())
+        val liveTimesResult = LiveTimesResult.Error.ServerError.Maintenance(123L)
         val expected = UiResult.Error(123L, ErrorType.DOWN_FOR_MAINTENANCE)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -131,7 +126,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithSystemOverloadedErrorReturnsError() {
-        val liveTimesResult = Result.Error(123L, SystemOverloadedException())
+        val liveTimesResult = LiveTimesResult.Error.ServerError.SystemOverloaded(123L)
         val expected = UiResult.Error(123L, ErrorType.SYSTEM_OVERLOADED)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -141,7 +136,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithStopNotFoundReturnsNoDataError() {
-        val liveTimesResult = Result.Success(
+        val liveTimesResult = LiveTimesResult.Success(
                 LiveTimes(
                         emptyMap(),
                         123L,
@@ -155,7 +150,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithEmptyServicesReturnsNoDataError() {
-        val liveTimesResult = Result.Success(
+        val liveTimesResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -175,7 +170,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultWithEmptyVehiclesInServicesReturnsNoDataError() {
-        val liveTimesResult = Result.Success(
+        val liveTimesResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -203,7 +198,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultHasNullColourWhenNoColoursAreProvided() {
-        val liveTimesResult = Result.Success(
+        val liveTimesResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -246,7 +241,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultHasNonNullColourWhenColoursAreProvided() {
-        val liveTimesResult = Result.Success(
+        val liveTimesResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -290,7 +285,7 @@ class LiveTimesMapperTest {
 
     @Test
     fun mapLiveTimesAndColoursToUiResultHasNonNullColourWhenColoursAreProvidedMultiple() {
-        val liveTimesResult = Result.Success(
+        val liveTimesResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(

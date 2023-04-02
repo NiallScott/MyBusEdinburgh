@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,4 +45,10 @@ class TimeUtils @Inject constructor() {
      * @return Get the current wall time in milliseconds since the UNIX epoch.
      */
     fun getCurrentTimeMillis() = System.currentTimeMillis()
+
+    /**
+     * The current wall time in milliseconds with the UNIX epoch. This merely proxies through to
+     * [System.currentTimeMillis].
+     */
+    val currentTimeMills get() = System.currentTimeMillis()
 }

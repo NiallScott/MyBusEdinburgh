@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -79,9 +79,9 @@ class FakeAlertsDao : AlertsDao {
 
     override suspend fun getProximityAlert(id: Int): ProximityAlert? = null
 
-    override fun getAllArrivalAlerts(): List<ArrivalAlert>? = null
+    override suspend fun getAllArrivalAlerts(): List<ArrivalAlert>? = null
 
-    override fun getAllArrivalAlertStopCodes(): List<String>? = null
+    override suspend fun getAllArrivalAlertStopCodes(): Set<String>? = null
 
     override suspend fun getArrivalAlertCount() = 0
 

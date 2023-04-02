@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,9 +31,8 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatch
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerRequest
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import javax.inject.Inject
@@ -61,43 +60,29 @@ internal class CheckTimesTask @Inject constructor(
         private val trackerEndpoint: TrackerEndpoint,
         private val alertNotificationDispatcher: AlertNotificationDispatcher) {
 
-    private var currentRequest: TrackerRequest<LiveTimes>? = null
-
     /**
      * Perform a check of the arrival times for all known [ArrivalAlert]s to see if any arrivals
      * match the constraints of each [ArrivalAlert].
      */
     fun checkTimes() {
-        alertsDao.getAllArrivalAlertStopCodes()?.let {
-            if (it.isNotEmpty()) {
-                val request = trackerEndpoint.createLiveTimesRequest(it.toTypedArray(), 1)
-                currentRequest = request
-                executeRequest(request)
-            }
+        runBlocking {
+            checkTimesInternal()
         }
     }
 
     /**
-     * Cancel any currently executing request to the tracker service.
+     * The internal implementation o check times. This exists as the public method is not a
+     * suspending function where as this method is.
      */
-    fun cancel() {
-        currentRequest?.cancel()
-    }
+    private suspend fun checkTimesInternal() {
+        alertsDao.getAllArrivalAlertStopCodes()?.let {
+            if (it.isNotEmpty()) {
+                val response = trackerEndpoint.getLiveTimes(it.toList(), 1)
 
-    /**
-     * Perform the request to the tracker service to load the [LiveTimes]s for the stops we are
-     * interested in.
-     *
-     * @param request An object describing the request, which will be executed in this method.
-     */
-    private fun executeRequest(request: TrackerRequest<LiveTimes>) {
-        try {
-            val response = request.performRequest()
-            handleResponse(response)
-        } catch (ignored: TrackerException) {
-            // There is no handling of the Exception required as this fails silently.
-        } finally {
-            currentRequest = null
+                if (response is LiveTimesResponse.Success) {
+                    handleResponse(response.liveTimes)
+                }
+            }
         }
     }
 
@@ -107,7 +92,7 @@ internal class CheckTimesTask @Inject constructor(
      *
      * @param liveTimes The successfully loaded [LiveTimes] object.
      */
-    private fun handleResponse(liveTimes: LiveTimes) {
+    private suspend fun handleResponse(liveTimes: LiveTimes) {
         alertsDao.getAllArrivalAlerts()?.forEach { alert ->
             liveTimes.stops[alert.stopCode]?.let { stop ->
                 checkArrivalsForStop(alert, stop)
@@ -122,7 +107,7 @@ internal class CheckTimesTask @Inject constructor(
      * @param arrivalAlert The [ArrivalAlert] for the [Stop].
      * @param stop The loaded [Stop].
      */
-    private fun checkArrivalsForStop(arrivalAlert: ArrivalAlert, stop: Stop) {
+    private suspend fun checkArrivalsForStop(arrivalAlert: ArrivalAlert, stop: Stop) {
         val servicesToLookFor = arrivalAlert.serviceNames.toSet()
         val timeTrigger = arrivalAlert.timeTrigger
 
@@ -134,10 +119,7 @@ internal class CheckTimesTask @Inject constructor(
         if (qualifyingServices.isNotEmpty()) {
             alertNotificationDispatcher.dispatchTimeAlertNotification(arrivalAlert,
                     qualifyingServices)
-            // TODO: re-write this in coroutines.
-            runBlocking {
-                alertsDao.removeArrivalAlert(arrivalAlert.id)
-            }
+            alertsDao.removeArrivalAlert(arrivalAlert.id)
         }
     }
 

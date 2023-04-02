@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 import uk.org.rivernile.edinburghbustrackerapi.FaultCode
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import java.net.HttpURLConnection
 import javax.inject.Inject
 
 /**
- * Map errors to their proper [TrackerException] type.
+ * Map errors to their proper [LiveTimesResponse.Error] type.
  *
  * @author Niall Scott
  */
@@ -42,21 +43,22 @@ internal class ErrorMapper @Inject constructor() {
      * Extract an error from the [BusTimes] response. If the error is not available (i.e. success),
      * then `null` is returned.
      *
-     * @return The [TrackerException] representing the error, or `null` if there was no error.
+     * @return The [LiveTimesResponse.Error.ServerError] representing the error, or `null` if there
+     * was no error.
      */
     fun extractError(busTimes: BusTimes) = busTimes.faultCode?.let {
         when (FaultCode.convertFromString(it)) {
             FaultCode.INVALID_APP_KEY ->
-                AuthenticationException("The API key was not accepted by the server.")
+                LiveTimesResponse.Error.ServerError.Authentication
             FaultCode.INVALID_PARAMETER ->
-                UnrecognisedServerErrorException("INVALID_PARAMETER")
+                LiveTimesResponse.Error.ServerError.Other("INVALID_PARAMETER")
             FaultCode.PROCESSING_ERROR ->
-                UnrecognisedServerErrorException("PROCESSING_ERROR")
+                LiveTimesResponse.Error.ServerError.Other("PROCESSING_ERROR")
             FaultCode.SYSTEM_MAINTENANCE ->
-                MaintenanceException()
+                LiveTimesResponse.Error.ServerError.Maintenance
             FaultCode.SYSTEM_OVERLOADED ->
-                SystemOverloadedException()
-            null -> UnrecognisedServerErrorException("Fault code = $it")
+                LiveTimesResponse.Error.ServerError.SystemOverloaded
+            null -> LiveTimesResponse.Error.ServerError.Other("Fault code = $it")
         }
     }
 
@@ -64,11 +66,11 @@ internal class ErrorMapper @Inject constructor() {
      * Convert an error HTTP status code in to an error.
      *
      * @param statusCode The returned HTTP status code.
-     * @return The [TrackerException] this maps to.
+     * @return The [LiveTimesResponse.Error.ServerError] this maps to.
      */
     fun mapHttpStatusCode(statusCode: Int) = when (statusCode) {
-        HttpURLConnection.HTTP_UNAUTHORIZED -> AuthenticationException()
-        HttpURLConnection.HTTP_FORBIDDEN -> AuthenticationException()
-        else -> UnrecognisedServerErrorException("Server error: $statusCode")
+        HttpURLConnection.HTTP_UNAUTHORIZED -> LiveTimesResponse.Error.ServerError.Authentication
+        HttpURLConnection.HTTP_FORBIDDEN -> LiveTimesResponse.Error.ServerError.Authentication
+        else -> LiveTimesResponse.Error.ServerError.Other("Server error: $statusCode")
     }
 }

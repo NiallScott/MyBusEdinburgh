@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,46 +26,39 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.AuthenticationException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.MaintenanceException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NetworkException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NoConnectivityException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.SystemOverloadedException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.UnrecognisedServerErrorException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
-import uk.org.rivernile.android.bustracker.core.livetimes.Result
+import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
 import java.net.UnknownHostException
 import javax.inject.Inject
 
 /**
- * This class maps a [LiveTimes] [Result] in to its [UiResult] form.
+ * This class maps a [LiveTimes] [LiveTimesResult] in to its [UiResult] form.
  *
  * @author Niall Scott
  */
 class LiveTimesMapper @Inject constructor() {
 
     /**
-     * Given a [Result] from attempting to load [LiveTimes], map it to a [UiResult]. Optionally,
-     * [serviceColours] may be provided to assign colours to services.
+     * Given a [LiveTimesResult] from attempting to load [LiveTimes], map it to a [UiResult].
+     * Optionally, [serviceColours] may be provided to assign colours to services.
      *
      * @param stopCode The stop code to retrieve from the [LiveTimes].
-     * @param liveTimesResult The [Result] from attempting to load [LiveTimes].
+     * @param result The [LiveTimesResult] from attempting to load [LiveTimes].
      * @param serviceColours Optional service colours to assign against services in the mapping
      * process. This is used in the UI to give services their own colours.
-     * @return A [UiResult] representing the [Result], but corrected for UI display.
+     * @return A [UiResult] representing the [LiveTimesResult], but corrected for UI display.
      */
     fun mapLiveTimesAndColoursToUiResult(
             stopCode: String,
-            liveTimesResult: Result<LiveTimes>,
+            result: LiveTimesResult,
             serviceColours: Map<String, Int>?): UiResult {
-        return when (liveTimesResult) {
-            is Result.InProgress -> UiResult.InProgress
-            is Result.Success -> mapSuccess(stopCode, liveTimesResult.result, serviceColours)
-            is Result.Error -> mapError(liveTimesResult)
+        return when (result) {
+            is LiveTimesResult.InProgress -> UiResult.InProgress
+            is LiveTimesResult.Success -> mapSuccess(stopCode, result.liveTimes, serviceColours)
+            is LiveTimesResult.Error -> mapError(result)
         }
     }
 
@@ -80,23 +73,22 @@ class LiveTimesMapper @Inject constructor() {
      * requested at a time. We need the stop code to get the right stop out of the [Map].
      * @param liveTimes The [LiveTimes] data.
      * @param serviceColours Known colours for services.
-     * @return A [UiResult], which represents the correct UI representation of the [Result].
+     * @return A [UiResult], which represents the correct UI representation of the
+     * [LiveTimesResult].
      */
     private fun mapSuccess(
             stopCode: String,
             liveTimes: LiveTimes,
             serviceColours: Map<String, Int>?): UiResult {
-        val receiveTime = liveTimes.receiveTime
-
         return liveTimes.stops[stopCode]?.let {
             val stop = mapStopToUiStop(it, serviceColours)
 
             if (stop.services.isNotEmpty()) {
-                UiResult.Success(receiveTime, stop)
+                UiResult.Success(liveTimes.receiveTime, stop)
             } else {
-                createNoDataError(receiveTime)
+                createNoDataError(liveTimes.receiveTime)
             }
-        } ?: createNoDataError(receiveTime)
+        } ?: createNoDataError(liveTimes.receiveTime)
     }
 
     /**
@@ -147,33 +139,28 @@ class LiveTimesMapper @Inject constructor() {
                     vehicle.isEstimatedTime)
 
     /**
-     * Given a [Result.Error], map it to a [UiResult.Error].
+     * Given a [LiveTimesResult.Error], map it to a [UiResult.Error].
      *
      * @param error The error while loading the data.
      * @return The error as a [UiResult.Error].
      */
-    private fun mapError(error: Result.Error) =
-            UiResult.Error(error.receiveTime, mapErrorException(error.exception))
-
-    /**
-     * Given a [TrackerException], map it to the appropriate [ErrorType].
-     *
-     * @param exception The [TrackerException] received from a [Result.Error].
-     * @return The error expressed as an [ErrorType].
-     */
-    private fun mapErrorException(exception: TrackerException) = when (exception) {
-        is NoConnectivityException -> ErrorType.NO_CONNECTIVITY
-        is NetworkException -> {
-            if (exception.cause is UnknownHostException) {
-                ErrorType.UNKNOWN_HOST
-            } else {
-                ErrorType.COMMUNICATION
+    private fun mapError(error: LiveTimesResult.Error): UiResult.Error {
+        val errorType = when (error) {
+            is LiveTimesResult.Error.NoConnectivity -> ErrorType.NO_CONNECTIVITY
+            is LiveTimesResult.Error.Io -> {
+                if (error.throwable is UnknownHostException) {
+                    ErrorType.UNKNOWN_HOST
+                } else {
+                    ErrorType.COMMUNICATION
+                }
             }
+            is LiveTimesResult.Error.ServerError.Authentication -> ErrorType.AUTHENTICATION
+            is LiveTimesResult.Error.ServerError.Maintenance -> ErrorType.DOWN_FOR_MAINTENANCE
+            is LiveTimesResult.Error.ServerError.SystemOverloaded -> ErrorType.SYSTEM_OVERLOADED
+            is LiveTimesResult.Error.ServerError.Other -> ErrorType.SERVER_ERROR
         }
-        is UnrecognisedServerErrorException -> ErrorType.SERVER_ERROR
-        is AuthenticationException -> ErrorType.AUTHENTICATION
-        is MaintenanceException -> ErrorType.DOWN_FOR_MAINTENANCE
-        is SystemOverloadedException -> ErrorType.SYSTEM_OVERLOADED
+
+        return UiResult.Error(error.receiveTime, errorType)
     }
 
     /**

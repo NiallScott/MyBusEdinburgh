@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,29 +26,40 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
-import org.junit.Assert.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import okio.IOException
+import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import retrofit2.Call
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.SingleLiveTimesRequest
-import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
-import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 
 /**
  * Tests for [EdinburghTrackerEndpoint].
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class EdinburghTrackerEndpointTest {
+
+    companion object {
+
+        private const val MOCK_API_KEY = "api_key"
+    }
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var api: EdinburghBusTrackerApi
@@ -59,76 +70,77 @@ class EdinburghTrackerEndpointTest {
     @Mock
     private lateinit var errorMapper: ErrorMapper
     @Mock
-    private lateinit var connectivityChecker: ConnectivityChecker
-
+    private lateinit var responseHandler: ResponseHandler
     @Mock
-    private lateinit var liveTimesCall: Call<BusTimes>
+    private lateinit var connectivityRepository: ConnectivityRepository
 
     private lateinit var endpoint: EdinburghTrackerEndpoint
 
     @Before
     fun setUp() {
         endpoint = EdinburghTrackerEndpoint(
-                api,
-                apiKeyGenerator,
-                liveTimesMapper,
-                errorMapper,
-                connectivityChecker)
+            api,
+            apiKeyGenerator,
+            liveTimesMapper,
+            errorMapper,
+            responseHandler,
+            connectivityRepository)
     }
 
     @Test
-    fun createLiveTimesRequestWithSingleStopCodeCreatesCorrectRequestObject() {
-        whenever(apiKeyGenerator.hashedApiKey)
-                .thenReturn("API_KEY")
-        whenever(api.getBusTimes("API_KEY", 4, "123456"))
-                .thenReturn(liveTimesCall)
+    fun getLiveBusTimesSingleWithNoConnectivityReturnsNoConnectivity() = runTest {
+        whenever(connectivityRepository.hasInternetConnectivity)
+            .thenReturn(false)
 
-        val result = endpoint.createLiveTimesRequest("123456", 4)
+        val result = endpoint.getLiveTimes("123456", 1)
 
-        assertTrue(result is SingleLiveTimesRequest)
-        verify(api)
-                .getBusTimes("API_KEY", 4, "123456")
+        assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
     }
 
     @Test
-    fun createLiveTimesRequestWithFourStopCodesCreatesCorrectRequestObject() {
+    fun getLiveBusTimesSingleWithIoExceptionReturnsIoError() = runTest {
+        whenever(connectivityRepository.hasInternetConnectivity)
+            .thenReturn(true)
         whenever(apiKeyGenerator.hashedApiKey)
-                .thenReturn("API_KEY")
-        whenever(api.getBusTimes("API_KEY", 4, "1", "2", "3", "4", null))
-                .thenReturn(liveTimesCall)
+            .thenReturn(MOCK_API_KEY)
+        val throwable = IOException()
+        whenever(api.getBusTimes(MOCK_API_KEY, 1, "123456"))
+            .thenAnswer { throw throwable }
 
-        val result = endpoint.createLiveTimesRequest(arrayOf("1", "2", "3", "4"), 4)
+        val result = endpoint.getLiveTimes("123456", 1)
 
-        assertTrue(result is SingleLiveTimesRequest)
-        verify(api)
-                .getBusTimes("API_KEY", 4, "1", "2", "3", "4", null)
+        assertEquals(LiveTimesResponse.Error.Io(throwable), result)
     }
 
     @Test
-    fun createLiveTimesRequestWithFiveStopCodesCreatesCorrectRequestObject() {
-        whenever(apiKeyGenerator.hashedApiKey)
-                .thenReturn("API_KEY")
-        whenever(api.getBusTimes("API_KEY", 4, "1", "2", "3", "4", "5"))
-                .thenReturn(liveTimesCall)
+    fun getLiveBusTimesMultipleWithNoConnectivityReturnsNoConnectivity() = runTest {
+        whenever(connectivityRepository.hasInternetConnectivity)
+            .thenReturn(false)
 
-        val result = endpoint.createLiveTimesRequest(arrayOf("1", "2", "3", "4", "5"), 4)
+        val result = endpoint.getLiveTimes(listOf("1", "2", "3", "4", "5"), 1)
 
-        assertTrue(result is SingleLiveTimesRequest)
-        verify(api)
-                .getBusTimes("API_KEY", 4, "1", "2", "3", "4", "5")
+        assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
     }
 
     @Test
-    fun createLiveTimesRequestWithSixStopCodesOnlyTakesFirstFiveCodes() {
+    fun getLiveBusTimesMultipleWithIoExceptionReturnsIoError() = runTest {
+        whenever(connectivityRepository.hasInternetConnectivity)
+            .thenReturn(true)
         whenever(apiKeyGenerator.hashedApiKey)
-                .thenReturn("API_KEY")
-        whenever(api.getBusTimes("API_KEY", 4, "1", "2", "3", "4", "5"))
-                .thenReturn(liveTimesCall)
+            .thenReturn(MOCK_API_KEY)
+        val throwable = IOException()
+        whenever(api.getBusTimes(
+            MOCK_API_KEY,
+            1,
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"))
+            .thenAnswer { throw throwable }
 
-        val result = endpoint.createLiveTimesRequest(arrayOf("1", "2", "3", "4", "5", "6"), 4)
+        val result = endpoint.getLiveTimes(listOf("1", "2", "3", "4", "5"), 1)
 
-        assertTrue(result is SingleLiveTimesRequest)
-        verify(api)
-                .getBusTimes("API_KEY", 4, "1", "2", "3", "4", "5")
+        assertEquals(LiveTimesResponse.Error.Io(throwable), result)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
 import javax.inject.Inject
@@ -52,19 +51,16 @@ internal class LiveTimesMapper @Inject constructor(
      *
      * @param busTimes The received [BusTimes] object from the tracker service.
      * @return On success, the mapped [LiveTimes] object.
-     * @throws TrackerException When the response contained an error, or there was some other error
-     * whilst handling this data.
      */
-    @Throws(TrackerException::class)
-    fun mapToLiveTimes(busTimes: BusTimes): LiveTimes {
+    fun mapToLiveTimes(busTimes: BusTimes): LiveTimesResponse {
         errorMapper.extractError(busTimes)?.let {
-            throw it
+            return it
         }
 
         val receiveTime = timeUtils.getCurrentTimeMillis()
         var globalDisruption = false
 
-        return busTimes.busTimes?.let {
+        return (busTimes.busTimes?.let {
             if (it.isNotEmpty()) {
                 val tempStops = HashMap<String, TempStop>(it.size)
 
@@ -99,7 +95,9 @@ internal class LiveTimesMapper @Inject constructor(
             } else {
                 emptyLiveTimes(receiveTime, false)
             }
-        } ?: emptyLiveTimes(receiveTime, false)
+        } ?: emptyLiveTimes(receiveTime, false)).let {
+            LiveTimesResponse.Success(it)
+        }
     }
 
     /**
@@ -108,7 +106,9 @@ internal class LiveTimesMapper @Inject constructor(
      *
      * @return The empty version of [LiveTimes].
      */
-    fun emptyLiveTimes() = emptyLiveTimes(timeUtils.getCurrentTimeMillis(), false)
+    fun emptyLiveTimes(): LiveTimesResponse =
+        LiveTimesResponse.Success(
+            emptyLiveTimes(timeUtils.getCurrentTimeMillis(), false))
 
     /**
      * Produce an instance of [LiveTimes] which does not contain any live departures. That is, its

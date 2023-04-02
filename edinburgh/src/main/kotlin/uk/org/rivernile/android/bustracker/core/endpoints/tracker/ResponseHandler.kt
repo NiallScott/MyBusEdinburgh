@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,29 +26,37 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
+import okio.IOException
+import retrofit2.Response
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
+import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
+import javax.inject.Inject
 
 /**
- * This interface is used to access data on the tracker endpoint.
+ * This class provides implementations to handle tracker endpoint responses.
  *
  * @author Niall Scott
  */
-interface TrackerEndpoint {
+internal class ResponseHandler @Inject constructor(
+    private val liveTimesMapper: LiveTimesMapper,
+    private val errorMapper: ErrorMapper) {
 
     /**
-     * Get live departure times.
+     * Handle the [Response] from the API and return the appropriate [LiveTimesResponse].
      *
-     * @param stopCode The stop code to request.
-     * @param numberOfDepartures The number of departures per service to retrieve.
-     * @return The [LiveTimesResponse] for this request.
+     * @param response The response from the API.
+     * @return The [LiveTimesResponse] to describe the response.
+     * @throws IOException When there was an IO issue.
      */
-    suspend fun getLiveTimes(stopCode: String, numberOfDepartures: Int): LiveTimesResponse
-
-    /**
-     * Get live departure times.
-     * @param stopCodes The stop codes to get live departures for.
-     * @param numberOfDepartures The number of departures per service to retrieve.
-     * @return The [LiveTimesResponse] for this request.
-     */
-    suspend fun getLiveTimes(stopCodes: List<String>, numberOfDepartures: Int): LiveTimesResponse
+    @Throws(IOException::class)
+    fun handleLiveTimesResponse(response: Response<BusTimes>): LiveTimesResponse {
+        return if (response.isSuccessful) {
+            response.body()?.let {
+                liveTimesMapper.mapToLiveTimes(it)
+            } ?: liveTimesMapper.emptyLiveTimes()
+        } else {
+            errorMapper.mapHttpStatusCode(response.code())
+        }
+    }
 }

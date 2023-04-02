@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -124,14 +124,14 @@ interface AlertsDao {
      *
      * @return All the arrival alerts.
      */
-    fun getAllArrivalAlerts(): List<ArrivalAlert>?
+    suspend fun getAllArrivalAlerts(): List<ArrivalAlert>?
 
     /**
      * Get all the stop codes that have arrival alerts against them.
      *
-     * @return A [List] of stop codes with arrival alerts.
+     * @return A [Set] of stop codes with arrival alerts.
      */
-    fun getAllArrivalAlertStopCodes(): List<String>?
+    suspend fun getAllArrivalAlertStopCodes(): Set<String>?
 
     /**
      * Get the number of current arrival alerts.

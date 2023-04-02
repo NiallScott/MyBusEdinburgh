@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,8 +37,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.ErrorMapper
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.UnrecognisedServerErrorException
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTime
 import uk.org.rivernile.edinburghbustrackerapi.bustimes.BusTimes
@@ -82,12 +80,15 @@ internal class LiveTimesMapperTest {
         liveTimesMapper = LiveTimesMapper(errorMapper, serviceMapper, timeUtils)
     }
 
-    @Test(expected = TrackerException::class)
+    @Test
     fun mapToLiveTimesThrowsExceptionWhenErrorIsFoundInData() {
+        val expected = LiveTimesResponse.Error.ServerError.Other()
         whenever(errorMapper.extractError(busTimes))
-                .thenReturn(UnrecognisedServerErrorException())
+                .thenReturn(expected)
 
-        liveTimesMapper.mapToLiveTimes(busTimes)
+        val result = liveTimesMapper.mapToLiveTimes(busTimes)
+
+        assertEquals(expected, result)
     }
 
     @Test
@@ -95,7 +96,7 @@ internal class LiveTimesMapperTest {
         givenTimeUtilsReturnsTestTimestamp()
         whenever(busTimes.busTimes)
                 .thenReturn(null)
-        val expected = LiveTimes(emptyMap(), TEST_TIMESTAMP, false)
+        val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -107,7 +108,7 @@ internal class LiveTimesMapperTest {
         givenTimeUtilsReturnsTestTimestamp()
         whenever(busTimes.busTimes)
                 .thenReturn(emptyList())
-        val expected = LiveTimes(emptyMap(), TEST_TIMESTAMP, false)
+        val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -121,7 +122,7 @@ internal class LiveTimesMapperTest {
                 .thenReturn(listOf(busTime))
         whenever(busTime.stopId)
                 .thenReturn(null)
-        val expected = LiveTimes(emptyMap(), TEST_TIMESTAMP, false)
+        val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -137,7 +138,7 @@ internal class LiveTimesMapperTest {
                 .thenReturn(listOf(busTime))
         whenever(busTime.stopId)
                 .thenReturn("")
-        val expected = LiveTimes(emptyMap(), TEST_TIMESTAMP, false)
+        val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -155,7 +156,7 @@ internal class LiveTimesMapperTest {
                 .thenReturn(TEST_STOP_CODE)
         whenever(serviceMapper.mapToService(busTime))
                 .thenReturn(null)
-        val expected = LiveTimes(emptyMap(), TEST_TIMESTAMP, false)
+        val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -171,10 +172,11 @@ internal class LiveTimesMapperTest {
         whenever(serviceMapper.mapToService(busTime))
                 .thenReturn(service)
         val expectedStop = Stop(TEST_STOP_CODE, TEST_STOP_NAME, listOf(service), true)
-        val expectedLiveTimes = LiveTimes(
+        val expectedLiveTimes = LiveTimesResponse.Success(
+            LiveTimes(
                 mapOf(TEST_STOP_CODE to expectedStop),
                 TEST_TIMESTAMP,
-                true)
+                true))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -204,10 +206,11 @@ internal class LiveTimesMapperTest {
                 TEST_STOP_NAME,
                 listOf(service1, service2, service3),
                 true)
-        val expectedLiveTimes = LiveTimes(
+        val expectedLiveTimes = LiveTimesResponse.Success(
+            LiveTimes(
                 mapOf(TEST_STOP_CODE to expectedStop),
                 TEST_TIMESTAMP,
-                true)
+                true))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -247,13 +250,14 @@ internal class LiveTimesMapperTest {
                 null,
                 listOf(service3),
                 true)
-        val expectedLiveTimes = LiveTimes(
+        val expectedLiveTimes = LiveTimesResponse.Success(
+            LiveTimes(
                 mapOf(
                         TEST_STOP_CODE to expectedStop1,
                         TEST_STOP_CODE_2 to expectedStop2,
                         TEST_STOP_CODE_3 to expectedStop3),
                 TEST_TIMESTAMP,
-                true)
+                true))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -295,12 +299,13 @@ internal class LiveTimesMapperTest {
                 null,
                 listOf(service3),
                 true)
-        val expectedLiveTimes = LiveTimes(
+        val expectedLiveTimes = LiveTimesResponse.Success(
+            LiveTimes(
                 mapOf(
                         TEST_STOP_CODE to expectedStop1,
                         TEST_STOP_CODE_3 to expectedStop2),
                 TEST_TIMESTAMP,
-                true)
+                true))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -310,7 +315,7 @@ internal class LiveTimesMapperTest {
     @Test
     fun emptyLiveTimesProducesLiveTimesInstanceWithNoStops() {
         givenTimeUtilsReturnsTestTimestamp()
-        val expected = LiveTimes(emptyMap(), TEST_TIMESTAMP, false)
+        val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.emptyLiveTimes()
 

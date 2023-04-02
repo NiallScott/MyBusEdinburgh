@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,12 +40,11 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.NoConnectivityException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesRepository
-import uk.org.rivernile.android.bustracker.core.livetimes.Result
+import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
@@ -78,10 +77,12 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithInProgressResultDoesNotGetColours() = runTest {
-        val liveTimesFlow = flowOf(Result.InProgress)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
 
@@ -96,12 +97,14 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithErrorsResultDoesNotGetColours() = runTest {
-        val errorResult = Result.Error(123L, NoConnectivityException())
+        val errorResult = LiveTimesResult.Error.NoConnectivity(123L)
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)
-        val liveTimesFlow = flowOf(Result.InProgress, errorResult)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress, errorResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", errorResult,
@@ -119,16 +122,18 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithSuccessButNoStopDoesNotGetColours() = runTest {
-        val successResult = Result.Success(
+        val successResult = LiveTimesResult.Success(
                 LiveTimes(
                         emptyMap(),
                         123L,
                         false))
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_DATA)
-        val liveTimesFlow = flowOf(Result.InProgress, successResult)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
@@ -146,7 +151,7 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithSuccessButNoServicesDoesNotGetColours() = runTest {
-        val successResult = Result.Success(
+        val successResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -158,10 +163,12 @@ class LiveTimesRetrieverTest {
                         123L,
                         false))
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_DATA)
-        val liveTimesFlow = flowOf(Result.InProgress, successResult)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
@@ -179,7 +186,7 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithSuccessSingleServiceWithNullColours() = runTest {
-        val successResult = Result.Success(
+        val successResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -209,12 +216,14 @@ class LiveTimesRetrieverTest {
                                         "1",
                                         null,
                                         emptyList()))))
-        val liveTimesFlow = flowOf(Result.InProgress, successResult)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
                 .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
@@ -230,7 +239,7 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithSuccessSingleServiceWithEmptyColours() = runTest {
-        val successResult = Result.Success(
+        val successResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -260,12 +269,14 @@ class LiveTimesRetrieverTest {
                                         "1",
                                         null,
                                         emptyList()))))
-        val liveTimesFlow = flowOf(Result.InProgress, successResult)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
                 .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
@@ -281,7 +292,7 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithSuccessSingleServiceGetsColours() = runTest {
-        val successResult = Result.Success(
+        val successResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -313,12 +324,14 @@ class LiveTimesRetrieverTest {
                                         "1",
                                         0xFFFFFF,
                                         emptyList()))))
-        val liveTimesFlow = flowOf(Result.InProgress, successResult)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
                 .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
@@ -334,7 +347,7 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithSuccessMultipleServicesGetsColours() = runTest {
-        val successResult = Result.Success(
+        val successResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -391,12 +404,14 @@ class LiveTimesRetrieverTest {
                                         0x00FF00,
                                         emptyList())
                         )))
-        val liveTimesFlow = flowOf(Result.InProgress, successResult)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
                 .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
@@ -412,7 +427,7 @@ class LiveTimesRetrieverTest {
 
     @Test
     fun getLiveTimesFlowWithSuccessSingleServiceUpdatesColours() = runTest {
-        val successResult = Result.Success(
+        val successResult = LiveTimesResult.Success(
                 LiveTimes(
                         mapOf(
                                 "123456" to Stop(
@@ -456,12 +471,14 @@ class LiveTimesRetrieverTest {
                                         "1",
                                         0xFF0000,
                                         emptyList()))))
-        val liveTimesFlow = flowOf(Result.InProgress, successResult)
+        val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
                 .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
                 .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", Result.InProgress,
+        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
                 null))
                 .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,

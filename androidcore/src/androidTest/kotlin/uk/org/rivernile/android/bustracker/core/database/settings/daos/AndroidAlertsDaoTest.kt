@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -457,7 +457,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertsWithNullResultIsHandledCorrectly() {
+    fun getAllArrivalAlertsWithNullResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForArrivalAlert()
         object : MockContentProvider() {
             override fun query(uri: Uri,
@@ -474,7 +474,7 @@ class AndroidAlertsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlerts()
 
@@ -482,7 +482,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertsWithEmptyResultIsHandledCorrectly() {
+    fun getAllArrivalAlertsWithEmptyResultIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForArrivalAlert()
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -500,7 +500,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlerts()
 
@@ -509,7 +509,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertsWithSingleItemAndSingleServiceIsHandledCorrectly() {
+    fun getAllArrivalAlertsWithSingleItemAndSingleServiceIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForArrivalAlert()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(1, 123L, "123456", "1", 5))
@@ -530,7 +530,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlerts()
 
@@ -539,7 +539,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertsWithSingleItemAndMultipleServicesIsHandledCorrectly() {
+    fun getAllArrivalAlertsWithSingleItemAndMultipleServicesIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForArrivalAlert()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(1, 123L, "123456", "1,2,3", 5))
@@ -560,7 +560,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlerts()
 
@@ -569,7 +569,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertsWithSingleItemAndMultipleServicesWithSpacesIsHandledCorrectly() {
+    fun getAllArrivalAlertsWithSingleItemAndMultipleServicesWithSpacesIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForArrivalAlert()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(1, 123L, "123456", "1 , 2 , 3", 5))
@@ -590,7 +590,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlerts()
 
@@ -599,7 +599,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertsWithMultipleItemsIsHandledCorrectly() {
+    fun getAllArrivalAlertsWithMultipleItemsIsHandledCorrectly() = runTest {
         val expectedProjection = getExpectedProjectionForArrivalAlert()
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf(1, 123L, "123456", "1,2,3", 5))
@@ -624,7 +624,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlerts()
 
@@ -633,7 +633,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertStopCodesWithNullResultIsHandledCorrectly() {
+    fun getAllArrivalAlertStopCodesWithNullResultIsHandledCorrectly() = runTest {
         val expectedProjection = arrayOf(AlertsContract.STOP_CODE)
         object : MockContentProvider() {
             override fun query(uri: Uri,
@@ -650,7 +650,7 @@ class AndroidAlertsDaoTest {
 
                 return null
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlertStopCodes()
 
@@ -658,7 +658,7 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertStopCodesWithEmptyResultIsHandledCorrectly() {
+    fun getAllArrivalAlertStopCodesWithEmptyResultIsHandledCorrectly() = runTest {
         val expectedProjection = arrayOf(AlertsContract.STOP_CODE)
         val cursor = MatrixCursor(expectedProjection)
         object : MockContentProvider() {
@@ -676,7 +676,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlertStopCodes()
 
@@ -685,11 +685,11 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertStopCodesWithSingleItemIsHandledCorrectly() {
+    fun getAllArrivalAlertStopCodesWithSingleItemIsHandledCorrectly() = runTest {
         val expectedProjection = arrayOf(AlertsContract.STOP_CODE)
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf("123456"))
-        val expected = listOf("123456")
+        val expected = setOf("123456")
         object : MockContentProvider() {
             override fun query(uri: Uri,
                                projection: Array<String>?,
@@ -705,7 +705,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlertStopCodes()
 
@@ -714,13 +714,13 @@ class AndroidAlertsDaoTest {
     }
 
     @Test
-    fun getAllArrivalAlertStopCodesWithMultipleItemsIsHandledCorrectly() {
+    fun getAllArrivalAlertStopCodesWithMultipleItemsIsHandledCorrectly() = runTest {
         val expectedProjection = arrayOf(AlertsContract.STOP_CODE)
         val cursor = MatrixCursor(expectedProjection)
         cursor.addRow(arrayOf("123456"))
         cursor.addRow(arrayOf("987654"))
         cursor.addRow(arrayOf("246802"))
-        val expected = listOf("123456", "987654", "246802")
+        val expected = setOf("123456", "987654", "246802")
         object : MockContentProvider() {
             override fun query(uri: Uri,
                                projection: Array<String>?,
@@ -736,7 +736,7 @@ class AndroidAlertsDaoTest {
 
                 return cursor
             }
-        }.also(this::addMockProvider)
+        }.also(this@AndroidAlertsDaoTest::addMockProvider)
 
         val result = alertsDao.getAllArrivalAlertStopCodes()
 

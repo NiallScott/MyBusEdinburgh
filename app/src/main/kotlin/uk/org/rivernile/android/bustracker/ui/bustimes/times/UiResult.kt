@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,17 +27,17 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 /**
- * This class encapsulates the result of loading [UiVehicle]s, for the purpose of displaying on the
- * UI.
+ * This interface encapsulates the result of loading [UiVehicle]s, for the purpose of displaying on
+ * the UI.
  *
  * @author Niall Scott
  */
-sealed class UiResult {
+sealed interface UiResult {
 
     /**
      * This represents a request currently in progress.
      */
-    object InProgress : UiResult()
+    object InProgress : UiResult
 
     /**
      * This represents a successfully completed request.
@@ -48,7 +48,7 @@ sealed class UiResult {
      */
     data class Success(
             val receiveTime: Long,
-            val stop: UiStop) : UiResult()
+            val stop: UiStop) : UiResult
 
     /**
      * This represents a request which completed with an error.
@@ -59,5 +59,5 @@ sealed class UiResult {
      */
     data class Error(
             val receiveTime: Long,
-            val error: ErrorType) : UiResult()
+            val error: ErrorType) : UiResult
 }

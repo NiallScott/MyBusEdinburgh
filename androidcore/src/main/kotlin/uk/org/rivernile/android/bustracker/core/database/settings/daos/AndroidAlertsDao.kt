@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -294,72 +294,101 @@ internal class AndroidAlertsDao @Inject constructor(
         }
     }
 
-    override fun getAllArrivalAlerts() = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    AlertsContract.ID,
-                    AlertsContract.TIME_ADDED,
-                    AlertsContract.STOP_CODE,
-                    AlertsContract.SERVICE_NAMES,
-                    AlertsContract.TIME_TRIGGER),
-            "${AlertsContract.TYPE} = ?",
-            arrayOf(
-                    AlertsContract.ALERTS_TYPE_TIME.toString()),
-            null)?.use {
-        val count = it.count
+    override suspend fun getAllArrivalAlerts(): List<ArrivalAlert>? {
+        val cancellationSignal = CancellationSignal()
 
-        if (count > 0) {
-            val result = ArrayList<ArrivalAlert>(count)
-            val idColumn = it.getColumnIndex(AlertsContract.ID)
-            val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
-            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
-            val serviceNamesColumn = it.getColumnIndex(AlertsContract.SERVICE_NAMES)
-            val timeTriggerColumn = it.getColumnIndex(AlertsContract.TIME_TRIGGER)
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
 
-            while (it.moveToNext()) {
-                val id = it.getInt(idColumn)
-                val timeAdded = it.getLong(timeAddedColumn)
-                val stopCode = it.getString(stopCodeColumn)
-                val serviceNames = it.getString(serviceNamesColumn)
-                        .split(",")
-                        .map { name -> name.trim() }
-                val timeTrigger = it.getInt(timeTriggerColumn)
-                val arrivalAlert = ArrivalAlert(
-                        id,
-                        timeAdded,
-                        stopCode,
-                        serviceNames,
-                        timeTrigger)
-                result.add(arrivalAlert)
+                val result = context.contentResolver.query(
+                    contract.getContentUri(),
+                    arrayOf(
+                        AlertsContract.ID,
+                        AlertsContract.TIME_ADDED,
+                        AlertsContract.STOP_CODE,
+                        AlertsContract.SERVICE_NAMES,
+                        AlertsContract.TIME_TRIGGER),
+                    "${AlertsContract.TYPE} = ?",
+                    arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                    null,
+                    cancellationSignal)?.use {
+                        val count = it.count
+
+                        if (count > 0) {
+                            val result = ArrayList<ArrivalAlert>(count)
+                            val idColumn = it.getColumnIndex(AlertsContract.ID)
+                            val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
+                            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+                            val serviceNamesColumn = it.getColumnIndex(AlertsContract.SERVICE_NAMES)
+                            val timeTriggerColumn = it.getColumnIndex(AlertsContract.TIME_TRIGGER)
+
+                            while (it.moveToNext()) {
+                                val id = it.getInt(idColumn)
+                                val timeAdded = it.getLong(timeAddedColumn)
+                                val stopCode = it.getString(stopCodeColumn)
+                                val serviceNames = it.getString(serviceNamesColumn)
+                                    .split(",")
+                                    .map { name -> name.trim() }
+                                val timeTrigger = it.getInt(timeTriggerColumn)
+                                val arrivalAlert = ArrivalAlert(
+                                    id,
+                                    timeAdded,
+                                    stopCode,
+                                    serviceNames,
+                                    timeTrigger
+                                )
+                                result.add(arrivalAlert)
+                            }
+
+                            result
+                        } else {
+                            null
+                        }
+                    }
+
+                continuation.resume(result)
             }
-
-            result
-        } else {
-            null
         }
     }
 
-    override fun getAllArrivalAlertStopCodes() = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    AlertsContract.STOP_CODE),
-            "${AlertsContract.TYPE} = ?",
-            arrayOf(
-                    AlertsContract.ALERTS_TYPE_TIME.toString()),
-            null)?.use {
-        val count = it.count
+    override suspend fun getAllArrivalAlertStopCodes(): Set<String>? {
+        val cancellationSignal = CancellationSignal()
 
-        if (count > 0) {
-            val result = ArrayList<String>(count)
-            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+        return withContext(ioDispatcher) {
+            suspendCancellableCoroutine { continuation ->
+                continuation.invokeOnCancellation {
+                    cancellationSignal.cancel()
+                }
 
-            while (it.moveToNext()) {
-                result.add(it.getString(stopCodeColumn))
+                val result = context.contentResolver.query(
+                    contract.getContentUri(),
+                    arrayOf(AlertsContract.STOP_CODE),
+                    "${AlertsContract.TYPE} = ?",
+                    arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                    null,
+                    cancellationSignal)
+                    ?.use {
+                        val count = it.count
+
+                        if (count > 0) {
+                            val result = HashSet<String>(count)
+                            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+
+                            while (it.moveToNext()) {
+                                result += it.getString(stopCodeColumn)
+                            }
+
+                            result
+                        } else {
+                            null
+                        }
+                    }
+
+                continuation.resume(result)
             }
-
-            result
-        } else {
-            null
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,14 +26,14 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
+import okio.IOException
+import retrofit2.awaitResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.SingleLiveTimesRequest
-import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * This class is the Edinburgh-specific implementation of a [TrackerEndpoint].
@@ -42,36 +42,58 @@ import javax.inject.Singleton
  * @param apiKeyGenerator An implementation to generate API keys for the API.
  * @param liveTimesMapper An implementation used to map the API objects to our model objects.
  * @param errorMapper An implementation used to map errors.
- * @param connectivityChecker An implementation of [ConnectivityChecker].
+ * @param connectivityRepository Used to check connectivity.
  * @author Niall Scott
  */
-@Singleton
 internal class EdinburghTrackerEndpoint @Inject constructor(
         private val api: EdinburghBusTrackerApi,
         private val apiKeyGenerator: ApiKeyGenerator,
         private val liveTimesMapper: LiveTimesMapper,
         private val errorMapper: ErrorMapper,
-        private val connectivityChecker: ConnectivityChecker): TrackerEndpoint {
+        private val responseHandler: ResponseHandler,
+        private val connectivityRepository: ConnectivityRepository): TrackerEndpoint {
 
-    override fun createLiveTimesRequest(stopCode: String, numberOfDepartures: Int)
-            : TrackerRequest<LiveTimes> {
-        val call = api.getBusTimes(apiKeyGenerator.hashedApiKey, numberOfDepartures, stopCode)
+    override suspend fun getLiveTimes(
+        stopCode: String,
+        numberOfDepartures: Int): LiveTimesResponse {
+        return if (connectivityRepository.hasInternetConnectivity) {
+            try {
+                val response = api.getBusTimes(
+                    apiKeyGenerator.hashedApiKey,
+                    numberOfDepartures,
+                    stopCode)
+                    .awaitResponse()
 
-        return SingleLiveTimesRequest(call, liveTimesMapper, errorMapper, connectivityChecker)
+                responseHandler.handleLiveTimesResponse(response)
+            } catch (e: IOException) {
+                LiveTimesResponse.Error.Io(e)
+            }
+        } else {
+            LiveTimesResponse.Error.NoConnectivity
+        }
     }
 
-    override fun createLiveTimesRequest(stopCodes: Array<String>, numberOfDepartures: Int)
-            : TrackerRequest<LiveTimes> {
-        val newStopCodes = stopCodes.copyOf(5)
-        val call = api.getBusTimes(
-                apiKeyGenerator.hashedApiKey,
-                numberOfDepartures,
-                newStopCodes[0],
-                newStopCodes[1],
-                newStopCodes[2],
-                newStopCodes[3],
-                newStopCodes[4])
+    override suspend fun getLiveTimes(
+        stopCodes: List<String>,
+        numberOfDepartures: Int): LiveTimesResponse {
+        return if (connectivityRepository.hasInternetConnectivity) {
+            try {
+                val response = api.getBusTimes(
+                    apiKeyGenerator.hashedApiKey,
+                    numberOfDepartures,
+                    stopCodes[0],
+                    stopCodes[1],
+                    stopCodes[2],
+                    stopCodes[3],
+                    stopCodes[4])
+                    .awaitResponse()
 
-        return SingleLiveTimesRequest(call, liveTimesMapper, errorMapper, connectivityChecker)
+                responseHandler.handleLiveTimesResponse(response)
+            } catch (e: IOException) {
+                LiveTimesResponse.Error.Io(e)
+            }
+        } else {
+            LiveTimesResponse.Error.NoConnectivity
+        }
     }
 }

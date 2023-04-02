@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,9 +43,8 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatch
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerRequest
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.UnrecognisedServerErrorException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
@@ -71,9 +70,6 @@ class CheckTimesTaskTest {
     @Mock
     lateinit var alertNotificationDispatcher: AlertNotificationDispatcher
 
-    @Mock
-    lateinit var trackerRequest: TrackerRequest<LiveTimes>
-
     private lateinit var checkTimesTask: CheckTimesTask
 
     @Before
@@ -82,67 +78,63 @@ class CheckTimesTaskTest {
     }
 
     @Test
-    fun doesNotCreateRequestWhenArrivalAlertStopCodesIsNull() {
+    fun doesNotCreateRequestWhenArrivalAlertStopCodesIsNull() = runTest {
         whenever(alertsDao.getAllArrivalAlertStopCodes())
                 .thenReturn(null)
 
         checkTimesTask.checkTimes()
 
         verify(trackerEndpoint, never())
-                .createLiveTimesRequest(any<Array<String>>(), any())
+                .getLiveTimes(any<List<String>>(), any())
     }
 
     @Test
-    fun doesNotCreateRequestWhenArrivalAlertStopCodesIsEmpty() {
+    fun doesNotCreateRequestWhenArrivalAlertStopCodesIsEmpty() = runTest {
         whenever(alertsDao.getAllArrivalAlertStopCodes())
-                .thenReturn(emptyList())
+                .thenReturn(emptySet())
 
         checkTimesTask.checkTimes()
 
         verify(trackerEndpoint, never())
-                .createLiveTimesRequest(any<Array<String>>(), any())
+                .getLiveTimes(any<List<String>>(), any())
     }
 
     @Test
-    fun createsRequestWithExpectedStopCodeWhenSingleStopCodeIsSupplied() {
-        givenTrackerEndpointCreatesRequest()
-        val stopCodes = listOf("123456")
+    fun createsRequestWithExpectedStopCodeWhenSingleStopCodeIsSupplied() = runTest {
+        val stopCodes = setOf("123456")
         whenever(alertsDao.getAllArrivalAlertStopCodes())
                 .thenReturn(stopCodes)
 
         checkTimesTask.checkTimes()
 
         verify(trackerEndpoint)
-                .createLiveTimesRequest(stopCodes.toTypedArray(), 1)
+                .getLiveTimes(stopCodes.toList(), 1)
     }
 
     @Test
-    fun createsRequestWithExpectedStopCodesWhenMultipleStopCodesAreSupplied() {
-        givenTrackerEndpointCreatesRequest()
-        val stopCodes = listOf("123456", "987654", "246802")
+    fun createsRequestWithExpectedStopCodesWhenMultipleStopCodesAreSupplied() = runTest {
+        val stopCodes = setOf("123456", "987654", "246802")
         whenever(alertsDao.getAllArrivalAlertStopCodes())
                 .thenReturn(stopCodes)
 
         checkTimesTask.checkTimes()
 
         verify(trackerEndpoint)
-                .createLiveTimesRequest(stopCodes.toTypedArray(), 1)
+                .getLiveTimes(stopCodes.toList(), 1)
     }
 
     @Test
-    fun failingRequestFailsSilently() {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
-        whenever(trackerRequest.performRequest())
-                .thenThrow(UnrecognisedServerErrorException::class.java)
+    fun failingRequestFailsSilently() = runTest {
+        givenArrivalAlertStopCodes(setOf("123456"))
+        whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
+                .thenReturn(LiveTimesResponse.Error.ServerError.Other())
 
         checkTimesTask.checkTimes()
     }
 
     @Test
     fun nullArrivalAlertsDoesNotCauseNotifications() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
+        givenArrivalAlertStopCodes(setOf("123456"))
         givenArrivalAlerts(null)
 
         checkTimesTask.checkTimes()
@@ -155,8 +147,7 @@ class CheckTimesTaskTest {
 
     @Test
     fun emptyArrivalAlertsDoesNotCauseNotifications() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
+        givenArrivalAlertStopCodes(setOf("123456"))
         givenArrivalAlerts(emptyList())
 
         checkTimesTask.checkTimes()
@@ -169,16 +160,15 @@ class CheckTimesTaskTest {
 
     @Test
     fun singleServiceForSingleStopThatDoesNotMeetTimeTriggerDoesNotCauseNotification() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
+        givenArrivalAlertStopCodes(setOf("123456"))
         val arrivalAlerts = listOf(ArrivalAlert(1, 123L, "123456", listOf("1"), 5))
         givenArrivalAlerts(arrivalAlerts)
         val vehicle = createVehicle(6)
         val service = createService("1", listOf(vehicle))
         val stop = createStop("123456", listOf(service))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
+                .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
@@ -190,16 +180,15 @@ class CheckTimesTaskTest {
 
     @Test
     fun singleServiceForSingleStopThatEqualsTimeTriggerCausesNotification() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
+        givenArrivalAlertStopCodes(setOf("123456"))
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         givenArrivalAlerts(listOf(arrivalAlert))
         val vehicle = createVehicle(5)
         val service = createService("1", listOf(vehicle))
         val stop = createStop("123456", listOf(service))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
+                .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
@@ -211,16 +200,15 @@ class CheckTimesTaskTest {
 
     @Test
     fun singleServiceForSingleStopThatIsLessThanTimeTriggerCausesNotification() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
+        givenArrivalAlertStopCodes(setOf("123456"))
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         givenArrivalAlerts(listOf(arrivalAlert))
         val vehicle = createVehicle(4)
         val service = createService("1", listOf(vehicle))
         val stop = createStop("123456", listOf(service))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
+                .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
@@ -232,16 +220,15 @@ class CheckTimesTaskTest {
 
     @Test
     fun stopNotFoundInArrivalAlertsDoesNotCauseNotification() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("987654"))
+        givenArrivalAlertStopCodes(setOf("987654"))
         val arrivalAlerts = listOf(ArrivalAlert(1, 123L, "987654", listOf("1"), 5))
         givenArrivalAlerts(arrivalAlerts)
         val vehicle = createVehicle(4)
         val service = createService("1", listOf(vehicle))
         val stop = createStop("123456", listOf(service))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes(listOf("987654"), 1))
+                .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
@@ -254,8 +241,7 @@ class CheckTimesTaskTest {
     @Test
     fun multipleServicesForSingleStopThatDoesNotMeetTimeTriggerDoesNotCauseNotification() =
             runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
+        givenArrivalAlertStopCodes(setOf("123456"))
         val arrivalAlerts = listOf(ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5))
         givenArrivalAlerts(arrivalAlerts)
         val vehicle = createVehicle(6)
@@ -264,8 +250,8 @@ class CheckTimesTaskTest {
         val service3 = createService("3", listOf(vehicle))
         val stop = createStop("123456", listOf(service1, service2, service3))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
+                .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
@@ -277,8 +263,7 @@ class CheckTimesTaskTest {
 
     @Test
     fun singleServiceForSingleStopThatSatisfiesTimeTriggerCausesNotification() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
+        givenArrivalAlertStopCodes(setOf("123456"))
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
         givenArrivalAlerts(listOf(arrivalAlert))
         val vehicle1 = createVehicle(6)
@@ -289,8 +274,8 @@ class CheckTimesTaskTest {
         val service3 = createService("3", listOf(vehicle3))
         val stop = createStop("123456", listOf(service1, service2, service3))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
+                .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
@@ -302,8 +287,7 @@ class CheckTimesTaskTest {
 
     @Test
     fun multipleServicesForSingleStopThatSatisfiesTimeTriggerCausesNotifications() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123456"))
+        givenArrivalAlertStopCodes(setOf("123456"))
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1", "2", "3"), 5)
         givenArrivalAlerts(listOf(arrivalAlert))
         val vehicle1 = createVehicle(6)
@@ -314,8 +298,8 @@ class CheckTimesTaskTest {
         val service3 = createService("3", listOf(vehicle3))
         val stop = createStop("123456", listOf(service1, service2, service3))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
+                .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
@@ -327,8 +311,7 @@ class CheckTimesTaskTest {
 
     @Test
     fun multipleStopsWithMultipleCombinationsYieldsExpectedResults() = runTest {
-        givenTrackerEndpointCreatesRequest()
-        givenArrivalAlertStopCodes(listOf("123", "456", "789"))
+        givenArrivalAlertStopCodes(setOf("123", "456", "789"))
         val arrivalAlert1 = ArrivalAlert(1, 123L, "123", listOf("1", "2", "3"), 10)
         val arrivalAlert2 = ArrivalAlert(2, 123L, "456", listOf("4", "5", "6"), 5)
         val arrivalAlert3 = ArrivalAlert(3, 123L, "789", listOf("7", "8", "9"), 3)
@@ -353,8 +336,8 @@ class CheckTimesTaskTest {
                 "123" to stop1,
                 "456" to stop2,
                 "789" to stop3))
-        whenever(trackerRequest.performRequest())
-                .thenReturn(liveTimes)
+        whenever(trackerEndpoint.getLiveTimes(listOf("123", "456", "789"), 1))
+                .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
@@ -372,17 +355,12 @@ class CheckTimesTaskTest {
                 .removeArrivalAlert(3)
     }
 
-    private fun givenTrackerEndpointCreatesRequest() {
-        whenever(trackerEndpoint.createLiveTimesRequest(any<Array<String>>(), any()))
-                .thenReturn(trackerRequest)
-    }
-
-    private fun givenArrivalAlertStopCodes(stopCodes: List<String>) {
+    private suspend fun givenArrivalAlertStopCodes(stopCodes: Set<String>) {
         whenever(alertsDao.getAllArrivalAlertStopCodes())
                 .thenReturn(stopCodes)
     }
 
-    private fun givenArrivalAlerts(arrivalAlerts: List<ArrivalAlert>?) {
+    private suspend fun givenArrivalAlerts(arrivalAlerts: List<ArrivalAlert>?) {
         whenever(alertsDao.getAllArrivalAlerts())
                 .thenReturn(arrivalAlerts)
     }

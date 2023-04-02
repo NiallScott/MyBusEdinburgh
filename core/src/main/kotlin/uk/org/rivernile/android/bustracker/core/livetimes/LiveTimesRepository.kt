@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,70 +26,49 @@
 
 package uk.org.rivernile.android.bustracker.core.livetimes
 
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerException
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
-import kotlin.coroutines.resume
 
 /**
  * This repository is used to access live times.
  *
  * @param trackerEndpoint The endpoint to receive [LiveTimes] from.
- * @param timeUtils Used to obtain a UNIX timestamp.
- * @param ioDispatcher The [CoroutineDispatcher] to perform IO operations on.
+ * @param liveTimesMapper Maps live times data.
  * @author Niall Scott
  */
 class LiveTimesRepository @Inject internal constructor(
         private val trackerEndpoint: TrackerEndpoint,
-        private val timeUtils: TimeUtils,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+        private val liveTimesMapper: LiveTimesMapper) {
 
     /**
-     * Get a [Flow] object which contains the [Result] of loading [LiveTimes].
+     * Get a [Flow] object which contains the [LiveTimesResult] of loading [LiveTimes].
      *
      * @param stopCode The stop code to load [LiveTimes] for.
      * @param numberOfDepartures The number of departures per services to obtain.
-     * @return A [Flow] object containing the [Result] of loading [LiveTimes].
+     * @return A [Flow] object containing the [LiveTimesResult] of loading [LiveTimes].
      */
-    fun getLiveTimesFlow(stopCode: String, numberOfDepartures: Int)
-            : Flow<Result<LiveTimes>> = flow {
-        emit(Result.InProgress)
+    fun getLiveTimesFlow(
+        stopCode: String,
+        numberOfDepartures: Int): Flow<LiveTimesResult> = flow {
+        emit(LiveTimesResult.InProgress)
         emit(fetchLiveTimes(stopCode, numberOfDepartures))
     }
 
     /**
-     * This suspending function, executed on the IO [CoroutineDispatcher], fetches the live times
-     * for the given stop code and returns the appropriate [Result] object.
+     * Attempts to fetch the live times from the server and returns the appropriate
+     * [LiveTimesResult].
      *
-     * @param stopCode The stop code to load [LiveTimes] for.
-     * @param numberOfDepartures The number of departures per services to obtain.
-     * @return A [Result] object encapsulating the result of the request.
+     * @param stopCode The stop code to fetch live times for.
+     * @param numberOfDepartures The number of departures per service to obtain.
+     * @return A [LiveTimesResult] for the response.
      */
     private suspend fun fetchLiveTimes(
-            stopCode: String,
-            numberOfDepartures: Int): Result<LiveTimes> {
-        val request = trackerEndpoint.createLiveTimesRequest(stopCode, numberOfDepartures)
-
-        return withContext(ioDispatcher) {
-            suspendCancellableCoroutine { continuation ->
-                continuation.invokeOnCancellation {
-                    request.cancel()
-                }
-
-                try {
-                    continuation.resume(Result.Success(request.performRequest()))
-                } catch (e: TrackerException) {
-                    continuation.resume(Result.Error(timeUtils.getCurrentTimeMillis(), e))
-                }
-            }
-        }
+        stopCode: String,
+        numberOfDepartures: Int): LiveTimesResult {
+        return liveTimesMapper.mapToLiveTimesResult(
+            trackerEndpoint.getLiveTimes(stopCode, numberOfDepartures))
     }
 }
