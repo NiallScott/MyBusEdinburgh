@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,8 +54,6 @@ class StopDetailsFragment : Fragment() {
 
     companion object {
 
-        private const val ARG_STOP_CODE = "stopCode"
-
         /**
          * Create a new instance of this [Fragment].
          *
@@ -64,7 +62,7 @@ class StopDetailsFragment : Fragment() {
          */
         fun newInstance(stopCode: String?) = StopDetailsFragment().apply {
             arguments = Bundle().apply {
-                putString(ARG_STOP_CODE, stopCode)
+                putString(StopDetailsFragmentViewModel.STATE_STOP_CODE, stopCode)
             }
         }
     }
@@ -74,7 +72,7 @@ class StopDetailsFragment : Fragment() {
     @Inject
     lateinit var mapStyleApplicator: MapStyleApplicator
 
-    private val viewModel: StopDetailsFragmentViewModel by viewModels()
+    private val viewModel by viewModels<StopDetailsFragmentViewModel>()
 
     private lateinit var callbacks: Callbacks
     private lateinit var adapter: StopDetailsAdapter
@@ -106,8 +104,6 @@ class StopDetailsFragment : Fragment() {
                 mapStyleApplicator) {
             viewModel.onMapClicked()
         }
-
-        viewModel.stopCode = arguments?.getString(ARG_STOP_CODE)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

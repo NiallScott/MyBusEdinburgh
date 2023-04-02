@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -62,17 +62,19 @@ class StopDetailsFragmentViewModel @Inject constructor(
 
     companion object {
 
+        /**
+         * State key for stop code.
+         */
+        const val STATE_STOP_CODE = "stopCode"
         private const val STATE_ASKED_FOR_PERMISSIONS = "askedForPermissions"
     }
 
     /**
      * The stop code to show details for.
      */
-    var stopCode: String?
-        get() = stopCodeFlow.value
-        set(value) {
-            stopCodeFlow.value = value
-        }
+    private val stopCode get() = stopCodeFlow.value
+
+    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     /**
      * The current state of permissions pertaining to this view.
@@ -84,7 +86,6 @@ class StopDetailsFragmentViewModel @Inject constructor(
             handlePermissionsSet(value)
         }
 
-    private val stopCodeFlow = MutableStateFlow<String?>(null)
     private val permissionsStateFlow = MutableStateFlow<PermissionsState?>(null)
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -102,7 +102,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
 
-    private val viewModel: DisplayStopDataActivityViewModel by viewModels()
+    private val viewModel by viewModels<DisplayStopDataActivityViewModel>()
 
     private lateinit var viewBinding: ActivityDisplayStopDataBinding
 
@@ -163,8 +163,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             }
         }
 
-        viewModel.distinctStopCodeLiveData.observe(this, this::handleStopCode)
-        viewModel.busStopDetails.observe(this, this::handleBusStop)
+        viewModel.stopCodeLiveData.observe(this, this::handleStopCode)
+        viewModel.stopDetailsLiveData.observe(this, this::handleStopDetails)
         viewModel.isFavouriteLiveData.observe(this, this::configureFavouriteMenuItem)
         viewModel.hasArrivalAlertLiveData.observe(this, this::configureArrivalAlertMenuItem)
         viewModel.hasProximityAlertLiveData.observe(this, this::configureProximityAlertMenuItem)
@@ -217,12 +217,12 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     }
 
     /**
-     * Handle the bus stop data being loaded. It also caters for the case when the details are
-     * `null`, when the stop isn't known.
+     * Handle the stop data being loaded. It also caters for the case when the details are `null`,
+     * when the stop isn't known.
      *
      * @param details The stop details.
      */
-    private fun handleBusStop(details: StopDetails?) {
+    private fun handleStopDetails(details: StopDetails?) {
         (details?.let {
             textFormattingUtils.formatBusStopName(it.stopName)
         } ?: getString(R.string.displaystopdata_error_unknown_stop_name)).let {
@@ -445,7 +445,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             configureFavouriteMenuItem(viewModel.isFavouriteLiveData.value)
             configureArrivalAlertMenuItem(viewModel.hasArrivalAlertLiveData.value)
             configureProximityAlertMenuItem(viewModel.hasProximityAlertLiveData.value)
-            configureStreetViewMenuItem(viewModel.busStopDetails.value)
+            configureStreetViewMenuItem(viewModel.stopDetailsLiveData.value)
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {

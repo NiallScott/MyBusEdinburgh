@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -54,6 +54,7 @@ class StopDetailsFragmentViewModelTest {
 
     companion object {
 
+        private const val STATE_STOP_CODE = "stopCode"
         private const val STATE_ASKED_FOR_PERMISSIONS = "askedForPermissions"
     }
 
@@ -158,13 +159,14 @@ class StopDetailsFragmentViewModelTest {
                 any(),
                 any()))
                 .thenReturn(flowOf(items1, items2))
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(STATE_STOP_CODE to "123456")))
 
         val observer = viewModel.itemsLiveData.test()
         viewModel.permissionsState = PermissionsState(
                 PermissionState.GRANTED,
                 PermissionState.GRANTED)
-        viewModel.stopCode = "123456"
         advanceUntilIdle()
 
         observer.assertValues(null, items1, items2)
@@ -201,13 +203,15 @@ class StopDetailsFragmentViewModelTest {
                 any(),
                 any()))
                 .thenReturn(flowOf(items1, items2))
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_STOP_CODE to "123456")))
 
         val observer = viewModel.uiStateLiveData.test()
         viewModel.permissionsState = PermissionsState(
                 PermissionState.GRANTED,
                 PermissionState.GRANTED)
-        viewModel.stopCode = "123456"
         advanceUntilIdle()
 
         observer.assertValues(UiState.PROGRESS, UiState.CONTENT)
@@ -215,10 +219,12 @@ class StopDetailsFragmentViewModelTest {
 
     @Test
     fun showStopMapLiveDataDoesNotEmitWhenStopCodeIsNull() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_STOP_CODE to null)))
 
         val observer = viewModel.showStopMapLiveData.test()
-        viewModel.stopCode = null
         viewModel.onMapClicked()
 
         observer.assertEmpty()
@@ -226,10 +232,12 @@ class StopDetailsFragmentViewModelTest {
 
     @Test
     fun showStopMapLiveDataEmitsWhenStopCodeIsNotNull() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_STOP_CODE to "123456")))
 
         val observer = viewModel.showStopMapLiveData.test()
-        viewModel.stopCode = "123456"
         viewModel.onMapClicked()
 
         observer.assertValues("123456")

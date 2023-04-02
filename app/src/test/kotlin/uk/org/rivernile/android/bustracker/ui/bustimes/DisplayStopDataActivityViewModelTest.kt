@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNull
@@ -45,6 +45,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDe
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
@@ -72,67 +73,75 @@ class DisplayStopDataActivityViewModelTest {
 
     @Before
     fun setUp() {
-        viewModel = DisplayStopDataActivityViewModel(busStopsRepository, favouritesRepository,
-                alertsRepository)
+        viewModel = DisplayStopDataActivityViewModel(
+            busStopsRepository,
+            favouritesRepository,
+            alertsRepository,
+            coroutineRule.testDispatcher)
     }
 
     @Test
-    fun distinctStopCodeLiveDataIsNullByDefault() {
-        val observer = viewModel.distinctStopCodeLiveData.test()
+    fun stopCodeLiveDataIsNullByDefault() {
+        val observer = viewModel.stopCodeLiveData.test()
 
-        observer.assertValues()
-        assertNull(viewModel.distinctStopCodeLiveData.value)
+        observer.assertValues(null)
     }
 
     @Test
-    fun distinctStopCodeLiveDataOnlyEmitsDistinctCodeOnce() {
-        val observer = viewModel.distinctStopCodeLiveData.test()
+    fun stopCodeLiveDataOnlyEmitsDistinctCodeOnce() = runTest {
+        val observer = viewModel.stopCodeLiveData.test()
 
         viewModel.stopCode = "123"
+        advanceUntilIdle()
         viewModel.stopCode = "123"
+        advanceUntilIdle()
         viewModel.stopCode = "123"
+        advanceUntilIdle()
 
-        observer.assertValues("123")
+        observer.assertValues(null, "123")
     }
 
     @Test
-    fun distinctStopCodeLiveDataEmitsGivenSequenceCorrectly() {
-        val observer = viewModel.distinctStopCodeLiveData.test()
+    fun stopCodeLiveDataEmitsGivenSequenceCorrectly() = runTest {
+        val observer = viewModel.stopCodeLiveData.test()
 
         viewModel.stopCode = "1"
+        advanceUntilIdle()
         viewModel.stopCode = "2"
+        advanceUntilIdle()
         viewModel.stopCode = "2"
+        advanceUntilIdle()
         viewModel.stopCode = "3"
+        advanceUntilIdle()
 
-        observer.assertValues("1", "2", "3")
+        observer.assertValues(null, "1", "2", "3")
     }
 
     @Test
     fun busStopDetailsWithNullStopCodeEmitsNullDetails() {
-        val observer = viewModel.busStopDetails.test()
+        val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = null
 
         observer.assertValues(null)
-        assertNull(viewModel.busStopDetails.value)
+        assertNull(viewModel.stopDetailsLiveData.value)
     }
 
     @Test
     fun busStopDetailsWithEmptyStopCodeEmitsNullDetails() {
-        val observer = viewModel.busStopDetails.test()
+        val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = ""
 
         observer.assertValues(null)
-        assertNull(viewModel.busStopDetails.value)
+        assertNull(viewModel.stopDetailsLiveData.value)
     }
 
     @Test
     fun busStopDetailsWithStopCodeWhichIsNotFoundReturnsNullDetails() = runTest {
-        val flow = flow<StopDetails?> { emit(null) }
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flow)
-        val observer = viewModel.busStopDetails.test()
+                .thenReturn(flowOf(null))
+        val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
@@ -150,15 +159,14 @@ class DisplayStopDataActivityViewModelTest {
                 1.2,
                 3.4,
                 5)
-        val flow = flow<StopDetails?> { emit(details) }
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flow)
-        val observer = viewModel.busStopDetails.test()
+                .thenReturn(flowOf(details))
+        val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
 
-        observer.assertValues(details)
+        observer.assertValues(null, details)
     }
 
     @Test
@@ -171,14 +179,9 @@ class DisplayStopDataActivityViewModelTest {
                 1.2,
                 3.4,
                 5)
-        val flow = flow {
-            emit(null)
-            emit(details)
-            emit(null)
-        }
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flow)
-        val observer = viewModel.busStopDetails.test()
+                .thenReturn(intervalFlowOf(0L, 10L, null, details, null))
+        val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
@@ -206,9 +209,8 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun isFavouriteLiveDataEmitsNullFollowedByRepositoryValue() = runTest {
-        val flow = flow { emit(true) }
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(true))
         val observer = viewModel.isFavouriteLiveData.test()
 
         viewModel.stopCode = "123456"
@@ -219,12 +221,10 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun isFavouriteLiveDataCopesWithStopChange() = runTest {
-        val flow1 = flow { emit(false) }
-        val flow2 = flow { emit(true) }
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123"))
-                .thenReturn(flow1)
+                .thenReturn(intervalFlowOf(10L, 0L, false))
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("456"))
-                .thenReturn(flow2)
+                .thenReturn(intervalFlowOf(10L, 0L, true))
         val observer = viewModel.isFavouriteLiveData.test()
 
         viewModel.stopCode = "123"
@@ -237,15 +237,8 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun isFavouriteLiveDataOnlyEmitsDistinctValues() = runTest {
-        val flow = flow {
-            emit(true)
-            emit(false)
-            emit(false)
-            emit(false)
-            emit(true)
-        }
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(intervalFlowOf(0L, 10L, true, false, false, false, true))
         val observer = viewModel.isFavouriteLiveData.test()
 
         viewModel.stopCode = "123456"
@@ -274,9 +267,8 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun hasArrivalAlertLiveDataEmitsNullFollowedByRepositoryValue() = runTest {
-        val flow = flow { emit(true) }
         whenever(alertsRepository.hasArrivalAlertFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(true))
         val observer = viewModel.hasArrivalAlertLiveData.test()
 
         viewModel.stopCode = "123456"
@@ -287,12 +279,10 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun hasArrivalAlertLiveDataCopesWithStopChange() = runTest {
-        val flow1 = flow { emit(false) }
-        val flow2 = flow { emit(true) }
         whenever(alertsRepository.hasArrivalAlertFlow("123"))
-                .thenReturn(flow1)
+                .thenReturn(intervalFlowOf(10L, 0L, false))
         whenever(alertsRepository.hasArrivalAlertFlow("456"))
-                .thenReturn(flow2)
+                .thenReturn(intervalFlowOf(10L, 0L, true))
         val observer = viewModel.hasArrivalAlertLiveData.test()
 
         viewModel.stopCode = "123"
@@ -305,15 +295,8 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun hasArrivalAlertLiveDataOnlyEmitsDistinctValues() = runTest {
-        val flow = flow {
-            emit(true)
-            emit(false)
-            emit(false)
-            emit(false)
-            emit(true)
-        }
         whenever(alertsRepository.hasArrivalAlertFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(intervalFlowOf(0L, 10L, true, false, false, false, true))
         val observer = viewModel.hasArrivalAlertLiveData.test()
 
         viewModel.stopCode = "123456"
@@ -342,9 +325,8 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun hasProximityAlertLiveDataEmitsNullFollowedByRepositoryValue() = runTest {
-        val flow = flow { emit(true) }
         whenever(alertsRepository.hasProximityAlertFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(true))
         val observer = viewModel.hasProximityAlertLiveData.test()
 
         viewModel.stopCode = "123456"
@@ -355,12 +337,10 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun hasProximityAlertLiveDataCopesWithStopChange() = runTest {
-        val flow1 = flow { emit(false) }
-        val flow2 = flow { emit(true) }
         whenever(alertsRepository.hasProximityAlertFlow("123"))
-                .thenReturn(flow1)
+                .thenReturn(intervalFlowOf(10L, 0L, false))
         whenever(alertsRepository.hasProximityAlertFlow("456"))
-                .thenReturn(flow2)
+                .thenReturn(intervalFlowOf(10L, 0L, true))
         val observer = viewModel.hasProximityAlertLiveData.test()
 
         viewModel.stopCode = "123"
@@ -373,15 +353,8 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun hasProximityAlertLiveDataOnlyEmitsDistinctValues() = runTest {
-        val flow = flow {
-            emit(true)
-            emit(false)
-            emit(false)
-            emit(false)
-            emit(true)
-        }
         whenever(alertsRepository.hasProximityAlertFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(intervalFlowOf(0L, 10L, true, false, false, false, true))
         val observer = viewModel.hasProximityAlertLiveData.test()
 
         viewModel.stopCode = "123456"
@@ -430,9 +403,8 @@ class DisplayStopDataActivityViewModelTest {
         val showAddObserver = viewModel.showAddFavouriteLiveData.test()
         val showRemoveObserver = viewModel.showRemoveFavouriteLiveData.test()
         viewModel.isFavouriteLiveData.test()
-        val flow = flow { emit(true) }
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(true))
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
@@ -448,9 +420,8 @@ class DisplayStopDataActivityViewModelTest {
         val showAddObserver = viewModel.showAddFavouriteLiveData.test()
         val showRemoveObserver = viewModel.showRemoveFavouriteLiveData.test()
         viewModel.isFavouriteLiveData.test()
-        val flow = flow { emit(true) }
         whenever(favouritesRepository.isStopAddedAsFavouriteFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(true))
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
@@ -501,9 +472,8 @@ class DisplayStopDataActivityViewModelTest {
         val showAddObserver = viewModel.showAddArrivalAlertLiveData.test()
         val showRemoveObserver = viewModel.showRemoveArrivalAlertLiveData.test()
         viewModel.hasArrivalAlertLiveData.test()
-        val flow = flow { emit(true) }
         whenever(alertsRepository.hasArrivalAlertFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(true))
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
@@ -519,9 +489,8 @@ class DisplayStopDataActivityViewModelTest {
         val showAddObserver = viewModel.showAddArrivalAlertLiveData.test()
         val showRemoveObserver = viewModel.showRemoveArrivalAlertLiveData.test()
         viewModel.hasArrivalAlertLiveData.test()
-        val flow = flow { emit(true) }
         whenever(alertsRepository.hasArrivalAlertFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(true))
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
@@ -573,9 +542,8 @@ class DisplayStopDataActivityViewModelTest {
                 val showAddObserver = viewModel.showAddProximityAlertLiveData.test()
                 val showRemoveObserver = viewModel.showRemoveProximityAlertLiveData.test()
                 viewModel.hasProximityAlertLiveData.test()
-                val flow = flow { emit(true) }
                 whenever(alertsRepository.hasProximityAlertFlow("123456"))
-                        .thenReturn(flow)
+                        .thenReturn(flowOf(true))
 
                 viewModel.stopCode = "123456"
                 advanceUntilIdle()
@@ -592,9 +560,8 @@ class DisplayStopDataActivityViewModelTest {
                 val showAddObserver = viewModel.showAddProximityAlertLiveData.test()
                 val showRemoveObserver = viewModel.showRemoveProximityAlertLiveData.test()
                 viewModel.hasProximityAlertLiveData.test()
-                val flow = flow { emit(true) }
                 whenever(alertsRepository.hasProximityAlertFlow("123456"))
-                        .thenReturn(flow)
+                        .thenReturn(flowOf(true))
 
                 viewModel.stopCode = "123456"
                 advanceUntilIdle()
@@ -607,11 +574,10 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun onStreetViewMenuItemClickedPerformsNoActionWhenStopDetailsIsNull() = runTest {
-        val flow = flow<StopDetails?> { emit(null) }
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(null))
         val showStreetView = viewModel.showStreetViewLiveData.test()
-        viewModel.busStopDetails.test()
+        viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
         viewModel.onStreetViewMenuItemClicked()
@@ -629,11 +595,10 @@ class DisplayStopDataActivityViewModelTest {
                 1.2,
                 3.4,
                 5)
-        val flow = flow { emit(details) }
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flow)
+                .thenReturn(flowOf(details))
         val showStreetView = viewModel.showStreetViewLiveData.test()
-        viewModel.busStopDetails.test()
+        viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
