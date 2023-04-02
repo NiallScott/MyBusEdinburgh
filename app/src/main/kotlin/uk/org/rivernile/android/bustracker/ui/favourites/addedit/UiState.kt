@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,26 +34,26 @@ import uk.org.rivernile.android.bustracker.core.database.settings.entities.Favou
  *
  * @author Niall Scott
  */
-sealed class UiState {
+sealed interface UiState {
 
     /**
      * The progress layout should be shown.
      */
-    object InProgress : UiState()
+    object InProgress : UiState
 
     /**
      * This is the base class for a favourite stop mode.
      */
-    sealed class Mode : UiState() {
+    sealed interface Mode : UiState {
 
         /**
          * The stop code.
          */
-        abstract val stopCode: String
+        val stopCode: String
         /**
          * The stop name properties.
          */
-        abstract val stopName: StopName?
+        val stopName: StopName?
 
         /**
          * The 'Add' layout should be shown.
@@ -63,7 +63,7 @@ sealed class UiState {
          */
         data class Add(
                 override val stopCode: String,
-                override val stopName: StopName?) : Mode()
+                override val stopName: StopName?) : Mode
 
         /**
          * The 'Edit' layout should be shown.
@@ -75,6 +75,6 @@ sealed class UiState {
         data class Edit(
                 override val stopCode: String,
                 override val stopName: StopName?,
-                val favouriteStop: FavouriteStop) : Mode()
+                val favouriteStop: FavouriteStop) : Mode
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -103,12 +103,12 @@ class FavouriteStopFetcher @Inject constructor(
      *
      * @author Niall Scott
      */
-    private sealed class FavouriteResult {
+    private sealed interface FavouriteResult {
 
         /**
          * Loading is in progress.
          */
-        object InProgress : FavouriteResult()
+        object InProgress : FavouriteResult
 
         /**
          * The item has loaded.
@@ -116,7 +116,7 @@ class FavouriteStopFetcher @Inject constructor(
          * @property favouriteStop The loaded [FavouriteStop]. This may be `null` if it does not exist.
          */
         data class Item(
-                val favouriteStop: FavouriteStop?) : FavouriteResult()
+                val favouriteStop: FavouriteStop?) : FavouriteResult
     }
 
     /**
@@ -124,12 +124,12 @@ class FavouriteStopFetcher @Inject constructor(
      *
      * @author Niall Scott
      */
-    private sealed class StopNameResult {
+    private sealed interface StopNameResult {
 
         /**
          * Loading is in progress.
          */
-        object InProgress : StopNameResult()
+        object InProgress : StopNameResult
 
         /**
          * The item has loaded.
@@ -137,6 +137,6 @@ class FavouriteStopFetcher @Inject constructor(
          * @property stopName The loaded [StopName]. This may be `null` if it does not exist.
          */
         data class Item(
-                val stopName: StopName?) : StopNameResult()
+                val stopName: StopName?) : StopNameResult
     }
 }

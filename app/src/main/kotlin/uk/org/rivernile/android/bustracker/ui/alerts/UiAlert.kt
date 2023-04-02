@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,12 +33,12 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDe
  *
  * @author Niall Scott
  */
-sealed class UiAlert {
+sealed interface UiAlert {
 
     /**
      * The ID of the alert.
      */
-    abstract val id: Int
+    val id: Int
 
     /**
      * An arrival alert.
@@ -54,7 +54,7 @@ sealed class UiAlert {
             val stopCode: String,
             val stopDetails: StopDetails?,
             val services: List<String>,
-            val timeTrigger: Int) : UiAlert()
+            val timeTrigger: Int) : UiAlert
 
     /**
      * A proximity alert.
@@ -68,5 +68,5 @@ sealed class UiAlert {
             override val id: Int,
             val stopCode: String,
             val stopDetails: StopDetails?,
-            val distanceFrom: Int) : UiAlert()
+            val distanceFrom: Int) : UiAlert
 }

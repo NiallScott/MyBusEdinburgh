@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,11 +27,11 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
 /**
- * This sealed class has child classes which encapsulate the possible items shown on the UI.
+ * This sealed interface has child classes which encapsulate the possible items shown on the UI.
  *
  * @author Niall Scott
  */
-sealed class UiItem {
+sealed interface UiItem {
 
     /**
      * Shows a map item on the U.
@@ -43,12 +43,12 @@ sealed class UiItem {
     data class Map(
             val latitude: Double,
             val longitude: Double,
-            val orientation: Int) : UiItem()
+            val orientation: Int) : UiItem
 
     /**
-     * This sealed class encapsulates the different states of the distance item.
+     * This sealed interface encapsulates the different states of the distance item.
      */
-    sealed class Distance : UiItem() {
+    sealed interface Distance : UiItem {
 
         /**
          * This item is shown when the distance between the device and the stop is known.
@@ -57,30 +57,30 @@ sealed class UiItem {
          * stop.
          */
         data class Known(
-                val distanceKilometers: Float) : Distance()
+                val distanceKilometers: Float) : Distance
 
         /**
          * This item is shown when the distance between the device and the stop is unknown, but not
          * because of insufficient permission or any other known type of issue.
          */
-        object Unknown : Distance()
+        object Unknown : Distance
 
         /**
          * This item is shown when the distance cannot be shown because there is insufficient
          * permission access to obtain a location.
          */
-        object PermissionDenied : Distance()
+        object PermissionDenied : Distance
 
         /**
          * This item is shown when location is turned off on the device.
          */
-        object LocationOff : Distance()
+        object LocationOff : Distance
 
         /**
          * This is a pseudo-item: it is not shown. Instead, it acts as a marker to denote the
          * distance item should not be shown as the device does not have a location feature.
          */
-        object NoLocationFeature : Distance()
+        object NoLocationFeature : Distance
     }
 
     /**
@@ -95,10 +95,10 @@ sealed class UiItem {
             val id: Long,
             val name: String,
             val description: String?,
-            val colour: Int?) : UiItem()
+            val colour: Int?) : UiItem
 
     /**
      * This item is shown when there are no known services for the stop.
      */
-    object NoServices : UiItem()
+    object NoServices : UiItem
 }
