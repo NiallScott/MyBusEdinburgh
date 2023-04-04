@@ -26,18 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
-import uk.org.rivernile.android.bustracker.testutils.test
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
  * Tests for [ExpandedServicesTracker].
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class ExpandedServicesTrackerTest {
 
     companion object {
@@ -46,49 +50,58 @@ class ExpandedServicesTrackerTest {
     }
 
     @get:Rule
-    val rule = InstantTaskExecutorRule()
+    val coroutineRule = MainCoroutineRule()
 
     @Test
-    fun initialStateWithNoPreviousStateIsEmpty() {
+    fun initialStateWithNoPreviousStateIsEmpty() = runTest {
         val handle = SavedStateHandle()
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesLiveData.test()
+        val observer = tracker.expandedServicesFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
 
         observer.assertValues(emptySet())
     }
 
     @Test
-    fun initialStateWithEmptyPreviousStateIsEmpty() {
+    fun initialStateWithEmptyPreviousStateIsEmpty() = runTest {
         val handle = SavedStateHandle(
-                mapOf(
-                        STATE_KEY_EXPANDED_SERVICES to arrayListOf<String>()))
+            mapOf(
+                STATE_KEY_EXPANDED_SERVICES to arrayListOf<String>()))
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesLiveData.test()
+        val observer = tracker.expandedServicesFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
 
         observer.assertValues(emptySet())
     }
 
     @Test
-    fun initialStateWithPopulatedServicesIsNonEmpty() {
+    fun initialStateWithPopulatedServicesIsNonEmpty() = runTest {
         val handle = SavedStateHandle(
-                mapOf(
-                        STATE_KEY_EXPANDED_SERVICES to arrayListOf("1", "2", "3")))
+            mapOf(
+                STATE_KEY_EXPANDED_SERVICES to arrayListOf("1", "2", "3")))
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesLiveData.test()
+        val observer = tracker.expandedServicesFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
 
         observer.assertValues(setOf("1", "2", "3"))
     }
 
     @Test
-    fun onServiceClickedAfterEmptyInitialStateAddsService() {
+    fun onServiceClickedAfterEmptyInitialStateAddsService() = runTest {
         val handle = SavedStateHandle()
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesLiveData.test()
+        val observer = tracker.expandedServicesFlow.test(this)
+        advanceUntilIdle()
         tracker.onServiceClicked("1")
+        advanceUntilIdle()
+        observer.finish()
 
         observer.assertValues(
                 emptySet(),
@@ -97,14 +110,17 @@ class ExpandedServicesTrackerTest {
     }
 
     @Test
-    fun onServiceClickedAfterPopulatedInitialStateRemovesService() {
+    fun onServiceClickedAfterPopulatedInitialStateRemovesService() = runTest {
         val handle = SavedStateHandle(
                 mapOf(
                         STATE_KEY_EXPANDED_SERVICES to arrayListOf("1")))
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesLiveData.test()
+        val observer = tracker.expandedServicesFlow.test(this)
+        advanceUntilIdle()
         tracker.onServiceClicked("1")
+        advanceUntilIdle()
+        observer.finish()
 
         observer.assertValues(
                 setOf("1"),
@@ -113,20 +129,29 @@ class ExpandedServicesTrackerTest {
     }
 
     @Test
-    fun onServiceClickedWithMultipleRandomInteractionsYieldsCorrectState() {
+    fun onServiceClickedWithMultipleRandomInteractionsYieldsCorrectState() = runTest {
         val handle = SavedStateHandle(
-                mapOf(
-                        STATE_KEY_EXPANDED_SERVICES to arrayListOf("1")))
+            mapOf(
+                STATE_KEY_EXPANDED_SERVICES to arrayListOf("1")))
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesLiveData.test()
+        val observer = tracker.expandedServicesFlow.test(this)
+        advanceUntilIdle()
         tracker.onServiceClicked("2")
+        advanceUntilIdle()
         tracker.onServiceClicked("3")
+        advanceUntilIdle()
         tracker.onServiceClicked("1")
+        advanceUntilIdle()
         tracker.onServiceClicked("4")
+        advanceUntilIdle()
         tracker.onServiceClicked("4")
+        advanceUntilIdle()
         tracker.onServiceClicked("4")
+        advanceUntilIdle()
         tracker.onServiceClicked("2")
+        advanceUntilIdle()
+        observer.finish()
 
         observer.assertValues(
                 setOf("1"),

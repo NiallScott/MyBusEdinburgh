@@ -31,7 +31,6 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
@@ -340,7 +339,7 @@ class BusTimesFragmentViewModel @Inject constructor(
     private fun createLiveTimesFlow(): Flow<UiTransformedResult> {
         return liveTimesFlowFactory.createLiveTimesFlow(
                 stopCodeFlow,
-                expandedServicesTracker.expandedServicesLiveData.asFlow(),
+                expandedServicesTracker.expandedServicesFlow,
                 refreshController.refreshTriggerReceiveChannel.consumeAsFlow())
                 .transformLatest {
                     emit(it) // Emit first so that the value is immediately available.

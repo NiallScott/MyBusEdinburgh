@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -862,8 +861,8 @@ class BusTimesFragmentViewModelTest {
     }
 
     private fun givenExpandServicesReturnsEmptySet() {
-        whenever(expandedServicesTracker.expandedServicesLiveData)
-                .thenReturn(MutableLiveData(emptySet()))
+        whenever(expandedServicesTracker.expandedServicesFlow)
+                .thenReturn(flowOf(emptySet()))
     }
 
     private fun createViewModel(

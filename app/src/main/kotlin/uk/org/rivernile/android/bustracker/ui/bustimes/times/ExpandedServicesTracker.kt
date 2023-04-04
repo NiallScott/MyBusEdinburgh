@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,69 +26,62 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
  * We want to track the user's service expand/collapse state over configuration changes and UI
  * destruction/restoration events. The old way would involve persisting to a [android.os.Bundle]
  * when the instance state is saved, and read from the bundle on UI creation. As we want to keep as
- * much logic away from the UI as possible, we use [SavedStateHandle] coupled with
- * [androidx.lifecycle.ViewModel].
+ * much logic away from the UI as possible, we use [SavedStateHandle].
  *
  * [android.os.Bundle] objects can only persist some types of objects as it needs to know how to
  * serialise those objects. For tracking expanded services, we want to use a [HashSet] for optimal
  * lookup times. Unfortunately, it's not a type we can persist inside a bundle. So instead, we will
  * persist as an [ArrayList] of [String], and have to convert between [HashSet] and [ArrayList].
  *
- * It would have been problematic to use [SavedStateHandle.getLiveData] coupled with mapping the
- * [MutableLiveData] as this only works ideally in one way, but will cause problems when the value
- * is being set. Instead, we manage the updating ourselves in this class, and expose
- * [expandedServicesLiveData] which we control.
- *
- * @param handle The [SavedStateHandle] where the state is stored. We read from here and later
+ * @param savedState The [SavedStateHandle] where the state is stored. We read from here and later
  * persist to here.
  * @author Niall Scott
  */
 @ViewModelScoped
 class ExpandedServicesTracker @Inject constructor(
-        private val handle: SavedStateHandle) {
+    private val savedState: SavedStateHandle) {
 
     companion object {
 
         private const val STATE_KEY_EXPANDED_SERVICES = "expandedServices"
     }
 
-    private val expandedItems = HashSet<String>()
-    private val expandedServices = MutableLiveData<Set<String>>()
-
-    val expandedServicesLiveData: LiveData<Set<String>> get() = expandedServices
-
-    init {
-        handle.get<ArrayList<String>>(STATE_KEY_EXPANDED_SERVICES)?.let {
-            expandedItems.addAll(it)
+    /**
+     * The [kotlinx.coroutines.flow.Flow] of expanded services, exposed as a [Set] of [String].
+     */
+    val expandedServicesFlow get() = savedState
+        .getStateFlow<List<String>?>(STATE_KEY_EXPANDED_SERVICES, null)
+        .map {
+            it?.toSet() ?: emptySet()
         }
-
-        expandedServices.value = HashSet(expandedItems)
-    }
 
     /**
      * When a service has been clicked, this method should be called to track the correct
      * expand/collapse state of each service. This method will expand or collapse as appropriate,
-     * propagate the new state via [expandedServicesLiveData] and save the new state in the
+     * propagate the new state via [expandedServicesFlow] and save the new state in the
      * [SavedStateHandle].
      *
      * @param serviceName The name of the service which was clicked.
      */
     fun onServiceClicked(serviceName: String) {
+        val expandedItems = savedState
+            .get<List<String>?>(STATE_KEY_EXPANDED_SERVICES)
+            ?.toMutableSet()
+            ?: mutableSetOf()
+
         if (!expandedItems.add(serviceName)) {
             expandedItems.remove(serviceName)
         }
 
-        expandedServices.value = HashSet(expandedItems)
-        handle[STATE_KEY_EXPANDED_SERVICES] = ArrayList(expandedItems)
+        savedState[STATE_KEY_EXPANDED_SERVICES] = ArrayList(expandedItems)
     }
 }
