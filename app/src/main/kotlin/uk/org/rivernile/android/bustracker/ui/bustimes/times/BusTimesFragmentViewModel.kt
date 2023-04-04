@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
@@ -43,10 +44,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.livedata.DistinctLiveData
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -55,6 +59,7 @@ import javax.inject.Inject
 /**
  * This is the [ViewModel] for [BusTimesFragment].
  *
+ * @param savedState The saved instance state.
  * @param expandedServicesTracker This implementation tracks the expanded/collapse state of the
  * services, for the purpose of showing the user services in the style of an expandable list.
  * @param liveTimesFlowFactory Used to construct the flow of live times.
@@ -69,23 +74,32 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class BusTimesFragmentViewModel @Inject constructor(
-        private val expandedServicesTracker: ExpandedServicesTracker,
-        private val liveTimesFlowFactory: LiveTimesFlowFactory,
-        private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
-        private val refreshController: RefreshController,
-        private val preferenceRepository: PreferenceRepository,
-        connectivityRepository: ConnectivityRepository,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    savedState: SavedStateHandle,
+    private val expandedServicesTracker: ExpandedServicesTracker,
+    private val liveTimesFlowFactory: LiveTimesFlowFactory,
+    private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
+    private val refreshController: RefreshController,
+    private val preferenceRepository: PreferenceRepository,
+    connectivityRepository: ConnectivityRepository,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+
+    companion object {
+
+        /**
+         * State key for the stop code.
+         */
+        const val STATE_STOP_CODE = "stopCode"
+    }
+
+    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     /**
      * This [LiveData] exposes whether the device currently has connectivity or not. This will emit
      * distinct values.
      */
-    val hasConnectivityLiveData by lazy {
-        connectivityRepository.hasInternetConnectivityFlow
-                .distinctUntilChanged() // Prevent unnecessary processing
-                .asLiveData(viewModelScope.coroutineContext)
-    }
+    val hasConnectivityLiveData = connectivityRepository.hasInternetConnectivityFlow
+        .distinctUntilChanged()
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] is used not to provide any data, but as a convenient way to know when the
@@ -104,7 +118,9 @@ class BusTimesFragmentViewModel @Inject constructor(
      * changes when an actual change occurs. If an update is made to the stop code that is identical
      * to the previously held code, this won't be delivered in this [LiveData].
      */
-    private val distinctStopCodeLiveData = DistinctLiveData<String?>(null)
+    private val distinctStopCodeLiveData = stopCodeFlow
+        .asLiveData(viewModelScope.coroutineContext)
+        .distinctUntilChanged()
 
     /**
      * This [LiveData] exposes whether the live times are currently sorted by time or by service
@@ -113,15 +129,12 @@ class BusTimesFragmentViewModel @Inject constructor(
      *
      * If there is no set stop code, this will emit `null`.
      */
-    val isSortedByTimeLiveData = distinctStopCodeLiveData.switchMap {
-        if (it?.isNotEmpty() == true) {
-            preferenceRepository.isLiveTimesSortByTimeFlow()
-                    .distinctUntilChanged() // Prevent unnecessary processing
-                    .asLiveData(viewModelScope.coroutineContext)
-        } else {
-            MutableLiveData<Boolean>(null)
-        }
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val isSortedByTimeLiveData = stopCodeFlow
+        .flatMapLatest(this::loadIsSortedByTime)
+        .distinctUntilChanged()
+        .flowOn(defaultDispatcher)
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] exposes whether auto refresh is enabled or not. This is based on the user
@@ -130,19 +143,11 @@ class BusTimesFragmentViewModel @Inject constructor(
      * If there is no set stop code, this will emit `null`.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val isAutoRefreshLiveData = distinctStopCodeLiveData.switchMap {
-        if (it?.isNotEmpty() == true) {
-            preferenceRepository.isLiveTimesAutoRefreshEnabledFlow()
-                    .distinctUntilChanged() // Prevent unnecessary processing
-                    .transformLatest { enabled ->
-                        emit(enabled)
-                        refreshController.onAutoRefreshPreferenceChanged(liveTimes.value, enabled)
-                    }
-                    .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
-        } else {
-            MutableLiveData<Boolean>(null)
-        }
-    }
+    val isAutoRefreshLiveData = stopCodeFlow
+        .flatMapLatest(this::loadIsAutoRefresh)
+        .distinctUntilChanged()
+        .flowOn(defaultDispatcher)
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This is the [LiveData] which contains the result from loading live times. This uses the
@@ -280,15 +285,6 @@ class BusTimesFragmentViewModel @Inject constructor(
     }
 
     /**
-     * This property is used to get and set the stop code which should be shown.
-     */
-    var stopCode: String?
-        get() = distinctStopCodeLiveData.value
-        set (value) {
-            distinctStopCodeLiveData.setValue(value)
-        }
-
-    /**
      * This is called when the refresh menu item has been clicked by the user.
      */
     fun onRefreshMenuItemClicked() {
@@ -343,7 +339,7 @@ class BusTimesFragmentViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun createLiveTimesFlow(): Flow<UiTransformedResult> {
         return liveTimesFlowFactory.createLiveTimesFlow(
-                distinctStopCodeLiveData.asFlow(),
+                stopCodeFlow,
                 expandedServicesTracker.expandedServicesLiveData.asFlow(),
                 refreshController.refreshTriggerReceiveChannel.consumeAsFlow())
                 .transformLatest {
@@ -380,4 +376,23 @@ class BusTimesFragmentViewModel @Inject constructor(
             UiState.ERROR
         } ?: if (isInProgress == true) UiState.PROGRESS else null
     }
+
+    /**
+     * Load whether we're sorting by time or not.
+     *
+     * @param stopCode The currently set stop code.
+     * @return `true` if we're sorting by time, `false` if we're sorting by service, `null` if the
+     * stop code is not known.
+     */
+    private fun loadIsSortedByTime(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+        preferenceRepository.isLiveTimesSortByTimeFlow()
+    } ?: flowOf(null)
+
+    private fun loadIsAutoRefresh(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
+        preferenceRepository.isLiveTimesAutoRefreshEnabledFlow()
+            .distinctUntilChanged() // Prevent unnecessary processing
+            .onEach {
+                refreshController.onAutoRefreshPreferenceChanged(liveTimes.value, it)
+            }
+    } ?: flowOf(null)
 }

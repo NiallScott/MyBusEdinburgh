@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -57,6 +58,7 @@ import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepositor
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
@@ -67,6 +69,11 @@ import uk.org.rivernile.android.bustracker.testutils.test
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class BusTimesFragmentViewModelTest {
+
+    companion object {
+
+        private const val STATE_STOP_CODE = "stopCode"
+    }
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
@@ -88,19 +95,8 @@ class BusTimesFragmentViewModelTest {
 
     private val refreshChannel = Channel<Unit>(Channel.CONFLATED)
 
-    private lateinit var viewModel: BusTimesFragmentViewModel
-
     @Before
     fun setUp() {
-        viewModel = BusTimesFragmentViewModel(
-                expandedServicesTracker,
-                liveTimesFlowFactory,
-                lastRefreshTimeCalculator,
-                refreshController,
-                preferenceRepository,
-                connectivityRepository,
-                coroutineRule.testDispatcher)
-
         whenever(refreshController.refreshTriggerReceiveChannel)
                 .thenReturn(refreshChannel)
     }
@@ -108,7 +104,8 @@ class BusTimesFragmentViewModelTest {
     @Test
     fun hasConnectivityLiveDataEmitsFromFlow() = runTest {
         whenever(connectivityRepository.hasInternetConnectivityFlow)
-                .thenReturn(flowOf(true, false, true))
+                .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
+        val viewModel = createViewModel(stopCode = null)
 
         val observer = viewModel.hasConnectivityLiveData.test()
         advanceUntilIdle()
@@ -119,7 +116,8 @@ class BusTimesFragmentViewModelTest {
     @Test
     fun hasConnectivityLiveDataOnlyEmitsDistinctValues() = runTest {
         whenever(connectivityRepository.hasInternetConnectivityFlow)
-                .thenReturn(flowOf(true, true, false, false, true))
+                .thenReturn(intervalFlowOf(0L, 10L, true, true, false, false, true))
+        val viewModel = createViewModel(stopCode = null)
 
         val observer = viewModel.hasConnectivityLiveData.test()
         advanceUntilIdle()
@@ -128,10 +126,11 @@ class BusTimesFragmentViewModelTest {
     }
 
     @Test
-    fun isSortedByTimeEmitsNullWhenStopCodeIsNull() {
-        viewModel.stopCode = null
+    fun isSortedByTimeEmitsNullWhenStopCodeIsNull() = runTest {
+        val viewModel = createViewModel(stopCode = null)
 
         val observer = viewModel.isSortedByTimeLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(null)
         verify(preferenceRepository, never())
@@ -142,7 +141,7 @@ class BusTimesFragmentViewModelTest {
     fun isSortedByTimeEmitsValuesFromRepository() = runTest {
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
                 .thenReturn(flowOf(true, false, true))
-        viewModel.stopCode = "123456"
+        val viewModel = createViewModel(stopCode = "123456")
 
         val observer = viewModel.isSortedByTimeLiveData.test()
         advanceUntilIdle()
@@ -153,8 +152,8 @@ class BusTimesFragmentViewModelTest {
     @Test
     fun isSortedByTimeEmitsDistinctValuesFromRepository() = runTest {
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-                .thenReturn(flowOf(true, true, false, false, true))
-        viewModel.stopCode = "123456"
+                .thenReturn(intervalFlowOf(0L, 10L, true, true, false, false, true))
+        val viewModel = createViewModel(stopCode = "123456")
 
         val observer = viewModel.isSortedByTimeLiveData.test()
         advanceUntilIdle()
@@ -163,10 +162,11 @@ class BusTimesFragmentViewModelTest {
     }
 
     @Test
-    fun isAutoRefreshEmitsNullWhenStopCodeIsNull() {
-        viewModel.stopCode = null
+    fun isAutoRefreshEmitsNullWhenStopCodeIsNull() = runTest {
+        val viewModel = createViewModel(stopCode = null)
 
         val observer = viewModel.isAutoRefreshLiveData.test()
+        advanceUntilIdle()
 
         observer.assertValues(null)
         verify(preferenceRepository, never())
@@ -177,7 +177,7 @@ class BusTimesFragmentViewModelTest {
     fun isAutoRefreshEmitsValuesFromRepository() = runTest {
         whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
                 .thenReturn(flowOf(true, false, true))
-        viewModel.stopCode = "123456"
+        val viewModel = createViewModel(stopCode = "123456")
 
         val observer = viewModel.isAutoRefreshLiveData.test()
         advanceUntilIdle()
@@ -197,7 +197,7 @@ class BusTimesFragmentViewModelTest {
     fun isAutoRefreshEmitsDistinctValuesFromRepository() = runTest {
         whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
                 .thenReturn(flowOf(true, true, false, false, true))
-        viewModel.stopCode = "123456"
+        val viewModel = createViewModel(stopCode = "123456")
 
         val observer = viewModel.isAutoRefreshLiveData.test()
         advanceUntilIdle()
@@ -225,8 +225,8 @@ class BusTimesFragmentViewModelTest {
         }.whenever(liveTimesFlowFactory).createLiveTimesFlow(any(), any(), any())
         whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
                 .thenReturn(flowOf(false))
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
         viewModel.isAutoRefreshLiveData.test()
@@ -250,8 +250,8 @@ class BusTimesFragmentViewModelTest {
         }.whenever(liveTimesFlowFactory).createLiveTimesFlow(any(), any(), any())
         whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
                 .thenReturn(flowOf(true))
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
         viewModel.isAutoRefreshLiveData.test()
@@ -265,7 +265,7 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun showProgressLiveDataEmitsNullWhenStopCodeIsNull() {
-        viewModel.stopCode = null
+        val viewModel = createViewModel(stopCode = null)
 
         val observer = viewModel.showProgressLiveData.test()
 
@@ -277,8 +277,8 @@ class BusTimesFragmentViewModelTest {
         givenExpandServicesReturnsEmptySet()
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flowOf(UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR)))
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.showProgressLiveData.test()
         advanceUntilIdle()
 
@@ -290,8 +290,8 @@ class BusTimesFragmentViewModelTest {
         givenExpandServicesReturnsEmptySet()
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flowOf(UiTransformedResult.Success(123L, emptyList())))
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.showProgressLiveData.test()
         advanceUntilIdle()
 
@@ -303,8 +303,8 @@ class BusTimesFragmentViewModelTest {
         givenExpandServicesReturnsEmptySet()
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flowOf(UiTransformedResult.InProgress))
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.showProgressLiveData.test()
         advanceUntilIdle()
 
@@ -321,8 +321,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.Success(123L, emptyList()))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(values)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.showProgressLiveData.test()
         advanceUntilIdle()
 
@@ -335,8 +335,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.InProgress)
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.errorLiveData.test()
         advanceUntilIdle()
 
@@ -352,8 +352,8 @@ class BusTimesFragmentViewModelTest {
                         listOf(mock())))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.errorLiveData.test()
         advanceUntilIdle()
 
@@ -366,8 +366,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.Success(123L, emptyList()))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.errorLiveData.test()
         advanceUntilIdle()
 
@@ -380,8 +380,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.errorLiveData.test()
         advanceUntilIdle()
 
@@ -401,8 +401,8 @@ class BusTimesFragmentViewModelTest {
         )
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.errorLiveData.test()
         advanceUntilIdle()
 
@@ -418,8 +418,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.Success(123L, emptyList()))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
 
@@ -433,8 +433,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.Success(123L, values))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
 
@@ -450,8 +450,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.Success(123L, values))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
 
@@ -464,8 +464,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.InProgress)
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
@@ -480,8 +480,8 @@ class BusTimesFragmentViewModelTest {
             UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
@@ -498,8 +498,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.Success(123L, listOf(mock())))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
@@ -517,8 +517,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.InProgress)
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
@@ -537,8 +537,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
@@ -557,8 +557,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.Success(123L, emptyList()))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
@@ -577,8 +577,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.InProgress)
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
@@ -599,8 +599,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.Success(123L, listOf(mock())))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
 
@@ -618,8 +618,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         viewModel.liveTimesLiveData.test()
         val errorObserver = viewModel.errorLiveData.test()
         val errorWithContentObserver = viewModel.errorWithContentLiveData.test()
@@ -635,8 +635,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.Success(123L, listOf(mock())))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         viewModel.liveTimesLiveData.test()
         val errorObserver = viewModel.errorLiveData.test()
         val errorWithContentObserver = viewModel.errorWithContentLiveData.test()
@@ -654,8 +654,8 @@ class BusTimesFragmentViewModelTest {
                 UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         viewModel.liveTimesLiveData.test()
         val errorObserver = viewModel.errorLiveData.test()
         val errorWithContentObserver = viewModel.errorWithContentLiveData.test()
@@ -673,8 +673,8 @@ class BusTimesFragmentViewModelTest {
         val flow = flowOf(UiTransformedResult.InProgress)
         whenever(liveTimesFlowFactory.createLiveTimesFlow(any(), any(), any()))
                 .thenReturn(flow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.lastRefreshLiveData.test()
         advanceUntilIdle()
 
@@ -693,8 +693,8 @@ class BusTimesFragmentViewModelTest {
                 LastRefreshTime.MoreThanOneHour)
         whenever(lastRefreshTimeCalculator.getLastRefreshTimeFlow(123L))
                 .thenReturn(lastRefreshFlow)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.lastRefreshLiveData.test()
         advanceUntilIdle()
 
@@ -727,8 +727,8 @@ class BusTimesFragmentViewModelTest {
                 .thenReturn(lastRefreshFlow1)
         whenever(lastRefreshTimeCalculator.getLastRefreshTimeFlow(125L))
                 .thenReturn(lastRefreshFlow2)
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.lastRefreshLiveData.test()
         advanceUntilIdle()
 
@@ -750,8 +750,8 @@ class BusTimesFragmentViewModelTest {
             stopCodeObserver.observe(stopCodeFlow)
             flowOf<UiTransformedResult>(loadResult)
         }.whenever(liveTimesFlowFactory).createLiveTimesFlow(any(), any(), any())
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
         viewModel.onRefreshMenuItemClicked()
@@ -765,6 +765,8 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun onSortMenuItemClickedTogglesSortByTime() {
+        val viewModel = createViewModel(stopCode = null)
+
         viewModel.onSortMenuItemClicked()
 
         verify(preferenceRepository)
@@ -773,6 +775,8 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun onAutoRefreshMenuItemClickedTogglesAutoRefresh() {
+        val viewModel = createViewModel(stopCode = null)
+
         viewModel.onAutoRefreshMenuItemClicked()
 
         verify(preferenceRepository)
@@ -789,8 +793,8 @@ class BusTimesFragmentViewModelTest {
             stopCodeObserver.observe(stopCodeFlow)
             flowOf<UiTransformedResult>(loadResult)
         }.whenever(liveTimesFlowFactory).createLiveTimesFlow(any(), any(), any())
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
         viewModel.onSwipeToRefresh()
@@ -805,6 +809,8 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun onParentItemClickedPassesItemToExpandedServicesTracker() {
+        val viewModel = createViewModel(stopCode = null)
+
         viewModel.onParentItemClicked("123")
 
         verify(expandedServicesTracker)
@@ -819,8 +825,8 @@ class BusTimesFragmentViewModelTest {
                 .thenReturn(flowOf(UiTransformedResult.Success(123L, emptyList())))
         whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
                 .thenReturn(flowOf(false))
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.isAutoRefreshLiveData.test()
         viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
@@ -841,8 +847,8 @@ class BusTimesFragmentViewModelTest {
                 .thenReturn(flowOf(UiTransformedResult.Success(123L, emptyList())))
         whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
                 .thenReturn(flowOf(true))
+        val viewModel = createViewModel(stopCode = "123456")
 
-        viewModel.stopCode = "123456"
         val observer = viewModel.isAutoRefreshLiveData.test()
         viewModel.liveTimesLiveData.test()
         advanceUntilIdle()
@@ -858,5 +864,21 @@ class BusTimesFragmentViewModelTest {
     private fun givenExpandServicesReturnsEmptySet() {
         whenever(expandedServicesTracker.expandedServicesLiveData)
                 .thenReturn(MutableLiveData(emptySet()))
+    }
+
+    private fun createViewModel(
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        stopCode: String?): BusTimesFragmentViewModel {
+        savedStateHandle[STATE_STOP_CODE] = stopCode
+
+        return BusTimesFragmentViewModel(
+            savedStateHandle,
+            expandedServicesTracker,
+            liveTimesFlowFactory,
+            lastRefreshTimeCalculator,
+            refreshController,
+            preferenceRepository,
+            connectivityRepository,
+            coroutineRule.testDispatcher)
     }
 }

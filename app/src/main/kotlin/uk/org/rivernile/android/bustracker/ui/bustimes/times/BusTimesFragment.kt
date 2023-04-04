@@ -57,20 +57,17 @@ class BusTimesFragment : Fragment() {
 
     companion object {
 
-        private const val EXTRA_STOP_CODE = "stopCode"
-
         /**
          * Creates a new instance of this [BusTimesFragment].
          *
          * @param stopCode The stop code to show bus times for.
          * @return A new instance of this [Fragment].
          */
-        fun newInstance(stopCode: String?) =
-                BusTimesFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(EXTRA_STOP_CODE, stopCode)
-                    }
-                }
+        fun newInstance(stopCode: String?) = BusTimesFragment().apply {
+            arguments = Bundle().apply {
+                putString(BusTimesFragmentViewModel.STATE_STOP_CODE, stopCode)
+            }
+        }
     }
 
     @Inject
@@ -92,17 +89,17 @@ class BusTimesFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.stopCode = arguments?.getString(EXTRA_STOP_CODE)
-
         adapter = LiveTimesAdapter(requireContext(), viewHolderFieldPopulator,
                 viewModel::onParentItemClicked)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?): View {
-        _viewBinding = FragmentBusTimesBinding.inflate(inflater, container, false)
-
-        return viewBinding.root
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?): View {
+        return FragmentBusTimesBinding.inflate(inflater, container, false).also {
+            _viewBinding = it
+        }.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
