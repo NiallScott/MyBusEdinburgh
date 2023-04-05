@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -58,17 +58,15 @@ class LiveTimesFlowFactoryTest {
     @Test
     fun createLiveTimesFlowPassesLiveTimesLoaderToLiveTimesTransform() {
         val stopCodeFlow = emptyFlow<String?>()
-        val expandedServicesFlow = emptyFlow<Set<String>>()
         val refreshTriggerFlow = emptyFlow<Unit>()
         val liveTimesFlow = emptyFlow<UiResult>()
         val expectedFlow = emptyFlow<UiTransformedResult>()
         whenever(liveTimesLoader.loadLiveTimesFlow(stopCodeFlow, refreshTriggerFlow))
                 .thenReturn(liveTimesFlow)
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow))
+        whenever(liveTimesTransform.getLiveTimesTransformFlow(liveTimesFlow))
                 .thenReturn(expectedFlow)
 
-        val result = factory.createLiveTimesFlow(stopCodeFlow, expandedServicesFlow,
-                refreshTriggerFlow)
+        val result = factory.createLiveTimesFlow(stopCodeFlow, refreshTriggerFlow)
 
         assertSame(expectedFlow, result)
     }

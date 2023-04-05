@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -42,11 +43,14 @@ import javax.inject.Inject
  * @param preferenceRepository Where the user preferences are stored. This class uses some user
  * preferences to affect the output in response to the user's preference.
  * @param transformations An implementation which performs the actual transformations.
+ * @param expandedServicesTracker Used to get user-expanded services.
  * @author Niall Scott
  */
+@ViewModelScoped
 class LiveTimesTransform @Inject constructor(
-        private val preferenceRepository: PreferenceRepository,
-        private val transformations: LiveTimesTransformations) {
+    private val preferenceRepository: PreferenceRepository,
+    private val transformations: LiveTimesTransformations,
+    private val expandedServicesTracker: ExpandedServicesTracker) {
 
     /**
      * Get a [Flow] which is the result of transforming the [UiResult] in to a
@@ -54,63 +58,53 @@ class LiveTimesTransform @Inject constructor(
      * preferences on to the [UiResult] and emit this as a [UiTransformedResult].
      *
      * @param liveTimesFlow The [Flow] of [UiResult] that will be transformed.
-     * @param expandedServicesFlow A [Flow] containing the [Set] of expanded services.
      * @return A [Flow] where the [UiResult] has been transformed in to a [UiTransformedResult].
      */
-    fun getLiveTimesTransformFlow(
-            liveTimesFlow: Flow<UiResult>,
-            expandedServicesFlow: Flow<Set<String>>): Flow<UiTransformedResult> {
-        return liveTimesFlow.combine(getParametersFlow(expandedServicesFlow)) { liveTimes, params ->
-            transformResult(liveTimes, params)
-        }
-    }
+    fun getLiveTimesTransformFlow(liveTimesFlow: Flow<UiResult>): Flow<UiTransformedResult> =
+        combine(
+            liveTimesFlow,
+            sortByTimeFlow,
+            showNightServicesFlow,
+            expandedServicesTracker.expandedServicesFlow,
+            this::transformResult)
 
     /**
-     * Get a [Flow] which contains the parameters which influence how the [Flow] of [UiResult] is
-     * transformed.
-     *
-     * @param expandedServicesFlow The [Flow] which contains which services have been expanded.
-     * @return A [Flow] containing the transformation parameters.
+     * A [Flow] which emits the user's sorting preference.
      */
-    private fun getParametersFlow(expandedServicesFlow: Flow<Set<String>>) =
-            combine(
-                    getSortByTimeFlow(),
-                    getShowNightServicesFlow(),
-                    expandedServicesFlow) { sortByTime, showNightServices, expandedServices ->
-                Parameters(sortByTime, showNightServices, expandedServices)
-            }
+    private val sortByTimeFlow get() = preferenceRepository
+        .isLiveTimesSortByTimeFlow()
+        .distinctUntilChanged()
 
     /**
-     * Get the [Flow] which emits the user's sorting preference.
-     *
-     * @return The [Flow] which emits the user's sorting preference.
+     * A [Flow] which emits the user's night services preference.
      */
-    private fun getSortByTimeFlow() =
-            // Distinct so that unnecessary computations are not carried out.
-            preferenceRepository.isLiveTimesSortByTimeFlow().distinctUntilChanged()
-
-    /**
-     * Get the [Flow] which emits the user's night services preference.
-     *
-     * @return The [Flow] which emits the user's night services preference.
-     */
-    private fun getShowNightServicesFlow() =
-            // Distinct so that unnecessary computations are not carried out.
-            preferenceRepository.isLiveTimesShowNightServicesEnabledFlow().distinctUntilChanged()
+    private val showNightServicesFlow get() = preferenceRepository
+        .isLiveTimesShowNightServicesEnabledFlow()
+        .distinctUntilChanged()
 
     /**
      * Given a [UiResult], transform this in to a [UiTransformedResult].
      *
      * @param result The [UiResult] from upstream.
-     * @param parameters The parameters to apply to the [UiResult].
+     * @param sortByTime Whether the services should be sorted by time (or by service name).
+     * @param showNightServices Whether night services should be shown.
+     * @param expandedServices A [Set] containing the names of expanded services.
      * @return The produced [UiTransformedResult].
      */
     private fun transformResult(
-            result: UiResult,
-            parameters: Parameters) = when (result) {
-        is UiResult.InProgress -> UiTransformedResult.InProgress
-        is UiResult.Success -> mapSuccess(result, parameters)
-        is UiResult.Error -> mapError(result)
+        result: UiResult,
+        sortByTime: Boolean,
+        showNightServices: Boolean,
+        expandedServices: Set<String>): UiTransformedResult {
+        return when (result) {
+            is UiResult.InProgress -> UiTransformedResult.InProgress
+            is UiResult.Success -> mapSuccess(
+                result,
+                sortByTime,
+                showNightServices,
+                expandedServices)
+            is UiResult.Error -> mapError(result)
+        }
     }
 
     /**
@@ -121,22 +115,32 @@ class LiveTimesTransform @Inject constructor(
      * [UiTransformedResult.Error].
      *
      * @param success The upstream [UiResult.Success].
-     * @param parameters The parameters required to know what transformations to perform on the
-     * data.
+     * @param sortByTime Whether the services should be sorted by time (or by service name).
+     * @param showNightServices Whether night services should be shown.
+     * @param expandedServices A [Set] containing the names of expanded services.
      * @return The calculated [UiTransformedResult].
      */
     private fun mapSuccess(
-            success: UiResult.Success,
-            parameters: Parameters): UiTransformedResult {
-        return success.stop.services.let {
-            transformations.filterNightServices(it, parameters.showNightServices)
-        }.let {
-            transformations.sortServices(it, parameters.sortByTime)
-        }.let {
-            transformations.applyExpansions(it, parameters.expandedServices)
-        }.ifEmpty { null }?.let {
-            UiTransformedResult.Success(success.receiveTime, it)
-        } ?: UiTransformedResult.Error(success.receiveTime, ErrorType.NO_DATA)
+        success: UiResult.Success,
+        sortByTime: Boolean,
+        showNightServices: Boolean,
+        expandedServices: Set<String>): UiTransformedResult {
+        return success
+            .stop
+            .services
+            .let {
+                transformations.filterNightServices(it, showNightServices)
+            }
+            .let {
+                transformations.sortServices(it, sortByTime)
+            }
+            .let {
+                transformations.applyExpansions(it, expandedServices)
+            }
+            .ifEmpty { null }
+            ?.let {
+                UiTransformedResult.Success(success.receiveTime, it)
+            } ?: UiTransformedResult.Error(success.receiveTime, ErrorType.NO_DATA)
     }
 
     /**
@@ -146,14 +150,5 @@ class LiveTimesTransform @Inject constructor(
      * @return The error mapped to a [UiTransformedResult.Error].
      */
     private fun mapError(error: UiResult.Error) =
-            UiTransformedResult.Error(error.receiveTime, error.error)
-
-    /**
-     * This class is used to store resolved parameters while in transition through the [Flow]
-     * operators.
-     */
-    private data class Parameters(
-            val sortByTime: Boolean,
-            val showNightServices: Boolean,
-            val expandedServices: Set<String>)
+        UiTransformedResult.Error(error.receiveTime, error.error)
 }

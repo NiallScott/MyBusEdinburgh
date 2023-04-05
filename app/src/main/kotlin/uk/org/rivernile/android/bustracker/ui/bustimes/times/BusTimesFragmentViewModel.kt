@@ -339,7 +339,6 @@ class BusTimesFragmentViewModel @Inject constructor(
     private fun createLiveTimesFlow(): Flow<UiTransformedResult> {
         return liveTimesFlowFactory.createLiveTimesFlow(
                 stopCodeFlow,
-                expandedServicesTracker.expandedServicesFlow,
                 refreshController.refreshTriggerReceiveChannel.consumeAsFlow())
                 .transformLatest {
                     emit(it) // Emit first so that the value is immediately available.

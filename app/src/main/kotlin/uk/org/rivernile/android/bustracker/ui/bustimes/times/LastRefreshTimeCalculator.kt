@@ -27,11 +27,13 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 /**
  * This class calculates the last refresh time to show to the user and emits updates via a
@@ -41,7 +43,7 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class LastRefreshTimeCalculator @Inject constructor(
-        private val timeUtils: TimeUtils) {
+    private val timeUtils: TimeUtils) {
 
     private companion object {
 
@@ -62,6 +64,7 @@ class LastRefreshTimeCalculator @Inject constructor(
     fun getLastRefreshTimeFlow(refreshTime: Long): Flow<LastRefreshTime> = flow {
         if (refreshTime > 0) {
             while (true) {
+                coroutineContext.ensureActive()
                 val lastRefreshTime = calculateLastRefreshTime(refreshTime)
                 emit(lastRefreshTime)
 

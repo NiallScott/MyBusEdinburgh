@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,8 +39,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class LiveTimesTransformations @Inject constructor(
-        private val isNightServiceDetector: IsNightServiceDetector,
-        private val serviceComparator: Comparator<String>) {
+    private val isNightServiceDetector: IsNightServiceDetector,
+    private val serviceComparator: Comparator<String>) {
 
     /**
      * Given a [List] of [UiService]s, remove night services if the user has set this preference,
@@ -53,12 +53,14 @@ class LiveTimesTransformations @Inject constructor(
      */
     fun filterNightServices(
             services: List<UiService>,
-            showNightServices: Boolean) = if (!showNightServices) {
-        services.filterNot {
-            isNightServiceDetector.isNightService(it.serviceName)
+            showNightServices: Boolean): List<UiService> {
+        return if (!showNightServices) {
+            services.filterNot {
+                isNightServiceDetector.isNightService(it.serviceName)
+            }
+        } else {
+            services
         }
-    } else {
-        services
     }
 
     /**
@@ -68,8 +70,8 @@ class LiveTimesTransformations @Inject constructor(
      * @param sortByTime `true` if the user wants to sort by time, otherwise `false`.
      */
     fun sortServices(
-            services: List<UiService>,
-            sortByTime: Boolean): List<UiService> {
+        services: List<UiService>,
+        sortByTime: Boolean): List<UiService> {
         val uiServiceComparator = compareBy(serviceComparator, UiService::serviceName)
 
         return if (sortByTime) {
@@ -93,8 +95,8 @@ class LiveTimesTransformations @Inject constructor(
      * applied.
      */
     fun applyExpansions(
-            services: List<UiService>,
-            expandedServices: Set<String>): List<UiLiveTimesItem> {
+        services: List<UiService>,
+        expandedServices: Set<String>): List<UiLiveTimesItem> {
         val mappedServices = mutableListOf<UiLiveTimesItem>()
 
         services.forEach { service ->

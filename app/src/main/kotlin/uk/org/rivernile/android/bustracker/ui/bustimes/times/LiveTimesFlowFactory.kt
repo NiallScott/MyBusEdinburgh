@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -38,6 +39,7 @@ import javax.inject.Inject
  * correct state for the UI.
  * @author Niall Scott
  */
+@ViewModelScoped
 class LiveTimesFlowFactory @Inject constructor(
         private val liveTimesLoader: LiveTimesLoader,
         private val liveTimesTransform: LiveTimesTransform) {
@@ -49,16 +51,14 @@ class LiveTimesFlowFactory @Inject constructor(
      * the data so it is in the correct state for the UI.
      *
      * @param stopCodeFlow A [Flow] of stop codes.
-     * @param expandedServicesFlow A [Flow] of the expanded services.
      * @param refreshTriggerFlow A [Flow] where refresh request items are emitted from.
      * @return A [Flow] which emits [UiTransformedResult] items, based on current state.
      */
     fun createLiveTimesFlow(
             stopCodeFlow: Flow<String?>,
-            expandedServicesFlow: Flow<Set<String>>,
             refreshTriggerFlow: Flow<Unit>): Flow<UiTransformedResult> {
         val liveTimesFlow = liveTimesLoader.loadLiveTimesFlow(stopCodeFlow, refreshTriggerFlow)
 
-        return liveTimesTransform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
+        return liveTimesTransform.getLiveTimesTransformFlow(liveTimesFlow)
     }
 }

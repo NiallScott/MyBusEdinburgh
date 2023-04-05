@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,6 +45,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
@@ -63,6 +64,8 @@ class LiveTimesTransformTest {
     private lateinit var preferenceRepository: PreferenceRepository
     @Mock
     private lateinit var transformations: LiveTimesTransformations
+    @Mock
+    private lateinit var expandedServicesTracker: ExpandedServicesTracker
 
     @Mock
     private lateinit var uiStop: UiStop
@@ -77,7 +80,10 @@ class LiveTimesTransformTest {
 
     @Before
     fun setUp() {
-        transform = LiveTimesTransform(preferenceRepository, transformations)
+        transform = LiveTimesTransform(
+            preferenceRepository,
+            transformations,
+            expandedServicesTracker)
 
         whenever(uiStop.services)
                 .thenReturn(uiServices1)
@@ -86,11 +92,11 @@ class LiveTimesTransformTest {
     @Test
     fun getLiveTimesTransformFlowWithInProgressYieldsInProgress() = runTest {
         givenPreferencesReturnsFlowWithNominalValues()
-        val expandedServicesFlow = flowOf(emptySet<String>())
+        whenever(expandedServicesTracker.expandedServicesFlow)
+            .thenReturn(flowOf(emptySet()))
         val liveTimesFlow = flowOf(UiResult.InProgress)
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
-                .test(this)
+        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -100,230 +106,225 @@ class LiveTimesTransformTest {
     @Test
     fun getLiveTimesTransformFlowWithErrorYieldsError() = runTest {
         givenPreferencesReturnsFlowWithNominalValues()
-        val expandedServicesFlow = flowOf(emptySet<String>())
-        val liveTimesFlow = flow {
-            delay(100L)
-            emit(UiResult.InProgress)
-            emit(UiResult.Error(123L, ErrorType.SERVER_ERROR))
-        }
+        val liveTimesFlow = intervalFlowOf(
+            100L,
+            10L,
+            UiResult.InProgress,
+            UiResult.Error(123L, ErrorType.SERVER_ERROR))
+        whenever(expandedServicesTracker.expandedServicesFlow)
+            .thenReturn(flowOf(emptySet()))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
-                .test(this)
+        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
         advanceTimeBy(1000L)
         observer.finish()
 
         observer.assertValues(
-                UiTransformedResult.InProgress,
-                UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
+            UiTransformedResult.InProgress,
+            UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
     }
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessResultingInEmptyResultYieldsNoDataError() = runTest {
         givenPreferencesReturnsFlowWithNominalValues()
-        val expandedServicesFlow = flowOf(emptySet<String>())
-        val liveTimesFlow = flow {
-            delay(100L)
-            emit(UiResult.InProgress)
-            emit(UiResult.Success(123L, uiStop))
-        }
+        val liveTimesFlow = intervalFlowOf(
+            100L,
+            10L,
+            UiResult.InProgress,
+            UiResult.Success(123L, uiStop))
+        whenever(expandedServicesTracker.expandedServicesFlow)
+            .thenReturn(flowOf(emptySet()))
         whenever(transformations.filterNightServices(uiServices1, false))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices1, false))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.applyExpansions(uiServices1, emptySet()))
-                .thenReturn(emptyList())
+            .thenReturn(emptyList())
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
-                .test(this)
+        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
         advanceTimeBy(1000L)
         observer.finish()
 
         observer.assertValues(
-                UiTransformedResult.InProgress,
-                UiTransformedResult.Error(123L, ErrorType.NO_DATA))
+            UiTransformedResult.InProgress,
+            UiTransformedResult.Error(123L, ErrorType.NO_DATA))
     }
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessAndResultingInNonEmptyListYieldsSuccess() = runTest {
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
-                .thenReturn(flowOf(true))
-        val expandedServicesFlow = flowOf(setOf("1"))
-        val liveTimesFlow = flow {
-            delay(100L)
-            emit(UiResult.InProgress)
-            emit(UiResult.Success(123L, uiStop))
-        }
+            .thenReturn(flowOf(true))
+        val liveTimesFlow = intervalFlowOf(
+            100L,
+            10L,
+            UiResult.InProgress,
+            UiResult.Success(123L, uiStop))
+        whenever(expandedServicesTracker.expandedServicesFlow)
+            .thenReturn(flowOf(setOf("1")))
         whenever(transformations.filterNightServices(uiServices1, true))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices1, true))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.applyExpansions(uiServices1, setOf("1")))
-                .thenReturn(listOf(uiLiveTimesItem1))
+            .thenReturn(listOf(uiLiveTimesItem1))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
-                .test(this)
+        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
         advanceTimeBy(1000L)
         observer.finish()
 
         observer.assertValues(
-                UiTransformedResult.InProgress,
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)))
+            UiTransformedResult.InProgress,
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)))
     }
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessCopesWithUpstreamRefresh() = runTest {
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
-                .thenReturn(flowOf(true))
-        val expandedServicesFlow = flowOf(setOf("1"))
-        val liveTimesFlow = flow {
-            delay(100L)
-            emit(UiResult.InProgress)
-            emit(UiResult.Success(123L, uiStop))
-            delay(100L)
-            emit(UiResult.InProgress)
-            emit(UiResult.Success(123L, mock()))
-        }
+            .thenReturn(flowOf(true))
+        val liveTimesFlow = intervalFlowOf(
+            100L,
+            10L,
+            UiResult.InProgress,
+            UiResult.Success(123L, uiStop),
+            UiResult.InProgress,
+            UiResult.Success(123L, mock()))
+        whenever(expandedServicesTracker.expandedServicesFlow)
+            .thenReturn(flowOf(setOf("1")))
         whenever(transformations.filterNightServices(any(), eq(true)))
-                .thenReturn(uiServices1, uiServices2)
+            .thenReturn(uiServices1, uiServices2)
         whenever(transformations.sortServices(any(), eq(true)))
-                .thenReturn(uiServices1, uiServices2)
+            .thenReturn(uiServices1, uiServices2)
         whenever(transformations.applyExpansions(any(), eq(setOf("1"))))
-                .thenReturn(listOf(uiLiveTimesItem1), listOf(uiLiveTimesItem2))
+            .thenReturn(listOf(uiLiveTimesItem1), listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
-                .test(this)
+        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
         advanceTimeBy(1000L)
         observer.finish()
 
         observer.assertValues(
-                UiTransformedResult.InProgress,
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
-                UiTransformedResult.InProgress,
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
+            UiTransformedResult.InProgress,
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
+            UiTransformedResult.InProgress,
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
     }
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessCopesWithNightServicePreferenceChange() = runTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
-                .thenReturn(flow {
-                    emit(false)
-                    delay(200L)
-                    emit(true)
-                })
+            .thenReturn(flow {
+                emit(false)
+                delay(200L)
+                emit(true)
+            })
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
                 .thenReturn(flowOf(false))
-        val expandedServicesFlow = flowOf(setOf("1"))
-        val liveTimesFlow = flow {
-            delay(100L)
-            emit(UiResult.InProgress)
-            emit(UiResult.Success(123L, uiStop))
-        }
+        val liveTimesFlow = intervalFlowOf(
+            100L,
+            10L,
+            UiResult.InProgress,
+            UiResult.Success(123L, uiStop))
+        whenever(expandedServicesTracker.expandedServicesFlow)
+            .thenReturn(flowOf(setOf("1")))
         whenever(transformations.filterNightServices(uiServices1, false))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.filterNightServices(uiServices1, true))
-                .thenReturn(uiServices2)
+            .thenReturn(uiServices2)
         whenever(transformations.sortServices(uiServices1, false))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices2, false))
-                .thenReturn(uiServices2)
+            .thenReturn(uiServices2)
         whenever(transformations.applyExpansions(uiServices1, setOf("1")))
-                .thenReturn(listOf(uiLiveTimesItem1))
+            .thenReturn(listOf(uiLiveTimesItem1))
         whenever(transformations.applyExpansions(uiServices2, setOf("1")))
-                .thenReturn(listOf(uiLiveTimesItem2))
+            .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
-                .test(this)
+        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
         advanceTimeBy(1000L)
         observer.finish()
 
         observer.assertValues(
-                UiTransformedResult.InProgress,
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
+            UiTransformedResult.InProgress,
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
     }
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessCopesWithSortingPreferenceChange() = runTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
-                .thenReturn(flowOf(false))
+            .thenReturn(flowOf(false))
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-                .thenReturn(flow {
-                    emit(false)
-                    delay(200L)
-                    emit(true)
-                })
-        val expandedServicesFlow = flowOf(setOf("1"))
-        val liveTimesFlow = flow {
-            delay(100L)
-            emit(UiResult.InProgress)
-            emit(UiResult.Success(123L, uiStop))
-        }
+            .thenReturn(flow {
+                emit(false)
+                delay(200L)
+                emit(true)
+            })
+        val liveTimesFlow = intervalFlowOf(
+            100L,
+            10L,
+            UiResult.InProgress,
+            UiResult.Success(123L, uiStop))
+        whenever(expandedServicesTracker.expandedServicesFlow)
+            .thenReturn(flowOf(setOf("1")))
         whenever(transformations.filterNightServices(uiServices1, false))
-                .thenReturn(uiServices1, uiServices2)
+            .thenReturn(uiServices1, uiServices2)
         whenever(transformations.sortServices(uiServices1, false))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices2, true))
-                .thenReturn(uiServices2)
+            .thenReturn(uiServices2)
         whenever(transformations.applyExpansions(uiServices1, setOf("1")))
-                .thenReturn(listOf(uiLiveTimesItem1))
+            .thenReturn(listOf(uiLiveTimesItem1))
         whenever(transformations.applyExpansions(uiServices2, setOf("1")))
-                .thenReturn(listOf(uiLiveTimesItem2))
+            .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
-                .test(this)
+        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
         advanceTimeBy(1000L)
         observer.finish()
 
         observer.assertValues(
-                UiTransformedResult.InProgress,
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
+            UiTransformedResult.InProgress,
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
     }
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessCopesWithExpandedServicesChange() = runTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
-                .thenReturn(flowOf(false))
+            .thenReturn(flowOf(false))
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-                .thenReturn(flowOf(false))
-        val expandedServicesFlow = flow {
-            emit(setOf("1"))
-            delay(200L)
-            emit(setOf("1", "2"))
-        }
-        val liveTimesFlow = flow {
-            delay(100L)
-            emit(UiResult.InProgress)
-            emit(UiResult.Success(123L, uiStop))
-        }
+            .thenReturn(flowOf(false))
+        val liveTimesFlow = intervalFlowOf(
+            100L,
+            10L,
+            UiResult.InProgress,
+            UiResult.Success(123L, uiStop))
+        whenever(expandedServicesTracker.expandedServicesFlow)
+            .thenReturn(intervalFlowOf(0L, 200L, setOf("1"), setOf("1", "2")))
         whenever(transformations.filterNightServices(uiServices1, false))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.sortServices(uiServices1, false))
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
         whenever(transformations.applyExpansions(uiServices1, setOf("1")))
-                .thenReturn(listOf(uiLiveTimesItem1))
+            .thenReturn(listOf(uiLiveTimesItem1))
         whenever(transformations.applyExpansions(uiServices1, setOf("1", "2")))
-                .thenReturn(listOf(uiLiveTimesItem2))
+            .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow, expandedServicesFlow)
-                .test(this)
+        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
         advanceTimeBy(1000L)
         observer.finish()
 
         observer.assertValues(
-                UiTransformedResult.InProgress,
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
-                UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
+            UiTransformedResult.InProgress,
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
+            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
     }
 
     private fun givenPreferencesReturnsFlowWithNominalValues() {
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-                .thenReturn(flowOf(false))
+            .thenReturn(flowOf(false))
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
-                .thenReturn(flowOf(false))
+            .thenReturn(flowOf(false))
     }
 }
