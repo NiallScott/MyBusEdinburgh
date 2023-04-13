@@ -44,7 +44,6 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
@@ -107,15 +106,33 @@ class BusTimesFragmentViewModelTest {
     }
 
     @Test
-    fun isSortedByTimeEmitsNullWhenStopCodeIsNull() = runTest {
+    fun isSortedByTimeEnabledEmitsFalseWhenStopCodeIsNull() = runTest {
         val viewModel = createViewModel(stopCode = null)
 
-        val observer = viewModel.isSortedByTimeLiveData.test()
+        val observer = viewModel.isSortedByTimeEnabledLiveData.test()
         advanceUntilIdle()
 
-        observer.assertValues(null)
-        verify(preferenceRepository, never())
-                .isLiveTimesSortByTimeFlow()
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isSortedByTimeEnabledEmitsFalseWhenStopCodeIsEmpty() = runTest {
+        val viewModel = createViewModel(stopCode = "")
+
+        val observer = viewModel.isSortedByTimeEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isSortedByTimeEnabledEmitsTrueWhenStopCodeIsNotNull() = runTest {
+        val viewModel = createViewModel(stopCode = "123456")
+
+        val observer = viewModel.isSortedByTimeEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(true)
     }
 
     @Test
@@ -143,15 +160,33 @@ class BusTimesFragmentViewModelTest {
     }
 
     @Test
-    fun isAutoRefreshEmitsNullWhenStopCodeIsNull() = runTest {
+    fun isAutoRefreshEnabledEmitsFalseWhenStopCodeIsNull() = runTest {
         val viewModel = createViewModel(stopCode = null)
 
-        val observer = viewModel.isAutoRefreshLiveData.test()
+        val observer = viewModel.isAutoRefreshEnabledLiveData.test()
         advanceUntilIdle()
 
-        observer.assertValues(null)
-        verify(preferenceRepository, never())
-                .isLiveTimesAutoRefreshEnabledFlow()
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isAutoRefreshEnabledEmitsFalseWhenStopCodeIsEmpty() = runTest {
+        val viewModel = createViewModel(stopCode = "")
+
+        val observer = viewModel.isAutoRefreshEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun isAutoRefreshEnabledEmitsTrueWhenStopCodeIsNotNull() = runTest {
+        val viewModel = createViewModel(stopCode = "123456")
+
+        val observer = viewModel.isAutoRefreshEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(true)
     }
 
     @Test

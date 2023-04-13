@@ -119,9 +119,12 @@ class BusTimesFragment : Fragment() {
 
         val viewLifecycle = viewLifecycleOwner
         viewModel.hasConnectivityLiveData.observe(viewLifecycle, this::handleConnectivityChange)
-        viewModel.isSortedByTimeLiveData.observe(viewLifecycle,
-                this::setSortedByTimeActionItemState)
-        viewModel.isAutoRefreshLiveData.observe(viewLifecycle, this::setAutoRefreshActionItemState)
+        viewModel.isSortedByTimeLiveData.observe(viewLifecycle, this::handleSortedByTimeChanged)
+        viewModel.isSortedByTimeEnabledLiveData.observe(viewLifecycle,
+            this::handleSortedByTimeEnabledChanged)
+        viewModel.isAutoRefreshLiveData.observe(viewLifecycle, this::handleAutoRefreshChanged)
+        viewModel.isAutoRefreshEnabledLiveData.observe(viewLifecycle,
+            this::handleAutoRefreshEnabledChanged)
         viewModel.showProgressLiveData.observe(viewLifecycle, this::handleShowProgress)
         viewModel.errorLiveData.observe(viewLifecycle, this::handleError)
         viewModel.liveTimesLiveData.observe(viewLifecycle, adapter::submitList)
@@ -273,34 +276,45 @@ class BusTimesFragment : Fragment() {
     /**
      * Update the state of the sorted by time/service [MenuItem].
      *
-     * @param isSortedByTime The current sort by time/service state. `null` means the [MenuItem]
-     * will be disabled.
+     * @param isSortedByTime The current sort by time/service state.
      */
-    private fun setSortedByTimeActionItemState(isSortedByTime: Boolean?) {
+    private fun handleSortedByTimeChanged(isSortedByTime: Boolean) {
         menuItemSort?.apply {
-            isEnabled = isSortedByTime != null
-
-            if (isSortedByTime == true) {
+            if (isSortedByTime) {
                 setTitle(R.string.bustimes_menu_sort_service)
-                        .setIcon(R.drawable.ic_action_sort_by_size)
+                setIcon(R.drawable.ic_action_sort_by_size)
             } else {
                 setTitle(R.string.bustimes_menu_sort_times)
-                        .setIcon(R.drawable.ic_action_time)
+                setIcon(R.drawable.ic_action_time)
             }
         }
     }
 
     /**
+     * Handle the enabled state changing of the sorted by time option.
+     *
+     * @param isEnabled Is the sorted by time option enabled?
+     */
+    private fun handleSortedByTimeEnabledChanged(isEnabled: Boolean) {
+        menuItemSort?.isEnabled = isEnabled
+    }
+
+    /**
      * Update the state of the auto refresh [MenuItem].
      *
-     * @param autoRefreshEnabled The current auto refresh state. `null` means the [MenuItem] will be
-     * disabled.
+     * @param autoRefresh The current auto refresh state.
      */
-    private fun setAutoRefreshActionItemState(autoRefreshEnabled: Boolean?) {
-        menuItemAutoRefresh?.apply {
-            isEnabled = autoRefreshEnabled != null
-            isChecked = autoRefreshEnabled ?: false
-        }
+    private fun handleAutoRefreshChanged(autoRefresh: Boolean) {
+        menuItemAutoRefresh?.isChecked = autoRefresh
+    }
+
+    /**
+     * Handle the enabled state changing of the auto refresh option.
+     *
+     * @param isEnabled Is the auto refresh option enabled?
+     */
+    private fun handleAutoRefreshEnabledChanged(isEnabled: Boolean) {
+        menuItemAutoRefresh?.isEnabled = isEnabled
     }
 
     /**
@@ -356,8 +370,10 @@ class BusTimesFragment : Fragment() {
 
         override fun onPrepareMenu(menu: Menu) {
             setRefreshActionItemLoadingState(viewModel.showProgressLiveData.value)
-            setSortedByTimeActionItemState(viewModel.isSortedByTimeLiveData.value)
-            setAutoRefreshActionItemState(viewModel.isAutoRefreshLiveData.value)
+            handleSortedByTimeChanged(viewModel.isSortedByTimeLiveData.value ?: false)
+            handleSortedByTimeEnabledChanged(viewModel.isSortedByTimeEnabledLiveData.value ?: false)
+            handleAutoRefreshChanged(viewModel.isAutoRefreshLiveData.value ?: false)
+            handleAutoRefreshEnabledChanged(viewModel.isAutoRefreshEnabledLiveData.value ?: false)
         }
 
         override fun onMenuItemSelected(menuItem: MenuItem) = when (menuItem.itemId) {

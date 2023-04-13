@@ -41,9 +41,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
@@ -122,29 +121,42 @@ class BusTimesFragmentViewModel @Inject constructor(
      * This [LiveData] exposes whether the live times are currently sorted by time or by service
      * name. This is based on the user preference from [PreferenceRepository]. This will emit
      * distinct values.
-     *
-     * If there is no set stop code, this will emit `null`.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val isSortedByTimeLiveData = arguments
-        .stopCodeFlow
-        .flatMapLatest(this::loadIsSortedByTime)
+    val isSortedByTimeLiveData = preferenceRepository
+        .isLiveTimesSortByTimeFlow()
         .distinctUntilChanged()
         .flowOn(defaultDispatcher)
         .asLiveData(viewModelScope.coroutineContext)
 
     /**
+     * This [LiveData] emits whether the sorted by time item is enabled or not.
+     */
+    val isSortedByTimeEnabledLiveData = arguments
+        .stopCodeFlow
+        .map { !it.isNullOrEmpty() }
+        .distinctUntilChanged()
+        .asLiveData(viewModelScope.coroutineContext)
+
+    /**
      * This [LiveData] exposes whether auto refresh is enabled or not. This is based on the user
      * preference from [PreferenceRepository]. This will emit distinct values.
-     *
-     * If there is no set stop code, this will emit `null`.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val isAutoRefreshLiveData = arguments
-        .stopCodeFlow
-        .flatMapLatest(this::loadIsAutoRefresh)
+    val isAutoRefreshLiveData = preferenceRepository
+        .isLiveTimesAutoRefreshEnabledFlow()
         .distinctUntilChanged()
+        .onEach {
+            refreshController.onAutoRefreshPreferenceChanged(liveTimes.value, it)
+        }
         .flowOn(defaultDispatcher)
+        .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits whether the auto refresh item is enabled or not.
+     */
+    val isAutoRefreshEnabledLiveData = arguments
+        .stopCodeFlow
+        .map { !it.isNullOrEmpty() }
+        .distinctUntilChanged()
         .asLiveData(viewModelScope.coroutineContext)
 
     /**
@@ -370,23 +382,4 @@ class BusTimesFragmentViewModel @Inject constructor(
             UiState.ERROR
         } ?: if (isInProgress == true) UiState.PROGRESS else null
     }
-
-    /**
-     * Load whether we're sorting by time or not.
-     *
-     * @param stopCode The currently set stop code.
-     * @return `true` if we're sorting by time, `false` if we're sorting by service, `null` if the
-     * stop code is not known.
-     */
-    private fun loadIsSortedByTime(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
-        preferenceRepository.isLiveTimesSortByTimeFlow()
-    } ?: flowOf(null)
-
-    private fun loadIsAutoRefresh(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
-        preferenceRepository.isLiveTimesAutoRefreshEnabledFlow()
-            .distinctUntilChanged() // Prevent unnecessary processing
-            .onEach {
-                refreshController.onAutoRefreshPreferenceChanged(liveTimes.value, it)
-            }
-    } ?: flowOf(null)
 }
