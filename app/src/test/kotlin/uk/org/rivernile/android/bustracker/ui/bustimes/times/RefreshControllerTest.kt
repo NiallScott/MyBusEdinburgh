@@ -71,18 +71,18 @@ class RefreshControllerTest {
 
     @Test
     fun setActiveStateDoesNotCauseRefreshWhenNotActive() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(false)
         advanceUntilIdle()
         observer.finish()
 
-        observer.assertEmpty()
+        observer.assertNoValues()
     }
 
     @Test
     fun setActiveStateCausesRefreshOnFirstActive() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         advanceUntilIdle()
@@ -93,7 +93,7 @@ class RefreshControllerTest {
 
     @Test
     fun setActiveStateDoesNotCauseRefreshOnSubsequentActive() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         controller.setActiveState(false)
@@ -106,7 +106,7 @@ class RefreshControllerTest {
 
     @Test
     fun setActiveStateCausesRefreshIfPendingRefreshWhenActive() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         advanceUntilIdle()
@@ -123,7 +123,7 @@ class RefreshControllerTest {
 
     @Test
     fun requestRefreshDoesNotCauseRefreshWhenNotActive() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         controller.setActiveState(false)
@@ -136,7 +136,7 @@ class RefreshControllerTest {
 
     @Test
     fun requestRefreshCausesRefreshWhenActive() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         advanceUntilIdle()
@@ -150,7 +150,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsNullAndEnabledIsFalse() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(null, false)
@@ -163,7 +163,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsNullAndEnabledIsTrue() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(null, true)
@@ -176,7 +176,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsInProgressAndEnabledIsFalse() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(UiTransformedResult.InProgress, false)
@@ -189,7 +189,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsInProgressAndEnabledIsTrue() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         controller.onAutoRefreshPreferenceChanged(UiTransformedResult.InProgress, true)
@@ -202,7 +202,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsErrorAndEnabledIsFalseAndDelayLessThanInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120001L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
@@ -218,7 +218,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsErrorAndEnabledIsFalseAndDelayEqualsInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
@@ -234,7 +234,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsErrorAndEnabledIsFalseAndDelayMoreThanInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
@@ -250,7 +250,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsErrorAndEnabledIsTrueAndDelayLessThanInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120001L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
@@ -266,7 +266,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedCauseRefreshWhenResultIsErrorAndEnabledIsTrueAndDelayEqualsInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
@@ -283,7 +283,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedCauseRefreshWhenResultIsErrorAndEnabledIsTrueAndDelayMoreThanInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 ErrorType.SERVER_ERROR)
@@ -300,7 +300,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsSuccessAndEnabledFalseAndDelayLessThanInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120001L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
@@ -315,7 +315,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsSuccessAndEnabledIsFalseAndDelayEqualsInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
@@ -330,7 +330,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsSuccessAndEnabledFalseAndDelayMoreThanInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
@@ -345,7 +345,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedDoesNotCauseRefreshWhenResultIsSuccessAndEnabledTrueAndDelayLessThanInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120001L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
@@ -360,7 +360,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedCausesRefreshWhenResultIsSuccessAndEnabledIsTrueAndDelayEqualsInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
@@ -376,7 +376,7 @@ class RefreshControllerTest {
     @Test
     fun onAutoRefreshPreferenceChangedCausesRefreshWhenResultIsSuccessAndEnabledIsTrueAndDelayMoreThanInterval() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 emptyList())
@@ -392,7 +392,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayDoesNotCauseRefreshWhenResultIsInProgress() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
         controller.performAutoRefreshDelay(UiTransformedResult.InProgress) { true }
@@ -405,7 +405,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsErrorAndCalculatedDelayIsNegative() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 ErrorType.SERVER_ERROR)
@@ -424,7 +424,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsNegativeAndPredicateIsTrue() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 ErrorType.SERVER_ERROR)
@@ -444,7 +444,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsErrorAndCalculatedDelayIsZero() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
@@ -463,7 +463,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsZeroAndPredicateIsTrue() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
                 ErrorType.SERVER_ERROR)
@@ -482,7 +482,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayDelaysWhenResultIsErrorAndCalculatedDelayIsPositive() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
                 ErrorType.SERVER_ERROR)
@@ -501,7 +501,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsPositiveAndPredicateIsTrue() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
                 ErrorType.SERVER_ERROR)
@@ -520,7 +520,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsSuccessAndCalculatedDelayIsNegative() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 emptyList())
@@ -539,7 +539,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsNegative() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
                 emptyList())
@@ -559,7 +559,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsSuccessAndCalculatedDelayIsZero() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
@@ -577,7 +577,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsZero() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
@@ -595,7 +595,7 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayDelaysWhenResultIsSuccessAndCalculatedDelayIsPositive() = runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
                 emptyList())
@@ -614,7 +614,7 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsPositive() =
             runTest {
-        val observer = controller.refreshTriggerReceiveChannel.test(this)
+        val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
                 emptyList())

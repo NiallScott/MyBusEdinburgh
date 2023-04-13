@@ -26,9 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.consumeAsFlow
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -39,6 +40,7 @@ import javax.inject.Inject
  * @param timeUtils Used to provide timestamps.
  * @author Niall Scott
  */
+@ViewModelScoped
 class RefreshController @Inject constructor(
         private val timeUtils: TimeUtils) {
 
@@ -48,10 +50,10 @@ class RefreshController @Inject constructor(
     }
 
     /**
-     * This [ReceiveChannel] is used to trigger refreshes. Consumers will receive a new [Unit] when
-     * a refresh is requested.
+     * This [kotlinx.coroutines.flow.Flow] is used to trigger refreshes. Consumers will receive a
+     * new [Unit] when a refresh is requested.
      */
-    val refreshTriggerReceiveChannel: ReceiveChannel<Unit> get() = refreshTriggerChannel
+    val refreshTriggerFlow get() = refreshTriggerChannel.consumeAsFlow()
     private val refreshTriggerChannel = Channel<Unit>(Channel.CONFLATED)
 
     // Initially set to true to cause the initial load.

@@ -30,7 +30,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -39,8 +38,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
@@ -94,9 +91,8 @@ class LiveTimesTransformTest {
         givenPreferencesReturnsFlowWithNominalValues()
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(emptySet()))
-        val liveTimesFlow = flowOf(UiResult.InProgress)
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
+        val observer = transform.getLiveTimesTransformFlow(UiResult.InProgress).test(this)
         advanceUntilIdle()
         observer.finish()
 
@@ -106,31 +102,21 @@ class LiveTimesTransformTest {
     @Test
     fun getLiveTimesTransformFlowWithErrorYieldsError() = runTest {
         givenPreferencesReturnsFlowWithNominalValues()
-        val liveTimesFlow = intervalFlowOf(
-            100L,
-            10L,
-            UiResult.InProgress,
-            UiResult.Error(123L, ErrorType.SERVER_ERROR))
+        val uiResult = UiResult.Error(123L, ErrorType.SERVER_ERROR)
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(emptySet()))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
-        advanceTimeBy(1000L)
+        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
+        advanceUntilIdle()
         observer.finish()
 
-        observer.assertValues(
-            UiTransformedResult.InProgress,
-            UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
+        observer.assertValues(UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
     }
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessResultingInEmptyResultYieldsNoDataError() = runTest {
         givenPreferencesReturnsFlowWithNominalValues()
-        val liveTimesFlow = intervalFlowOf(
-            100L,
-            10L,
-            UiResult.InProgress,
-            UiResult.Success(123L, uiStop))
+        val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(emptySet()))
         whenever(transformations.filterNightServices(uiServices1, false))
@@ -140,13 +126,11 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices1, emptySet()))
             .thenReturn(emptyList())
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
-        advanceTimeBy(1000L)
+        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
+        advanceUntilIdle()
         observer.finish()
 
-        observer.assertValues(
-            UiTransformedResult.InProgress,
-            UiTransformedResult.Error(123L, ErrorType.NO_DATA))
+        observer.assertValues(UiTransformedResult.Error(123L, ErrorType.NO_DATA))
     }
 
     @Test
@@ -155,11 +139,7 @@ class LiveTimesTransformTest {
             .thenReturn(flowOf(true))
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
             .thenReturn(flowOf(true))
-        val liveTimesFlow = intervalFlowOf(
-            100L,
-            10L,
-            UiResult.InProgress,
-            UiResult.Success(123L, uiStop))
+        val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(setOf("1")))
         whenever(transformations.filterNightServices(uiServices1, true))
@@ -169,46 +149,11 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices1, setOf("1")))
             .thenReturn(listOf(uiLiveTimesItem1))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
-        advanceTimeBy(1000L)
+        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
+        advanceUntilIdle()
         observer.finish()
 
-        observer.assertValues(
-            UiTransformedResult.InProgress,
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)))
-    }
-
-    @Test
-    fun getLiveTimesTransformFlowWithSuccessCopesWithUpstreamRefresh() = runTest {
-        whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-            .thenReturn(flowOf(true))
-        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
-            .thenReturn(flowOf(true))
-        val liveTimesFlow = intervalFlowOf(
-            100L,
-            10L,
-            UiResult.InProgress,
-            UiResult.Success(123L, uiStop),
-            UiResult.InProgress,
-            UiResult.Success(123L, mock()))
-        whenever(expandedServicesTracker.expandedServicesFlow)
-            .thenReturn(flowOf(setOf("1")))
-        whenever(transformations.filterNightServices(any(), eq(true)))
-            .thenReturn(uiServices1, uiServices2)
-        whenever(transformations.sortServices(any(), eq(true)))
-            .thenReturn(uiServices1, uiServices2)
-        whenever(transformations.applyExpansions(any(), eq(setOf("1"))))
-            .thenReturn(listOf(uiLiveTimesItem1), listOf(uiLiveTimesItem2))
-
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
-        advanceTimeBy(1000L)
-        observer.finish()
-
-        observer.assertValues(
-            UiTransformedResult.InProgress,
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
-            UiTransformedResult.InProgress,
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
+        observer.assertValues(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)))
     }
 
     @Test
@@ -221,11 +166,7 @@ class LiveTimesTransformTest {
             })
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
                 .thenReturn(flowOf(false))
-        val liveTimesFlow = intervalFlowOf(
-            100L,
-            10L,
-            UiResult.InProgress,
-            UiResult.Success(123L, uiStop))
+        val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(setOf("1")))
         whenever(transformations.filterNightServices(uiServices1, false))
@@ -241,12 +182,11 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices2, setOf("1")))
             .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
-        advanceTimeBy(1000L)
+        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-            UiTransformedResult.InProgress,
             UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
             UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
     }
@@ -256,16 +196,8 @@ class LiveTimesTransformTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
             .thenReturn(flowOf(false))
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-            .thenReturn(flow {
-                emit(false)
-                delay(200L)
-                emit(true)
-            })
-        val liveTimesFlow = intervalFlowOf(
-            100L,
-            10L,
-            UiResult.InProgress,
-            UiResult.Success(123L, uiStop))
+            .thenReturn(intervalFlowOf(0L, 10L, false, true))
+        val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(setOf("1")))
         whenever(transformations.filterNightServices(uiServices1, false))
@@ -279,12 +211,11 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices2, setOf("1")))
             .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
-        advanceTimeBy(1000L)
+        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-            UiTransformedResult.InProgress,
             UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
             UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
     }
@@ -295,11 +226,7 @@ class LiveTimesTransformTest {
             .thenReturn(flowOf(false))
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
             .thenReturn(flowOf(false))
-        val liveTimesFlow = intervalFlowOf(
-            100L,
-            10L,
-            UiResult.InProgress,
-            UiResult.Success(123L, uiStop))
+        val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(intervalFlowOf(0L, 200L, setOf("1"), setOf("1", "2")))
         whenever(transformations.filterNightServices(uiServices1, false))
@@ -311,12 +238,11 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices1, setOf("1", "2")))
             .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(liveTimesFlow).test(this)
-        advanceTimeBy(1000L)
+        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
+        advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-            UiTransformedResult.InProgress,
             UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
             UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
     }

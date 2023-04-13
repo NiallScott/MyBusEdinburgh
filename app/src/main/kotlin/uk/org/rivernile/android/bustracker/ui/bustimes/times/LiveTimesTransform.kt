@@ -34,8 +34,8 @@ import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import javax.inject.Inject
 
 /**
- * The responsibility of this class is to take a [Flow] of [UiResult] (produced by loading the live
- * times), and mutate this result in to a form which is suitable for consumption by the UI. Also,
+ * The responsibility of this class is to take a [UiResult] (produced by loading the live times),
+ * and mutate this result in to a form which is suitable for consumption by the UI. Also,
  * this class reacts in response to some user actions, such as the user expanding/collapsing
  * services, changing their sorting preference etc. This class will mutate the data correctly
  * according to these UI events.
@@ -57,16 +57,17 @@ class LiveTimesTransform @Inject constructor(
      * [UiTransformedResult]. This will apply transformations based on the current UI state and user
      * preferences on to the [UiResult] and emit this as a [UiTransformedResult].
      *
-     * @param liveTimesFlow The [Flow] of [UiResult] that will be transformed.
+     * @param result The [UiResult] that will be transformed.
      * @return A [Flow] where the [UiResult] has been transformed in to a [UiTransformedResult].
      */
-    fun getLiveTimesTransformFlow(liveTimesFlow: Flow<UiResult>): Flow<UiTransformedResult> =
+    fun getLiveTimesTransformFlow(result: UiResult): Flow<UiTransformedResult> =
         combine(
-            liveTimesFlow,
             sortByTimeFlow,
             showNightServicesFlow,
-            expandedServicesTracker.expandedServicesFlow,
-            this::transformResult)
+            expandedServicesTracker.expandedServicesFlow
+        ) { sortByTime, showNightServices, expandedServices ->
+            transformResult(result, sortByTime, showNightServices, expandedServices)
+        }
 
     /**
      * A [Flow] which emits the user's sorting preference.

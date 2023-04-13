@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.ui.bustimes.times
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
@@ -41,7 +40,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -58,10 +56,10 @@ import javax.inject.Inject
 /**
  * This is the [ViewModel] for [BusTimesFragment].
  *
- * @param savedState The saved instance state.
+ * @param arguments The arguments for this instance.
  * @param expandedServicesTracker This implementation tracks the expanded/collapse state of the
  * services, for the purpose of showing the user services in the style of an expandable list.
- * @param liveTimesFlowFactory Used to construct the flow of live times.
+ * @param liveTimesLoader Used to load live times.
  * @param lastRefreshTimeCalculator This is used to calculate the amount of time since the last
  * refresh on a continual basis for the purpose of showing this to the user.
  * @param refreshController This is used to control refreshing data.
@@ -73,9 +71,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class BusTimesFragmentViewModel @Inject constructor(
-    savedState: SavedStateHandle,
+    arguments: Arguments,
     private val expandedServicesTracker: ExpandedServicesTracker,
-    private val liveTimesFlowFactory: LiveTimesFlowFactory,
+    private val liveTimesLoader: LiveTimesLoader,
     private val lastRefreshTimeCalculator: LastRefreshTimeCalculator,
     private val refreshController: RefreshController,
     private val preferenceRepository: PreferenceRepository,
@@ -87,10 +85,8 @@ class BusTimesFragmentViewModel @Inject constructor(
         /**
          * State key for the stop code.
          */
-        const val STATE_STOP_CODE = "stopCode"
+        const val STATE_STOP_CODE = Arguments.STATE_STOP_CODE
     }
-
-    private val stopCodeFlow = savedState.getStateFlow<String?>(STATE_STOP_CODE, null)
 
     /**
      * This [LiveData] exposes whether the device currently has connectivity or not. This will emit
@@ -117,7 +113,8 @@ class BusTimesFragmentViewModel @Inject constructor(
      * changes when an actual change occurs. If an update is made to the stop code that is identical
      * to the previously held code, this won't be delivered in this [LiveData].
      */
-    private val distinctStopCodeLiveData = stopCodeFlow
+    private val distinctStopCodeLiveData = arguments
+        .stopCodeFlow
         .asLiveData(viewModelScope.coroutineContext)
         .distinctUntilChanged()
 
@@ -129,7 +126,8 @@ class BusTimesFragmentViewModel @Inject constructor(
      * If there is no set stop code, this will emit `null`.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val isSortedByTimeLiveData = stopCodeFlow
+    val isSortedByTimeLiveData = arguments
+        .stopCodeFlow
         .flatMapLatest(this::loadIsSortedByTime)
         .distinctUntilChanged()
         .flowOn(defaultDispatcher)
@@ -142,7 +140,8 @@ class BusTimesFragmentViewModel @Inject constructor(
      * If there is no set stop code, this will emit `null`.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val isAutoRefreshLiveData = stopCodeFlow
+    val isAutoRefreshLiveData = arguments
+        .stopCodeFlow
         .flatMapLatest(this::loadIsAutoRefresh)
         .distinctUntilChanged()
         .flowOn(defaultDispatcher)
@@ -157,7 +156,7 @@ class BusTimesFragmentViewModel @Inject constructor(
     private val liveTimes = liveData(
             viewModelScope.coroutineContext + defaultDispatcher,
             Long.MAX_VALUE) {
-        createLiveTimesFlow().collect {
+        liveTimesFlow.collect {
             emit(it)
         }
     }
@@ -167,7 +166,7 @@ class BusTimesFragmentViewModel @Inject constructor(
      * Otherwise, it will emit the progress state of the loading live times.
      */
     val showProgressLiveData = distinctStopCodeLiveData.switchMap { stopCode ->
-        if (stopCode?.isNotEmpty() == true) {
+        if (!stopCode.isNullOrEmpty()) {
             liveTimes.map {
                 it is UiTransformedResult.InProgress
             }
@@ -336,17 +335,14 @@ class BusTimesFragmentViewModel @Inject constructor(
      * @return A [Flow] which produces live times.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun createLiveTimesFlow(): Flow<UiTransformedResult> {
-        return liveTimesFlowFactory.createLiveTimesFlow(
-                stopCodeFlow,
-                refreshController.refreshTriggerReceiveChannel.consumeAsFlow())
-                .transformLatest {
-                    emit(it) // Emit first so that the value is immediately available.
-                    refreshController.performAutoRefreshDelay(it) {
-                        isAutoRefreshLiveData.value == true
-                    }
+    private val liveTimesFlow: Flow<UiTransformedResult> get() =
+        liveTimesLoader.liveTimesFlow
+            .transformLatest {
+                emit(it) // Emit first so that the value is immediately available.
+                refreshController.performAutoRefreshDelay(it) {
+                    isAutoRefreshLiveData.value == true
                 }
-    }
+            }
 
     /**
      * Given the currently displayed [items] and any [error], calculate the current top level state

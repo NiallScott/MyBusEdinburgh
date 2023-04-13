@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -46,43 +47,53 @@ import javax.inject.Inject
  * - A refresh trigger is supported. When a new item appears in the refresh trigger [Flow], the data
  *   will be reloaded with the current stop code and number of departures data.
  *
+ * @param arguments Bus times arguments.
+ * @param refreshController Used to detect when the live times should be refreshed.
  * @param liveTimesRetriever This is used to retrieve live times.
+ * @param liveTimesTransform Used to transform live times.
  * @param preferenceRepository Used to obtain preferences which are required to load the data.
  * @author Niall Scott
  */
+@ViewModelScoped
 class LiveTimesLoader @Inject constructor(
-        private val liveTimesRetriever: LiveTimesRetriever,
-        private val preferenceRepository: PreferenceRepository) {
+    private val arguments: Arguments,
+    private val refreshController: RefreshController,
+    private val liveTimesRetriever: LiveTimesRetriever,
+    private val liveTimesTransform: LiveTimesTransform,
+    private val preferenceRepository: PreferenceRepository) {
 
     /**
-     * Given a [Flow] of stop codes, and a [Flow] to represent refresh triggers, return a [Flow]
-     * which provides live times.
+     * A [Flow] which emits events relating to loading bus times, including the actual result.
      *
-     * If [stopCodeFlow] emits a `null`, then a `Flow` containing a [UiResult.Error] of
-     * [ErrorType.NO_STOP_CODE] will be emitted.
-     *
-     * @param stopCodeFlow This [Flow] provides stop codes which should be loaded. A `null` stop
-     * code will emit an error. If non-`null`, a load will be attempted (which itself may emit
-     * errors). A change in stop code will cause a new load to occur.
-     * @param refreshFlow This [Flow] is used as a refresh trigger. Every time a refresh of the data
-     * should occur, this [Flow] will emit a new [Unit].
-     * @return A [Flow] which emits [UiResult]s of attempting to load live times.
+     * When no stop code is known (obtained from [Arguments]), then this [Flow] will emit an
+     * [UiResult.Error] with an error type of [ErrorType.NO_STOP_CODE].
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun loadLiveTimesFlow(
-            stopCodeFlow: Flow<String?>,
-            refreshFlow: Flow<Unit?>): Flow<UiResult> {
-        return combine(
-                stopCodeFlow,
-                preferenceRepository.getLiveTimesNumberOfDeparturesFlow(),
-                refreshFlow) { stopCode, numberOfDepartures, _ ->
-            LoadParams(stopCode, numberOfDepartures)
-        }.flatMapLatest { params ->
-            params.stopCode?.let {
-                liveTimesRetriever.getLiveTimesFlow(it, params.numberOfDepartures)
-            } ?: flowOf(UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE))
-        }
-    }
+    val liveTimesFlow get() = combinedArgumentsFlow
+        .flatMapLatest(this::loadLiveTimes)
+        .flatMapLatest(liveTimesTransform::getLiveTimesTransformFlow)
+
+    /**
+     * This [Flow] takes all the flows which can trigger a load of live times and combines them in
+     * to an parameters flow.
+     */
+    private val combinedArgumentsFlow get() =
+        combine(
+            arguments.stopCodeFlow,
+            preferenceRepository.getLiveTimesNumberOfDeparturesFlow(),
+            refreshController.refreshTriggerFlow) { stopCode, numberOfDepartures, _ ->
+                LoadParams(stopCode, numberOfDepartures)
+            }
+
+    /**
+     * Given [params], load live times with these parameters.
+     *
+     * @param params The parameters to load live times with.
+     * @return A [Flow] of [UiResult] based upon loading the live times.
+     */
+    private fun loadLiveTimes(params: LoadParams) = params.stopCode?.let {
+        liveTimesRetriever.getLiveTimesFlow(it, params.numberOfDepartures)
+    } ?: flowOf(UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE))
 
     /**
      * This data class stores the live times loading parameters as it flows through the [Flow]

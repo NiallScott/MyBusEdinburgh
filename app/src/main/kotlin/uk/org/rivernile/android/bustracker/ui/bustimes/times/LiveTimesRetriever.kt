@@ -61,17 +61,18 @@ class LiveTimesRetriever @Inject constructor(
      * @return A [Flow] which contains the updating [UiResult].
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getLiveTimesFlow(stopCode: String, numberOfDepartures: Int): Flow<UiResult> =
-            liveTimesRepository.getLiveTimesFlow(stopCode, numberOfDepartures)
-                    .flatMapLatest {
-                        obtainColoursForLiveTimes(stopCode, it)
-                    }
-                    .map {
-                        liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                            stopCode,
-                            it.first,
-                            it.second)
-                    }
+    fun getLiveTimesFlow(stopCode: String, numberOfDepartures: Int): Flow<UiResult> {
+        return liveTimesRepository.getLiveTimesFlow(stopCode, numberOfDepartures)
+            .flatMapLatest {
+                obtainColoursForLiveTimes(stopCode, it)
+            }
+            .map {
+                liveTimesMapper.mapLiveTimesAndColoursToUiResult(
+                    stopCode,
+                    it.first,
+                    it.second)
+            }
+    }
 
     /**
      * This method returns a [Flow] which is a [Pair] of [LiveTimesResult] and a [Map] of service
@@ -121,8 +122,9 @@ class LiveTimesRetriever @Inject constructor(
      * @return A [Flow] which emits [Map]s of service names to colours, or emits `null` if unable to
      * get colours.
      */
-    private fun getColoursForLiveTimes(stopCode: String, liveTimes: LiveTimes)
-            : Flow<Map<String, Int>?> {
+    private fun getColoursForLiveTimes(
+        stopCode: String,
+        liveTimes: LiveTimes): Flow<Map<String, Int>?> {
         return liveTimes.stops[stopCode]
                 ?.services
                 ?.map { it.serviceName }

@@ -52,9 +52,9 @@ class LiveTimesMapper @Inject constructor() {
      * @return A [UiResult] representing the [LiveTimesResult], but corrected for UI display.
      */
     fun mapLiveTimesAndColoursToUiResult(
-            stopCode: String,
-            result: LiveTimesResult,
-            serviceColours: Map<String, Int>?): UiResult {
+        stopCode: String,
+        result: LiveTimesResult,
+        serviceColours: Map<String, Int>?): UiResult {
         return when (result) {
             is LiveTimesResult.InProgress -> UiResult.InProgress
             is LiveTimesResult.Success -> mapSuccess(stopCode, result.liveTimes, serviceColours)
@@ -77,18 +77,21 @@ class LiveTimesMapper @Inject constructor() {
      * [LiveTimesResult].
      */
     private fun mapSuccess(
-            stopCode: String,
-            liveTimes: LiveTimes,
-            serviceColours: Map<String, Int>?): UiResult {
-        return liveTimes.stops[stopCode]?.let {
-            val stop = mapStopToUiStop(it, serviceColours)
+        stopCode: String,
+        liveTimes: LiveTimes,
+        serviceColours: Map<String, Int>?): UiResult {
+        return liveTimes
+            .stops[stopCode]
+            ?.let {
+                val stop = mapStopToUiStop(it, serviceColours)
 
-            if (stop.services.isNotEmpty()) {
-                UiResult.Success(liveTimes.receiveTime, stop)
-            } else {
-                createNoDataError(liveTimes.receiveTime)
+                if (stop.services.isNotEmpty()) {
+                    UiResult.Success(liveTimes.receiveTime, stop)
+                } else {
+                    createNoDataError(liveTimes.receiveTime)
+                }
             }
-        } ?: createNoDataError(liveTimes.receiveTime)
+            ?: createNoDataError(liveTimes.receiveTime)
     }
 
     /**
@@ -99,12 +102,12 @@ class LiveTimesMapper @Inject constructor() {
      * @return The mapped [Stop] as a [UiStop].
      */
     private fun mapStopToUiStop(stop: Stop, serviceColours: Map<String, Int>?) =
-            UiStop(
-                    stop.stopCode,
-                    stop.stopName,
-                    stop.services.mapNotNull {
-                        mapServiceToUiService(it, serviceColours)
-                    })
+        UiStop(
+            stop.stopCode,
+            stop.stopName,
+            stop.services.mapNotNull {
+                mapServiceToUiService(it, serviceColours)
+            })
 
     /**
      * Given a [Service], map it to a [UiService]. Also combine this with [serviceColours], if
@@ -116,13 +119,19 @@ class LiveTimesMapper @Inject constructor() {
      * @param serviceColours Service colour data to combine with the mapped [Service].
      * @return The mapped [Service], or `null` if there were no [Vehicle]s.
      */
-    private fun mapServiceToUiService(service: Service, serviceColours: Map<String, Int>?) =
-            service.vehicles.ifEmpty { null }?.let {
+    private fun mapServiceToUiService(
+        service: Service,
+        serviceColours: Map<String, Int>?): UiService? {
+        return service
+            .vehicles
+            .ifEmpty { null }
+            ?.let {
                 UiService(
-                        service.serviceName,
-                        serviceColours?.get(service.serviceName),
-                        it.map(this::mapVehicleToUiVehicle))
+                    service.serviceName,
+                    serviceColours?.get(service.serviceName),
+                    it.map(this::mapVehicleToUiVehicle))
             }
+    }
 
     /**
      * Given a [Vehicle], map it to a [UiVehicle].
@@ -131,12 +140,12 @@ class LiveTimesMapper @Inject constructor() {
      * @return The mapped [Vehicle].
      */
     private fun mapVehicleToUiVehicle(vehicle: Vehicle) =
-            UiVehicle(
-                    vehicle.destination,
-                    vehicle.isDiverted,
-                    vehicle.departureTime,
-                    vehicle.departureMinutes,
-                    vehicle.isEstimatedTime)
+        UiVehicle(
+            vehicle.destination,
+            vehicle.isDiverted,
+            vehicle.departureTime,
+            vehicle.departureMinutes,
+            vehicle.isEstimatedTime)
 
     /**
      * Given a [LiveTimesResult.Error], map it to a [UiResult.Error].
@@ -172,5 +181,5 @@ class LiveTimesMapper @Inject constructor() {
      * @return A [UiResult.Error] which contains [ErrorType.NO_DATA].
      */
     private fun createNoDataError(receiveTime: Long) =
-            UiResult.Error(receiveTime, ErrorType.NO_DATA)
+        UiResult.Error(receiveTime, ErrorType.NO_DATA)
 }
