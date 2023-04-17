@@ -148,7 +148,6 @@ dependencies {
 
     testImplementation project(':testutils')
     testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
-    testImplementation "org.mockito:mockito-inline:$mockitoVersion"
 }
 
 private def getApiKey(final String city) {

@@ -55,5 +55,4 @@ dependencies {
 
     // Tests
     testImplementation project(':testutils')
-    testImplementation "org.mockito:mockito-inline:$mockitoVersion"
 }
