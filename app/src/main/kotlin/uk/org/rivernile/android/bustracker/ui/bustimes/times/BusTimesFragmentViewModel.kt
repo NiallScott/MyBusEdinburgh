@@ -27,23 +27,26 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.liveData
-import androidx.lifecycle.map
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
@@ -88,11 +91,72 @@ class BusTimesFragmentViewModel @Inject constructor(
     }
 
     /**
+     * A [Flow] which emits whether the stop code is valid.
+     */
+    private val isValidStopCodeFlow = arguments
+        .stopCodeFlow
+        .map(this::isValidStopCode)
+        .distinctUntilChanged()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    /**
+     * A [Flow] which produces the [UiTransformedResult], containing states of either progress,
+     * error or success.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val liveTimesFlow = liveTimesLoader
+        .liveTimesFlow
+        .transformLatest {
+            emit(it) // Emit first so that the value is immediately available.
+            refreshController.performAutoRefreshDelay(it)
+        }
+        .flowOn(defaultDispatcher)
+        // TODO: this is started with SharingStarted.Lazily. We don't want to keep doing this going
+        // forwards. This should be fixed with the refresh refactor.
+        .stateIn(viewModelScope, SharingStarted.Lazily, UiTransformedResult.InProgress)
+
+    /**
+     * This emits the last successful load of the live times. This data populates the live times
+     * list the user sees. We also hold the last successful load to calculate the UI state, because
+     * after the first successful load, we never return directly to the progress state, and we only
+     * go to the error state when the live times is empty (which can land us back on the progress
+     * state).
+     */
+    private val lastSuccessFlow = liveTimesFlow
+        .filterIsInstance<UiTransformedResult.Success>()
+        .onStart<UiTransformedResult.Success?> { emit(null) }
+        .flowOn(defaultDispatcher)
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    /**
+     * This emits the last error while loading live times.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val errorFlow = liveTimesFlow
+        .transformLatest {
+            when (it) {
+                is UiTransformedResult.Success -> {
+                    if (it.items.isEmpty()) {
+                        emit(ErrorType.NO_DATA)
+                    } else {
+                        emit(null)
+                    }
+                }
+                is UiTransformedResult.Error -> emit(it.error)
+                else -> { /* Suppress exhaustive warning. */ }
+            }
+        }
+        .flowOn(defaultDispatcher)
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
+    /**
      * This [LiveData] exposes whether the device currently has connectivity or not. This will emit
      * distinct values.
      */
-    val hasConnectivityLiveData = connectivityRepository.hasInternetConnectivityFlow
+    val hasConnectivityLiveData = connectivityRepository
+        .hasInternetConnectivityFlow
         .distinctUntilChanged()
+        .flowOn(defaultDispatcher)
         .asLiveData(viewModelScope.coroutineContext)
 
     /**
@@ -108,16 +172,6 @@ class BusTimesFragmentViewModel @Inject constructor(
     private val refresh = RefreshLiveData(refreshController)
 
     /**
-     * This exposes the stop code as a [LiveData]. It is distinct as it only delivers stop code
-     * changes when an actual change occurs. If an update is made to the stop code that is identical
-     * to the previously held code, this won't be delivered in this [LiveData].
-     */
-    private val distinctStopCodeLiveData = arguments
-        .stopCodeFlow
-        .asLiveData(viewModelScope.coroutineContext)
-        .distinctUntilChanged()
-
-    /**
      * This [LiveData] exposes whether the live times are currently sorted by time or by service
      * name. This is based on the user preference from [PreferenceRepository]. This will emit
      * distinct values.
@@ -131,10 +185,7 @@ class BusTimesFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits whether the sorted by time item is enabled or not.
      */
-    val isSortedByTimeEnabledLiveData = arguments
-        .stopCodeFlow
-        .map { !it.isNullOrEmpty() }
-        .distinctUntilChanged()
+    val isSortedByTimeEnabledLiveData = isValidStopCodeFlow
         .asLiveData(viewModelScope.coroutineContext)
 
     /**
@@ -145,7 +196,7 @@ class BusTimesFragmentViewModel @Inject constructor(
         .isLiveTimesAutoRefreshEnabledFlow()
         .distinctUntilChanged()
         .onEach {
-            refreshController.onAutoRefreshPreferenceChanged(liveTimes.value, it)
+            refreshController.onAutoRefreshPreferenceChanged(liveTimesFlow.value, it)
         }
         .flowOn(defaultDispatcher)
         .asLiveData(viewModelScope.coroutineContext)
@@ -153,87 +204,70 @@ class BusTimesFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits whether the auto refresh item is enabled or not.
      */
-    val isAutoRefreshEnabledLiveData = arguments
+    val isAutoRefreshEnabledLiveData = isValidStopCodeFlow
+        .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits whether the swipe refresh UI component is enabled.
+     */
+    val isSwipeRefreshEnabledLiveData = isValidStopCodeFlow
+        .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits whether progress is enabled or not.
+     */
+    val isProgressMenuItemEnabledLiveData = arguments
         .stopCodeFlow
-        .map { !it.isNullOrEmpty() }
+        .combine(liveTimesFlow, this::calculateIsProgressEnabled)
         .distinctUntilChanged()
         .asLiveData(viewModelScope.coroutineContext)
 
     /**
-     * This is the [LiveData] which contains the result from loading live times. This uses the
-     * [liveData] builder, with a timeout set to [Long.MAX_VALUE] so that a reload does not happen
-     * on configuration change, but has the [viewModelScope] applied so the live times [Flow] is
-     * cancelled when the [ViewModel] is cleared.
+     * This [Flow] emits whether progress is visible or not.
      */
-    private val liveTimes = liveData(
-            viewModelScope.coroutineContext + defaultDispatcher,
-            Long.MAX_VALUE) {
-        liveTimesFlow.collect {
-            emit(it)
-        }
-    }
+    private val isProgressVisibleFlow = liveTimesFlow
+        .map { it is UiTransformedResult.InProgress }
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     /**
-     * Show loading progress to the user. If there is no stop code, this will emit `null`.
-     * Otherwise, it will emit the progress state of the loading live times.
+     * This [LiveData] emits whether progress is currently visible.
      */
-    val showProgressLiveData = distinctStopCodeLiveData.switchMap { stopCode ->
-        if (!stopCode.isNullOrEmpty()) {
-            liveTimes.map {
-                it is UiTransformedResult.InProgress
-            }
-        } else {
-            MutableLiveData<Boolean>(null)
-        }
-    }
-
-    /**
-     * This contains the last successful load of the live times. This data populates the live times
-     * list the user sees. We also hold the last successful load to calculate the UI state, because
-     * after the first successful load, we never return to the progress state, and we only go to the
-     * error state when the live times is empty.
-     */
-    private val lastSuccess = MediatorLiveData<UiTransformedResult.Success>().apply {
-        // We don't use LiveData.map() here because we only wish to apply the transformation when
-        // the result is UiTransformedResult.Success, otherwise the value is left untouched.
-        addSource(liveTimes) {
-            if (it is UiTransformedResult.Success) {
-                value = it
-            }
-        }
-    }
+    val isProgressVisibleLiveData = isProgressVisibleFlow
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] exposes errors which occur when loading live times. Additionally, if the
      * state is successful but there is no data, this will generate an [ErrorType.NO_DATA].
      */
-    val errorLiveData: LiveData<ErrorType?> = MediatorLiveData<ErrorType?>().apply {
-        // We don't use LiveData.map() here because we don't wish to apply any new state when
-        // liveTimes is UiTransformedResult.InProgress - the last value should remain in this case.
-        addSource(liveTimes) {
-            when (it) {
-                is UiTransformedResult.Success -> {
-                    value = if (it.items.isEmpty()) {
-                        ErrorType.NO_DATA
-                    } else {
-                        null
-                    }
-                }
-                is UiTransformedResult.Error -> value = it.error
-                else -> { /* Suppress exhaustive warning. */ }
-            }
-        }
-    }
+    val errorLiveData = errorFlow.asLiveData(viewModelScope.coroutineContext)
 
     /**
-     * This [LiveData] exposes the live times to be shown in the UI. It contains the last
-     * successfully loaded data, but only if it's non-empty. Otherwise, it will yield `null`.
+     * This [Flow] emits the [List] of [UiLiveTimesItem]s to be displayed.
      */
-    val liveTimesLiveData = lastSuccess.map {
-        it.items.ifEmpty {
-            null
-        }
-    }
+    private val liveTimesListFlow = lastSuccessFlow
+        .map { it?.items?.ifEmpty { null } }
+        .flowOn(defaultDispatcher)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
+    /**
+     * This [LiveData] emits the live times to be shown in the UI. It contains the last successfully
+     * loaded data, but only if it's non-empty. Otherwise, it will emit `null`.
+     */
+    val liveTimesListLiveData = liveTimesListFlow
+        .asLiveData(viewModelScope.coroutineContext)
+        .distinctUntilChanged()
+
+    /**
+     * This [Flow] emits and holds the state for the current [UiState].
+     */
+    private val uiStateFlow = combine(
+        liveTimesListFlow,
+        errorFlow,
+        isProgressVisibleFlow,
+        this::calculateUiState)
+        .filterNotNull()
+        .flowOn(defaultDispatcher)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.PROGRESS)
 
     /**
      * This [LiveData] exposes the calculated top-level [UiState]. This will emit distinct values.
@@ -241,58 +275,47 @@ class BusTimesFragmentViewModel @Inject constructor(
      * - [UiState.PROGRESS]: this is only shown when the screen is first shown (other states are
      * unpopulated). After the next state ([UiState.CONTENT] or [UiState.ERROR]), this is never
      * shown again.
-     * - [UiState.CONTENT]: this is always shown when [liveTimesLiveData] contains non-`null` live
-     * times after the initial first [UiState.PROGRESS] state.
+     * - [UiState.CONTENT]: this is always shown when [liveTimesListLiveData] contains non-`null`
+     * live times after the initial first [UiState.PROGRESS] state.
      * - [UiState.ERROR]: this is only shown after the initial [UiState.PROGRESS] when
-     * [liveTimesLiveData] is `null`.
+     * [liveTimesListLiveData] is `null`.
      */
-    val uiStateLiveData: LiveData<UiState> = MediatorLiveData<UiState>().apply {
-        // showProgressLiveData is listened to so that we recalculate state when the progress state
-        // changes.
-        addSource(showProgressLiveData) {
-            calculateUiState(liveTimesLiveData.value, errorLiveData.value, it)?.let { s ->
-                value = s
-            }
-        }
-        addSource(liveTimesLiveData) {
-            calculateUiState(it, errorLiveData.value, showProgressLiveData.value)?.let { s ->
-                value = s
-            }
-        }
-        addSource(errorLiveData) {
-            calculateUiState(liveTimesLiveData.value, it, showProgressLiveData.value)?.let { s ->
-                value = s
-            }
-        }
-    }.distinctUntilChanged()
+    val uiStateLiveData = uiStateFlow
+        .asLiveData(viewModelScope.coroutineContext)
+        .distinctUntilChanged()
 
     /**
      * This [LiveData] exposes errors when there is previous content loaded which should be
-     * currently shown, but a new error has occured. Instead, a special type of object is emitted,
+     * currently shown, but a new error has occurred. Instead, a special type of object is emitted,
      * an [Event], which can only be consumed once. This is because in the content loaded
      * scenario, errors should be shown as snackbars rather than in-line UI, so that the user is
      * still able to see the previously loaded live times whilst being shown the new error.
      */
-    val errorWithContentLiveData = errorLiveData.map { error ->
-        if (liveTimesLiveData.value?.isNotEmpty() == true) {
-            error?.let {
-                Event(it)
+    val errorWithContentLiveData = errorFlow
+        .map { error ->
+            if (uiStateFlow.value == UiState.CONTENT) {
+                error?.let {
+                    Event(it)
+                }
+            } else {
+                null
             }
-        } else {
-            null
         }
-    }
+        .flowOn(defaultDispatcher)
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] emits last-refresh updates, to inform the user when the data was last
      * successfully loaded. Once a successful load takes place, the last refresh times is emitted on
      * a continual basis. This emits distinct values.
      */
-    val lastRefreshLiveData = lastSuccess.switchMap {
-        lastRefreshTimeCalculator.getLastRefreshTimeFlow(it.receiveTime)
-                .distinctUntilChanged()
-                .asLiveData(viewModelScope.coroutineContext + defaultDispatcher)
-    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val lastRefreshLiveData = lastSuccessFlow
+        .map { it?.receiveTime ?: -1L }
+        .flatMapLatest(lastRefreshTimeCalculator::getLastRefreshTimeFlow)
+        .distinctUntilChanged()
+        .flowOn(defaultDispatcher)
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This is called when the refresh menu item has been clicked by the user.
@@ -341,22 +364,6 @@ class BusTimesFragmentViewModel @Inject constructor(
     }
 
     /**
-     * Create a [Flow] which produces the [UiTransformedResult], containing states of either
-     * progress, error or success.
-     *
-     * @return A [Flow] which produces live times.
-     */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val liveTimesFlow: Flow<UiTransformedResult> get() =
-        liveTimesLoader.liveTimesFlow
-            .transformLatest {
-                emit(it) // Emit first so that the value is immediately available.
-                refreshController.performAutoRefreshDelay(it) {
-                    isAutoRefreshLiveData.value == true
-                }
-            }
-
-    /**
      * Given the currently displayed [items] and any [error], calculate the current top level state
      * of the UI.
      *
@@ -373,13 +380,33 @@ class BusTimesFragmentViewModel @Inject constructor(
      * transition.
      */
     private fun calculateUiState(
-            items: List<UiLiveTimesItem>?,
-            error: ErrorType?,
-            isInProgress: Boolean?): UiState? {
-        return items?.ifEmpty { null }?.let {
-            UiState.CONTENT
-        } ?: error?.let {
-            UiState.ERROR
-        } ?: if (isInProgress == true) UiState.PROGRESS else null
+        items: List<UiLiveTimesItem>?,
+        error: ErrorType?,
+        isInProgress: Boolean): UiState? {
+        return when {
+            !items.isNullOrEmpty() -> UiState.CONTENT
+            error != null -> UiState.ERROR
+            isInProgress -> UiState.PROGRESS
+            else -> null
+        }
     }
+
+    /**
+     * Calculate whether progress is enabled.
+     *
+     * @param stopCode The currently set stop code.
+     * @param result The current [UiTransformedResult].
+     * @return `true` when the stop code is valid and we're not currently in progress, otherwise
+     * `false`.
+     */
+    private fun calculateIsProgressEnabled(stopCode: String?, result: UiTransformedResult) =
+        isValidStopCode(stopCode) && result !is UiTransformedResult.InProgress
+
+    /**
+     * Is the stop code valid?
+     *
+     * @param stopCode The stop code to test.
+     * @return `true` if the stop code is valid, otherwise `false`.
+     */
+    private fun isValidStopCode(stopCode: String?) = !stopCode.isNullOrEmpty()
 }

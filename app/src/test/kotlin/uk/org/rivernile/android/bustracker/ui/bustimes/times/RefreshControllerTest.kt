@@ -38,6 +38,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
@@ -60,13 +61,17 @@ class RefreshControllerTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
+    private lateinit var preferenceRepository: PreferenceRepository
+    @Mock
     private lateinit var timeUtils: TimeUtils
 
     private lateinit var controller: RefreshController
 
     @Before
     fun setUp() {
-        controller = RefreshController(timeUtils)
+        controller = RefreshController(
+            preferenceRepository,
+            timeUtils)
     }
 
     @Test
@@ -395,7 +400,7 @@ class RefreshControllerTest {
         val observer = controller.refreshTriggerFlow.test(this)
 
         controller.setActiveState(true)
-        controller.performAutoRefreshDelay(UiTransformedResult.InProgress) { true }
+        controller.performAutoRefreshDelay(UiTransformedResult.InProgress)
         advanceUntilIdle()
         observer.finish()
 
@@ -405,6 +410,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsErrorAndCalculatedDelayIsNegative() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(false)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
@@ -412,7 +419,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { false }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -424,6 +431,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsNegativeAndPredicateIsTrue() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(true)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
@@ -432,7 +441,7 @@ class RefreshControllerTest {
         controller.setActiveState(true)
         advanceUntilIdle()
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { true }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -444,6 +453,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsErrorAndCalculatedDelayIsZero() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(false)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
@@ -451,7 +462,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { false }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -463,6 +474,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsZeroAndPredicateIsTrue() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(true)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS,
@@ -471,7 +484,7 @@ class RefreshControllerTest {
         controller.setActiveState(true)
         advanceUntilIdle()
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { true }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -482,6 +495,8 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayDelaysWhenResultIsErrorAndCalculatedDelayIsPositive() = runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(false)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
@@ -489,7 +504,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { false }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -501,6 +516,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsErrorAndCalculatedDelayIsPositiveAndPredicateIsTrue() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(true)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Error(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
@@ -508,7 +525,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { true }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -520,6 +537,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsSuccessAndCalculatedDelayIsNegative() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(false)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
@@ -527,7 +546,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { false }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -539,6 +558,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsNegative() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(true)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS - 1L,
@@ -547,7 +568,7 @@ class RefreshControllerTest {
         controller.setActiveState(true)
         advanceUntilIdle()
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { true }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -559,13 +580,15 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayReturnsImmediatelyWhenResultIsSuccessAndCalculatedDelayIsZero() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(false)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
 
         controller.setActiveState(true)
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { false }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -577,6 +600,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsZero() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(true)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS, emptyList())
@@ -584,7 +609,7 @@ class RefreshControllerTest {
         controller.setActiveState(true)
         advanceUntilIdle()
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { true }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -595,6 +620,8 @@ class RefreshControllerTest {
 
     @Test
     fun performAutoRefreshDelayDelaysWhenResultIsSuccessAndCalculatedDelayIsPositive() = runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(false)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
@@ -602,7 +629,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { false }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()
@@ -614,6 +641,8 @@ class RefreshControllerTest {
     @Test
     fun performAutoRefreshDelayCausesRefreshWhenResultIsSuccessAndCalculatedDelayIsPositive() =
             runTest {
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabled)
+            .thenReturn(true)
         val observer = controller.refreshTriggerFlow.test(this)
         givenReturnsTimestamp()
         val data = UiTransformedResult.Success(120000L - AUTO_REFRESH_INTERVAL_MILLIS + 1L,
@@ -621,7 +650,7 @@ class RefreshControllerTest {
 
         controller.setActiveState(true)
         val startTime = currentTime
-        controller.performAutoRefreshDelay(data) { true }
+        controller.performAutoRefreshDelay(data)
         val endTime = currentTime
         advanceUntilIdle()
         observer.finish()

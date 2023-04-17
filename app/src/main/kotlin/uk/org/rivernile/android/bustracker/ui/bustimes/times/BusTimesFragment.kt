@@ -125,9 +125,14 @@ class BusTimesFragment : Fragment() {
         viewModel.isAutoRefreshLiveData.observe(viewLifecycle, this::handleAutoRefreshChanged)
         viewModel.isAutoRefreshEnabledLiveData.observe(viewLifecycle,
             this::handleAutoRefreshEnabledChanged)
-        viewModel.showProgressLiveData.observe(viewLifecycle, this::handleShowProgress)
+        viewModel.isProgressVisibleLiveData.observe(viewLifecycle,
+            this::handleIsProgressVisibleChanged)
+        viewModel.isProgressMenuItemEnabledLiveData.observe(viewLifecycle,
+            this::handleIsProgressMenuItemEnabledChanged)
+        viewModel.isSwipeRefreshEnabledLiveData.observe(viewLifecycle,
+            viewBinding.swipeRefreshLayout::setEnabled)
         viewModel.errorLiveData.observe(viewLifecycle, this::handleError)
-        viewModel.liveTimesLiveData.observe(viewLifecycle, adapter::submitList)
+        viewModel.liveTimesListLiveData.observe(viewLifecycle, adapter::submitList)
         viewModel.uiStateLiveData.observe(viewLifecycle, this::handleUiStateChanged)
         viewModel.errorWithContentLiveData.observe(viewLifecycle, this::handleErrorWithContent)
         viewModel.lastRefreshLiveData.observe(viewLifecycle, this::handleLastRefreshUpdated)
@@ -146,10 +151,9 @@ class BusTimesFragment : Fragment() {
      * Handle a change in top-level UI state. This displays either the empty progress view, the
      * empty error view, or the content view.
      *
-     * @param uiState The new [UiState] to show. If this is `null`, then the progress view will be
-     * shown, as this is the default state of the screen.
+     * @param uiState The new [UiState] to show.
      */
-    private fun handleUiStateChanged(uiState: UiState?) {
+    private fun handleUiStateChanged(uiState: UiState) {
         // When transiting UI state, dismiss the existing error Snackbar.
         dismissErrorSnackbar()
 
@@ -163,24 +167,23 @@ class BusTimesFragment : Fragment() {
     }
 
     /**
-     * Handle the progress state of the UI. This does not affect the top level progress state.
+     * Handle the progress visibility of the UI. This does not affect the top level progress state.
      * Namely, this affects the swipe-to-refresh layout and the refresh [MenuItem].
      *
-     * @param showProgress Should progress be shown? If this is `null`, then the refresh [MenuItem]
-     * and swipe-to-refresh layouts will be disabled.
+     * @param isVisible Should progress be shown?
      */
-    private fun handleShowProgress(showProgress: Boolean?) {
-        setRefreshActionItemLoadingState(showProgress)
+    private fun handleIsProgressVisibleChanged(isVisible: Boolean) {
+        handleIsProgressVisibleChangedForMenuItem(isVisible)
+        viewBinding.swipeRefreshLayout.isRefreshing = isVisible
+    }
 
-        viewBinding.swipeRefreshLayout.apply {
-            showProgress?.also {
-                isEnabled = true
-                isRefreshing = it
-            } ?: run {
-                isEnabled = false
-                isRefreshing = false
-            }
-        }
+    /**
+     * Handle the enabled state of the progress menu item changing.
+     *
+     * @param isEnabled Is progress menu item enabled?
+     */
+    private fun handleIsProgressMenuItemEnabledChanged(isEnabled: Boolean) {
+        menuItemRefresh?.isEnabled = isEnabled
     }
 
     /**
@@ -207,16 +210,17 @@ class BusTimesFragment : Fragment() {
         dismissErrorSnackbar()
 
         event?.getContentIfNotHandled()?.let {
-            errorSnackbar = Snackbar.make(viewBinding.root, mapErrorToStringResource(it),
-                    Snackbar.LENGTH_LONG).apply {
-                addCallback(object : Snackbar.Callback() {
-                    override fun onDismissed(snackbar: Snackbar, event: Int) {
-                        errorSnackbar = null
-                    }
-                })
+            errorSnackbar = Snackbar
+                .make(viewBinding.root, mapErrorToStringResource(it), Snackbar.LENGTH_LONG)
+                .apply {
+                    addCallback(object : Snackbar.Callback() {
+                        override fun onDismissed(snackbar: Snackbar, event: Int) {
+                            errorSnackbar = null
+                        }
+                    })
 
-                show()
-            }
+                    show()
+                }
         }
     }
 
@@ -251,24 +255,16 @@ class BusTimesFragment : Fragment() {
     }
 
     /**
-     * Update the state of the refresh [MenuItem].
+     * Handle the progress visibility for the refresh menu item changing.
      *
-     * @param showProgress Should progress be shown? If this value is `null`, then the [MenuItem]
-     * will be disabled.
+     * @param isVisible Is the progress visible?
      */
-    private fun setRefreshActionItemLoadingState(showProgress: Boolean?) {
+    private fun handleIsProgressVisibleChangedForMenuItem(isVisible: Boolean) {
         menuItemRefresh?.apply {
-            showProgress?.let {
-                if (it) {
-                    setActionView(R.layout.actionbar_indeterminate_progress)
-                    isEnabled = false
-                } else {
-                    actionView = null
-                    isEnabled = true
-                }
-            } ?: run {
+            if (isVisible) {
+                setActionView(R.layout.actionbar_indeterminate_progress)
+            } else {
                 actionView = null
-                isEnabled = false
             }
         }
     }
@@ -369,7 +365,10 @@ class BusTimesFragment : Fragment() {
         }
 
         override fun onPrepareMenu(menu: Menu) {
-            setRefreshActionItemLoadingState(viewModel.showProgressLiveData.value)
+            handleIsProgressVisibleChangedForMenuItem(
+                viewModel.isProgressVisibleLiveData.value ?: false)
+            handleIsProgressMenuItemEnabledChanged(
+                viewModel.isProgressMenuItemEnabledLiveData.value ?: false)
             handleSortedByTimeChanged(viewModel.isSortedByTimeLiveData.value ?: false)
             handleSortedByTimeEnabledChanged(viewModel.isSortedByTimeEnabledLiveData.value ?: false)
             handleAutoRefreshChanged(viewModel.isAutoRefreshLiveData.value ?: false)

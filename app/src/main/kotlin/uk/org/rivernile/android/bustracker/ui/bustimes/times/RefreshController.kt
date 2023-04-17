@@ -30,6 +30,7 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.consumeAsFlow
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -37,12 +38,14 @@ import javax.inject.Inject
 /**
  * This class contains business logic for controlling the refresh and auto-refresh functionality.
  *
+ * @param preferenceRepository The preferences repository.
  * @param timeUtils Used to provide timestamps.
  * @author Niall Scott
  */
 @ViewModelScoped
 class RefreshController @Inject constructor(
-        private val timeUtils: TimeUtils) {
+    private val preferenceRepository: PreferenceRepository,
+    private val timeUtils: TimeUtils) {
 
     companion object {
 
@@ -113,27 +116,23 @@ class RefreshController @Inject constructor(
 
     /**
      * Perform the auto-refresh delay if the current [result] is not
-     * [UiTransformedResult.InProgress], and after the delay, execute the [predicate] to determine
-     * if a refresh should be performed.
+     * [UiTransformedResult.InProgress], and after the delay, inspect the user's auto refresh
+     * preference to determine if auto refresh should be performed.
      *
      * The auto-refresh period is defined as [AUTO_REFRESH_INTERVAL_MILLIS], therefore the next
      * refresh will happen at the time of the last refresh + [AUTO_REFRESH_INTERVAL_MILLIS]. This
      * method uses the amount of time between now and the calculated timestamp to calculate the
      * length of delay. If the calculated delay is less than `0`, that is, the next refresh time
-     * is in the past, the next refresh should happen immediately (if the [predicate] allows).
+     * is in the past, the next refresh should happen immediately (if the preference allows).
      *
      * @param result The last loaded [UiTransformedResult], used to calculate when the next refresh
      * time should be.
-     * @param predicate This [predicate] is executed at the end of the auto-refresh delay period to
-     * determine if a refresh should be performed or not.
      */
-    suspend fun performAutoRefreshDelay(
-            result: UiTransformedResult,
-            predicate: () -> Boolean) {
+    suspend fun performAutoRefreshDelay(result: UiTransformedResult) {
         getDelayUntilNextRefresh(result)?.let {
             delay(it)
 
-            if (predicate()) {
+            if (preferenceRepository.isLiveTimesAutoRefreshEnabled) {
                 requestRefresh()
             }
         }

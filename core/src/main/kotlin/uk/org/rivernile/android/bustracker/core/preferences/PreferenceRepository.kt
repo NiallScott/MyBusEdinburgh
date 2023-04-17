@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -84,6 +84,12 @@ class PreferenceRepository @Inject constructor(
             preferenceManager.isBusTimesAutoRefreshEnabled()
         }
     }
+
+    /**
+     * Is live times auto refresh enabled?
+     */
+    val isLiveTimesAutoRefreshEnabled: Boolean get() =
+        preferenceManager.isBusTimesAutoRefreshEnabled()
 
     /**
      * Get a [Flow] which returns whether night services should be shown or not, and will emit
