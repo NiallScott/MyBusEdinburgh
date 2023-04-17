@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -81,6 +81,7 @@ class OneLineItemViewHolder(
     @StringRes
     private fun getItemText(item: UiAboutItem.OneLineItem) = when (item) {
         is UiAboutItem.OneLineItem.Credits -> R.string.about_credits
+        is UiAboutItem.OneLineItem.PrivacyPolicy -> R.string.about_privacy_policy
         is UiAboutItem.OneLineItem.OpenSourceLicences -> R.string.about_open_source
     }
 

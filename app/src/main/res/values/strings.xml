@@ -41,6 +41,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="app_author_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/</string>
     <string name="app_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/bustracker/</string>
     <string name="app_twitter" tools:ignore="MissingTranslation">https://twitter.com/MyBusEdinburgh</string>
+    <string name="app_privacy_policy" translatable="false">https://niallscott.co.uk/my-bus-edinburgh-privacy-policy/</string>
     <string name="asset_db_version" tools:ignore="MissingTranslation">1402286404622</string> <!-- Should not be included in localised versions -->
 
     <!--
@@ -216,6 +217,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="about_website">Website</string>
     <string name="about_twitter">Twitter</string>
     <string name="about_credits">Credits</string>
+    <string name="about_privacy_policy">Privacy policy</string>
     <string name="about_open_source">Open source licences</string>
 
     <string name="about_database_version_loading">@string/loading</string>

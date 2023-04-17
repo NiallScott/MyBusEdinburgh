@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -78,6 +78,7 @@ class AboutViewModelTest {
                 UiAboutItem.TwoLinesItem.DatabaseVersion(null),
                 UiAboutItem.TwoLinesItem.TopologyVersion(null),
                 UiAboutItem.OneLineItem.Credits,
+                UiAboutItem.OneLineItem.PrivacyPolicy,
                 UiAboutItem.OneLineItem.OpenSourceLicences)
 
         val observer = viewModel.itemsLiveData.test()
@@ -100,6 +101,7 @@ class AboutViewModelTest {
                 UiAboutItem.TwoLinesItem.DatabaseVersion(null),
                 UiAboutItem.TwoLinesItem.TopologyVersion(null),
                 UiAboutItem.OneLineItem.Credits,
+                UiAboutItem.OneLineItem.PrivacyPolicy,
                 UiAboutItem.OneLineItem.OpenSourceLicences)
         val expected2 = listOf(
                 UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4L),
@@ -109,6 +111,7 @@ class AboutViewModelTest {
                 UiAboutItem.TwoLinesItem.DatabaseVersion(Date(123L)),
                 UiAboutItem.TwoLinesItem.TopologyVersion("abc123"),
                 UiAboutItem.OneLineItem.Credits,
+                UiAboutItem.OneLineItem.PrivacyPolicy,
                 UiAboutItem.OneLineItem.OpenSourceLicences)
 
         val observer = viewModel.itemsLiveData.test()
@@ -123,6 +126,16 @@ class AboutViewModelTest {
         val observer = viewModel.showCreditsLiveData.test()
 
         viewModel.onItemClicked(UiAboutItem.OneLineItem.Credits)
+
+        observer.assertSize(1)
+    }
+
+    @Test
+    fun onItemClickedWithPrivacyPolicyItemShowsPrivacyPolicy() {
+        val viewModel = createViewModel()
+        val observer = viewModel.showPrivacyPolicyLiveData.test()
+
+        viewModel.onItemClicked(UiAboutItem.OneLineItem.PrivacyPolicy)
 
         observer.assertSize(1)
     }
