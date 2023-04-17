@@ -30,20 +30,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     xmlns:tools="http://schemas.android.com/tools"
     tools:locale="en">
 
-    <!-- 
-    ***********************
-    * Application strings *
-    ***********************
-    -->
-    <string name="app_name" tools:ignore="MissingTranslation">My Bus Edinburgh</string> <!-- Should not be included in localised versions -->
-    <string name="app_description">View live bus data in Edinburgh</string>
-    <string name="app_author" tools:ignore="MissingTranslation">Niall Scott</string> <!-- Should not be included in localised versions -->
-    <string name="app_author_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/</string>
-    <string name="app_website" tools:ignore="MissingTranslation">http://www.rivernile.org.uk/bustracker/</string>
-    <string name="app_twitter" tools:ignore="MissingTranslation">https://twitter.com/MyBusEdinburgh</string>
-    <string name="app_privacy_policy" translatable="false">https://niallscott.co.uk/my-bus-edinburgh-privacy-policy/</string>
-    <string name="asset_db_version" tools:ignore="MissingTranslation">1402286404622</string> <!-- Should not be included in localised versions -->
-
     <!--
     *******************
     * Generic strings *
@@ -223,9 +209,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="about_database_version_loading">@string/loading</string>
     <string name="about_topology_version_loading">@string/loading</string>
 
-    <string name="about_version_format" tools:ignore="MissingTranslation">%1$s (#%2$d)</string> <!-- %1$s = external version number. %2$d = internal version number. -->
-    <string name="about_database_version_format" tools:ignore="MissingTranslation">%1$d (%2$s)</string> <!-- %1$d = UNIX timestamp. %2$s = human readable data. -->
-
     <!--
     ************************************
     * Strings for AlertManagerFragment *
@@ -273,7 +256,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="bustimes_diverted">diverted</string>
     <string name="bustimes_diverted_with_destination">%s (diverted)</string> <!-- %s = destination. -->
     <string name="bustimes_due">DUE</string>
-    <string name="bustimes_estimated_time" tools:ignore="MissingTranslation">*%s</string> <!-- %s = time bus is due, e.g. "5" or "13:11" -->
     <string name="bustimes_lastupdated">Last updated %s</string> <!-- %s = last updated text, e.g. "5 minutes ago." -->
 
     <string name="bustimes_err_unknown">An error has occurred, but we\'re not quite sure what it is</string>
@@ -637,21 +619,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     *******************************************
     -->
     <string name="twitterupdates_menu_refresh">Refresh</string>
-
-    <!--
-    *******************
-    *******************
-    ** List Adapters **
-    *******************
-    *******************
-    -->
-    
-    <!--
-    ****************
-    * TweetAdapter *
-    ****************
-    -->
-    <string name="tweetadapter_info_format" tools:ignore="MissingTranslation">%1$s - %2$s</string> <!-- %1$s = display name. %2$s = date and time String. No need to translate this String. -->
 
     <!--
     ******************
