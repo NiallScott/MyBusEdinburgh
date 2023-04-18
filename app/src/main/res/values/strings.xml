@@ -428,15 +428,13 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="creditsdialog_title">Credits</string>
     <string name="creditsdialog_body">
         <![CDATA[
-            <h5>Thanks to the following people and entities for making this application happen:</h5>
+            <h5>Thanks to the following people and entities for making this application happen;</h5>
 
             <p>
                 &#8226; Gordon Christie (EdinBus for iOS developer)<br/>
                 &#8226; The City of Edinburgh Council<br/>
                 &#8226; Anthony Totton (App icon, website and graphics)<br/>
-                &#8226; Matteo Doni (Italian localisation, testing)<br/>
                 &#8226; Ross McClymont (testing)<br/>
-                &#8226; Connexionz UK (donation)<br/>
                 &#8226; INEO Systrans<br/>
                 &#8226; Lothian Buses
             </p>
