@@ -35,5 +35,5 @@
     <string name="app_website" translatable="false">http://www.rivernile.org.uk/bustracker/</string>
     <string name="app_twitter" translatable="false">https://twitter.com/MyBusEdinburgh</string>
     <string name="app_privacy_policy" translatable="false">https://niallscott.co.uk/my-bus-edinburgh-privacy-policy/</string>
-    <string name="asset_db_version" translatable="false">1402286404622</string>
+    <string name="asset_db_version" translatable="false">1681099203955</string>
 </resources>
