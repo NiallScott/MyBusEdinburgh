@@ -41,12 +41,12 @@ android {
         minSdkVersion androidMinSdkVersion
         targetSdkVersion androidTargetSdkVersion
         testInstrumentationRunner 'uk.org.rivernile.android.bustracker.core.CoreTestRunner'
+        consumerProguardFiles 'proguard-consumer-rules.pro'
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled false
         }
 
         debug {
