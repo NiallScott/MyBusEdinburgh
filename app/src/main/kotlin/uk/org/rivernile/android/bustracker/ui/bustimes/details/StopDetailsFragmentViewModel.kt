@@ -67,6 +67,8 @@ class StopDetailsFragmentViewModel @Inject constructor(
          */
         const val STATE_STOP_CODE = "stopCode"
         private const val STATE_ASKED_FOR_PERMISSIONS = "askedForPermissions"
+
+        private const val LIVE_DATA_TIMEOUT_MILLIS = 1000L
     }
 
     /**
@@ -107,7 +109,8 @@ class StopDetailsFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits the [List] of [UiItem]s to show on the UI.
      */
-    val itemsLiveData = itemsFlow.asLiveData(viewModelScope.coroutineContext)
+    val itemsLiveData = itemsFlow
+        .asLiveData(viewModelScope.coroutineContext, LIVE_DATA_TIMEOUT_MILLIS)
 
     /**
      * This [LiveData] emits the current state of the UI, as defined by [UiState].
@@ -115,7 +118,7 @@ class StopDetailsFragmentViewModel @Inject constructor(
     val uiStateLiveData = itemsFlow
             .map(this::calculateState)
             .distinctUntilChanged()
-            .asLiveData(viewModelScope.coroutineContext)
+            .asLiveData(viewModelScope.coroutineContext, LIVE_DATA_TIMEOUT_MILLIS)
 
     /**
      * This [LiveData] emits when the user should be shown a map with the given stop highlighted.

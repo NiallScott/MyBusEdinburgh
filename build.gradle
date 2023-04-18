@@ -41,7 +41,7 @@ buildscript {
         materialVersion = '1.8.0'
         recyclerViewVersion = '1.3.0'
         cardViewVersion = '1.0.0'
-        viewPager2Version = '1.0.0'
+        viewPager2Version = '1.1.0-beta01'
         constraintLayoutVersion = '2.1.4'
         androidXPreferenceVersion = '1.2.0'
         architectureComponentsVersion = '2.6.1'
