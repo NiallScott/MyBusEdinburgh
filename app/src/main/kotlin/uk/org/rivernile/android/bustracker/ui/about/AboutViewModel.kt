@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -105,6 +105,12 @@ class AboutViewModel @Inject constructor(
     private val showCredits = SingleLiveEvent<Unit>()
 
     /**
+     * This [LiveData] is invoked when the privacy policy should be shown.
+     */
+    val showPrivacyPolicyLiveData: LiveData<Unit> get() = showPrivacyPolicy
+    private val showPrivacyPolicy = SingleLiveEvent<Unit>()
+
+    /**
      * This [LiveData] is invoked when the open source licences should be shown.
      */
     val showOpenSourceLicencesLiveData: LiveData<Unit> get() = showOpenSourceLicences
@@ -118,6 +124,7 @@ class AboutViewModel @Inject constructor(
     fun onItemClicked(item: UiAboutItem) {
         when (item) {
             is UiAboutItem.OneLineItem.Credits -> showCredits.call()
+            is UiAboutItem.OneLineItem.PrivacyPolicy -> showPrivacyPolicy.call()
             is UiAboutItem.OneLineItem.OpenSourceLicences -> showOpenSourceLicences.call()
             is UiAboutItem.TwoLinesItem.AppVersion -> showStoreListing.call()
             is UiAboutItem.TwoLinesItem.Author -> showAuthorWebsite.call()
@@ -148,5 +155,6 @@ class AboutViewModel @Inject constructor(
                     UiAboutItem.TwoLinesItem.TopologyVersion(
                             databaseMetadata?.topologyVersion),
                     UiAboutItem.OneLineItem.Credits,
+                    UiAboutItem.OneLineItem.PrivacyPolicy,
                     UiAboutItem.OneLineItem.OpenSourceLicences)
 }

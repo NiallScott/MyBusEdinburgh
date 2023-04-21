@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,10 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes
 
 import androidx.annotation.StringRes
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.commitNow
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import uk.org.rivernile.android.bustracker.ui.bustimes.details.StopDetailsFragment
 import uk.org.rivernile.android.bustracker.ui.bustimes.times.BusTimesFragment
@@ -55,6 +58,10 @@ class StopDataPagerAdapter(
         private const val PAGE_DETAILS = 1
     }
 
+    init {
+        registerFragmentTransactionCallback(fragmentTransactionCallback)
+    }
+
     override fun getItemCount() = PAGE_COUNT
 
     override fun createFragment(position: Int) = when (position) {
@@ -68,5 +75,50 @@ class StopDataPagerAdapter(
         PAGE_TIMES -> R.string.displaystopdata_tab_times
         PAGE_DETAILS -> R.string.displaystopdata_tab_details
         else -> throw IllegalArgumentException()
+    }
+
+    /**
+     * When swiping to [StopDetailsFragment] and swiping back to [BusTimesFragment], the location
+     * access symbol will perpetually stay in the status bar. This is because the details Fragment,
+     * despite no longer being visible, is still requesting locations. Why?
+     *
+     * Because [FragmentStateAdapter] merely puts the details Fragment back to a
+     * [Lifecycle.State.STARTED] state. In this state, LiveData instances in [StopDetailsFragment]
+     * are still active, and up the chain this still causes locations to be collected. This is
+     * consistent with normal Android practice, because a STARTED element normally means the item
+     * is still visible.
+     *
+     * Except it's not in this case, because it's been scrolled off-screen. We don't want to be
+     * collecting locations when the user can't see [StopDetailsFragment] as this will hammer the
+     * battery.
+     *
+     * This is controlled under the hood by [FragmentStateAdapter] by controlling the maximum
+     * lifecycle of a Fragment via the FragmentManager. When a Fragment is the primary item, its max
+     * lifecycle is [Lifecycle.State.RESUMED], and when not the primary item but cached, it is
+     * [Lifecycle.State.STARTED]. It's because of this that the details Fragment is still started
+     * and its LiveDatas are still active.
+     *
+     * So instead, we register this callback and implement
+     * [FragmentStateAdapter.FragmentTransactionCallback] so we know when the maximum lifecycle for
+     * a Fragment is changing. In the case the Fragment is [StopDetailsFragment], AND its maximum
+     * lifecycle is [Lifecycle.State.STARTED], we then perform another transaction to forcefully
+     * place its max lifecycle down to [Lifecycle.State.CREATED]. This means the Fragment still
+     * exists, but all of its LiveDatas will be inactive.
+     */
+    private val fragmentTransactionCallback get() = object : FragmentTransactionCallback() {
+        override fun onFragmentMaxLifecyclePreUpdated(
+            fragment: Fragment,
+            maxLifecycleState: Lifecycle.State): OnPostEventListener {
+            return if (fragment is StopDetailsFragment &&
+                maxLifecycleState == Lifecycle.State.STARTED) {
+                OnPostEventListener {
+                    fragment.parentFragmentManager.commitNow {
+                        setMaxLifecycle(fragment, Lifecycle.State.CREATED)
+                    }
+                }
+            } else {
+                super.onFragmentMaxLifecyclePreUpdated(fragment, maxLifecycleState)
+            }
+        }
     }
 }

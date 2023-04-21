@@ -84,16 +84,12 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
             productFlavors {
                 edinburgh {
                     signingConfig signingConfigs.edinburgh
-                    manifestPlaceholders += [
-                            googleMapsApiKey: project.findProperty('mybus.edinburgh.release.mapsKey')
-                                    ?: "undefined"
-                    ]
                 }
             }
         }
@@ -103,11 +99,6 @@ android {
             versionNameSuffix '-debug'
             testCoverageEnabled true
             signingConfig signingConfigs.globalDebug
-
-            productFlavors.edinburgh.manifestPlaceholders += [
-                    googleMapsApiKey: project.findProperty('mybus.edinburgh.debug.mapsKey')
-                            ?: "undefined"
-            ]
         }
     }
 
@@ -133,6 +124,10 @@ androidComponents {
     onVariants(selector().all(), { variant ->
         variant.resValues[variant.makeResValueKey('string', 'package_name')] =
                 new ResValue("${variant.applicationId.get()}", null)
+
+        manifestPlaceholders.googleMapsApiKey = project
+                .findProperty("mybus.${flavorName}.${buildType}.mapsKey")
+                ?: 'undefined'
     })
 }
 
@@ -194,5 +189,4 @@ dependencies {
 
     testImplementation project(':testutils')
     testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
-    testImplementation "org.mockito:mockito-inline:$mockitoVersion"
 }

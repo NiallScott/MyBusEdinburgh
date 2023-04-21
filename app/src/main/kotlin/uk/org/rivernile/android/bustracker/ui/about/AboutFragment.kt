@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -114,6 +114,9 @@ class AboutFragment : Fragment() {
         viewModel.showOpenSourceLicencesLiveData.observe(viewLifecycleOwner) {
             callbacks.onShowLicences()
         }
+        viewModel.showPrivacyPolicyLiveData.observe(viewLifecycleOwner) {
+            handlePrivacyPolicyItemClick()
+        }
     }
 
     override fun onDestroyView() {
@@ -173,6 +176,21 @@ class AboutFragment : Fragment() {
     private fun handleTwitterItemClick() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(getString(R.string.app_twitter))
+        }
+
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            // Fail silently.
+        }
+    }
+
+    /**
+     * Handle the privacy policy item being clicked.
+     */
+    private fun handlePrivacyPolicyItemClick() {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(getString(R.string.app_privacy_policy))
         }
 
         try {

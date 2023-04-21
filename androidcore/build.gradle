@@ -41,12 +41,12 @@ android {
         minSdkVersion androidMinSdkVersion
         targetSdkVersion androidTargetSdkVersion
         testInstrumentationRunner 'uk.org.rivernile.android.bustracker.core.CoreTestRunner'
+        consumerProguardFiles 'proguard-consumer-rules.pro'
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled false
         }
 
         debug {
@@ -148,7 +148,6 @@ dependencies {
 
     testImplementation project(':testutils')
     testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
-    testImplementation "org.mockito:mockito-inline:$mockitoVersion"
 }
 
 private def getApiKey(final String city) {

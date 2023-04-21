@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,8 @@ sealed interface UiAboutItem {
         private const val ITEM_ID_DATABASE_VERSION = 5
         private const val ITEM_ID_TOPOLOGY_VERSION = 6
         private const val ITEM_ID_CREDITS = 7
-        private const val ITEM_ID_OPEN_SOURCE_LICENCES = 8
+        private const val ITEM_ID_PRIVACY_POLICY = 8
+        private const val ITEM_ID_OPEN_SOURCE_LICENCES = 9
     }
 
     /**
@@ -67,6 +68,16 @@ sealed interface UiAboutItem {
         object Credits : OneLineItem {
 
             override val id get() = ITEM_ID_CREDITS
+
+            override val isClickable get() = true
+        }
+
+        /**
+         * Privacy policy item.
+         */
+        object PrivacyPolicy : OneLineItem {
+
+            override val id get() = ITEM_ID_PRIVACY_POLICY
 
             override val isClickable get() = true
         }
