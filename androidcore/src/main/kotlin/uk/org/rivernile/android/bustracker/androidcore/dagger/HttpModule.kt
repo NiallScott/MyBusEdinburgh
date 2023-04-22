@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
@@ -90,7 +89,6 @@ internal class HttpModule {
      * @param json The app-wide [Json] instance.
      * @return A [Converter.Factory] which does Kotlin JSON (de-)serialisation.
      */
-    @OptIn(ExperimentalSerializationApi::class)
     @Singleton
     @Provides
     @ForKotlinJsonSerialization
