@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -39,6 +43,7 @@ import java.util.Locale
  *
  * @author Niall Scott
  */
+@RunWith(MockitoJUnitRunner::class)
 class TweetsMapperTest {
 
     companion object {
@@ -54,11 +59,14 @@ class TweetsMapperTest {
         private val TEST_TIME = DATE_FORMAT.parse(TEST_TIMESTAMP)
     }
 
+    @Mock
+    private lateinit var exceptionLogger: ExceptionLogger
+
     private lateinit var mapper: TweetsMapper
 
     @Before
     fun setUp() {
-        mapper = TweetsMapper()
+        mapper = TweetsMapper(exceptionLogger)
     }
 
     @Test

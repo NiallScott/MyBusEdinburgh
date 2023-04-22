@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.preferences
 
 import android.content.SharedPreferences
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.lang.NumberFormatException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,11 +36,13 @@ import javax.inject.Singleton
  * This is the Android-specific implementation of [PreferenceManager].
  *
  * @param preferences The Android [SharedPreferences] instance.
+ * @param exceptionLogger The exception logger.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidPreferenceManager @Inject constructor(
-        private val preferences: SharedPreferences) : PreferenceManager {
+    private val preferences: SharedPreferences,
+    private val exceptionLogger: ExceptionLogger) : PreferenceManager {
 
     companion object {
 
@@ -147,7 +150,8 @@ internal class AndroidPreferenceManager @Inject constructor(
 
         return try {
             asString?.toInt() ?: DEFAULT_NUMBER_OF_DEPARTURES_PER_SERVICE
-        } catch (ignored: NumberFormatException) {
+        } catch (e: NumberFormatException) {
+            exceptionLogger.log(e)
             DEFAULT_NUMBER_OF_DEPARTURES_PER_SERVICE
         }
     }
@@ -169,7 +173,8 @@ internal class AndroidPreferenceManager @Inject constructor(
 
         return try {
             asString?.toDouble() ?: DEFAULT_LATITUDE
-        } catch (ignored: NumberFormatException) {
+        } catch (e: NumberFormatException) {
+            exceptionLogger.log(e)
             DEFAULT_LATITUDE
         }
     }
@@ -185,7 +190,8 @@ internal class AndroidPreferenceManager @Inject constructor(
 
         return try {
             asString?.toDouble() ?: DEFAULT_LONGITUDE
-        } catch (ignored: NumberFormatException) {
+        } catch (e: NumberFormatException) {
+            exceptionLogger.log(e)
             DEFAULT_LONGITUDE
         }
     }

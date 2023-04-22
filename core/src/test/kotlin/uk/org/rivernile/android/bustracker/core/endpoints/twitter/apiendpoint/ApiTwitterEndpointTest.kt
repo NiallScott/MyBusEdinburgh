@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,12 +37,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import retrofit2.Response
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.LatestTweetsResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
@@ -72,6 +76,8 @@ class ApiTwitterEndpointTest {
     private val appName = "TEST"
     @Mock
     private lateinit var tweetsMapper: TweetsMapper
+    @Mock
+    private lateinit var exceptionLogger: ExceptionLogger
 
     private lateinit var endpoint: ApiTwitterEndpoint
 
@@ -82,7 +88,8 @@ class ApiTwitterEndpointTest {
                 connectivityRepository,
                 apiKeyGenerator,
                 appName,
-                tweetsMapper)
+                tweetsMapper,
+                exceptionLogger)
     }
 
     @Test
@@ -92,6 +99,8 @@ class ApiTwitterEndpointTest {
         val result = endpoint.getLatestTweets()
 
         assertEquals(LatestTweetsResponse.Error.NoConnectivity, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -105,6 +114,8 @@ class ApiTwitterEndpointTest {
         val result = endpoint.getLatestTweets()
 
         assertEquals(LatestTweetsResponse.Error.Io(exception), result)
+        verify(exceptionLogger)
+            .log(exception)
     }
 
     @Test
@@ -117,6 +128,8 @@ class ApiTwitterEndpointTest {
         val result = endpoint.getLatestTweets()
 
         assertEquals(LatestTweetsResponse.Error.UnrecognisedServerError, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -129,6 +142,8 @@ class ApiTwitterEndpointTest {
         val result = endpoint.getLatestTweets()
 
         assertEquals(LatestTweetsResponse.Error.Authentication, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -143,6 +158,8 @@ class ApiTwitterEndpointTest {
         val result = endpoint.getLatestTweets()
 
         assertEquals(LatestTweetsResponse.Success(null), result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -157,6 +174,8 @@ class ApiTwitterEndpointTest {
         val result = endpoint.getLatestTweets()
 
         assertEquals(LatestTweetsResponse.Success(null), result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -173,6 +192,8 @@ class ApiTwitterEndpointTest {
         val result = endpoint.getLatestTweets()
 
         assertEquals(LatestTweetsResponse.Success(tweets), result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     private fun givenHasInternetConnectivity(hasInternetConnectivity: Boolean) {

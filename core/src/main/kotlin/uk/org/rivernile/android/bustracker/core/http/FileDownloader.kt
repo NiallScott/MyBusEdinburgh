@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import okio.IOException
 import okio.buffer
 import okio.sink
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
 import javax.inject.Inject
 import javax.net.SocketFactory
@@ -42,12 +43,14 @@ import javax.net.SocketFactory
  * This class is used to download files.
  *
  * @param okHttpClient The HTTP implementation.
+ * @param exceptionLogger Used to log exceptions.
  * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
 class FileDownloader @Inject internal constructor(
-        private val okHttpClient: OkHttpClient,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+    private val okHttpClient: OkHttpClient,
+    private val exceptionLogger: ExceptionLogger,
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
      * Download a file from the given [url] to [toLocation]. If [socketFactory] is not-`null`, this
@@ -74,6 +77,7 @@ class FileDownloader @Inject internal constructor(
             try {
                 toLocation.sink().buffer()
             } catch (e: IOException) {
+                exceptionLogger.log(e)
                 return@withContext FileDownloadResponse.Error.IoError(e)
             }.use { fileSink ->
                 val request = Request.Builder()
@@ -92,6 +96,7 @@ class FileDownloader @Inject internal constructor(
                         FileDownloadResponse.Error.ServerError
                     }
                 } catch (e: IOException) {
+                    exceptionLogger.log(e)
                     FileDownloadResponse.Error.IoError(e)
                 }
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,6 +49,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.ServicesContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -77,6 +78,8 @@ class AndroidServicesDaoTest {
 
     @Mock
     private lateinit var contract: ServicesContract
+    @Mock
+    private lateinit var exceptionLogger: ExceptionLogger
 
     private lateinit var mockContext: Context
     private lateinit var mockContentResolver: MockContentResolver
@@ -94,6 +97,7 @@ class AndroidServicesDaoTest {
         servicesDao = AndroidServicesDao(
                 mockContext,
                 contract,
+                exceptionLogger,
                 coroutineRule.testDispatcher)
 
         whenever(contract.getContentUri())

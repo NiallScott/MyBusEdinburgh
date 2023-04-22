@@ -38,8 +38,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentAboutBinding
+import javax.inject.Inject
 
 /**
  * This [Fragment] will show the user 'about' information for the application as a list of items.
@@ -48,6 +50,9 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentAboutBin
  */
 @AndroidEntryPoint
 class AboutFragment : Fragment() {
+
+    @Inject
+    lateinit var exceptionLogger: ExceptionLogger
 
     private val viewModel: AboutViewModel by viewModels()
 
@@ -136,6 +141,7 @@ class AboutFragment : Fragment() {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             // Fail silently.
         }
     }
@@ -151,6 +157,7 @@ class AboutFragment : Fragment() {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             // Fail silently.
         }
     }
@@ -166,6 +173,7 @@ class AboutFragment : Fragment() {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             // Fail silently.
         }
     }
@@ -181,6 +189,7 @@ class AboutFragment : Fragment() {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             // Fail silently.
         }
     }
@@ -196,6 +205,7 @@ class AboutFragment : Fragment() {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             // Fail silently.
         }
     }

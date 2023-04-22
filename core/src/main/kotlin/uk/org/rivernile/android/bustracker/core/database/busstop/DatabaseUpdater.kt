@@ -34,6 +34,7 @@ import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.io.File
@@ -48,6 +49,8 @@ import javax.net.SocketFactory
  * @param fileConsistencyChecker An implementation for checking the consistency of files.
  * @param databaseRepository The repository which represents this database.
  * @param timeUtils Used to access timestamps.
+ * @param exceptionLogger Used to log exceptions.
+ * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
 class DatabaseUpdater @Inject internal constructor(
@@ -56,6 +59,7 @@ class DatabaseUpdater @Inject internal constructor(
         private val fileConsistencyChecker: FileConsistencyChecker,
         private val databaseRepository: BusStopDatabaseRepository,
         private val timeUtils: TimeUtils,
+        private val exceptionLogger: ExceptionLogger,
         @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
@@ -100,7 +104,8 @@ class DatabaseUpdater @Inject internal constructor(
      */
     private suspend fun doesPassConsistencyCheck(downloadFile: File, checksum: String) = try {
         fileConsistencyChecker.checkFileMatchesHash(downloadFile, checksum)
-    } catch (ignored: IOException) {
+    } catch (e: IOException) {
+        exceptionLogger.log(e)
         false
     }
 

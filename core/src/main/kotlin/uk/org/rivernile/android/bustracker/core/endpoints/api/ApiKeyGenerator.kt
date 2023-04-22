@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.api
 
 import uk.org.rivernile.android.bustracker.core.di.ForApiKey
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -38,11 +39,13 @@ import javax.inject.Inject
 /**
  * This class is used to generate API keys for the API.
  *
- * @property unhashedKey The unhashed version of the key.
+ * @param unhashedKey The unhashed version of the key.
+ * @param exceptionLogger Used to log exceptions.
  * @author Niall Scott
  */
 internal class ApiKeyGenerator @Inject constructor(
-        @ForApiKey private val unhashedKey: String) {
+    @ForApiKey private val unhashedKey: String,
+    private val exceptionLogger: ExceptionLogger) {
 
     @Suppress("SimpleDateFormat")
     private val dateFormatter = SimpleDateFormat("yyyyMMddHH").also {
@@ -76,6 +79,7 @@ internal class ApiKeyGenerator @Inject constructor(
 
             hashedKey
         } catch (e: NoSuchAlgorithmException) {
+            exceptionLogger.log(e)
             ""
         }
     }

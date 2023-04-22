@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.LatestTweetsResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.TwitterEndpoint
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -44,6 +45,7 @@ import javax.inject.Singleton
  * @param apiKeyGenerator An implementation to generate API keys.
  * @param appName The app name to identify this app on the server.
  * @param tweetsMapper An implementation to map the response to [Tweet]s.
+ * @param exceptionLogger Used to log exceptions.
  * @author Niall Scott
  */
 @Singleton
@@ -52,7 +54,8 @@ internal class ApiTwitterEndpoint @Inject constructor(
         private val connectivityRepository: ConnectivityRepository,
         private val apiKeyGenerator: ApiKeyGenerator,
         @ForApiAppName private val appName: String,
-        private val tweetsMapper: TweetsMapper) : TwitterEndpoint {
+        private val tweetsMapper: TweetsMapper,
+        private val exceptionLogger: ExceptionLogger) : TwitterEndpoint {
 
     override suspend fun getLatestTweets(): LatestTweetsResponse {
         return if (connectivityRepository.hasInternetConnectivity) {
@@ -70,6 +73,7 @@ internal class ApiTwitterEndpoint @Inject constructor(
                     }
                 }
             } catch (e: IOException) {
+                exceptionLogger.log(e)
                 LatestTweetsResponse.Error.Io(e)
             }
         } else {

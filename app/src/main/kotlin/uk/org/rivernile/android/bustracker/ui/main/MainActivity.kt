@@ -61,6 +61,7 @@ import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.search.SearchView
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.ui.RequiresContentPadding
 import uk.org.rivernile.android.bustracker.ui.about.AboutActivity
 import uk.org.rivernile.android.bustracker.ui.alerts.AlertManagerFragment
@@ -85,6 +86,7 @@ import uk.org.rivernile.android.bustracker.ui.turnongps.TurnOnGpsDialogFragment
 import uk.org.rivernile.edinburghbustracker.android.BuildConfig
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityMainBinding
+import javax.inject.Inject
 
 /**
  * This [android.app.Activity] is the root Activity of the app.
@@ -126,6 +128,9 @@ class MainActivity : AppCompatActivity(),
         private const val BARCODE_APP_PACKAGE =
                 "market://details?id=com.google.zxing.client.android"
     }
+
+    @Inject
+    lateinit var exceptionLogger: ExceptionLogger
 
     private val viewModel by viewModels<MainActivityViewModel>()
 
@@ -276,7 +281,8 @@ class MainActivity : AppCompatActivity(),
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     .let(this::startActivity)
             true
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             false
         }
     }
@@ -292,7 +298,8 @@ class MainActivity : AppCompatActivity(),
                 .setData(Uri.parse(BARCODE_APP_PACKAGE))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .let(this::startActivity)
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             Toast.makeText(
                 this,
                 R.string.barcodescannerdialog_noplaystore,

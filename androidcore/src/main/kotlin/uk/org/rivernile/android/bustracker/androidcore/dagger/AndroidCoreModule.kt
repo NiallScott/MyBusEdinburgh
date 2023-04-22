@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,6 +41,8 @@ import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
+import uk.org.rivernile.android.bustracker.core.log.CrashlyticsExceptionLogger
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.V24ConnectivityChecker
@@ -107,13 +109,18 @@ class AndroidCoreModule {
 
         @Suppress("unused")
         @Binds
-        fun bindFeatureRepository(androidFeatureRepository: AndroidFeatureRepository)
-                : FeatureRepository
+        fun bindExceptionLogger(
+            crashlyticsExceptionLogger: CrashlyticsExceptionLogger): ExceptionLogger
 
         @Suppress("unused")
         @Binds
-        fun bindPreferenceManager(androidPreferenceManager: AndroidPreferenceManager)
-                : PreferenceManager
+        fun bindFeatureRepository(
+            androidFeatureRepository: AndroidFeatureRepository): FeatureRepository
+
+        @Suppress("unused")
+        @Binds
+        fun bindPreferenceManager(
+            androidPreferenceManager: AndroidPreferenceManager): PreferenceManager
 
         @Suppress("unused")
         @Binds

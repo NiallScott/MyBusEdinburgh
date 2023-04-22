@@ -46,6 +46,7 @@ import com.google.android.material.color.MaterialColors
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -63,6 +64,8 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
 
     @Inject
     lateinit var avatarImageLoader: TweetAvatarImageLoader
+    @Inject
+    lateinit var exceptionLogger: ExceptionLogger
 
     private val viewModel: TwitterUpdatesFragmentViewModel by viewModels()
     private lateinit var adapter: TweetAdapter
@@ -234,7 +237,8 @@ class TwitterUpdatesFragment : Fragment(), HasScrollableContent {
 
         try {
             startActivity(intent)
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             Toast.makeText(
                     requireContext(),
                     R.string.twitterupdates_err_no_activity_for_click,

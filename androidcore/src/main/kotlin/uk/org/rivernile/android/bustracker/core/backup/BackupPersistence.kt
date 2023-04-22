@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.backup
 import com.google.gson.Gson
 import com.google.gson.JsonIOException
 import com.google.gson.JsonSyntaxException
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
@@ -40,7 +41,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class BackupPersistence @Inject constructor(
-        private val gson: Gson) {
+    private val gson: Gson,
+    private val exceptionLogger: ExceptionLogger) {
 
     /**
      * Persist the backup data in to the specified [File].
@@ -53,9 +55,11 @@ internal class BackupPersistence @Inject constructor(
             backupFile.bufferedWriter().use {
                 gson.toJson(backup, it)
             }
-        } catch (ignored: IOException) {
+        } catch (e: IOException) {
+            exceptionLogger.log(e)
             // Fail silently - no recovery path.
-        } catch (ignored: JsonIOException) {
+        } catch (e: JsonIOException) {
+            exceptionLogger.log(e)
             // Fail silently - no recovery path.
         }
     }
@@ -69,13 +73,16 @@ internal class BackupPersistence @Inject constructor(
         backupFile.bufferedReader().use {
             gson.fromJson(it, Backup::class.java)
         }
-    } catch (ignored: IOException) {
+    } catch (e: IOException) {
+        exceptionLogger.log(e)
         // Fail silently - no recovery path.
         null
-    } catch (ignored: JsonIOException) {
+    } catch (e: JsonIOException) {
+        exceptionLogger.log(e)
         // Fail silently - no recovery path.
         null
-    } catch (ignored: JsonSyntaxException) {
+    } catch (e: JsonSyntaxException) {
+        exceptionLogger.log(e)
         // Fail silently - no recovery path.
         null
     }

@@ -57,6 +57,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.RequiresContentPadding
 import uk.org.rivernile.android.bustracker.core.bundle.getParcelableCompat
 import uk.org.rivernile.android.bustracker.core.bundle.getSerializableCompat
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
@@ -123,6 +124,8 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     lateinit var stopClusterRendererFactory: StopClusterRendererFactory
     @Inject
     lateinit var mapStyleApplicator: MapStyleApplicator
+    @Inject
+    lateinit var exceptionLogger: ExceptionLogger
 
     private val viewModel: BusStopMapViewModel by viewModels()
 
@@ -439,7 +442,8 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
         googleApiAvailability.getErrorResolutionPendingIntent(requireContext(), errorCode, 0)?.let {
             try {
                 it.send()
-            } catch (ignored: PendingIntent.CanceledException) {
+            } catch (e: PendingIntent.CanceledException) {
+                exceptionLogger.log(e)
                 null
             }
         } ?: showFailedToResolvePlayServicesToast()

@@ -36,9 +36,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
@@ -73,6 +77,8 @@ class EdinburghTrackerEndpointTest {
     private lateinit var responseHandler: ResponseHandler
     @Mock
     private lateinit var connectivityRepository: ConnectivityRepository
+    @Mock
+    private lateinit var exceptionLogger: ExceptionLogger
 
     private lateinit var endpoint: EdinburghTrackerEndpoint
 
@@ -84,7 +90,8 @@ class EdinburghTrackerEndpointTest {
             liveTimesMapper,
             errorMapper,
             responseHandler,
-            connectivityRepository)
+            connectivityRepository,
+            exceptionLogger)
     }
 
     @Test
@@ -95,6 +102,8 @@ class EdinburghTrackerEndpointTest {
         val result = endpoint.getLiveTimes("123456", 1)
 
         assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -110,6 +119,8 @@ class EdinburghTrackerEndpointTest {
         val result = endpoint.getLiveTimes("123456", 1)
 
         assertEquals(LiveTimesResponse.Error.Io(throwable), result)
+        verify(exceptionLogger)
+            .log(throwable)
     }
 
     @Test
@@ -120,6 +131,8 @@ class EdinburghTrackerEndpointTest {
         val result = endpoint.getLiveTimes(listOf("1", "2", "3", "4", "5"), 1)
 
         assertEquals(LiveTimesResponse.Error.NoConnectivity, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -142,5 +155,7 @@ class EdinburghTrackerEndpointTest {
         val result = endpoint.getLiveTimes(listOf("1", "2", "3", "4", "5"), 1)
 
         assertEquals(LiveTimesResponse.Error.Io(throwable), result)
+        verify(exceptionLogger)
+            .log(throwable)
     }
 }

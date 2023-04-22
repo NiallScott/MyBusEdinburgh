@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import okio.IOException
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -46,11 +47,11 @@ import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import java.io.File
-import java.io.IOException
 
 /**
  * Tests for [DatabaseUpdater].
@@ -74,6 +75,8 @@ class DatabaseUpdaterTest {
     private lateinit var databaseRepository: BusStopDatabaseRepository
     @Mock
     private lateinit var timeUtils: TimeUtils
+    @Mock
+    private lateinit var exceptionLogger: ExceptionLogger
 
     @Mock
     private lateinit var downloadFile: File
@@ -90,6 +93,7 @@ class DatabaseUpdaterTest {
                 fileConsistencyChecker,
                 databaseRepository,
                 timeUtils,
+                exceptionLogger,
                 coroutineRule.testDispatcher)
 
         whenever(databaseUtils.getDatabasePath(any()))
@@ -139,8 +143,9 @@ class DatabaseUpdaterTest {
     fun returnsFalseAndDeletesDownloadFileWhenFileConsistencyFailsToReadFile() = runTest {
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
                 .thenReturn(FileDownloadResponse.Success)
+        val exception = IOException()
         whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
-                .thenThrow(IOException::class.java)
+                .thenThrow(exception)
 
         val result = updater.updateDatabase(databaseVersion, null)
 
@@ -151,6 +156,8 @@ class DatabaseUpdaterTest {
                 .delete()
         verify(databaseRepository, never())
                 .replaceDatabase(any())
+        verify(exceptionLogger)
+            .log(exception)
     }
 
     @Test

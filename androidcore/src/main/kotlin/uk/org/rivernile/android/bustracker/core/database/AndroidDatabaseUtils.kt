@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.database.sqlite.SQLiteException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
 import javax.inject.Inject
 
@@ -38,11 +39,14 @@ import javax.inject.Inject
  * This class is an Android specific implementation of [DatabaseUtils].
  *
  * @param context The application [Context].
+ * @param exceptionLogger The exception logger.
+ * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
 internal class AndroidDatabaseUtils @Inject constructor(
-        private val context: Context,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): DatabaseUtils {
+    private val context: Context,
+    private val exceptionLogger: ExceptionLogger,
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): DatabaseUtils {
 
     companion object {
 
@@ -53,7 +57,8 @@ internal class AndroidDatabaseUtils @Inject constructor(
         withContext(ioDispatcher) {
             try {
                 context.openOrCreateDatabase(TEMP_DB, Context.MODE_PRIVATE, null).close()
-            } catch (ignored: SQLiteException) {
+            } catch (e: SQLiteException) {
+                exceptionLogger.log(e)
                 // Nothing to do here.
             }
 
