@@ -36,8 +36,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.app.AndroidAppRepository
 import uk.org.rivernile.android.bustracker.core.app.AppRepository
-import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
-import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -102,10 +100,6 @@ class AndroidCoreModule {
     @InstallIn(SingletonComponent::class)
     @Module
     internal interface Bindings {
-
-        @Suppress("unused")
-        @Binds
-        fun bindBackupInvoker(androidBackupInvoker: AndroidBackupInvoker): BackupInvoker
 
         @Suppress("unused")
         @Binds

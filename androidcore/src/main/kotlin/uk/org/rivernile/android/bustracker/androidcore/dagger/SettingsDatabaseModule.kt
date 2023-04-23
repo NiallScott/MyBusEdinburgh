@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,8 +32,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.database.settings.AndroidSettingsDatabaseRepository
-import uk.org.rivernile.android.bustracker.core.database.settings.SettingsDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.di.ForSettingsDatabase
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AndroidAlertsDao
@@ -58,12 +56,6 @@ internal class SettingsDatabaseModule {
     @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
-
-        @Suppress("unused")
-        @Binds
-        fun bindSettingsDatabaseRepository(
-                androidSettingsDatabaseRepository: AndroidSettingsDatabaseRepository)
-                : SettingsDatabaseRepository
 
         @Suppress("unused")
         @Binds

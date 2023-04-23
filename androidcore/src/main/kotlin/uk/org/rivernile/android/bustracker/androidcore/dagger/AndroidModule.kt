@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.app.Application
-import android.app.backup.BackupManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -50,10 +49,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 internal class AndroidModule {
-
-    @Provides
-    @Singleton
-    fun provideBackupManager(context: Context): BackupManager = BackupManager(context)
 
     @Provides
     fun provideConnectivityManager(context: Context): ConnectivityManager =

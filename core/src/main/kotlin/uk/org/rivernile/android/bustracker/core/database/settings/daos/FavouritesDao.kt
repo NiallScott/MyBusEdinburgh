@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -79,28 +79,6 @@ interface FavouritesDao {
      * @param stopCode The saved favourite with this stop code to remove.
      */
     suspend fun removeFavouriteStop(stopCode: String)
-
-    /**
-     * Add [FavouriteStop]s.
-     *
-     * @param favouriteStops The favourite stops to add.
-     * @return The number of rows added.
-     */
-    fun addFavouriteStops(favouriteStops: List<FavouriteStop>): Int
-
-    /**
-     * Remove all [FavouriteStop]s from the database.
-     *
-     * @return The number of deleted items.
-     */
-    fun removeAllFavouriteStops(): Int
-
-    /**
-     * Get all user-saved favourite stops.
-     *
-     * @return All user-saved favourite stops.
-     */
-    fun getAllFavouriteStops(): List<FavouriteStop>?
 
     /**
      * Get a specific user-saved favourite stop.

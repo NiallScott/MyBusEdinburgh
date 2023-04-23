@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
-import uk.org.rivernile.android.bustracker.core.backup.BackupObserver
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseWorkScheduler
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
@@ -45,8 +44,6 @@ import javax.inject.Inject
  * The task is begun in [performStartUpTasks] and this is executed on another thread.
  *
  * @param appNotificationChannels Implementation to set up notification channels.
- * @param backupObserver Used to observe data changes in the app to then inform the backup manager
- * as a hint that data should be backed up.
  * @param busStopDatabaseUpdateJobScheduler Implementation to schedule updates to the bus stop
  * database.
  * @param cleanUpTask Implementation to perform clean up of app data - usually to remove data from
@@ -58,7 +55,6 @@ import javax.inject.Inject
  */
 class StartUpTask @Inject internal constructor(
         private val appNotificationChannels: AppNotificationChannels,
-        private val backupObserver: BackupObserver,
         private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseWorkScheduler,
         private val cleanUpTask: CleanUpTask?,
         private val alertManager: AlertManager,
@@ -73,7 +69,6 @@ class StartUpTask @Inject internal constructor(
             // In-order tasks that are pre-requisites should be executed first, before launching
             // the async tasks.
             appNotificationChannels.createNotificationChannels()
-            backupObserver.beginObserving()
 
             supervisorScope {
                 launchScheduleUpdateBusStopDatabaseAsync()
