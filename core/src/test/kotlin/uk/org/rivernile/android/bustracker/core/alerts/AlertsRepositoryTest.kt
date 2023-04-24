@@ -94,7 +94,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun hasArrivalAlertFlowRespondsToFavouritesChanged() = runTest {
+    fun hasArrivalAlertFlowRespondsToAlertsChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
             listener.onAlertsChanged()
@@ -129,7 +129,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun hasProximityAlertFlowRespondsToFavouritesChanged() = runTest {
+    fun hasProximityAlertFlowRespondsToAlertsChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
             listener.onAlertsChanged()
@@ -146,6 +146,43 @@ class AlertsRepositoryTest {
         observer.assertValues(false, true, false)
         verify(alertsDao)
                 .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun arrivalAlertCountFlowGetsInitialValue() = runTest {
+        whenever(alertsDao.getArrivalAlertCount())
+            .thenReturn(4)
+
+        val observer = repository.arrivalAlertCountFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(4)
+        verify(alertsDao)
+            .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun arrivalAlertCountFlowRespondsToAlertsChanged() = runTest {
+        doAnswer {
+            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
+            listener.onAlertsChanged()
+            listener.onAlertsChanged()
+            listener.onAlertsChanged()
+            listener.onAlertsChanged()
+        }.whenever(alertsDao).addOnAlertsChangedListener(any())
+        whenever(alertsDao.getArrivalAlertCount())
+            .thenReturn(1, 2, 3, 4, 0)
+
+        val observer = repository.arrivalAlertCountFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(1, 2, 3, 4, 0)
+        verify(alertsDao)
+            .removeOnAlertsChangedListener(any())
     }
 
     @Test

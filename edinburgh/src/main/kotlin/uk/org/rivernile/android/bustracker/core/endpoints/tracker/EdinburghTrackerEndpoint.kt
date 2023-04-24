@@ -85,11 +85,11 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
                 val response = api.getBusTimes(
                     apiKeyGenerator.hashedApiKey,
                     numberOfDepartures,
-                    stopCodes[0],
-                    stopCodes[1],
-                    stopCodes[2],
-                    stopCodes[3],
-                    stopCodes[4])
+                    stopCodes.getOrNull(0),
+                    stopCodes.getOrNull(1),
+                    stopCodes.getOrNull(2),
+                    stopCodes.getOrNull(3),
+                    stopCodes.getOrNull(4))
                     .awaitResponse()
 
                 responseHandler.handleLiveTimesResponse(response)

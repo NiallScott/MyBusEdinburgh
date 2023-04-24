@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,25 +27,25 @@
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
 
 /**
  * Tests for [TimeAlertRunner].
@@ -56,129 +56,81 @@ import java.util.concurrent.TimeUnit
 @RunWith(MockitoJUnitRunner::class)
 class TimeAlertRunnerTest {
 
-    companion object {
-
-        private const val CHECK_TIMES_INTERVAL_SECS = 60L
-    }
-
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var checkTimesTask: CheckTimesTask
     @Mock
-    private lateinit var alertsDao: AlertsDao
-    @Mock
-    private lateinit var executorService: ScheduledExecutorService
-    @Mock
-    private lateinit var stopListener: () -> Unit
+    private lateinit var alertsRepository: AlertsRepository
 
     private lateinit var runner: TimeAlertRunner
 
     @Before
     fun setUp() {
-        runner = TimeAlertRunner(checkTimesTask, alertsDao, executorService)
+        runner = TimeAlertRunner(
+            checkTimesTask,
+            alertsRepository)
     }
 
     @Test
-    fun startingRunnerRegistersCallbackListenerWithDao() {
-        runner.start(null)
+    fun runWithZeroArrivalAlertsOnStartThrowsImmediateCancellationException() = runTest {
+        whenever(alertsRepository.arrivalAlertCountFlow)
+            .thenReturn(flowOf(0))
 
-        verify(alertsDao)
-                .addOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun startingRunnerSchedulesPollingWithCheckTimesTask() {
-        runner.start(null)
-
-        verify(executorService)
-                .scheduleWithFixedDelay(any(), eq(0L), eq(CHECK_TIMES_INTERVAL_SECS),
-                        eq(TimeUnit.SECONDS))
-    }
-
-    @Test
-    fun stopRunnerRemovesCallbackListenerWithDao() {
-        runner.start(null)
-        runner.stop()
-
-        verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun stopRunnerShutsDownExecutorService() {
-        runner.start(null)
-        runner.stop()
-
-        verify(executorService)
-                .shutdownNow()
-    }
-
-    @Test
-    fun stopRunnerCallsStopListener() {
-        runner.start(stopListener)
-        runner.stop()
-
-        verify(stopListener)
-                .invoke()
-    }
-
-    @Test
-    fun runnerCanOnlyBeStartedOnce() {
-        runner.start(null)
-        runner.stop()
-        runner.start(null)
-
-        verify(alertsDao, times(1))
-                .addOnAlertsChangedListener(any())
-        verify(executorService, times(1))
-                .scheduleWithFixedDelay(any(), any(), any(), any())
-    }
-
-    @Test
-    fun onAlertsChangedWithNonZeroCountDoesNotStopRunner() = runTest {
-        doAnswer {
-            val runnable = it.getArgument<Runnable>(0)
-            runnable.run()
-        }.whenever(executorService).execute(any())
-        whenever(alertsDao.getArrivalAlertCount())
-                .thenReturn(1)
-
-        runner.start(null)
-        argumentCaptor<AlertsDao.OnAlertsChangedListener> {
-            verify(alertsDao)
-                    .addOnAlertsChangedListener(capture())
-            firstValue.onAlertsChanged()
+        val job = launch {
+            runner.run()
         }
+        job.join()
 
-        verify(alertsDao, never())
-                .removeOnAlertsChangedListener(any())
-        verify(executorService, never())
-                .shutdownNow()
+        // As the launched Coroutine is self-cancelling when there are no arrival alerts, and we did
+        // not cancel it in this test, we're expecting the Job to be in a cancelled state.
+        assertTrue(job.isCancelled)
+        verify(checkTimesTask, never())
+            .checkTimes()
     }
 
     @Test
-    fun onAlertsChangedWithZeroCountStopsRunner() = runTest {
-        doAnswer {
-            val runnable = it.getArgument<Runnable>(0)
-            runnable.run()
-        }.whenever(executorService).execute(any())
-        whenever(alertsDao.getArrivalAlertCount())
-                .thenReturn(1, 0)
+    fun runWithOneArrivalAlertOnStartCausesCheckTimesTaskToRun() = runTest {
+        whenever(alertsRepository.arrivalAlertCountFlow)
+            .thenReturn(flowOf(1))
 
-        runner.start(stopListener)
-        argumentCaptor<AlertsDao.OnAlertsChangedListener> {
-            verify(alertsDao)
-                    .addOnAlertsChangedListener(capture())
-            firstValue.onAlertsChanged()
+        val job = launch {
+            runner.run()
         }
+        advanceTimeBy(1L)
+        job.cancel()
 
-        verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
-        verify(executorService)
-                .shutdownNow()
-        verify(stopListener)
-                .invoke()
+        verify(checkTimesTask)
+            .checkTimes()
+    }
+
+    @Test
+    fun runWithRepresentativeExampleYieldsCorrectResults() = runTest {
+        // Count change: 0s(1), 30s(2), 61s(3), 91s(0)
+        // Check:        0s, 60s, (cancelled before next check at 120s)
+        val flow = flow {
+            emit(1)
+            delay(30000L)
+            emit(2)
+            delay(31000L)
+            emit(3)
+            delay(30000L)
+            emit(0)
+        }
+        whenever(alertsRepository.arrivalAlertCountFlow)
+            .thenReturn(flow)
+
+        val job = launch {
+            runner.run()
+        }
+        // Advance time by 1 million millis. This should be enough to determine the check task only
+        // ran twice.
+        advanceTimeBy(1000000L)
+        job.join()
+
+        assertTrue(job.isCancelled)
+        verify(checkTimesTask, times(2))
+            .checkTimes()
     }
 }

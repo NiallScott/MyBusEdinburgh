@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
-import kotlinx.coroutines.runBlocking
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
@@ -56,34 +55,24 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class CheckTimesTask @Inject constructor(
-        private val alertsDao: AlertsDao,
-        private val trackerEndpoint: TrackerEndpoint,
-        private val alertNotificationDispatcher: AlertNotificationDispatcher) {
+    private val alertsDao: AlertsDao,
+    private val trackerEndpoint: TrackerEndpoint,
+    private val alertNotificationDispatcher: AlertNotificationDispatcher) {
 
     /**
      * Perform a check of the arrival times for all known [ArrivalAlert]s to see if any arrivals
      * match the constraints of each [ArrivalAlert].
      */
-    fun checkTimes() {
-        runBlocking {
-            checkTimesInternal()
-        }
-    }
-
-    /**
-     * The internal implementation o check times. This exists as the public method is not a
-     * suspending function where as this method is.
-     */
-    private suspend fun checkTimesInternal() {
-        alertsDao.getAllArrivalAlertStopCodes()?.let {
-            if (it.isNotEmpty()) {
+    suspend fun checkTimes() {
+        alertsDao.getAllArrivalAlertStopCodes()
+            ?.takeIf(Set<String>::isNotEmpty)
+            ?.let {
                 val response = trackerEndpoint.getLiveTimes(it.toList(), 1)
 
                 if (response is LiveTimesResponse.Success) {
                     handleResponse(response.liveTimes)
                 }
             }
-        }
     }
 
     /**
@@ -132,7 +121,7 @@ internal class CheckTimesTask @Inject constructor(
      * `false` if the time trigger is not matched, or there is no vehicles in the [Service].
      */
     private fun isServiceArrivingWithinTimeTrigger(service: Service, timeTrigger: Int) =
-            service.vehicles.firstOrNull()?.let {
-                it.departureMinutes <= timeTrigger
-            } ?: false
+        service.vehicles.firstOrNull()?.let {
+            it.departureMinutes <= timeTrigger
+        } ?: false
 }

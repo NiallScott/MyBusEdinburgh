@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,101 +26,81 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
-import kotlinx.coroutines.runBlocking
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import javax.inject.Inject
+import kotlin.coroutines.coroutineContext
 
 /**
- * This class runs checks of the arrival alerts on a time period. Start this runner by calling
- * [TimeAlertRunner.start]. While running, this runner will stop itself if there are no more active
- * alerts set.
+ * This class runs checks of the arrival alerts on a time period. While running, this runner will
+ * stop itself if there are no more active alerts set by throwing a [CancellationException].
  *
  * @param checkTimesTask The implementation for performing the check of the arrival alerts.
- * @param alertsDao The DAO to access the currently set arrival alerts.
- * @param executorService A [ScheduledExecutorService] to run the period checks on.
+ * @param alertsRepository The repository to access the currently set arrival alerts.
  * @author Niall Scott
  */
 class TimeAlertRunner @Inject internal constructor(
         private val checkTimesTask: CheckTimesTask,
-        private val alertsDao: AlertsDao,
-        @ForArrivalAlerts private val executorService: ScheduledExecutorService) {
+        private val alertsRepository: AlertsRepository) {
 
     companion object {
 
-        private const val CHECK_TIMES_INTERVAL_SECS = 60L
-    }
-
-    private val hasBeenStarted = AtomicBoolean(false)
-    private val hasBeenStopped = AtomicBoolean(false)
-    private var onStopListener: (() -> Unit)? = null
-
-    /**
-     * Start this runner. If the runner has been started before, calling this method has no effect.
-     */
-    fun start(onStopListener: (() -> Unit)?) {
-        if (!hasBeenStopped.get() && hasBeenStarted.compareAndSet(false, true)) {
-            this.onStopListener = onStopListener
-            alertsDao.addOnAlertsChangedListener(alertsChangedListener)
-            // Perform customary check on the alert count.
-            executeAlertCountCheck()
-            executorService.scheduleWithFixedDelay(checkTimesTask::checkTimes, 0L,
-                    CHECK_TIMES_INTERVAL_SECS, TimeUnit.SECONDS)
-        }
+        private const val CHECK_TIMES_INTERVAL_MILLIS = 60000L
     }
 
     /**
-     * Stop this runner.
+     * Run this [TimeAlertRunner]. This performs the check for live times, and keeps the coroutine
+     * going unless and until the number of arrival alerts is less than 1. If the number of arrival
+     * alerts is less than 1, a [CancellationException] will be thrown.
      */
-    fun stop() {
-        if (hasBeenStopped.compareAndSet(false, true)) {
-            alertsDao.removeOnAlertsChangedListener(alertsChangedListener)
-            stopRunner()
-            onStopListener?.invoke()
-            onStopListener = null
-        }
-    }
-
-    /**
-     * Java finalizer.
-     */
-    protected fun finalize() {
-        stop()
-    }
-
-    /**
-     * Perform a check of the arrival alert count. If there are no active alerts, we will stop
-     * ourselves.
-     */
-    private fun checkAlertCount() {
-        // TODO: re-write with coroutines.
-        runBlocking {
-            if (alertsDao.getArrivalAlertCount() <= 0) {
-                stop()
+    suspend fun run() {
+        alertsRepository
+            .arrivalAlertCountFlow
+            .runTimesCheck()
+            .collect {
+                if (it < 1) {
+                    throw CancellationException()
+                }
             }
+    }
+
+    /**
+     * Run the arrival times check on a timer until the coroutine is cancelled.
+     */
+    private suspend fun runCheck() {
+        while (true) {
+            coroutineContext.ensureActive()
+
+            checkTimesTask.checkTimes()
+            delay(CHECK_TIMES_INTERVAL_MILLIS)
         }
     }
 
     /**
-     * Stop this runner.
+     * This [Flow] takes the values from upstream (the number of arrival alerts) and re-emits them
+     * downstream. Meanwhile, it also runs a coroutine that performs the live times check on a
+     * timer.
+     *
+     * @return A [Flow] which performs the live times check and emits the number of set arrival
+     * alerts.
      */
-    private fun stopRunner() {
-        executorService.shutdownNow()
-    }
+    private fun Flow<Int>.runTimesCheck() = channelFlow {
+        var checkJob: Job? = null
 
-    /**
-     * Run an alert count check on the executor thread.
-     */
-    private fun executeAlertCountCheck() {
-        executorService.execute(this::checkAlertCount)
-    }
+        collect {
+            if (it > 0 && checkJob == null) {
+                checkJob = launch {
+                    runCheck()
+                }
+            }
 
-    private val alertsChangedListener = object : AlertsDao.OnAlertsChangedListener {
-        override fun onAlertsChanged() {
-            executeAlertCountCheck()
+            send(it)
         }
     }
 }
