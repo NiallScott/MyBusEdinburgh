@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,153 +26,88 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.never
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
-import java.util.concurrent.ExecutorService
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 
 /**
  * Tests for [ManageProximityAlertsRunner].
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ManageProximityAlertsRunnerTest {
 
     @Mock
-    private lateinit var alertsDao: AlertsDao
+    private lateinit var alertsRepository: AlertsRepository
     @Mock
     private lateinit var proximityAlertTracker: ProximityAlertTracker
-    @Mock
-    private lateinit var backgroundExecutor: ExecutorService
-
-    @Mock
-    private lateinit var stopListener: () -> Unit
 
     private lateinit var runner: ManageProximityAlertsRunner
 
     @Before
     fun setUp() {
         runner = ManageProximityAlertsRunner(
-                alertsDao,
-                proximityAlertTracker,
-                backgroundExecutor)
+            alertsRepository,
+            proximityAlertTracker)
     }
 
     @Test
-    fun startRunnerRegistersCallbacksListenerWithAlertsDao() {
-        runner.start(null)
+    fun runnerIsStoppedIfStartedWithNullProximityAlerts() = runTest {
+        whenever(alertsRepository.allProximityAlertsFlow)
+            .thenReturn(flowOf(null))
 
-        verify(alertsDao)
-                .addOnAlertsChangedListener(any())
+        launch {
+            runner.run()
+        }
+        advanceUntilIdle()
+
+        verifyNoInteractions(proximityAlertTracker)
     }
 
     @Test
-    fun startRunnerFetchesCurrentProximityAlertsFromDao() {
-        givenBackgroundExecutorExecutesTask()
+    fun runnerIsStoppedIfStartedWithEmptyProximityAlerts() = runTest {
+        whenever(alertsRepository.allProximityAlertsFlow)
+            .thenReturn(flowOf(emptyList()))
 
-        runner.start(null)
+        launch {
+            runner.run()
+        }
+        advanceUntilIdle()
 
-        verify(alertsDao)
-                .getAllProximityAlerts()
+        verifyNoInteractions(proximityAlertTracker)
     }
 
     @Test
-    fun stopRunnerRemovesCallbackListenerWithAlertDao() {
-        runner.start(null)
-        runner.stop()
-
-        verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun stopRunnerShutsDownExecutorService() {
-        runner.start(null)
-        runner.stop()
-
-        verify(backgroundExecutor)
-                .shutdownNow()
-    }
-
-    @Test
-    fun stopRunnerCallsStopListener() {
-        runner.start(stopListener)
-        runner.stop()
-
-        verify(stopListener)
-                .invoke()
-    }
-
-    @Test
-    fun startRunnerOnlyExecutesOnce() {
-        givenBackgroundExecutorExecutesTask()
-        runner.start(null)
-        runner.start(null)
-
-        verify(alertsDao, times(1))
-                .addOnAlertsChangedListener(any())
-        verify(alertsDao, times(1))
-                .getAllProximityAlerts()
-    }
-
-    @Test
-    fun stoppedRunnerCannotBeStarted() {
-        runner.stop()
-        runner.start(null)
-
-        verify(alertsDao, never())
-                .addOnAlertsChangedListener(any())
-        verify(alertsDao, never())
-                .getAllProximityAlerts()
-    }
-
-    @Test
-    fun runnerIsStoppedIfStartedWithNullProximityAlerts() {
-        givenBackgroundExecutorExecutesTask()
-        whenever(alertsDao.getAllProximityAlerts())
-                .thenReturn(null)
-
-        runner.start(stopListener)
-
-        verify(stopListener)
-                .invoke()
-    }
-
-    @Test
-    fun runnerIsStoppedIfStartedWithEmptyProximityAlerts() {
-        givenBackgroundExecutorExecutesTask()
-        whenever(alertsDao.getAllProximityAlerts())
-                .thenReturn(emptyList())
-
-        runner.start(stopListener)
-
-        verify(stopListener)
-                .invoke()
-    }
-
-    @Test
-    fun initialAlertsAreTracked() {
-        givenBackgroundExecutorExecutesTask()
+    fun initialAlertsAreTracked() = runTest {
         val alert1 = ProximityAlert(1, 101L, "100001", 10)
         val alert2 = ProximityAlert(2, 102L, "100002", 20)
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts = listOf(alert1, alert2, alert3)
-        whenever(alertsDao.getAllProximityAlerts())
-                .thenReturn(alerts)
+        whenever(alertsRepository.allProximityAlertsFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, alerts, null))
 
-        runner.start(stopListener)
+        val job = launch {
+            runner.run()
+        }
+        advanceTimeBy(1L)
 
         verify(proximityAlertTracker)
                 .trackProximityAlert(alert1)
@@ -182,26 +117,22 @@ class ManageProximityAlertsRunnerTest {
                 .trackProximityAlert(alert3)
         verify(proximityAlertTracker, never())
                 .removeProximityAlert(any())
-        verify(stopListener, never())
-                .invoke()
+        job.cancel()
     }
 
     @Test
-    fun alertsChangedWithNoProximityAlertsRemovesAllTrackedAlerts() {
-        givenBackgroundExecutorExecutesTask()
+    fun alertsChangedWithNoProximityAlertsRemovesAllTrackedAlerts() = runTest {
         val alert1 = ProximityAlert(1, 101L, "100001", 10)
         val alert2 = ProximityAlert(2, 102L, "100002", 20)
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts = listOf(alert1, alert2, alert3)
-        whenever(alertsDao.getAllProximityAlerts())
-                .thenReturn(alerts, null)
+        whenever(alertsRepository.allProximityAlertsFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, alerts, null, null))
 
-        runner.start(stopListener)
-        argumentCaptor<AlertsDao.OnAlertsChangedListener> {
-            verify(alertsDao)
-                    .addOnAlertsChangedListener(capture())
-            firstValue.onAlertsChanged()
+        val job = launch {
+            runner.run()
         }
+        advanceTimeBy(15L)
 
         verify(proximityAlertTracker)
                 .removeProximityAlert(1)
@@ -209,27 +140,23 @@ class ManageProximityAlertsRunnerTest {
                 .removeProximityAlert(2)
         verify(proximityAlertTracker)
                 .removeProximityAlert(3)
-        verify(stopListener)
-                .invoke()
+        job.cancel()
     }
 
     @Test
-    fun alertsChangedWithRemovalRemovesTrackedAlert() {
-        givenBackgroundExecutorExecutesTask()
+    fun alertsChangedWithRemovalRemovesTrackedAlert() = runTest {
         val alert1 = ProximityAlert(1, 101L, "100001", 10)
         val alert2 = ProximityAlert(2, 102L, "100002", 20)
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts1 = listOf(alert1, alert2, alert3)
         val alerts2 = listOf(alert1, alert3)
-        whenever(alertsDao.getAllProximityAlerts())
-                .thenReturn(alerts1, alerts2)
+        whenever(alertsRepository.allProximityAlertsFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, alerts1, alerts2, null))
 
-        runner.start(stopListener)
-        argumentCaptor<AlertsDao.OnAlertsChangedListener> {
-            verify(alertsDao)
-                    .addOnAlertsChangedListener(capture())
-            firstValue.onAlertsChanged()
+        val job = launch {
+            runner.run()
         }
+        advanceTimeBy(15L)
 
         verify(proximityAlertTracker, never())
                 .removeProximityAlert(1)
@@ -237,27 +164,23 @@ class ManageProximityAlertsRunnerTest {
                 .removeProximityAlert(2)
         verify(proximityAlertTracker, never())
                 .removeProximityAlert(3)
-        verify(stopListener, never())
-                .invoke()
+        job.cancel()
     }
 
     @Test
-    fun alertsChangedWithAdditionAddsTrackedAlert() {
-        givenBackgroundExecutorExecutesTask()
+    fun alertsChangedWithAdditionAddsTrackedAlert() = runTest {
         val alert1 = ProximityAlert(1, 101L, "100001", 10)
         val alert2 = ProximityAlert(2, 102L, "100002", 20)
         val alert3 = ProximityAlert(3, 103L, "100003", 30)
         val alerts1 = listOf(alert1, alert2)
         val alerts2 = listOf(alert1, alert2, alert3)
-        whenever(alertsDao.getAllProximityAlerts())
-                .thenReturn(alerts1, alerts2)
+        whenever(alertsRepository.allProximityAlertsFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, alerts1, alerts2, null))
 
-        runner.start(stopListener)
-        argumentCaptor<AlertsDao.OnAlertsChangedListener> {
-            verify(alertsDao)
-                    .addOnAlertsChangedListener(capture())
-            firstValue.onAlertsChanged()
+        val job = launch {
+            runner.run()
         }
+        advanceTimeBy(15L)
 
         verify(proximityAlertTracker)
                 .trackProximityAlert(alert1)
@@ -267,14 +190,53 @@ class ManageProximityAlertsRunnerTest {
                 .trackProximityAlert(alert3)
         verify(proximityAlertTracker, never())
                 .removeProximityAlert(any())
-        verify(stopListener, never())
-                .invoke()
+        job.cancel()
     }
 
-    private fun givenBackgroundExecutorExecutesTask() {
-        doAnswer {
-            it.getArgument<Runnable>(0)
-                    .run()
-        }.whenever(backgroundExecutor).execute(any())
+    @Test
+    fun allAlertsAreUntrackedWhenCoroutineIsCancelled() = runTest {
+        val alert1 = ProximityAlert(1, 101L, "100001", 10)
+        val alert2 = ProximityAlert(2, 102L, "100002", 20)
+        val alert3 = ProximityAlert(3, 103L, "100003", 30)
+        val alerts = listOf(alert1, alert2, alert3)
+        whenever(alertsRepository.allProximityAlertsFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, alerts, null))
+
+        val job = launch {
+            runner.run()
+        }
+        advanceTimeBy(1L)
+        job.cancel()
+        advanceUntilIdle()
+
+        verify(proximityAlertTracker)
+            .removeProximityAlert(1)
+        verify(proximityAlertTracker)
+            .removeProximityAlert(2)
+        verify(proximityAlertTracker)
+            .removeProximityAlert(3)
+    }
+
+    @Test
+    fun allAlertsAreUntrackedWhenProximityAlertsFlowTerminates() = runTest {
+        val alert1 = ProximityAlert(1, 101L, "100001", 10)
+        val alert2 = ProximityAlert(2, 102L, "100002", 20)
+        val alert3 = ProximityAlert(3, 103L, "100003", 30)
+        val alerts = listOf(alert1, alert2, alert3)
+        whenever(alertsRepository.allProximityAlertsFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, alerts))
+
+        val job = launch {
+            runner.run()
+        }
+        advanceUntilIdle()
+        job.cancel()
+
+        verify(proximityAlertTracker)
+            .removeProximityAlert(1)
+        verify(proximityAlertTracker)
+            .removeProximityAlert(2)
+        verify(proximityAlertTracker)
+            .removeProximityAlert(3)
     }
 }

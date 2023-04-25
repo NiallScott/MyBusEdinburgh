@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,17 +44,17 @@ import javax.inject.Inject
  * @param permissionChecker Used to check granted permissions.
  * @author Niall Scott
  */
-class AndroidGeofencingManager @Inject constructor(
-        private val context: Context,
-        private val locationManager: LocationManager,
-        private val permissionChecker: AndroidPermissionChecker) : GeofencingManager {
+internal class AndroidGeofencingManager @Inject constructor(
+    private val context: Context,
+    private val locationManager: LocationManager,
+    private val permissionChecker: AndroidPermissionChecker) : GeofencingManager {
 
     override fun addGeofence(
-            id: Int,
-            latitude: Double,
-            longitude: Double,
-            radius: Float,
-            duration: Long) {
+        id: Int,
+        latitude: Double,
+        longitude: Double,
+        radius: Float,
+        duration: Long) {
         if (permissionChecker.checkFineLocationPermission()) {
             createPendingIntent(id).let {
                 locationManager.addProximityAlert(latitude, longitude, radius, duration, it)
@@ -79,13 +79,13 @@ class AndroidGeofencingManager @Inject constructor(
      */
     @SuppressLint("InlinedApi")
     private fun createPendingIntent(alertId: Int) =
-            Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
-                    .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, alertId)
-                    .let {
-                        PendingIntent.getBroadcast(
-                                context,
-                                alertId,
-                                it,
-                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
-                    }
+        Intent(context, AndroidAreaEnteredBroadcastReceiver::class.java)
+            .putExtra(AndroidAreaEnteredBroadcastReceiver.EXTRA_ALERT_ID, alertId)
+            .let {
+                PendingIntent.getBroadcast(
+                    context,
+                    alertId,
+                    it,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+            }
 }

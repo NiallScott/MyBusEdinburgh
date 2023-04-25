@@ -124,6 +124,26 @@ class AlertsRepository @Inject internal constructor(
     }
 
     /**
+     * A [Flow] which emits all [ProximityAlert]s.
+     */
+    val allProximityAlertsFlow get() = callbackFlow {
+        val listener = object : AlertsDao.OnAlertsChangedListener {
+            override fun onAlertsChanged() {
+                launch {
+                    getAndSendAllProximityAlerts()
+                }
+            }
+        }
+
+        alertsDao.addOnAlertsChangedListener(listener)
+        getAndSendAllProximityAlerts()
+
+        awaitClose {
+            alertsDao.removeOnAlertsChangedListener(listener)
+        }
+    }
+
+    /**
      * Add a new arrival alert.
      *
      * @param request The arrival alert to add.
@@ -217,6 +237,13 @@ class AlertsRepository @Inject internal constructor(
      */
     private suspend fun ProducerScope<Int>.getAndSendArrivalAlertCount() {
         send(alertsDao.getArrivalAlertCount())
+    }
+
+    /**
+     * A suspended function which obtains all proximity alerts and sends it to the channel.
+     */
+    private suspend fun ProducerScope<List<ProximityAlert>?>.getAndSendAllProximityAlerts() {
+        send(alertsDao.getAllProximityAlerts())
     }
 
     /**

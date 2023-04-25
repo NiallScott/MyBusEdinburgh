@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
-import kotlinx.coroutines.runBlocking
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
@@ -41,9 +40,9 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class ProximityAlertTracker @Inject constructor(
-        private val busStopsDao: BusStopsDao,
-        private val geofencingManager: GeofencingManager,
-        private val timeUtils: TimeUtils) {
+    private val busStopsDao: BusStopsDao,
+    private val geofencingManager: GeofencingManager,
+    private val timeUtils: TimeUtils) {
 
     companion object {
 
@@ -55,20 +54,20 @@ internal class ProximityAlertTracker @Inject constructor(
      *
      * @param alert The alert to track.
      */
-    fun trackProximityAlert(alert: ProximityAlert) {
-        // TODO: convert this all to proper coroutines.
-        runBlocking {
-            busStopsDao.getLocationForStop(alert.stopCode)
-                    ?.let {
-                        val duration = (alert.timeAdded + MAX_DURATION_MILLIS) -
-                                timeUtils.currentTimeMills
+    suspend fun trackProximityAlert(alert: ProximityAlert) {
+        busStopsDao.getLocationForStop(alert.stopCode)
+            ?.let {
+                val duration = alert.timeAdded + MAX_DURATION_MILLIS - timeUtils.currentTimeMills
 
-                        if (duration > 0) {
-                            geofencingManager.addGeofence(alert.id, it.latitude, it.longitude,
-                                    alert.distanceFrom.toFloat(), duration)
-                        }
-                    }
-        }
+                if (duration > 0) {
+                    geofencingManager.addGeofence(
+                        alert.id,
+                        it.latitude,
+                        it.longitude,
+                        alert.distanceFrom.toFloat(),
+                        duration)
+                }
+            }
     }
 
     /**

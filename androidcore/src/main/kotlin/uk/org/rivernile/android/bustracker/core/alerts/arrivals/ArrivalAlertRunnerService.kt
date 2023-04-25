@@ -42,7 +42,7 @@ import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForServiceCoroutineScope
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import javax.inject.Inject
 
@@ -64,21 +64,13 @@ class ArrivalAlertRunnerService : Service() {
     @Inject
     lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
     @Inject
-    @ForMainDispatcher
-    lateinit var mainDispatcher: CoroutineDispatcher
+    @ForServiceCoroutineScope
+    lateinit var serviceCoroutineScope: CoroutineScope
     @Inject
     @ForDefaultDispatcher
     lateinit var defaultDispatcher: CoroutineDispatcher
 
-    private lateinit var serviceCoroutineScope: CoroutineScope
-
     private var job: Job? = null
-
-    override fun onCreate() {
-        super.onCreate()
-
-        serviceCoroutineScope = CoroutineScope(mainDispatcher + Job())
-    }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification)

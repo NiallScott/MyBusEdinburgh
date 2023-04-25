@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,12 +43,14 @@ interface AlertNotificationDispatcher {
      * @param arrivalAlert The [ArrivalAlert] that caused the notification.
      * @param qualifyingServices What services caused the notification to be fired.
      */
-    fun dispatchTimeAlertNotification(arrivalAlert: ArrivalAlert, qualifyingServices: List<Service>)
+    suspend fun dispatchTimeAlertNotification(
+        arrivalAlert: ArrivalAlert,
+        qualifyingServices: List<Service>)
 
     /**
      * Dispatch a new proximity alert notification to show to the user.
      *
      * @param proximityAlert The [ProximityAlert] that caused the notification.
      */
-    fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert)
+    suspend fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert)
 }

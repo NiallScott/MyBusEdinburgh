@@ -106,8 +106,9 @@ internal class CheckTimesTask @Inject constructor(
         }
 
         if (qualifyingServices.isNotEmpty()) {
-            alertNotificationDispatcher.dispatchTimeAlertNotification(arrivalAlert,
-                    qualifyingServices)
+            alertNotificationDispatcher.dispatchTimeAlertNotification(
+                arrivalAlert,
+                qualifyingServices)
             alertsDao.removeArrivalAlert(arrivalAlert.id)
         }
     }

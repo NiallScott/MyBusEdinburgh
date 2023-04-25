@@ -42,9 +42,6 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.AndroidProximit
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.GeofencingManager
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidGeofencingManager
-import uk.org.rivernile.android.bustracker.core.di.ForProximityAlerts
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import javax.inject.Provider
 
 /**
@@ -55,11 +52,6 @@ import javax.inject.Provider
 @InstallIn(SingletonComponent::class)
 @Module
 internal class AlertsModule {
-
-    @Provides
-    @ForProximityAlerts
-    fun provideProximityAlertExecutorService(): ExecutorService =
-            Executors.newSingleThreadExecutor()
 
     @Provides
     fun provideNotificationPreferences(
