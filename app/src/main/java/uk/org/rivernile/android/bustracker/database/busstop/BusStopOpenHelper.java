@@ -148,6 +148,15 @@ class BusStopOpenHelper extends SQLiteOpenHelper {
                     }
 
                     c.close();
+
+                    try {
+                        final SQLiteDatabase database = super.getWritableDatabase();
+
+                        setUpIndexes(database);
+                        setUpViews(database);
+                    } catch (SQLiteException ignored) {
+                        shouldExtractDatabase = true;
+                    }
                 } else {
                     shouldExtractDatabase = true;
                 }
