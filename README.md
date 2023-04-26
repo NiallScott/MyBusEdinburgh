@@ -9,8 +9,8 @@ This is the open source project for the "My Bus Edinburgh" Android application.
 
 My Bus Edinburgh is an application for the Android platform of mobile devices. It allows users to
 check the next departures of bus services at most bus stops served by Lothian Buses and Edinburgh
-Trams. Users can save and maintain a list of favourite stops, view bus stops on a Google Maps view
-and the user may change a number of preferences.
+Trams. Users can save and maintain a list of favourite stops, view bus stops on a Google Maps view,
+set alerts and show the nearest stops to their location.
 
 As this is the source code hosting service for this project, these pages most likely wont interest
 you unless you're a developer. To find out more about the application, please visit
@@ -24,24 +24,21 @@ Science final year dissertation at Heriot-Watt University, Edinburgh, in 2009.
 Obtaining
 ---------
 The application is available to download in the Google Play Store under the name "My Bus Edinburgh".
-The package name is uk.org.rivernile.edinburghbustracker.android. Here is a direct link to the app
+The package name is `uk.org.rivernile.edinburghbustracker.android`. Here is a direct link to the app
 in the Google Play Store:
 https://play.google.com/store/apps/details?id=uk.org.rivernile.edinburghbustracker.android
 
 Latest Version
 --------------
-The latest stable version of the application is 2.2.4. To see what has changed between versions,
-please see the change log.
+The latest stable version of the application is 3.0.
 
-As of version 2.2.3, Android 2.2 (API level 8) is required as the minimum platform version, as well
-as devices that support OpenGL ES 2. If your device uses a version prior to this, it is possible to
-install an older version of the application.
+The minimum supported version of Android is Android 6.0 Marshmallow (API level 23).
 
 Developers
 ----------
 Developers are welcome to clone or fork this repository. The master branch is generally that of the
 last released version, where as new work is merged in to development which is then merged in to
-master at release time. A building guide will be written in the near future.
+master at release time. A building guide will be written in this README.
 
 Donations
 ---------
