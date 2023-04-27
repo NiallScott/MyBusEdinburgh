@@ -527,7 +527,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for TurnOnGpsDialogFragment *
     ***************************************
     -->
-    <string name="turnongpsdialog_title">You do not have GPS turned on</string>
+    <string name="turnongpsdialog_title">GPS is turned off</string>
     <string name="turnongpsdialog_message">To get the most precise location information, GPS needs to be turned on. Turn on now?</string>
     <string name="turnongpsdialog_checkbox">Do not remind me again</string>
     
