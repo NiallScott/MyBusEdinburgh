@@ -39,6 +39,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceDataStorage
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_ALERT_LED
 import uk.org.rivernile.android.bustracker.core.preferences.PREF_ALERT_SOUND
@@ -75,9 +76,14 @@ internal class PreferenceModule {
 
     @Provides
     @Singleton
-    fun providePreferencesDataStore(context: Context): DataStore<Preferences> {
+    fun providePreferencesDataStore(
+        context: Context,
+        exceptionLogger: ExceptionLogger): DataStore<Preferences> {
         return PreferenceDataStoreFactory.create(
-            corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+            corruptionHandler = ReplaceFileCorruptionHandler {
+                exceptionLogger.log(it)
+                emptyPreferences()
+            },
             migrations = listOf(
                 SharedPreferencesMigration(
                     context,
