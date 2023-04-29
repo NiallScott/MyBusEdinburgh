@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2022 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -27,12 +27,16 @@
 <data-extraction-rules>
     <cloud-backup>
         <include domain="database" path="settings.db" />
+        <include domain="file" path="datastore/preferences.preferences_pb" />
+        <!-- Keep preferences SharedPrefs for now. Remove later. -->
         <include domain="sharedpref" path="preferences.xml" />
     </cloud-backup>
 
     <device-transfer>
         <include domain="database" path="settings.db" />
         <include domain="database" path="busstops10.db" />
+        <include domain="file" path="datastore/preferences.preferences_pb" />
+        <!-- Keep preferences SharedPrefs for now. Remove later. -->
         <include domain="sharedpref" path="preferences.xml" />
     </device-transfer>
 </data-extraction-rules>
