@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,5 +41,5 @@ internal interface NotificationPreferences {
      * @param builder The [NotificationCompat] currently being built that will have user preferences
      * applied to it.
      */
-    fun applyNotificationPreferences(builder: NotificationCompat.Builder)
+    suspend fun applyNotificationPreferences(builder: NotificationCompat.Builder)
 }

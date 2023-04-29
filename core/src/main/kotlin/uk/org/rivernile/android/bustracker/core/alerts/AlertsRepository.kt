@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
-import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -66,13 +66,13 @@ class AlertsRepository @Inject internal constructor(
         val listener = object : AlertsDao.OnAlertsChangedListener {
             override fun onAlertsChanged() {
                 launch {
-                    getAndSendHasArrivalAlertSet(channel, stopCode)
+                    getAndSendHasArrivalAlertSet(stopCode)
                 }
             }
         }
 
         alertsDao.addOnAlertsChangedListener(listener)
-        getAndSendHasArrivalAlertSet(channel, stopCode)
+        getAndSendHasArrivalAlertSet(stopCode)
 
         awaitClose {
             alertsDao.removeOnAlertsChangedListener(listener)
@@ -90,13 +90,53 @@ class AlertsRepository @Inject internal constructor(
         val listener = object : AlertsDao.OnAlertsChangedListener {
             override fun onAlertsChanged() {
                 launch {
-                    getAndSendHasProximityAlertSet(channel, stopCode)
+                    getAndSendHasProximityAlertSet(stopCode)
                 }
             }
         }
 
         alertsDao.addOnAlertsChangedListener(listener)
-        getAndSendHasProximityAlertSet(channel, stopCode)
+        getAndSendHasProximityAlertSet(stopCode)
+
+        awaitClose {
+            alertsDao.removeOnAlertsChangedListener(listener)
+        }
+    }
+
+    /**
+     * A [Flow] which emits the number of arrival alerts.
+     */
+    val arrivalAlertCountFlow get() = callbackFlow {
+        val listener = object : AlertsDao.OnAlertsChangedListener {
+            override fun onAlertsChanged() {
+                launch {
+                    getAndSendArrivalAlertCount()
+                }
+            }
+        }
+
+        alertsDao.addOnAlertsChangedListener(listener)
+        getAndSendArrivalAlertCount()
+
+        awaitClose {
+            alertsDao.removeOnAlertsChangedListener(listener)
+        }
+    }
+
+    /**
+     * A [Flow] which emits all [ProximityAlert]s.
+     */
+    val allProximityAlertsFlow get() = callbackFlow {
+        val listener = object : AlertsDao.OnAlertsChangedListener {
+            override fun onAlertsChanged() {
+                launch {
+                    getAndSendAllProximityAlerts()
+                }
+            }
+        }
+
+        alertsDao.addOnAlertsChangedListener(listener)
+        getAndSendAllProximityAlerts()
 
         awaitClose {
             alertsDao.removeOnAlertsChangedListener(listener)
@@ -159,13 +199,13 @@ class AlertsRepository @Inject internal constructor(
         val listener = object : AlertsDao.OnAlertsChangedListener {
             override fun onAlertsChanged() {
                 launch {
-                    getAndSendAllAlerts(channel)
+                    getAndSendAllAlerts()
                 }
             }
         }
 
         alertsDao.addOnAlertsChangedListener(listener)
-        getAndSendAllAlerts(channel)
+        getAndSendAllAlerts()
 
         awaitClose {
             alertsDao.removeOnAlertsChangedListener(listener)
@@ -174,36 +214,42 @@ class AlertsRepository @Inject internal constructor(
 
     /**
      * A suspended function which obtains the arrival alert status of the given `stopCode` and then
-     * sends it to the given `channel`.
+     * sends it to the channel.
      *
-     * @param channel The [SendChannel] that emissions should be sent to.
      * @param stopCode The `stopCode` to obtain the arrival alert status for.
      */
-    private suspend fun getAndSendHasArrivalAlertSet(
-            channel: SendChannel<Boolean>,
-            stopCode: String) {
-        channel.send(alertsDao.hasArrivalAlert(stopCode))
+    private suspend fun ProducerScope<Boolean>.getAndSendHasArrivalAlertSet(stopCode: String) {
+        send(alertsDao.hasArrivalAlert(stopCode))
     }
 
     /**
      * A suspended function which obtains the proximity alert status of the given `stopCode` and
-     * then sends it to the given `channel`.
+     * then sends it to the channel.
      *
-     * @param channel The [SendChannel] that emissions should be sent to.
      * @param stopCode The `stopCode` to obtain the proximity alert status for.
      */
-    private suspend fun getAndSendHasProximityAlertSet(
-            channel: SendChannel<Boolean>,
-            stopCode: String) {
-        channel.send(alertsDao.hasProximityAlert(stopCode))
+    private suspend fun ProducerScope<Boolean>.getAndSendHasProximityAlertSet(stopCode: String) {
+        send(alertsDao.hasProximityAlert(stopCode))
+    }
+
+    /**
+     * A suspended function which obtains the arrival alert count and sends it to the channel.
+     */
+    private suspend fun ProducerScope<Int>.getAndSendArrivalAlertCount() {
+        send(alertsDao.getArrivalAlertCount())
+    }
+
+    /**
+     * A suspended function which obtains all proximity alerts and sends it to the channel.
+     */
+    private suspend fun ProducerScope<List<ProximityAlert>?>.getAndSendAllProximityAlerts() {
+        send(alertsDao.getAllProximityAlerts())
     }
 
     /**
      * A suspended function which obtains all set user alerts.
-     *
-     * @param channel The [SendChannel] that emissions should be sent to.
      */
-    private suspend fun getAndSendAllAlerts(channel: SendChannel<List<Alert>?>) {
-        channel.send(alertsDao.getAllAlerts())
+    private suspend fun ProducerScope<List<Alert>?>.getAndSendAllAlerts() {
+        send(alertsDao.getAllAlerts())
     }
 }

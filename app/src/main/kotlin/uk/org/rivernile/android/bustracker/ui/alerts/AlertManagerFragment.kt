@@ -38,6 +38,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
@@ -63,6 +64,8 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
     lateinit var stopMapMarkerDecorator: StopMapMarkerDecorator
     @Inject
     lateinit var mapStyleApplicator: MapStyleApplicator
+    @Inject
+    lateinit var exceptionLogger: ExceptionLogger
 
     private val viewModel: AlertManagerFragmentViewModel by viewModels()
 
@@ -153,7 +156,8 @@ class AlertManagerFragment : Fragment(), HasScrollableContent {
             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     .let(this::startActivity)
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             Toast.makeText(
                     requireContext(),
                     R.string.alertmanager_error_no_location_settings,

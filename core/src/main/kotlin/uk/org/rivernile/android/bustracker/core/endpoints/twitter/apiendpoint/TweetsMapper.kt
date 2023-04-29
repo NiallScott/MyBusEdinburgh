@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -35,9 +36,11 @@ import javax.inject.Inject
 /**
  * This class maps the [JsonTweet]s returned by the endpoint in to [Tweet]s.
  *
+ * @param exceptionLogger Used to log exceptions.
  * @author Niall Scott
  */
-internal class TweetsMapper @Inject constructor() {
+internal class TweetsMapper @Inject constructor(
+    private val exceptionLogger: ExceptionLogger) {
 
     companion object {
 
@@ -67,7 +70,8 @@ internal class TweetsMapper @Inject constructor() {
     private fun mapToTweet(jsonTweet: JsonTweet): Tweet? {
         val time = try {
             jsonTweet.createdAt?.let(dateFormat::parse)
-        } catch (ignored: ParseException) {
+        } catch (e: ParseException) {
+            exceptionLogger.log(e)
             null
         } ?: return null
 

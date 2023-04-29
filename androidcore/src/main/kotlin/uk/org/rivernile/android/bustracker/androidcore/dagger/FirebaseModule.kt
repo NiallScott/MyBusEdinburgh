@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,30 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.settings
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 /**
- * Tests for [AndroidSettingsDatabaseRepository].
+ * This module provides Firebase dependencies.
  *
  * @author Niall Scott
  */
-class AndroidSettingsDatabaseRepositoryTest {
+@InstallIn(SingletonComponent::class)
+@Module
+internal class FirebaseModule {
 
-    private lateinit var repository: AndroidSettingsDatabaseRepository
-
-    @Before
-    fun setUp() {
-        repository = AndroidSettingsDatabaseRepository()
-    }
-
-    @Test
-    fun getDatabaseVersionReturnsDatabaseVersion() {
-        val result = repository.getDatabaseVersion()
-
-        assertEquals(SettingsDatabaseContract.DATABASE_VERSION, result)
-    }
+    @Provides
+    @Singleton
+    fun provideFirebaseCrashlytics(): FirebaseCrashlytics = FirebaseCrashlytics.getInstance()
 }

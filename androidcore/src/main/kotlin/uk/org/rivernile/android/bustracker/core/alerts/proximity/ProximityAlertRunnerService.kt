@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,8 +33,16 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForServiceCoroutineScope
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import javax.inject.Inject
 
@@ -55,10 +63,31 @@ class ProximityAlertRunnerService : Service() {
     lateinit var manageProximityAlertsRunner: ManageProximityAlertsRunner
     @Inject
     lateinit var deeplinkIntentFactory: DeeplinkIntentFactory
+    @Inject
+    @ForServiceCoroutineScope
+    lateinit var serviceCoroutineScope: CoroutineScope
+    @Inject
+    @ForDefaultDispatcher
+    lateinit var defaultDispatcher: CoroutineDispatcher
+
+    private var job: Job? = null
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
-        manageProximityAlertsRunner.start(this::stopSelf)
+        startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification)
+
+        if (job == null) {
+            job = serviceCoroutineScope.launch {
+                try {
+                    withContext(defaultDispatcher) {
+                        manageProximityAlertsRunner.run()
+                    }
+                } finally {
+                    // This will usually be because a CancellationException has been thrown
+                    // upstream.
+                    stopSelf()
+                }
+            }
+        }
 
         return START_STICKY
     }
@@ -66,7 +95,9 @@ class ProximityAlertRunnerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
 
-        manageProximityAlertsRunner.stop()
+        job?.cancel()
+        job = null
+        serviceCoroutineScope.cancel()
     }
 
     override fun onBind(intent: Intent): IBinder? = null
@@ -77,56 +108,55 @@ class ProximityAlertRunnerService : Service() {
      *
      * @return The [Notification] shown to the user while the foreground service is running.
      */
-    private fun createForegroundNotification() =
-            NotificationCompat.Builder(this, AppNotificationChannels.CHANNEL_FOREGROUND_TASKS)
-                    .apply {
-                        priority = NotificationCompat.PRIORITY_LOW
-                        setCategory(NotificationCompat.CATEGORY_SERVICE)
-                        setSmallIcon(R.drawable.ic_directions_bus_black)
-                        setContentTitle(
-                                getString(R.string.proximity_foreground_service_notification_title))
-                        setContentIntent(createNotificationActionPendingIntent())
-                        addAction(createRemoveNotificationAction())
-                    }
-                    .build()
+    private val foregroundNotification get() =
+        NotificationCompat.Builder(this, AppNotificationChannels.CHANNEL_FOREGROUND_TASKS)
+            .apply {
+                priority = NotificationCompat.PRIORITY_LOW
+                setCategory(NotificationCompat.CATEGORY_SERVICE)
+                setSmallIcon(R.drawable.ic_directions_bus_black)
+                setContentTitle(getString(R.string.proximity_foreground_service_notification_title))
+                setContentIntent(notificationActionPendingIntent)
+                addAction(removeNotificationAction)
+            }
+            .build()
 
     /**
-     * Create the [PendingIntent] which will be called when the user taps on the notification.
-     *
-     * @return The [PendingIntent] called when the user taps on the notification.
+     * A [PendingIntent] which will be called when the user taps on the notification.
      */
-    private fun createNotificationActionPendingIntent() =
-            deeplinkIntentFactory.createManageAlertsIntent()
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .let {
-                        PendingIntent.getActivity(this, FOREGROUND_NOTIFICATION_ID, it,
-                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                    }
+    private val notificationActionPendingIntent get() =
+        deeplinkIntentFactory.createManageAlertsIntent()
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .let {
+                PendingIntent.getActivity(
+                    this,
+                    FOREGROUND_NOTIFICATION_ID,
+                    it,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            }
 
     /**
-     * Create a [NotificationCompat.Action] which allows the user to remove a current proximity
-     * alert.
-     *
-     * @return A [NotificationCompat.Action] which allows the user to remove a current proximity
-     * alert.
+     * A [NotificationCompat.Action] which allows the user to remove a current proximity alert.
      */
-    private fun createRemoveNotificationAction() =
-            NotificationCompat.Action.Builder(
-                    R.drawable.ic_action_delete,
-                    getString(R.string.remove_all),
-                    createRemoveActionButtonPendingIntent())
-                    .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_DELETE)
-                    .build()
+    private val removeNotificationAction get() =
+        NotificationCompat.Action.Builder(
+            R.drawable.ic_action_delete,
+            getString(R.string.remove_all),
+            removeActionButtonPendingIntent)
+            .setSemanticAction(NotificationCompat.Action.SEMANTIC_ACTION_DELETE)
+            .build()
 
     /**
-     * Create a [PendingIntent] which is called when the user wishes to remove the in-progress
+     * A [PendingIntent] which is called when the user wishes to remove the in-progress
      * proximity alert.
      */
-    private fun createRemoveActionButtonPendingIntent() =
-            Intent(this, RemoveProximityAlertBroadcastReceiver::class.java)
-                    .let {
-                        PendingIntent.getBroadcast(this, FOREGROUND_NOTIFICATION_ID, it,
-                                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                    }
+    private val removeActionButtonPendingIntent get() =
+        Intent(this, RemoveProximityAlertBroadcastReceiver::class.java)
+            .let {
+                PendingIntent.getBroadcast(
+                    this,
+                    FOREGROUND_NOTIFICATION_ID,
+                    it,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            }
 }

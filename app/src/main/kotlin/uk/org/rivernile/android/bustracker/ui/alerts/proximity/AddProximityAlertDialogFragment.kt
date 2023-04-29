@@ -46,6 +46,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -82,6 +83,8 @@ class AddProximityAlertDialogFragment : DialogFragment() {
     lateinit var textFormattingUtils: TextFormattingUtils
     @Inject
     lateinit var permissionChecker: AndroidPermissionChecker
+    @Inject
+    lateinit var exceptionLogger: ExceptionLogger
 
     private val viewModel: AddProximityAlertDialogFragmentViewModel by viewModels()
 
@@ -278,7 +281,8 @@ class AddProximityAlertDialogFragment : DialogFragment() {
             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                     .let(this::startActivity)
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             Toast.makeText(
                     requireContext(),
                     R.string.addproxalertdialog_error_no_location_settings,
@@ -318,7 +322,8 @@ class AddProximityAlertDialogFragment : DialogFragment() {
                     .setData(Uri.fromParts("package", context.packageName, null))
                     .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                     .let(this::startActivity)
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             Toast.makeText(context,
                     R.string.addproxalertdialog_error_no_app_settings,
                     Toast.LENGTH_SHORT)

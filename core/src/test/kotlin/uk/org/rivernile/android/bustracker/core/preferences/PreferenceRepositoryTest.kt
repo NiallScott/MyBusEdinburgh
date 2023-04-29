@@ -27,23 +27,19 @@
 package uk.org.rivernile.android.bustracker.core.preferences
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
  * Tests for [PreferenceRepository].
@@ -58,437 +54,174 @@ class PreferenceRepositoryTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var preferenceManager: PreferenceManager
+    private lateinit var dataStorage: PreferenceDataStorage
 
     private lateinit var repository: PreferenceRepository
 
     @Before
     fun setUp() {
-        repository = PreferenceRepository(
-                preferenceManager,
-                coroutineRule.scope,
-                coroutineRule.testDispatcher)
+        repository = PreferenceRepository(dataStorage)
     }
 
     @Test
-    fun isDatabaseUpdateWifiOnlyReturnsFalseWhenPreferenceManagerReturnsFalse() {
-        whenever(preferenceManager.isBusStopDatabaseUpdateWifiOnly())
-                .thenReturn(false)
+    fun isDatabaseUpdateWifiOnlyFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<Boolean>>()
+        whenever(dataStorage.isDatabaseUpdateWifiOnlyFlow)
+            .thenReturn(flow)
 
-        val result = repository.isDatabaseUpdateWifiOnly
+        val result = repository.isDatabaseUpdateWifiOnlyFlow
 
-        assertFalse(result)
+        assertSame(flow, result)
     }
 
     @Test
-    fun isDatabaseUpdateWifiOnlyReturnsTrueWhenPreferenceManagerReturnsTrue() {
-        whenever(preferenceManager.isBusStopDatabaseUpdateWifiOnly())
-                .thenReturn(true)
+    fun appThemeFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<AppTheme>>()
+        whenever(dataStorage.appThemeFlow)
+            .thenReturn(flow)
 
-        val result = repository.isDatabaseUpdateWifiOnly
+        val result = repository.appThemeFlow
 
-        assertTrue(result)
+        assertSame(flow, result)
     }
 
     @Test
-    fun isDatabaseUpdateWifiOnlyFlowEmitsInitialValue() = runTest {
-        whenever(preferenceManager.isBusStopDatabaseUpdateWifiOnly())
-                .thenReturn(false)
+    fun alertNotificationPreferencesFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<AlertNotificationPreferences>>()
+        whenever(dataStorage.alertNotificationPreferencesFlow)
+            .thenReturn(flow)
 
-        val observer = repository.isDatabaseUpdateWifiOnlyFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        val result = repository.alertNotificationPreferencesFlow
 
-        observer.assertValues(false)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        assertSame(flow, result)
     }
 
     @Test
-    fun isDatabaseUpdateWifiOnlyFlowRespondsToPreferenceChange() = runTest {
-        doAnswer {
-            val prefListener = it.getArgument<PreferenceListener>(0)
-            val expectedKeys = setOf(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY)
-            assertEquals(expectedKeys, prefListener.keys)
-            prefListener.listener.apply {
-                onPreferenceChanged(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY)
-                onPreferenceChanged(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY)
-            }
-        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
-        whenever(preferenceManager.isBusStopDatabaseUpdateWifiOnly())
-                .thenReturn(false, true, false)
+    fun isLiveTimesAutoRefreshEnabledFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<Boolean>>()
+        whenever(dataStorage.isLiveTimesAutoRefreshEnabledFlow)
+            .thenReturn(flow)
 
-        val observer = repository.isDatabaseUpdateWifiOnlyFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        val result = repository.isLiveTimesAutoRefreshEnabledFlow
 
-        observer.assertValues(false, true, false)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        assertSame(flow, result)
     }
 
     @Test
-    fun appThemeFlowEmitsInitialValue() = runTest {
-        whenever(preferenceManager.appTheme)
-                .thenReturn(AppTheme.SYSTEM_DEFAULT)
+    fun isLiveTimesShowNightServicesEnabledFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<Boolean>>()
+        whenever(dataStorage.isLiveTimesShowNightServicesEnabledFlow)
+            .thenReturn(flow)
 
-        val observer = repository.appThemeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        val result = repository.isLiveTimesShowNightServicesEnabledFlow
 
-        observer.assertValues(AppTheme.SYSTEM_DEFAULT)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        assertSame(flow, result)
     }
 
     @Test
-    fun appThemeFlowRespondsToPreferenceChange() = runTest {
-        doAnswer {
-            val prefListener = it.getArgument<PreferenceListener>(0)
-            val expectedKeys = setOf(PreferenceKey.APP_THEME)
-            assertEquals(expectedKeys, prefListener.keys)
-            prefListener.listener.apply {
-                onPreferenceChanged(PreferenceKey.APP_THEME)
-                onPreferenceChanged(PreferenceKey.APP_THEME)
-            }
-        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
-        whenever(preferenceManager.appTheme)
-                .thenReturn(AppTheme.SYSTEM_DEFAULT, AppTheme.LIGHT, AppTheme.DARK)
+    fun isLiveTimesSortByTimeFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<Boolean>>()
+        whenever(dataStorage.isLiveTimesSortByTimeFlow)
+            .thenReturn(flow)
 
-        val observer = repository.appThemeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        val result = repository.isLiveTimesSortByTimeFlow
 
-        observer.assertValues(AppTheme.SYSTEM_DEFAULT, AppTheme.LIGHT, AppTheme.DARK)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        assertSame(flow, result)
     }
 
     @Test
-    fun isLiveTimesAutoRefreshEnabledFlowGetsInitialValue() = runTest {
-        whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
-                .thenReturn(true)
+    fun liveTimesNumberOfDeparturesFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<Int>>()
+        whenever(dataStorage.liveTimesNumberOfDeparturesFlow)
+            .thenReturn(flow)
 
-        val observer = repository.isLiveTimesAutoRefreshEnabledFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        val result = repository.liveTimesNumberOfDeparturesFlow
 
-        observer.assertValues(true)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        assertSame(flow, result)
     }
 
     @Test
-    fun isLiveTimesAutoRefreshEnabledFlowRespondsToPreferenceChange() = runTest {
-        doAnswer {
-            val prefListener = it.getArgument<PreferenceListener>(0)
-            val expectedKeys = setOf(PreferenceKey.LIVE_TIMES_AUTO_REFRESH_ENABLED)
-            assertEquals(expectedKeys, prefListener.keys)
-            prefListener.listener.apply {
-                onPreferenceChanged(PreferenceKey.LIVE_TIMES_AUTO_REFRESH_ENABLED)
-                onPreferenceChanged(PreferenceKey.LIVE_TIMES_AUTO_REFRESH_ENABLED)
-            }
-        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
-        whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
-                .thenReturn(true, false, true)
+    fun isGpsPromptDisabledFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<Boolean>>()
+        whenever(dataStorage.isGpsPromptDisabledFlow)
+            .thenReturn(flow)
 
-        val observer = repository.isLiveTimesAutoRefreshEnabledFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        val result = repository.isGpsPromptDisabledFlow
 
-        observer.assertValues(true, false, true)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        assertSame(flow, result)
     }
 
     @Test
-    fun isLiveTimesAutoRefreshEnabledReturnsFalseWhenPreferenceManagerReturnsFalse() {
-        whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
-            .thenReturn(false)
+    fun isMapZoomControlsVisibleFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<Boolean>>()
+        whenever(dataStorage.isMapZoomControlsVisibleFlow)
+            .thenReturn(flow)
 
-        val result = repository.isLiveTimesAutoRefreshEnabled
+        val result = repository.isMapZoomControlsVisibleFlow
 
-        assertFalse(result)
+        assertSame(flow, result)
     }
 
     @Test
-    fun isLiveTimesAutoRefreshEnabledReturnsTrueWhenPreferenceManagerReturnsTrue() {
-        whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
-            .thenReturn(true)
+    fun lastMapCameraLocationFlowReturnsFlowFromPreferenceDataStorage() = runTest {
+        val flow = mock<Flow<LastMapCameraLocation>>()
+        whenever(dataStorage.lastMapCameraLocationFlow)
+            .thenReturn(flow)
 
-        val result = repository.isLiveTimesAutoRefreshEnabled
+        val result = repository.lastMapCameraLocationFlow
 
-        assertTrue(result)
+        assertSame(flow, result)
     }
 
     @Test
-    fun isLiveTimesShowNightServicesEnabledFlowGetsInitialValue() = runTest {
-        whenever(preferenceManager.isBusTimesShowingNightServices())
-                .thenReturn(true)
+    fun mapTypeFlowReturnsFlowFromPreferenceDatsStorage() = runTest {
+        val flow = mock<Flow<Int>>()
+        whenever(dataStorage.mapTypeFlow)
+            .thenReturn(flow)
 
-        val observer = repository.isLiveTimesShowNightServicesEnabledFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        val result = repository.mapTypeFlow
 
-        observer.assertValues(true)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        assertSame(flow, result)
     }
 
     @Test
-    fun isLiveTimesShowNightServicesEnabledFlowRespondsToPreferenceChange() = runTest {
-        doAnswer {
-            val prefListener = it.getArgument<PreferenceListener>(0)
-            val expectedKeys = setOf(PreferenceKey.LIVE_TIMES_SHOW_NIGHT_SERVICES)
-            assertEquals(expectedKeys, prefListener.keys)
-            prefListener.listener.apply {
-                onPreferenceChanged(PreferenceKey.LIVE_TIMES_SHOW_NIGHT_SERVICES)
-                onPreferenceChanged(PreferenceKey.LIVE_TIMES_SHOW_NIGHT_SERVICES)
-            }
-        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
-        whenever(preferenceManager.isBusTimesShowingNightServices())
-                .thenReturn(true, false, true)
-
-        val observer = repository.isLiveTimesShowNightServicesEnabledFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(true, false, true)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
-    }
-
-    @Test
-    fun isLiveTimesSortByTimeFlowGetsInitialValue() = runTest {
-        whenever(preferenceManager.isBusTimesSortedByTime())
-                .thenReturn(true)
-
-        val observer = repository.isLiveTimesSortByTimeFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(true)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
-    }
-
-    @Test
-    fun isLiveTimesSortByTimeFlowRespondsToPreferenceChange() = runTest {
-        doAnswer {
-            val prefListener = it.getArgument<PreferenceListener>(0)
-            val expectedKeys = setOf(PreferenceKey.LIVE_TIMES_SORT_BY_TIME)
-            assertEquals(expectedKeys, prefListener.keys)
-            prefListener.listener.apply {
-                onPreferenceChanged(PreferenceKey.LIVE_TIMES_SORT_BY_TIME)
-                onPreferenceChanged(PreferenceKey.LIVE_TIMES_SORT_BY_TIME)
-            }
-        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
-        whenever(preferenceManager.isBusTimesSortedByTime())
-                .thenReturn(true, false, true)
-
-        val observer = repository.isLiveTimesSortByTimeFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(true, false, true)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
-    }
-
-    @Test
-    fun getLiveTimesNumberOfDeparturesFlowGetsInitialValue() = runTest {
-        whenever(preferenceManager.getBusTimesNumberOfDeparturesToShowPerService())
-                .thenReturn(1)
-
-        val observer = repository.getLiveTimesNumberOfDeparturesFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(1)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
-    }
-
-    @Test
-    fun getLiveTimesNumberOfDeparturesFlowRespondsToPreferenceChange() = runTest {
-        doAnswer {
-            val prefListener = it.getArgument<PreferenceListener>(0)
-            val expectedKeys = setOf(PreferenceKey.LIVE_TIMES_NUMBER_OF_DEPARTURES)
-            assertEquals(expectedKeys, prefListener.keys)
-            prefListener.listener.apply {
-                onPreferenceChanged(PreferenceKey.LIVE_TIMES_NUMBER_OF_DEPARTURES)
-                onPreferenceChanged(PreferenceKey.LIVE_TIMES_NUMBER_OF_DEPARTURES)
-            }
-        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
-        whenever(preferenceManager.getBusTimesNumberOfDeparturesToShowPerService())
-                .thenReturn(1, 2, 3)
-
-        val observer = repository.getLiveTimesNumberOfDeparturesFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(1, 2, 3)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
-    }
-
-    @Test
-    fun isGpsPromptDisabledReturnsFalseWhenPreferenceManagerReturnsFalse() {
-        whenever(preferenceManager.isGpsPromptDisabled())
-                .thenReturn(false)
-
-        val result = repository.isGpsPromptDisabled
-
-        assertFalse(result)
-    }
-
-    @Test
-    fun isGpsPromptDisabledReturnsTrueWhenPreferenceManagerReturnsTrue() {
-        whenever(preferenceManager.isGpsPromptDisabled())
-                .thenReturn(true)
-
-        val result = repository.isGpsPromptDisabled
-
-        assertTrue(result)
-    }
-
-    @Test
-    fun toggleSortByTimeTogglesFalseToTrue() = runTest {
-        whenever(preferenceManager.isBusTimesSortedByTime())
-                .thenReturn(false)
-
+    fun toggleSortByTimeCallsMethodInPreferenceDataStorage() = runTest {
         repository.toggleSortByTime()
-        advanceUntilIdle()
 
-        verify(preferenceManager)
-                .setBusTimesSortedByTime(true)
+        verify(dataStorage)
+            .toggleSortByTime()
     }
 
     @Test
-    fun toggleSortByTimeTogglesTrueToFalse() = runTest {
-        whenever(preferenceManager.isBusTimesSortedByTime())
-                .thenReturn(true)
-
-        repository.toggleSortByTime()
-        advanceUntilIdle()
-
-        verify(preferenceManager)
-                .setBusTimesSortedByTime(false)
-    }
-
-    @Test
-    fun toggleAutoRefreshTogglesFalseToTrue() = runTest {
-        whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
-                .thenReturn(false)
-
+    fun toggleAutoRefreshCallsMethodInPreferenceDataStorage() = runTest {
         repository.toggleAutoRefresh()
-        advanceUntilIdle()
 
-        verify(preferenceManager)
-                .setBusTimesAutoRefreshEnabled(true)
+        verify(dataStorage)
+            .toggleAutoRefresh()
     }
 
     @Test
-    fun toggleAutoRefreshTogglesTrueToFalse() = runTest {
-        whenever(preferenceManager.isBusTimesAutoRefreshEnabled())
-                .thenReturn(true)
+    fun setIsGpsPromptDisabledCallsMethodInPreferenceDataStorage() = runTest {
+        repository.setIsGpsPromptDisabled(true)
 
-        repository.toggleAutoRefresh()
-        advanceUntilIdle()
-
-        verify(preferenceManager)
-                .setBusTimesAutoRefreshEnabled(false)
+        verify(dataStorage)
+            .setIsGpsPromptDisabled(true)
     }
 
     @Test
-    fun isMapZoomControlsVisibleFlowEmitsInitialValue() = runTest {
-        whenever(preferenceManager.isMapZoomButtonsShown())
-                .thenReturn(true)
+    fun setLastMapCameraLocationCallsMethodInPreferenceDataStorage() = runTest {
+        val cameraLocation = LastMapCameraLocation(1.1, 2.2, 3f)
+        repository.setLastMapCameraLocation(cameraLocation)
 
-        val observer = repository.isMapZoomControlsVisibleFLow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(true)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        verify(dataStorage)
+            .setLastMapCameraLocation(cameraLocation)
     }
 
     @Test
-    fun isMapZoomControlsVisibleFlowRespondsToPreferenceChange() = runTest {
-        doAnswer {
-            val prefListener = it.getArgument<PreferenceListener>(0)
-            val expectedKeys = setOf(PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS)
-            assertEquals(expectedKeys, prefListener.keys)
-            prefListener.listener.apply {
-                onPreferenceChanged(PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS)
-                onPreferenceChanged(PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS)
-            }
-        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
-        whenever(preferenceManager.isMapZoomButtonsShown())
-                .thenReturn(true, false, true)
+    fun setMapTypeCallsMethodInPreferenceDataStorage() = runTest {
+        repository.setMapType(1)
 
-        val observer = repository.isMapZoomControlsVisibleFLow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(true, false, true)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
+        verify(dataStorage)
+            .setMapType(1)
     }
-
-    @Test
-    fun mapTypeFlowEmitsInitialValue() = runTest {
-        whenever(preferenceManager.getLastMapType())
-                .thenReturn(1)
-
-        val observer = repository.mapTypeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(1)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
-    }
-
-    @Test
-    fun mapTypeFlowRespondsToPreferenceChange() = runTest {
-        doAnswer {
-            val prefListener = it.getArgument<PreferenceListener>(0)
-            val expectedKeys = setOf(PreferenceKey.STOP_MAP_TYPE)
-            assertEquals(expectedKeys, prefListener.keys)
-            prefListener.listener.apply {
-                onPreferenceChanged(PreferenceKey.STOP_MAP_TYPE)
-                onPreferenceChanged(PreferenceKey.STOP_MAP_TYPE)
-            }
-        }.whenever(preferenceManager).addOnPreferenceChangedListener(any())
-        whenever(preferenceManager.getLastMapType())
-                .thenReturn(1, 2, 3)
-
-        val observer = repository.mapTypeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(1, 2, 3)
-        verify(preferenceManager)
-                .removeOnPreferenceChangedListener(any())
-    }
-
-    // TODO: test mapType property
 }

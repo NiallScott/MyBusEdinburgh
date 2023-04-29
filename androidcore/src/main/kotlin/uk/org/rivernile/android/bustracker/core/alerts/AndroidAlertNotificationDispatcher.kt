@@ -31,7 +31,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import kotlinx.coroutines.runBlocking
 import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
@@ -72,7 +71,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
         private const val TIMEOUT_ALERT_MILLIS = 1800000L // 30 minutes
     }
 
-    override fun dispatchTimeAlertNotification(
+    override suspend fun dispatchTimeAlertNotification(
             arrivalAlert: ArrivalAlert,
             qualifyingServices: List<Service>) {
         if (permissionChecker.checkPostNotificationPermission()) {
@@ -81,51 +80,51 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
             val pendingIntent = createArrivalAlertPendingIntent(arrivalAlert.stopCode)
 
             NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_ARRIVAL_ALERTS)
-                    .apply {
-                        setSmallIcon(R.drawable.ic_directions_bus_black)
-                        setContentTitle(title)
-                        setContentText(summary)
-                        setTicker(summary)
-                        setStyle(NotificationCompat.BigTextStyle().bigText(summary))
-                        priority = NotificationCompat.PRIORITY_HIGH
-                        setCategory(NotificationCompat.CATEGORY_ALARM)
-                        setContentIntent(pendingIntent)
-                        setAutoCancel(true)
-                        setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
-                        notificationPreferences?.applyNotificationPreferences(this)
-                    }
-                    .let {
-                        notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
-                    }
+                .apply {
+                    setSmallIcon(R.drawable.ic_directions_bus_black)
+                    setContentTitle(title)
+                    setContentText(summary)
+                    setTicker(summary)
+                    setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                    priority = NotificationCompat.PRIORITY_HIGH
+                    setCategory(NotificationCompat.CATEGORY_ALARM)
+                    setContentIntent(pendingIntent)
+                    setAutoCancel(true)
+                    setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+                    notificationPreferences?.applyNotificationPreferences(this)
+                }
+                .let {
+                    notificationManager.notify(NOTIFICATION_ID_ARRIVAL, it.build())
+                }
         }
     }
 
-    override fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert) {
+    override suspend fun dispatchProximityAlertNotification(proximityAlert: ProximityAlert) {
         if (permissionChecker.checkPostNotificationPermission()) {
             val stopName = getDisplayableStopName(proximityAlert.stopCode)
             val title = context.getString(R.string.proximity_alert_notification_title, stopName)
             val ticker = context.getString(R.string.proximity_alert_notification_ticker, stopName)
             val summary = context.getString(R.string.proximity_alert_notification_summary,
-                    proximityAlert.distanceFrom, stopName)
+                proximityAlert.distanceFrom, stopName)
             val pendingIntent = createProximityAlertPendingIntent(proximityAlert.stopCode)
 
             NotificationCompat.Builder(context, AppNotificationChannels.CHANNEL_PROXIMITY_ALERTS)
-                    .apply {
-                        setSmallIcon(R.drawable.ic_directions_bus_black)
-                        setContentTitle(title)
-                        setContentText(summary)
-                        setTicker(ticker)
-                        setStyle(NotificationCompat.BigTextStyle().bigText(summary))
-                        priority = NotificationCompat.PRIORITY_HIGH
-                        setCategory(NotificationCompat.CATEGORY_NAVIGATION)
-                        setContentIntent(pendingIntent)
-                        setAutoCancel(true)
-                        setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
-                        notificationPreferences?.applyNotificationPreferences(this)
-                    }
-                    .let {
-                        notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())
-                    }
+                .apply {
+                    setSmallIcon(R.drawable.ic_directions_bus_black)
+                    setContentTitle(title)
+                    setContentText(summary)
+                    setTicker(ticker)
+                    setStyle(NotificationCompat.BigTextStyle().bigText(summary))
+                    priority = NotificationCompat.PRIORITY_HIGH
+                    setCategory(NotificationCompat.CATEGORY_NAVIGATION)
+                    setContentIntent(pendingIntent)
+                    setAutoCancel(true)
+                    setTimeoutAfter(TIMEOUT_ALERT_MILLIS)
+                    notificationPreferences?.applyNotificationPreferences(this)
+                }
+                .let {
+                    notificationManager.notify(NOTIFICATION_ID_PROXIMITY, it.build())
+                }
         }
     }
 
@@ -136,19 +135,19 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      * @param qualifyingServices What services caused the notification to be fired.
      * @return The summary [String] shown to the user.
      */
-    private fun createAlertSummaryString(
-            arrivalAlert: ArrivalAlert,
-            qualifyingServices: List<Service>): String {
+    private suspend fun createAlertSummaryString(
+        arrivalAlert: ArrivalAlert,
+        qualifyingServices: List<Service>): String {
         val serviceListing = qualifyingServices.joinToString { it.serviceName }
         val numberOfMinutes = getAlertNumberOfMinutesString(arrivalAlert.timeTrigger)
         val displayableStopName = getDisplayableStopName(arrivalAlert.stopCode)
 
         return context.resources.getQuantityString(
-                R.plurals.arrival_alert_notification_services,
-                qualifyingServices.size,
-                serviceListing,
-                numberOfMinutes,
-                displayableStopName)
+            R.plurals.arrival_alert_notification_services,
+            qualifyingServices.size,
+            serviceListing,
+            numberOfMinutes,
+            displayableStopName)
     }
 
     /**
@@ -157,11 +156,15 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      * @param minutes The number of minutes time trigger.
      * @return Human readable number of minutes until arrival.
      */
-    private fun getAlertNumberOfMinutesString(minutes: Int) = if (minutes < 2) {
-        context.getString(R.string.arrival_alert_notification_time_now)
-    } else {
-        context.resources.getQuantityString(
-                R.plurals.arrival_alert_notifications_time_plural, minutes, minutes)
+    private fun getAlertNumberOfMinutesString(minutes: Int): String {
+        return if (minutes < 2) {
+            context.getString(R.string.arrival_alert_notification_time_now)
+        } else {
+            context.resources.getQuantityString(
+                R.plurals.arrival_alert_notifications_time_plural,
+                minutes,
+                minutes)
+        }
     }
 
     /**
@@ -170,13 +173,10 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      * @param stopCode The stop code.
      * @return The stop name to display.
      */
-    private fun getDisplayableStopName(stopCode: String): String {
-        // TODO: re-write properly with coroutines.
-        val stopName = runBlocking {
-            busStopsDao.getNameForStop(stopCode)
-        }
-
-        return textFormattingUtils.formatBusStopNameWithStopCode(stopCode, stopName)
+    private suspend fun getDisplayableStopName(stopCode: String): String {
+        return textFormattingUtils.formatBusStopNameWithStopCode(
+            stopCode,
+            busStopsDao.getNameForStop(stopCode))
     }
 
     /**
@@ -187,12 +187,15 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      * @return A [PendingIntent] which is executed when the user clicks on the notification.
      */
     private fun createArrivalAlertPendingIntent(stopCode: String) =
-            deeplinkIntentFactory.createShowBusTimesIntent(stopCode)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    .let {
-                        PendingIntent.getActivity(context, NOTIFICATION_ID_ARRIVAL, it,
-                                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
-                    }
+        deeplinkIntentFactory.createShowBusTimesIntent(stopCode)
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .let {
+                PendingIntent.getActivity(
+                    context,
+                    NOTIFICATION_ID_ARRIVAL,
+                    it,
+                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+            }
 
     /**
      * Create a [PendingIntent] for a fired proximity alert - the action which is performed when the
@@ -202,11 +205,14 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
      * @return A [PendingIntent] which is executed when the user clicks on the notification.
      */
     private fun createProximityAlertPendingIntent(stopCode: String) =
-            (deeplinkIntentFactory.createShowStopOnMapIntent(stopCode)
-                    ?: deeplinkIntentFactory.createShowBusTimesIntent(stopCode))
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    .let {
-                        PendingIntent.getActivity(context, NOTIFICATION_ID_PROXIMITY, it,
-                                PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
-                    }
+        (deeplinkIntentFactory.createShowStopOnMapIntent(stopCode)
+            ?: deeplinkIntentFactory.createShowBusTimesIntent(stopCode))
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .let {
+                PendingIntent.getActivity(
+                    context,
+                    NOTIFICATION_ID_PROXIMITY,
+                    it,
+                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE)
+            }
 }

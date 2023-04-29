@@ -44,8 +44,7 @@
     <uses-permission
         android:name="android.permission.VIBRATE" />
 
-    <application
-        android:backupAgent="uk.org.rivernile.android.bustracker.core.backup.BusTrackerBackupAgent">
+    <application>
 
         <service
             android:name="uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRunnerService"

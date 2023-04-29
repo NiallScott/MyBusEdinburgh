@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,106 +26,76 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
-import uk.org.rivernile.android.bustracker.core.di.ForProximityAlerts
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 /**
  * This implementation runs the tracking of proximity alerts.
  *
- * @param alertsDao Used to access the alerts data store.
+ * @param alertsRepository The repository to access the currently set proximity alerts.
  * @param proximityAlertTracker Proximity alerts to begin or stop tracking are managed through this.
- * @param backgroundExecutor Used to run tasks in the background.
  * @author Niall Scott
  */
 class ManageProximityAlertsRunner @Inject internal constructor(
-        private val alertsDao: AlertsDao,
-        private val proximityAlertTracker: ProximityAlertTracker,
-        @ForProximityAlerts private val backgroundExecutor: ExecutorService) {
-
-    private val hasBeenStarted = AtomicBoolean(false)
-    private val hasBeenStopped = AtomicBoolean(false)
-    private var onStopListener: (() -> Unit)? = null
-
-    private val trackedAlerts = mutableMapOf<Int, ProximityAlert>()
+    private val alertsRepository: AlertsRepository,
+    private val proximityAlertTracker: ProximityAlertTracker) {
 
     /**
-     * Start the runner.
+     * Run this [ManageProximityAlertsRunner]. This responds to changes in the set proximity alerts
+     * and propagates out starting and stopping of proximity alerts. If the number of proximity
+     * alerts is less than 1, a [CancellationException] will be thrown.
+     */
+    suspend fun run() {
+        alertsRepository
+            .allProximityAlertsFlow
+            .manageProximityAlerts()
+            .collect {
+                if (it < 1) {
+                    throw CancellationException()
+                }
+            }
+    }
+
+    /**
+     * Manages the set proximity alerts by consuming the [Flow] of [ProximityAlert]s and adding and
+     * removing proximity alerts as appropriate. Upon cancellation, all set proximity alerts will
+     * be removed.
      *
-     * @param onStopListener An optional listener which is called when this runner stops.
-     */
-    fun start(onStopListener: (() -> Unit)?) {
-        if (!hasBeenStopped.get() && hasBeenStarted.compareAndSet(false, true)) {
-            this.onStopListener = onStopListener
-            alertsDao.addOnAlertsChangedListener(alertsChangedListener)
-            executeFetchCurrentProximityAlerts()
-        }
-    }
-
-    /**
-     * Stop the runner.
-     */
-    fun stop() {
-        if (hasBeenStopped.compareAndSet(false, true)) {
-            alertsDao.removeOnAlertsChangedListener(alertsChangedListener)
-            stopExecutor()
-            onStopListener?.invoke()
-            onStopListener = null
-        }
-    }
-
-    /**
-     * Java finalizer.
-     */
-    protected fun finalize() {
-        stop()
-    }
-
-    /**
-     * Stop the background [ExecutorService].
-     */
-    private fun stopExecutor() {
-        backgroundExecutor.shutdownNow()
-    }
-
-    /**
-     * Begins the process of fetching current proximity alerts on the background [ExecutorService].
-     */
-    private fun executeFetchCurrentProximityAlerts() {
-        backgroundExecutor.execute(this::fetchCurrentProximityAlerts)
-    }
-
-    /**
-     * Fetch the current proximity alerts and compares them to what we know we have set. Additions
-     * and removals are handled by propagating this as appropriate to the [GeofencingManager] and
-     * we update our internal state.
+     * The [Flow] will emit the current number of [ProximityAlert]s being tracked.
      *
-     * If no alerts are set, this will call [stop].
+     * @return A [Flow] which manages the set [ProximityAlert]s.
      */
-    private fun fetchCurrentProximityAlerts() {
-        val alertsMap = alertsDao.getAllProximityAlerts()?.associateBy { it.id } ?: emptyMap()
-        val toAdd = HashMap<Int, ProximityAlert>(alertsMap).apply {
-            keys.removeAll(trackedAlerts.keys)
-        }
-        val toRemove = HashSet<Int>(trackedAlerts.keys).apply {
-            removeAll(alertsMap.keys)
-        }
+    private fun Flow<List<ProximityAlert>?>.manageProximityAlerts() = flow {
+        val trackedAlerts = mutableMapOf<Int, ProximityAlert>()
 
-        trackedAlerts.keys.removeAll(toRemove)
-        trackedAlerts.putAll(toAdd)
+        try {
+            collect { proximityAlerts ->
+                val alertsMap = proximityAlerts?.associateBy { it.id } ?: emptyMap()
+                val toAdd = alertsMap.toMutableMap().apply {
+                    keys.removeAll(trackedAlerts.keys)
+                }
+                val toRemove = trackedAlerts.keys.toMutableSet().apply {
+                    removeAll(alertsMap.keys)
+                }
 
-        toAdd.values.forEach(proximityAlertTracker::trackProximityAlert)
-        toRemove.forEach(proximityAlertTracker::removeProximityAlert)
+                trackedAlerts.keys.removeAll(toRemove)
+                trackedAlerts.putAll(toAdd)
 
-        trackedAlerts.ifEmpty { stop() }
-    }
+                toAdd.values.forEach {
+                    proximityAlertTracker.trackProximityAlert(it)
+                }
 
-    private val alertsChangedListener = object : AlertsDao.OnAlertsChangedListener {
-        override fun onAlertsChanged() {
-            executeFetchCurrentProximityAlerts()
+                toRemove.forEach(proximityAlertTracker::removeProximityAlert)
+
+                emit(trackedAlerts.size)
+            }
+        } finally {
+            // Upon any termination reason (e.g. cancellation), make sure we cancel all set alerts.
+            trackedAlerts.keys.forEach(proximityAlertTracker::removeProximityAlert)
         }
     }
 }

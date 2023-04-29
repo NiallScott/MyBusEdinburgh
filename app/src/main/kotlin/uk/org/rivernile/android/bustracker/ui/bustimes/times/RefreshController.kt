@@ -30,6 +30,7 @@ import dagger.hilt.android.scopes.ViewModelScoped
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.first
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.util.concurrent.atomic.AtomicBoolean
@@ -132,7 +133,7 @@ class RefreshController @Inject constructor(
         getDelayUntilNextRefresh(result)?.let {
             delay(it)
 
-            if (preferenceRepository.isLiveTimesAutoRefreshEnabled) {
+            if (preferenceRepository.isLiveTimesAutoRefreshEnabledFlow.first()) {
                 requestRefresh()
             }
         }

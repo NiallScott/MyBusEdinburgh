@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -115,13 +115,6 @@ internal class AndroidFavouritesDao @Inject constructor(
         }
     }
 
-    override fun addFavouriteStops(favouriteStops: List<FavouriteStop>) =
-            favouriteStops.map(this::mapToContentValues)
-                    .toTypedArray()
-                    .let {
-                        context.contentResolver.bulkInsert(contract.getContentUri(), it)
-                    }
-
     override suspend fun addFavouriteStop(favouriteStop: FavouriteStop) {
         withContext(ioDispatcher) {
             context.contentResolver.insert(
@@ -147,37 +140,6 @@ internal class AndroidFavouritesDao @Inject constructor(
                     contract.getContentUri(),
                     "${FavouritesContract.STOP_CODE} = ?",
                     arrayOf(stopCode))
-        }
-    }
-
-    override fun removeAllFavouriteStops() =
-            context.contentResolver.delete(contract.getContentUri(), null, null)
-
-    override fun getAllFavouriteStops() = context.contentResolver.query(
-            contract.getContentUri(),
-            arrayOf(
-                    FavouritesContract.ID,
-                    FavouritesContract.STOP_CODE,
-                    FavouritesContract.STOP_NAME),
-            null,
-            null,
-            null)?.use {
-        // Fill Cursor window.
-        val count = it.count
-
-        if (count > 0) {
-            val result = ArrayList<FavouriteStop>(count)
-            val idColumn = it.getColumnIndex(FavouritesContract.ID)
-            val stopCodeColumn = it.getColumnIndex(FavouritesContract.STOP_CODE)
-            val stopNameColumn = it.getColumnIndex(FavouritesContract.STOP_NAME)
-
-            while (it.moveToNext()) {
-                result.add(mapToFavouriteStop(it, idColumn, stopCodeColumn, stopNameColumn))
-            }
-
-            result
-        } else {
-            null
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.backup
+package uk.org.rivernile.android.bustracker.core.preferences
 
-import com.google.gson.annotations.SerializedName
-
-/**
- * This defines the root of the JSON backup object.
- *
- * @property dbVersion The version of the database schema.
- * @property backupSchemaVersion The schema of the backup output.
- * @property createTime The UNIX timestamp, in milliseconds, when the backup was created.
- * @property favouriteStops A [List] of [BackupFavouriteStop]s to backup.
- * @author Niall Scott
- */
-internal data class Backup(
-        @SerializedName("dbVersion")
-        val dbVersion: Int,
-        @SerializedName("jsonSchemaVersion")
-        val backupSchemaVersion: Int = 1,
-        @SerializedName("createTime")
-        val createTime: Long,
-        @SerializedName("favouriteStops")
-        val favouriteStops: List<BackupFavouriteStop>?)
+const val PREF_BUS_STOP_DATABASE_WIFI_ONLY = "pref_bus_stop_database_wifi_only"
+const val PREF_APP_THEME = "pref_theme"
+const val PREF_ALERT_SOUND = "pref_alertsound_state"
+const val PREF_ALERT_VIBRATE = "pref_alertvibrate_state"
+const val PREF_ALERT_LED = "pref_alertled_state"
+const val PREF_AUTO_REFRESH = "pref_autorefresh_state"
+const val PREF_SHOW_NIGHT_BUSES = "pref_nightservices_state"
+const val PREF_SERVICE_SORTING = "pref_servicessorting_state"
+const val PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE = "pref_numberOfShownDeparturesPerService"
+const val PREF_ZOOM_BUTTONS = "pref_map_zoom_buttons_state"
+const val PREF_DISABLE_GPS_PROMPT = "neareststops_gps_prompt_disable"
+const val PREF_MAP_LAST_LATITUDE = "pref_map_last_latitude"
+const val PREF_MAP_LAST_LONGITUDE = "pref_map_last_longitude"
+const val PREF_MAP_LAST_ZOOM = "pref_map_last_zoom"
+const val PREF_MAP_LAST_MAP_TYPE = "pref_map_last_map_type"

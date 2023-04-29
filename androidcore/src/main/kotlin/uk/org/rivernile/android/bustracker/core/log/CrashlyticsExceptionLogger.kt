@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.settings
+package uk.org.rivernile.android.bustracker.core.log
+
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * This class defines the contract for the settings database as a whole entity. It does not
- * define the contract for individual tables within this database - these are defined in the
- * other contract classes.
+ * This is the Crashlytics-specific implementation of [ExceptionLogger].
  *
+ * @param crashlytics The Firebase Crashlytics instance.
  * @author Niall Scott
  */
-internal class SettingsDatabaseContract private constructor() {
+@Singleton
+internal class CrashlyticsExceptionLogger @Inject constructor(
+    private val crashlytics: FirebaseCrashlytics) : ExceptionLogger {
 
-    companion object {
-
-        /**
-         * The version of the database.
-         */
-        const val DATABASE_VERSION = 3
+    override fun log(throwable: Throwable) {
+        crashlytics.recordException(throwable)
     }
 }

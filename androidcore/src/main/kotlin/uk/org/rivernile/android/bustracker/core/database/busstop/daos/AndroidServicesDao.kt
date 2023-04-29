@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,6 +45,7 @@ import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.ServicesContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -53,14 +54,16 @@ import javax.inject.Singleton
  *
  * @param context The application [Context].
  * @param contract The database contract, so we know how to talk to it.
+ * @param exceptionLogger The exception logger.
  * @param ioDispatcher The [CoroutineDispatcher] that database operations are performed on.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidServicesDao @Inject constructor(
-        private val context: Context,
-        private val contract: ServicesContract,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): ServicesDao {
+    private val context: Context,
+    private val contract: ServicesContract,
+    private val exceptionLogger: ExceptionLogger,
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): ServicesDao {
 
     companion object {
 
@@ -138,7 +141,8 @@ internal class AndroidServicesDao @Inject constructor(
                             it.getString(colourColumn)?.let { c ->
                                 try {
                                     Color.parseColor(c)
-                                } catch (ignored: IllegalArgumentException) {
+                                } catch (e: IllegalArgumentException) {
+                                    exceptionLogger.log(e)
                                     null
                                 }
                             }?.let { colourInt ->
@@ -194,7 +198,8 @@ internal class AndroidServicesDao @Inject constructor(
                             val colour = it.getString(colourColumn)?.let { c ->
                                 try {
                                     Color.parseColor(c)
-                                } catch (ignored: IllegalArgumentException) {
+                                } catch (e: IllegalArgumentException) {
+                                    exceptionLogger.log(e)
                                     null
                                 }
                             }

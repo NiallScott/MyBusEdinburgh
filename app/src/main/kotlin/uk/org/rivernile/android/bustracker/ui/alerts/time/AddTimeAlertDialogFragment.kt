@@ -46,6 +46,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
@@ -102,6 +103,8 @@ class AddTimeAlertDialogFragment : DialogFragment() {
     lateinit var textFormattingUtils: TextFormattingUtils
     @Inject
     lateinit var permissionChecker: AndroidPermissionChecker
+    @Inject
+    lateinit var exceptionLogger: ExceptionLogger
 
     private val viewModel by viewModels<AddTimeAlertDialogFragmentViewModel>()
 
@@ -344,7 +347,8 @@ class AddTimeAlertDialogFragment : DialogFragment() {
                     .setData(Uri.fromParts("package", context.packageName, null))
                     .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                     .let(this::startActivity)
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             Toast.makeText(context,
                     R.string.addproxalertdialog_error_no_app_settings,
                     Toast.LENGTH_SHORT)

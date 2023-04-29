@@ -135,8 +135,8 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun isSortedByTimeEmitsValuesFromRepository() = runTest {
-        whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-                .thenReturn(flowOf(true, false, true))
+        whenever(preferenceRepository.isLiveTimesSortByTimeFlow)
+            .thenReturn(flowOf(true, false, true))
         val viewModel = createViewModel(stopCode = "123456")
 
         val observer = viewModel.isSortedByTimeLiveData.test()
@@ -147,8 +147,8 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun isSortedByTimeEmitsDistinctValuesFromRepository() = runTest {
-        whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
-                .thenReturn(intervalFlowOf(0L, 10L, true, true, false, false, true))
+        whenever(preferenceRepository.isLiveTimesSortByTimeFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, true, true, false, false, true))
         val viewModel = createViewModel(stopCode = "123456")
 
         val observer = viewModel.isSortedByTimeLiveData.test()
@@ -189,8 +189,8 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun isAutoRefreshEmitsValuesFromRepository() = runTest {
-        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
-                .thenReturn(flowOf(true, false, true))
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow)
+            .thenReturn(flowOf(true, false, true))
         val viewModel = createViewModel(stopCode = "123456")
 
         val observer = viewModel.isAutoRefreshLiveData.test()
@@ -209,7 +209,7 @@ class BusTimesFragmentViewModelTest {
 
     @Test
     fun isAutoRefreshEmitsDistinctValuesFromRepository() = runTest {
-        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow)
             .thenReturn(intervalFlowOf(0L, 10L, true, true, false, false, true))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -232,7 +232,7 @@ class BusTimesFragmentViewModelTest {
         val loadResult = UiTransformedResult.Success(123L, emptyList())
         whenever(liveTimesLoader.liveTimesFlow)
             .thenReturn(flowOf(loadResult))
-        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow)
             .thenReturn(flowOf(false))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -250,7 +250,7 @@ class BusTimesFragmentViewModelTest {
         val loadResult = UiTransformedResult.Success(123L, emptyList())
         whenever(liveTimesLoader.liveTimesFlow)
             .thenReturn(flowOf(loadResult))
-        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow)
             .thenReturn(flowOf(true))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -827,20 +827,22 @@ class BusTimesFragmentViewModelTest {
     }
 
     @Test
-    fun onSortMenuItemClickedTogglesSortByTime() {
+    fun onSortMenuItemClickedTogglesSortByTime() = runTest {
         val viewModel = createViewModel(stopCode = null)
 
         viewModel.onSortMenuItemClicked()
+        advanceUntilIdle()
 
         verify(preferenceRepository)
                 .toggleSortByTime()
     }
 
     @Test
-    fun onAutoRefreshMenuItemClickedTogglesAutoRefresh() {
+    fun onAutoRefreshMenuItemClickedTogglesAutoRefresh() = runTest {
         val viewModel = createViewModel(stopCode = null)
 
         viewModel.onAutoRefreshMenuItemClicked()
+        advanceUntilIdle()
 
         verify(preferenceRepository)
                 .toggleAutoRefresh()
@@ -878,7 +880,7 @@ class BusTimesFragmentViewModelTest {
         val loadResult = UiTransformedResult.Success(123L, emptyList())
         whenever(liveTimesLoader.liveTimesFlow)
                 .thenReturn(flowOf(UiTransformedResult.Success(123L, emptyList())))
-        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow)
                 .thenReturn(flowOf(false))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -896,7 +898,7 @@ class BusTimesFragmentViewModelTest {
         val loadResult = UiTransformedResult.Success(123L, emptyList())
         whenever(liveTimesLoader.liveTimesFlow)
             .thenReturn(flowOf(UiTransformedResult.Success(123L, emptyList())))
-        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesAutoRefreshEnabledFlow)
             .thenReturn(flowOf(true))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -921,6 +923,7 @@ class BusTimesFragmentViewModelTest {
             refreshController,
             preferenceRepository,
             connectivityRepository,
+            coroutineRule.scope,
             coroutineRule.testDispatcher)
     }
 }

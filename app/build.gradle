@@ -76,8 +76,8 @@ android {
             dimension 'city'
 
             applicationId 'uk.org.rivernile.edinburghbustracker.android'
-            versionCode 15
-            versionName '3.0'
+            versionCode 16
+            versionName '3.0.1'
             archivesBaseName = "MyBusEdinburgh-$versionName"
         }
     }
@@ -152,6 +152,7 @@ dependencies {
     implementation "androidx.viewpager2:viewpager2:$viewPager2Version"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
     implementation "androidx.preference:preference-ktx:$androidXPreferenceVersion"
+    implementation "androidx.datastore:datastore-preferences:$androidXDataStoreVersion"
 
     // AndroidX and support libraries KTX
     implementation "androidx.core:core-ktx:$androidXCoreVersion"

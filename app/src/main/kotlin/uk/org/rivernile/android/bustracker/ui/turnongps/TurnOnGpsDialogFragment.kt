@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,6 +35,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowSystemLocationPreferencesListener
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.DialogTurnOnGpsBinding
@@ -46,9 +47,10 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.DialogTurnOnGpsB
  *
  * @author Niall Scott
  */
+@AndroidEntryPoint
 class TurnOnGpsDialogFragment : DialogFragment() {
 
-    private val viewModel: TurnOnGpsDialogFragmentViewModel by viewModels()
+    private val viewModel by viewModels<TurnOnGpsDialogFragmentViewModel>()
 
     private lateinit var callbacks: Callbacks
 
@@ -65,9 +67,14 @@ class TurnOnGpsDialogFragment : DialogFragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        isCancelable = true
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return MaterialAlertDialogBuilder(requireContext())
-                .setCancelable(true)
                 .setTitle(R.string.turnongpsdialog_title)
                 .setView(viewBinding.root)
                 .setPositiveButton(R.string.yes) { _, _ ->

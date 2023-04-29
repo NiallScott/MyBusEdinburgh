@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,11 +36,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.app.AndroidAppRepository
 import uk.org.rivernile.android.bustracker.core.app.AppRepository
-import uk.org.rivernile.android.bustracker.core.backup.AndroidBackupInvoker
-import uk.org.rivernile.android.bustracker.core.backup.BackupInvoker
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
+import uk.org.rivernile.android.bustracker.core.log.CrashlyticsExceptionLogger
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.V24ConnectivityChecker
@@ -50,8 +50,6 @@ import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotification
 import uk.org.rivernile.android.bustracker.core.permission.LegacyNotificationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.permission.NotificationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.permission.V33NotificationPermissionChecker
-import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import javax.inject.Provider
 
 /**
@@ -103,17 +101,13 @@ class AndroidCoreModule {
 
         @Suppress("unused")
         @Binds
-        fun bindBackupInvoker(androidBackupInvoker: AndroidBackupInvoker): BackupInvoker
+        fun bindExceptionLogger(
+            crashlyticsExceptionLogger: CrashlyticsExceptionLogger): ExceptionLogger
 
         @Suppress("unused")
         @Binds
-        fun bindFeatureRepository(androidFeatureRepository: AndroidFeatureRepository)
-                : FeatureRepository
-
-        @Suppress("unused")
-        @Binds
-        fun bindPreferenceManager(androidPreferenceManager: AndroidPreferenceManager)
-                : PreferenceManager
+        fun bindFeatureRepository(
+            androidFeatureRepository: AndroidFeatureRepository): FeatureRepository
 
         @Suppress("unused")
         @Binds

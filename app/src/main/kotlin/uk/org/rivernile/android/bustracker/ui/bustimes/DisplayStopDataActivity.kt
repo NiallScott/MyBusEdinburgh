@@ -49,6 +49,7 @@ import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.DeleteProximityAlertDialogFragment
@@ -101,6 +102,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
     @Inject
     lateinit var textFormattingUtils: TextFormattingUtils
+    @Inject
+    lateinit var exceptionLogger: ExceptionLogger
 
     private val viewModel by viewModels<DisplayStopDataActivityViewModel>()
 
@@ -405,7 +408,8 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
 
         try {
             startActivity(intent)
-        } catch (ignored: ActivityNotFoundException) {
+        } catch (e: ActivityNotFoundException) {
+            exceptionLogger.log(e)
             // This should not happen as a check happened before even allowing the Street View menu
             // item to be displayed. Handling in case the device state changed since then.
             Toast.makeText(this, R.string.displaystopdata_error_street_view_missing,

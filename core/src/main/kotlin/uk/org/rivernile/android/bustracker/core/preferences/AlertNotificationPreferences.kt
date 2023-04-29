@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.di
-
-import javax.inject.Qualifier
-import kotlin.annotation.MustBeDocumented
-import kotlin.annotation.Retention
+package uk.org.rivernile.android.bustracker.core.preferences
 
 /**
- * This annotation defines a Dagger qualifier for proximity alert dependencies.
+ * This class holds the preference values for alert notifications.
  *
+ * @property hasSound Should the notification happen with sound?
+ * @property hasVibration Should the notification happen with vibration?
+ * @property hasLedFlash Should the notification happen with LED flash?
  * @author Niall Scott
  */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ForProximityAlerts
+data class AlertNotificationPreferences(
+    val hasSound: Boolean,
+    val hasVibration: Boolean,
+    val hasLedFlash: Boolean)

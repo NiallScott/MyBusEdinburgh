@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import kotlinx.coroutines.flow.collectIndexed
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -65,13 +66,15 @@ internal class UpdateBusStopDatabaseWorkScheduler @Inject constructor(
      * Schedules the recurring job to update the bus stop database, if required.
      */
     suspend fun scheduleUpdateBusStopDatabaseJob() {
-        workManager.enqueueUniquePeriodicWork(
-                WORKER_NAME,
-                ExistingPeriodicWorkPolicy.KEEP,
-                createWorkRequest(preferenceRepository.isDatabaseUpdateWifiOnly))
-
-        preferenceRepository.isDatabaseUpdateWifiOnlyFlow.collect {
-            workManager.updateWork(createWorkRequest(it))
+        preferenceRepository.isDatabaseUpdateWifiOnlyFlow.collectIndexed { index, value ->
+            if (index == 0) {
+                workManager.enqueueUniquePeriodicWork(
+                    WORKER_NAME,
+                    ExistingPeriodicWorkPolicy.KEEP,
+                    createWorkRequest(value))
+            } else {
+                workManager.updateWork(createWorkRequest(value))
+            }
         }
     }
 

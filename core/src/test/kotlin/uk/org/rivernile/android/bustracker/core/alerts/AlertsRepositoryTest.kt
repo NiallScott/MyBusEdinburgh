@@ -37,6 +37,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
@@ -94,7 +95,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun hasArrivalAlertFlowRespondsToFavouritesChanged() = runTest {
+    fun hasArrivalAlertFlowRespondsToAlertsChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
             listener.onAlertsChanged()
@@ -129,7 +130,7 @@ class AlertsRepositoryTest {
     }
 
     @Test
-    fun hasProximityAlertFlowRespondsToFavouritesChanged() = runTest {
+    fun hasProximityAlertFlowRespondsToAlertsChanged() = runTest {
         doAnswer {
             val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
             listener.onAlertsChanged()
@@ -146,6 +147,82 @@ class AlertsRepositoryTest {
         observer.assertValues(false, true, false)
         verify(alertsDao)
                 .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun arrivalAlertCountFlowGetsInitialValue() = runTest {
+        whenever(alertsDao.getArrivalAlertCount())
+            .thenReturn(4)
+
+        val observer = repository.arrivalAlertCountFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(4)
+        verify(alertsDao)
+            .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun arrivalAlertCountFlowRespondsToAlertsChanged() = runTest {
+        doAnswer {
+            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
+            listener.onAlertsChanged()
+            listener.onAlertsChanged()
+            listener.onAlertsChanged()
+            listener.onAlertsChanged()
+        }.whenever(alertsDao).addOnAlertsChangedListener(any())
+        whenever(alertsDao.getArrivalAlertCount())
+            .thenReturn(1, 2, 3, 4, 0)
+
+        val observer = repository.arrivalAlertCountFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(1, 2, 3, 4, 0)
+        verify(alertsDao)
+            .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun allProximityAlertsFlowGetsInitialValue() = runTest {
+        val proximityAlerts = mock<List<ProximityAlert>>()
+        whenever(alertsDao.getAllProximityAlerts())
+            .thenReturn(proximityAlerts)
+
+        val observer = repository.allProximityAlertsFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(proximityAlerts)
+        verify(alertsDao)
+            .removeOnAlertsChangedListener(any())
+    }
+
+    @Test
+    fun allProximityAlertsFlowRespondsToAlertsChanged() = runTest {
+        doAnswer {
+            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
+            listener.onAlertsChanged()
+            listener.onAlertsChanged()
+        }.whenever(alertsDao).addOnAlertsChangedListener(any())
+        val proximityAlerts1 = mock<List<ProximityAlert>>()
+        val proximityAlerts2 = mock<List<ProximityAlert>>()
+        val proximityAlerts3 = mock<List<ProximityAlert>>()
+        whenever(alertsDao.getAllProximityAlerts())
+            .thenReturn(proximityAlerts1, proximityAlerts2, proximityAlerts3)
+
+        val observer = repository.allProximityAlertsFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+        advanceUntilIdle()
+
+        observer.assertValues(proximityAlerts1, proximityAlerts2, proximityAlerts3)
+        verify(alertsDao)
+            .removeOnAlertsChangedListener(any())
     }
 
     @Test

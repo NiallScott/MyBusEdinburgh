@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersionResponse
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.net.SocketFactory
@@ -39,16 +40,18 @@ import javax.net.SocketFactory
 /**
  * This class represents the JSON version of the [ApiEndpoint] that connects over HTTP(S).
  *
- * @property apiServiceFactory An implementation to retrieve instances of [ApiService].
- * @property apiKeyGenerator An implementation to generate API keys.
- * @property schemaType The schema type.
+ * @param apiServiceFactory An implementation to retrieve instances of [ApiService].
+ * @param apiKeyGenerator An implementation to generate API keys.
+ * @param schemaType The schema type.
+ * @param exceptionLogger Used to report exceptions.
  * @author Niall Scott
  */
 @Singleton
 internal class JsonApiEndpoint @Inject constructor(
         private val apiServiceFactory: ApiServiceFactory,
         private val apiKeyGenerator: ApiKeyGenerator,
-        @ForApiSchemaName private val schemaType: String) : ApiEndpoint {
+        @ForApiSchemaName private val schemaType: String,
+        private val exceptionLogger: ExceptionLogger) : ApiEndpoint {
 
     override suspend fun getDatabaseVersion(
             socketFactory: SocketFactory?): DatabaseVersionResponse {
@@ -64,6 +67,7 @@ internal class JsonApiEndpoint @Inject constructor(
                 DatabaseVersionResponse.Error.ServerError
             }
         } catch (e: IOException) {
+            exceptionLogger.log(e)
             DatabaseVersionResponse.Error.Io(e)
         }
     }

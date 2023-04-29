@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,24 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.preferences
+package uk.org.rivernile.android.bustracker.core.di
+
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * This should be implemented by classes wishing to know when a preference has changed.
+ * This annotation defines a Dagger qualifier for the Service Kotlin coroutine scope.
  *
  * @author Niall Scott
  */
-interface OnPreferenceChangedListener {
-
-    /**
-     * This is called when a preference has been changed.
-     *
-     * The given preference here may be `null` as it may not be an exposed type. This is useful if
-     * it is to be known when the preferences have changed, but it doesn't matter what key has been
-     * changed, i.e. to cause a backup to occur.
-     *
-     * @param preference The preference which changed, or `null` if it's not known or not an exposed
-     * type.
-     */
-    fun onPreferenceChanged(preference: PreferenceKey?)
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForServiceCoroutineScope

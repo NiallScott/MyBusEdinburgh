@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.backup
+package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import com.google.gson.annotations.SerializedName
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
+import uk.org.rivernile.android.bustracker.core.di.ForServiceCoroutineScope
 
 /**
- * A single favourite stop which is contained within a backup.
+ * This [Module] provides dependencies for [android.app.Service]s.
  *
- * @property stopCode The code of the favourite stop.
- * @property stopName The user-supplied name for the favourite stop.
  * @author Niall Scott
  */
-internal data class BackupFavouriteStop(
-        @SerializedName("stopCode")
-        val stopCode: String,
-        @SerializedName("stopName")
-        val stopName: String)
+@InstallIn(SingletonComponent::class)
+@Module
+internal class ServiceModule {
+
+    @Provides
+    @ForServiceCoroutineScope
+    fun provideServiceCoroutineScope(
+        @ForMainDispatcher mainCoroutineDispatcher: CoroutineDispatcher): CoroutineScope =
+        CoroutineScope(mainCoroutineDispatcher + Job())
+}

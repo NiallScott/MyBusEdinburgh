@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,37 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.extensions
-
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
-import java.io.Closeable
-import java.io.IOException
+package uk.org.rivernile.android.bustracker.core.log
 
 /**
- * Unit tests for extensions methods on the [java.io.Closeable] interface.
+ * This is an exception logger, used to log handled exceptions.
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
-class CloseableExtensionsTest {
+interface ExceptionLogger {
 
-    @Mock
-    private lateinit var closeable: Closeable
-
-    @Test
-    fun safeCloseWithNoExceptionSucceeds() {
-        closeable.closeSafely()
-    }
-
-    @Test
-    fun safeCloseWithExceptionSafelyCatchesException() {
-        whenever(closeable.close())
-                .thenThrow(IOException::class.java)
-
-        closeable.closeSafely()
-    }
+    /**
+     * Log the given [Throwable].
+     *
+     * @param throwable The [Throwable] to log.
+     */
+    fun log(throwable: Throwable)
 }

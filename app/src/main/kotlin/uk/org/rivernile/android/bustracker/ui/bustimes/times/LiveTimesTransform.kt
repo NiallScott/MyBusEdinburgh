@@ -73,14 +73,14 @@ class LiveTimesTransform @Inject constructor(
      * A [Flow] which emits the user's sorting preference.
      */
     private val sortByTimeFlow get() = preferenceRepository
-        .isLiveTimesSortByTimeFlow()
+        .isLiveTimesSortByTimeFlow
         .distinctUntilChanged()
 
     /**
      * A [Flow] which emits the user's night services preference.
      */
     private val showNightServicesFlow get() = preferenceRepository
-        .isLiveTimesShowNightServicesEnabledFlow()
+        .isLiveTimesShowNightServicesEnabledFlow
         .distinctUntilChanged()
 
     /**

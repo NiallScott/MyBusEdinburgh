@@ -27,9 +27,7 @@
 package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.app.Application
-import android.app.backup.BackupManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.ConnectivityManager
@@ -39,7 +37,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import javax.inject.Singleton
 
 /**
@@ -50,10 +47,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 internal class AndroidModule {
-
-    @Provides
-    @Singleton
-    fun provideBackupManager(context: Context): BackupManager = BackupManager(context)
 
     @Provides
     fun provideConnectivityManager(context: Context): ConnectivityManager =
@@ -67,11 +60,6 @@ internal class AndroidModule {
     @Singleton
     fun provideNotificationManagerCompat(context: Context): NotificationManagerCompat =
             NotificationManagerCompat.from(context)
-
-    @Provides
-    @Singleton
-    fun provideSharedPreferences(context: Context): SharedPreferences =
-            context.getSharedPreferences(PreferenceManager.PREF_FILE, Context.MODE_PRIVATE)
 
     @Provides
     fun providePackageManager(context: Context): PackageManager = context.packageManager

@@ -347,12 +347,16 @@ class NearestStopsFragmentViewModel @Inject constructor(
      * When this [LiveData] emits a new consumable event, the user should be asked to turn on the
      * GPS location provider.
      */
-    val showTurnOnGpsLiveData = permissionsStateFlow
-            .filterNotNull()
-            .filter(this::shouldAskToTurnOnGps)
-            .onEach { savedState[STATE_ASKED_TURN_ON_GPS] = true }
-            .map { Event(Unit) }
-            .asLiveData(viewModelScope.coroutineContext)
+    val showTurnOnGpsLiveData = combine(
+        permissionsStateFlow.filterNotNull(),
+        preferenceRepository.isGpsPromptDisabledFlow,
+        ::Pair)
+        .filter {
+            shouldAskToTurnOnGps(it.first, it.second)
+        }
+        .onEach { savedState[STATE_ASKED_TURN_ON_GPS] = true }
+        .map { Event(Unit) }
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This is called when the user has clicked on a nearest stop.
@@ -555,9 +559,12 @@ class NearestStopsFragmentViewModel @Inject constructor(
      * Should we ask to turn on GPS?
      *
      * @param permissionsState The [PermissionsState].
+     * @param isGpsPromptDisabled Is the GPS prompt disabled?
      * @return `true` if we should ask to turn on GPS, otherwise `false`.
      */
-    private fun shouldAskToTurnOnGps(permissionsState: PermissionsState): Boolean {
+    private fun shouldAskToTurnOnGps(
+        permissionsState: PermissionsState,
+        isGpsPromptDisabled: Boolean): Boolean {
         if (permissionsState.coarseLocationPermission != PermissionState.GRANTED &&
                 permissionsState.fineLocationPermission != PermissionState.GRANTED) {
             return false
@@ -567,7 +574,7 @@ class NearestStopsFragmentViewModel @Inject constructor(
             return false
         }
 
-        if (preferenceRepository.isGpsPromptDisabled) {
+        if (isGpsPromptDisabled) {
             return false
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.app
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.pm.PackageInfoCompat
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.packagemanager.getPackageInfoCompat
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,12 +39,14 @@ import javax.inject.Singleton
  *
  * @param context The application [Context].
  * @param packageManager The Android [PackageManager].
+ * @param exceptionLogger Used to log exceptions.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidAppRepository @Inject constructor(
         private val context: Context,
-        private val packageManager: PackageManager) : AppRepository {
+        private val packageManager: PackageManager,
+        private val exceptionLogger: ExceptionLogger) : AppRepository {
 
     override val appVersion get() = try {
         packageManager.getPackageInfoCompat(context.packageName, 0).let {
@@ -51,7 +54,8 @@ internal class AndroidAppRepository @Inject constructor(
                     it.versionName,
                     PackageInfoCompat.getLongVersionCode(it))
         }
-    } catch (ignored: PackageManager.NameNotFoundException) {
+    } catch (e: PackageManager.NameNotFoundException) {
+        exceptionLogger.log(e)
         // This should never happen as we should always be able to look up our own package name. If
         // this happens, there is something terribly wrong in the system.
         throw UnsupportedOperationException()

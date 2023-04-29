@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -203,63 +203,6 @@ class AndroidFavouritesDaoTest {
     }
 
     @Test
-    fun addFavouriteStopsWithSingleItemAddsFavouriteStop() {
-        val favouriteStop = FavouriteStop(0L, "100001", "Stop 1")
-        val favouriteStops = listOf(favouriteStop)
-        val expectedContentValues = ContentValues().apply {
-            put(FavouritesContract.STOP_CODE, "100001")
-            put(FavouritesContract.STOP_NAME, "Stop 1")
-        }
-        val expectedContentValuesArray = arrayOf(expectedContentValues)
-        object : MockContentProvider() {
-            override fun bulkInsert(uri: Uri, values: Array<out ContentValues>): Int {
-                assertEquals(contentUri, uri)
-                assertArrayEquals(expectedContentValuesArray, values)
-
-                return 1
-            }
-        }.also(this::addMockProvider)
-
-        val result = favouritesDao.addFavouriteStops(favouriteStops)
-
-        assertEquals(1, result)
-    }
-
-    @Test
-    fun addFavouriteStopsWithMultipleItemsAddsFavouriteStops() {
-        val favouriteStop1 = FavouriteStop(0L, "100001", "Stop 1")
-        val favouriteStop2 = FavouriteStop(0L, "100002", "Stop 2")
-        val favouriteStop3 = FavouriteStop(0L, "100003", "Stop 3")
-        val favouriteStops = listOf(favouriteStop1, favouriteStop2, favouriteStop3)
-        val expectedContentValues1 = ContentValues().apply {
-            put(FavouritesContract.STOP_CODE, "100001")
-            put(FavouritesContract.STOP_NAME, "Stop 1")
-        }
-        val expectedContentValues2 = ContentValues().apply {
-            put(FavouritesContract.STOP_CODE, "100002")
-            put(FavouritesContract.STOP_NAME, "Stop 2")
-        }
-        val expectedContentValues3 = ContentValues().apply {
-            put(FavouritesContract.STOP_CODE, "100003")
-            put(FavouritesContract.STOP_NAME, "Stop 3")
-        }
-        val expectedContentValuesArray = arrayOf(expectedContentValues1, expectedContentValues2,
-                expectedContentValues3)
-        object : MockContentProvider() {
-            override fun bulkInsert(uri: Uri, values: Array<out ContentValues>): Int {
-                assertEquals(contentUri, uri)
-                assertArrayEquals(expectedContentValuesArray, values)
-
-                return 3
-            }
-        }.also(this::addMockProvider)
-
-        val result = favouritesDao.addFavouriteStops(favouriteStops)
-
-        assertEquals(3, result)
-    }
-
-    @Test
     fun addFavouriteStopAddsFavouriteStop() = runTest {
         val favouriteStop = FavouriteStop(0L, "123456", "Stop name")
         val expectedContentValues = ContentValues().apply {
@@ -320,111 +263,6 @@ class AndroidFavouritesDaoTest {
         }.also(this@AndroidFavouritesDaoTest::addMockProvider)
 
         favouritesDao.removeFavouriteStop("123456")
-    }
-
-    @Test
-    fun removeAllFavouriteStopsUsesCorrectParameters() {
-        object : MockContentProvider() {
-            override fun delete(
-                    uri: Uri,
-                    selection: String?,
-                    selectionArgs: Array<out String>?): Int {
-                assertEquals(contentUri, uri)
-                assertNull(selection)
-                assertNull(selectionArgs)
-
-                return 1
-            }
-        }.also(this::addMockProvider)
-
-        val result = favouritesDao.removeAllFavouriteStops()
-
-        assertEquals(1, result)
-    }
-
-    @Test
-    fun getAllFavouriteStopsWithNullResultIsHandledCorrectly() {
-        val expectedProjection = getExpectedProjectionForFavouriteStop()
-        object : MockContentProvider() {
-            override fun query(uri: Uri,
-                    projection: Array<String>?,
-                    selection: String?,
-                    selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor? {
-                assertEquals(contentUri, uri)
-                assertArrayEquals(expectedProjection, projection)
-                assertNull(selection)
-                assertNull(selectionArgs)
-                assertNull(sortOrder)
-
-                return null
-            }
-        }.also(this::addMockProvider)
-
-        val result = favouritesDao.getAllFavouriteStops()
-
-        assertNull(result)
-    }
-
-    @Test
-    fun getAllFavouriteStopsWithEmptyResultIsHandledCorrectly() {
-        val expectedProjection = getExpectedProjectionForFavouriteStop()
-        val cursor = MatrixCursor(expectedProjection)
-        object : MockContentProvider() {
-            override fun query(uri: Uri,
-                    projection: Array<String>?,
-                    selection: String?,
-                    selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor {
-                assertEquals(contentUri, uri)
-                assertArrayEquals(expectedProjection, projection)
-                assertNull(selection)
-                assertNull(selectionArgs)
-                assertNull(sortOrder)
-
-                return cursor
-            }
-        }.also(this::addMockProvider)
-
-        val result = favouritesDao.getAllFavouriteStops()
-
-        assertNull(result)
-        assertTrue(cursor.isClosed)
-    }
-
-    @Test
-    fun getAllFavouriteStopsWithNonEmptyResultIsHandledCorrectly() {
-        val expectedProjection = getExpectedProjectionForFavouriteStop()
-        val cursor = MatrixCursor(expectedProjection)
-        cursor.apply {
-            addRow(arrayOf(1, "100001", "Stop 1"))
-            addRow(arrayOf(2, "100002", "Stop 2"))
-            addRow(arrayOf(3, "100003", "Stop 3"))
-        }
-        val expected = listOf(
-                FavouriteStop(1L, "100001", "Stop 1"),
-                FavouriteStop(2L, "100002", "Stop 2"),
-                FavouriteStop(3L, "100003", "Stop 3"))
-        object : MockContentProvider() {
-            override fun query(uri: Uri,
-                    projection: Array<String>?,
-                    selection: String?,
-                    selectionArgs: Array<String>?,
-                    sortOrder: String?): Cursor {
-                assertEquals(contentUri, uri)
-                assertArrayEquals(expectedProjection, projection)
-                assertNull(selection)
-                assertNull(selectionArgs)
-                assertNull(sortOrder)
-
-                return cursor
-            }
-        }.also(this::addMockProvider)
-
-        val result = favouritesDao.getAllFavouriteStops()
-
-        assertEquals(expected, result)
-        assertTrue(cursor.isClosed)
     }
 
     @Test

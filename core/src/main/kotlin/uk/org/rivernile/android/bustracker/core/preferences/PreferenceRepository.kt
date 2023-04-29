@@ -26,216 +26,121 @@
 
 package uk.org.rivernile.android.bustracker.core.preferences
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 
 /**
  * This repository is used to access application preference data.
  *
- * @param preferenceManager Used to access the preference backing store.
- * @param applicationCoroutineScope The application [CoroutineScope].
- * @param defaultDispatcher The [CoroutineDispatcher] to perform processing operations on.
+ * @param preferenceDataStorage Preference data storage.
  * @author Niall Scott
  */
-class PreferenceRepository @Inject constructor(
-        private val preferenceManager: PreferenceManager,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
-
-    /**
-     * Should database updates be over Wi-Fi only?
-     */
-    val isDatabaseUpdateWifiOnly: Boolean get() =
-        preferenceManager.isBusStopDatabaseUpdateWifiOnly()
+class PreferenceRepository @Inject internal constructor(
+    private val preferenceDataStorage: PreferenceDataStorage) {
 
     /**
      * A [Flow] which emits whether database updates should be over Wi-Fi only.
      */
-    val isDatabaseUpdateWifiOnlyFlow get() =
-        getPreferenceFlow(PreferenceKey.DATABASE_UPDATE_WIFI_ONLY) {
-            preferenceManager.isBusStopDatabaseUpdateWifiOnly()
-        }
+    val isDatabaseUpdateWifiOnlyFlow get() = preferenceDataStorage.isDatabaseUpdateWifiOnlyFlow
 
     /**
      * A [Flow] which emits the [AppTheme] and will emit further values when this preference
      * changes.
      */
-    val appThemeFlow: Flow<AppTheme> get() = getPreferenceFlow(PreferenceKey.APP_THEME) {
-        preferenceManager.appTheme
-    }
+    val appThemeFlow get() = preferenceDataStorage.appThemeFlow
 
     /**
-     * Get a [Flow] which returns whether auto refresh is enabled by default, and will emit further
+     * A [Flow] which emits alert notification preferences.
+     */
+    val alertNotificationPreferencesFlow get() =
+        preferenceDataStorage.alertNotificationPreferencesFlow
+
+    /**
+     * A [Flow] which emits whether auto refresh is enabled by default, and will emit further values
+     * when this preference changes.
+     */
+    val isLiveTimesAutoRefreshEnabledFlow get() =
+        preferenceDataStorage.isLiveTimesAutoRefreshEnabledFlow
+
+    /**
+     * A [Flow] which emits whether night services should be shown or not, and will emit further
      * values when this preference changes.
-     *
-     * @return The [Flow] which emits whether auto refresh is enabled by default.
      */
-    fun isLiveTimesAutoRefreshEnabledFlow(): Flow<Boolean> {
-        return getPreferenceFlow(PreferenceKey.LIVE_TIMES_AUTO_REFRESH_ENABLED) {
-            preferenceManager.isBusTimesAutoRefreshEnabled()
-        }
-    }
+    val isLiveTimesShowNightServicesEnabledFlow get() =
+        preferenceDataStorage.isLiveTimesShowNightServicesEnabledFlow
 
     /**
-     * Is live times auto refresh enabled?
+     * A [Flow] which emits whether live times are sorted by time, and will emit further values when
+     * this preference changes.
      */
-    val isLiveTimesAutoRefreshEnabled: Boolean get() =
-        preferenceManager.isBusTimesAutoRefreshEnabled()
+    val isLiveTimesSortByTimeFlow get() = preferenceDataStorage.isLiveTimesSortByTimeFlow
 
     /**
-     * Get a [Flow] which returns whether night services should be shown or not, and will emit
-     * further values when this preference changes.
-     *
-     * @return The [Flow] which emits whether night services should be shown or not.
+     * A [Flow] which emits the number of departures preference value and will emit further values
+     * when this preference changes.
      */
-    fun isLiveTimesShowNightServicesEnabledFlow(): Flow<Boolean> {
-        return getPreferenceFlow(PreferenceKey.LIVE_TIMES_SHOW_NIGHT_SERVICES) {
-            preferenceManager.isBusTimesShowingNightServices()
-        }
-    }
+    val liveTimesNumberOfDeparturesFlow get() =
+        preferenceDataStorage.liveTimesNumberOfDeparturesFlow
 
     /**
-     * Get a [Flow] which returns whether live times are sorted by time, and will emit further
-     * values when this preference changes.
-     *
-     * @return The [Flow] which emits whether live times are sorted by time.
+     * A [Flow] which emits whether the GPS prompt is disabled.
      */
-    fun isLiveTimesSortByTimeFlow(): Flow<Boolean> {
-        return getPreferenceFlow(PreferenceKey.LIVE_TIMES_SORT_BY_TIME) {
-            preferenceManager.isBusTimesSortedByTime()
-        }
-    }
+    val isGpsPromptDisabledFlow get() = preferenceDataStorage.isGpsPromptDisabledFlow
 
     /**
-     * Get a [Flow] which returns the number of departures preference value and will emit further
-     * values when this preference changes.
-     *
-     * @return The [Flow] which emits the number of departures to show.
+     * A [Flow] which emits whether the zoom controls should be visible on the map or not.
      */
-    fun getLiveTimesNumberOfDeparturesFlow(): Flow<Int> {
-        return getPreferenceFlow(PreferenceKey.LIVE_TIMES_NUMBER_OF_DEPARTURES) {
-            preferenceManager.getBusTimesNumberOfDeparturesToShowPerService()
-        }
-    }
+    val isMapZoomControlsVisibleFlow get() =
+        preferenceDataStorage.isMapZoomControlsVisibleFlow
 
     /**
-     * Is the GPS prompt disabled?
+     * A [Flow] which emits the last (most recently recorded) map camera location.
      */
-    var isGpsPromptDisabled
-        get() = preferenceManager.isGpsPromptDisabled()
-        set(value) {
-            preferenceManager.setGpsPromptDisabled(value)
-        }
+    val lastMapCameraLocationFlow get() = preferenceDataStorage.lastMapCameraLocationFlow
+
+    /**
+     * A [Flow] which emits the last set map type.
+     */
+    val mapTypeFlow get() = preferenceDataStorage.mapTypeFlow
 
     /**
      * Toggle the sort by time preference.
      */
-    fun toggleSortByTime() {
-        applicationCoroutineScope.launch(defaultDispatcher) {
-            preferenceManager.setBusTimesSortedByTime(!preferenceManager.isBusTimesSortedByTime())
-        }
+    suspend fun toggleSortByTime() {
+        preferenceDataStorage.toggleSortByTime()
     }
 
     /**
      * Toggle the auto-refresh preference.
      */
-    fun toggleAutoRefresh() {
-        applicationCoroutineScope.launch(defaultDispatcher) {
-            preferenceManager.setBusTimesAutoRefreshEnabled(
-                    !preferenceManager.isBusTimesAutoRefreshEnabled())
-        }
+    suspend fun toggleAutoRefresh() {
+        preferenceDataStorage.toggleAutoRefresh()
     }
 
     /**
-     * The last last (most recently recorded) map camera location.
-     */
-    var lastMapCameraLocation: LastMapCameraLocation
-        get() {
-            return LastMapCameraLocation(
-                    preferenceManager.getLastMapLatitude(),
-                    preferenceManager.getLastMapLongitude(),
-                    preferenceManager.getLastMapZoomLevel())
-        }
-        set(value) {
-            preferenceManager.setLastMapLatitude(value.latitude)
-            preferenceManager.setLastMapLongitude(value.longitude)
-            preferenceManager.setLastMapZoomLevel(value.zoomLevel)
-        }
-
-    /**
-     * A [Flow] which emits whether the zoom controls should be visible on the map or not.
-     */
-    val isMapZoomControlsVisibleFLow: Flow<Boolean> get() =
-            getPreferenceFlow(PreferenceKey.STOP_MAP_SHOW_ZOOM_CONTROLS) {
-                preferenceManager.isMapZoomButtonsShown()
-            }
-
-    /**
-     * A [Flow] which emits the last set map type.
-     */
-    val mapTypeFlow: Flow<Int> get() =
-            getPreferenceFlow(PreferenceKey.STOP_MAP_TYPE) {
-                preferenceManager.getLastMapType()
-            }
-
-    /**
-     * The last set map type.
-     */
-    var mapType: Int
-        get() = preferenceManager.getLastMapType()
-        set(value) {
-            preferenceManager.setLastMapType(value)
-        }
-
-    /**
-     * Get a [Flow] which returns the preference value obtained from [block], and identified by the
-     * supplied [key], which is observed for changes. Changes will cause further emissions.
+     * Set the value of the GPS prompt disabled preference.
      *
-     * @param T The type of data for the preference.
-     * @param key The [PreferenceKey] to observe for.
-     * @param block This block is executed to retrieve the preference value. It will be executed on
-     * the default [CoroutineDispatcher].
+     * @param isDisabled Is the GPS prompt disabled?
      */
-    private fun <T> getPreferenceFlow(key: PreferenceKey, block: () -> T) = callbackFlow {
-        val listener = object : OnPreferenceChangedListener {
-            override fun onPreferenceChanged(preference: PreferenceKey?) {
-                if (key == preference) {
-                    launch {
-                        getAndSendPreference(channel, block)
-                    }
-                }
-            }
-        }
-
-        preferenceManager.addOnPreferenceChangedListener(PreferenceListener(listener, setOf(key)))
-        getAndSendPreference(channel, block)
-
-        awaitClose {
-            preferenceManager.removeOnPreferenceChangedListener(listener)
-        }
+    suspend fun setIsGpsPromptDisabled(isDisabled: Boolean) {
+        preferenceDataStorage.setIsGpsPromptDisabled(isDisabled)
     }
 
     /**
-     * A suspended function which obtains the preference from the supplied [block], and then sends
-     * the retrieved preference to the given [channel].
+     * Set the value of the last map camera location preference.
      *
-     * @param T The type of data for the preference.
-     * @param channel The [SendChannel] that emissions should be sent to.
-     * @param block This block is executed to retrieve the preference value. It will be executed on
-     * the default [CoroutineDispatcher].
+     * @param cameraLocation The last map camera location.
      */
-    private suspend fun <T> getAndSendPreference(
-            channel: SendChannel<T>,
-            block: () -> T) = withContext(defaultDispatcher) {
-        channel.send(block())
+    suspend fun setLastMapCameraLocation(cameraLocation: LastMapCameraLocation) {
+        preferenceDataStorage.setLastMapCameraLocation(cameraLocation)
+    }
+
+    /**
+     * Set the value of the map type preference.
+     *
+     * @param mapType The new value of the map type preference.
+     */
+    suspend fun setMapType(mapType: Int) {
+        preferenceDataStorage.setMapType(mapType)
     }
 }

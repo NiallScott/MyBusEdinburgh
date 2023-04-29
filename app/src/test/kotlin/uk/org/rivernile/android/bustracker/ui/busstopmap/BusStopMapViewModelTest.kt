@@ -119,33 +119,6 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun getLastCameraLocationReturnsValueFromPreferenceRepository() {
-        whenever(preferenceRepository.lastMapCameraLocation)
-                .thenReturn(LastMapCameraLocation(1.1, 2.2, 3f))
-        val expected = UiCameraLocation(
-                UiLatLon(1.1, 2.2),
-                3f)
-        val viewModel = createViewModel()
-
-        val result = viewModel.lastCameraLocation
-
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun setLastCameraLocationSetsValueOnPreferenceRepository() {
-        val expected = LastMapCameraLocation(1.1, 2.2, 3f)
-        val viewModel = createViewModel()
-
-        viewModel.lastCameraLocation = UiCameraLocation(
-                UiLatLon(1.1, 2.2),
-                3f)
-
-        verify(preferenceRepository)
-                .lastMapCameraLocation = expected
-    }
-
-    @Test
     fun requestLocationPermissionsLiveDataDoesNotEmitWhenPermissionsHandlerDoesNotEmit() = runTest {
         whenever(permissionHandler.requestLocationPermissionsFlow)
                 .thenReturn(emptyFlow())
@@ -589,7 +562,7 @@ class BusStopMapViewModelTest {
 
     @Test
     fun isZoomControlsVisibleLiveDataEmitsItemsFromPreferenceRepository() = runTest {
-        whenever(preferenceRepository.isMapZoomControlsVisibleFLow)
+        whenever(preferenceRepository.isMapZoomControlsVisibleFlow)
                 .thenReturn(intervalFlowOf(0L, 10L, false, true, false))
         val viewModel = createViewModel()
 
@@ -613,6 +586,24 @@ class BusStopMapViewModelTest {
                 MapType.SATELLITE,
                 MapType.HYBRID,
                 MapType.NORMAL)
+    }
+
+    @Test
+    fun lastCameraLocationLiveDataEmitsItemsFromPreferenceRepository() = runTest {
+        val lastMapCameraLocation = LastMapCameraLocation(1.1, 2.2, 3f)
+        whenever(preferenceRepository.lastMapCameraLocationFlow)
+            .thenReturn(flowOf(lastMapCameraLocation))
+        val viewModel = createViewModel()
+        val expected = UiCameraLocation(
+            UiLatLon(
+                1.1,
+                2.2),
+            3f)
+
+        val observer = viewModel.lastCameraLocationLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(expected)
     }
 
     @Test
@@ -837,7 +828,7 @@ class BusStopMapViewModelTest {
     @Test
     fun showStopShowsInfoWindowButDoesNotMoveCameraWhenNoStopLocation() = runTest {
         whenever(busStopsRepository.getStopLocation("123456"))
-                .thenReturn(null)
+            .thenReturn(null)
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
@@ -848,13 +839,13 @@ class BusStopMapViewModelTest {
         showStopMarkerInfoWindowObserver.assertValues(null, "123456")
         cameraLocationObserver.assertEmpty()
         verify(preferenceRepository, never())
-                .lastMapCameraLocation = any()
+            .setLastMapCameraLocation(any())
     }
 
     @Test
     fun showStopShowsInfoWindowAndMovesCameraToStopLocation() = runTest {
         whenever(busStopsRepository.getStopLocation("123456"))
-                .thenReturn(StopLocation("123456", 1.1, 2.2))
+            .thenReturn(StopLocation("123456", 1.1, 2.2))
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
@@ -864,15 +855,15 @@ class BusStopMapViewModelTest {
 
         showStopMarkerInfoWindowObserver.assertValues(null, "123456")
         cameraLocationObserver.assertValues(
-                UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
+            UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
         verify(preferenceRepository)
-                .lastMapCameraLocation = LastMapCameraLocation(1.1, 2.2, STOP_ZOOM)
+            .setLastMapCameraLocation(LastMapCameraLocation(1.1, 2.2, STOP_ZOOM))
     }
 
     @Test
     fun onStopSearchResultShowsInfoWindowButDoesNotMoveCameraWhenNoStopLocation() = runTest {
         whenever(busStopsRepository.getStopLocation("123456"))
-                .thenReturn(null)
+            .thenReturn(null)
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
@@ -883,13 +874,13 @@ class BusStopMapViewModelTest {
         showStopMarkerInfoWindowObserver.assertValues(null, "123456")
         cameraLocationObserver.assertEmpty()
         verify(preferenceRepository, never())
-                .lastMapCameraLocation = any()
+            .setLastMapCameraLocation(any())
     }
 
     @Test
     fun onStopSearchResultShowsInfoWindowAndMovesCameraToStopLocation() = runTest {
         whenever(busStopsRepository.getStopLocation("123456"))
-                .thenReturn(StopLocation("123456", 1.1, 2.2))
+            .thenReturn(StopLocation("123456", 1.1, 2.2))
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
@@ -899,9 +890,9 @@ class BusStopMapViewModelTest {
 
         showStopMarkerInfoWindowObserver.assertValues(null, "123456")
         cameraLocationObserver.assertValues(
-                UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
+            UiCameraLocation(UiLatLon(1.1, 2.2), STOP_ZOOM))
         verify(preferenceRepository)
-                .lastMapCameraLocation = LastMapCameraLocation(1.1, 2.2, STOP_ZOOM)
+            .setLastMapCameraLocation(LastMapCameraLocation(1.1, 2.2, STOP_ZOOM))
     }
 
     @Test
@@ -913,9 +904,10 @@ class BusStopMapViewModelTest {
 
         val observer = viewModel.cameraLocationLiveData.test()
         viewModel.showLocation(latLon)
+        advanceUntilIdle()
 
         verify(preferenceRepository)
-                .lastMapCameraLocation = expectedLastCameraLocation
+            .setLastMapCameraLocation(expectedLastCameraLocation)
         observer.assertValues(expectedCameraLocation)
     }
 
@@ -924,9 +916,10 @@ class BusStopMapViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onMapTypeSelected(MapType.NORMAL)
+        advanceUntilIdle()
 
         verify(preferenceRepository)
-                .mapType = MapType.NORMAL.value
+            .setMapType(MapType.NORMAL.value)
     }
 
     @Test
@@ -934,9 +927,10 @@ class BusStopMapViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onMapTypeSelected(MapType.SATELLITE)
+        advanceUntilIdle()
 
         verify(preferenceRepository)
-                .mapType = MapType.SATELLITE.value
+            .setMapType(MapType.SATELLITE.value)
     }
 
     @Test
@@ -944,9 +938,10 @@ class BusStopMapViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onMapTypeSelected(MapType.HYBRID)
+        advanceUntilIdle()
 
         verify(preferenceRepository)
-                .mapType = MapType.HYBRID.value
+            .setMapType(MapType.HYBRID.value)
     }
 
     private fun createViewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) =
@@ -960,5 +955,6 @@ class BusStopMapViewModelTest {
                     routeLineRetriever,
                     isMyLocationEnabledDetector,
                     preferenceRepository,
+                    coroutineRule.scope,
                     coroutineRule.testDispatcher)
 }

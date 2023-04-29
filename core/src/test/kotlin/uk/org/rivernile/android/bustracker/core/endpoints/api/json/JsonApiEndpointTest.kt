@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,12 +37,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import retrofit2.Response
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersionResponse
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
@@ -73,6 +77,8 @@ class JsonApiEndpointTest {
     private lateinit var apiServiceFactory: ApiServiceFactory
     @Mock
     private lateinit var apiKeyGenerator: ApiKeyGenerator
+    @Mock
+    private lateinit var exceptionLogger: ExceptionLogger
 
     @Mock
     private lateinit var apiService: ApiService
@@ -84,7 +90,8 @@ class JsonApiEndpointTest {
         endpoint = JsonApiEndpoint(
                 apiServiceFactory,
                 apiKeyGenerator,
-                MOCK_SCHEMA_TYPE)
+                MOCK_SCHEMA_TYPE,
+                exceptionLogger)
 
         whenever(apiServiceFactory.getApiInstance(anyOrNull()))
                 .thenReturn(apiService)
@@ -101,6 +108,8 @@ class JsonApiEndpointTest {
         val result = endpoint.getDatabaseVersion(null)
 
         assertEquals(expected, result)
+        verify(exceptionLogger)
+            .log(ioException)
     }
 
     @Test
@@ -113,6 +122,8 @@ class JsonApiEndpointTest {
         val result = endpoint.getDatabaseVersion(null)
 
         assertEquals(expected, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -125,6 +136,8 @@ class JsonApiEndpointTest {
         val result = endpoint.getDatabaseVersion(null)
 
         assertEquals(expected, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -142,6 +155,8 @@ class JsonApiEndpointTest {
         val result = endpoint.getDatabaseVersion(null)
 
         assertEquals(expected, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -159,6 +174,8 @@ class JsonApiEndpointTest {
         val result = endpoint.getDatabaseVersion(null)
 
         assertEquals(expected, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -176,6 +193,8 @@ class JsonApiEndpointTest {
         val result = endpoint.getDatabaseVersion(null)
 
         assertEquals(expected, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -193,6 +212,8 @@ class JsonApiEndpointTest {
         val result = endpoint.getDatabaseVersion(null)
 
         assertEquals(expected, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     @Test
@@ -215,6 +236,8 @@ class JsonApiEndpointTest {
         val result = endpoint.getDatabaseVersion(null)
 
         assertEquals(expected, result)
+        verify(exceptionLogger, never())
+            .log(any())
     }
 
     private fun givenApiKeyGeneratedReturnsHashedApiKey() {

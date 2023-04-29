@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,11 +42,6 @@ import uk.org.rivernile.android.bustracker.core.alerts.proximity.AndroidProximit
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.GeofencingManager
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidGeofencingManager
-import uk.org.rivernile.android.bustracker.core.di.ForArrivalAlerts
-import uk.org.rivernile.android.bustracker.core.di.ForProximityAlerts
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import javax.inject.Provider
 
 /**
@@ -57,16 +52,6 @@ import javax.inject.Provider
 @InstallIn(SingletonComponent::class)
 @Module
 internal class AlertsModule {
-
-    @Provides
-    @ForArrivalAlerts
-    fun provideArrivalAlertExecutorService(): ScheduledExecutorService =
-            Executors.newSingleThreadScheduledExecutor()
-
-    @Provides
-    @ForProximityAlerts
-    fun provideProximityAlertExecutorService(): ExecutorService =
-            Executors.newSingleThreadExecutor()
 
     @Provides
     fun provideNotificationPreferences(

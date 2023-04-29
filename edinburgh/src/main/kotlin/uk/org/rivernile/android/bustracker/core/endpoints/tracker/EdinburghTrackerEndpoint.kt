@@ -30,6 +30,7 @@ import okio.IOException
 import retrofit2.awaitResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
@@ -43,6 +44,7 @@ import javax.inject.Inject
  * @param liveTimesMapper An implementation used to map the API objects to our model objects.
  * @param errorMapper An implementation used to map errors.
  * @param connectivityRepository Used to check connectivity.
+ * @param exceptionLogger Used to log exceptions.
  * @author Niall Scott
  */
 internal class EdinburghTrackerEndpoint @Inject constructor(
@@ -51,7 +53,8 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
         private val liveTimesMapper: LiveTimesMapper,
         private val errorMapper: ErrorMapper,
         private val responseHandler: ResponseHandler,
-        private val connectivityRepository: ConnectivityRepository): TrackerEndpoint {
+        private val connectivityRepository: ConnectivityRepository,
+        private val exceptionLogger: ExceptionLogger): TrackerEndpoint {
 
     override suspend fun getLiveTimes(
         stopCode: String,
@@ -66,6 +69,7 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
 
                 responseHandler.handleLiveTimesResponse(response)
             } catch (e: IOException) {
+                exceptionLogger.log(e)
                 LiveTimesResponse.Error.Io(e)
             }
         } else {
@@ -81,15 +85,16 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
                 val response = api.getBusTimes(
                     apiKeyGenerator.hashedApiKey,
                     numberOfDepartures,
-                    stopCodes[0],
-                    stopCodes[1],
-                    stopCodes[2],
-                    stopCodes[3],
-                    stopCodes[4])
+                    stopCodes.getOrNull(0),
+                    stopCodes.getOrNull(1),
+                    stopCodes.getOrNull(2),
+                    stopCodes.getOrNull(3),
+                    stopCodes.getOrNull(4))
                     .awaitResponse()
 
                 responseHandler.handleLiveTimesResponse(response)
             } catch (e: IOException) {
+                exceptionLogger.log(e)
                 LiveTimesResponse.Error.Io(e)
             }
         } else {
