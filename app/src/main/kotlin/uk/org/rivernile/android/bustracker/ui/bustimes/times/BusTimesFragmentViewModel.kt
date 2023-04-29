@@ -38,6 +38,7 @@ import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.launch
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityRepository
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
@@ -65,6 +67,7 @@ import javax.inject.Inject
  * @param preferenceRepository This contains the user's preferences.
  * @param connectivityRepository This informs us about the device's connectivity status. This status
  * is shown to the user.
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher Computation is run on this [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -77,6 +80,7 @@ class BusTimesFragmentViewModel @Inject constructor(
     private val refreshController: RefreshController,
     private val preferenceRepository: PreferenceRepository,
     connectivityRepository: ConnectivityRepository,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
     @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
@@ -123,7 +127,7 @@ class BusTimesFragmentViewModel @Inject constructor(
      * distinct values.
      */
     val isSortedByTimeLiveData = preferenceRepository
-        .isLiveTimesSortByTimeFlow()
+        .isLiveTimesSortByTimeFlow
         .distinctUntilChanged()
         .flowOn(defaultDispatcher)
         .asLiveData(viewModelScope.coroutineContext)
@@ -142,7 +146,7 @@ class BusTimesFragmentViewModel @Inject constructor(
      * preference from [PreferenceRepository]. This will emit distinct values.
      */
     val isAutoRefreshLiveData = preferenceRepository
-        .isLiveTimesAutoRefreshEnabledFlow()
+        .isLiveTimesAutoRefreshEnabledFlow
         .distinctUntilChanged()
         .onEach {
             refreshController.onAutoRefreshPreferenceChanged(liveTimes.value, it)
@@ -305,14 +309,18 @@ class BusTimesFragmentViewModel @Inject constructor(
      * This is called when the sort menu item has been clicked by the user.
      */
     fun onSortMenuItemClicked() {
-        preferenceRepository.toggleSortByTime()
+        applicationCoroutineScope.launch(defaultDispatcher) {
+            preferenceRepository.toggleSortByTime()
+        }
     }
 
     /**
      * This is called when the auto refresh menu item has been clicked by the user.
      */
     fun onAutoRefreshMenuItemClicked() {
-        preferenceRepository.toggleAutoRefresh()
+        applicationCoroutineScope.launch(defaultDispatcher) {
+            preferenceRepository.toggleAutoRefresh()
+        }
     }
 
     /**

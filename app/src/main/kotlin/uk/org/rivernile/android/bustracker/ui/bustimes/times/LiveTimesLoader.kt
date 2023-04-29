@@ -80,7 +80,7 @@ class LiveTimesLoader @Inject constructor(
     private val combinedArgumentsFlow get() =
         combine(
             arguments.stopCodeFlow,
-            preferenceRepository.getLiveTimesNumberOfDeparturesFlow(),
+            preferenceRepository.liveTimesNumberOfDeparturesFlow,
             refreshController.refreshTriggerFlow) { stopCode, numberOfDepartures, _ ->
                 LoadParams(stopCode, numberOfDepartures)
             }

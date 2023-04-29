@@ -44,6 +44,7 @@ buildscript {
         viewPager2Version = '1.1.0-beta01'
         constraintLayoutVersion = '2.1.4'
         androidXPreferenceVersion = '1.2.0'
+        androidXDataStoreVersion = '1.0.0'
         architectureComponentsVersion = '2.6.1'
         workManagerVersion = '2.8.1'
         daggerVersion = '2.45'

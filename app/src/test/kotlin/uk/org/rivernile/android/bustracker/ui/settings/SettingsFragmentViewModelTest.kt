@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,15 +27,19 @@
 package uk.org.rivernile.android.bustracker.ui.settings
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import org.junit.Assert.assertEquals
-import org.junit.Before
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.AppTheme
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
@@ -43,38 +47,72 @@ import uk.org.rivernile.android.bustracker.testutils.test
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class SettingsFragmentViewModelTest {
 
     @get:Rule
+    val coroutineRule = MainCoroutineRule()
+    @get:Rule
     val liveDataTaskExecutor = InstantTaskExecutorRule()
 
     @Mock
-    private lateinit var preferenceManager: PreferenceManager
+    private lateinit var preferenceRepository: PreferenceRepository
 
-    private lateinit var viewModel: SettingsFragmentViewModel
+    @Test
+    fun appThemeLiveDataEmitsAppThemValueFromPreferenceRepository() = runTest {
+        whenever(preferenceRepository.appThemeFlow)
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                AppTheme.SYSTEM_DEFAULT,
+                AppTheme.DARK,
+                AppTheme.LIGHT))
+        val viewModel = createViewModel()
 
-    @Before
-    fun setUp() {
-        viewModel = SettingsFragmentViewModel(preferenceManager)
+        val observer = viewModel.appThemeLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+            AppTheme.SYSTEM_DEFAULT,
+            AppTheme.DARK,
+            AppTheme.LIGHT)
     }
 
     @Test
-    fun getNumberOfDeparturesPerServiceReturnsValueFromPreferenceManager() {
-        whenever(preferenceManager.getBusTimesNumberOfDeparturesToShowPerService())
-                .thenReturn(4)
+    fun numberOfDeparturesPerServiceLiveDataEmitsValuesFromPreferenceRepository() = runTest {
+        whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                1,
+                2,
+                3,
+                4))
+        val viewModel = createViewModel()
 
-        val result = viewModel.numberOfDeparturesPerService
+        val observer = viewModel.numberOfDeparturesPerServiceLiveData.test()
+        advanceUntilIdle()
 
-        assertEquals(4, result)
+        observer.assertValues(
+            1,
+            2,
+            3,
+            4)
     }
 
     @Test
     fun onClearSearchHistoryClickedCausesShowClearSearchHistory() {
+        val viewModel = createViewModel()
         val observer = viewModel.showClearSearchHistoryLiveData.test()
 
         viewModel.onClearSearchHistoryClicked()
 
         observer.assertSize(1)
     }
+
+    private fun createViewModel() =
+        SettingsFragmentViewModel(
+            preferenceRepository,
+            coroutineRule.testDispatcher)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.alerts
 
 import androidx.core.app.NotificationCompat
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import kotlinx.coroutines.flow.first
+import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import javax.inject.Inject
 
 /**
@@ -36,20 +37,21 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class LegacyNotificationPreferences @Inject constructor(
-        private val preferenceManager: PreferenceManager) : NotificationPreferences {
+    private val preferenceRepository: PreferenceRepository) : NotificationPreferences {
 
-    override fun applyNotificationPreferences(builder: NotificationCompat.Builder) {
+    override suspend fun applyNotificationPreferences(builder: NotificationCompat.Builder) {
         var defaults = 0
+        val preferences = preferenceRepository.alertNotificationPreferencesFlow.first()
 
-        if (preferenceManager.isNotificationWithSound()) {
+        if (preferences.hasSound) {
             defaults = defaults or NotificationCompat.DEFAULT_SOUND
         }
 
-        if (preferenceManager.isNotificationWithVibration()) {
+        if (preferences.hasVibration) {
             defaults = defaults or NotificationCompat.DEFAULT_VIBRATE
         }
 
-        if (preferenceManager.isNotificationWithLed()) {
+        if (preferences.hasLedFlash) {
             defaults = defaults or NotificationCompat.DEFAULT_LIGHTS
         }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -1358,6 +1358,8 @@ class NearestStopsFragmentViewModelTest {
     fun showTurnOnGpsLiveDataDoesNotEmitWhenDoesNotHaveGpsLocationProvider() = runTest {
         whenever(locationRepository.hasGpsLocationProvider)
                 .thenReturn(false)
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.showTurnOnGpsLiveData.test()
@@ -1372,9 +1374,9 @@ class NearestStopsFragmentViewModelTest {
     @Test
     fun showTurnOnGpsLiveDataDoesNotEmitWhenGpsPromptIsDisabled() = runTest {
         whenever(locationRepository.hasGpsLocationProvider)
-                .thenReturn(true)
-        whenever(preferenceRepository.isGpsPromptDisabled)
-                .thenReturn(true)
+            .thenReturn(true)
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(true))
         val viewModel = createViewModel()
 
         val observer = viewModel.showTurnOnGpsLiveData.test()
@@ -1389,17 +1391,17 @@ class NearestStopsFragmentViewModelTest {
     @Test
     fun showTurnOnGpsLiveDataDoesNotEmitWhenUserHasAlreadyBeenAskedToTurnOnGps() = runTest {
         whenever(locationRepository.hasGpsLocationProvider)
-                .thenReturn(true)
-        whenever(preferenceRepository.isGpsPromptDisabled)
-                .thenReturn(false)
+            .thenReturn(true)
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel(
-                SavedStateHandle(
-                        mapOf(STATE_ASKED_TURN_ON_GPS to true)))
+            SavedStateHandle(
+                mapOf(STATE_ASKED_TURN_ON_GPS to true)))
 
         val observer = viewModel.showTurnOnGpsLiveData.test()
         viewModel.permissionsState = PermissionsState(
-                PermissionState.GRANTED,
-                PermissionState.GRANTED)
+            PermissionState.GRANTED,
+            PermissionState.GRANTED)
         advanceUntilIdle()
 
         observer.assertEmpty()
@@ -1408,17 +1410,17 @@ class NearestStopsFragmentViewModelTest {
     @Test
     fun showTurnOnGpsLiveDataDoesNotEmitGpsProviderIsEnabled() = runTest {
         whenever(locationRepository.hasGpsLocationProvider)
-                .thenReturn(true)
-        whenever(preferenceRepository.isGpsPromptDisabled)
-                .thenReturn(false)
+            .thenReturn(true)
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(false))
         whenever(locationRepository.isGpsLocationProviderEnabled)
-                .thenReturn(true)
+            .thenReturn(true)
         val viewModel = createViewModel()
 
         val observer = viewModel.showTurnOnGpsLiveData.test()
         viewModel.permissionsState = PermissionsState(
-                PermissionState.GRANTED,
-                PermissionState.GRANTED)
+            PermissionState.GRANTED,
+            PermissionState.GRANTED)
         advanceUntilIdle()
 
         observer.assertEmpty()
@@ -1427,17 +1429,17 @@ class NearestStopsFragmentViewModelTest {
     @Test
     fun showTurnOnGpsLiveDataEmitsWhenGpsProviderIsNotEnabled() = runTest {
         whenever(locationRepository.hasGpsLocationProvider)
-                .thenReturn(true)
-        whenever(preferenceRepository.isGpsPromptDisabled)
-                .thenReturn(false)
+            .thenReturn(true)
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(false))
         whenever(locationRepository.isGpsLocationProviderEnabled)
-                .thenReturn(false)
+            .thenReturn(false)
         val viewModel = createViewModel()
 
         val observer = viewModel.showTurnOnGpsLiveData.test()
         viewModel.permissionsState = PermissionsState(
-                PermissionState.GRANTED,
-                PermissionState.GRANTED)
+            PermissionState.GRANTED,
+            PermissionState.GRANTED)
         advanceUntilIdle()
 
         observer.assertSize(1)

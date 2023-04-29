@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.ui.settings
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
@@ -35,8 +34,10 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.preferences.AppTheme
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
+import uk.org.rivernile.android.bustracker.core.preferences.PREF_APP_THEME
+import uk.org.rivernile.android.bustracker.core.preferences.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE
 import uk.org.rivernile.edinburghbustracker.android.R
+import javax.inject.Inject
 
 /**
  * This [SettingsFragment] shows the app's settings to the user and allows them to change their
@@ -57,20 +58,23 @@ class SettingsFragment : PreferenceFragmentCompat(),
         private const val DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
     }
 
-    private val viewModel: SettingsFragmentViewModel by viewModels()
+    @Inject
+    lateinit var preferenceDataStore: SettingsPreferenceDataStore
+
+    private val viewModel by viewModels<SettingsFragmentViewModel>()
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        preferenceManager.sharedPreferencesName = PreferenceManager.PREF_FILE
-        preferenceManager.sharedPreferencesMode = Context.MODE_PRIVATE
+        preferenceManager.preferenceDataStore = preferenceDataStore
         setPreferencesFromResource(R.xml.preferences, rootKey)
-
-        setupSummaries()
-        setupClickListeners()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val viewLifecycleOwner = viewLifecycleOwner
+        viewModel.appThemeLiveData.observe(viewLifecycleOwner, this::handleAppThemeChanged)
+        viewModel.numberOfDeparturesPerServiceLiveData.observe(viewLifecycleOwner,
+            this::handleNumberOfDeparturesPerServiceChanged)
         viewModel.showClearSearchHistoryLiveData.observe(viewLifecycleOwner) {
             showClearSearchHistoryDialog()
         }
@@ -89,40 +93,28 @@ class SettingsFragment : PreferenceFragmentCompat(),
     }
 
     /**
-     * Set up the binding of preference summaries. These are used when the summary is dynamic based
-     * on what the set value is.
+     * Handle the app theme changing.
+     *
+     * @param appTheme The new app theme.
      */
-    private fun setupSummaries() {
-        findPreference<ListPreference>(
-                PreferenceManager.PREF_THEME)
-                ?.setSummaryProvider {
-                    when (viewModel.appTheme) {
-                        AppTheme.SYSTEM_DEFAULT ->
-                            getString(R.string.preferences_list_theme_system_default)
-                        AppTheme.LIGHT -> getString(R.string.preferences_list_theme_light)
-                        AppTheme.DARK -> getString(R.string.preferences_list_theme_dark)
-                    }
-                }
-
-        findPreference<ListPreference>(
-                PreferenceManager.PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE)
-                ?.setSummaryProvider {
-                    val numberOfDepartures = viewModel.numberOfDeparturesPerService
-                    val strings = resources.getStringArray(
-                            R.array.preferences_num_departures_entries)
-                    strings[numberOfDepartures - 1]
-                }
+    private fun handleAppThemeChanged(appTheme: AppTheme) {
+        findPreference<Preference>(PREF_APP_THEME)?.summary = when (appTheme) {
+            AppTheme.SYSTEM_DEFAULT -> getString(R.string.preferences_list_theme_system_default)
+            AppTheme.LIGHT -> getString(R.string.preferences_list_theme_light)
+            AppTheme.DARK -> getString(R.string.preferences_list_theme_dark)
+        }
     }
 
     /**
-     * Set up any required click listeners
+     * Handle the number of departures to show per service changing.
+     *
+     * @param numberOfDepartures The number of departures per service to show.
      */
-    private fun setupClickListeners() {
-        findPreference<Preference>(PreferenceManager.PREF_CLEAR_SEARCH_HISTORY)
-                ?.setOnPreferenceClickListener {
-                    viewModel.onClearSearchHistoryClicked()
-                    true
-                }
+    private fun handleNumberOfDeparturesPerServiceChanged(numberOfDepartures: Int) {
+        findPreference<Preference>(PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE)?.apply {
+            val strings = resources.getStringArray(R.array.preferences_num_departures_entries)
+            summary = strings[numberOfDepartures - 1]
+        }
     }
 
     /**

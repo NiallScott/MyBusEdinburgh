@@ -127,6 +127,9 @@ dependencies {
     // WorkManager
     api "androidx.work:work-runtime-ktx:$workManagerVersion"
 
+    // DataStore
+    implementation "androidx.datastore:datastore-preferences:$androidXDataStoreVersion"
+
     // Firebase
     implementation platform("com.google.firebase:firebase-bom:$firebaseBomVersion")
     implementation 'com.google.firebase:firebase-crashlytics-ktx'

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.core.preferences
 
-/**
- * This class describes a preference listener to be added. The listener is only fired when the keys
- * it is interested in have changed. This class allows the keys to be specified.
- *
- * @property listener The listener which is called on change.
- * @property keys The listener is called when these keys are changed. If `null` or empty, the
- * listener will be called when any key is changed.
- * @author Niall Scott
- */
-data class PreferenceListener(
-        val listener: OnPreferenceChangedListener,
-        val keys: Set<PreferenceKey>?)
+const val PREF_BUS_STOP_DATABASE_WIFI_ONLY = "pref_bus_stop_database_wifi_only"
+const val PREF_APP_THEME = "pref_theme"
+const val PREF_ALERT_SOUND = "pref_alertsound_state"
+const val PREF_ALERT_VIBRATE = "pref_alertvibrate_state"
+const val PREF_ALERT_LED = "pref_alertled_state"
+const val PREF_AUTO_REFRESH = "pref_autorefresh_state"
+const val PREF_SHOW_NIGHT_BUSES = "pref_nightservices_state"
+const val PREF_SERVICE_SORTING = "pref_servicessorting_state"
+const val PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE = "pref_numberOfShownDeparturesPerService"
+const val PREF_ZOOM_BUTTONS = "pref_map_zoom_buttons_state"
+const val PREF_DISABLE_GPS_PROMPT = "neareststops_gps_prompt_disable"
+const val PREF_MAP_LAST_LATITUDE = "pref_map_last_latitude"
+const val PREF_MAP_LAST_LONGITUDE = "pref_map_last_longitude"
+const val PREF_MAP_LAST_ZOOM = "pref_map_last_zoom"
+const val PREF_MAP_LAST_MAP_TYPE = "pref_map_last_map_type"

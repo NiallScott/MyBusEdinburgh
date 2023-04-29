@@ -34,6 +34,7 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -46,6 +47,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
@@ -67,6 +69,7 @@ import javax.inject.Inject
  * @param isMyLocationEnabledDetector Used to detect whether the My Location feature is enabled or
  * not.
  * @param preferenceRepository A repository for storing user preferences.
+ * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
@@ -81,6 +84,7 @@ class BusStopMapViewModel @Inject constructor(
         private val routeLineRetriever: RouteLineRetriever,
         isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
         private val preferenceRepository: PreferenceRepository,
+        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModel() {
 
@@ -101,15 +105,6 @@ class BusStopMapViewModel @Inject constructor(
         get() = permissionHandler.permissionsState
         set(value) {
             permissionHandler.permissionsState = value
-        }
-
-    /**
-     * This property is used to get and set the last [UiCameraLocation].
-     */
-    var lastCameraLocation: UiCameraLocation
-        get() = mapToUiCameraLocation(preferenceRepository.lastMapCameraLocation)
-        set(value) {
-            preferenceRepository.lastMapCameraLocation = mapToLastMapCameraLocation(value)
         }
 
     private val selectedServicesFlow =
@@ -233,7 +228,7 @@ class BusStopMapViewModel @Inject constructor(
      * This [LiveData] emits whether the map zoom controls should be shown.
      */
     val isZoomControlsVisibleLiveData = preferenceRepository
-            .isMapZoomControlsVisibleFLow
+            .isMapZoomControlsVisibleFlow
             .flowOn(defaultDispatcher)
             .asLiveData(viewModelScope.coroutineContext)
 
@@ -245,6 +240,15 @@ class BusStopMapViewModel @Inject constructor(
             .map(MapType::fromValue)
             .flowOn(defaultDispatcher)
             .asLiveData(viewModelScope.coroutineContext)
+
+    /**
+     * This [LiveData] emits the last camera location.
+     */
+    val lastCameraLocationLiveData = preferenceRepository
+        .lastMapCameraLocationFlow
+        .map(this::mapToUiCameraLocation)
+        .flowOn(defaultDispatcher)
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] emits an `Int` error code when the Play Services error resolution UI should
@@ -343,7 +347,9 @@ class BusStopMapViewModel @Inject constructor(
      * @param mapType The selected map type.
      */
     fun onMapTypeSelected(mapType: MapType) {
-        preferenceRepository.mapType = mapType.value
+        applicationCoroutineScope.launch(defaultDispatcher) {
+            preferenceRepository.setMapType(mapType.value)
+        }
     }
 
     /**
@@ -387,6 +393,18 @@ class BusStopMapViewModel @Inject constructor(
      */
     fun onInfoWindowClosed() {
         savedState[STATE_SELECTED_STOP_CODE] = null
+    }
+
+    /**
+     * Update the camera location to the new value.
+     *
+     * @param cameraLocation The new camera location.
+     */
+    fun updateCameraLocation(cameraLocation: UiCameraLocation) {
+        applicationCoroutineScope.launch(defaultDispatcher) {
+            preferenceRepository.setLastMapCameraLocation(
+                mapToLastMapCameraLocation(cameraLocation))
+        }
     }
 
     /**
@@ -449,7 +467,7 @@ class BusStopMapViewModel @Inject constructor(
      * @param location The new location for the camera.
      */
     private fun moveCameraToLocation(location: UiCameraLocation) {
-        lastCameraLocation = location
+        updateCameraLocation(location)
         cameraLocation.value = location
     }
 

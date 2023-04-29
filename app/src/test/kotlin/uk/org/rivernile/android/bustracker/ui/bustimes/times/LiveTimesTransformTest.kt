@@ -135,9 +135,9 @@ class LiveTimesTransformTest {
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessAndResultingInNonEmptyListYieldsSuccess() = runTest {
-        whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
+        whenever(preferenceRepository.isLiveTimesSortByTimeFlow)
             .thenReturn(flowOf(true))
-        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow)
             .thenReturn(flowOf(true))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
@@ -158,13 +158,13 @@ class LiveTimesTransformTest {
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessCopesWithNightServicePreferenceChange() = runTest {
-        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow)
             .thenReturn(flow {
                 emit(false)
                 delay(200L)
                 emit(true)
             })
-        whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
+        whenever(preferenceRepository.isLiveTimesSortByTimeFlow)
                 .thenReturn(flowOf(false))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
@@ -193,9 +193,9 @@ class LiveTimesTransformTest {
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessCopesWithSortingPreferenceChange() = runTest {
-        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow)
             .thenReturn(flowOf(false))
-        whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
+        whenever(preferenceRepository.isLiveTimesSortByTimeFlow)
             .thenReturn(intervalFlowOf(0L, 10L, false, true))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
@@ -222,9 +222,9 @@ class LiveTimesTransformTest {
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessCopesWithExpandedServicesChange() = runTest {
-        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow)
             .thenReturn(flowOf(false))
-        whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
+        whenever(preferenceRepository.isLiveTimesSortByTimeFlow)
             .thenReturn(flowOf(false))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
@@ -248,9 +248,9 @@ class LiveTimesTransformTest {
     }
 
     private fun givenPreferencesReturnsFlowWithNominalValues() {
-        whenever(preferenceRepository.isLiveTimesSortByTimeFlow())
+        whenever(preferenceRepository.isLiveTimesSortByTimeFlow)
             .thenReturn(flowOf(false))
-        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow())
+        whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow)
             .thenReturn(flowOf(false))
     }
 }

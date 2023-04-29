@@ -152,6 +152,7 @@ dependencies {
     implementation "androidx.viewpager2:viewpager2:$viewPager2Version"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
     implementation "androidx.preference:preference-ktx:$androidXPreferenceVersion"
+    implementation "androidx.datastore:datastore-preferences:$androidXDataStoreVersion"
 
     // AndroidX and support libraries KTX
     implementation "androidx.core:core-ktx:$androidXCoreVersion"

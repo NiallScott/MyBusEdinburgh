@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,9 @@
 package uk.org.rivernile.android.bustracker.ui.turnongps
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +38,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.verify
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
@@ -42,11 +46,14 @@ import uk.org.rivernile.android.bustracker.testutils.test
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class TurnOnGpsDialogFragmentViewModelTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var preferenceRepository: PreferenceRepository
@@ -55,23 +62,28 @@ class TurnOnGpsDialogFragmentViewModelTest {
 
     @Before
     fun setUp() {
-        viewModel = TurnOnGpsDialogFragmentViewModel(preferenceRepository)
+        viewModel = TurnOnGpsDialogFragmentViewModel(
+            preferenceRepository,
+            coroutineRule.scope,
+            coroutineRule.testDispatcher)
     }
 
     @Test
-    fun onDoNotRemindCheckChangedSendsThroughValueToPreferenceRepositoryWhenFalse() {
+    fun onDoNotRemindCheckChangedSendsThroughValueToPreferenceRepositoryWhenFalse() = runTest {
         viewModel.onDoNotRemindCheckChanged(false)
+        advanceUntilIdle()
 
         verify(preferenceRepository)
-                .isGpsPromptDisabled = false
+            .setIsGpsPromptDisabled(false)
     }
 
     @Test
-    fun onDoNotRemindCheckChangedSendsThroughValueToPreferenceRepositoryWhenTrue() {
+    fun onDoNotRemindCheckChangedSendsThroughValueToPreferenceRepositoryWhenTrue() = runTest {
         viewModel.onDoNotRemindCheckChanged(true)
+        advanceUntilIdle()
 
         verify(preferenceRepository)
-                .isGpsPromptDisabled = true
+            .setIsGpsPromptDisabled(true)
     }
 
     @Test

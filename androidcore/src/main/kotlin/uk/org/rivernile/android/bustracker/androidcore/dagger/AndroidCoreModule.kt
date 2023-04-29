@@ -50,8 +50,6 @@ import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotification
 import uk.org.rivernile.android.bustracker.core.permission.LegacyNotificationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.permission.NotificationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.permission.V33NotificationPermissionChecker
-import uk.org.rivernile.android.bustracker.core.preferences.AndroidPreferenceManager
-import uk.org.rivernile.android.bustracker.core.preferences.PreferenceManager
 import javax.inject.Provider
 
 /**
@@ -110,11 +108,6 @@ class AndroidCoreModule {
         @Binds
         fun bindFeatureRepository(
             androidFeatureRepository: AndroidFeatureRepository): FeatureRepository
-
-        @Suppress("unused")
-        @Binds
-        fun bindPreferenceManager(
-            androidPreferenceManager: AndroidPreferenceManager): PreferenceManager
 
         @Suppress("unused")
         @Binds
