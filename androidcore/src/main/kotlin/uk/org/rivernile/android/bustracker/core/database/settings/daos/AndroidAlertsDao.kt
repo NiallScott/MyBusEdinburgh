@@ -33,6 +33,7 @@ import android.database.ContentObserver
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import android.os.OperationCanceledException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -176,72 +177,82 @@ internal class AndroidAlertsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                AlertsContract.ID,
-                                AlertsContract.TIME_ADDED,
-                                AlertsContract.STOP_CODE,
-                                AlertsContract.TYPE,
-                                AlertsContract.DISTANCE_FROM,
-                                AlertsContract.SERVICE_NAMES,
-                                AlertsContract.TIME_TRIGGER),
+                            AlertsContract.ID,
+                            AlertsContract.TIME_ADDED,
+                            AlertsContract.STOP_CODE,
+                            AlertsContract.TYPE,
+                            AlertsContract.DISTANCE_FROM,
+                            AlertsContract.SERVICE_NAMES,
+                            AlertsContract.TIME_TRIGGER),
                         null,
                         null,
                         "${AlertsContract.TIME_ADDED} ASC",
-                        cancellationSignal)?.use {
-                    val count = it.count
+                        cancellationSignal)
+                        ?.use {
+                        val count = it.count
 
-                    if (count > 0) {
-                        val result = ArrayList<Alert>(count)
-                        val idColumn = it.getColumnIndex(AlertsContract.ID)
-                        val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
-                        val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
-                        val typeColumn = it.getColumnIndex(AlertsContract.TYPE)
-                        val distanceFromColumn = it.getColumnIndex(AlertsContract.DISTANCE_FROM)
-                        val serviceNamesColumn = it.getColumnIndex(AlertsContract.SERVICE_NAMES)
-                        val timeTriggerColumn = it.getColumnIndex(AlertsContract.TIME_TRIGGER)
+                        if (count > 0) {
+                                val result = ArrayList<Alert>(count)
+                                val idColumn = it.getColumnIndex(AlertsContract.ID)
+                                val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
+                                val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+                                val typeColumn = it.getColumnIndex(AlertsContract.TYPE)
+                                val distanceFromColumn =
+                                    it.getColumnIndex(AlertsContract.DISTANCE_FROM)
+                                val serviceNamesColumn =
+                                    it.getColumnIndex(AlertsContract.SERVICE_NAMES)
+                                val timeTriggerColumn =
+                                    it.getColumnIndex(AlertsContract.TIME_TRIGGER)
 
-                        while (it.moveToNext()) {
-                            val id = it.getInt(idColumn)
-                            val timeAdded = it.getLong(timeAddedColumn)
-                            val stopCode = it.getString(stopCodeColumn)
-                            val type = it.getInt(typeColumn)
+                                while (it.moveToNext()) {
+                                    val id = it.getInt(idColumn)
+                                    val timeAdded = it.getLong(timeAddedColumn)
+                                    val stopCode = it.getString(stopCodeColumn)
+                                    val type = it.getInt(typeColumn)
 
-                            when (type.toByte()) {
-                                AlertsContract.ALERTS_TYPE_TIME -> {
-                                    val serviceNames = it.getString(serviceNamesColumn)
-                                            .split(',')
-                                            .map(String::trim)
-                                    val timeTrigger = it.getInt(timeTriggerColumn)
+                                    when (type.toByte()) {
+                                        AlertsContract.ALERTS_TYPE_TIME -> {
+                                            val serviceNames = it.getString(serviceNamesColumn)
+                                                .split(',')
+                                                .map(String::trim)
+                                            val timeTrigger = it.getInt(timeTriggerColumn)
 
-                                    ArrivalAlert(
-                                            id,
-                                            timeAdded,
-                                            stopCode,
-                                            serviceNames,
-                                            timeTrigger)
+                                            ArrivalAlert(
+                                                id,
+                                                timeAdded,
+                                                stopCode,
+                                                serviceNames,
+                                                timeTrigger)
+                                        }
+
+                                        AlertsContract.ALERTS_TYPE_PROXIMITY -> {
+                                            val distanceFrom = it.getInt(distanceFromColumn)
+
+                                            ProximityAlert(
+                                                id,
+                                                timeAdded,
+                                                stopCode,
+                                                distanceFrom)
+                                        }
+
+                                        else -> null
+                                    }?.let(result::add)
                                 }
-                                AlertsContract.ALERTS_TYPE_PROXIMITY -> {
-                                    val distanceFrom = it.getInt(distanceFromColumn)
 
-                                    ProximityAlert(
-                                            id,
-                                            timeAdded,
-                                            stopCode,
-                                            distanceFrom)
-                                }
-                                else -> null
-                            }?.let(result::add)
+                                result
+                            } else {
+                                null
+                            }
                         }
 
-                        result
-                    } else {
-                        null
-                    }
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }
@@ -255,17 +266,18 @@ internal class AndroidAlertsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                AlertsContract.ID,
-                                AlertsContract.TIME_ADDED,
-                                AlertsContract.STOP_CODE,
-                                AlertsContract.DISTANCE_FROM),
+                            AlertsContract.ID,
+                            AlertsContract.TIME_ADDED,
+                            AlertsContract.STOP_CODE,
+                            AlertsContract.DISTANCE_FROM),
                         "${AlertsContract.ID} = ? AND ${AlertsContract.TYPE} = ?",
                         arrayOf(
-                                id.toString(),
-                                AlertsContract.ALERTS_TYPE_PROXIMITY.toString()),
+                            id.toString(),
+                            AlertsContract.ALERTS_TYPE_PROXIMITY.toString()),
                         null,
                         cancellationSignal)
                         ?.use {
@@ -277,19 +289,22 @@ internal class AndroidAlertsDao @Inject constructor(
                                 val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
                                 val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
                                 val distanceFromColumn =
-                                        it.getColumnIndex(AlertsContract.DISTANCE_FROM)
+                                    it.getColumnIndex(AlertsContract.DISTANCE_FROM)
 
                                 ProximityAlert(
-                                        it.getInt(idColumn),
-                                        it.getLong(timeAddedColumn),
-                                        it.getString(stopCodeColumn),
-                                        it.getInt(distanceFromColumn))
+                                    it.getInt(idColumn),
+                                    it.getLong(timeAddedColumn),
+                                    it.getString(stopCodeColumn),
+                                    it.getInt(distanceFromColumn))
                             } else {
                                 null
                             }
                         }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -303,53 +318,59 @@ internal class AndroidAlertsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
-                    contract.getContentUri(),
-                    arrayOf(
-                        AlertsContract.ID,
-                        AlertsContract.TIME_ADDED,
-                        AlertsContract.STOP_CODE,
-                        AlertsContract.SERVICE_NAMES,
-                        AlertsContract.TIME_TRIGGER),
-                    "${AlertsContract.TYPE} = ?",
-                    arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
-                    null,
-                    cancellationSignal)?.use {
-                        val count = it.count
+                try {
+                    val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(
+                            AlertsContract.ID,
+                            AlertsContract.TIME_ADDED,
+                            AlertsContract.STOP_CODE,
+                            AlertsContract.SERVICE_NAMES,
+                            AlertsContract.TIME_TRIGGER),
+                        "${AlertsContract.TYPE} = ?",
+                        arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            val count = it.count
 
-                        if (count > 0) {
-                            val result = ArrayList<ArrivalAlert>(count)
-                            val idColumn = it.getColumnIndex(AlertsContract.ID)
-                            val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
-                            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
-                            val serviceNamesColumn = it.getColumnIndex(AlertsContract.SERVICE_NAMES)
-                            val timeTriggerColumn = it.getColumnIndex(AlertsContract.TIME_TRIGGER)
+                            if (count > 0) {
+                                val result = ArrayList<ArrivalAlert>(count)
+                                val idColumn = it.getColumnIndex(AlertsContract.ID)
+                                val timeAddedColumn = it.getColumnIndex(AlertsContract.TIME_ADDED)
+                                val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+                                val serviceNamesColumn =
+                                    it.getColumnIndex(AlertsContract.SERVICE_NAMES)
+                                val timeTriggerColumn =
+                                    it.getColumnIndex(AlertsContract.TIME_TRIGGER)
 
-                            while (it.moveToNext()) {
-                                val id = it.getInt(idColumn)
-                                val timeAdded = it.getLong(timeAddedColumn)
-                                val stopCode = it.getString(stopCodeColumn)
-                                val serviceNames = it.getString(serviceNamesColumn)
-                                    .split(",")
-                                    .map { name -> name.trim() }
-                                val timeTrigger = it.getInt(timeTriggerColumn)
-                                val arrivalAlert = ArrivalAlert(
-                                    id,
-                                    timeAdded,
-                                    stopCode,
-                                    serviceNames,
-                                    timeTrigger
-                                )
-                                result.add(arrivalAlert)
+                                while (it.moveToNext()) {
+                                    val id = it.getInt(idColumn)
+                                    val timeAdded = it.getLong(timeAddedColumn)
+                                    val stopCode = it.getString(stopCodeColumn)
+                                    val serviceNames = it.getString(serviceNamesColumn)
+                                        .split(",")
+                                        .map { name -> name.trim() }
+                                    val timeTrigger = it.getInt(timeTriggerColumn)
+                                    val arrivalAlert = ArrivalAlert(
+                                        id,
+                                        timeAdded,
+                                        stopCode,
+                                        serviceNames,
+                                        timeTrigger)
+                                    result.add(arrivalAlert)
+                                }
+
+                                result
+                            } else {
+                                null
                             }
-
-                            result
-                        } else {
-                            null
                         }
-                    }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -363,31 +384,35 @@ internal class AndroidAlertsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
-                    contract.getContentUri(),
-                    arrayOf(AlertsContract.STOP_CODE),
-                    "${AlertsContract.TYPE} = ?",
-                    arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
-                    null,
-                    cancellationSignal)
-                    ?.use {
-                        val count = it.count
+                try {
+                    val result = context.contentResolver.query(
+                        contract.getContentUri(),
+                        arrayOf(AlertsContract.STOP_CODE),
+                        "${AlertsContract.TYPE} = ?",
+                        arrayOf(AlertsContract.ALERTS_TYPE_TIME.toString()),
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            val count = it.count
 
-                        if (count > 0) {
-                            val result = HashSet<String>(count)
-                            val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
+                            if (count > 0) {
+                                val result = HashSet<String>(count)
+                                val stopCodeColumn = it.getColumnIndex(AlertsContract.STOP_CODE)
 
-                            while (it.moveToNext()) {
-                                result += it.getString(stopCodeColumn)
+                                while (it.moveToNext()) {
+                                    result += it.getString(stopCodeColumn)
+                                }
+
+                                result
+                            } else {
+                                null
                             }
-
-                            result
-                        } else {
-                            null
                         }
-                    }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -401,7 +426,8 @@ internal class AndroidAlertsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(AlertsContract.COUNT),
                         "${AlertsContract.TYPE} = ?",
@@ -420,7 +446,10 @@ internal class AndroidAlertsDao @Inject constructor(
                             }
                         } ?: 0
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -473,7 +502,8 @@ internal class AndroidAlertsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(AlertsContract.COUNT),
                         "${AlertsContract.TYPE} = ?",
@@ -492,7 +522,10 @@ internal class AndroidAlertsDao @Inject constructor(
                             }
                         } ?: 0
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -506,24 +539,28 @@ internal class AndroidAlertsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(AlertsContract.COUNT),
                         "${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
                         arrayOf(
-                                AlertsContract.ALERTS_TYPE_TIME.toString(),
-                                stopCode),
+                            AlertsContract.ALERTS_TYPE_TIME.toString(),
+                            stopCode),
                         null,
                         cancellationSignal)
                         ?.use {
                             // Fill the Cursor window.
                             it.count
 
-                            it.moveToFirst() && it.getInt(
-                                    it.getColumnIndex(AlertsContract.COUNT)) > 0
+                            it.moveToFirst() &&
+                                    it.getInt(it.getColumnIndexOrThrow(AlertsContract.COUNT)) > 0
                         } ?: false
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -537,24 +574,28 @@ internal class AndroidAlertsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(AlertsContract.COUNT),
                         "${AlertsContract.TYPE} = ? AND ${AlertsContract.STOP_CODE} = ?",
                         arrayOf(
-                                AlertsContract.ALERTS_TYPE_PROXIMITY.toString(),
-                                stopCode),
+                            AlertsContract.ALERTS_TYPE_PROXIMITY.toString(),
+                            stopCode),
                         null,
                         cancellationSignal)
                         ?.use {
                             // Fill the Cursor window.
                             it.count
 
-                            it.moveToFirst() && it.getInt(
-                                    it.getColumnIndex(AlertsContract.COUNT)) > 0
+                            it.moveToFirst() &&
+                                    it.getInt(it.getColumnIndexOrThrow(AlertsContract.COUNT)) > 0
                         } ?: false
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }

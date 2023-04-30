@@ -32,6 +32,7 @@ import android.graphics.Color
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import android.os.OperationCanceledException
 import androidx.annotation.VisibleForTesting
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineDispatcher
@@ -118,45 +119,50 @@ internal class AndroidServicesDao @Inject constructor(
                     it.toTypedArray()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                ServicesContract.NAME,
-                                ServicesContract.COLOUR),
+                            ServicesContract.NAME,
+                            ServicesContract.COLOUR),
                         selection,
                         selectionArgs,
                         null,
-                        cancellationSignal)?.use {
-                    // Fill the Cursor window.
-                    val count = it.count
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            val count = it.count
 
-                    if (count > 0) {
-                        val nameColumn = it.getColumnIndex(ServicesContract.NAME)
-                        val colourColumn = it.getColumnIndex(ServicesContract.COLOUR)
-                        val result = HashMap<String, Int>(count)
+                            if (count > 0) {
+                                val nameColumn = it.getColumnIndex(ServicesContract.NAME)
+                                val colourColumn = it.getColumnIndex(ServicesContract.COLOUR)
+                                val result = HashMap<String, Int>(count)
 
-                        while (it.moveToNext()) {
-                            val name = it.getString(nameColumn)
+                                while (it.moveToNext()) {
+                                    val name = it.getString(nameColumn)
 
-                            it.getString(colourColumn)?.let { c ->
-                                try {
-                                    Color.parseColor(c)
-                                } catch (e: IllegalArgumentException) {
-                                    exceptionLogger.log(e)
-                                    null
+                                    it.getString(colourColumn)?.let { c ->
+                                        try {
+                                            Color.parseColor(c)
+                                        } catch (e: IllegalArgumentException) {
+                                            exceptionLogger.log(e)
+                                            null
+                                        }
+                                    }?.let { colourInt ->
+                                        result[name] = colourInt
+                                    }
                                 }
-                            }?.let { colourInt ->
-                                result[name] = colourInt
+
+                                result.ifEmpty { null }
+                            } else {
+                                null
                             }
                         }
 
-                        result.ifEmpty { null }
-                    } else {
-                        null
-                    }
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }
@@ -174,49 +180,55 @@ internal class AndroidServicesDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                ServicesContract.NAME,
-                                ServicesContract.DESCRIPTION,
-                                ServicesContract.COLOUR),
+                            ServicesContract.NAME,
+                            ServicesContract.DESCRIPTION,
+                            ServicesContract.COLOUR),
                         "${ServicesContract.NAME} IN (" +
                                 "${generateInClausePlaceholders(services.size)})",
                         services.toTypedArray(),
                         null,
-                        cancellationSignal)?.use {
-                    val count = it.count
+                        cancellationSignal)
+                        ?.use {
+                            val count = it.count
 
-                    if (count > 0) {
-                        val nameColumn = it.getColumnIndex(ServicesContract.NAME)
-                        val descriptionColumn = it.getColumnIndex(ServicesContract.DESCRIPTION)
-                        val colourColumn = it.getColumnIndex(ServicesContract.COLOUR)
-                        val result = mutableMapOf<String, ServiceDetails>()
+                            if (count > 0) {
+                                val nameColumn = it.getColumnIndex(ServicesContract.NAME)
+                                val descriptionColumn =
+                                    it.getColumnIndex(ServicesContract.DESCRIPTION)
+                                val colourColumn = it.getColumnIndex(ServicesContract.COLOUR)
+                                val result = mutableMapOf<String, ServiceDetails>()
 
-                        while (it.moveToNext()) {
-                            val name = it.getString(nameColumn)
-                            val colour = it.getString(colourColumn)?.let { c ->
-                                try {
-                                    Color.parseColor(c)
-                                } catch (e: IllegalArgumentException) {
-                                    exceptionLogger.log(e)
-                                    null
+                                while (it.moveToNext()) {
+                                    val name = it.getString(nameColumn)
+                                    val colour = it.getString(colourColumn)?.let { c ->
+                                        try {
+                                            Color.parseColor(c)
+                                        } catch (e: IllegalArgumentException) {
+                                            exceptionLogger.log(e)
+                                            null
+                                        }
+                                    }
+
+                                    result[name] = ServiceDetails(
+                                        name,
+                                        it.getString(descriptionColumn),
+                                        colour)
                                 }
-                            }
 
-                            result[name] = ServiceDetails(
-                                    name,
-                                    it.getString(descriptionColumn),
-                                    colour)
+                                result.ifEmpty { null }
+                            } else {
+                                null
+                            }
                         }
 
-                        result.ifEmpty { null }
-                    } else {
-                        null
-                    }
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }
@@ -267,31 +279,37 @@ internal class AndroidServicesDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(ServicesContract.NAME),
                         null,
                         null,
                         SERVICE_SORT_CLAUSE,
-                        cancellationSignal)?.use {
-                    // Fill the Cursor window.
-                    val count = it.count
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            val count = it.count
 
-                    if (count > 0) {
-                        val result = ArrayList<String>(count)
-                        val serviceNameColumn = it.getColumnIndexOrThrow(ServicesContract.NAME)
+                            if (count > 0) {
+                                val result = ArrayList<String>(count)
+                                val serviceNameColumn =
+                                    it.getColumnIndexOrThrow(ServicesContract.NAME)
 
-                        while (it.moveToNext()) {
-                            result.add(it.getString(serviceNameColumn))
+                                while (it.moveToNext()) {
+                                    result.add(it.getString(serviceNameColumn))
+                                }
+
+                                result
+                            } else {
+                                null
+                            }
                         }
 
-                        result
-                    } else {
-                        null
-                    }
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }
