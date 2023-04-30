@@ -148,7 +148,6 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appCompatVersion"
     implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
-    implementation "androidx.cardview:cardview:$cardViewVersion"
     implementation "androidx.viewpager2:viewpager2:$viewPager2Version"
     implementation "androidx.constraintlayout:constraintlayout:$constraintLayoutVersion"
     implementation "androidx.preference:preference-ktx:$androidXPreferenceVersion"
