@@ -63,27 +63,31 @@ internal class AndroidFavouritesDao @Inject constructor(
     private val listeners = mutableListOf<FavouritesDao.OnFavouritesChangedListener>()
     private val observer = Observer()
 
-    @Synchronized
     override fun addOnFavouritesChangedListener(
             listener: FavouritesDao.OnFavouritesChangedListener) {
-        listeners.apply {
-            add(listener)
+        synchronized(listeners) {
+            listeners.apply {
+                add(listener)
 
-            if (size == 1) {
-                context.contentResolver.registerContentObserver(contract.getContentUri(), true,
+                if (size == 1) {
+                    context.contentResolver.registerContentObserver(
+                        contract.getContentUri(),
+                        true,
                         observer)
+                }
             }
         }
     }
 
-    @Synchronized
     override fun removeOnFavouritesChangedListener(
             listener: FavouritesDao.OnFavouritesChangedListener) {
-        listeners.apply {
-            remove(listener)
+        synchronized(listeners) {
+            listeners.apply {
+                remove(listener)
 
-            if (isEmpty()) {
-                context.contentResolver.unregisterContentObserver(observer)
+                if (isEmpty()) {
+                    context.contentResolver.unregisterContentObserver(observer)
+                }
             }
         }
     }
@@ -283,8 +287,10 @@ internal class AndroidFavouritesDao @Inject constructor(
      * For all of the currently registers listeners, dispatch a favourite change to them.
      */
     private fun dispatchOnFavouritesChangedListeners() {
-        listeners.forEach { listener ->
-            listener.onFavouritesChanged()
+        synchronized(listeners) {
+            listeners.forEach { listener ->
+                listener.onFavouritesChanged()
+            }
         }
     }
 

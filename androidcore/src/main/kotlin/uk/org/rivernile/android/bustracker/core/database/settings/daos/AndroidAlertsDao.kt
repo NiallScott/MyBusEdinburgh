@@ -63,25 +63,29 @@ internal class AndroidAlertsDao @Inject constructor(
     private val listeners = mutableListOf<AlertsDao.OnAlertsChangedListener>()
     private val observer = Observer()
 
-    @Synchronized
     override fun addOnAlertsChangedListener(listener: AlertsDao.OnAlertsChangedListener) {
-        listeners.apply {
-            add(listener)
+        synchronized(listeners) {
+            listeners.apply {
+                add(listener)
 
-            if (size == 1) {
-                context.contentResolver.registerContentObserver(contract.getContentUri(), true,
+                if (size == 1) {
+                    context.contentResolver.registerContentObserver(
+                        contract.getContentUri(),
+                        true,
                         observer)
+                }
             }
         }
     }
 
-    @Synchronized
     override fun removeOnAlertsChangedListener(listener: AlertsDao.OnAlertsChangedListener) {
-        listeners.apply {
-            remove(listener)
+        synchronized(listeners) {
+            listeners.apply {
+                remove(listener)
 
-            if (isEmpty()) {
-                context.contentResolver.unregisterContentObserver(observer)
+                if (isEmpty()) {
+                    context.contentResolver.unregisterContentObserver(observer)
+                }
             }
         }
     }
@@ -604,8 +608,10 @@ internal class AndroidAlertsDao @Inject constructor(
      * For all of the currently registers listeners, dispatch an alert change to them.
      */
     private fun dispatchOnAlertsChangedListeners() {
-        listeners.forEach { listener ->
-            listener.onAlertsChanged()
+        synchronized(listeners) {
+            listeners.forEach { listener ->
+                listener.onAlertsChanged()
+            }
         }
     }
 
