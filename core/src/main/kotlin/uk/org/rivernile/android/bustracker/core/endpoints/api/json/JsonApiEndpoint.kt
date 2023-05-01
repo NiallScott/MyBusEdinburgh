@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
+import kotlinx.serialization.SerializationException
 import okio.IOException
 import uk.org.rivernile.android.bustracker.core.di.ForApiSchemaName
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
@@ -69,6 +70,9 @@ internal class JsonApiEndpoint @Inject constructor(
         } catch (e: IOException) {
             exceptionLogger.log(e)
             DatabaseVersionResponse.Error.Io(e)
+        } catch (e: SerializationException) {
+            exceptionLogger.log(e)
+            DatabaseVersionResponse.Error.ServerError
         }
     }
 

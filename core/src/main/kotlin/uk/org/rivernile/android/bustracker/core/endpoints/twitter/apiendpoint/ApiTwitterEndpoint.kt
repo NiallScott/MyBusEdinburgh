@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
+import kotlinx.serialization.SerializationException
 import okio.IOException
 import uk.org.rivernile.android.bustracker.core.di.ForApiAppName
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiKeyGenerator
@@ -75,6 +76,9 @@ internal class ApiTwitterEndpoint @Inject constructor(
             } catch (e: IOException) {
                 exceptionLogger.log(e)
                 LatestTweetsResponse.Error.Io(e)
+            } catch (e: SerializationException) {
+                exceptionLogger.log(e)
+                LatestTweetsResponse.Error.UnrecognisedServerError
             }
         } else {
             LatestTweetsResponse.Error.NoConnectivity
