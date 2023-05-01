@@ -26,17 +26,19 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
-import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.Alert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ArrivalAlertEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ProximityAlertEntity
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -44,104 +46,18 @@ import javax.inject.Singleton
 /**
  * This repository is used to access alerts data.
  *
- * @param alertManager The [AlertManager] implementation.
+ * @param arrivalAlertTaskLauncher Used to launch the arrival alert checker task.
+ * @param proximityAlertTaskLauncher Used to launch the proximity alert checker task.
  * @param alertsDao The DAO to access the alerts data store.
  * @param timeUtils Used to access timestamp data.
  * @author Niall Scott
  */
 @Singleton
 class AlertsRepository @Inject internal constructor(
-        private val alertManager: AlertManager,
-        private val alertsDao: AlertsDao,
-        private val timeUtils: TimeUtils) {
-
-    /**
-     * Get a [Flow] which returns whether the given `stopCode` has an arrival alert set or not, and
-     * will emit further items when the status changes.
-     *
-     * @param stopCode The `stopCode` to watch.
-     * @return The [Flow] which emits the arrival alert status of the given `stopCode`.
-     */
-    fun hasArrivalAlertFlow(stopCode: String): Flow<Boolean> = callbackFlow {
-        val listener = object : AlertsDao.OnAlertsChangedListener {
-            override fun onAlertsChanged() {
-                launch {
-                    getAndSendHasArrivalAlertSet(stopCode)
-                }
-            }
-        }
-
-        alertsDao.addOnAlertsChangedListener(listener)
-        getAndSendHasArrivalAlertSet(stopCode)
-
-        awaitClose {
-            alertsDao.removeOnAlertsChangedListener(listener)
-        }
-    }
-
-    /**
-     * Get a [Flow] which returns whether the given `stopCode` has a proximity alert set or not, and
-     * will emit further items when the status changes.
-     *
-     * @param stopCode The `stopCode` to watch.
-     * @return The [Flow] which emits the proximity alert status of the given `stopCode`.
-     */
-    fun hasProximityAlertFlow(stopCode: String): Flow<Boolean> = callbackFlow {
-        val listener = object : AlertsDao.OnAlertsChangedListener {
-            override fun onAlertsChanged() {
-                launch {
-                    getAndSendHasProximityAlertSet(stopCode)
-                }
-            }
-        }
-
-        alertsDao.addOnAlertsChangedListener(listener)
-        getAndSendHasProximityAlertSet(stopCode)
-
-        awaitClose {
-            alertsDao.removeOnAlertsChangedListener(listener)
-        }
-    }
-
-    /**
-     * A [Flow] which emits the number of arrival alerts.
-     */
-    val arrivalAlertCountFlow get() = callbackFlow {
-        val listener = object : AlertsDao.OnAlertsChangedListener {
-            override fun onAlertsChanged() {
-                launch {
-                    getAndSendArrivalAlertCount()
-                }
-            }
-        }
-
-        alertsDao.addOnAlertsChangedListener(listener)
-        getAndSendArrivalAlertCount()
-
-        awaitClose {
-            alertsDao.removeOnAlertsChangedListener(listener)
-        }
-    }
-
-    /**
-     * A [Flow] which emits all [ProximityAlert]s.
-     */
-    val allProximityAlertsFlow get() = callbackFlow {
-        val listener = object : AlertsDao.OnAlertsChangedListener {
-            override fun onAlertsChanged() {
-                launch {
-                    getAndSendAllProximityAlerts()
-                }
-            }
-        }
-
-        alertsDao.addOnAlertsChangedListener(listener)
-        getAndSendAllProximityAlerts()
-
-        awaitClose {
-            alertsDao.removeOnAlertsChangedListener(listener)
-        }
-    }
+    private val arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher,
+    private val proximityAlertTaskLauncher: ProximityAlertTaskLauncher,
+    private val alertsDao: AlertsDao,
+    private val timeUtils: TimeUtils) {
 
     /**
      * Add a new arrival alert.
@@ -149,13 +65,14 @@ class AlertsRepository @Inject internal constructor(
      * @param request The arrival alert to add.
      */
     suspend fun addArrivalAlert(request: ArrivalAlertRequest) {
-        val alert = ArrivalAlert(
-                0,
-                timeUtils.currentTimeMills,
-                request.stopCode,
-                request.serviceNames,
-                request.timeTrigger)
-        alertManager.addArrivalAlert(alert)
+        val alert = ArrivalAlertEntity(
+            0,
+            timeUtils.currentTimeMills,
+            request.stopCode,
+            request.serviceNames,
+            request.timeTrigger)
+        alertsDao.addArrivalAlert(alert)
+        arrivalAlertTaskLauncher.launchArrivalAlertTask()
     }
 
     /**
@@ -164,12 +81,13 @@ class AlertsRepository @Inject internal constructor(
      * @param request The proximity alert to add.
      */
     suspend fun addProximityAlert(request: ProximityAlertRequest) {
-        val alert = ProximityAlert(
-                0,
-                timeUtils.currentTimeMills,
-                request.stopCode,
-                request.distanceFrom)
-        alertManager.addProximityAlert(alert)
+        val alert = ProximityAlertEntity(
+            0,
+            timeUtils.currentTimeMills,
+            request.stopCode,
+            request.distanceFrom)
+        alertsDao.addProximityAlert(alert)
+        proximityAlertTaskLauncher.launchProximityAlertTask()
     }
 
     /**
@@ -178,7 +96,23 @@ class AlertsRepository @Inject internal constructor(
      * @param stopCode The stop code to remove arrival alerts for.
      */
     suspend fun removeArrivalAlert(stopCode: String) {
-        alertManager.removeArrivalAlert(stopCode)
+        alertsDao.removeArrivalAlert(stopCode)
+    }
+
+    /**
+     * Remove any set arrival alerts with the given ID.
+     *
+     * @param id ID of the alert to remove.
+     */
+    suspend fun removeArrivalAlert(id: Int) {
+        alertsDao.removeArrivalAlert(id)
+    }
+
+    /**
+     * Remove all arrival alerts.
+     */
+    suspend fun removeAllArrivalAlerts() {
+        alertsDao.removeAllArrivalAlerts()
     }
 
     /**
@@ -187,69 +121,163 @@ class AlertsRepository @Inject internal constructor(
      * @param stopCode The stop code to remove proximity alerts for.
      */
     suspend fun removeProximityAlert(stopCode: String) {
-        alertManager.removeProximityAlert(stopCode)
+        alertsDao.removeProximityAlert(stopCode)
     }
+
+    /**
+     * Remove any set proximity alerts with the given ID.
+     *
+     * @param id ID of the alert to remove.
+     */
+    suspend fun removeProximityAlert(id: Int) {
+        alertsDao.removeProximityAlert(id)
+    }
+
+    /**
+     * Remove all proximity alerts.
+     */
+    suspend fun removeAllProximityAlerts() {
+        alertsDao.removeAllProximityAlerts()
+    }
+
+    /**
+     * Get all current [ArrivalAlert]s.
+     *
+     * @return All current [ArrivalAlert]s.
+     */
+    suspend fun getAllArrivalAlerts(): List<ArrivalAlert>? =
+        alertsDao.getAllArrivalAlerts()
+            ?.map(this::mapToArrivalAlert)
+
+    /**
+     * Get the stop codes of all active arrival alerts.
+     *
+     * @return The stop codes of all active arrival alerts.
+     */
+    suspend fun getAllArrivalAlertStopCodes(): Set<String>? =
+        alertsDao.getAllArrivalAlertStopCodes()?.toSet()
+
+    /**
+     * Get the [ProximityAlert] with the given ID. If this alert does not not exist, `null` will be
+     * returned.
+     *
+     * @param id The ID of the proximity alert.
+     * @return The [ProximityAlert] with the given ID. If this alert does not not exist, `null`
+     * will be returned.
+     */
+    suspend fun getProximityAlert(id: Int): ProximityAlert? =
+        alertsDao.getProximityAlert(id)?.let(this::mapToProximityAlert)
+
+    /**
+     * Get a [Flow] which emits whether the given `stopCode` has an arrival alert set or not, and
+     * will emit further items when the status changes.
+     *
+     * @param stopCode The `stopCode` to watch.
+     * @return The [Flow] which emits the arrival alert status of the given `stopCode`.
+     */
+    fun hasArrivalAlertFlow(stopCode: String): Flow<Boolean> =
+        alertsDao
+            .getHasArrivalAlertFlow(stopCode)
+            .distinctUntilChanged()
+
+    /**
+     * Get a [Flow] which emits whether the given `stopCode` has a proximity alert set or not, and
+     * will emit further items when the status changes.
+     *
+     * @param stopCode The `stopCode` to watch.
+     * @return The [Flow] which emits the proximity alert status of the given `stopCode`.
+     */
+    fun hasProximityAlertFlow(stopCode: String): Flow<Boolean> =
+        alertsDao
+            .getHasProximityAlertFlow(stopCode)
+            .distinctUntilChanged()
+
+    /**
+     * A [Flow] which emits the number of arrival alerts.
+     */
+    val arrivalAlertCountFlow: Flow<Int> get() =
+        alertsDao
+            .arrivalAlertCountFlow
+            .distinctUntilChanged()
+
+    /**
+     * A [Flow] which emits all [ProximityAlert]s.
+     */
+    val allProximityAlertsFlow: Flow<List<ProximityAlert>?> get() =
+        alertsDao
+            .allProximityAlertsFlow
+            .distinctUntilChanged()
+            .map {
+                it?.map(this::mapToProximityAlert)
+            }
 
     /**
      * Get a [Flow] which emits a [List] of all the currently set user alerts.
      *
      * @return A [Flow] which emits a [List] of all the currently set user alerts.
      */
-    fun getAllAlertsFlow(): Flow<List<Alert>?> = callbackFlow {
-        val listener = object : AlertsDao.OnAlertsChangedListener {
-            override fun onAlertsChanged() {
-                launch {
-                    getAndSendAllAlerts()
-                }
+    val allAlertsFlow: Flow<List<Alert>?> get() =
+        alertsDao
+            .allAlertsFlow
+            .distinctUntilChanged()
+            .map {
+                it?.map(this::mapToAlert)
+            }
+
+    /**
+     * Ensure that tasks required to fulfil alerts are running.
+     */
+    suspend fun ensureTasksRunningIfAlertsExists() = supervisorScope {
+        launch {
+            if (alertsDao.getArrivalAlertCount() > 0) {
+                arrivalAlertTaskLauncher.launchArrivalAlertTask()
             }
         }
 
-        alertsDao.addOnAlertsChangedListener(listener)
-        getAndSendAllAlerts()
-
-        awaitClose {
-            alertsDao.removeOnAlertsChangedListener(listener)
+        launch {
+            if (alertsDao.getProximityAlertCount() > 0) {
+                proximityAlertTaskLauncher.launchProximityAlertTask()
+            }
         }
     }
 
     /**
-     * A suspended function which obtains the arrival alert status of the given `stopCode` and then
-     * sends it to the channel.
+     * Map a given [entity] to an [Alert].
      *
-     * @param stopCode The `stopCode` to obtain the arrival alert status for.
+     * @param entity The entity to map.
+     * @return The [entity] mapped to an [AlertEntity].
      */
-    private suspend fun ProducerScope<Boolean>.getAndSendHasArrivalAlertSet(stopCode: String) {
-        send(alertsDao.hasArrivalAlert(stopCode))
+    private fun mapToAlert(entity: AlertEntity): Alert {
+        return when (entity) {
+            is ArrivalAlertEntity -> mapToArrivalAlert(entity)
+            is ProximityAlertEntity -> mapToProximityAlert(entity)
+        }
     }
 
     /**
-     * A suspended function which obtains the proximity alert status of the given `stopCode` and
-     * then sends it to the channel.
+     * Map a given [entity] to an [ArrivalAlert].
      *
-     * @param stopCode The `stopCode` to obtain the proximity alert status for.
+     * @param entity The entity to map.
+     * @return The [entity] mapped to an [ArrivalAlertEntity].
      */
-    private suspend fun ProducerScope<Boolean>.getAndSendHasProximityAlertSet(stopCode: String) {
-        send(alertsDao.hasProximityAlert(stopCode))
-    }
+    private fun mapToArrivalAlert(entity: ArrivalAlertEntity) =
+        ArrivalAlert(
+            entity.id,
+            entity.timeAdded,
+            entity.stopCode,
+            entity.serviceNames,
+            entity.timeTrigger)
 
     /**
-     * A suspended function which obtains the arrival alert count and sends it to the channel.
+     * Map a given [entity] to a [ProximityAlert].
+     *
+     * @param entity The entity to map.
+     * @return The [entity] mapped to a [ProximityAlert].
      */
-    private suspend fun ProducerScope<Int>.getAndSendArrivalAlertCount() {
-        send(alertsDao.getArrivalAlertCount())
-    }
-
-    /**
-     * A suspended function which obtains all proximity alerts and sends it to the channel.
-     */
-    private suspend fun ProducerScope<List<ProximityAlert>?>.getAndSendAllProximityAlerts() {
-        send(alertsDao.getAllProximityAlerts())
-    }
-
-    /**
-     * A suspended function which obtains all set user alerts.
-     */
-    private suspend fun ProducerScope<List<Alert>?>.getAndSendAllAlerts() {
-        send(alertsDao.getAllAlerts())
-    }
+    private fun mapToProximityAlert(entity: ProximityAlertEntity) =
+        ProximityAlert(
+            entity.id,
+            entity.timeAdded,
+            entity.stopCode,
+            entity.distanceFrom)
 }

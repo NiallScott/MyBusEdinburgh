@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,11 +38,11 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -72,7 +72,7 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsFlowEmitsEmptyListWhenUpstreamEmitsNull() = runTest {
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(null))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
@@ -84,7 +84,7 @@ class AlertsRetrieverTest {
 
     @Test
     fun allAlertsFlowEmitsEmptyListWhenUpstreamEmitsEmptyList() = runTest {
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(emptyList()))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
@@ -97,7 +97,7 @@ class AlertsRetrieverTest {
     @Test
     fun allAlertsFlowWithArrivalAlertAndNullStopDetailsEmitsAlertWithoutStopDetails() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(flowOf(null))
@@ -114,7 +114,7 @@ class AlertsRetrieverTest {
     @Test
     fun allAlertsFlowWithArrivalAlertAndEmptyStopDetailsEmitsAlertWithoutStopDetails() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(flowOf(emptyMap()))
@@ -139,7 +139,7 @@ class AlertsRetrieverTest {
                 1.2,
                 3.4,
                 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(flowOf(mapOf("123456" to stopDetails)))
@@ -165,7 +165,7 @@ class AlertsRetrieverTest {
                 1.2,
                 3.4,
                 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert1), listOf(arrivalAlert2)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(flowOf(mapOf("123456" to stopDetails)))
@@ -201,7 +201,7 @@ class AlertsRetrieverTest {
                 1.2,
                 3.4,
                 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(
@@ -221,7 +221,7 @@ class AlertsRetrieverTest {
     @Test
     fun allAlertsFlowWithProximityAlertAndNullStopDetailsEmitsAlertWithoutStopDetails() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(flowOf(null))
@@ -238,7 +238,7 @@ class AlertsRetrieverTest {
     @Test
     fun allAlertsFlowWithProximityAlertAndEmptyStopDetailsEmitsAlertWithoutStopDetails() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(flowOf(emptyMap()))
@@ -263,7 +263,7 @@ class AlertsRetrieverTest {
                 1.2,
                 3.4,
                 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(flowOf(mapOf("123456" to stopDetails)))
@@ -289,7 +289,7 @@ class AlertsRetrieverTest {
                 1.2,
                 3.4,
                 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(proximityAlert1), listOf(proximityAlert2)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(flowOf(mapOf("123456" to stopDetails)))
@@ -325,7 +325,7 @@ class AlertsRetrieverTest {
                 1.2,
                 3.4,
                 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(
@@ -362,7 +362,7 @@ class AlertsRetrieverTest {
                 1.2,
                 3.4,
                 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert, proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
                 .thenReturn(
@@ -409,7 +409,7 @@ class AlertsRetrieverTest {
                 1.2,
                 3.4,
                 5)
-        whenever(alertsRepository.getAllAlertsFlow())
+        whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert, proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456", "987654")))
                 .thenReturn(

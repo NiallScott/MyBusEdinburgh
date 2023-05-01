@@ -30,7 +30,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
-import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseWorkScheduler
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
@@ -48,7 +48,7 @@ import javax.inject.Inject
  * database.
  * @param cleanUpTask Implementation to perform clean up of app data - usually to remove data from
  * old installations of the app.
- * @param alertManager The [AlertManager] - for controlling user set alerts.
+ * @param alertsRepository The [AlertsRepository] - for controlling user set alerts.
  * @param applicationCoroutineScope The application [CoroutineScope].
  * @param defaultDispatcher The default dispatcher to dispatch coroutines on.
  * @author Niall Scott
@@ -57,7 +57,7 @@ class StartUpTask @Inject internal constructor(
         private val appNotificationChannels: AppNotificationChannels,
         private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseWorkScheduler,
         private val cleanUpTask: CleanUpTask?,
-        private val alertManager: AlertManager,
+        private val alertsRepository: AlertsRepository,
         @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
         @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
@@ -102,6 +102,6 @@ class StartUpTask @Inject internal constructor(
      * @return The deferred task.
      */
     private fun CoroutineScope.launchEnsureAlertTasksRunningAsync() = launch {
-        alertManager.ensureTasksRunningIfAlertsExists()
+        alertsRepository.ensureTasksRunningIfAlertsExists()
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import javax.inject.Inject
@@ -53,8 +53,8 @@ class FavouriteStopsRetriever @Inject constructor(
      * This produces a [Flow] which emits [List]s of [UiFavouriteStop]s.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val favouriteStopsFlow: Flow<List<UiFavouriteStop>?> get() =
-            favouritesRepository.favouriteStopsFlow
+    val allFavouriteStopsFlow: Flow<List<UiFavouriteStop>?> get() =
+            favouritesRepository.allFavouriteStopsFlow
                     .flatMapLatest(this::loadServices)
                     .onStart { emit(null) }
 

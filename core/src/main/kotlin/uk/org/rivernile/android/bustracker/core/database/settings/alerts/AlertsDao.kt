@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,47 +24,30 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.settings.daos
+package uk.org.rivernile.android.bustracker.core.database.settings.alerts
 
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.Alert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import kotlinx.coroutines.flow.Flow
 
 /**
- * This DAO is used to access alerts created in the app.
+ * This DAO is used to access alerts.
  *
  * @author Niall Scott
  */
 interface AlertsDao {
 
     /**
-     * Add a new [OnAlertsChangedListener] to be informed when the alerts data has been changed.
-     *
-     * @param listener The listener to add.
-     */
-    fun addOnAlertsChangedListener(listener: OnAlertsChangedListener)
-
-    /**
-     * Remove a [OnAlertsChangedListener] so it is no longer informed that alerts have been changed.
-     *
-     * @param listener The listener to remove.
-     */
-    fun removeOnAlertsChangedListener(listener: OnAlertsChangedListener)
-
-    /**
-     * Add a new arrival alert to the database.
+     * Add a new arrival alert.
      *
      * @param arrivalAlert The alert to add.
-     * @return The ID of the new added arrival alert.
      */
-    suspend fun addArrivalAlert(arrivalAlert: ArrivalAlert): Long
+    suspend fun addArrivalAlert(arrivalAlert: ArrivalAlertEntity)
 
     /**
-     * Add a new proximity alert to the database.
+     * Add a new proximity alert.
      *
      * @param proximityAlert The alert to add.
      */
-    suspend fun addProximityAlert(proximityAlert: ProximityAlert)
+    suspend fun addProximityAlert(proximityAlert: ProximityAlertEntity)
 
     /**
      * Remove an arrival alert.
@@ -105,33 +88,47 @@ interface AlertsDao {
     suspend fun removeAllProximityAlerts()
 
     /**
-     * Get all user-set active alerts.
+     * Get a [Flow] which emits whether there is an arrival alert set for the given [stopCode].
      *
-     * @return All user set active alerts.
+     * @param stopCode The stop code to check for active arrival alerts.
+     * @return A [Flow] which emits whether there is an arrival alert set for the given [stopCode].
      */
-    suspend fun getAllAlerts(): List<Alert>?
+    fun getHasArrivalAlertFlow(stopCode: String): Flow<Boolean>
+
+    /**
+     * Get a [Flow] which emits whether there is a proximity alert set for the given [stopCode].
+     *
+     * @param stopCode The stop code to check for active proximity alerts.
+     * @return A [Flow] which emits whether there is a proximity alert set for the given [stopCode].
+     */
+    fun getHasProximityAlertFlow(stopCode: String): Flow<Boolean>
+
+    /**
+     * A [Flow] which emits all active alerts. This will be `null` when no alerts are set.
+     */
+    val allAlertsFlow: Flow<List<AlertEntity>?>
 
     /**
      * Get an active proximity alert.
      *
      * @param id The ID of the proximity alert.
-     * @return The [ProximityAlert], or `null` if it doesn't exist.
+     * @return The [ProximityAlertEntity], or `null` if it doesn't exist.
      */
-    suspend fun getProximityAlert(id: Int): ProximityAlert?
+    suspend fun getProximityAlert(id: Int): ProximityAlertEntity?
 
     /**
      * Get all the arrival alerts.
      *
      * @return All the arrival alerts.
      */
-    suspend fun getAllArrivalAlerts(): List<ArrivalAlert>?
+    suspend fun getAllArrivalAlerts(): List<ArrivalAlertEntity>?
 
     /**
      * Get all the stop codes that have arrival alerts against them.
      *
      * @return A [Set] of stop codes with arrival alerts.
      */
-    suspend fun getAllArrivalAlertStopCodes(): Set<String>?
+    suspend fun getAllArrivalAlertStopCodes(): List<String>?
 
     /**
      * Get the number of current arrival alerts.
@@ -141,11 +138,14 @@ interface AlertsDao {
     suspend fun getArrivalAlertCount(): Int
 
     /**
-     * Get all the proximity alerts.
-     *
-     * @return All the proximity alerts.
+     * A [Flow] which emits the number of active arrival alerts.
      */
-    fun getAllProximityAlerts(): List<ProximityAlert>?
+    val arrivalAlertCountFlow: Flow<Int>
+
+    /**
+     * A [Flow] which emits all active proximity alerts.
+     */
+    val allProximityAlertsFlow: Flow<List<ProximityAlertEntity>?>
 
     /**
      * Get the number of current proximity alerts.
@@ -153,32 +153,4 @@ interface AlertsDao {
      * @return The number of current proximity alerts.
      */
     suspend fun getProximityAlertCount(): Int
-
-    /**
-     * Does the given `stopCode` have an arrival alert set?
-     *
-     * @param stopCode The stop code to check.
-     * @return `true` if the given `stopCode` has an arrival alert set, otherwise `false`.
-     */
-    suspend fun hasArrivalAlert(stopCode: String): Boolean
-
-    /**
-     * Does the given `stopCode` have a proximity alert set?
-     *
-     * @param stopCode The stop code to check.
-     * @return `true` if the given `stopCode` has a proximity alert set, otherwise `false`.
-     */
-    suspend fun hasProximityAlert(stopCode: String): Boolean
-
-    /**
-     * This interface should be implemented to listen for changes to alerts. Call
-     * [addOnAlertsChangedListener] to register the listener.
-     */
-    interface OnAlertsChangedListener {
-
-        /**
-         * This is called when the alerts have changed.
-         */
-        fun onAlertsChanged()
-    }
 }

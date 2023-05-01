@@ -24,14 +24,14 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.settings.entities
+package uk.org.rivernile.android.bustracker.core.database.settings.alerts
 
 /**
  * This is the base type for user alerts.
  *
  * @author Niall Scott
  */
-sealed interface Alert {
+sealed interface AlertEntity {
 
     /**
      * The ID of this alert.
@@ -60,12 +60,12 @@ sealed interface Alert {
  * named stop at this value or less.
  * @author Niall Scott
  */
-data class ArrivalAlert(
-        override val id: Int,
-        override val timeAdded: Long,
-        override val stopCode: String,
-        val serviceNames: List<String>,
-        val timeTrigger: Int) : Alert
+data class ArrivalAlertEntity(
+    override val id: Int,
+    override val timeAdded: Long,
+    override val stopCode: String,
+    val serviceNames: List<String>,
+    val timeTrigger: Int) : AlertEntity
 
 /**
  * This data class describes a proximity alert that is persisted in the settings database.
@@ -77,8 +77,8 @@ data class ArrivalAlert(
  * is the radius of the proximity area.
  * @author Niall Scott
  */
-data class ProximityAlert(
-        override val id: Int,
-        override val timeAdded: Long,
-        override val stopCode: String,
-        val distanceFrom: Int) : Alert
+data class ProximityAlertEntity(
+    override val id: Int,
+    override val timeAdded: Long,
+    override val stopCode: String,
+    val distanceFrom: Int) : AlertEntity

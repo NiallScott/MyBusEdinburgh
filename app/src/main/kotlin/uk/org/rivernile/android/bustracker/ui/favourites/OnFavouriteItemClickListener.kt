@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.favourites
 
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 
 /**
  * Classes which wish to be informed when favourite click events happen should implement this

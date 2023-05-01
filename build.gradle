@@ -41,8 +41,8 @@ buildscript {
         kotlinCoroutinesVersion = '1.6.4'
 
         // Dagger/Hilt
-        hiltVersion = '2.46'
-        daggerVersion = '2.46'
+        hiltVersion = '2.45'
+        daggerVersion = '2.45'
 
         // AndroidX
         androidXCoreVersion = '1.10.0'
@@ -55,6 +55,7 @@ buildscript {
         androidXPreferenceVersion = '1.2.0'
         androidXDataStoreVersion = '1.0.0'
         constraintLayoutVersion = '2.1.4'
+        roomVersion = '2.5.1'
         workManagerVersion = '2.8.1'
 
         // Material Design

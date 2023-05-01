@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,7 +33,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
@@ -48,7 +48,7 @@ import javax.inject.Inject
 class RemoveArrivalAlertBroadcastReceiver : BroadcastReceiver() {
 
     @Inject
-    lateinit var alertManager: AlertManager
+    lateinit var alertsRepository: AlertsRepository
     @Inject
     @ForApplicationCoroutineScope
     lateinit var applicationCoroutineScope: CoroutineScope
@@ -58,7 +58,7 @@ class RemoveArrivalAlertBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         applicationCoroutineScope.launch(defaultDispatcher) {
-            alertManager.removeAllArrivalAlerts()
+            alertsRepository.removeAllArrivalAlerts()
         }
     }
 }

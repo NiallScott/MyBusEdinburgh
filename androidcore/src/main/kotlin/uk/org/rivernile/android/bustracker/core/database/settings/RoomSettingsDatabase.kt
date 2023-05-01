@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,17 +24,36 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.settings.entities
+package uk.org.rivernile.android.bustracker.core.database.settings
+
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.RoomAlertEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.RoomAlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.RoomFavouriteStopEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.RoomFavouriteStopsDao
 
 /**
- * This data class describes a user-saved favourite stop persisted in the settings database.
+ * This is the Room implementation of the Settings Database.
  *
- * @property id The ID of this alert.
- * @property stopCode The stop code.
- * @property stopName The name given to this stop by the user.
  * @author Niall Scott
  */
-data class FavouriteStop(
-        val id: Long = 0L,
-        val stopCode: String,
-        val stopName: String)
+@Database(
+    version = 4,
+    entities = [
+        RoomAlertEntity::class,
+        RoomFavouriteStopEntity::class
+    ]
+)
+internal abstract class RoomSettingsDatabase : RoomDatabase() {
+
+    /**
+     * The [RoomFavouriteStopsDao].
+     */
+    abstract val favouriteStopsDao: RoomFavouriteStopsDao
+
+    /**
+     * The [RoomAlertsDao].
+     */
+    abstract val alertsDao: RoomAlertsDao
+}

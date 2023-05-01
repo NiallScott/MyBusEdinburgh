@@ -181,12 +181,6 @@
             android:label="@string/about_title"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
 
-        <!-- SettingsProvider, to provide the user's saved favourite stops and active alerts. -->
-        <provider
-            android:name="uk.org.rivernile.android.bustracker.database.settings.SettingsProvider"
-            android:authorities="${applicationId}.provider.settings"
-            android:exported="false" />
-
         <!-- BusStopProvider, to provide bus stop data. -->
         <provider
             android:name="uk.org.rivernile.android.bustracker.database.busstop.BusStopProvider"

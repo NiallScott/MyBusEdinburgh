@@ -27,8 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
@@ -37,10 +37,10 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import javax.inject.Inject
 
 /**
- * This class performs the task of obtaining all known [ArrivalAlert]s from the [AlertsDao] and then
- * obtaining live departure times for each stop. Each successfully loaded stop is then checked to
- * see if any matching services are within the time trigger. Each matching stop will generate a
- * notification with [AlertNotificationDispatcher].
+ * This class performs the task of obtaining all known [ArrivalAlert]s from the [AlertsRepository]
+ * and then obtaining live departure times for each stop. Each successfully loaded stop is then
+ * checked to see if any matching services are within the time trigger. Each matching stop will
+ * generate a notification with [AlertNotificationDispatcher].
  *
  * This class can handle multiple current [ArrivalAlert]s.
  *
@@ -48,14 +48,14 @@ import javax.inject.Inject
  * ignored. This is because there is no appropriate error handler, and we'd be expected to be called
  * again in a short while anyway.
  *
- * @param alertsDao A reference to the [AlertsDao].
+ * @param alertsRepository The [AlertsRepository].
  * @param trackerEndpoint A reference to the [TrackerEndpoint].
  * @param alertNotificationDispatcher An implementation used to dispatch notifications of arrival
  * alerts.
  * @author Niall Scott
  */
 internal class CheckTimesTask @Inject constructor(
-    private val alertsDao: AlertsDao,
+    private val alertsRepository: AlertsRepository,
     private val trackerEndpoint: TrackerEndpoint,
     private val alertNotificationDispatcher: AlertNotificationDispatcher) {
 
@@ -64,7 +64,7 @@ internal class CheckTimesTask @Inject constructor(
      * match the constraints of each [ArrivalAlert].
      */
     suspend fun checkTimes() {
-        alertsDao.getAllArrivalAlertStopCodes()
+        alertsRepository.getAllArrivalAlertStopCodes()
             ?.takeIf(Set<String>::isNotEmpty)
             ?.let {
                 val response = trackerEndpoint.getLiveTimes(it.toList(), 1)
@@ -82,7 +82,7 @@ internal class CheckTimesTask @Inject constructor(
      * @param liveTimes The successfully loaded [LiveTimes] object.
      */
     private suspend fun handleResponse(liveTimes: LiveTimes) {
-        alertsDao.getAllArrivalAlerts()?.forEach { alert ->
+        alertsRepository.getAllArrivalAlerts()?.forEach { alert ->
             liveTimes.stops[alert.stopCode]?.let { stop ->
                 checkArrivalsForStop(alert, stop)
             }
@@ -109,7 +109,7 @@ internal class CheckTimesTask @Inject constructor(
             alertNotificationDispatcher.dispatchTimeAlertNotification(
                 arrivalAlert,
                 qualifyingServices)
-            alertsDao.removeArrivalAlert(arrivalAlert.id)
+            alertsRepository.removeArrivalAlert(arrivalAlert.id)
         }
     }
 

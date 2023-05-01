@@ -40,8 +40,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
@@ -64,7 +64,7 @@ class CheckTimesTaskTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    lateinit var alertsDao: AlertsDao
+    lateinit var alertsRepository: AlertsRepository
     @Mock
     lateinit var trackerEndpoint: TrackerEndpoint
     @Mock
@@ -74,12 +74,15 @@ class CheckTimesTaskTest {
 
     @Before
     fun setUp() {
-        checkTimesTask = CheckTimesTask(alertsDao, trackerEndpoint, alertNotificationDispatcher)
+        checkTimesTask = CheckTimesTask(
+            alertsRepository,
+            trackerEndpoint,
+            alertNotificationDispatcher)
     }
 
     @Test
     fun doesNotCreateRequestWhenArrivalAlertStopCodesIsNull() = runTest {
-        whenever(alertsDao.getAllArrivalAlertStopCodes())
+        whenever(alertsRepository.getAllArrivalAlertStopCodes())
                 .thenReturn(null)
 
         checkTimesTask.checkTimes()
@@ -90,7 +93,7 @@ class CheckTimesTaskTest {
 
     @Test
     fun doesNotCreateRequestWhenArrivalAlertStopCodesIsEmpty() = runTest {
-        whenever(alertsDao.getAllArrivalAlertStopCodes())
+        whenever(alertsRepository.getAllArrivalAlertStopCodes())
                 .thenReturn(emptySet())
 
         checkTimesTask.checkTimes()
@@ -102,7 +105,7 @@ class CheckTimesTaskTest {
     @Test
     fun createsRequestWithExpectedStopCodeWhenSingleStopCodeIsSupplied() = runTest {
         val stopCodes = setOf("123456")
-        whenever(alertsDao.getAllArrivalAlertStopCodes())
+        whenever(alertsRepository.getAllArrivalAlertStopCodes())
                 .thenReturn(stopCodes)
 
         checkTimesTask.checkTimes()
@@ -114,7 +117,7 @@ class CheckTimesTaskTest {
     @Test
     fun createsRequestWithExpectedStopCodesWhenMultipleStopCodesAreSupplied() = runTest {
         val stopCodes = setOf("123456", "987654", "246802")
-        whenever(alertsDao.getAllArrivalAlertStopCodes())
+        whenever(alertsRepository.getAllArrivalAlertStopCodes())
                 .thenReturn(stopCodes)
 
         checkTimesTask.checkTimes()
@@ -141,7 +144,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
-        verify(alertsDao, never())
+        verify(alertsRepository, never())
                 .removeArrivalAlert(any<Int>())
     }
 
@@ -154,7 +157,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
-        verify(alertsDao, never())
+        verify(alertsRepository, never())
                 .removeArrivalAlert(any<Int>())
     }
 
@@ -174,7 +177,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
-        verify(alertsDao, never())
+        verify(alertsRepository, never())
                 .removeArrivalAlert(any<Int>())
     }
 
@@ -194,7 +197,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher)
                 .dispatchTimeAlertNotification(arrivalAlert, listOf(service))
-        verify(alertsDao)
+        verify(alertsRepository)
                 .removeArrivalAlert(1)
     }
 
@@ -214,7 +217,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher)
                 .dispatchTimeAlertNotification(arrivalAlert, listOf(service))
-        verify(alertsDao)
+        verify(alertsRepository)
                 .removeArrivalAlert(1)
     }
 
@@ -234,7 +237,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
-        verify(alertsDao, never())
+        verify(alertsRepository, never())
                 .removeArrivalAlert(any<Int>())
     }
 
@@ -257,7 +260,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher, never())
                 .dispatchTimeAlertNotification(any(), any())
-        verify(alertsDao, never())
+        verify(alertsRepository, never())
                 .removeArrivalAlert(any<Int>())
     }
 
@@ -281,7 +284,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher)
                 .dispatchTimeAlertNotification(arrivalAlert, listOf(service2))
-        verify(alertsDao)
+        verify(alertsRepository)
                 .removeArrivalAlert(1)
     }
 
@@ -305,7 +308,7 @@ class CheckTimesTaskTest {
 
         verify(alertNotificationDispatcher)
                 .dispatchTimeAlertNotification(arrivalAlert, listOf(service2, service3))
-        verify(alertsDao)
+        verify(alertsRepository)
                 .removeArrivalAlert(1)
     }
 
@@ -347,21 +350,21 @@ class CheckTimesTaskTest {
                 .dispatchTimeAlertNotification(eq(arrivalAlert2), any())
         verify(alertNotificationDispatcher)
                 .dispatchTimeAlertNotification(arrivalAlert3, listOf(service9))
-        verify(alertsDao)
+        verify(alertsRepository)
                 .removeArrivalAlert(1)
-        verify(alertsDao, never())
+        verify(alertsRepository, never())
                 .removeArrivalAlert(2)
-        verify(alertsDao)
+        verify(alertsRepository)
                 .removeArrivalAlert(3)
     }
 
     private suspend fun givenArrivalAlertStopCodes(stopCodes: Set<String>) {
-        whenever(alertsDao.getAllArrivalAlertStopCodes())
+        whenever(alertsRepository.getAllArrivalAlertStopCodes())
                 .thenReturn(stopCodes)
     }
 
     private suspend fun givenArrivalAlerts(arrivalAlerts: List<ArrivalAlert>?) {
-        whenever(alertsDao.getAllArrivalAlerts())
+        whenever(alertsRepository.getAllArrivalAlerts())
                 .thenReturn(arrivalAlerts)
     }
 

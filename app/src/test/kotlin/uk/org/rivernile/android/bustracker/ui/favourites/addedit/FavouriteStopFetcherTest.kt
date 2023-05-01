@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
@@ -121,7 +121,7 @@ class FavouriteStopFetcherTest {
 
     @Test
     fun loadFavouriteStopAndDetailsWithFavouriteButNoDetailsEmitsEditMode() = runTest {
-        val favouriteStop = FavouriteStop(1, "123456", "Stored name")
+        val favouriteStop = FavouriteStop("123456", "Stored name")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flowOf(favouriteStop))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
@@ -138,7 +138,7 @@ class FavouriteStopFetcherTest {
 
     @Test
     fun loadFavouriteStopAndDetailsWithFavouriteAndStopNameEmitsEditMode() = runTest {
-        val favouriteStop = FavouriteStop(1, "123456", "Stored name")
+        val favouriteStop = FavouriteStop("123456", "Stored name")
         val stopName = StopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flowOf(favouriteStop))
@@ -156,8 +156,8 @@ class FavouriteStopFetcherTest {
 
     @Test
     fun loadFavouriteStopAndDetailsPropagatesUpdatesToFavouriteStop() = runTest {
-        val favouriteStop1 = FavouriteStop(1, "123456", "Stored name 1")
-        val favouriteStop2 = FavouriteStop(1, "123456", "Stored name 2")
+        val favouriteStop1 = FavouriteStop("123456", "Stored name 1")
+        val favouriteStop2 = FavouriteStop("123456", "Stored name 2")
         val stopName = StopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flow {
@@ -183,7 +183,7 @@ class FavouriteStopFetcherTest {
 
     @Test
     fun loadFavouriteStopAndDetailsPropagatesUpdatesToStopName() = runTest {
-        val favouriteStop = FavouriteStop(1, "123456", "Stored name")
+        val favouriteStop = FavouriteStop("123456", "Stored name")
         val stopName1 = StopName("Name 1", "Locality")
         val stopName2 = StopName("Name 2", "Locality")
         val stopName3 = StopName("Name 3", "Locality")

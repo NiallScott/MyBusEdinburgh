@@ -35,7 +35,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.inOrder
-import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseWorkScheduler
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -59,7 +59,7 @@ class StartUpTaskTest {
     @Mock
     private lateinit var cleanUpTask: CleanUpTask
     @Mock
-    private lateinit var alertManager: AlertManager
+    private lateinit var alertsRepository: AlertsRepository
 
     @Test
     fun performsStartUpTasks() = runTest {
@@ -67,21 +67,25 @@ class StartUpTaskTest {
                 appNotificationChannels,
                 busStopDatabaseJobScheduler,
                 cleanUpTask,
-                alertManager,
+                alertsRepository,
                 coroutineRule.scope,
                 coroutineRule.testDispatcher)
 
         startUpTask.performStartUpTasks()
         advanceUntilIdle()
 
-        inOrder(appNotificationChannels, busStopDatabaseJobScheduler, cleanUpTask, alertManager) {
+        inOrder(
+            appNotificationChannels,
+            busStopDatabaseJobScheduler,
+            cleanUpTask,
+            alertsRepository) {
             verify(appNotificationChannels)
                     .createNotificationChannels()
             verify(busStopDatabaseJobScheduler)
                     .scheduleUpdateBusStopDatabaseJob()
             verify(cleanUpTask)
                     .performCleanUp()
-            verify(alertManager)
+            verify(alertsRepository)
                     .ensureTasksRunningIfAlertsExists()
         }
     }
@@ -92,7 +96,7 @@ class StartUpTaskTest {
                 appNotificationChannels,
                 busStopDatabaseJobScheduler,
                 null,
-                alertManager,
+                alertsRepository,
                 coroutineRule.scope,
                 coroutineRule.testDispatcher)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.verify
-import uk.org.rivernile.android.bustracker.core.alerts.AlertManager
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
@@ -56,14 +56,14 @@ class RemoveArrivalAlertBroadcastReceiverTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var alertManager: AlertManager
+    private lateinit var alertsRepository: AlertsRepository
 
     private lateinit var receiver: RemoveArrivalAlertBroadcastReceiver
 
     @Before
     fun setUp() {
         receiver = RemoveArrivalAlertBroadcastReceiver().also {
-            it.alertManager = alertManager
+            it.alertsRepository = alertsRepository
             it.applicationCoroutineScope = coroutineRule.scope
             it.defaultDispatcher = coroutineRule.testDispatcher
         }
@@ -74,7 +74,7 @@ class RemoveArrivalAlertBroadcastReceiverTest {
         receiver.onReceive(ApplicationProvider.getApplicationContext(), createIntent())
         advanceUntilIdle()
 
-        verify(alertManager)
+        verify(alertsRepository)
                 .removeAllArrivalAlerts()
     }
 

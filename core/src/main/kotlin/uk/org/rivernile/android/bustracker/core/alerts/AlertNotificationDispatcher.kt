@@ -26,8 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts
 
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 
 /**

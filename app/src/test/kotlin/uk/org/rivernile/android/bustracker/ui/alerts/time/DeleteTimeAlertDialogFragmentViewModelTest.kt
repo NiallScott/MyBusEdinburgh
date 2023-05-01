@@ -68,7 +68,7 @@ class DeleteTimeAlertDialogFragmentViewModelTest {
         viewModel.onUserConfirmDeletion()
 
         verify(alertsRepository, never())
-                .removeArrivalAlert(anyOrNull())
+                .removeArrivalAlert(anyOrNull<String>())
     }
 
     @Test
@@ -78,7 +78,7 @@ class DeleteTimeAlertDialogFragmentViewModelTest {
         viewModel.onUserConfirmDeletion()
 
         verify(alertsRepository, never())
-                .removeArrivalAlert(anyOrNull())
+                .removeArrivalAlert(anyOrNull<String>())
     }
 
     @Test

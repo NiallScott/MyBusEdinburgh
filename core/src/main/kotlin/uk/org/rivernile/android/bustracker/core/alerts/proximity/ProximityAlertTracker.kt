@@ -26,8 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
+import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
 

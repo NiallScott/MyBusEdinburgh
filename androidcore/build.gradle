@@ -42,6 +42,18 @@ android {
         targetSdkVersion androidTargetSdkVersion
         testInstrumentationRunner 'uk.org.rivernile.android.bustracker.core.CoreTestRunner'
         consumerProguardFiles 'proguard-consumer-rules.pro'
+
+        /*
+         * This is used to export the Room schema out to a JSON file in the module's "schemas"
+         * directory. We want to do this so that we can compare schema versions after upgrades.
+         * It's also possible for us to do automated testing using the JSON files to test database
+         * migrations.
+         */
+        kapt {
+            arguments {
+                arg 'room.schemaLocation', "$projectDir/schemas"
+            }
+        }
     }
 
     buildTypes {
@@ -77,6 +89,10 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
         test.java.srcDirs += 'src/test/kotlin'
+
+        // This adds the generated Room schema files to the instrumentation test assets so that they
+        // can be loaded at test time.
+        androidTest.assets.srcDirs += files("$projectDir/schemas")
     }
 
     compileOptions {
@@ -124,6 +140,10 @@ dependencies {
     // Android Architecture Components
     api "androidx.lifecycle:lifecycle-livedata-ktx:$architectureComponentsVersion"
 
+    // Room (ORM)
+    implementation "androidx.room:room-ktx:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
+
     // WorkManager
     api "androidx.work:work-runtime-ktx:$workManagerVersion"
 
@@ -151,6 +171,7 @@ dependencies {
     androidTestImplementation "androidx.test:core-ktx:$androidTestCoreVersion"
     androidTestImplementation "org.mockito:mockito-android:$mockitoVersion"
     androidTestImplementation "com.google.dagger:hilt-android-testing:$hiltVersion"
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
     kaptAndroidTest "com.google.dagger:hilt-android-compiler:$hiltVersion"
 
     testImplementation project(':testutils')

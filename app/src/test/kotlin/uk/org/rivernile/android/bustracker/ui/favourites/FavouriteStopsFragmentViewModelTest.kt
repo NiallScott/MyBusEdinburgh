@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,7 +42,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
@@ -75,7 +75,7 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun favouritesLiveDataEmitsNullFromUpstream() = runTest {
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(null))
         val viewModel = createViewModel()
 
@@ -87,7 +87,7 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun favouritesLiveDataEmitsEmptyListFromUpstream() = runTest {
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(emptyList()))
         val viewModel = createViewModel()
 
@@ -100,10 +100,10 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun favouritesLiveDataEmitsPopulatedListFromUpstream() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
 
@@ -116,14 +116,14 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun favouritesLiveDataEmitsItemsWithCorrectSelectedState() = runTest {
         val favourites1 = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
         val favourites2 = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), true),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), true),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites1))
         val viewModel = createViewModel()
 
@@ -139,7 +139,7 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun uiStateLiveDataEmitsInProgressWhenFavouritesIsNull() = runTest {
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(null))
         val viewModel = createViewModel()
 
@@ -151,7 +151,7 @@ class FavouriteStopsFragmentViewModelTest {
 
     @Test
     fun uiStateLiveDataEmitsErrorWhenFavouritesIsEmpty() = runTest {
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(emptyList()))
         val viewModel = createViewModel()
 
@@ -164,10 +164,10 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun uiStateLiveDataEmitsContentWhenFavouritesIsPopulated() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
 
@@ -297,10 +297,10 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataIsNullByDefault() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -314,10 +314,10 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataUsesNameOfStopFromPreviousState() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel(SavedStateHandle(
                 mapOf(STATE_SELECTED_STOP_CODE to "222222")))
@@ -334,10 +334,10 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataEmitsNullWhenStopCodeIsEmpty() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -353,10 +353,10 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataEmitsNullWhenStopIsNotFound() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -372,10 +372,10 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataEmitsNameWhenStopIsFound() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -391,10 +391,10 @@ class FavouriteStopsFragmentViewModelTest {
     @Test
     fun selectedStopNameLiveDataEmitNullWhenStopIsUnselected() = runTest {
         val favourites = listOf(
-                UiFavouriteStop(FavouriteStop(1L, "111111", "Name 1"), listOf("1", "2"), false),
-                UiFavouriteStop(FavouriteStop(2L, "222222", "Name 2"), listOf("3", "4"), false),
-                UiFavouriteStop(FavouriteStop(3L, "333333", "Name 3"), listOf("5", "6"), false))
-        whenever(favouriteStopsRetriever.favouriteStopsFlow)
+                UiFavouriteStop(FavouriteStop("111111", "Name 1"), listOf("1", "2"), false),
+                UiFavouriteStop(FavouriteStop("222222", "Name 2"), listOf("3", "4"), false),
+                UiFavouriteStop(FavouriteStop("333333", "Name 3"), listOf("5", "6"), false))
+        whenever(favouriteStopsRetriever.allFavouriteStopsFlow)
                 .thenReturn(flowOf(favourites))
         val viewModel = createViewModel()
         viewModel.isCreateShortcutMode = false
@@ -682,9 +682,9 @@ class FavouriteStopsFragmentViewModelTest {
 
         val createShortcutObserver = viewModel.createShortcutLiveData.test()
         val showStopDataObserver = viewModel.showStopDataLiveData.test()
-        viewModel.onFavouriteStopClicked(FavouriteStop(1L, "123456", "Stop name"))
+        viewModel.onFavouriteStopClicked(FavouriteStop("123456", "Stop name"))
 
-        createShortcutObserver.assertValues(FavouriteStop(1L, "123456", "Stop name"))
+        createShortcutObserver.assertValues(FavouriteStop("123456", "Stop name"))
         showStopDataObserver.assertEmpty()
     }
 
@@ -696,7 +696,7 @@ class FavouriteStopsFragmentViewModelTest {
 
         val createShortcutObserver = viewModel.createShortcutLiveData.test()
         val showStopDataObserver = viewModel.showStopDataLiveData.test()
-        viewModel.onFavouriteStopClicked(FavouriteStop(1L, "123456", "Stop name"))
+        viewModel.onFavouriteStopClicked(FavouriteStop("123456", "Stop name"))
 
         createShortcutObserver.assertEmpty()
         showStopDataObserver.assertEmpty()
@@ -709,7 +709,7 @@ class FavouriteStopsFragmentViewModelTest {
 
         val createShortcutObserver = viewModel.createShortcutLiveData.test()
         val showStopDataObserver = viewModel.showStopDataLiveData.test()
-        viewModel.onFavouriteStopClicked(FavouriteStop(1L, "123456", "Stop name"))
+        viewModel.onFavouriteStopClicked(FavouriteStop("123456", "Stop name"))
 
         createShortcutObserver.assertEmpty()
         showStopDataObserver.assertValues("123456")

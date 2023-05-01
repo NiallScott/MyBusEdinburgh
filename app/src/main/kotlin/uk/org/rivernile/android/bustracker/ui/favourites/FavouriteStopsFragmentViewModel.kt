@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,8 +47,8 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -91,10 +91,11 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
      */
     var isCreateShortcutMode = false
 
-    private val favouritesFlow = favouriteStopsRetriever.favouriteStopsFlow
-            .combine(selectedStopCodeFlow, this::applySelectedState)
-            .flowOn(defaultDispatcher)
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+    private val favouritesFlow = favouriteStopsRetriever
+        .allFavouriteStopsFlow
+        .combine(selectedStopCodeFlow, this::applySelectedState)
+        .flowOn(defaultDispatcher)
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     /**
      * This [LiveData] emits the current [List] of [UiFavouriteStop]s, for display on the UI.

@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.favourites.addedit
 
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 
 /**
  * This class represents the current state of the UI.

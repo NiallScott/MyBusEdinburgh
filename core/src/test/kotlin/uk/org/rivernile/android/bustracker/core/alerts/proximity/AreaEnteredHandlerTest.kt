@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,8 +39,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
@@ -56,7 +56,7 @@ class AreaEnteredHandlerTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var alertsDao: AlertsDao
+    private lateinit var alertsRepository: AlertsRepository
     @Mock
     private lateinit var geofencingManager: GeofencingManager
     @Mock
@@ -67,9 +67,9 @@ class AreaEnteredHandlerTest {
     @Before
     fun setUp() {
         handler = AreaEnteredHandler(
-                alertsDao,
-                geofencingManager,
-                notificationDispatcher)
+            alertsRepository,
+            geofencingManager,
+            notificationDispatcher)
     }
 
     @Test
@@ -84,7 +84,7 @@ class AreaEnteredHandlerTest {
     fun handleAreaEnteredRemovesAlertFromDao() = runTest {
         handler.handleAreaEntered(1)
 
-        verify(alertsDao)
+        verify(alertsRepository)
                 .removeProximityAlert(1)
     }
 
@@ -92,7 +92,7 @@ class AreaEnteredHandlerTest {
     fun handleAreaEnteredDoesNotDispatchNotificationWhenAlertDoesNotExist() = runTest {
         handler.handleAreaEntered(1)
 
-        verify(alertsDao)
+        verify(alertsRepository)
                 .getProximityAlert(1)
         verify(notificationDispatcher, never())
                 .dispatchProximityAlertNotification(any())
@@ -101,7 +101,7 @@ class AreaEnteredHandlerTest {
     @Test
     fun handleAreaEnteredDispatchesNotificationWhenAlertDoesExist() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
-        whenever(alertsDao.getProximityAlert(1))
+        whenever(alertsRepository.getProximityAlert(1))
                 .thenReturn(proximityAlert)
 
         handler.handleAreaEntered(1)

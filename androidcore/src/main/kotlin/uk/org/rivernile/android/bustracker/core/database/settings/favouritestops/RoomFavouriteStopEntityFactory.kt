@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.di
+package uk.org.rivernile.android.bustracker.core.database.settings.favouritestops
 
-import javax.inject.Qualifier
-import kotlin.annotation.MustBeDocumented
-import kotlin.annotation.Retention
+import javax.inject.Inject
 
 /**
- * This annotation defines a Dagger qualifier for settings database dependencies.
+ * This is the Room-specific implementation of [FavouriteStopEntityFactory].
  *
  * @author Niall Scott
  */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ForSettingsDatabase
+internal class RoomFavouriteStopEntityFactory @Inject constructor() : FavouriteStopEntityFactory {
+
+    override fun createFavouriteStopEntity(
+        stopCode: String,
+        stopName: String): FavouriteStopEntity {
+        return RoomFavouriteStopEntity(
+            stopCode,
+            stopName)
+    }
+}

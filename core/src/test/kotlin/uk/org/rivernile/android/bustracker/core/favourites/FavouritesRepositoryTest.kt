@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,13 +35,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.FavouritesDao
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopEntityFactory
+import uk.org.rivernile.android.bustracker.core.database.settings.favouritestops.FavouriteStopsDao
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
@@ -57,156 +58,97 @@ class FavouritesRepositoryTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var favouritesDao: FavouritesDao
+    private lateinit var favouritesStopsDao: FavouriteStopsDao
+    @Mock
+    private lateinit var entityFactory: FavouriteStopEntityFactory
 
     private lateinit var repository: FavouritesRepository
 
     @Before
     fun setUp() {
-        repository = FavouritesRepository(favouritesDao)
+        repository = FavouritesRepository(
+            favouritesStopsDao,
+            entityFactory)
     }
 
     @Test
-    fun isStopAddedAsFavouriteFlowGetsInitialValue() = runTest {
-        whenever(favouritesDao.isStopAddedAsFavourite("123456"))
-                .thenReturn(false)
+    fun addOrUpdateFavouriteStopCallsDao() = runTest {
+        val favouriteStop = mock<FavouriteStopEntity>()
+        whenever(entityFactory.createFavouriteStopEntity("123456", "Stop name"))
+            .thenReturn(favouriteStop)
 
-        val observer = repository.isStopAddedAsFavouriteFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
+        repository.addOrUpdateFavouriteStop(FavouriteStop("123456", "Stop name"))
 
-        observer.assertValues(false)
-        verify(favouritesDao)
-                .removeOnFavouritesChangedListener(any())
+        verify(favouritesStopsDao)
+            .addOrUpdateFavouriteStop(favouriteStop)
     }
 
     @Test
-    fun isStopAddedAsFavouriteFlowRespondsToFavouritesChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<FavouritesDao.OnFavouritesChangedListener>(0)
-            listener.onFavouritesChanged()
-            listener.onFavouritesChanged()
-        }.whenever(favouritesDao).addOnFavouritesChangedListener(any())
-        whenever(favouritesDao.isStopAddedAsFavourite("123456"))
-                .thenReturn(false, true, false)
-
-        val observer = repository.isStopAddedAsFavouriteFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(false, true, false)
-        verify(favouritesDao)
-                .removeOnFavouritesChangedListener(any())
-    }
-
-    @Test
-    fun getFavouriteStopFlowGetsInitialValue() = runTest {
-        whenever(favouritesDao.getFavouriteStop("123456"))
-                .thenReturn(FavouriteStop(1, "123456", "Favourite stop"))
-
-        val observer = repository.getFavouriteStopFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(FavouriteStop(1, "123456", "Favourite stop"))
-        verify(favouritesDao)
-                .removeOnFavouritesChangedListener(any())
-    }
-
-    @Test
-    fun getFavouriteStopFlowRespondsToFavouritesChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<FavouritesDao.OnFavouritesChangedListener>(0)
-            listener.onFavouritesChanged()
-            listener.onFavouritesChanged()
-        }.whenever(favouritesDao).addOnFavouritesChangedListener(any())
-        whenever(favouritesDao.getFavouriteStop("123456"))
-                .thenReturn(
-                        null,
-                        FavouriteStop(1, "123456", "Favourite stop"),
-                        null)
-
-        val observer = repository.getFavouriteStopFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(null, FavouriteStop(1, "123456", "Favourite stop"), null)
-        verify(favouritesDao)
-                .removeOnFavouritesChangedListener(any())
-    }
-
-    @Test
-    fun favouriteStopsFlowGetsInitialValue() = runTest {
-        val favourites = listOf(
-                FavouriteStop(1, "111111", "Stop name 1"),
-                FavouriteStop(2, "222222", "Stop name 2"),
-                FavouriteStop(3, "333333", "Stop name 3"))
-        whenever(favouritesDao.getFavouriteStops())
-                .thenReturn(favourites)
-
-        val observer = repository.favouriteStopsFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(favourites)
-        verify(favouritesDao)
-                .removeOnFavouritesChangedListener(any())
-    }
-
-    @Test
-    fun favouriteStopsFlowRespondsToFavouritesChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<FavouritesDao.OnFavouritesChangedListener>(0)
-            listener.onFavouritesChanged()
-            listener.onFavouritesChanged()
-        }.whenever(favouritesDao).addOnFavouritesChangedListener(any())
-        val favourites = listOf(
-                FavouriteStop(1, "111111", "Stop name 1"),
-                FavouriteStop(2, "222222", "Stop name 2"),
-                FavouriteStop(3, "333333", "Stop name 3"))
-        whenever(favouritesDao.getFavouriteStops())
-                .thenReturn(null, favourites, null)
-
-        val observer = repository.favouriteStopsFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(null, favourites, null)
-        verify(favouritesDao)
-                .removeOnFavouritesChangedListener(any())
-    }
-
-    @Test
-    fun addFavouriteStopAddsFavouriteWithDao() = runTest {
-        val favouriteStop = FavouriteStop(0L, "123456", "Stop name")
-
-        repository.addFavouriteStop(favouriteStop)
-
-        verify(favouritesDao)
-                .addFavouriteStop(favouriteStop)
-    }
-
-    @Test
-    fun updateFavouriteStopUpdatesFavouriteWithDao() = runTest {
-        val favouriteStop = FavouriteStop(1L, "123456", "New name")
-
-        repository.updateFavouriteStop(favouriteStop)
-
-        verify(favouritesDao)
-                .updateFavouriteStop(favouriteStop)
-    }
-
-    @Test
-    fun removeFavouriteStopRemovedFavouriteStopWithDao() = runTest {
+    fun removeFavouriteStopCallsDao() = runTest {
         repository.removeFavouriteStop("123456")
 
-        verify(favouritesDao)
-                .removeFavouriteStop("123456")
+        verify(favouritesStopsDao)
+            .removeFavouriteStop("123456")
     }
+
+    @Test
+    fun isStopAddedAsFavouriteEmitsDistinctValues() = runTest {
+        whenever(favouritesStopsDao.isStopAddedAsFavouriteFlow("123456"))
+            .thenReturn(intervalFlowOf(0L, 10L, false, false, true, true, false))
+
+        val observer = repository.isStopAddedAsFavouriteFlow("123456").test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(false, true, false)
+    }
+
+    @Test
+    fun getFavouriteStopsFlowEmitsDistinctValues() = runTest {
+        val stop1 = MockFavouriteStopEntity("123456", "Name 1")
+        val stop2 = MockFavouriteStopEntity("123456", "Name 2")
+        val expected1 = FavouriteStop("123456", "Name 1")
+        val expected2 = FavouriteStop("123456", "Name 2")
+        whenever(favouritesStopsDao.getFavouriteStopFlow("123456"))
+            .thenReturn(intervalFlowOf(0L, 10L, null, null, stop1, stop1, stop2, stop2, stop1))
+
+        val observer = repository.getFavouriteStopFlow("123456").test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(null, expected1, expected2, expected1)
+    }
+
+    @Test
+    fun allFavouriteStopsFlowEmitsDistinctValues() = runTest {
+        val stop1 = MockFavouriteStopEntity("1", "Name 1")
+        val stop2 = MockFavouriteStopEntity("2", "Name 2")
+        val stop3 = MockFavouriteStopEntity("3", "Name 3")
+        val expected1 = FavouriteStop("1", "Name 1")
+        val expected2 = FavouriteStop("2", "Name 2")
+        val expected3 = FavouriteStop("3", "Name 3")
+        val flow = intervalFlowOf(
+            0L,
+            10L,
+            null,
+            null,
+            listOf(stop1),
+            listOf(stop1),
+            listOf(stop1, stop2, stop3))
+        whenever(favouritesStopsDao.allFavouriteStopsFlow)
+            .thenReturn(flow)
+
+        val observer = repository.allFavouriteStopsFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(
+            null,
+            listOf(expected1),
+            listOf(expected1, expected2, expected3))
+    }
+
+    private data class MockFavouriteStopEntity(
+        override val stopCode: String,
+        override val stopName: String) : FavouriteStopEntity
 }

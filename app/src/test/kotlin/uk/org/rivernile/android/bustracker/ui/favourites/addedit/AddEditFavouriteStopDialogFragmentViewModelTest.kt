@@ -45,7 +45,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
+import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -244,7 +244,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                         UiState.Mode.Edit(
                                 "123456",
                                 StopName("Stop name", "Locality"),
-                                FavouriteStop(1, "123456", "Saved name"))))
+                                FavouriteStop("123456", "Saved name"))))
         val viewModel = createViewModel(stopCode = "123456")
 
         val observer = viewModel.prePopulateNameLiveData.test()
@@ -260,7 +260,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                         UiState.Mode.Edit(
                                 "123456",
                                 StopName("Stop name", "Locality"),
-                                FavouriteStop(1, "123456", "Saved name"))))
+                                FavouriteStop("123456", "Saved name"))))
         val savedState = SavedStateHandle(
                 mapOf(STATE_PRE_POPULATED_STOP_CODE to "123456"))
         val viewModel = createViewModel(savedState, "123456")
@@ -283,9 +283,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         verify(favouritesRepository, never())
-                .addFavouriteStop(any())
-        verify(favouritesRepository, never())
-                .updateFavouriteStop(any())
+                .addOrUpdateFavouriteStop(any())
     }
 
     @Test
@@ -300,9 +298,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         verify(favouritesRepository, never())
-                .addFavouriteStop(any())
-        verify(favouritesRepository, never())
-                .updateFavouriteStop(any())
+                .addOrUpdateFavouriteStop(any())
     }
 
     @Test
@@ -317,9 +313,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         verify(favouritesRepository, never())
-                .addFavouriteStop(any())
-        verify(favouritesRepository, never())
-                .updateFavouriteStop(any())
+                .addOrUpdateFavouriteStop(any())
     }
 
     @Test
@@ -335,9 +329,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         verify(favouritesRepository, never())
-                .addFavouriteStop(any())
-        verify(favouritesRepository, never())
-                .updateFavouriteStop(any())
+                .addOrUpdateFavouriteStop(any())
     }
 
     @Test
@@ -353,9 +345,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         verify(favouritesRepository, never())
-                .addFavouriteStop(any())
-        verify(favouritesRepository, never())
-                .updateFavouriteStop(any())
+                .addOrUpdateFavouriteStop(any())
     }
 
     @Test
@@ -373,11 +363,9 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         verify(favouritesRepository)
-                .addFavouriteStop(FavouriteStop(
+                .addOrUpdateFavouriteStop(FavouriteStop(
                         stopCode = "123456",
                         stopName = "abc123"))
-        verify(favouritesRepository, never())
-                .updateFavouriteStop(any())
     }
 
     @Test
@@ -387,7 +375,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                         UiState.Mode.Edit(
                                 "123456",
                                 StopName("Stop name", "Locality"),
-                                FavouriteStop(1, "123456", "Saved name"))))
+                                FavouriteStop("123456", "Saved name"))))
         val viewModel = createViewModel(stopCode = "123456")
 
         viewModel.uiStateLiveData.test()
@@ -398,9 +386,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         verify(favouritesRepository, never())
-                .addFavouriteStop(any())
-        verify(favouritesRepository, never())
-                .updateFavouriteStop(any())
+                .addOrUpdateFavouriteStop(any())
     }
 
     @Test
@@ -410,7 +396,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                         UiState.Mode.Edit(
                                 "123456",
                                 StopName("Stop name", "Locality"),
-                                FavouriteStop(1, "123456", "Saved name"))))
+                                FavouriteStop("123456", "Saved name"))))
         val viewModel = createViewModel(stopCode = "123456")
 
         viewModel.uiStateLiveData.test()
@@ -421,9 +407,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         advanceUntilIdle()
 
         verify(favouritesRepository, never())
-                .addFavouriteStop(any())
-        verify(favouritesRepository, never())
-                .updateFavouriteStop(any())
+                .addOrUpdateFavouriteStop(any())
     }
 
     @Test
@@ -433,7 +417,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                         UiState.Mode.Edit(
                                 "123456",
                                 StopName("Stop name", "Locality"),
-                                FavouriteStop(1, "123456", "Saved name"))))
+                                FavouriteStop("123456", "Saved name"))))
         val viewModel = createViewModel(stopCode = "123456")
 
         viewModel.uiStateLiveData.test()
@@ -443,10 +427,8 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
         viewModel.onSubmitClicked()
         advanceUntilIdle()
 
-        verify(favouritesRepository, never())
-                .addFavouriteStop(any())
         verify(favouritesRepository)
-                .updateFavouriteStop(FavouriteStop(1, "123456", "abc123"))
+                .addOrUpdateFavouriteStop(FavouriteStop("123456", "abc123"))
     }
 
     private fun createViewModel(

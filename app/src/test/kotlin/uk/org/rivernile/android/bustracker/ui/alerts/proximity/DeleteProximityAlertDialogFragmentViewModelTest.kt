@@ -68,7 +68,7 @@ class DeleteProximityAlertDialogFragmentViewModelTest {
         viewModel.onUserConfirmDeletion()
 
         verify(alertsRepository, never())
-                .removeProximityAlert(anyOrNull())
+                .removeProximityAlert(anyOrNull<String>())
     }
 
     @Test
@@ -78,7 +78,7 @@ class DeleteProximityAlertDialogFragmentViewModelTest {
         viewModel.onUserConfirmDeletion()
 
         verify(alertsRepository, never())
-                .removeProximityAlert(anyOrNull())
+                .removeProximityAlert(anyOrNull<String>())
     }
 
     @Test

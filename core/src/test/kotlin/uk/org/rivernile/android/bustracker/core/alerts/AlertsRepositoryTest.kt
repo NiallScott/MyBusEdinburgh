@@ -29,25 +29,27 @@ package uk.org.rivernile.android.bustracker.core.alerts
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.Alert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.AlertsDao
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ArrivalAlertEntity
+import uk.org.rivernile.android.bustracker.core.database.settings.alerts.ProximityAlertEntity
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
@@ -63,7 +65,9 @@ class AlertsRepositoryTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var alertManager: AlertManager
+    private lateinit var arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher
+    @Mock
+    private lateinit var proximityAlertTaskLauncher: ProximityAlertTaskLauncher
     @Mock
     private lateinit var alertsDao: AlertsDao
     @Mock
@@ -74,236 +78,345 @@ class AlertsRepositoryTest {
     @Before
     fun setUp() {
         repository = AlertsRepository(
-                alertManager,
-                alertsDao,
-                timeUtils)
-    }
+            arrivalAlertTaskLauncher,
+            proximityAlertTaskLauncher,
+            alertsDao,
+            timeUtils)
 
-    @Test
-    fun hasArrivalAlertFlowGetsInitialValue() = runTest {
-        whenever(alertsDao.hasArrivalAlert("123456"))
-                .thenReturn(false)
-
-        val observer = repository.hasArrivalAlertFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-        verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun hasArrivalAlertFlowRespondsToAlertsChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
-            listener.onAlertsChanged()
-            listener.onAlertsChanged()
-        }.whenever(alertsDao).addOnAlertsChangedListener(any())
-        whenever(alertsDao.hasArrivalAlert("123456"))
-                .thenReturn(false, true, false)
-
-        val observer = repository.hasArrivalAlertFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(false, true, false)
-        verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun hasProximityAlertFlowGetsInitialValue() = runTest {
-        whenever(alertsDao.hasProximityAlert("123456"))
-                .thenReturn(false)
-
-        val observer = repository.hasProximityAlertFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(false)
-        verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun hasProximityAlertFlowRespondsToAlertsChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
-            listener.onAlertsChanged()
-            listener.onAlertsChanged()
-        }.whenever(alertsDao).addOnAlertsChangedListener(any())
-        whenever(alertsDao.hasProximityAlert("123456"))
-                .thenReturn(false, true, false)
-
-        val observer = repository.hasProximityAlertFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(false, true, false)
-        verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun arrivalAlertCountFlowGetsInitialValue() = runTest {
-        whenever(alertsDao.getArrivalAlertCount())
-            .thenReturn(4)
-
-        val observer = repository.arrivalAlertCountFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(4)
-        verify(alertsDao)
-            .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun arrivalAlertCountFlowRespondsToAlertsChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
-            listener.onAlertsChanged()
-            listener.onAlertsChanged()
-            listener.onAlertsChanged()
-            listener.onAlertsChanged()
-        }.whenever(alertsDao).addOnAlertsChangedListener(any())
-        whenever(alertsDao.getArrivalAlertCount())
-            .thenReturn(1, 2, 3, 4, 0)
-
-        val observer = repository.arrivalAlertCountFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(1, 2, 3, 4, 0)
-        verify(alertsDao)
-            .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun allProximityAlertsFlowGetsInitialValue() = runTest {
-        val proximityAlerts = mock<List<ProximityAlert>>()
-        whenever(alertsDao.getAllProximityAlerts())
-            .thenReturn(proximityAlerts)
-
-        val observer = repository.allProximityAlertsFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(proximityAlerts)
-        verify(alertsDao)
-            .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun allProximityAlertsFlowRespondsToAlertsChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
-            listener.onAlertsChanged()
-            listener.onAlertsChanged()
-        }.whenever(alertsDao).addOnAlertsChangedListener(any())
-        val proximityAlerts1 = mock<List<ProximityAlert>>()
-        val proximityAlerts2 = mock<List<ProximityAlert>>()
-        val proximityAlerts3 = mock<List<ProximityAlert>>()
-        whenever(alertsDao.getAllProximityAlerts())
-            .thenReturn(proximityAlerts1, proximityAlerts2, proximityAlerts3)
-
-        val observer = repository.allProximityAlertsFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(proximityAlerts1, proximityAlerts2, proximityAlerts3)
-        verify(alertsDao)
-            .removeOnAlertsChangedListener(any())
-    }
-
-    @Test
-    fun addArrivalAlertAddsArrivalAlertToAlertManager() = runTest {
         whenever(timeUtils.currentTimeMills)
-                .thenReturn(123L)
-        val expected = ArrivalAlert(0, 123L, "123456", listOf("1", "2", "3"), 5)
-
-        repository.addArrivalAlert(ArrivalAlertRequest(
-                "123456",
-                listOf("1", "2", "3"),
-                5))
-
-        verify(alertManager)
-                .addArrivalAlert(expected)
+            .thenReturn(123L)
     }
 
     @Test
-    fun addProximityAlertAddsProximityAlertToAlertManager() = runTest {
-        whenever(timeUtils.currentTimeMills)
-                .thenReturn(123L)
-        val expected = ProximityAlert(0, 123L, "123456", 250)
+    fun addArrivalAlertAddsAlertToDaoAndLaunchesArrivalAlertTask() = runTest {
+        val request = ArrivalAlertRequest("123456", listOf("1", "2", "3"), 5)
+        val expected = ArrivalAlertEntity(
+            0,
+            123L,
+            "123456",
+            listOf("1", "2", "3"),
+            5)
 
-        repository.addProximityAlert(ProximityAlertRequest("123456", 250))
+        repository.addArrivalAlert(request)
 
-        verify(alertManager)
-                .addProximityAlert(expected)
+        verify(alertsDao)
+            .addArrivalAlert(expected)
+        verify(arrivalAlertTaskLauncher)
+            .launchArrivalAlertTask()
     }
 
     @Test
-    fun removeArrivalAlertCallsAlertManager() = runTest {
+    fun addProximityAlertAddsAlertToDaoAndLaunchesArrivalAlertTask() = runTest {
+        val request = ProximityAlertRequest("123456", 50)
+        val expected = ProximityAlertEntity(
+            0,
+            123L,
+            "123456",
+            50)
+
+        repository.addProximityAlert(request)
+
+        verify(alertsDao)
+            .addProximityAlert(expected)
+        verify(proximityAlertTaskLauncher)
+            .launchProximityAlertTask()
+    }
+
+    @Test
+    fun removeArrivalAlertWithStopCodeRemovesArrivalAlert() = runTest {
         repository.removeArrivalAlert("123456")
 
-        verify(alertManager)
-                .removeArrivalAlert("123456")
+        verify(alertsDao)
+            .removeArrivalAlert("123456")
     }
 
     @Test
-    fun removeProximityAlertCallsAlertManager() = runTest {
+    fun removeArrivalAlertWithIdRemovesArrivalAlert() = runTest {
+        repository.removeArrivalAlert(42)
+
+        verify(alertsDao)
+            .removeArrivalAlert(42)
+    }
+
+    @Test
+    fun removeAllArrivalAlertsRemovesAllArrivalAlertsInDao() = runTest {
+        repository.removeAllArrivalAlerts()
+
+        verify(alertsDao)
+            .removeAllArrivalAlerts()
+    }
+
+    @Test
+    fun removeProximityAlertWithStopCodeRemovesProximityAlert() = runTest {
         repository.removeProximityAlert("123456")
 
-        verify(alertManager)
-                .removeProximityAlert("123456")
+        verify(alertsDao)
+            .removeProximityAlert("123456")
     }
 
     @Test
-    fun getAllAlertsFlowGetsInitialValue() = runTest {
-        val alerts = listOf(ArrivalAlert(1, 123L, "123456", listOf("1"), 10))
-        whenever(alertsDao.getAllAlerts())
-                .thenReturn(alerts)
+    fun removeProximityAlertWithIdRemovesProximityAlert() = runTest {
+        repository.removeProximityAlert(42)
 
-        val observer = repository.getAllAlertsFlow().test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(alerts)
         verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
+            .removeProximityAlert(42)
     }
 
     @Test
-    fun getAllAlertsFlowRespondsToAlertChanges() = runTest {
-        val alerts1 = listOf(ArrivalAlert(1, 123L, "123456", listOf("1"), 10))
-        val alerts2 = emptyList<Alert>()
-        val alerts3 = listOf(ProximityAlert(2, 123L, "123457", 250))
-        doAnswer {
-            val listener = it.getArgument<AlertsDao.OnAlertsChangedListener>(0)
-            listener.onAlertsChanged()
-            listener.onAlertsChanged()
-        }.whenever(alertsDao).addOnAlertsChangedListener(any())
-        whenever(alertsDao.getAllAlerts())
-                .thenReturn(alerts1, alerts2, alerts3)
+    fun removeAllProximityAlertsRemovesAllProximityAlertsInDao() = runTest {
+        repository.removeAllProximityAlerts()
 
-        val observer = repository.getAllAlertsFlow().test(this)
+        verify(alertsDao)
+            .removeAllProximityAlerts()
+    }
+
+    @Test
+    fun getAllArrivalAlertsMapsNullResult() = runTest {
+        whenever(alertsDao.getAllArrivalAlerts())
+            .thenReturn(null)
+
+        val result = repository.getAllArrivalAlerts()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getAllArrivalAlertsMapsNonNullResult() = runTest {
+        val items = listOf(
+            ArrivalAlertEntity(
+                1,
+                10L,
+                "1",
+                listOf("1"),
+                1),
+            ArrivalAlertEntity(
+                2,
+                20L,
+                "2",
+                listOf("1", "2"),
+                2),
+            ArrivalAlertEntity(
+                3,
+                30L,
+                "3",
+                listOf("1", "2", "3"),
+                3))
+        val expected = listOf(
+            ArrivalAlert(
+                1,
+                10L,
+                "1",
+                listOf("1"),
+                1),
+            ArrivalAlert(
+                2,
+                20L,
+                "2",
+                listOf("1", "2"),
+                2),
+            ArrivalAlert(
+                3,
+                30L,
+                "3",
+                listOf("1", "2", "3"),
+                3))
+        whenever(alertsDao.getAllArrivalAlerts())
+            .thenReturn(items)
+
+        val result = repository.getAllArrivalAlerts()
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun getAllArrivalAlertStopCodesMapsNullResult() = runTest {
+        whenever(alertsDao.getAllArrivalAlertStopCodes())
+            .thenReturn(null)
+
+        val result = repository.getAllArrivalAlertStopCodes()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun getAllArrivalAlertStopCodesMapsNonNullResult() = runTest {
+        val items = listOf("1", "2", "3")
+        val expected = setOf("1", "2", "3")
+        whenever(alertsDao.getAllArrivalAlertStopCodes())
+            .thenReturn(items)
+
+        val result = repository.getAllArrivalAlertStopCodes()
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun getProximityAlertMapsNullResult() = runTest {
+        whenever(alertsDao.getProximityAlert(42))
+            .thenReturn(null)
+
+        val result = repository.getProximityAlert(42)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun hasArrivalAlertFlowEmitsDistinctValues() = runTest {
+        whenever(alertsDao.getHasArrivalAlertFlow("123456"))
+            .thenReturn(intervalFlowOf(0L, 10L, false, false, true, true, false))
+
+        val observer = repository.hasArrivalAlertFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(alerts1, alerts2, alerts3)
-        verify(alertsDao)
-                .removeOnAlertsChangedListener(any())
+        observer.assertValues(false, true, false)
+    }
+
+    @Test
+    fun hasProximityAlertFlowEmitsDistinctValues() = runTest {
+        whenever(alertsDao.getHasProximityAlertFlow("123456"))
+            .thenReturn(intervalFlowOf(0L, 10L, false, false, true, true, false))
+
+        val observer = repository.hasProximityAlertFlow("123456").test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(false, true, false)
+    }
+
+    @Test
+    fun arrivalAlertCountFlowEmitsDistinctValues() = runTest {
+        whenever(alertsDao.arrivalAlertCountFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, 0, 0, 1, 1, 2, 2, 3))
+
+        val observer = repository.arrivalAlertCountFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(0, 1, 2, 3)
+    }
+
+    @Test
+    fun allProximityAlertsFlowEmitsDistinctValues() = runTest {
+        val alert1 = ProximityAlertEntity(1, 1L, "1", 1)
+        val alert2 = ProximityAlertEntity(2, 2L, "2", 2)
+        val alert3 = ProximityAlertEntity(3, 3L, "3", 3)
+        val expected1 = ProximityAlert(1, 1L, "1", 1)
+        val expected2 = ProximityAlert(2, 2L, "2", 2)
+        val expected3 = ProximityAlert(3, 3L, "3", 3)
+        val flow = intervalFlowOf(
+            0L,
+            10L,
+            null,
+            null,
+            listOf(alert1),
+            listOf(alert1),
+            listOf(alert1, alert2, alert3),
+            listOf(alert2))
+        whenever(alertsDao.allProximityAlertsFlow)
+            .thenReturn(flow)
+
+        val observer = repository.allProximityAlertsFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(
+            null,
+            listOf(expected1),
+            listOf(expected1, expected2, expected3),
+            listOf(expected2))
+    }
+
+    @Test
+    fun allAlertsFlowEmitsDistinctValues() = runTest {
+        val arrivalAlert1 = ArrivalAlertEntity(1, 1L, "1", listOf("1", "2", "3"), 1)
+        val arrivalAlert2 = ArrivalAlertEntity(2, 2L, "2", listOf("4", "5", "6"), 6)
+        val proximityAlert1 = ProximityAlertEntity(3, 3L, "3", 3)
+        val proximityAlert2 = ProximityAlertEntity(4, 4L, "4", 4)
+        val expectedArrivalAlert1 = ArrivalAlert(1, 1L, "1", listOf("1", "2", "3"), 1)
+        val expectedArrivalAlert2 = ArrivalAlert(2, 2L, "2", listOf("4", "5", "6"), 6)
+        val expectedProximityAlert1 = ProximityAlert(3, 3L, "3", 3)
+        val expectedProximityAlert2 = ProximityAlert(4, 4L, "4", 4)
+        val flow = intervalFlowOf(
+            0L,
+            10L,
+            null,
+            null,
+            listOf(arrivalAlert1),
+            listOf(arrivalAlert1),
+            listOf(proximityAlert1),
+            listOf(proximityAlert1),
+            listOf(arrivalAlert1, arrivalAlert2, proximityAlert1, proximityAlert2),
+            listOf(arrivalAlert1, arrivalAlert2, proximityAlert1, proximityAlert2),
+            listOf(arrivalAlert2, proximityAlert2))
+        whenever(alertsDao.allAlertsFlow)
+            .thenReturn(flow)
+
+        val observer = repository.allAlertsFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(
+            null,
+            listOf(expectedArrivalAlert1),
+            listOf(expectedProximityAlert1),
+            listOf(
+                expectedArrivalAlert1,
+                expectedArrivalAlert2,
+                expectedProximityAlert1,
+                expectedProximityAlert2),
+            listOf(expectedArrivalAlert2, expectedProximityAlert2))
+    }
+
+    @Test
+    fun ensureTasksRunningIfAlertsExistDoesNotStartArrivalTaskWhenCountIsZero() = runTest {
+        whenever(alertsDao.getArrivalAlertCount())
+            .thenReturn(0)
+        whenever(alertsDao.getProximityAlertCount())
+            .thenReturn(0)
+
+        repository.ensureTasksRunningIfAlertsExists()
+
+        verify(arrivalAlertTaskLauncher, never())
+            .launchArrivalAlertTask()
+    }
+
+    @Test
+    fun ensureTasksRunningIfAlertsExistStartsArrivalTaskWhenCountIsGreaterThanZero() = runTest {
+        whenever(alertsDao.getArrivalAlertCount())
+            .thenReturn(1)
+        whenever(alertsDao.getProximityAlertCount())
+            .thenReturn(0)
+
+        repository.ensureTasksRunningIfAlertsExists()
+
+        verify(arrivalAlertTaskLauncher)
+            .launchArrivalAlertTask()
+    }
+
+    @Test
+    fun ensureTasksRunningIfAlertsExistDoesNotStartProximityTaskWhenCountIsZero() = runTest {
+        whenever(alertsDao.getProximityAlertCount())
+            .thenReturn(0)
+        whenever(alertsDao.getArrivalAlertCount())
+            .thenReturn(0)
+
+        repository.ensureTasksRunningIfAlertsExists()
+
+        verify(proximityAlertTaskLauncher, never())
+            .launchProximityAlertTask()
+    }
+
+    @Test
+    fun ensureTasksRunningIfAlertsExistStartsProximityTaskWhenCountIsGreaterThanZero() = runTest {
+        whenever(alertsDao.getProximityAlertCount())
+            .thenReturn(1)
+        whenever(alertsDao.getArrivalAlertCount())
+            .thenReturn(0)
+
+        repository.ensureTasksRunningIfAlertsExists()
+
+        verify(proximityAlertTaskLauncher)
+            .launchProximityAlertTask()
     }
 }

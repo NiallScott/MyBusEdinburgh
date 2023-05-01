@@ -27,21 +27,21 @@
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
 import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatcher
-import uk.org.rivernile.android.bustracker.core.database.settings.daos.AlertsDao
+import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import javax.inject.Inject
 
 /**
  * This class contains the business logic for handling a proximity are being entered.
  *
- * @param alertsDao The DAO to access set alerts.
+ * @param alertsRepository The alerts repository.
  * @param geofencingManager The geofencing implementation used.
  * @param notificationDispatcher Used to dispatch the notification to the user.
  * @author Niall Scott
  */
 class AreaEnteredHandler @Inject internal constructor(
-        private val alertsDao: AlertsDao,
-        private val geofencingManager: GeofencingManager,
-        private val notificationDispatcher: AlertNotificationDispatcher) {
+    private val alertsRepository: AlertsRepository,
+    private val geofencingManager: GeofencingManager,
+    private val notificationDispatcher: AlertNotificationDispatcher) {
 
     /**
      * Handle the area being entered.
@@ -49,12 +49,12 @@ class AreaEnteredHandler @Inject internal constructor(
      * @param alertId The ID of the alert which triggered this method being called.
      */
     suspend fun handleAreaEntered(alertId: Int) {
-        alertsDao.getProximityAlert(alertId)
+        alertsRepository.getProximityAlert(alertId)
             ?.let {
                 notificationDispatcher.dispatchProximityAlertNotification(it)
             }
 
         geofencingManager.removeGeofence(alertId)
-        alertsDao.removeProximityAlert(alertId)
+        alertsRepository.removeProximityAlert(alertId)
     }
 }

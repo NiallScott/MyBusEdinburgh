@@ -44,9 +44,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.utils.Event
@@ -178,7 +178,7 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
                 // the user clicks the 'positive' button. If we were to use the ViewModel scope, the
                 // task would be immediately cancelled. Besides, once the Dialog is dismissed, the
                 // user doesn't have the opportunity to cancel the operation anyway.
-                favouritesRepository.addFavouriteStop(favouriteStop)
+                favouritesRepository.addOrUpdateFavouriteStop(favouriteStop)
             }
         }
     }
@@ -198,7 +198,7 @@ class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
                 // the user clicks the 'positive' button. If we were to use the ViewModel scope, the
                 // task would be immediately cancelled. Besides, once the Dialog is dismissed, the
                 // user doesn't have the opportunity to cancel the operation anyway.
-                favouritesRepository.updateFavouriteStop(favouriteStop)
+                favouritesRepository.addOrUpdateFavouriteStop(favouriteStop)
             }
         }
     }

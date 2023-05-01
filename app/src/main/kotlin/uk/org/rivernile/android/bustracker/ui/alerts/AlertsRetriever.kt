@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,12 +32,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import uk.org.rivernile.android.bustracker.core.alerts.Alert
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
+import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
+import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.Alert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ArrivalAlert
-import uk.org.rivernile.android.bustracker.core.database.settings.entities.ProximityAlert
 import javax.inject.Inject
 
 /**
@@ -57,7 +57,7 @@ class AlertsRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val allAlertsFlow: Flow<List<UiAlert>?> get() =
-            alertsRepository.getAllAlertsFlow()
+            alertsRepository.allAlertsFlow
                     .flatMapLatest(this::loadStopDetailsForAlerts)
                     .onStart<List<UiAlert>?> { emit(null) }
 
@@ -88,8 +88,8 @@ class AlertsRetriever @Inject constructor(
      * available.
      */
     private fun combineAlertsAndStopDetails(
-            alerts: List<Alert>,
-            stopDetailsMap: Map<String, StopDetails>?) = alerts.mapNotNull {
+        alerts: List<Alert>,
+        stopDetailsMap: Map<String, StopDetails>?) = alerts.mapNotNull {
         val stopDetails = stopDetailsMap?.get(it.stopCode)
 
         when (it) {
