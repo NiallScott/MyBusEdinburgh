@@ -72,7 +72,7 @@ class ArrivalAlertRunnerService : Service() {
 
     private var job: Job? = null
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForeground(FOREGROUND_NOTIFICATION_ID, foregroundNotification)
 
         if (job == null) {

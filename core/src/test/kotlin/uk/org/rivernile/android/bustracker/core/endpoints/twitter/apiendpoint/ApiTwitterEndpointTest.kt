@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.SerializationException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.IOException
 import org.junit.Assert.assertEquals
@@ -114,6 +115,21 @@ class ApiTwitterEndpointTest {
         val result = endpoint.getLatestTweets()
 
         assertEquals(LatestTweetsResponse.Error.Io(exception), result)
+        verify(exceptionLogger)
+            .log(exception)
+    }
+
+    @Test
+    fun getLatestTweetsThrowsSerializationExceptionReturnsUnrecognisedServerError() = runTest {
+        givenHasInternetConnectivity(true)
+        givenHasGeneratedHashedApiKey()
+        val exception = SerializationException()
+        whenever(twitterService.getLatestTweets(MOCK_API_KEY, appName))
+            .thenAnswer { throw exception }
+
+        val result = endpoint.getLatestTweets()
+
+        assertEquals(LatestTweetsResponse.Error.UnrecognisedServerError, result)
         verify(exceptionLogger)
             .log(exception)
     }
