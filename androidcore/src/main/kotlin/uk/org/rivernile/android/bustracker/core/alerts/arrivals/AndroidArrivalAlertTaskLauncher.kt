@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,23 +26,50 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
+import android.app.ServiceStartNotAllowedException
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
 
 /**
- * This is the Android specific implementation of [ArrivalAlertTaskLauncher].
+ * This is the pre-Android S specific implementation of [ArrivalAlertTaskLauncher].
  *
  * @param context The application [Context].
  * @author Niall Scott
  */
-internal class AndroidArrivalAlertTaskLauncher @Inject constructor(
-        private val context: Context) : ArrivalAlertTaskLauncher {
+internal class LegacyAndroidArrivalAlertTaskLauncher @Inject constructor(
+    private val context: Context) : ArrivalAlertTaskLauncher {
 
     override fun launchArrivalAlertTask() {
         Intent(context, ArrivalAlertRunnerService::class.java).let {
             ContextCompat.startForegroundService(context, it)
+        }
+    }
+}
+
+/**
+ * This is the Android S+ specific implementation of [ArrivalAlertTaskLauncher].
+ *
+ * @param context The application [Context].
+ * @param exceptionLogger Used to log handled exceptions.
+ * @author Niall Scott
+ */
+@RequiresApi(Build.VERSION_CODES.S)
+internal class V31AndroidArrivalAlertTaskLauncher @Inject constructor(
+    private val context: Context,
+    private val exceptionLogger: ExceptionLogger) : ArrivalAlertTaskLauncher {
+
+    override fun launchArrivalAlertTask() {
+        Intent(context, ArrivalAlertRunnerService::class.java).let {
+            try {
+                ContextCompat.startForegroundService(context, it)
+            } catch (e: ServiceStartNotAllowedException) {
+                exceptionLogger.log(e)
+            }
         }
     }
 }
