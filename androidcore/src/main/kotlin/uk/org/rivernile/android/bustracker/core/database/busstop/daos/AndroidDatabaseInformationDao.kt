@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.database.ContentObserver
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import android.os.OperationCanceledException
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.ProducerScope
@@ -69,25 +70,33 @@ internal class AndroidDatabaseInformationDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(DatabaseInformationContract.CURRENT_TOPOLOGY_ID),
                         null,
                         null,
-                        null)?.use {
-                    // Fill the Cursor window.
-                    it.count
+                        null,
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
 
-                    if (it.moveToFirst()) {
-                        it.getString(
-                                it.getColumnIndexOrThrow(
-                                        DatabaseInformationContract.CURRENT_TOPOLOGY_ID))
-                    } else {
-                        null
-                    }
+                            if (it.moveToFirst()) {
+                                it.getString(
+                                    it.getColumnIndexOrThrow(
+                                        DatabaseInformationContract.CURRENT_TOPOLOGY_ID
+                                    )
+                                )
+                            } else {
+                                null
+                            }
+                        }
+
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }
@@ -134,33 +143,38 @@ internal class AndroidDatabaseInformationDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                DatabaseInformationContract.LAST_UPDATE_TIMESTAMP,
-                                DatabaseInformationContract.CURRENT_TOPOLOGY_ID),
+                            DatabaseInformationContract.LAST_UPDATE_TIMESTAMP,
+                            DatabaseInformationContract.CURRENT_TOPOLOGY_ID),
                         null,
                         null,
                         null,
-                        cancellationSignal)?.use {
-                    // Fill the Cursor window.
-                    it.count
+                        cancellationSignal)
+                        ?.use {
+                            // Fill the Cursor window.
+                            it.count
 
-                    if (it.moveToFirst()) {
-                        val lastUpdateTimestampColumn = it.getColumnIndexOrThrow(
-                                DatabaseInformationContract.LAST_UPDATE_TIMESTAMP)
-                        val currentTopologyIdColumn = it.getColumnIndexOrThrow(
-                                DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
+                            if (it.moveToFirst()) {
+                                val lastUpdateTimestampColumn = it.getColumnIndexOrThrow(
+                                    DatabaseInformationContract.LAST_UPDATE_TIMESTAMP)
+                                val currentTopologyIdColumn = it.getColumnIndexOrThrow(
+                                    DatabaseInformationContract.CURRENT_TOPOLOGY_ID)
 
-                        DatabaseMetadata(
-                                it.getLong(lastUpdateTimestampColumn),
-                                it.getString(currentTopologyIdColumn))
-                    } else {
-                        null
-                    }
+                                DatabaseMetadata(
+                                    it.getLong(lastUpdateTimestampColumn),
+                                    it.getString(currentTopologyIdColumn))
+                            } else {
+                                null
+                            }
+                        }
+
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }

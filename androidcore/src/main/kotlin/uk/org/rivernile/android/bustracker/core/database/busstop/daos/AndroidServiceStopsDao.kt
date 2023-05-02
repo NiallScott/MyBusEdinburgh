@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.database.ContentObserver
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import android.os.OperationCanceledException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -101,7 +102,8 @@ internal class AndroidServiceStopsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(ServiceStopsContract.SERVICE_NAME),
                         "${ServiceStopsContract.STOP_CODE} = ?",
@@ -115,7 +117,7 @@ internal class AndroidServiceStopsDao @Inject constructor(
                             if (count > 0) {
                                 val result = ArrayList<String>(count)
                                 val serviceNameColumn = it.getColumnIndex(
-                                        ServiceStopsContract.SERVICE_NAME)
+                                    ServiceStopsContract.SERVICE_NAME)
 
                                 while (it.moveToNext()) {
                                     result.add(it.getString(serviceNameColumn))
@@ -127,7 +129,10 @@ internal class AndroidServiceStopsDao @Inject constructor(
                             }
                         }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import android.database.ContentObserver
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import android.os.OperationCanceledException
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -130,13 +131,14 @@ internal class AndroidServicePointsDao @Inject constructor(
                         "${ServicePointsContract.CHAINAGE} ASC, " +
                         "${ServicePointsContract.ORDER_VALUE} ASC"
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                ServicePointsContract.SERVICE_NAME,
-                                ServicePointsContract.CHAINAGE,
-                                ServicePointsContract.LATITUDE,
-                                ServicePointsContract.LONGITUDE),
+                            ServicePointsContract.SERVICE_NAME,
+                            ServicePointsContract.CHAINAGE,
+                            ServicePointsContract.LATITUDE,
+                            ServicePointsContract.LONGITUDE),
                         selection,
                         selectionArgs,
                         sortClause,
@@ -148,16 +150,17 @@ internal class AndroidServicePointsDao @Inject constructor(
                             if (count > 0) {
                                 val result = ArrayList<ServicePoint>(count)
                                 val serviceNameColumn =
-                                        it.getColumnIndexOrThrow(ServicePointsContract.SERVICE_NAME)
+                                    it.getColumnIndexOrThrow(ServicePointsContract.SERVICE_NAME)
                                 val chainageColumn =
-                                        it.getColumnIndexOrThrow(ServicePointsContract.CHAINAGE)
+                                    it.getColumnIndexOrThrow(ServicePointsContract.CHAINAGE)
                                 val latitudeColumn =
-                                        it.getColumnIndexOrThrow(ServicePointsContract.LATITUDE)
+                                    it.getColumnIndexOrThrow(ServicePointsContract.LATITUDE)
                                 val longitudeColumn =
-                                        it.getColumnIndexOrThrow(ServicePointsContract.LONGITUDE)
+                                    it.getColumnIndexOrThrow(ServicePointsContract.LONGITUDE)
 
                                 while (it.moveToNext()) {
-                                    result.add(ServicePoint(
+                                    result.add(
+                                        ServicePoint(
                                             it.getString(serviceNameColumn),
                                             it.getInt(chainageColumn),
                                             it.getDouble(latitudeColumn),
@@ -170,7 +173,10 @@ internal class AndroidServicePointsDao @Inject constructor(
                             }
                         }
 
-                continuation.resume(result, null)
+                    continuation.resume(result, null)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }

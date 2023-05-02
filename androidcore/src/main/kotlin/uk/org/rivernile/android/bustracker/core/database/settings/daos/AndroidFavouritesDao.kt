@@ -34,6 +34,7 @@ import android.database.Cursor
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import android.os.OperationCanceledException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -62,27 +63,31 @@ internal class AndroidFavouritesDao @Inject constructor(
     private val listeners = mutableListOf<FavouritesDao.OnFavouritesChangedListener>()
     private val observer = Observer()
 
-    @Synchronized
     override fun addOnFavouritesChangedListener(
             listener: FavouritesDao.OnFavouritesChangedListener) {
-        listeners.apply {
-            add(listener)
+        synchronized(listeners) {
+            listeners.apply {
+                add(listener)
 
-            if (size == 1) {
-                context.contentResolver.registerContentObserver(contract.getContentUri(), true,
+                if (size == 1) {
+                    context.contentResolver.registerContentObserver(
+                        contract.getContentUri(),
+                        true,
                         observer)
+                }
             }
         }
     }
 
-    @Synchronized
     override fun removeOnFavouritesChangedListener(
             listener: FavouritesDao.OnFavouritesChangedListener) {
-        listeners.apply {
-            remove(listener)
+        synchronized(listeners) {
+            listeners.apply {
+                remove(listener)
 
-            if (isEmpty()) {
-                context.contentResolver.unregisterContentObserver(observer)
+                if (isEmpty()) {
+                    context.contentResolver.unregisterContentObserver(observer)
+                }
             }
         }
     }
@@ -96,7 +101,8 @@ internal class AndroidFavouritesDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(FavouritesContract.COUNT),
                         "${FavouritesContract.STOP_CODE} = ?",
@@ -106,11 +112,15 @@ internal class AndroidFavouritesDao @Inject constructor(
                             // Fill Cursor window.
                             it.count
 
-                            it.moveToFirst() && it.getInt(
-                                    it.getColumnIndex(FavouritesContract.COUNT)) > 0
+                            it.moveToFirst() &&
+                                    it.getInt(
+                                        it.getColumnIndexOrThrow(FavouritesContract.COUNT)) > 0
                         } ?: false
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -152,32 +162,37 @@ internal class AndroidFavouritesDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                FavouritesContract.ID,
-                                FavouritesContract.STOP_NAME),
+                            FavouritesContract.ID,
+                            FavouritesContract.STOP_NAME),
                         "${FavouritesContract.STOP_CODE} = ?",
                         arrayOf(stopCode),
                         null,
-                        cancellationSignal)?.use {
-                    // Fill Cursor window.
-                    it.count
+                        cancellationSignal)
+                        ?.use {
+                            // Fill Cursor window.
+                            it.count
 
-                    if (it.moveToFirst()) {
-                        val idColumn = it.getColumnIndex(FavouritesContract.ID)
-                        val stopNameColumn = it.getColumnIndex(FavouritesContract.STOP_NAME)
+                            if (it.moveToFirst()) {
+                                val idColumn = it.getColumnIndex(FavouritesContract.ID)
+                                val stopNameColumn = it.getColumnIndex(FavouritesContract.STOP_NAME)
 
-                        FavouriteStop(
-                                it.getLong(idColumn),
-                                stopCode,
-                                it.getString(stopNameColumn))
-                    } else {
-                        null
-                    }
+                                FavouriteStop(
+                                    it.getLong(idColumn),
+                                    stopCode,
+                                    it.getString(stopNameColumn))
+                            } else {
+                                null
+                            }
+                        }
+
+                    continuation.resume(result)
+                }  catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }
@@ -191,39 +206,45 @@ internal class AndroidFavouritesDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                FavouritesContract.ID,
-                                FavouritesContract.STOP_CODE,
-                                FavouritesContract.STOP_NAME),
+                            FavouritesContract.ID,
+                            FavouritesContract.STOP_CODE,
+                            FavouritesContract.STOP_NAME),
                         null,
                         null,
                         "${FavouritesContract.STOP_NAME} ASC",
-                        cancellationSignal)?.use {
-                    val count = it.count
+                        cancellationSignal)
+                        ?.use {
+                            val count = it.count
 
-                    if (count > 0) {
-                        val result = ArrayList<FavouriteStop>(count)
-                        val idColumn = it.getColumnIndex(FavouritesContract.ID)
-                        val stopCodeColumn = it.getColumnIndex(FavouritesContract.STOP_CODE)
-                        val stopNameColumn = it.getColumnIndex(FavouritesContract.STOP_NAME)
+                            if (count > 0) {
+                                val result = ArrayList<FavouriteStop>(count)
+                                val idColumn = it.getColumnIndex(FavouritesContract.ID)
+                                val stopCodeColumn = it.getColumnIndex(FavouritesContract.STOP_CODE)
+                                val stopNameColumn = it.getColumnIndex(FavouritesContract.STOP_NAME)
 
-                        while (it.moveToNext()) {
-                            result.add(mapToFavouriteStop(
-                                    it,
-                                    idColumn,
-                                    stopCodeColumn,
-                                    stopNameColumn))
+                                while (it.moveToNext()) {
+                                    result.add(
+                                        mapToFavouriteStop(
+                                            it,
+                                            idColumn,
+                                            stopCodeColumn,
+                                            stopNameColumn))
+                                }
+
+                                result
+                            } else {
+                                null
+                            }
                         }
 
-                        result
-                    } else {
-                        null
-                    }
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }
@@ -266,8 +287,10 @@ internal class AndroidFavouritesDao @Inject constructor(
      * For all of the currently registers listeners, dispatch a favourite change to them.
      */
     private fun dispatchOnFavouritesChangedListeners() {
-        listeners.forEach { listener ->
-            listener.onFavouritesChanged()
+        synchronized(listeners) {
+            listeners.forEach { listener ->
+                listener.onFavouritesChanged()
+            }
         }
     }
 

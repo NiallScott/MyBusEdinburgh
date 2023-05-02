@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.SerializationException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.IOException
 import org.junit.Assert.assertEquals
@@ -110,6 +111,21 @@ class JsonApiEndpointTest {
         assertEquals(expected, result)
         verify(exceptionLogger)
             .log(ioException)
+    }
+
+    @Test
+    fun getDatabaseVersionReturnsServerErrorWhenApiServiceThrowsSerializationException() = runTest {
+        givenApiKeyGeneratedReturnsHashedApiKey()
+        val exception = SerializationException()
+        whenever(apiService.getDatabaseVersion(HASHED_API_KEY, MOCK_SCHEMA_TYPE))
+            .thenAnswer { throw exception }
+        val expected = DatabaseVersionResponse.Error.ServerError
+
+        val result = endpoint.getDatabaseVersion(null)
+
+        assertEquals(expected, result)
+        verify(exceptionLogger)
+            .log(exception)
     }
 
     @Test

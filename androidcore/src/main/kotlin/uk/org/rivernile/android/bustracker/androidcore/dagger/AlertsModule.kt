@@ -36,11 +36,13 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertNotificationDispatch
 import uk.org.rivernile.android.bustracker.core.alerts.AndroidAlertNotificationDispatcher
 import uk.org.rivernile.android.bustracker.core.alerts.LegacyNotificationPreferences
 import uk.org.rivernile.android.bustracker.core.alerts.NotificationPreferences
-import uk.org.rivernile.android.bustracker.core.alerts.arrivals.AndroidArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertTaskLauncher
-import uk.org.rivernile.android.bustracker.core.alerts.proximity.AndroidProximityAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.LegacyAndroidArrivalAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.arrivals.V31AndroidArrivalAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.GeofencingManager
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.LegacyAndroidProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertTaskLauncher
+import uk.org.rivernile.android.bustracker.core.alerts.proximity.V31AndroidProximityAlertTaskLauncher
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.android.AndroidGeofencingManager
 import javax.inject.Provider
 
@@ -64,6 +66,30 @@ internal class AlertsModule {
         }
     }
 
+    @Provides
+    fun provideProximityAlertTaskLauncher(
+        legacyAndroidProximityAlertTaskLauncher: Provider<LegacyAndroidProximityAlertTaskLauncher>,
+        v31AndroidProximityAlertTaskLauncher: Provider<V31AndroidProximityAlertTaskLauncher>
+    ): ProximityAlertTaskLauncher {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            v31AndroidProximityAlertTaskLauncher.get()
+        } else {
+            legacyAndroidProximityAlertTaskLauncher.get()
+        }
+    }
+
+    @Provides
+    fun provideArrivalAlertTaskLauncher(
+        legacyAndroidArrivalAlertTaskLauncher: Provider<LegacyAndroidArrivalAlertTaskLauncher>,
+        v31AndroidArrivalAlertTaskLauncher: Provider<V31AndroidArrivalAlertTaskLauncher>
+    ): ArrivalAlertTaskLauncher {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            v31AndroidArrivalAlertTaskLauncher.get()
+        } else {
+            legacyAndroidArrivalAlertTaskLauncher.get()
+        }
+    }
+
     @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
@@ -73,18 +99,6 @@ internal class AlertsModule {
         fun bindAlertNotificationDispatcher(
                 androidAlertNotificationDispatcher: AndroidAlertNotificationDispatcher)
                 : AlertNotificationDispatcher
-
-        @Suppress("unused")
-        @Binds
-        fun bindArrivalAlertTaskLauncher(
-                androidArrivalAlertTaskLauncher: AndroidArrivalAlertTaskLauncher)
-                : ArrivalAlertTaskLauncher
-
-        @Suppress("unused")
-        @Binds
-        fun bindProximityAlertTaskLauncher(
-                androidProximityAlertTaskLauncher: AndroidProximityAlertTaskLauncher)
-                : ProximityAlertTaskLauncher
 
         @Suppress("unused")
         @Binds

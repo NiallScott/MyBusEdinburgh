@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,6 +32,7 @@ import android.database.Cursor
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
+import android.os.OperationCanceledException
 import androidx.annotation.VisibleForTesting
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.ProducerScope
@@ -104,11 +105,12 @@ internal class AndroidBusStopsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.STOP_NAME,
-                                BusStopsContract.LOCALITY),
+                            BusStopsContract.STOP_NAME,
+                            BusStopsContract.LOCALITY),
                         "${BusStopsContract.STOP_CODE} = ?",
                         arrayOf(stopCode),
                         null,
@@ -119,18 +121,21 @@ internal class AndroidBusStopsDao @Inject constructor(
 
                             if (it.moveToFirst()) {
                                 it.getString(it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME))
-                                        ?.let { name ->
-                                            val locality = it.getString(
-                                                    it.getColumnIndexOrThrow(
-                                                            BusStopsContract.LOCALITY))
-                                            StopName(name, locality)
-                                        }
+                                    ?.let { name ->
+                                        val locality = it.getString(
+                                            it.getColumnIndexOrThrow(
+                                                BusStopsContract.LOCALITY))
+                                        StopName(name, locality)
+                                    }
                             } else {
                                 null
                             }
                         }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -144,11 +149,12 @@ internal class AndroidBusStopsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.LATITUDE,
-                                BusStopsContract.LONGITUDE),
+                            BusStopsContract.LATITUDE,
+                            BusStopsContract.LONGITUDE),
                         "${BusStopsContract.STOP_CODE} = ?",
                         arrayOf(stopCode),
                         null,
@@ -159,18 +165,23 @@ internal class AndroidBusStopsDao @Inject constructor(
 
                             if (it.moveToFirst()) {
                                 val latitudeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
                                 val longitudeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
 
-                                StopLocation(stopCode, it.getDouble(latitudeColumn),
-                                        it.getDouble(longitudeColumn))
+                                StopLocation(
+                                    stopCode,
+                                    it.getDouble(latitudeColumn),
+                                    it.getDouble(longitudeColumn))
                             } else {
                                 null
                             }
                         }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -184,14 +195,15 @@ internal class AndroidBusStopsDao @Inject constructor(
                     cancellationSignal.cancel()
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.STOP_NAME,
-                                BusStopsContract.LOCALITY,
-                                BusStopsContract.LATITUDE,
-                                BusStopsContract.LONGITUDE,
-                                BusStopsContract.ORIENTATION),
+                            BusStopsContract.STOP_NAME,
+                            BusStopsContract.LOCALITY,
+                            BusStopsContract.LATITUDE,
+                            BusStopsContract.LONGITUDE,
+                            BusStopsContract.ORIENTATION),
                         "${BusStopsContract.STOP_CODE} = ?",
                         arrayOf(stopCode),
                         null,
@@ -202,30 +214,33 @@ internal class AndroidBusStopsDao @Inject constructor(
 
                             if (it.moveToFirst()) {
                                 val stopNameColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
+                                    it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
                                 val localityColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
                                 val latitudeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
                                 val longitudeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
                                 val orientationColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
+                                    it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
 
                                 StopDetails(
-                                        stopCode,
-                                        StopName(
-                                                it.getString(stopNameColumn),
-                                                it.getString(localityColumn)),
-                                        it.getDouble(latitudeColumn),
-                                        it.getDouble(longitudeColumn),
-                                        it.getInt(orientationColumn))
+                                    stopCode,
+                                    StopName(
+                                        it.getString(stopNameColumn),
+                                        it.getString(localityColumn)),
+                                    it.getDouble(latitudeColumn),
+                                    it.getDouble(longitudeColumn),
+                                    it.getInt(orientationColumn))
                             } else {
                                 null
                             }
                         }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -244,15 +259,17 @@ internal class AndroidBusStopsDao @Inject constructor(
                 }
 
                 val inPlaceholders = Array(stopCodes.size) { '?' }
-                val result = context.contentResolver.query(
+
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.STOP_CODE,
-                                BusStopsContract.STOP_NAME,
-                                BusStopsContract.LOCALITY,
-                                BusStopsContract.LATITUDE,
-                                BusStopsContract.LONGITUDE,
-                                BusStopsContract.ORIENTATION),
+                            BusStopsContract.STOP_CODE,
+                            BusStopsContract.STOP_NAME,
+                            BusStopsContract.LOCALITY,
+                            BusStopsContract.LATITUDE,
+                            BusStopsContract.LONGITUDE,
+                            BusStopsContract.ORIENTATION),
                         "${BusStopsContract.STOP_CODE} IN (${inPlaceholders.joinToString(",")})",
                         stopCodes.toTypedArray(),
                         null,
@@ -263,28 +280,28 @@ internal class AndroidBusStopsDao @Inject constructor(
                             if (count > 0) {
                                 val result = mutableMapOf<String, StopDetails>()
                                 val stopCodeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
                                 val stopNameColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
+                                    it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
                                 val localityColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
                                 val latitudeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
                                 val longitudeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
                                 val orientationColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
+                                    it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
 
                                 while (it.moveToNext()) {
                                     val stopCode = it.getString(stopCodeColumn)
                                     result[stopCode] = StopDetails(
-                                            stopCode,
-                                            StopName(
-                                                    it.getString(stopNameColumn),
-                                                    it.getString(localityColumn)),
-                                            it.getDouble(latitudeColumn),
-                                            it.getDouble(longitudeColumn),
-                                            it.getInt(orientationColumn))
+                                        stopCode,
+                                        StopName(
+                                            it.getString(stopNameColumn),
+                                            it.getString(localityColumn)),
+                                        it.getDouble(latitudeColumn),
+                                        it.getDouble(longitudeColumn),
+                                        it.getInt(orientationColumn))
                                 }
 
                                 result
@@ -293,7 +310,10 @@ internal class AndroidBusStopsDao @Inject constructor(
                             }
                         }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -312,44 +332,51 @@ internal class AndroidBusStopsDao @Inject constructor(
                 }
 
                 val inPlaceholders = Array(stopCodes.size) { '?' }
-                val result = context.contentResolver.query(
+
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.STOP_CODE,
-                                BusStopsContract.SERVICE_LISTING),
+                            BusStopsContract.STOP_CODE,
+                            BusStopsContract.SERVICE_LISTING),
                         "${BusStopsContract.STOP_CODE} IN (${inPlaceholders.joinToString(",")})",
                         stopCodes.toTypedArray(),
                         null,
-                        cancellationSignal)?.use {
-                    val count = it.count
+                        cancellationSignal)
+                        ?.use {
+                            val count = it.count
 
-                    if (count > 0) {
-                        val result = mutableMapOf<String, List<String>>()
-                        val stopCodeColumn = it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
-                        val serviceListingColumn =
-                                it.getColumnIndexOrThrow(BusStopsContract.SERVICE_LISTING)
+                            if (count > 0) {
+                                val result = mutableMapOf<String, List<String>>()
+                                val stopCodeColumn =
+                                    it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
+                                val serviceListingColumn =
+                                    it.getColumnIndexOrThrow(BusStopsContract.SERVICE_LISTING)
 
-                        while (it.moveToNext()) {
-                            val stopCode = it.getString(stopCodeColumn)
-                            val serviceListing = it.getString(serviceListingColumn)
+                                while (it.moveToNext()) {
+                                    val stopCode = it.getString(stopCodeColumn)
+                                    val serviceListing = it.getString(serviceListingColumn)
 
-                            serviceListing?.split(',')
-                                    ?.mapNotNull { name ->
-                                        name.trim().ifEmpty { null }
-                                    }
-                                    ?.ifEmpty { null }
-                                    ?.let { names ->
-                                        result.put(stopCode, names)
-                                    }
+                                    serviceListing?.split(',')
+                                        ?.mapNotNull { name ->
+                                            name.trim().ifEmpty { null }
+                                        }
+                                        ?.ifEmpty { null }
+                                        ?.let { names ->
+                                            result.put(stopCode, names)
+                                        }
+                                }
+
+                                result
+                            } else {
+                                null
+                            }
                         }
 
-                        result
-                    } else {
-                        null
-                    }
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
                 }
-
-                continuation.resume(result)
             }
         }
     }
@@ -546,27 +573,33 @@ internal class AndroidBusStopsDao @Inject constructor(
                 val selection = "(${BusStopsContract.LATITUDE} BETWEEN ? AND ?) AND " +
                         "(${BusStopsContract.LONGITUDE} BETWEEN ? AND ?)"
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.STOP_CODE,
-                                BusStopsContract.STOP_NAME,
-                                BusStopsContract.LOCALITY,
-                                BusStopsContract.LATITUDE,
-                                BusStopsContract.LONGITUDE,
-                                BusStopsContract.ORIENTATION,
-                                BusStopsContract.SERVICE_LISTING),
+                            BusStopsContract.STOP_CODE,
+                            BusStopsContract.STOP_NAME,
+                            BusStopsContract.LOCALITY,
+                            BusStopsContract.LATITUDE,
+                            BusStopsContract.LONGITUDE,
+                            BusStopsContract.ORIENTATION,
+                            BusStopsContract.SERVICE_LISTING
+                        ),
                         selection,
                         arrayOf(
-                                minLatitude.toString(),
-                                maxLatitude.toString(),
-                                minLongitude.toString(),
-                                maxLongitude.toString()),
+                            minLatitude.toString(),
+                            maxLatitude.toString(),
+                            minLongitude.toString(),
+                            maxLongitude.toString()
+                        ),
                         null,
                         cancellationSignal)
                         ?.use(this@AndroidBusStopsDao::mapCursorToStopDetailsWithServicesListing)
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -612,23 +645,28 @@ internal class AndroidBusStopsDao @Inject constructor(
                         minLongitude.toString(),
                         maxLongitude.toString()) + serviceFilter
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.STOP_CODE,
-                                BusStopsContract.STOP_NAME,
-                                BusStopsContract.LOCALITY,
-                                BusStopsContract.LATITUDE,
-                                BusStopsContract.LONGITUDE,
-                                BusStopsContract.ORIENTATION,
-                                BusStopsContract.SERVICE_LISTING),
+                            BusStopsContract.STOP_CODE,
+                            BusStopsContract.STOP_NAME,
+                            BusStopsContract.LOCALITY,
+                            BusStopsContract.LATITUDE,
+                            BusStopsContract.LONGITUDE,
+                            BusStopsContract.ORIENTATION,
+                            BusStopsContract.SERVICE_LISTING
+                        ),
                         selection,
                         selectionArgs,
                         null,
                         cancellationSignal)
                         ?.use(this@AndroidBusStopsDao::mapCursorToStopDetailsWithServicesListing)
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -666,15 +704,16 @@ internal class AndroidBusStopsDao @Inject constructor(
                     selectionArgs = null
                 }
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.STOP_CODE,
-                                BusStopsContract.STOP_NAME,
-                                BusStopsContract.LOCALITY,
-                                BusStopsContract.LATITUDE,
-                                BusStopsContract.LONGITUDE,
-                                BusStopsContract.ORIENTATION),
+                            BusStopsContract.STOP_CODE,
+                            BusStopsContract.STOP_NAME,
+                            BusStopsContract.LOCALITY,
+                            BusStopsContract.LATITUDE,
+                            BusStopsContract.LONGITUDE,
+                            BusStopsContract.ORIENTATION),
                         selection,
                         selectionArgs,
                         null,
@@ -686,27 +725,27 @@ internal class AndroidBusStopsDao @Inject constructor(
                             if (count > 0) {
                                 val result = mutableListOf<StopDetails>()
                                 val stopCodeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.STOP_CODE)
                                 val stopNameColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
+                                    it.getColumnIndexOrThrow(BusStopsContract.STOP_NAME)
                                 val localityColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LOCALITY)
                                 val latitudeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LATITUDE)
                                 val longitudeColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
+                                    it.getColumnIndexOrThrow(BusStopsContract.LONGITUDE)
                                 val orientationColumn =
-                                        it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
+                                    it.getColumnIndexOrThrow(BusStopsContract.ORIENTATION)
 
                                 while (it.moveToNext()) {
                                     result += StopDetails(
-                                            it.getString(stopCodeColumn),
-                                            StopName(
-                                                    it.getString(stopNameColumn),
-                                                    it.getString(localityColumn)),
-                                            it.getDouble(latitudeColumn),
-                                            it.getDouble(longitudeColumn),
-                                            it.getInt(orientationColumn))
+                                        it.getString(stopCodeColumn),
+                                        StopName(
+                                            it.getString(stopNameColumn),
+                                            it.getString(localityColumn)),
+                                        it.getDouble(latitudeColumn),
+                                        it.getDouble(longitudeColumn),
+                                        it.getInt(orientationColumn))
                                 }
 
                                 result
@@ -715,7 +754,10 @@ internal class AndroidBusStopsDao @Inject constructor(
                             }
                         }
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
@@ -736,21 +778,25 @@ internal class AndroidBusStopsDao @Inject constructor(
                 val fixedSearchTerm = "%$searchTerm%"
                 val selectionArgs = arrayOf(fixedSearchTerm, fixedSearchTerm, fixedSearchTerm)
 
-                val result = context.contentResolver.query(
+                try {
+                    val result = context.contentResolver.query(
                         contract.getContentUri(),
                         arrayOf(
-                                BusStopsContract.STOP_CODE,
-                                BusStopsContract.STOP_NAME,
-                                BusStopsContract.LOCALITY,
-                                BusStopsContract.ORIENTATION,
-                                BusStopsContract.SERVICE_LISTING),
+                            BusStopsContract.STOP_CODE,
+                            BusStopsContract.STOP_NAME,
+                            BusStopsContract.LOCALITY,
+                            BusStopsContract.ORIENTATION,
+                            BusStopsContract.SERVICE_LISTING),
                         selection,
                         selectionArgs,
                         "${BusStopsContract.STOP_NAME} ASC",
                         cancellationSignal)
                         ?.use(this@AndroidBusStopsDao::mapCursorToStopSearchResult)
 
-                continuation.resume(result)
+                    continuation.resume(result)
+                } catch (ignored: OperationCanceledException) {
+                    // Do nothing.
+                }
             }
         }
     }
