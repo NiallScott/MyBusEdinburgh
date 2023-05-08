@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -56,7 +55,6 @@ import java.util.Date
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class CheckTimesTaskTest {
 

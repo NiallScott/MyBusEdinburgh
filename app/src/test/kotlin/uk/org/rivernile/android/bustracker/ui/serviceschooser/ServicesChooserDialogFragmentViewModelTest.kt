@@ -26,189 +26,233 @@
 
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
-import androidx.lifecycle.SavedStateHandle
-import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertNull
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertSame
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.mock
+import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
+import uk.org.rivernile.android.bustracker.testutils.test
 
 /**
  * Tests for [ServicesChooserDialogFragmentViewModel].
  *
  * @author Niall Scott
  */
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(MockitoJUnitRunner::class)
 class ServicesChooserDialogFragmentViewModelTest {
 
-    companion object {
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+    @get:Rule
+    val rule = InstantTaskExecutorRule()
 
-        private const val STATE_SERVICES = "services"
-        private const val STATE_SELECTED_SERVICES = "selectedServices"
-    }
-
-    @Test
-    fun setServicesSetsServices() {
-        val services = arrayOf("1", "2", "3")
-        val viewModel = createViewModel(
-            SavedStateHandle(
-                mapOf(
-                    STATE_SERVICES to services)))
-
-        assertArrayEquals(services, viewModel.services)
-    }
+    @Mock
+    private lateinit var arguments: Arguments
+    @Mock
+    private lateinit var state: State
+    @Mock
+    private lateinit var servicesLoader: ServicesLoader
 
     @Test
-    fun getSelectedServicesReturnsNullByDefault() {
+    fun servicesLiveDataEmitsValuesUpstreamFromServicesLoader() = runTest {
+        val service1 = mock<UiService>()
+        val service2 = mock<UiService>()
+        val service3 = mock<UiService>()
+        val flow = intervalFlowOf(
+            0L,
+            10L,
+            emptyList<UiService>(),
+            listOf(service1, service2, service3),
+            listOf(service1, service2, service3),
+            listOf(service1))
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(flow)
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel()
+
+        val observer = viewModel.servicesLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+            null,
+            emptyList(),
+            listOf(service1, service2, service3),
+            listOf(service1))
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsProgressThenContentWhenServicesIsPopulated() = runTest {
+        whenever(arguments.paramsFlow)
+            .thenReturn(flowOf(null))
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(intervalFlowOf(10L, 10L, listOf(mock())))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+            UiState.PROGRESS,
+            UiState.CONTENT)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsProgressThenErrorWhenServicesNotPopulated() = runTest {
+        whenever(arguments.paramsFlow)
+            .thenReturn(flowOf(null))
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(intervalFlowOf(10L, 10L, emptyList()))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+            UiState.PROGRESS,
+            UiState.ERROR_NO_SERVICES_GLOBAL)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsGlobalErrorWhenServicesEMptyAndParamsAllServices() = runTest {
+        whenever(arguments.paramsFlow)
+            .thenReturn(flowOf(ServicesChooserParams.AllServices(0, null)))
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(intervalFlowOf(10L, 10L, emptyList()))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+            UiState.PROGRESS,
+            UiState.ERROR_NO_SERVICES_GLOBAL)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsGlobalErrorWhenServicesEMptyAndParamsStop() = runTest {
+        whenever(arguments.paramsFlow)
+            .thenReturn(flowOf(ServicesChooserParams.Stop(0, null, "123456")))
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(intervalFlowOf(10L, 10L, emptyList()))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+            UiState.PROGRESS,
+            UiState.ERROR_NO_SERVICES_STOP)
+    }
+
+    @Test
+    fun uiStateLiveDataEmitsValues() = runTest {
+        whenever(arguments.paramsFlow)
+            .thenReturn(flowOf(ServicesChooserParams.Stop(0, null, "123456")))
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(intervalFlowOf(
+                10L,
+                10L,
+                emptyList(),
+                emptyList(),
+                listOf(mock()),
+                emptyList()))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.uiStateLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(
+            UiState.PROGRESS,
+            UiState.ERROR_NO_SERVICES_STOP,
+            UiState.CONTENT,
+            UiState.ERROR_NO_SERVICES_STOP)
+    }
+
+    @Test
+    fun isClearAllButtonEnabledLiveDataEmitsValuesFromState() = runTest {
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(flowOf(emptyList()))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, false, true, false))
+        val viewModel = createViewModel()
+
+        val observer = viewModel.isClearAllButtonEnabledLiveData.test()
+        advanceUntilIdle()
+
+        observer.assertValues(false, true, false)
+    }
+
+    @Test
+    fun selectedServicesReturnsValueFromState() {
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(flowOf(emptyList()))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
+        val viewModel = createViewModel()
+        val expected = mock<ArrayList<String>?>()
+        whenever(state.selectedServices)
+            .thenReturn(expected)
 
         val result = viewModel.selectedServices
 
-        assertNull(result)
+        assertSame(expected, result)
     }
 
     @Test
-    fun getSelectedServicesReturnsFromSavedStateByDefault() {
-        val services = arrayOf("1", "2", "3")
-        val viewModel = createViewModel(
-                SavedStateHandle(
-                        mapOf(STATE_SELECTED_SERVICES to services)))
-
-        val result = viewModel.selectedServices
-
-        assertArrayEquals(services, result)
-    }
-
-    @Test
-    fun setSelectedServicesSetsServices() {
-        val services = arrayOf("1", "2", "3")
+    fun onServiceClickedPassesThroughToState() {
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(flowOf(emptyList()))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
-        viewModel.selectedServices = services
+        viewModel.onServiceClicked("1")
 
-        assertArrayEquals(services, viewModel.selectedServices)
+        verify(state)
+            .onServiceClicked("1")
     }
 
     @Test
-    fun checkBoxesIsNullByDefault() {
+    fun onClearAllClickedPassesThroughToState() {
+        whenever(servicesLoader.servicesFlow)
+            .thenReturn(flowOf(emptyList()))
+        whenever(state.hasSelectedServicesFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
-        assertNull(viewModel.checkBoxes)
+        viewModel.onClearAllClicked()
+
+        verify(state)
+            .onClearAllClicked()
     }
 
-    @Test
-    fun checkBoxesIsNullWhenServicesIsEmpty() {
-        val viewModel = createViewModel(
-            SavedStateHandle(
-                mapOf(
-                    STATE_SERVICES to emptyArray<String>())))
-
-        assertNull(viewModel.checkBoxes)
-    }
-
-    @Test
-    fun checkBoxesHasArrayOfFalseByDefaultWhenServicesExist() {
-        val viewModel = createViewModel(
-            SavedStateHandle(
-                mapOf(
-                    STATE_SERVICES to arrayOf("1", "2", "3"))))
-        val expected = booleanArrayOf(false, false, false)
-
-        val result = viewModel.checkBoxes
-
-        assertArrayEquals(expected, result)
-    }
-
-    @Test
-    fun checkBoxesHasPopulatedArrayWhenServicesExistAndSelectedServicesInSavedState() {
-        val viewModel = createViewModel(
-                SavedStateHandle(
-                        mapOf(
-                            STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"),
-                            STATE_SELECTED_SERVICES to arrayOf("2", "4"))))
-        val expected = booleanArrayOf(false, true, false, true, false)
-
-        val result = viewModel.checkBoxes
-
-        assertArrayEquals(expected, result)
-    }
-
-    @Test
-    fun checkBoxesHasPopulatedArrayWhenServicesExistAndSelectedServices() {
-        val viewModel = createViewModel(
-            SavedStateHandle(
-                mapOf(
-                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
-        val expected = booleanArrayOf(false, true, false, true, false)
-
-        viewModel.selectedServices = arrayOf("2", "4")
-        val result = viewModel.checkBoxes
-
-        assertArrayEquals(expected, result)
-    }
-
-    @Test
-    fun onItemClickedWithNoServicesDoesNotMakeAnyChanges() {
-        val viewModel = createViewModel()
-
-        viewModel.onItemClicked(2, true)
-
-        assertNull(viewModel.selectedServices)
-    }
-
-    @Test
-    fun onItemClickedAndIsCheckedAddsSelectedService() {
-        val viewModel = createViewModel(
-            SavedStateHandle(
-                mapOf(
-                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
-        val expected = arrayOf("3")
-
-        viewModel.onItemClicked(2, true)
-
-        assertArrayEquals(expected, viewModel.selectedServices)
-    }
-
-    @Test
-    fun onItemClickedAndIsCheckedOnlyAddsServiceOnce() {
-        val viewModel = createViewModel(
-            SavedStateHandle(
-                mapOf(
-                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
-        val expected = arrayOf("3")
-
-        viewModel.onItemClicked(2, true)
-        viewModel.onItemClicked(2, true)
-
-        assertArrayEquals(expected, viewModel.selectedServices)
-    }
-
-    @Test
-    fun onItemClickedWithMultipleServices() {
-        val viewModel = createViewModel(
-            SavedStateHandle(
-                mapOf(
-                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
-        val expected = arrayOf("2", "4")
-
-        viewModel.onItemClicked(1, true)
-        viewModel.onItemClicked(3, true)
-
-        assertArrayEquals(expected, viewModel.selectedServices)
-    }
-
-    @Test
-    fun onItemClickedAndIsNotCheckedRemovesService() {
-        val viewModel = createViewModel(
-            SavedStateHandle(
-                mapOf(
-                    STATE_SERVICES to arrayOf("1", "2", "3", "4", "5"))))
-        val expected = arrayOf("4")
-
-        viewModel.onItemClicked(1, true)
-        viewModel.onItemClicked(3, true)
-        viewModel.onItemClicked(1, false)
-
-        assertArrayEquals(expected, viewModel.selectedServices)
-    }
-
-    private fun createViewModel(savedState: SavedStateHandle = SavedStateHandle()) =
-            ServicesChooserDialogFragmentViewModel(savedState)
+    private fun createViewModel() =
+        ServicesChooserDialogFragmentViewModel(
+            arguments,
+            state,
+            servicesLoader,
+            coroutineRule.testDispatcher)
 }

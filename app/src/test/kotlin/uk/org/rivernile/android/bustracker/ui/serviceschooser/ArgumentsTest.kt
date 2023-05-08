@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,53 +24,59 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.search
+package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
+import androidx.lifecycle.SavedStateHandle
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.verify
-import uk.org.rivernile.android.bustracker.core.database.search.daos.SearchHistoryDao
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
- * Tests for [SearchHistoryRepository].
+ * Tests for [Arguments].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
-class SearchHistoryRepositoryTest {
+class ArgumentsTest {
 
     @get:Rule
     val coroutineRule = MainCoroutineRule()
 
-    @Mock
-    private lateinit var searchHistoryDao: SearchHistoryDao
+    @Test
+    fun paramsFlowIsNullByDefault() = runTest {
+        val arguments = Arguments(SavedStateHandle())
 
-    private lateinit var searchHistoryRepository: SearchHistoryRepository
+        val result = arguments.paramsFlow.first()
 
-    @Before
-    fun setUp() {
-        searchHistoryRepository = SearchHistoryRepository(searchHistoryDao)
+        assertNull(result)
     }
 
     @Test
-    fun addSearchTermAddsSearchTermToDao() = runTest {
-        searchHistoryRepository.addSearchTerm("test")
+    fun paramsFlowEmitsAllServicesWhenSetAsArgument() = runTest {
+        val allServices = ServicesChooserParams.AllServices(1, listOf("1", "2", "3"))
+        val arguments = Arguments(
+            SavedStateHandle(
+                mapOf(
+                    Arguments.STATE_PARAMS to allServices)))
 
-        verify(searchHistoryDao)
-                .addSearchTerm("test")
+        val result = arguments.paramsFlow.first()
+
+        assertEquals(allServices, result)
     }
 
     @Test
-    fun clearSearchHistoryCallsDao() = runTest {
-        searchHistoryRepository.clearSearchHistory()
+    fun paramsFlowEmitsStopWhenSetAsArgument() = runTest {
+        val stop = ServicesChooserParams.Stop(1, listOf("1", "2", "3"), "123456")
+        val arguments = Arguments(
+            SavedStateHandle(
+                mapOf(
+                    Arguments.STATE_PARAMS to stop)))
 
-        verify(searchHistoryDao)
-                .clearSearchHistory()
+        val result = arguments.paramsFlow.first()
+
+        assertEquals(stop, result)
     }
 }

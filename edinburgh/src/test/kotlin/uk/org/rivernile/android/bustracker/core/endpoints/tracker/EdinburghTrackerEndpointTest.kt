@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okio.IOException
 import org.junit.Assert.assertEquals
@@ -53,7 +52,6 @@ import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class EdinburghTrackerEndpointTest {
 

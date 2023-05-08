@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,15 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.busstopmap
+package uk.org.rivernile.android.bustracker.ui.alerts.time
 
 /**
  * This class contains the parameters which are sent through to the services selection UI.
  *
- * @property services The services to choose from.
  * @property selectedServices The currently selected services, to show the appropriate current
  * state.
  * @author Niall Scott
  */
-data class ServicesChooserParams(
-        val services: List<String>,
+data class UiServicesChooserParams(
+        val stopCode: String,
         val selectedServices: List<String>?)

@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -56,7 +55,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ApiTwitterEndpointTest {
 

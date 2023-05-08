@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.preferences
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertSame
@@ -46,7 +45,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class PreferenceRepositoryTest {
 

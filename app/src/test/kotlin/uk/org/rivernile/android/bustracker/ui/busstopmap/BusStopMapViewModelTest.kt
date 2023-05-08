@@ -748,6 +748,8 @@ class BusStopMapViewModelTest {
     fun showServicesChooserLiveDataDoesNotEmitWhenServiceNamesIsNull() = runTest {
         whenever(servicesRepository.allServiceNamesFlow)
                 .thenReturn(flowOf(null))
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+            .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
 
         viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -762,6 +764,8 @@ class BusStopMapViewModelTest {
     fun showServicesChooserLiveDataDoesNotEmitWhenServiceNamesIsEmpty() = runTest {
         whenever(servicesRepository.allServiceNamesFlow)
                 .thenReturn(flowOf(emptyList()))
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+            .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
 
         viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -777,15 +781,16 @@ class BusStopMapViewModelTest {
         val services = listOf("1", "2", "3")
         whenever(servicesRepository.allServiceNamesFlow)
                 .thenReturn(flowOf(services))
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+            .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
-        val expected = ServicesChooserParams(services, null)
 
         viewModel.isFilterMenuItemEnabledLiveData.test()
         val observer = viewModel.showServicesChooserLiveData.test()
         advanceUntilIdle()
         viewModel.onServicesMenuItemClicked()
 
-        observer.assertValues(expected)
+        observer.assertValues(null)
     }
 
     @Test
@@ -794,8 +799,9 @@ class BusStopMapViewModelTest {
         val selectedServices = listOf("1", "2")
         whenever(servicesRepository.allServiceNamesFlow)
                 .thenReturn(flowOf(services))
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+            .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
-        val expected = ServicesChooserParams(services, selectedServices)
 
         viewModel.onServicesSelected(selectedServices)
         viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -803,7 +809,7 @@ class BusStopMapViewModelTest {
         advanceUntilIdle()
         viewModel.onServicesMenuItemClicked()
 
-        observer.assertValues(expected)
+        observer.assertValues(selectedServices)
     }
 
     @Test
@@ -812,17 +818,18 @@ class BusStopMapViewModelTest {
         val selectedServices = listOf("1", "2")
         whenever(servicesRepository.allServiceNamesFlow)
                 .thenReturn(flowOf(services))
+        whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
+            .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel(
                 SavedStateHandle(
                         mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2"))))
-        val expected = ServicesChooserParams(services, selectedServices)
 
         viewModel.isFilterMenuItemEnabledLiveData.test()
         val observer = viewModel.showServicesChooserLiveData.test()
         advanceUntilIdle()
         viewModel.onServicesMenuItemClicked()
 
-        observer.assertValues(expected)
+        observer.assertValues(selectedServices)
     }
 
     @Test

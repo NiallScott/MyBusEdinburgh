@@ -499,7 +499,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
         availableServicesFlow.finish()
 
         observer.assertValues(
-                ServicesChooserParams(listOf("1", "2", "3"), null))
+                UiServicesChooserParams("123456", null))
     }
 
     @Test
@@ -527,7 +527,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
-                ServicesChooserParams(listOf("1", "2", "3"), listOf("2", "3")))
+                UiServicesChooserParams("123456", listOf("2", "3")))
     }
 
     @Test
@@ -554,7 +554,7 @@ class AddTimeAlertDialogFragmentViewModelTest {
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
-                ServicesChooserParams(listOf("1", "2", "3"), listOf("2", "3")))
+                UiServicesChooserParams("123456", listOf("2", "3")))
     }
 
     @Test
@@ -586,8 +586,8 @@ class AddTimeAlertDialogFragmentViewModelTest {
         availableServicesFlow.finish()
 
         chooserObserver.assertValues(
-                ServicesChooserParams(listOf("1", "2", "3"), listOf("2", "3")),
-                ServicesChooserParams(listOf("1", "2", "3"), listOf("2")))
+                UiServicesChooserParams("123456", listOf("2", "3")),
+                UiServicesChooserParams("123456", listOf("2")))
     }
 
     @Test

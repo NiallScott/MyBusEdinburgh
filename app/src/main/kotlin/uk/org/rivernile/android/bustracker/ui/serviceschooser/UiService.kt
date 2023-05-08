@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.alerts.time
+package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
 /**
- * This class contains the parameters which are sent through to the services selection UI.
+ * This class represents a service item to be displayed within the services chooser.
  *
- * @property services The services to choose from.
- * @property selectedServices The currently selected services, to show the appropriate current
- * state.
+ * @property serviceName The name of the service.
+ * @property serviceColour The colour of the service, if available.
+ * @property isSelected Is the service selected?
  * @author Niall Scott
  */
-data class ServicesChooserParams(
-        val services: List<String>,
-        val selectedServices: List<String>?)
+data class UiService(
+    val serviceName: String,
+    val serviceColour: Int?,
+    val isSelected: Boolean)

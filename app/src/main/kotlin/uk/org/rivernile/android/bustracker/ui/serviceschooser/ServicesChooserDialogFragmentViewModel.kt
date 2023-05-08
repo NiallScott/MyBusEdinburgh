@@ -26,76 +26,115 @@
 
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
+import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import javax.inject.Inject
 
 /**
  * This is the [ViewModel] for [ServicesChooserDialogFragment].
  *
- * @param savedState Used to access the saved instance state.
+ * @param arguments The arguments sent in to [ServicesChooserDialogFragment].
+ * @param state State tracking for this instance.
+ * @param servicesLoader Used to load services and combine them with their current selected state.
+ * @param defaultDispatcher The default [CoroutineDispatcher].
  * @author Niall Scott
  */
 @HiltViewModel
 class ServicesChooserDialogFragmentViewModel @Inject constructor(
-        private val savedState: SavedStateHandle) : ViewModel() {
+    arguments: Arguments,
+    private val state: State,
+    servicesLoader: ServicesLoader,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
 
         /**
-         * State key for services.
+         * State key for the parameters.
          */
-        const val STATE_SERVICES = "services"
-        /**
-         * State key for selected services.
-         */
-        const val STATE_SELECTED_SERVICES = "selectedServices"
+        const val STATE_PARAMS = Arguments.STATE_PARAMS
     }
 
+    private val servicesFlow = servicesLoader
+        .servicesFlow
+        .distinctUntilChanged()
+        .flowOn(defaultDispatcher)
+        .onStart<List<UiService>?> { emit(null) }
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+
     /**
-     * This property hold the [Array] of services which the user can select from.
+     * This emits the services to be displayed in the chooser along with their state.
      */
-    val services: Array<String>? get() = savedState[STATE_SERVICES]
+    val servicesLiveData = servicesFlow.asLiveData(viewModelScope.coroutineContext)
 
     /**
-     * This property holds the services which the user has selected.
+     * This emits the current [UiState].
      */
-    var selectedServices: Array<String>?
-        get() = savedState[STATE_SELECTED_SERVICES]
-        set(value) {
-            savedState[STATE_SELECTED_SERVICES] = value
-        }
+    val uiStateLiveData =
+        combine(
+            arguments.paramsFlow,
+            servicesFlow,
+            this::mapToUiState)
+            .distinctUntilChanged()
+            .asLiveData(viewModelScope.coroutineContext)
 
     /**
-     * This property exists as a convenience for the Dialog API, to turn the state of the selected
-     * services in to a [BooleanArray] to dictate which checkboxes are checked (or not).
+     * This emits whether the clear all button should be enabled or not.
      */
-    val checkBoxes: BooleanArray? get() {
-        val services = this.services?.ifEmpty { null } ?: return null
-        val selectedServices = selectedServices?.toSet() ?: emptySet()
-
-        return BooleanArray(services.size) { index ->
-            selectedServices.contains(services[index])
-        }
-    }
+    val isClearAllButtonEnabledLiveData = state
+        .hasSelectedServicesFlow
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
-     * This is called when an item has been clicked.
+     * This field exposes the current selected services.
+     */
+    val selectedServices get() = state.selectedServices
+
+    /**
+     * This is called when a service has been clicked.
      *
-     * @param index The index of the clicked item, which corresponds to the index within [services].
-     * @param isChecked Is the item at the given [index] checked?
+     * @param serviceName The name of the service which was clicked.
      */
-    fun onItemClicked(index: Int, isChecked: Boolean) {
-        val serviceName = services?.getOrNull(index) ?: return
-        val selectedServices = selectedServices?.toMutableSet() ?: mutableSetOf()
+    fun onServiceClicked(serviceName: String) {
+        state.onServiceClicked(serviceName)
+    }
 
-        if (isChecked) {
-            selectedServices += serviceName
-        } else {
-            selectedServices -= serviceName
+    /**
+     * This is called when the 'Clear all' button has been clicked.
+     */
+    fun onClearAllClicked() {
+        state.onClearAllClicked()
+    }
+
+    /**
+     * Given the supplied [params] and [services], map this to the current [UiState].
+     *
+     * @param params The params sent to to this [ViewModel].
+     * @param services The [List] of [UiService]s.
+     * @return The mapped [UiState].
+     */
+    private fun mapToUiState(
+        params: ServicesChooserParams?,
+        services: List<UiService>?): UiState {
+        return when {
+            services == null -> UiState.PROGRESS
+            services.isEmpty() -> {
+                if (params is ServicesChooserParams.Stop) {
+                    UiState.ERROR_NO_SERVICES_STOP
+                } else {
+                    UiState.ERROR_NO_SERVICES_GLOBAL
+                }
+            }
+            else -> UiState.CONTENT
         }
-
-        this.selectedServices = selectedServices.toTypedArray()
     }
 }

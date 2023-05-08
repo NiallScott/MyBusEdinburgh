@@ -281,8 +281,8 @@ class BusStopMapViewModel @Inject constructor(
      * When this [LiveData] emits a new item, the services chooser should be shown. The data that is
      * emitted is the parameters which should be passed to the chooser UI.
      */
-    val showServicesChooserLiveData: LiveData<ServicesChooserParams> get() = showServicesChooser
-    private val showServicesChooser = SingleLiveEvent<ServicesChooserParams>()
+    val showServicesChooserLiveData: LiveData<List<String>?> get() = showServicesChooser
+    private val showServicesChooser = SingleLiveEvent<List<String>?>()
 
     /**
      * This is called when the error resolution button has been clicked.
@@ -319,10 +319,8 @@ class BusStopMapViewModel @Inject constructor(
      * This is called when the services menu item is clicked.
      */
     fun onServicesMenuItemClicked() {
-        allServiceNamesFlow.value?.ifEmpty { null }?.let {
-            showServicesChooser.value = ServicesChooserParams(
-                    it,
-                    selectedServicesFlow.value?.toList())
+        if (!allServiceNamesFlow.value.isNullOrEmpty()) {
+            showServicesChooser.value = selectedServicesFlow.value?.toList()
         }
     }
 

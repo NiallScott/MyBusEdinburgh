@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okio.IOException
 import org.junit.Assert.assertFalse
@@ -58,7 +57,6 @@ import java.io.File
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class DatabaseUpdaterTest {
 

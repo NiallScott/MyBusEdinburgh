@@ -176,8 +176,8 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
      * When this [LiveData] emits a new item, the services chooser should be shown. The data that is
      * emitted is the parameters which should be passed to the chooser UI.
      */
-    val showServicesChooserLiveData: LiveData<ServicesChooserParams> get() = showServicesChooser
-    private val showServicesChooser = SingleLiveEvent<ServicesChooserParams>()
+    val showServicesChooserLiveData: LiveData<UiServicesChooserParams> get() = showServicesChooser
+    private val showServicesChooser = SingleLiveEvent<UiServicesChooserParams>()
 
     /**
      * When this [LiveData] emits a new item, the app settings screen should be shown.
@@ -225,8 +225,9 @@ class AddTimeAlertDialogFragmentViewModel @Inject constructor(
      * This is called when the user has clicked on the button to select services.
      */
     fun onSelectServicesClicked() {
-        availableServicesFlow.value?.ifEmpty { null }?.let {
-            showServicesChooser.value = ServicesChooserParams(it, selectedServices)
+        if (!availableServicesFlow.value.isNullOrEmpty()) {
+            val stopCode = stopCode?.ifBlank { null } ?: return
+            showServicesChooser.value = UiServicesChooserParams(stopCode, selectedServices)
         }
     }
 

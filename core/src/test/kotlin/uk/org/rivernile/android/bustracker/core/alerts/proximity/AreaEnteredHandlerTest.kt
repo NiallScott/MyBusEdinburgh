@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -48,7 +47,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AreaEnteredHandlerTest {
 
