@@ -1303,6 +1303,8 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun showTurnOnGpsLiveDataDoesNotEmitWhenPermissionsStateNotSet() = runTest {
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.showTurnOnGpsLiveData.test()
@@ -1313,6 +1315,8 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun showTurnOnGpsLiveDataDoesNotEmitWhenPermissionsAreDenied() = runTest {
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.showTurnOnGpsLiveData.test()
@@ -1326,6 +1330,8 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun showTurnOnGpsLiveDataDoesNotEmitWhenCoarseLocationIsDenied() = runTest {
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.showTurnOnGpsLiveData.test()
@@ -1339,6 +1345,8 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun showTurnOnGpsLiveDataDoesNotEmitWhenFineLocationIsDenied() = runTest {
+        whenever(preferenceRepository.isGpsPromptDisabledFlow)
+            .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.showTurnOnGpsLiveData.test()

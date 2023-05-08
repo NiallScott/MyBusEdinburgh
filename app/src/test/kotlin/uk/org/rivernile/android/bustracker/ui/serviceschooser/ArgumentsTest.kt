@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -41,7 +40,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ArgumentsTest {
 
     @get:Rule

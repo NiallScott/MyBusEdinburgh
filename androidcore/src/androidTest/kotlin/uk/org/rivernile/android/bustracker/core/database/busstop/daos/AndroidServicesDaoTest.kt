@@ -36,7 +36,6 @@ import android.os.CancellationSignal
 import android.test.mock.MockContentProvider
 import android.test.mock.MockContentResolver
 import android.test.mock.MockContext
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
@@ -59,7 +58,6 @@ import kotlin.test.assertTrue
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AndroidServicesDaoTest {
 
