@@ -952,8 +952,7 @@ class NearestStopsFragmentViewModelTest {
         viewModel.onFilterMenuItemClicked()
         advanceUntilIdle()
 
-        observer.assertValues(
-                ServicesChooserParams(services, null))
+        observer.assertValues(null)
     }
 
     @Test
@@ -971,8 +970,7 @@ class NearestStopsFragmentViewModelTest {
         viewModel.onFilterMenuItemClicked()
         advanceUntilIdle()
 
-        observer.assertValues(
-                ServicesChooserParams(services, null))
+        observer.assertValues(null)
     }
 
     @Test
@@ -990,8 +988,7 @@ class NearestStopsFragmentViewModelTest {
         viewModel.onFilterMenuItemClicked()
         advanceUntilIdle()
 
-        observer.assertValues(
-                ServicesChooserParams(services, null))
+        observer.assertValues(null)
     }
 
     @Test
@@ -1009,8 +1006,7 @@ class NearestStopsFragmentViewModelTest {
         viewModel.onFilterMenuItemClicked()
         advanceUntilIdle()
 
-        observer.assertValues(
-                ServicesChooserParams(services, listOf("1", "2")))
+        observer.assertValues(listOf("1", "2"))
     }
 
     @Test

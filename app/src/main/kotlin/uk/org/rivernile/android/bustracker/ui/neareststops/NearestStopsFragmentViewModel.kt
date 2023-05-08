@@ -334,8 +334,8 @@ class NearestStopsFragmentViewModel @Inject constructor(
      * When this [LiveData] emits a new item, the services chooser should be shown. The data that is
      * emitted is the parameters which should be passed to the chooser UI.
      */
-    val showServicesChooserLiveData: LiveData<ServicesChooserParams> get() = showServicesChooser
-    private val showServicesChooser = SingleLiveEvent<ServicesChooserParams>()
+    val showServicesChooserLiveData: LiveData<List<String>?> get() = showServicesChooser
+    private val showServicesChooser = SingleLiveEvent<List<String>?>()
 
     /**
      * When this [LiveData] emits a new item, the location settings should be shown.
@@ -390,8 +390,8 @@ class NearestStopsFragmentViewModel @Inject constructor(
      * This is called when the user has clicked on the filter menu item.
      */
     fun onFilterMenuItemClicked() {
-        allServiceNamesFlow.value?.ifEmpty { null }?.let {
-            showServicesChooser.value = ServicesChooserParams(it, selectedServices)
+        if (!allServiceNamesFlow.value.isNullOrEmpty()) {
+            showServicesChooser.value = selectedServices
         }
     }
 

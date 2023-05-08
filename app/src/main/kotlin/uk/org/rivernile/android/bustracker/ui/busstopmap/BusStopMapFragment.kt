@@ -62,6 +62,7 @@ import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.map.MapStyleApplicator
 import uk.org.rivernile.android.bustracker.ui.callbacks.OnShowBusTimesListener
 import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserDialogFragment
+import uk.org.rivernile.android.bustracker.ui.serviceschooser.ServicesChooserParams
 import uk.org.rivernile.android.bustracker.utils.Event
 import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.FragmentBusStopMapBinding
@@ -199,9 +200,9 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
         childFragmentManager.setFragmentResultListener(
                 ServicesChooserDialogFragment.REQUEST_KEY,
                 viewLifecycleOwner) { _, result ->
-            val selectedServices = result.getStringArray(
+            val selectedServices = result.getStringArrayList(
                     ServicesChooserDialogFragment.RESULT_CHOSEN_SERVICES)
-            viewModel.onServicesSelected(selectedServices?.toList())
+            viewModel.onServicesSelected(selectedServices)
         }
 
         viewBinding.apply {
@@ -638,14 +639,16 @@ class BusStopMapFragment : Fragment(), RequiresContentPadding {
     /**
      * Show the services chooser UI.
      *
-     * @param params The parameters to start [ServicesChooserDialogFragment] with.
+     * @param selectedServices The existing selected services.
      */
-    private fun showServicesChooser(params: ServicesChooserParams) {
-        ServicesChooserDialogFragment.newInstance(
-                params.services.toTypedArray(),
-                params.selectedServices?.toTypedArray(),
-                getString(R.string.busstopmapfragment_service_chooser_title))
-                .show(childFragmentManager, DIALOG_SERVICES_CHOOSER)
+    private fun showServicesChooser(selectedServices: List<String>?) {
+        ServicesChooserParams.AllServices(
+            R.string.busstopmapfragment_service_chooser_title,
+            selectedServices)
+            .let {
+                ServicesChooserDialogFragment.newInstance(it)
+                    .show(childFragmentManager, DIALOG_SERVICES_CHOOSER)
+            }
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,29 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.neareststops
+package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
 /**
- * This class contains the parameters which are sent through to the services selection UI.
+ * This enum defines the possible states of the [ServicesChooserDialogFragment].
  *
- * @property services The services to choose from.
- * @property selectedServices The currently selected services, to show the appropriate current
- * state.
  * @author Niall Scott
  */
-data class ServicesChooserParams(
-        val services: List<String>,
-        val selectedServices: List<String>?)
+enum class UiState {
+
+    /**
+     * The progress view should be shown.
+     */
+    PROGRESS,
+    /**
+     * The content view should be shown.
+     */
+    CONTENT,
+    /**
+     * The global no services view should be shown.
+     */
+    ERROR_NO_SERVICES_GLOBAL,
+    /**
+     * The stop no services view should be shown.
+     */
+    ERROR_NO_SERVICES_STOP
+}

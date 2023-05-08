@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2023 Niall 'Rivernile' Scott
+  ~
+  ~ This software is provided 'as-is', without any express or implied
+  ~ warranty.  In no event will the authors or contributors be held liable for
+  ~ any damages arising from the use of this software.
+  ~
+  ~ The aforementioned copyright holder(s) hereby grant you a
+  ~ non-transferrable right to use this software for any purpose (including
+  ~ commercial applications), and to modify it and redistribute it, subject to
+  ~ the following conditions:
+  ~
+  ~  1. This notice may not be removed or altered from any file it appears in.
+  ~
+  ~  2. Any modifications made to this software, except those defined in
+  ~     clause 3 of this agreement, must be released under this license, and
+  ~     the source code of any modifications must be made available on a
+  ~     publically accessible (and locateable) website, or sent to the
+  ~     original author of this software.
+  ~
+  ~  3. Software modifications that do not alter the functionality of the
+  ~     software but are simply adaptations to a specific environment are
+  ~     exempt from clause 2.
+  ~
+  -->
+
+<uk.org.rivernile.android.bustracker.core.widget.ContentView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contentView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:progressView="@id/progress"
+    app:contentView="@id/layoutContent"
+    app:errorView="@id/txtError"
+    app:contentLayout="progress"
+    tools:contentLayout="content">
+
+    <LinearLayout
+        android:id="@+id/layoutContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/padding_double"
+        android:orientation="vertical">
+
+        <View
+            android:id="@+id/viewTopDividerLine"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1f000000"
+            app:backgroundTint="?android:attr/colorForeground" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/padding_default"
+            android:paddingBottom="@dimen/padding_default"
+            android:paddingStart="?dialogPreferredPadding"
+            android:paddingEnd="?dialogPreferredPadding"
+            android:scrollbars="vertical"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:scrollbarStyle="outsideInset"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="4"
+            tools:listitem="@layout/list_item_service_chooser_service" />
+
+        <View
+            android:id="@+id/viewBottomDividerLine"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1f000000"
+            app:backgroundTint="?android:attr/colorForeground" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtError"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_double"
+        android:layout_marginStart="?dialogPreferredPadding"
+        android:layout_marginEnd="?dialogPreferredPadding"
+        android:layout_gravity="center_horizontal"
+        android:textAppearance="?textAppearanceBodyMedium"
+        tools:text="@string/serviceschooserdialog_error_no_services_stop" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_double"
+        android:layout_marginBottom="@dimen/padding_default"
+        android:layout_marginStart="?dialogPreferredPadding"
+        android:layout_marginEnd="?dialogPreferredPadding"
+        android:layout_gravity="center"
+        android:indeterminateOnly="true" />
+</uk.org.rivernile.android.bustracker.core.widget.ContentView>

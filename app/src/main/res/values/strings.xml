@@ -507,6 +507,15 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     -->
     <string name="proxlimitationsdialog_title">Proximity alert limitations</string>
     <string name="proxlimitationsdialog_message">This is an experimental feature. If you have issues using it, please contact the developer, details can be found on the Google Play Store.\n\nIf you already have a proximity alert active, it will be removed if you set this alert.\n\nIf you restart your device, the alert will be removed and will not be re-added, although you can manually re-add the alert if you wish.\n\nIf you do not come within the preset distance of the bus stop within 1 hour of setting this alert, it will be automatically removed and you will not be alerted. This is to prevent alerts lasting an indefinite amount of time.</string>
+
+    <!--
+    *********************************************
+    * Strings for ServicesChooserDialogFragment *
+    *********************************************
+    -->
+    <string name="serviceschooserdialog_btn_clear_all">Clear all</string>
+    <string name="serviceschooserdialog_error_no_services_global">There are no known services</string>
+    <string name="serviceschooserdialog_error_no_services_stop">There are no known services for this stop</string>
     
     <!--
     *********************************************

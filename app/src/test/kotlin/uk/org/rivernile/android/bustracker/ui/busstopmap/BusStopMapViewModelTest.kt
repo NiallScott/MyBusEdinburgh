@@ -778,14 +778,13 @@ class BusStopMapViewModelTest {
         whenever(servicesRepository.allServiceNamesFlow)
                 .thenReturn(flowOf(services))
         val viewModel = createViewModel()
-        val expected = ServicesChooserParams(services, null)
 
         viewModel.isFilterMenuItemEnabledLiveData.test()
         val observer = viewModel.showServicesChooserLiveData.test()
         advanceUntilIdle()
         viewModel.onServicesMenuItemClicked()
 
-        observer.assertValues(expected)
+        observer.assertValues(null)
     }
 
     @Test
@@ -795,7 +794,6 @@ class BusStopMapViewModelTest {
         whenever(servicesRepository.allServiceNamesFlow)
                 .thenReturn(flowOf(services))
         val viewModel = createViewModel()
-        val expected = ServicesChooserParams(services, selectedServices)
 
         viewModel.onServicesSelected(selectedServices)
         viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -803,7 +801,7 @@ class BusStopMapViewModelTest {
         advanceUntilIdle()
         viewModel.onServicesMenuItemClicked()
 
-        observer.assertValues(expected)
+        observer.assertValues(selectedServices)
     }
 
     @Test
@@ -815,14 +813,13 @@ class BusStopMapViewModelTest {
         val viewModel = createViewModel(
                 SavedStateHandle(
                         mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2"))))
-        val expected = ServicesChooserParams(services, selectedServices)
 
         viewModel.isFilterMenuItemEnabledLiveData.test()
         val observer = viewModel.showServicesChooserLiveData.test()
         advanceUntilIdle()
         viewModel.onServicesMenuItemClicked()
 
-        observer.assertValues(expected)
+        observer.assertValues(selectedServices)
     }
 
     @Test
