@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,8 +41,13 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class StopClusterRendererFactory @Inject constructor(
-        private val stopMapMarkerDecorator: StopMapMarkerDecorator,
-        private val textFormattingUtils: TextFormattingUtils) {
+    private val stopMapMarkerDecorator: StopMapMarkerDecorator,
+    private val textFormattingUtils: TextFormattingUtils) {
+
+    companion object {
+
+        private const val MIN_CLUSTER_SIZE = 10
+    }
 
     /**
      * Create a new instance of [StopClusterRenderer].
@@ -53,13 +58,16 @@ class StopClusterRendererFactory @Inject constructor(
      * @return A new [StopClusterRenderer] instance.
      */
     fun createStopClusterRenderer(
-            context: Context,
-            map: GoogleMap,
-            clusterManager: ClusterManager<UiStopMarker>) =
-            StopClusterRenderer(
-                    context,
-                    map,
-                    clusterManager,
-                    stopMapMarkerDecorator,
-                    textFormattingUtils)
+        context: Context,
+        map: GoogleMap,
+        clusterManager: ClusterManager<UiStopMarker>) =
+        StopClusterRenderer(
+            context,
+            map,
+            clusterManager,
+            stopMapMarkerDecorator,
+            textFormattingUtils)
+            .apply {
+                minClusterSize = MIN_CLUSTER_SIZE
+            }
 }
