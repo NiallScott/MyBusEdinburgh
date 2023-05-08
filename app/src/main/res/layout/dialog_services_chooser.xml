@@ -65,7 +65,7 @@
             android:orientation="vertical"
             android:scrollbarStyle="outsideInset"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="4"
+            app:spanCount="@integer/services_chooser_grid_spans"
             tools:listitem="@layout/list_item_service_chooser_service" />
 
         <View
