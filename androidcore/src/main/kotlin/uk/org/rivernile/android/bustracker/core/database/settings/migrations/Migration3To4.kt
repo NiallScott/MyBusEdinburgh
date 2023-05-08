@@ -168,7 +168,7 @@ internal class Migration3To4 : Migration(3, 4) {
         execSQL("""
             CREATE TRIGGER IF NOT EXISTS $triggerName 
             $condition ON active_alerts 
-            FOR EACH ROW BEGIN
+            BEGIN
                 DELETE FROM active_alerts 
                 WHERE timeAdded < ((SELECT strftime('%s','now') * 1000) - 3600000);
             END
