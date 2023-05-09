@@ -498,6 +498,11 @@ class MainActivity : AppCompatActivity(),
             scanQrCodeLauncher.launch()
         } catch (ignored: ActivityNotFoundException) {
             viewModel.onQrScannerNotFound()
+        } catch (ignored: SecurityException) {
+            // SecurityException has been seen out in the wild, albeit from an unsupported app which
+            // is hijacking the Intent. When this happens, the user will be directed to install the
+            // supported app.
+            viewModel.onQrScannerNotFound()
         }
     }
 

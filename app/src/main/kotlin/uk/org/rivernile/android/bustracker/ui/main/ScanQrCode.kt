@@ -47,20 +47,25 @@ class ScanQrCode : ActivityResultContract<Unit, ScanQrCodeResult>() {
         private const val BARCODE_EXTRA_SCAN_RESULT = "SCAN_RESULT"
 
         private const val URI_QUERY_PARAMETER_STOP_CODE = "busStopCode"
+
+        private const val ZXING_PACKAGE_NAME = "com.google.zxing.client.android"
     }
 
     override fun createIntent(context: Context, input: Unit) =
-            Intent(BARCODE_ACTION)
-                    .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                    .putExtra(BARCODE_EXTRA_QR_CODE_MODE, true)
+        Intent(BARCODE_ACTION)
+            // We specify the ZXing package name to prevent Intent hijacking.
+            .setPackage(ZXING_PACKAGE_NAME)
+            .addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+            .putExtra(BARCODE_EXTRA_QR_CODE_MODE, true)
 
     override fun parseResult(resultCode: Int, intent: Intent?): ScanQrCodeResult {
         return if (resultCode == Activity.RESULT_OK) {
-            val stopCode = intent?.getStringExtra(BARCODE_EXTRA_SCAN_RESULT)
-                    ?.let(Uri::parse)
-                    ?.takeIf(Uri::isHierarchical)
-                    ?.getQueryParameter(URI_QUERY_PARAMETER_STOP_CODE)
-                    ?.takeIf(String::isNotBlank)
+            val stopCode = intent
+                ?.getStringExtra(BARCODE_EXTRA_SCAN_RESULT)
+                ?.let(Uri::parse)
+                ?.takeIf(Uri::isHierarchical)
+                ?.getQueryParameter(URI_QUERY_PARAMETER_STOP_CODE)
+                ?.takeIf(String::isNotBlank)
 
             ScanQrCodeResult.Success(stopCode)
         } else {

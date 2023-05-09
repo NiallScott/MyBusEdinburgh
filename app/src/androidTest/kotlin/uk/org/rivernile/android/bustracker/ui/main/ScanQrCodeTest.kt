@@ -46,6 +46,7 @@ class ScanQrCodeTest {
         private const val BARCODE_ACTION = "com.google.zxing.client.android.SCAN"
         private const val BARCODE_EXTRA_QR_CODE_MODE = "QR_CODE_MODE"
         private const val BARCODE_EXTRA_SCAN_RESULT = "SCAN_RESULT"
+        private const val ZXING_PACKAGE_NAME = "com.google.zxing.client.android"
     }
 
     private lateinit var contract: ScanQrCode
@@ -62,8 +63,9 @@ class ScanQrCodeTest {
             Unit)
 
         assertEquals(BARCODE_ACTION, intent.action)
+        assertEquals(ZXING_PACKAGE_NAME, intent.`package`)
         assertEquals(Intent.FLAG_ACTIVITY_NO_HISTORY, intent.flags)
-        assert(intent.hasExtra(BARCODE_EXTRA_QR_CODE_MODE))
+        assertTrue(intent.hasExtra(BARCODE_EXTRA_QR_CODE_MODE))
         assertTrue(intent.getBooleanExtra(BARCODE_EXTRA_QR_CODE_MODE, false))
     }
 
