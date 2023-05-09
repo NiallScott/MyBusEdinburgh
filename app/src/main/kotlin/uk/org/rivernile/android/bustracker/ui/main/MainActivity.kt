@@ -111,7 +111,6 @@ class MainActivity : AppCompatActivity(),
          */
         const val ACTION_MANAGE_ALERTS = "${BuildConfig.APPLICATION_ID}.ACTION_MANAGE_ALERTS"
 
-        private const val FRAGMENT_TAG_FAVOURITES = "tagFavourites"
         private const val FRAGMENT_TAG_EXPLORE = "tagExplore"
         private const val FRAGMENT_TAG_UPDATES = "tagUpdates"
         private const val FRAGMENT_TAG_ALERTS = "tagAlerts"
@@ -186,7 +185,7 @@ class MainActivity : AppCompatActivity(),
 
         if (savedInstanceState == null) {
             if (!handleIntent(intent)) {
-                showItem(R.id.main_navigation_favourites, false)
+                showItem(R.id.main_navigation_explore, false)
             }
         }
     }
@@ -414,14 +413,6 @@ class MainActivity : AppCompatActivity(),
             currentFragment?.let(this::detach)
 
             when (itemId) {
-                R.id.main_navigation_favourites -> {
-                    supportFragmentManager.findFragmentByTag(FRAGMENT_TAG_FAVOURITES)
-                            ?.let(this::attach)
-                            ?: add(
-                                    R.id.fragmentContainer,
-                                    FavouriteStopsFragment(),
-                                    FRAGMENT_TAG_FAVOURITES)
-                }
                 R.id.main_navigation_explore -> {
                     supportFragmentManager.findFragmentByTag(FRAGMENT_TAG_EXPLORE)
                             ?.let(this::attach)

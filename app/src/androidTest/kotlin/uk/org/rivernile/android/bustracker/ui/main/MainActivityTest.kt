@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -76,7 +76,11 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 activity.supportFragmentManager.executePendingTransactions()
 
-                assertTrue(activity.currentFragment is FavouriteStopsFragment)
+                val topLevelFragment = activity.currentFragment as ExploreFragment
+                val currentFragment = topLevelFragment
+                    .childFragmentManager
+                    .findFragmentById(R.id.fragmentContainer)
+                assertTrue(currentFragment is FavouriteStopsFragment)
             }
         }
     }
