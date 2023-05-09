@@ -206,17 +206,51 @@ class BusTimesFragment : Fragment() {
     private fun handleErrorWithContent(event: Event<ErrorType>?) {
         dismissErrorSnackbar()
 
-        event?.getContentIfNotHandled()?.let {
-            errorSnackbar = Snackbar.make(viewBinding.root, mapErrorToStringResource(it),
-                    Snackbar.LENGTH_LONG).apply {
-                addCallback(object : Snackbar.Callback() {
-                    override fun onDismissed(snackbar: Snackbar, event: Int) {
-                        errorSnackbar = null
+        event?.getContentIfNotHandled()?.let { errorType ->
+            // There have been some crashes caused by this function being called when our layout is
+            // not yet attached to the parent yet. Snackbar looks for a parent View to attach to,
+            // and will throw an Exception if it cannot find a parent. So in this case, if we have
+            // a parent, we attempt to show the Snackbar normally. If we do not have a parent, we
+            // post to the root View's Handler in the hope that we'll have attached by the time the
+            // enqueued Runnable is executed.
+            viewBinding.root.let { rootView ->
+                if (rootView.parent != null) {
+                    showErrorSnackbar(rootView, errorType)
+                } else {
+                    // Defer execution by posting to the end of the run queue.
+                    rootView.handler.post {
+                        // Perform a dismiss again incase another Snackbar was already posted.
+                        dismissErrorSnackbar()
+                        showErrorSnackbar(rootView, errorType)
                     }
-                })
-
-                show()
+                }
             }
+        }
+    }
+
+    /**
+     * Show the error [Snackbar] to the user.
+     *
+     * @param view The [View] to attach the [Snackbar] to.
+     * @param errorType The [ErrorType] to display.
+     */
+    private fun showErrorSnackbar(
+        view: View,
+        errorType: ErrorType) {
+        if (view.parent != null) {
+            errorSnackbar = Snackbar.make(
+                view,
+                mapErrorToStringResource(errorType),
+                Snackbar.LENGTH_LONG)
+                .apply {
+                    addCallback(object : Snackbar.Callback() {
+                        override fun onDismissed(snackbar: Snackbar, event: Int) {
+                            errorSnackbar = null
+                        }
+                    })
+
+                    show()
+                }
         }
     }
 
