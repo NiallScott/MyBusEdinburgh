@@ -31,6 +31,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /**
  * This is the Room-specific implementation of [AlertsDao].
@@ -97,43 +98,43 @@ internal abstract class RoomAlertsDao : AlertsDao {
     override fun getHasArrivalAlertFlow(stopCode: String) =
         getHasArrivalAlertFlowInternal(stopCode)
             .map { it > 0 }
+            .onStart { deleteOldAlerts() }
 
     override fun getHasProximityAlertFlow(stopCode: String) =
         getHasProximityAlertFlowInternal(stopCode)
             .map { it > 0 }
+            .onStart { deleteOldAlerts() }
 
     override val allAlertsFlow get() =
         allAlertsFlowInternal
             .map(this::mapToAlertEntities)
+            .onStart { deleteOldAlerts() }
 
-    override suspend fun getProximityAlert(id: Int) =
-        mapToProximityAlertEntity(getProximityAlertInternal(id))
+    override suspend fun getProximityAlert(id: Int): ProximityAlertEntity? {
+        deleteOldAlerts()
+        return mapToProximityAlertEntity(getProximityAlertInternal(id))
+    }
 
-    override suspend fun getAllArrivalAlerts() =
-        getAllArrivalAlertsInternal()
+    override suspend fun getAllArrivalAlerts(): List<ArrivalAlertEntity>? {
+        deleteOldAlerts()
+        return getAllArrivalAlertsInternal()
             ?.mapNotNull(this::mapToArrivalAlertEntity)
             ?.ifEmpty { null }
+    }
 
-    @Query("""
-        SELECT DISTINCT stopCode 
-        FROM active_alerts 
-        WHERE type = $ALERT_TYPE_ARRIVAL
-    """)
-    abstract override suspend fun getAllArrivalAlertStopCodes(): List<String>?
+    override suspend fun getAllArrivalAlertStopCodes(): List<String>? {
+        deleteOldAlerts()
+        return getAllArrivalAlertStopCodesInternal()
+    }
 
-    @Query("""
-        SELECT COUNT(*) 
-        FROM active_alerts 
-        WHERE type = $ALERT_TYPE_ARRIVAL
-    """)
-    abstract override suspend fun getArrivalAlertCount(): Int
+    override suspend fun getArrivalAlertCount(): Int {
+        deleteOldAlerts()
+        return getArrivalAlertCountInternal()
+    }
 
-    @get:Query("""
-        SELECT COUNT(*) 
-        FROM active_alerts 
-        WHERE type = $ALERT_TYPE_ARRIVAL
-    """)
-    abstract override val arrivalAlertCountFlow: Flow<Int>
+    override val arrivalAlertCountFlow: Flow<Int> get() =
+        arrivalAlertCountFlowInternal
+            .onStart { deleteOldAlerts() }
 
     override val allProximityAlertsFlow get() =
         allProximityAlertsFlowInternal
@@ -142,13 +143,12 @@ internal abstract class RoomAlertsDao : AlertsDao {
                     ?.mapNotNull(this::mapToProximityAlertEntity)
                     ?.ifEmpty { null }
             }
+            .onStart { deleteOldAlerts() }
 
-    @Query("""
-        SELECT COUNT(*) 
-        FROM active_alerts 
-        WHERE type = $ALERT_TYPE_PROXIMITY
-    """)
-    abstract override suspend fun getProximityAlertCount(): Int
+    override suspend fun getProximityAlertCount(): Int {
+        deleteOldAlerts()
+        return getProximityAlertCountInternal()
+    }
 
     @Insert
     abstract suspend fun addAlertInternal(alert: RoomAlertEntity)
@@ -192,12 +192,46 @@ internal abstract class RoomAlertsDao : AlertsDao {
     """)
     abstract suspend fun getAllArrivalAlertsInternal(): List<RoomAlertEntity>?
 
+    @Query("""
+        SELECT DISTINCT stopCode 
+        FROM active_alerts 
+        WHERE type = $ALERT_TYPE_ARRIVAL
+    """)
+    abstract suspend fun getAllArrivalAlertStopCodesInternal(): List<String>?
+
+    @Query("""
+        SELECT COUNT(*) 
+        FROM active_alerts 
+        WHERE type = $ALERT_TYPE_ARRIVAL
+    """)
+    abstract suspend fun getArrivalAlertCountInternal(): Int
+
+    @get:Query("""
+        SELECT COUNT(*) 
+        FROM active_alerts 
+        WHERE type = $ALERT_TYPE_ARRIVAL
+    """)
+    abstract val arrivalAlertCountFlowInternal: Flow<Int>
+
     @get:Query("""
         SELECT id, timeAdded, stopCode, type, distanceFrom, serviceNames, timeTrigger 
         FROM active_alerts 
         WHERE type = $ALERT_TYPE_PROXIMITY
     """)
     abstract val allProximityAlertsFlowInternal: Flow<List<RoomAlertEntity>?>
+
+    @Query("""
+        SELECT COUNT(*) 
+        FROM active_alerts 
+        WHERE type = $ALERT_TYPE_PROXIMITY
+    """)
+    abstract suspend fun getProximityAlertCountInternal(): Int
+
+    @Query("""
+        DELETE FROM active_alerts 
+        WHERE timeAdded < ((SELECT strftime('%s','now') * 1000) - 3600000)
+    """)
+    abstract suspend fun deleteOldAlerts()
 
     /**
      * Map the given [ArrivalAlertEntity] to a [RoomAlertEntity].
