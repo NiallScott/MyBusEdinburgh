@@ -185,7 +185,7 @@ class MainActivity : AppCompatActivity(),
 
         if (savedInstanceState == null) {
             if (!handleIntent(intent)) {
-                showItem(R.id.main_navigation_explore, false)
+                viewBinding.bottomNavigation.selectedItemId = R.id.main_navigation_explore
             }
         }
     }
@@ -389,7 +389,7 @@ class MainActivity : AppCompatActivity(),
      */
     private fun handleIntent(intent: Intent) = when (intent.action) {
         ACTION_MANAGE_ALERTS -> {
-            showItem(R.id.main_navigation_alerts, false)
+            viewBinding.bottomNavigation.selectedItemId = R.id.main_navigation_alerts
             true
         }
         Intent.ACTION_SEARCH -> {
