@@ -186,6 +186,7 @@ class MainActivity : AppCompatActivity(),
         if (savedInstanceState == null) {
             if (!handleIntent(intent)) {
                 viewBinding.bottomNavigation.selectedItemId = R.id.main_navigation_explore
+                viewBinding.searchBar.startOnLoadAnimation()
             }
         }
     }
