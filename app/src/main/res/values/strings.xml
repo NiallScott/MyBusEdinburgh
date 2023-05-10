@@ -113,8 +113,7 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for MainActivity *
     ****************************
     -->
-    <string name="main_navigation_favourites">Favourites</string>
-    <string name="main_navigation_explore">Explore</string>
+    <string name="main_navigation_explore">Stops</string>
     <string name="main_navigation_updates">Updates</string>
     <string name="main_navigation_alerts">Alerts</string>
     <string name="main_search_bar_hint">Search stops</string>
@@ -275,8 +274,9 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     * Strings for ExploreFragment *
     *******************************
     -->
+    <string name="explore_tab_favourites">Favourites</string>
     <string name="explore_tab_map">Map</string>
-    <string name="explore_tab_nearest_stops">Nearest stops</string>
+    <string name="explore_tab_nearest_stops">Nearest</string>
     
     <!--
     **************************************

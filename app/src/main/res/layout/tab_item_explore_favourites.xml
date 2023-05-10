@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2023 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,8 @@
   ~
   -->
 
-<menu
+<com.google.android.material.tabs.TabItem
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="uk.org.rivernile.android.bustracker.ui.main.MainActivity">
-
-    <item
-        android:id="@+id/main_navigation_explore"
-        android:title="@string/main_navigation_explore"
-        android:icon="@drawable/ic_travel_explore" />
-
-    <item
-        android:id="@+id/main_navigation_updates"
-        android:title="@string/main_navigation_updates"
-        android:icon="@drawable/ic_newspaper" />
-
-    <item
-        android:id="@+id/main_navigation_alerts"
-        android:title="@string/main_navigation_alerts"
-        android:icon="@drawable/ic_navigation_alerts" />
-</menu>
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:text="@string/explore_tab_favourites" />

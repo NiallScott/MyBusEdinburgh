@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-  ~ Copyright (C) 2022 Niall 'Rivernile' Scott
+  ~ Copyright (C) 2023 Niall 'Rivernile' Scott
   ~
   ~ This software is provided 'as-is', without any express or implied
   ~ warranty.  In no event will the authors or contributors be held liable for
@@ -24,13 +24,9 @@
   ~
   -->
 
-<selector
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item
-        android:state_checked="true"
-        android:drawable="@drawable/ic_action_star" />
-
-    <item
-        android:drawable="@drawable/ic_action_star_border" />
-</selector>
+<com.google.android.material.tabs.TabItem
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:text="@string/explore_tab_favourites"
+    android:icon="@drawable/ic_action_star" />
