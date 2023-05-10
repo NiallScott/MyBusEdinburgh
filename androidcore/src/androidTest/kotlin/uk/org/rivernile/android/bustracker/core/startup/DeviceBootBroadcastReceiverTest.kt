@@ -29,12 +29,8 @@ package uk.org.rivernile.android.bustracker.core.startup
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Ignore
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -42,7 +38,6 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
  * Tests for [DeviceBootBroadcastReceiver].
@@ -50,12 +45,8 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  * @author Niall Scott
  */
 @Ignore("Until I figure out how to do BroadcastReceiver testing.")
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class DeviceBootBroadcastReceiverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var alertsRepository: AlertsRepository
@@ -66,44 +57,39 @@ class DeviceBootBroadcastReceiverTest {
     fun setUp() {
         receiver = DeviceBootBroadcastReceiver().also {
             it.alertsRepository = alertsRepository
-            it.applicationCoroutineScope = coroutineRule.scope
-            it.defaultDispatcher = coroutineRule.testDispatcher
         }
     }
 
     @Test
-    fun invokingBroadcastReceiverWithNoActionDoesNotEnsureAlertTasksRunning() = runTest {
+    fun invokingBroadcastReceiverWithNoActionDoesNotEnsureAlertTasksRunning() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = Intent(context, DeviceBootBroadcastReceiver::class.java)
 
         receiver.onReceive(context, intent)
-        advanceUntilIdle()
 
         verify(alertsRepository, never())
-                .ensureTasksRunningIfAlertsExists()
+            .ensureTasksRunning()
     }
 
     @Test
-    fun invokingBroadcastReceiverWithWrongActionDoesNotEnsureAlertTasksRunning() = runTest {
+    fun invokingBroadcastReceiverWithWrongActionDoesNotEnsureAlertTasksRunning() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = Intent("wrong.action")
 
         receiver.onReceive(context, intent)
-        advanceUntilIdle()
 
         verify(alertsRepository, never())
-                .ensureTasksRunningIfAlertsExists()
+            .ensureTasksRunning()
     }
 
     @Test
-    fun invokingBroadcastReceiverWithBootCompletedActionEnsuresAlertTasksRunning() = runTest {
+    fun invokingBroadcastReceiverWithBootCompletedActionEnsuresAlertTasksRunning() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = Intent(Intent.ACTION_BOOT_COMPLETED)
 
         receiver.onReceive(context, intent)
-        advanceUntilIdle()
 
         verify(alertsRepository)
-                .ensureTasksRunningIfAlertsExists()
+            .ensureTasksRunning()
     }
 }

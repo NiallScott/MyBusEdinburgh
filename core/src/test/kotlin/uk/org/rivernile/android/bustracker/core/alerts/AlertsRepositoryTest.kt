@@ -382,6 +382,16 @@ class AlertsRepositoryTest {
     }
 
     @Test
+    fun ensureTasksRunningLaunchesTasks() {
+        repository.ensureTasksRunning()
+
+        verify(arrivalAlertTaskLauncher)
+            .launchArrivalAlertTask()
+        verify(proximityAlertTaskLauncher)
+            .launchProximityAlertTask()
+    }
+
+    @Test
     fun ensureTasksRunningIfAlertsExistStartsArrivalTaskWhenCountIsGreaterThanZero() = runTest {
         whenever(alertsDao.getArrivalAlertCount())
             .thenReturn(1)

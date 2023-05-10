@@ -225,6 +225,16 @@ class AlertsRepository @Inject internal constructor(
             }
 
     /**
+     * Ensure the arrival and proximity alert tasks are running. These tasks will auto-cancel
+     * themselves if there are no alerts to track - but this method at least starts these tasks so
+     * the tasks themselves can verify this.
+     */
+    fun ensureTasksRunning() {
+        arrivalAlertTaskLauncher.launchArrivalAlertTask()
+        proximityAlertTaskLauncher.launchProximityAlertTask()
+    }
+
+    /**
      * Ensure that tasks required to fulfil alerts are running.
      */
     suspend fun ensureTasksRunningIfAlertsExists() = supervisorScope {

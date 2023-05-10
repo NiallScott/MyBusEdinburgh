@@ -30,12 +30,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 
 /**
@@ -48,18 +43,11 @@ class DeviceBootBroadcastReceiver : BroadcastReceiver() {
 
     @Inject
     lateinit var alertsRepository: AlertsRepository
-    @Inject
-    @ForApplicationCoroutineScope
-    lateinit var applicationCoroutineScope: CoroutineScope
-    @Inject
-    @ForDefaultDispatcher
-    lateinit var defaultDispatcher: CoroutineDispatcher
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
-            applicationCoroutineScope.launch(defaultDispatcher) {
-                alertsRepository.ensureTasksRunningIfAlertsExists()
-            }
+        if (Intent.ACTION_BOOT_COMPLETED == intent.action ||
+                Intent.ACTION_MY_PACKAGE_REPLACED == intent.action) {
+            alertsRepository.ensureTasksRunning()
         }
     }
 }
