@@ -369,6 +369,16 @@ class MainActivity : AppCompatActivity(),
         searchView.editText.doAfterTextChanged {
             performSearch(it?.toString())
         }
+
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.fragmentSearch) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            v.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = insets.bottom
+            }
+
+            windowInsets
+        }
     }
 
     /**
