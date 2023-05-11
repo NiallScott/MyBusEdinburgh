@@ -353,7 +353,7 @@ class AddTimeAlertDialogFragment : DialogFragment() {
         } catch (e: ActivityNotFoundException) {
             exceptionLogger.log(e)
             Toast.makeText(context,
-                    R.string.addproxalertdialog_error_no_app_settings,
+                    R.string.addtimealertdialog_error_no_app_settings,
                     Toast.LENGTH_SHORT)
                     .show()
         }
