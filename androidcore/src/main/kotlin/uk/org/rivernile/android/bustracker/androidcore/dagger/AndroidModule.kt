@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.androidcore.dagger
 
 import android.app.Application
+import android.app.UiModeManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
@@ -63,6 +64,10 @@ internal class AndroidModule {
 
     @Provides
     fun providePackageManager(context: Context): PackageManager = context.packageManager
+
+    @Provides
+    fun provideUiModeManager(context: Context): UiModeManager =
+        context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
 
     @InstallIn(SingletonComponent::class)
     @Module

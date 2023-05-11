@@ -60,7 +60,7 @@ buildscript {
         workManagerVersion = '2.8.1'
 
         // Material Design
-        materialVersion = '1.8.0'
+        materialVersion = '1.9.0'
 
         // HTTP/networking
         okhttpVersion = '4.10.0'

@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -41,7 +42,22 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
+    private val savedState: SavedStateHandle,
     featureRepository: FeatureRepository) : ViewModel() {
+
+    companion object {
+
+        private const val STATE_HAS_SHOWN_INITIAL_ANIMATION = "hasShownInitialAnimation"
+    }
+
+    /**
+     * This property exposes if the initial animation has been shown.
+     */
+    var hasShownInitialAnimation: Boolean
+        get() = savedState[STATE_HAS_SHOWN_INITIAL_ANIMATION] ?: false
+        private set(value) {
+            savedState[STATE_HAS_SHOWN_INITIAL_ANIMATION] = value
+        }
 
     /**
      * This [LiveData] emits when the stop details should be shown.
@@ -84,6 +100,13 @@ class MainActivityViewModel @Inject constructor(
      */
     val showAboutLiveData: LiveData<Unit> get() = showAbout
     private val showAbout = SingleLiveEvent<Unit>()
+
+    /**
+     * This is called when the initial animation has finished.
+     */
+    fun onInitialAnimationFinished() {
+        hasShownInitialAnimation = true
+    }
 
     /**
      * This is called when the scan menu item has been clicked.

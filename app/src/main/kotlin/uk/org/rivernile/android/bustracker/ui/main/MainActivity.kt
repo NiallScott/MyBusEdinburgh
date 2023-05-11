@@ -58,6 +58,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
 import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
 import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
@@ -186,7 +187,6 @@ class MainActivity : AppCompatActivity(),
         if (savedInstanceState == null) {
             if (!handleIntent(intent)) {
                 viewBinding.bottomNavigation.selectedItemId = R.id.main_navigation_explore
-                viewBinding.searchBar.startOnLoadAnimation()
             }
         }
     }
@@ -378,6 +378,17 @@ class MainActivity : AppCompatActivity(),
             }
 
             windowInsets
+        }
+
+        if (!viewModel.hasShownInitialAnimation) {
+            searchBar.addOnLoadAnimationCallback(object : SearchBar.OnLoadAnimationCallback() {
+                override fun onAnimationEnd() {
+                    viewModel.onInitialAnimationFinished()
+                    searchBar.removeOnLoadAnimationCallback(this)
+                }
+            })
+
+            searchBar.startOnLoadAnimation()
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,10 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.startup
 
+import android.app.UiModeManager
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
@@ -41,6 +46,17 @@ import javax.inject.Inject
 /**
  * The [observeAppTheme] method observes the app theme preference setting and responds to this
  * setting changing to apply the new theme.
+ */
+sealed interface AppThemeObserver {
+
+    /**
+     * Observe the app theme setting and respond to changes by applying the new theme.
+     */
+    fun observeAppTheme()
+}
+
+/**
+ * This is the legacy implementation of [AppThemeObserver].
  *
  * @param preferenceRepository Used to retriever the app theme setting.
  * @param applicationCoroutineScope The application [CoroutineScope].
@@ -48,26 +64,80 @@ import javax.inject.Inject
  * @param mainDispatcher The main-thread [CoroutineDispatcher].
  * @author Niall Scott
  */
-class AppThemeObserver @Inject constructor(
-        private val preferenceRepository: PreferenceRepository,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-        @ForMainDispatcher private val mainDispatcher: CoroutineDispatcher) {
+class LegacyAppThemeObserver @Inject constructor(
+    private val preferenceRepository: PreferenceRepository,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @ForMainDispatcher private val mainDispatcher: CoroutineDispatcher) : AppThemeObserver {
 
-    /**
-     * Observe the app theme setting and respond to changes by applying the new theme.
-     */
-    fun observeAppTheme() {
+    override fun observeAppTheme() {
         applicationCoroutineScope.launch(mainDispatcher) {
             preferenceRepository.appThemeFlow
-                    .flowOn(defaultDispatcher)
-                    .collect {
-                        when (it) {
-                            AppTheme.SYSTEM_DEFAULT -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                            AppTheme.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
-                            AppTheme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
-                        }.let(AppCompatDelegate::setDefaultNightMode)
-                    }
+                .map(this@LegacyAppThemeObserver::mapToUiMode)
+                .distinctUntilChanged()
+                .flowOn(defaultDispatcher)
+                .collect {
+                    AppCompatDelegate.setDefaultNightMode(it)
+                }
+        }
+    }
+
+    /**
+     * Map the given [AppTheme] to the correct `MODE_*` constant value.
+     *
+     * @param appTheme The [AppTheme] to map.
+     * @return The correct `MODE_*` for the [AppTheme].
+     */
+    private fun mapToUiMode(appTheme: AppTheme): Int {
+        return when (appTheme) {
+            AppTheme.SYSTEM_DEFAULT -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            AppTheme.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO
+            AppTheme.DARK -> AppCompatDelegate.MODE_NIGHT_YES
+        }
+    }
+}
+
+/**
+ * This is the Android S+ (API Level 31+) implementation of [AppThemeObserver].
+ *
+ * @param uiModeManager Used to change the UI mode.
+ * @param preferenceRepository Used to retriever the app theme setting.
+ * @param applicationCoroutineScope The application [CoroutineScope].
+ * @param defaultDispatcher The default [CoroutineDispatcher].
+ * @param mainDispatcher The main-thread [CoroutineDispatcher].
+ * @author Niall Scott
+ */
+@RequiresApi(Build.VERSION_CODES.S)
+class V31AppThemeObserver @Inject constructor(
+    private val uiModeManager: UiModeManager,
+    private val preferenceRepository: PreferenceRepository,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @ForMainDispatcher private val mainDispatcher: CoroutineDispatcher) : AppThemeObserver {
+
+    override fun observeAppTheme() {
+        applicationCoroutineScope.launch(mainDispatcher) {
+            preferenceRepository.appThemeFlow
+                .map(this@V31AppThemeObserver::mapToUiMode)
+                .distinctUntilChanged()
+                .flowOn(defaultDispatcher)
+                .collect {
+                    uiModeManager.setApplicationNightMode(it)
+                }
+        }
+    }
+
+    /**
+     * Map the given [AppTheme] to the correct `MODE_*` constant value.
+     *
+     * @param appTheme The [AppTheme] to map.
+     * @return The correct `MODE_*` for the [AppTheme].
+     */
+    private fun mapToUiMode(appTheme: AppTheme): Int {
+        return when (appTheme) {
+            AppTheme.SYSTEM_DEFAULT -> UiModeManager.MODE_NIGHT_AUTO
+            AppTheme.LIGHT -> UiModeManager.MODE_NIGHT_NO
+            AppTheme.DARK -> UiModeManager.MODE_NIGHT_YES
         }
     }
 }

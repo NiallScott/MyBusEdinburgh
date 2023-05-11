@@ -48,7 +48,7 @@
         <com.google.android.material.search.SearchBar
             android:id="@+id/searchBar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:hint="@string/main_search_bar_hint"
             app:forceDefaultNavigationOnClickListener="true">
 

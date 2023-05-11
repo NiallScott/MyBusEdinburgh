@@ -27,6 +27,9 @@
 package uk.org.rivernile.android.bustracker.ui.main
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,11 +47,71 @@ import uk.org.rivernile.android.bustracker.testutils.test
 @RunWith(MockitoJUnitRunner::class)
 class MainActivityViewModelTest {
 
+    companion object {
+
+        private const val STATE_HAS_SHOWN_INITIAL_ANIMATION = "hasShownInitialAnimation"
+    }
+
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @Mock
     private lateinit var featureRepository: FeatureRepository
+
+    @Test
+    fun hasShownInitialAnimationReturnsFalseByDefault() {
+        val viewModel = createViewModel()
+
+        val result = viewModel.hasShownInitialAnimation
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun hasShownInitialAnimationReturnsTrueWhenTrueInSavedState() {
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_HAS_SHOWN_INITIAL_ANIMATION to true)))
+
+        val result = viewModel.hasShownInitialAnimation
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun hasShownInitialAnimationReturnsTrueAfterCallingOnInitialAnimationFinished() {
+        val viewModel = createViewModel()
+
+        viewModel.onInitialAnimationFinished()
+        val result = viewModel.hasShownInitialAnimation
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun hasShownInitialAnimationReturnsTrueWithSubsequentFinishedCallAfterTrueState() {
+        val viewModel = createViewModel(
+            SavedStateHandle(
+                mapOf(
+                    STATE_HAS_SHOWN_INITIAL_ANIMATION to true)))
+
+        viewModel.onInitialAnimationFinished()
+        val result = viewModel.hasShownInitialAnimation
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun hasShownInitialAnimationReturnsTrueWithSubsequentFinishedCalls() {
+        val viewModel = createViewModel()
+
+        viewModel.onInitialAnimationFinished()
+        viewModel.onInitialAnimationFinished()
+        val result = viewModel.hasShownInitialAnimation
+
+        assertTrue(result)
+    }
 
     @Test
     fun isScanMenuItemVisibleEmitsFalseWhenNoCameraFeature() {
@@ -160,5 +223,8 @@ class MainActivityViewModelTest {
         observer.assertSize(1)
     }
 
-    private fun createViewModel() = MainActivityViewModel(featureRepository)
+    private fun createViewModel(savedState: SavedStateHandle = SavedStateHandle()) =
+        MainActivityViewModel(
+            savedState,
+            featureRepository)
 }
