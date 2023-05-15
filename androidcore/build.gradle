@@ -86,18 +86,14 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        androidTest.java.srcDirs += 'src/androidTest/kotlin'
-        test.java.srcDirs += 'src/test/kotlin'
-
         // This adds the generated Room schema files to the instrumentation test assets so that they
         // can be loaded at test time.
         androidTest.assets.srcDirs += files("$projectDir/schemas")
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     packagingOptions {

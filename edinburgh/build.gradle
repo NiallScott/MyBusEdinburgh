@@ -25,19 +25,8 @@
  */
 
 plugins {
-    id 'java-library'
     id 'kotlin'
     id 'kotlin-kapt'
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-
-    sourceSets {
-        main.java.srcDirs += 'src/main/kotlin'
-        test.java.srcDirs += 'src/test/kotlin'
-    }
 }
 
 dependencies {

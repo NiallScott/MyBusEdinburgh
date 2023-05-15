@@ -89,7 +89,7 @@ class LiveTimesLoaderTest {
             .thenReturn(flowOf(Unit))
         whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
             .thenReturn(flowOf(4))
-        val expected = mock<UiTransformedResult>()
+        val expected = mock<UiTransformedResult.Error>()
         whenever(liveTimesTransform.getLiveTimesTransformFlow(
             UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE)))
             .thenReturn(flowOf(expected))
@@ -114,7 +114,7 @@ class LiveTimesLoaderTest {
                 .thenReturn(flowOf(4))
         whenever(liveTimesRetriever.getLiveTimesFlow("123456", 4))
                 .thenReturn(flowOf(UiResult.Success(123L, stop)))
-        val expected = mock<UiTransformedResult>()
+        val expected = mock<UiTransformedResult.Success>()
         whenever(liveTimesTransform.getLiveTimesTransformFlow(
             UiResult.Success(123L, stop)))
             .thenReturn(flowOf(expected))
@@ -140,8 +140,8 @@ class LiveTimesLoaderTest {
             .thenReturn(flowOf(UiResult.Success(123L, stop1)))
         whenever(liveTimesRetriever.getLiveTimesFlow("246813", 4))
             .thenReturn(flowOf(UiResult.Success(123L, stop2)))
-        val expected1 = mock<UiTransformedResult>()
-        val expected2 = mock<UiTransformedResult>()
+        val expected1 = mock<UiTransformedResult.Success>()
+        val expected2 = mock<UiTransformedResult.Success>()
         whenever(liveTimesTransform.getLiveTimesTransformFlow(
             UiResult.Success(123L, stop1)))
             .thenReturn(flowOf(expected1))
@@ -169,8 +169,8 @@ class LiveTimesLoaderTest {
             .thenReturn(flowOf(UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)))
         whenever(liveTimesRetriever.getLiveTimesFlow("123456", 2))
             .thenReturn(flowOf(UiResult.Success(123L, stop)))
-        val expected1 = mock<UiTransformedResult>()
-        val expected2 = mock<UiTransformedResult>()
+        val expected1 = mock<UiTransformedResult.Error>()
+        val expected2 = mock<UiTransformedResult.Success>()
         whenever(liveTimesTransform.getLiveTimesTransformFlow(
             UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)))
             .thenReturn(flowOf(expected1))
@@ -198,8 +198,8 @@ class LiveTimesLoaderTest {
                 .thenReturn(flowOf(4))
         whenever(liveTimesRetriever.getLiveTimesFlow("123456", 4))
                 .thenReturn(loadFlow1, loadFlow2)
-        val expected1 = mock<UiTransformedResult>()
-        val expected2 = mock<UiTransformedResult>()
+        val expected1 = mock<UiTransformedResult.Error>()
+        val expected2 = mock<UiTransformedResult.Success>()
         whenever(liveTimesTransform.getLiveTimesTransformFlow(
             UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)))
             .thenReturn(flowOf(expected1))

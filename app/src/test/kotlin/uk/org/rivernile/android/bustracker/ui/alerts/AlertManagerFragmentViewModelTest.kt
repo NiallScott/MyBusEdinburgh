@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -147,7 +147,7 @@ class AlertManagerFragmentViewModelTest {
     @Test
     fun uiStateLiveDataEmitsContentWhenFlowEmitsPopulatedList() = runTest {
         whenever(alertsRetriever.allAlertsFlow)
-                .thenReturn(flowOf(listOf(mock())))
+            .thenReturn(flowOf(listOf(mock<UiAlert.ArrivalAlert>())))
 
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
@@ -161,9 +161,9 @@ class AlertManagerFragmentViewModelTest {
                 .thenReturn(flowOf(
                         null,
                         emptyList(),
-                        listOf(mock()),
+                        listOf(mock<UiAlert.ArrivalAlert>()),
                         emptyList(),
-                        listOf(mock(), mock())))
+                        listOf(mock<UiAlert.ArrivalAlert>(), mock<UiAlert.ProximityAlert>())))
 
         val observer = viewModel.uiStateLiveData.test()
         advanceUntilIdle()
