@@ -23,6 +23,9 @@
  *     exempt from clause 2.
  */
 
+import com.android.build.gradle.BasePlugin
+import com.android.build.gradle.BaseExtension
+
 buildscript {
     ext {
         androidCompileSdkVersion = 33
@@ -115,7 +118,7 @@ buildscript {
     }
 }
 
-allprojects {
+subprojects {
     repositories {
         google()
         mavenCentral()
@@ -130,6 +133,23 @@ allprojects {
         kotlinOptions {
             jvmTarget = JavaVersion.VERSION_17.toString()
             freeCompilerArgs += '-opt-in=kotlin.RequiresOptIn'
+        }
+    }
+
+    plugins.withType(BasePlugin).configureEach {
+        extensions.configure(BaseExtension) { extension ->
+            extension.compileSdkVersion androidCompileSdkVersion
+            extension.buildToolsVersion androidBuildToolsVersion
+
+            extension.defaultConfig {
+                minSdkVersion androidMinSdkVersion
+                targetSdkVersion androidTargetSdkVersion
+            }
+
+            extension.compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
+            }
         }
     }
 }

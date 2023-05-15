@@ -39,12 +39,8 @@ plugins {
 
 android {
     namespace 'uk.org.rivernile.edinburghbustracker.android'
-    compileSdkVersion androidCompileSdkVersion
-    buildToolsVersion androidBuildToolsVersion
 
     defaultConfig {
-        minSdkVersion androidMinSdkVersion
-        targetSdkVersion androidTargetSdkVersion
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         firebaseAppDistribution {
@@ -100,11 +96,6 @@ android {
             testCoverageEnabled true
             signingConfig signingConfigs.globalDebug
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {

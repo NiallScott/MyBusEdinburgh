@@ -34,12 +34,8 @@ plugins {
 
 android {
     namespace 'uk.org.rivernile.android.bustracker.androidcore'
-    compileSdkVersion androidCompileSdkVersion
-    buildToolsVersion androidBuildToolsVersion
 
     defaultConfig {
-        minSdkVersion androidMinSdkVersion
-        targetSdkVersion androidTargetSdkVersion
         testInstrumentationRunner 'uk.org.rivernile.android.bustracker.core.CoreTestRunner'
         consumerProguardFiles 'proguard-consumer-rules.pro'
 
@@ -89,11 +85,6 @@ android {
         // This adds the generated Room schema files to the instrumentation test assets so that they
         // can be loaded at test time.
         androidTest.assets.srcDirs += files("$projectDir/schemas")
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 
     packagingOptions {
