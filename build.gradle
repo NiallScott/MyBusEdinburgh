@@ -41,14 +41,14 @@ buildscript {
         kotlinVersion = '1.8.21'
 
         // Kotlin Coroutines
-        kotlinCoroutinesVersion = '1.7.0'
+        kotlinCoroutinesVersion = '1.7.1'
 
         // Dagger/Hilt
-        hiltVersion = '2.45'
-        daggerVersion = '2.45'
+        hiltVersion = '2.46.1'
+        daggerVersion = '2.46.1'
 
         // AndroidX
-        androidXCoreVersion = '1.10.0'
+        androidXCoreVersion = '1.10.1'
         androidXActivityVersion = '1.7.1'
         androidXFragmentVersion = '1.5.7'
         appCompatVersion = '1.6.1'
@@ -71,7 +71,7 @@ buildscript {
         retrofitKotlinSerializationConverterVersion = '1.0.0'
 
         // Serialisation
-        kotlinJsonSerialisationVersion = '1.5.0'
+        kotlinJsonSerialisationVersion = '1.5.1'
         gsonVersion = '2.8.9'
 
         // Image loading
