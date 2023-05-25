@@ -1,0 +1,152 @@
+[versions]
+# Build targeting.
+compile_sdk_version = "33"
+min_sdk_version = "23"
+target_sdk_version = "33"
+build_tools_version = "33.0.2"
+
+android_gradle_plugin = "8.0.1"
+kotlin = "1.8.21"
+dagger = "2.46.1"
+hilt_androidx = "1.0.0"
+coroutines = "1.7.1"
+okhttp = "4.10.0"
+retrofit = "2.9.0"
+kotlin-serialization = "1.5.1"
+edinburgh_bus_tracker_api = "1.2.0"
+retrofit-kotlinx-serialization-converter = "1.0.0"
+fetchutils = "1.1.1"
+
+# AndroidX
+androidx-core = "1.10.1"
+appcompat = "1.6.1"
+activity = "1.7.1"
+fragment = "1.5.7"
+architecture_components = "2.6.1"
+room = "2.5.1"
+work-manager = "2.8.1"
+datastore = "1.0.0"
+arch-core = "2.2.0"
+recyclerview = "1.3.0"
+viewpager2 = "1.1.0-beta01"
+palette = "1.0.0"
+constraintlayout = "2.1.4"
+preference = "1.2.0"
+
+# Material Design
+material = "1.9.0"
+
+# Firebase
+firebase-bom = "32.0.0"
+
+# Play Services
+play-services-location = "21.0.1"
+play-services-maps = "18.1.0"
+play-services-maps-ktx = "3.4.0"
+play-services-maps-utils = "3.4.0"
+play-services-maps-utils-ktx = "3.4.0"
+
+# Image loading
+picasso = "2.71828"
+
+# Testing versions.
+junit = "4.13.2"
+mockito = "5.3.1"
+mockito_kotlin = "4.1.0"
+androidx-test-runner = "1.4.0"
+androidx-test-core = "1.4.0"
+espresso = "3.4.0"
+hamcrest = "2.2"
+
+[libraries]
+# Coroutines
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+
+# Dagger 2 / Hilt
+dagger-core = { module = "com.google.dagger:dagger", version.ref = "dagger" }
+dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagger" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
+hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hilt_androidx" }
+hilt-androidx-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt_androidx" }
+
+# Okhttp
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+
+# Retrofit
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+retrofit-converter-kotlin-serialization = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit-kotlinx-serialization-converter" }
+
+# (De-)serialisation
+kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin-serialization" }
+
+# Edinburgh Bus Tracker API
+edinburgh-bus-tracker-api = { module = "uk.org.rivernile.edinburghbustrackerapi:api", version.ref = "edinburgh_bus_tracker_api" }
+fetchutils = { module = "uk.org.rivernile.android.fetchutils:fetchutils-library", version.ref = "fetchutils" }
+
+# AndroidX
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
+androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity" }
+androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment" }
+androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragment" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "architecture_components" }
+androidx-room-core = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "work-manager" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
+androidx-palette-ktx = { module = "androidx.palette:palette-ktx", version.ref = "palette" }
+androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+androidx-preference = { module = "androidx.preference:preference-ktx", version.ref = "preference" }
+androidx-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "architecture_components" }
+
+# Material Design
+material = { module = "com.google.android.material:material", version.ref = "material" }
+
+# Firebase
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
+
+# Play Services
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "play-services-location" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "play-services-maps" }
+play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version.ref = "play-services-maps-ktx" }
+play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "play-services-maps-utils" }
+play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-ktx", version.ref = "play-services-maps-utils-ktx" }
+
+# Image loading
+picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }
+
+# Testing dependencies.
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito_kotlin" }
+mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockito" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
+androidx-test-core = { module = "androidx.test:core-ktx", version.ref = "androidx-test-core" }
+androidx-room-test = { module = "androidx.room:room-testing", version.ref = "room" }
+androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version.ref = "arch-core" }
+hilt-test = { module = "com.google.dagger:hilt-android-testing", version.ref = "dagger" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "dagger" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
+espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espresso" }
+hamcrest = { module = "org.hamcrest:hamcrest-library", version.ref = "hamcrest" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
+android-library = { id = "com.android.library", version.ref = "android_gradle_plugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
+google-services = "com.google.gms.google-services:4.3.15"
+firebase-crashlytics = "com.google.firebase.crashlytics:2.9.5"
+firebase-appdistribution = "com.google.firebase.appdistribution:4.0.0"

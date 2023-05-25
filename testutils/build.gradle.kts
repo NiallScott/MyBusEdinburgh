@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,15 +25,12 @@
  */
 
 plugins {
-    id 'kotlin'
+    kotlin("jvm")
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    api "junit:junit:$junitVersion"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
-    api "org.mockito:mockito-core:$mockitoVersion"
-    api "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    api(libs.junit)
+    api(libs.coroutines.test)
+    api(libs.mockito)
+    api(libs.mockito.kotlin)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -21,6 +21,33 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
+ *
  */
 
-include ':app', ':core', ':edinburgh', ':androidcore', ':testutils'
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
+    @Suppress("UnstableApiUsage")
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "MyBusEdinburgh"
+
+include(
+    ":app",
+    ":core",
+    ":edinburgh",
+    ":androidcore",
+    ":testutils")

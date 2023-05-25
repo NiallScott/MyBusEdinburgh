@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,23 +25,20 @@
  */
 
 plugins {
-    id 'kotlin'
-    id 'kotlin-kapt'
+    kotlin("jvm")
+    kotlin("kapt")
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    // Core
-    api project(':core')
+    api(project(":core"))
 
     // Dagger 2
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation(libs.dagger.core)
+    kapt(libs.dagger.compiler)
 
     // Edinburgh APIs
-    api 'uk.org.rivernile.edinburghbustrackerapi:api:1.2.0'
+    api(libs.edinburgh.bus.tracker.api)
 
     // Tests
-    testImplementation project(':testutils')
+    testImplementation(project(":testutils"))
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,32 +25,29 @@
  */
 
 plugins {
-    id 'kotlin'
-    id 'kotlin-kapt'
-    id 'kotlinx-serialization'
+    kotlin("jvm")
+    kotlin("kapt")
+    id("kotlinx-serialization")
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     // Kotlin
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    api(libs.coroutines.core)
 
     // Dagger 2
-    implementation "com.google.dagger:dagger:$daggerVersion"
-    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation(libs.dagger.core)
+    kapt(libs.dagger.compiler)
 
     // (De-)serialisation
-    api "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinJsonSerialisationVersion"
+    api(libs.kotlin.serialization.json)
 
     // Okhttp
-    api "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    api(libs.okhttp)
 
     // Retrofit
-    api "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    api(libs.retrofit)
 
     // Testing
-    testImplementation project(':testutils')
+    testImplementation(project(":testutils"))
 }
