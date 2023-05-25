@@ -5,7 +5,7 @@ min_sdk_version = "23"
 target_sdk_version = "33"
 build_tools_version = "33.0.2"
 
-android_gradle_plugin = "8.0.1"
+android_gradle_plugin = "8.0.2"
 kotlin = "1.8.21"
 dagger = "2.46.1"
 hilt_androidx = "1.0.0"
