@@ -24,24 +24,24 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
+package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
-import kotlinx.coroutines.flow.Flow
+import androidx.room.ColumnInfo
+import androidx.room.TypeConverters
 
 /**
- * This DAO is used to access database information for the bus stop database.
+ * This is the Room specific implementation of [ServiceDetails].
  *
+ * @property name See [ServiceDetails.name].
+ * @property description See [ServiceDetails.description].
+ * @property colour See [ServiceDetails.colour].
  * @author Niall Scott
  */
-interface DatabaseDao {
-
-    /**
-     * A [Flow] which emits the current topology ID.
-     */
-    val topologyIdFlow: Flow<String?>
-
-    /**
-     * A [Flow] which emits database metadata.
-     */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
-}
+internal data class RoomServiceDetails(
+    override val name: String,
+    override val description: String?,
+    @field:TypeConverters(ColourTypeConverter::class)
+    @ColumnInfo(
+        name = "hexColour",
+        typeAffinity = ColumnInfo.TEXT)
+    override val colour: Int?) : ServiceDetails

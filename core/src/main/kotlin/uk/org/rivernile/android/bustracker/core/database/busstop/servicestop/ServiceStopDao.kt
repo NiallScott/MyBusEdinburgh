@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
 
+import kotlinx.coroutines.flow.Flow
+
 /**
  * This DAO is used to access service stop data in the bus stop database.
  *
@@ -33,4 +35,22 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
  */
 interface ServiceStopDao {
 
+    /**
+     * Get a [Flow] which emits [List]s of services which stop at the given [stopCode].
+     *
+     * @param stopCode The stop code to get services for.
+     * @return A [Flow] which emits [List]s of services which stop at the given [stopCode].
+     */
+    fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
+
+    /**
+     * Given a [Set] of stop codes, get a [Flow] which emits a [Map] containing the mappings between
+     * the stop code and the [List] of services for that particular stop.
+     *
+     * @param stopCodes The stop codes to get services for.
+     * @return A [Flow] which emits a [Map] containing the mappings between
+     * the stop code and the [List] of services for that particular stop, or emits `null` when there
+     * is no data or there is an error.
+     */
+    fun getServicesForStopsFlow(stopCodes: Set<String>): Flow<Map<String, List<String>>?>
 }

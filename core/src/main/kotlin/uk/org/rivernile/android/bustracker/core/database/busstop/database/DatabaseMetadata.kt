@@ -26,22 +26,20 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
-import kotlinx.coroutines.flow.Flow
-
 /**
- * This DAO is used to access database information for the bus stop database.
+ * Database metadata, containing details about the database itself.
  *
  * @author Niall Scott
  */
-interface DatabaseDao {
+interface DatabaseMetadata {
 
     /**
-     * A [Flow] which emits the current topology ID.
+     * The timestamp the database was last updated at.
      */
-    val topologyIdFlow: Flow<String?>
+    val updateTimestamp: Long
 
     /**
-     * A [Flow] which emits database metadata.
+     * The topology ID, or `null` if it is not known.
      */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    val topologyVersionId: String?
 }

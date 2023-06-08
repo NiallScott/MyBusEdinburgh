@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
+import kotlinx.coroutines.flow.Flow
+
 /**
  * This DAO is used to access service data in the bus stop database.
  *
@@ -33,4 +35,29 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.service
  */
 interface ServiceDao {
 
+    /**
+     * A [Flow] which emits a [List] of all service names, if available.
+     */
+    val allServiceNamesFlow: Flow<List<String>?>
+
+    /**
+     * Get a [Flow] which emits colours for services. If [services] is specified, then only the
+     * given services will be returned, otherwise colours will be returned for all known services.
+     *
+     * @param services The services to get colours for, or `null` if colours for all services should
+     * be returned.
+     * @return A [Flow] which emits [Map]s where the service name is the key and the colour for the
+     * service is the value. The [Flow] may emit `null` items.
+     */
+    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?>
+
+    /**
+     * Get a [Flow] which emits [ServiceDetails] for the given [services].
+     *
+     * @param services The services to get [ServiceDetails] for.
+     * @return A [Flow] which emits [Map]s of service name to [ServiceDetails]. May be `null` if
+     * [services] is empty, or if there are no items, or if there was some other issue getting the
+     * details.
+     */
+    fun getServiceDetailsFlow(services: Set<String>): Flow<Map<String, ServiceDetails>?>
 }

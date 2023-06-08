@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
 import androidx.room.Dao
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 /**
  * This is the Room implementation of [ServicePointDao].
@@ -36,4 +38,31 @@ import androidx.room.Dao
 @Dao
 internal abstract class RoomServicePointDao : ServicePointDao {
 
+    override fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?> {
+        return serviceNames
+            ?.ifEmpty { null }
+            ?.let {
+                getServicePointsForServicesFlow(it)
+            }
+            ?: servicePointsForAllServicesFlow
+    }
+
+    @get:Query("""
+        SELECT service.name AS serviceName, chainage, latitude, longitude 
+        FROM service_point 
+        LEFT JOIN service ON service_point.serviceId = service.id 
+        WHERE serviceName NOT NULL 
+        ORDER BY serviceName ASC, chainage ASC, orderValue ASC
+    """)
+    abstract val servicePointsForAllServicesFlow: Flow<List<RoomServicePoint>?>
+
+    @Query("""
+        SELECT service.name AS serviceName, chainage, latitude, longitude 
+        FROM service_point 
+        LEFT JOIN service ON service_point.serviceId = service.id 
+        WHERE serviceName IN (:services)
+        ORDER BY serviceName ASC, chainage ASC, orderValue ASC
+    """)
+    abstract fun getServicePointsForServicesFlow(
+        services: Set<String>): Flow<List<RoomServicePoint>?>
 }

@@ -24,24 +24,52 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
+package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
-import kotlinx.coroutines.flow.Flow
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Before
+import org.junit.Test
 
 /**
- * This DAO is used to access database information for the bus stop database.
+ * Tests for [ColourTypeConverter].
  *
  * @author Niall Scott
  */
-interface DatabaseDao {
+class ColourTypeConverterTest {
 
-    /**
-     * A [Flow] which emits the current topology ID.
-     */
-    val topologyIdFlow: Flow<String?>
+    private lateinit var converter: ColourTypeConverter
 
-    /**
-     * A [Flow] which emits database metadata.
-     */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    @Before
+    fun setUp() {
+        converter = ColourTypeConverter()
+    }
+
+    @Test
+    fun convertColourToIntReturnsNullWhenHexColourIsNull() {
+        val result = converter.convertToColourInt(null)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun convertColourToIntReturnsNullWhenHexColourIsEmpty() {
+        val result = converter.convertToColourInt("")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun convertColourToIntReturnsNullWhenInvalidColourIsSupplied() {
+        val result = converter.convertToColourInt("foobar")
+
+        assertNull(result)
+    }
+
+    @Test
+    fun convertColourToIntReturnsColourIntWhenColourIsValid() {
+        val result = converter.convertToColourInt("#C41411")
+
+        assertEquals(-3927023, result)
+    }
 }

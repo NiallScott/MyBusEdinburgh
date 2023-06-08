@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.RoomDatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.RoomDatabaseInfoEntity
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.RoomServiceDao
@@ -38,6 +39,7 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.Roo
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.RoomServiceStopEntity
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.RoomStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.RoomStopEntity
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopTypeConverter
 
 /**
  * This is the Room implementation of the bus stop database.
@@ -54,6 +56,9 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.RoomStopEn
         RoomStopEntity::class
     ]
 )
+@TypeConverters(value = [
+    StopTypeConverter::class
+])
 internal abstract class RoomBusStopDatabase : RoomDatabase() {
 
     /**

@@ -24,24 +24,32 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
-
-import kotlinx.coroutines.flow.Flow
+package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
 /**
- * This DAO is used to access database information for the bus stop database.
+ * A stop search result.
  *
  * @author Niall Scott
  */
-interface DatabaseDao {
+interface StopSearchResult {
 
     /**
-     * A [Flow] which emits the current topology ID.
+     * The stop code.
      */
-    val topologyIdFlow: Flow<String?>
+    val stopCode: String
 
     /**
-     * A [Flow] which emits database metadata.
+     * The stop name.
      */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    val stopName: StopName
+
+    /**
+     * The stop orientation.
+     */
+    val orientation: StopOrientation
+
+    /**
+     * A [String] which lists the services which stop at this stop.
+     */
+    val serviceListing: String?
 }

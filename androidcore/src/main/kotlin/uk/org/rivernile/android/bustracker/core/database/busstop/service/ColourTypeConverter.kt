@@ -24,24 +24,37 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
+package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
-import kotlinx.coroutines.flow.Flow
+import android.graphics.Color
+import androidx.room.TypeConverter
 
 /**
- * This DAO is used to access database information for the bus stop database.
+ * This [TypeConverter] is used to convert colours in the database (stored in hex representation) in
+ * to Android's colour integer representation.
  *
  * @author Niall Scott
  */
-interface DatabaseDao {
+internal class ColourTypeConverter {
 
     /**
-     * A [Flow] which emits the current topology ID.
+     * Convert a colour hex [String] in to an integer representing the colour. This will return
+     * `null` if [hexColour] is `null`, empty or could not be parsed.
+     *
+     * @param hexColour A [String] representing the colour in hex representation.
+     * @return The [hexColour] as a colour integer, or `null` if [hexColour] is null, empty or could
+     * not be parsed.
      */
-    val topologyIdFlow: Flow<String?>
-
-    /**
-     * A [Flow] which emits database metadata.
-     */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    @TypeConverter
+    fun convertToColourInt(hexColour: String?): Int? {
+        return hexColour
+            ?.ifBlank { null }
+            ?.let {
+                try {
+                    Color.parseColor(it)
+                } catch (e: IllegalArgumentException) {
+                    null
+                }
+            }
+    }
 }

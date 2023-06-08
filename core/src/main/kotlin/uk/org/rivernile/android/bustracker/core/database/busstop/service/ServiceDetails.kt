@@ -24,24 +24,28 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
-
-import kotlinx.coroutines.flow.Flow
+package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
 /**
- * This DAO is used to access database information for the bus stop database.
+ * This contains details for a service.
  *
  * @author Niall Scott
  */
-interface DatabaseDao {
+interface ServiceDetails {
 
     /**
-     * A [Flow] which emits the current topology ID.
+     * The display name of the service.
      */
-    val topologyIdFlow: Flow<String?>
+    val name: String
 
     /**
-     * A [Flow] which emits database metadata.
+     * A description of the service. This might be a human-readable version of its rout, or
+     * something else that the user will find useful to describe the service.
      */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    val description: String?
+
+    /**
+     * The display colour of the service. This may be `null` if no colour is attributed.
+     */
+    val colour: Int?
 }

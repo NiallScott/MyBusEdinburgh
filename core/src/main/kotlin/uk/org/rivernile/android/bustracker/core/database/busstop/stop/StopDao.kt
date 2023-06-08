@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
+import kotlinx.coroutines.flow.Flow
+
 /**
  * This DAO is used to access stop data in the bus stop database.
  *
@@ -33,4 +35,97 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.stop
  */
 interface StopDao {
 
+    /**
+     * Given a stop code, return a [Flow] which emits the name for this stop.
+     *
+     * @param stopCode The stop to get the name for.
+     * @return A [Flow] which emits the name of the stop, or will emit `null` when the stop is not
+     * known or the stop cannot be found.
+     */
+    fun getNameForStopFlow(stopCode: String): Flow<StopName?>
+
+    /**
+     * Given a stop code, return a [Flow] which emits the location for this stop.
+     *
+     * @param stopCode The stop to get the location for.
+     * @return A [Flow] which emits the location of the stop, or emits `null` when the stop is not
+     * found.
+     */
+    fun getLocationForStopFlow(stopCode: String): Flow<StopLocation?>
+
+    /**
+     * Given a stop code, return a [Flow] which emits the stop details for this stop.
+     *
+     * @param stopCode The stop to get the location for.
+     * @return A [Flow] which emits the stop details, or emits `null` when the stop is not found.
+     */
+    fun getStopDetailsFlow(stopCode: String): Flow<StopDetails?>
+
+    /**
+     * Given a [Set] of stop codes, get a [Flow] which emits the details for each stop.
+     *
+     * @param stopCodes The stop codes to get details for.
+     * @return A [Flow] which emits the details for the given stop codes, or emits `null` if no
+     * stops were found or if an error occurred.
+     */
+    fun getStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?>
+
+    /**
+     * Return a [Flow] which emits a [List] of [StopDetails], which only contains items which
+     * satisfy the supplied [serviceFilter].
+     *
+     * @param serviceFilter An optional [Set] which contains the service filter.
+     * @return A [Flow] which emits [List]s pf [StopDetails] which satify the supplied
+     * [serviceFilter].
+     */
+    fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?): Flow<List<StopDetails>?>
+
+    /**
+     * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects which are within
+     * the bounding box created by the min/max latitude/longitudes.
+     *
+     * @param minLatitude The minimum latitude of the included stops.
+     * @param minLongitude The minimum longitude of the included stops.
+     * @param maxLatitude The maximum latitude of the included stops.
+     * @param maxLongitude The maximum longitude of the included stops.
+     * @return A [Flow] which emits [List]s of [StopDetailsWithServices] objects which match the
+     * filter parameters.
+     */
+    fun getStopDetailsWithinSpanFlow(
+        minLatitude: Double,
+        minLongitude: Double,
+        maxLatitude: Double,
+        maxLongitude: Double): Flow<List<StopDetailsWithServices>?>
+
+    /**
+     * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects which are within
+     * the bounding box created by the min/max latitude/longitudes. Additionally, a [serviceFilter]
+     * must be specified where these stops are further filtered to only include stops with these
+     * services.
+     *
+     * @param minLatitude The minimum latitude of the included stops.
+     * @param minLongitude The minimum longitude of the included stops.
+     * @param maxLatitude The maximum latitude of the included stops.
+     * @param maxLongitude The maximum longitude of the included stops.
+     * @param serviceFilter A service filter. Only stops which include these services will be
+     * emitted.
+     * @return A [Flow] which emits [List]s of [StopDetailsWithServices] objects which match the
+     * filter parameters.
+     */
+    fun getStopDetailsWithinSpanFlow(
+        minLatitude: Double,
+        minLongitude: Double,
+        maxLatitude: Double,
+        maxLongitude: Double,
+        serviceFilter: Set<String>): Flow<List<StopDetailsWithServices>?>
+
+    /**
+     * Return a [Flow] which emits [List]s of [StopSearchResult] objects, based upon the supplied
+     * [searchTerm].
+     *
+     * @param searchTerm The search term to use to search for stops.
+     * @return A [Flow] which emits [List]s of [StopSearchResult] objects, based upon the supplied
+     * [searchTerm].
+     */
+    fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?>
 }

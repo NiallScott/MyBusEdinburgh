@@ -24,24 +24,34 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
+package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
-import kotlinx.coroutines.flow.Flow
+import androidx.room.TypeConverter
 
 /**
- * This DAO is used to access database information for the bus stop database.
+ * This class contains [TypeConverter]s for stops.
  *
  * @author Niall Scott
  */
-interface DatabaseDao {
+internal class StopTypeConverter {
 
     /**
-     * A [Flow] which emits the current topology ID.
+     * Convert an integer value representing the stop orientation to the [StopOrientation] enum
+     * value.
+     *
+     * @param value The integer value from the database.
+     * @return The value mapped to its [StopOrientation] value.
      */
-    val topologyIdFlow: Flow<String?>
-
-    /**
-     * A [Flow] which emits database metadata.
-     */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    @TypeConverter
+    fun convertToStopOrientation(value: Int?) = when (value) {
+        0 -> StopOrientation.NORTH
+        1 -> StopOrientation.NORTH_EAST
+        2 -> StopOrientation.EAST
+        3 -> StopOrientation.SOUTH_EAST
+        4 -> StopOrientation.SOUTH
+        5 -> StopOrientation.SOUTH_WEST
+        6 -> StopOrientation.WEST
+        7 -> StopOrientation.NORTH_WEST
+        else -> StopOrientation.UNKNOWN
+    }
 }

@@ -26,22 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
-import kotlinx.coroutines.flow.Flow
+import androidx.room.ColumnInfo
 
 /**
- * This DAO is used to access database information for the bus stop database.
+ * This is the Room specific implementation of [DatabaseMetadata].
  *
+ * @property updateTimestamp See [DatabaseMetadata.updateTimestamp].
+ * @property topologyVersionId See [DatabaseMetadata.topologyVersionId].
  * @author Niall Scott
  */
-interface DatabaseDao {
-
-    /**
-     * A [Flow] which emits the current topology ID.
-     */
-    val topologyIdFlow: Flow<String?>
-
-    /**
-     * A [Flow] which emits database metadata.
-     */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
-}
+internal data class RoomDatabaseMetadata(
+    override val updateTimestamp: Long,
+    @ColumnInfo("topologyId") override val topologyVersionId: String?) : DatabaseMetadata

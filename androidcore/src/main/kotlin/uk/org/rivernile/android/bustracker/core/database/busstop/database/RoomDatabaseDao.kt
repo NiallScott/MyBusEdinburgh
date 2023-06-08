@@ -27,6 +27,8 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
 import androidx.room.Dao
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 /**
  * This is the Room implementation of [DatabaseDao].
@@ -36,4 +38,21 @@ import androidx.room.Dao
 @Dao
 internal abstract class RoomDatabaseDao : DatabaseDao {
 
+    @get:Query("""
+        SELECT topologyId 
+        FROM database_info 
+        ORDER BY updateTimestamp DESC 
+        LIMIT 1
+    """)
+    abstract override val topologyIdFlow: Flow<String?>
+
+    override val databaseMetadataFlow: Flow<DatabaseMetadata?> get() = databaseMetadataFlowInternal
+
+    @get:Query("""
+        SELECT updateTimestamp, topologyId 
+        FROM database_info 
+        ORDER BY updateTimestamp DESC 
+        LIMIT 1
+    """)
+    abstract val databaseMetadataFlowInternal: Flow<RoomDatabaseMetadata?>
 }

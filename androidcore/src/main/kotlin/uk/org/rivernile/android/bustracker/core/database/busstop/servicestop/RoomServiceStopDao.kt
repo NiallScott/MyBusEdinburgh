@@ -27,6 +27,9 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
 
 import androidx.room.Dao
+import androidx.room.MapInfo
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 /**
  * This is the Room implementation of [ServiceStopDao].
@@ -36,4 +39,25 @@ import androidx.room.Dao
 @Dao
 internal abstract class RoomServiceStopDao : ServiceStopDao {
 
+    @Query("""
+        SELECT serviceName 
+        FROM service_stop 
+        WHERE stopCode = :stopCode 
+        ORDER BY CASE WHEN serviceName GLOB '[^0-9.]*' THEN 
+            serviceName ELSE cast(serviceName AS int) END
+    """)
+    abstract override fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
+
+    @Query("""
+        SELECT stopCode, serviceName
+        FROM service_stop
+        WHERE stopCode IN (:stopCodes)
+        ORDER BY stopCode ASC, 
+            CASE WHEN serviceName GLOB '[^0-9.]*' THEN serviceName ELSE cast(serviceName AS int) END
+    """)
+    @MapInfo(
+        keyColumn = "stopCode",
+        valueColumn = "serviceName")
+    abstract override fun getServicesForStopsFlow(
+        stopCodes: Set<String>): Flow<Map<String, List<String>>?>
 }

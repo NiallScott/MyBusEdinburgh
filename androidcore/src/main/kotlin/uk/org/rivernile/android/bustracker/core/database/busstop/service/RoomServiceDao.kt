@@ -27,6 +27,11 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
 import androidx.room.Dao
+import androidx.room.MapInfo
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import okhttp3.internal.toImmutableMap
 
 /**
  * This is the Room implementation of [ServiceDao].
@@ -36,4 +41,68 @@ import androidx.room.Dao
 @Dao
 internal abstract class RoomServiceDao : ServiceDao {
 
+    @get:Query("""
+        SELECT name 
+        FROM service 
+        ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
+    """)
+    abstract override val allServiceNamesFlow: Flow<List<String>?>
+
+    override fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> {
+        val flow = services
+            ?.ifEmpty { null }
+            ?.let {
+                getColoursForServicesFlowInternal(it)
+            }
+            ?: coloursForAllServicesFlow
+
+        return flow.map(this::mapToServiceColourMap)
+    }
+
+    override fun getServiceDetailsFlow(services: Set<String>): Flow<Map<String, ServiceDetails>?> =
+        getServiceDetailsFlowInternal(services)
+
+    @get:Query("""
+        SELECT name, hexColour 
+        FROM service 
+        WHERE hexColour NOT NULL
+    """)
+    abstract val coloursForAllServicesFlow: Flow<List<RoomServiceColour>?>
+
+    @Query("""
+        SELECT name, hexColour 
+        FROM service 
+        WHERE name IN (:services) 
+        AND hexColour NOT NULL
+    """)
+    abstract fun getColoursForServicesFlowInternal(
+        services: Set<String>): Flow<List<RoomServiceColour>?>
+
+    @Query("""
+        SELECT name, description, hexColour 
+        FROM service 
+        WHERE name IN (:services)
+    """)
+    @MapInfo(keyColumn = "name")
+    abstract fun getServiceDetailsFlowInternal(
+        services: Set<String>): Flow<Map<String, RoomServiceDetails>?>
+
+    private fun mapToServiceColourMap(serviceColours: List<RoomServiceColour>?): Map<String, Int>? {
+        return serviceColours
+            ?.ifEmpty { null }
+            ?.let { scs ->
+                val result = HashMap<String, Int>(scs.size)
+
+                scs.forEach { serviceColour ->
+                    serviceColour
+                        .colour
+                        ?.let { colour ->
+                            result[serviceColour.name] = colour
+                        }
+                }
+
+                result.ifEmpty { null }
+                    ?.toImmutableMap()
+            }
+    }
 }

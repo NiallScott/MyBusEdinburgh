@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
+import kotlinx.coroutines.flow.Flow
+
 /**
  * This DAO is used to access service point data in the bus stop database.
  *
@@ -33,4 +35,20 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
  */
 interface ServicePointDao {
 
+    /**
+     * This is a [Flow] which emits a [List] of [ServicePoint]s for the given [serviceNames]. `null`
+     * may be omitted if there are no results.
+     *
+     * Ordering is in the following precedence;
+     *
+     * - [ServicePoint.serviceName]
+     * - [ServicePoint.chainage]
+     * - Then ordered by an internal ordering value, so the points are in the correct order.
+     *
+     * @param serviceNames Only [ServicePoint]s for the supplied [Set] of service names are
+     * returned. `null` means all [ServicePoint]s are returned - this could be an expensive
+     * operation.
+     * @return A [List] of [ServicePoint]s for the given [serviceNames].
+     */
+    fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?>
 }

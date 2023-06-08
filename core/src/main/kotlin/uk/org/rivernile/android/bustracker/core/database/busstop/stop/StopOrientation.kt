@@ -24,24 +24,49 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.database
-
-import kotlinx.coroutines.flow.Flow
+package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
 /**
- * This DAO is used to access database information for the bus stop database.
+ * This enum represents the orientation of a stop (the direction of travel).
  *
  * @author Niall Scott
  */
-interface DatabaseDao {
+enum class StopOrientation {
 
     /**
-     * A [Flow] which emits the current topology ID.
+     * The stop is facing north.
      */
-    val topologyIdFlow: Flow<String?>
-
+    NORTH,
     /**
-     * A [Flow] which emits database metadata.
+     * The stop is facing north-east.
      */
-    val databaseMetadataFlow: Flow<DatabaseMetadata?>
+    NORTH_EAST,
+    /**
+     * The stop is facing east.
+     */
+    EAST,
+    /**
+     * The stop is facing south-east.
+     */
+    SOUTH_EAST,
+    /**
+     * The stop is facing south.
+     */
+    SOUTH,
+    /**
+     * The stop is facing south-west.
+     */
+    SOUTH_WEST,
+    /**
+     * The stop is facing west.
+     */
+    WEST,
+    /**
+     * The stop is facing north-west.
+     */
+    NORTH_WEST,
+    /**
+     * The stop orientation is unknown.
+     */
+    UNKNOWN
 }
