@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.migrations
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import javax.inject.Inject
 
 /**
  * Perform a migration from version 1 to version 2 of the stop database. Version 1 is pre-Room.
@@ -75,7 +76,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  *
  * @author Niall Scott
  */
-internal class Migration1To2 : Migration(1, 2) {
+internal class Migration1To2 @Inject constructor() : Migration(1, 2) {
 
     override fun migrate(database: SupportSQLiteDatabase) {
         database.apply {
