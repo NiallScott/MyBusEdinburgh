@@ -37,52 +37,7 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 @Dao
-internal abstract class RoomStopDao : StopDao {
-
-    override fun getNameForStopFlow(stopCode: String): Flow<StopName?> =
-        getNameForStopFlowInternal(stopCode)
-
-    override fun getLocationForStopFlow(stopCode: String): Flow<StopLocation?> =
-        getLocationForStopFlowInternal(stopCode)
-
-    override fun getStopDetailsFlow(stopCode: String): Flow<StopDetails?> =
-        getStopDetailsFlowInternal(stopCode)
-
-    override fun getStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?> =
-        getStopDetailsFlowInternal(stopCodes)
-
-    override fun getStopDetailsWithServiceFilterFlow(
-        serviceFilter: Set<String>?): Flow<List<StopDetails>?> {
-        return serviceFilter
-            ?.ifEmpty { null }
-            ?.let {
-                getStopDetailsWithServiceFilterFlowInternal(it)
-            }
-            ?: allStopDetailsFlow
-    }
-
-    override fun getStopDetailsWithinSpanFlow(
-        minLatitude: Double,
-        minLongitude: Double,
-        maxLatitude: Double,
-        maxLongitude: Double): Flow<List<StopDetailsWithServices>?> =
-        getStopDetailsWithinSpanFlowInternal(minLatitude, minLongitude, maxLatitude, maxLongitude)
-
-    override fun getStopDetailsWithinSpanFlow(
-        minLatitude: Double,
-        minLongitude: Double,
-        maxLatitude: Double,
-        maxLongitude: Double,
-        serviceFilter: Set<String>): Flow<List<StopDetailsWithServices>?> =
-        getStopDetailsWithinSpanFlowInternal(
-            minLatitude,
-            minLongitude,
-            maxLatitude,
-            maxLongitude,
-            serviceFilter)
-
-    override fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?> =
-        getStopSearchResultsFlowInternal(searchTerm)
+internal abstract class RoomStopDao {
 
     @Query("""
         SELECT stopName AS name, locality 
@@ -90,7 +45,7 @@ internal abstract class RoomStopDao : StopDao {
         WHERE stopCode = :stopCode 
         LIMIT 1
     """)
-    abstract fun getNameForStopFlowInternal(stopCode: String): Flow<RoomStopName?>
+    abstract fun getNameForStopFlow(stopCode: String): Flow<RoomStopName?>
 
     @Query("""
         SELECT latitude, longitude 
@@ -100,7 +55,7 @@ internal abstract class RoomStopDao : StopDao {
         AND longitude NOT NULL 
         LIMIT 1
     """)
-    abstract fun getLocationForStopFlowInternal(stopCode: String): Flow<RoomStopLocation?>
+    abstract fun getLocationForStopFlow(stopCode: String): Flow<RoomStopLocation?>
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
@@ -110,40 +65,27 @@ internal abstract class RoomStopDao : StopDao {
         AND longitude NOT NULL 
         LIMIT 1
     """)
-    abstract fun getStopDetailsFlowInternal(stopCode: String): Flow<RoomStopDetails?>
+    abstract fun getStopDetailsFlow(stopCode: String): Flow<RoomStopDetails?>
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
         FROM bus_stop 
-        WHERE stopCode IN (:stopsCodes) 
+        WHERE stopCode IN (:stopCodes) 
         AND latitude NOT NULL 
         AND longitude NOT NULL 
     """)
     @MapInfo(keyColumn = "stopCode")
-    abstract fun getStopDetailsFlowInternal(
-        stopsCodes: Set<String>): Flow<Map<String, RoomStopDetails>?>
+    abstract fun getStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, RoomStopDetails>?>
 
-    @get:Query("""
-        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
-        FROM bus_stop 
-        WHERE latitude NOT NULL 
-        AND longitude NOT NULL
-    """)
-    abstract val allStopDetailsFlow: Flow<List<RoomStopDetails>?>
-
-    @Query("""
-        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
-        FROM bus_stop 
-        WHERE stopCode IN (
-            SELECT stopCode 
-            FROM service_stop 
-            WHERE serviceName IN (:serviceFilter)
-        )
-        AND latitude NOT NULL 
-        AND longitude NOT NULL
-    """)
-    abstract fun getStopDetailsWithServiceFilterFlowInternal(
-        serviceFilter: Set<String>): Flow<List<RoomStopDetails>?>
+    fun getStopDetailsWithServiceFilterFlow(
+        serviceFilter: Set<String>?): Flow<List<StopDetails>?> {
+        return serviceFilter
+            ?.ifEmpty { null }
+            ?.let {
+                getStopDetailsWithServiceFilterFlowInternal(it)
+            }
+            ?: allStopDetailsFlow
+    }
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation, (
@@ -160,7 +102,7 @@ internal abstract class RoomStopDao : StopDao {
         WHERE (latitude BETWEEN :minLatitude AND :maxLatitude) 
         AND (longitude BETWEEN :minLongitude AND :maxLongitude)
     """)
-    abstract fun getStopDetailsWithinSpanFlowInternal(
+    abstract fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
@@ -186,7 +128,7 @@ internal abstract class RoomStopDao : StopDao {
             WHERE serviceName IN (:serviceFilter)
         )
     """)
-    abstract fun getStopDetailsWithinSpanFlowInternal(
+    abstract fun getStopDetailsWithinSpanFlow(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
@@ -209,6 +151,27 @@ internal abstract class RoomStopDao : StopDao {
         OR stopName LIKE '%' || :searchTerm || '%' 
         OR locality LIKE '%' || :searchTerm || '%'
     """)
-    abstract fun getStopSearchResultsFlowInternal(
-        searchTerm: String): Flow<List<RoomStopSearchResult>?>
+    abstract fun getStopSearchResultsFlow(searchTerm: String): Flow<List<RoomStopSearchResult>?>
+
+    @get:Query("""
+        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
+        FROM bus_stop 
+        WHERE latitude NOT NULL 
+        AND longitude NOT NULL
+    """)
+    abstract val allStopDetailsFlow: Flow<List<RoomStopDetails>?>
+
+    @Query("""
+        SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation 
+        FROM bus_stop 
+        WHERE stopCode IN (
+            SELECT stopCode 
+            FROM service_stop 
+            WHERE serviceName IN (:serviceFilter)
+        )
+        AND latitude NOT NULL 
+        AND longitude NOT NULL
+    """)
+    abstract fun getStopDetailsWithServiceFilterFlowInternal(
+        serviceFilter: Set<String>): Flow<List<RoomStopDetails>?>
 }

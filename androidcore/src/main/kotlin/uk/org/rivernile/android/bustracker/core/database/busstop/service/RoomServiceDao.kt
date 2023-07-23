@@ -39,16 +39,16 @@ import okhttp3.internal.toImmutableMap
  * @author Niall Scott
  */
 @Dao
-internal abstract class RoomServiceDao : ServiceDao {
+internal abstract class RoomServiceDao {
 
     @get:Query("""
         SELECT name 
         FROM service 
         ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
     """)
-    abstract override val allServiceNamesFlow: Flow<List<String>?>
+    abstract val allServiceNamesFlow: Flow<List<String>?>
 
-    override fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> {
+    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> {
         val flow = services
             ?.ifEmpty { null }
             ?.let {
@@ -59,8 +59,14 @@ internal abstract class RoomServiceDao : ServiceDao {
         return flow.map(this::mapToServiceColourMap)
     }
 
-    override fun getServiceDetailsFlow(services: Set<String>): Flow<Map<String, ServiceDetails>?> =
-        getServiceDetailsFlowInternal(services)
+    @Query("""
+        SELECT name, description, hexColour 
+        FROM service 
+        WHERE name IN (:services)
+    """)
+    @MapInfo(keyColumn = "name")
+    abstract fun getServiceDetailsFlow(
+        services: Set<String>): Flow<Map<String, RoomServiceDetails>?>
 
     @get:Query("""
         SELECT name, hexColour 
@@ -77,15 +83,6 @@ internal abstract class RoomServiceDao : ServiceDao {
     """)
     abstract fun getColoursForServicesFlowInternal(
         services: Set<String>): Flow<List<RoomServiceColour>?>
-
-    @Query("""
-        SELECT name, description, hexColour 
-        FROM service 
-        WHERE name IN (:services)
-    """)
-    @MapInfo(keyColumn = "name")
-    abstract fun getServiceDetailsFlowInternal(
-        services: Set<String>): Flow<Map<String, RoomServiceDetails>?>
 
     private fun mapToServiceColourMap(serviceColours: List<RoomServiceColour>?): Map<String, Int>? {
         return serviceColours

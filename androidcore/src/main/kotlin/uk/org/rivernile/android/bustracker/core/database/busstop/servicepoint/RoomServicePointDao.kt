@@ -36,9 +36,9 @@ import kotlinx.coroutines.flow.Flow
  * @author Niall Scott
  */
 @Dao
-internal abstract class RoomServicePointDao : ServicePointDao {
+internal abstract class RoomServicePointDao {
 
-    override fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?> {
+    fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?> {
         return serviceNames
             ?.ifEmpty { null }
             ?.let {

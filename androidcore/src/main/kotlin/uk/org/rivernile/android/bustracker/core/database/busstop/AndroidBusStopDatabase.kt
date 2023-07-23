@@ -27,38 +27,182 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
+import android.database.sqlite.SQLiteException
 import androidx.room.Room
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.ProxyDatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.migrations.Migration1To2
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ProxyServiceDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ProxyServicePointDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ProxyServiceStopDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.ProxyStopDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
+import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * This is the Android-specific implementation of the bus stop database.
+ *
+ * @param context The application [Context].
+ * @param migration1To2 An implementation which migrates the database from version 1 to 2.
+ * @param versionCheckOpenHelperFactory The open helper.
+ * @param exceptionLogger Used to log exceptions.
+ * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidBusStopDatabase @Inject constructor(
     private val context: Context,
     private val migration1To2: Migration1To2,
-    private val openHelperFactory: VersionCheckOpenHelperFactory) {
+    private val versionCheckOpenHelperFactory: VersionCheckOpenHelperFactory,
+    private val exceptionLogger: ExceptionLogger,
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     companion object {
 
         private const val DATABASE_NAME = "busstops10.db"
     }
 
-    private val isDatabaseOpenStateFlow = MutableStateFlow(false)
+    // Creates the RoomBusStopDatabase. Calling createRoomDatabase does not do IO blocking as the
+    // database is lazily opened on the first query. This just creates a reference to allow us to
+    // talk to the database.
+    private var database = createRoomDatabase(DATABASE_NAME, true)
+    private val databaseMutex = Mutex()
+    private val _isDatabaseOpenFlow = MutableStateFlow(true)
 
+    /**
+     * A [Flow] which emits whether the database is open or not.
+     */
+    val isDatabaseOpenFlow: Flow<Boolean> get() = _isDatabaseOpenFlow
+
+    /**
+     * The [DatabaseDao].
+     */
+    val databaseDao: DatabaseDao = ProxyDatabaseDao(this)
+
+    /**
+     * The [ServiceDao].
+     */
+    val serviceDao: ServiceDao = ProxyServiceDao(this)
+
+    /**
+     * The [ServicePointDao].
+     */
+    val servicePointDao: ServicePointDao = ProxyServicePointDao(this)
+
+    /**
+     * The [ServiceStopDao].
+     */
+    val serviceStopDao: ServiceStopDao = ProxyServiceStopDao(this)
+
+    /**
+     * The [StopDao].
+     */
+    val stopDao: StopDao = ProxyStopDao(this)
+
+    val roomDatabaseDao get() = database.databaseDao
+    val roomServiceDao get() = database.serviceDao
+    val roomServicePointDao get() = database.servicePointDao
+    val roomServiceStopDao get() = database.serviceStopDao
+    val roomStopDao get() = database.stopDao
+
+    /**
+     * Given a [newDatabaseFile], attempt to replace the existing database with this file. If the
+     * new database does not pass some internal checks, the operation will fail and the existing
+     * database will continue to be used.
+     *
+     * @param newDatabaseFile The new database file. This is assumed to already be in the database
+     * directory.
+     */
     suspend fun replaceDatabase(newDatabaseFile: File) {
+        databaseMutex.withLock {
+            var deleteNewDatabase: Boolean
 
+            createRoomDatabase(newDatabaseFile.name, false)
+                .apply {
+                    deleteNewDatabase = !tryTestQuery()
+                }
+                .close()
+
+            if (!deleteNewDatabase) {
+                database.close()
+                _isDatabaseOpenFlow.value = false
+                replaceDatabaseFile(newDatabaseFile)
+
+                database = createRoomDatabase(DATABASE_NAME, true)
+                _isDatabaseOpenFlow.value = true
+            } else {
+                withContext(ioDispatcher) {
+                    newDatabaseFile.delete()
+                }
+            }
+        }
     }
 
-    private fun createRoomDatabase(): RoomBusStopDatabase {
-        return Room.databaseBuilder(context, RoomBusStopDatabase::class.java, DATABASE_NAME)
-            .openHelperFactory(openHelperFactory)
-            .createFromAsset(DATABASE_NAME)
+    /**
+     * Create an instance of [RoomBusStopDatabase].
+     *
+     * @param databaseName The name of the database. This is the name of the file contained within
+     * the database path.
+     * @param allowAssetExtraction Should it be allowed for the database to be extracted from assets
+     * if it doesn't yet exist?
+     * @return A new [RoomBusStopDatabase] instance.
+     */
+    private fun createRoomDatabase(
+        databaseName: String,
+        allowAssetExtraction: Boolean): RoomBusStopDatabase {
+        val builder = Room.databaseBuilder(context, RoomBusStopDatabase::class.java, databaseName)
             .addMigrations(migration1To2)
-            .build()
+
+        if (allowAssetExtraction) {
+            builder.openHelperFactory(versionCheckOpenHelperFactory)
+                .createFromAsset(DATABASE_NAME)
+        }
+
+        return builder.build()
+    }
+
+    /**
+     * Try a test query out on the database. If this query runs without encountering any exceptions
+     * then it is deemed to pass and `true` will be returned. Conversely, if an exception is thrown
+     * during the test, the test fails and `false` is returned.
+     *
+     * @return `true` if the test passed, otherwise `false`.
+     */
+    private suspend fun RoomBusStopDatabase.tryTestQuery(): Boolean {
+        return withContext(ioDispatcher) {
+            try {
+                query("SELECT 1 FROM database_info", null).close()
+                true
+            } catch (e: SQLiteException) {
+                exceptionLogger.log(e)
+                false
+            }
+        }
+    }
+
+    /**
+     * Replace the existing database file by removing it and renaming the [newDatabaseFile] to the
+     * same name as the expected database file.
+     *
+     * @param newDatabaseFile The new database file.
+     */
+    private suspend fun replaceDatabaseFile(newDatabaseFile: File) {
+        withContext(ioDispatcher) {
+            context.deleteDatabase(DATABASE_NAME)
+            newDatabaseFile.renameTo(context.getDatabasePath(DATABASE_NAME))
+        }
     }
 }

@@ -26,31 +26,40 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
-import androidx.room.Dao
-import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
 
 /**
- * This is the Room implementation of [DatabaseDao].
+ * The proxy implementation of [DatabaseDao] which responds to the database opening/closing and
+ * switches [kotlinx.coroutines.flow.Flow]s when this happens.
  *
+ * @param database A reference to the database.
  * @author Niall Scott
  */
-@Dao
-internal abstract class RoomDatabaseDao {
+internal class ProxyDatabaseDao(
+    private val database: AndroidBusStopDatabase) : DatabaseDao {
 
-    @get:Query("""
-        SELECT topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    abstract val topologyIdFlow: Flow<String?>
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val topologyIdFlow get() =
+        database.isDatabaseOpenFlow
+            .flatMapLatest {
+                if (it) {
+                    database.roomDatabaseDao.topologyIdFlow
+                } else {
+                    emptyFlow()
+                }
+            }
 
-    @get:Query("""
-        SELECT updateTimestamp, topologyId 
-        FROM database_info 
-        ORDER BY updateTimestamp DESC 
-        LIMIT 1
-    """)
-    abstract val databaseMetadataFlow: Flow<RoomDatabaseMetadata?>
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val databaseMetadataFlow get() =
+        database.isDatabaseOpenFlow
+            .flatMapLatest {
+                if (it) {
+                    database.roomDatabaseDao.databaseMetadataFlow
+                } else {
+                    emptyFlow()
+                }
+            }
 }

@@ -24,40 +24,31 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
+package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
-import androidx.room.Dao
-import androidx.room.MapInfo
-import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
 
 /**
- * This is the Room implementation of [ServiceStopDao].
+ * The proxy implementation of [ServicePointDao] which responds to the database opening/closing and
+ * switches [kotlinx.coroutines.flow.Flow]s when this happens.
  *
+ * @param database A reference to the database.
  * @author Niall Scott
  */
-@Dao
-internal abstract class RoomServiceStopDao {
+internal class ProxyServicePointDao(
+    private val database: AndroidBusStopDatabase) : ServicePointDao {
 
-    @Query("""
-        SELECT serviceName 
-        FROM service_stop 
-        WHERE stopCode = :stopCode 
-        ORDER BY CASE WHEN serviceName GLOB '[^0-9.]*' THEN 
-            serviceName ELSE cast(serviceName AS int) END
-    """)
-    abstract fun getServicesForStopFlow(stopCode: String): Flow<List<String>?>
-
-    @Query("""
-        SELECT stopCode, serviceName
-        FROM service_stop
-        WHERE stopCode IN (:stopCodes)
-        ORDER BY stopCode ASC, 
-            CASE WHEN serviceName GLOB '[^0-9.]*' THEN serviceName ELSE cast(serviceName AS int) END
-    """)
-    @MapInfo(
-        keyColumn = "stopCode",
-        valueColumn = "serviceName")
-    abstract fun getServicesForStopsFlow(
-        stopCodes: Set<String>): Flow<Map<String, List<String>>?>
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getServicePointsFlow(serviceNames: Set<String>?) =
+        database.isDatabaseOpenFlow
+            .flatMapLatest {
+                if (it) {
+                    database.roomServicePointDao.getServicePointsFlow(serviceNames)
+                } else {
+                    emptyFlow()
+                }
+            }
 }
