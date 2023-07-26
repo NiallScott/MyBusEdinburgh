@@ -63,7 +63,6 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     flavorDimensions += "city"
 
     productFlavors {
@@ -83,7 +82,6 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     sourceSets {
         // This adds the generated Room schema files to the instrumentation test assets so that they
         // can be loaded at test time.
@@ -101,7 +99,6 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     useLibrary("android.test.mock")
 }
 

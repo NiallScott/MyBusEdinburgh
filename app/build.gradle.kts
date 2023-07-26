@@ -73,7 +73,6 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     flavorDimensions += "city"
 
     productFlavors {
@@ -90,7 +89,6 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
-            @Suppress("UnstableApiUsage")
             proguardFiles(
                 getDefaultProguardFile("proguard-android.txt"),
                 "proguard-rules.pro")
@@ -111,12 +109,10 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         viewBinding = true
     }
 
-    @Suppress("UnstableApiUsage")
     useLibrary("android.test.mock")
 }
 
