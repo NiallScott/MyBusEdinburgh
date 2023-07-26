@@ -5,8 +5,9 @@ min_sdk_version = "23"
 target_sdk_version = "33"
 build_tools_version = "33.0.2"
 
-android_gradle_plugin = "8.0.2"
+android_gradle_plugin = "8.1.0"
 kotlin = "1.8.21"
+ksp = "1.8.21-1.0.11"
 dagger = "2.46.1"
 hilt_androidx = "1.0.0"
 coroutines = "1.7.1"
@@ -20,15 +21,15 @@ fetchutils = "1.1.1"
 # AndroidX
 androidx-core = "1.10.1"
 appcompat = "1.6.1"
-activity = "1.7.1"
-fragment = "1.5.7"
+activity = "1.7.2"
+fragment = "1.6.1"
 architecture_components = "2.6.1"
-room = "2.5.1"
+room = "2.5.2"
 work-manager = "2.8.1"
 datastore = "1.0.0"
 arch-core = "2.2.0"
-recyclerview = "1.3.0"
-viewpager2 = "1.1.0-beta01"
+recyclerview = "1.3.1"
+viewpager2 = "1.1.0-beta02"
 palette = "1.0.0"
 constraintlayout = "2.1.4"
 preference = "1.2.0"
@@ -37,7 +38,7 @@ preference = "1.2.0"
 material = "1.9.0"
 
 # Firebase
-firebase-bom = "32.0.0"
+firebase-bom = "32.2.0"
 
 # Play Services
 play-services-location = "21.0.1"
@@ -53,9 +54,9 @@ picasso = "2.71828"
 junit = "4.13.2"
 mockito = "5.3.1"
 mockito_kotlin = "4.1.0"
-androidx-test-runner = "1.4.0"
-androidx-test-core = "1.4.0"
-espresso = "3.4.0"
+androidx-test-runner = "1.5.2"
+androidx-test-core = "1.5.0"
+espresso = "3.5.1"
 hamcrest = "2.2"
 
 [libraries]
@@ -91,7 +92,7 @@ fetchutils = { module = "uk.org.rivernile.android.fetchutils:fetchutils-library"
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "activity" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment" }
-androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragment" }
+androidx-fragment-testing-manifest = { module = "androidx.fragment:fragment-testing-manifest", version.ref = "fragment" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "architecture_components" }
 androidx-room-core = { module = "androidx.room:room-ktx", version.ref = "room" }
@@ -133,6 +134,7 @@ androidx-test-runner = { module = "androidx.test:runner", version.ref = "android
 androidx-test-core = { module = "androidx.test:core-ktx", version.ref = "androidx-test-core" }
 androidx-room-test = { module = "androidx.room:room-testing", version.ref = "room" }
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version.ref = "arch-core" }
+androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragment" }
 hilt-test = { module = "com.google.dagger:hilt-android-testing", version.ref = "dagger" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "dagger" }
 espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
@@ -145,6 +147,7 @@ android-library = { id = "com.android.library", version.ref = "android_gradle_pl
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 google-services = "com.google.gms.google-services:4.3.15"
 firebase-crashlytics = "com.google.firebase.crashlytics:2.9.5"

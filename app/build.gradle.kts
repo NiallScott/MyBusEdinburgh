@@ -72,7 +72,6 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     flavorDimensions += "city"
 
     productFlavors {
@@ -89,7 +88,6 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
-            @Suppress("UnstableApiUsage")
             proguardFiles(
                 getDefaultProguardFile("proguard-android.txt"),
                 "proguard-rules.pro")
@@ -110,12 +108,10 @@ android {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     buildFeatures {
         viewBinding = true
     }
 
-    @Suppress("UnstableApiUsage")
     useLibrary("android.test.mock")
 }
 
@@ -144,7 +140,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.fragment.ktx)
-    debugImplementation(libs.androidx.fragment.testing)
+    debugImplementation(libs.androidx.fragment.testing.manifest)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.viewpager2)
@@ -177,6 +173,7 @@ dependencies {
     androidTestImplementation(project(":testutils"))
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.fragment.testing)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.espresso.intents)
     androidTestImplementation(libs.hamcrest)
