@@ -29,6 +29,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     kotlin("plugin.allopen")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
 
@@ -38,18 +39,6 @@ android {
     defaultConfig {
         testInstrumentationRunner = "uk.org.rivernile.android.bustracker.core.CoreTestRunner"
         consumerProguardFiles += file("proguard-consumer-rules.pro")
-
-        /*
-         * This is used to export the Room schema out to a JSON file in the module's "schemas"
-         * directory. We want to do this so that we can compare schema versions after upgrades.
-         * It's also possible for us to do automated testing using the JSON files to test database
-         * migrations.
-         */
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-            }
-        }
     }
 
     buildTypes {
@@ -102,6 +91,16 @@ android {
     useLibrary("android.test.mock")
 }
 
+ksp {
+    /*
+     * This is used to export the Room schema out to a JSON file in the module's "schemas"
+     * directory. We want to do this so that we can compare schema versions after upgrades.
+     * It's also possible for us to do automated testing using the JSON files to test database
+     * migrations.
+     */
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 allOpen {
     annotation("uk.org.rivernile.android.bustracker.core.utils.OpenClass")
 }
@@ -127,7 +126,7 @@ dependencies {
 
     // Room (ORM)
     implementation(libs.androidx.room.core)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
     // WorkManager
     api(libs.androidx.work)
