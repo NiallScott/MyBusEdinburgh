@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetailsWithServices
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -68,7 +68,7 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getUiStateFlow(
             permissionStateFlow: Flow<PermissionsState>,
-            serviceFilterFlow: Flow<List<String>?>): Flow<UiState> {
+            serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
         return if (locationRepository.hasLocationFeature) {
             permissionStateFlow
                     .map(this::isPermissionsSufficient)
@@ -92,7 +92,7 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handlePermissionsStateChanged(
             isPermissionsSufficient: Boolean,
-            serviceFilterFlow: Flow<List<String>?>): Flow<UiState> {
+            serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
         return if (isPermissionsSufficient) {
             locationRepository.isLocationEnabledFlow
                     .distinctUntilChanged()
@@ -115,7 +115,7 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleLocationEnabled(
             isEnabled: Boolean,
-            serviceFilterFlow: Flow<List<String>?>): Flow<UiState> {
+            serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
         return if (isEnabled) {
             locationRepository.userVisibleLocationFlow
                     .flatMapLatest { loadNearestStops(it, serviceFilterFlow) }
@@ -138,7 +138,7 @@ class UiStateRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadNearestStops(
             location: DeviceLocation,
-            serviceFilterFlow: Flow<List<String>?>): Flow<UiState> {
+            serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
         return serviceFilterFlow
                 .flatMapLatest { loadNearestStops(location, it) }
     }
@@ -155,7 +155,7 @@ class UiStateRetriever @Inject constructor(
      */
     private fun loadNearestStops(
             location: DeviceLocation,
-            serviceFilter: List<String>?): Flow<UiState> {
+            serviceFilter: Set<String>?): Flow<UiState> {
         val latitudeSpan = configRepository.nearestStopsLatitudeSpan
         val longitudeSpan = configRepository.nearestStopsLongitudeSpan
 
@@ -203,18 +203,18 @@ class UiStateRetriever @Inject constructor(
      * @return The resulting [UiNearestStop] of combining these together.
      */
     private fun mapToNearestStop(
-            stop: StopDetailsWithServices,
-            location: DeviceLocation): UiNearestStop {
-        val stopLocation = DeviceLocation(stop.latitude, stop.longitude)
+        stop: StopDetailsWithServices,
+        location: DeviceLocation): UiNearestStop {
+        val stopLocation = DeviceLocation(stop.location.latitude, stop.location.longitude)
         val distanceBetween = locationRepository.distanceBetween(stopLocation, location)
 
         return UiNearestStop(
-                stop.stopCode,
-                stop.stopName,
-                stop.serviceListing,
-                distanceBetween.absoluteValue.toInt(),
-                stop.orientation,
-                false)
+            stop.stopCode,
+            stop.stopName,
+            stop.serviceListing,
+            distanceBetween.absoluteValue.toInt(),
+            stop.orientation,
+            false)
     }
 
     /**

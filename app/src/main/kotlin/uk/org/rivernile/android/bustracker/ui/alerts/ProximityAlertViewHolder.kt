@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -128,7 +128,7 @@ class ProximityAlertViewHolder(
 
         alert?.let { a ->
             a.stopDetails?.let { stopDetails ->
-                val latLon = LatLng(stopDetails.latitude, stopDetails.longitude)
+                val latLon = LatLng(stopDetails.location.latitude, stopDetails.location.longitude)
                 map.moveCamera(CameraUpdateFactory.newLatLng(latLon))
 
                 circle = CircleOptions().center(latLon)

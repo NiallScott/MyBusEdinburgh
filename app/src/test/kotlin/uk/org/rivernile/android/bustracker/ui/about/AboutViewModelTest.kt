@@ -36,11 +36,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.app.AppVersion
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
 import java.util.*
@@ -90,8 +91,13 @@ class AboutViewModelTest {
     @Test
     fun itemsLiveDataEmitsItemsWhenDatabaseMetadataIsAvailable() = runTest {
         givenAppVersion()
+        val databaseMetadata = mock<DatabaseMetadata>()
+        whenever(databaseMetadata.updateTimestamp)
+            .thenReturn(123L)
+        whenever(databaseMetadata.topologyVersionId)
+            .thenReturn("abc123")
         whenever(busStopDatabaseRepository.databaseMetadataFlow)
-                .thenReturn(flowOf(DatabaseMetadata(123L, "abc123")))
+                .thenReturn(flowOf(databaseMetadata))
         val viewModel = createViewModel()
         val expected1 = listOf(
                 UiAboutItem.TwoLinesItem.AppVersion("1.2.3", 4L),

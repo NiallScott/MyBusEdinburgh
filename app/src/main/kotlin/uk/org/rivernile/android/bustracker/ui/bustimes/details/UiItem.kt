@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+
 /**
  * This sealed interface has child classes which encapsulate the possible items shown on the UI.
  *
@@ -43,7 +45,7 @@ sealed interface UiItem {
     data class Map(
             val latitude: Double,
             val longitude: Double,
-            val orientation: Int) : UiItem
+            val orientation: StopOrientation) : UiItem
 
     /**
      * This sealed interface encapsulates the different states of the distance item.

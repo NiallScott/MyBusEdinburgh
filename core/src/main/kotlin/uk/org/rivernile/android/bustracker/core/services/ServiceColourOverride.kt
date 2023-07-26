@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,16 +37,14 @@ package uk.org.rivernile.android.bustracker.core.services
 interface ServiceColourOverride {
 
     /**
-     * This gives implementations the opportunity to override the contents of [serviceColours] or
-     * add new items to it. If no changes are being made, [serviceColours] should just be returned
-     * as-is.
+     * This gives implementations the opportunity to override the colour for a given [serviceName],
+     * or assign it a colour when it does not already have a colour.
      *
-     * @param services The service names that colours should be determined for.
-     * @param serviceColours The mapping of service names to colours which has been loaded upstream.
-     * This may be `null` if upstream was unable to load colours.
-     * @return The mapping of service names to colours which should be used instead.
+     * If no changes are being made, then [currentColour] should be returned.
+     *
+     * @param serviceName The display name of the service.
+     * @param currentColour The currently set colour of the service.
+     * @return The new colour for the service.
      */
-    fun overrideServiceColours(
-            services: Set<String>?,
-            serviceColours: Map<String, Int>?): Map<String, Int>?
+    fun overrideServiceColour(serviceName: String, currentColour: Int?): Int?
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,29 +26,26 @@
 
 package uk.org.rivernile.android.bustracker.core.busstops
 
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
+import kotlinx.coroutines.flow.first
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearchResult
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * This repository is used to access bus stop data.
  *
- * @param busStopsDao The DAO to access the bus stop data store.
+ * @param stopDao The DAO to access the bus stop data store.
  * @author Niall Scott
  */
 @Singleton
 class BusStopsRepository @Inject internal constructor(
-        private val busStopsDao: BusStopsDao) {
+    private val stopDao: StopDao) {
 
     /**
      * Get a [Flow] which returns [StopName] for the given `stopCode`. If the stop name is updated
@@ -57,22 +54,8 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get details for.
      * @return The [Flow] which emits the [StopName] for the given stop code.
      */
-    fun getNameForStopFlow(stopCode: String): Flow<StopName?> = callbackFlow {
-        val listener = object : BusStopsDao.OnBusStopsChangedListener {
-            override fun onBusStopsChanged() {
-                launch {
-                    getAndSendNameForStop(channel, stopCode)
-                }
-            }
-        }
-
-        busStopsDao.addOnBusStopsChangedListener(listener)
-        getAndSendNameForStop(channel, stopCode)
-
-        awaitClose {
-            busStopsDao.removeOnBusStopsChangedListener(listener)
-        }
-    }
+    fun getNameForStopFlow(stopCode: String): Flow<StopName?> =
+        stopDao.getNameForStopFlow(stopCode)
 
     /**
      * Get a [Flow] which returns [StopDetails] for the given `stopCode`. If stop details are
@@ -81,22 +64,8 @@ class BusStopsRepository @Inject internal constructor(
      * @param stopCode The stop code to get details for.
      * @return The [Flow] which emits [StopDetails] for the given stop code.
      */
-    fun getBusStopDetailsFlow(stopCode: String): Flow<StopDetails?> = callbackFlow {
-        val listener = object : BusStopsDao.OnBusStopsChangedListener {
-            override fun onBusStopsChanged() {
-                launch {
-                    getAndSendStopDetails(channel, stopCode)
-                }
-            }
-        }
-
-        busStopsDao.addOnBusStopsChangedListener(listener)
-        getAndSendStopDetails(channel, stopCode)
-
-        awaitClose {
-            busStopsDao.removeOnBusStopsChangedListener(listener)
-        }
-    }
+    fun getBusStopDetailsFlow(stopCode: String): Flow<StopDetails?> =
+        stopDao.getStopDetailsFlow(stopCode)
 
     /**
      * Get a [Flow] which returns [StopDetails] for the given `stopCodes`. If stop details are
@@ -106,22 +75,7 @@ class BusStopsRepository @Inject internal constructor(
      * @return The [Flow] which emits [StopDetails] for the given stop codes.
      */
     fun getBusStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, StopDetails>?> =
-            callbackFlow {
-        val listener = object : BusStopsDao.OnBusStopsChangedListener {
-            override fun onBusStopsChanged() {
-                launch {
-                    getAndSendStopDetails(channel, stopCodes)
-                }
-            }
-        }
-
-        busStopsDao.addOnBusStopsChangedListener(listener)
-        getAndSendStopDetails(channel, stopCodes)
-
-        awaitClose {
-            busStopsDao.removeOnBusStopsChangedListener(listener)
-        }
-    }
+        stopDao.getStopDetailsFlow(stopCodes)
 
     /**
      * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects for stops which
@@ -134,34 +88,34 @@ class BusStopsRepository @Inject internal constructor(
      * @param serviceFilter The listing of services to filter by.
      */
     fun getStopDetailsWithinSpanFlow(
-            minLatitude: Double,
-            minLongitude: Double,
-            maxLatitude: Double,
-            maxLongitude: Double,
-            serviceFilter: List<String>?) =
-            serviceFilter?.ifEmpty { null }?.let {
-                busStopsDao.getStopDetailsWithinSpanFlow(
-                        minLatitude,
-                        minLongitude,
-                        maxLatitude,
-                        maxLongitude,
-                        it)
-            } ?: busStopsDao.getStopDetailsWithinSpanFlow(
-                    minLatitude,
-                    minLongitude,
-                    maxLatitude,
-                    maxLongitude)
+        minLatitude: Double,
+        minLongitude: Double,
+        maxLatitude: Double,
+        maxLongitude: Double,
+        serviceFilter: Set<String>?): Flow<List<StopDetailsWithServices>?> =
+        serviceFilter?.ifEmpty { null }?.let {
+            stopDao.getStopDetailsWithinSpanFlow(
+                minLatitude,
+                minLongitude,
+                maxLatitude,
+                maxLongitude,
+                it)
+        } ?: stopDao.getStopDetailsWithinSpanFlow(
+            minLatitude,
+            minLongitude,
+            maxLatitude,
+            maxLongitude)
 
     /**
      * Return a [Flow] which emits a [List] of [StopDetails], which only contains items which
      * satisfy the supplied [serviceFilter].
      *
      * @param serviceFilter An optional [Set] which contains the service filter.
-     * @return A [Flow] which emits [List]s pf [StopDetails] which satify the supplied
+     * @return A [Flow] which emits [List]s pf [StopDetails] which satisfy the supplied
      * [serviceFilter].
      */
     fun getStopDetailsWithServiceFilterFlow(serviceFilter: Set<String>?): Flow<List<StopDetails>?> =
-            busStopsDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
+        stopDao.getStopDetailsWithServiceFilterFlow(serviceFilter)
 
     /**
      * Return a [Flow] which emits [List]s of [StopSearchResult] objects for stops which match the
@@ -172,7 +126,7 @@ class BusStopsRepository @Inject internal constructor(
      * given search term.
      */
     fun getStopSearchResultsFlow(searchTerm: String): Flow<List<StopSearchResult>?> =
-            busStopsDao.getStopSearchResultsFlow(searchTerm)
+        stopDao.getStopSearchResultsFlow(searchTerm)
 
     /**
      * Get a [StopLocation] for a given [stopCode].
@@ -182,47 +136,14 @@ class BusStopsRepository @Inject internal constructor(
      * this stop.
      */
     suspend fun getStopLocation(stopCode: String): StopLocation? =
-            busStopsDao.getLocationForStop(stopCode)
+        stopDao.getLocationForStopFlow(stopCode).first()
 
     /**
-     * A suspended function which gets [StopName] for the given `stopCode` and sends these details
-     * tot he given `channel`. This might send `null` to the channel when no stop name was found for
-     * the given `stopCode`.
+     * Get the [StopName] for the given [stopCode].
      *
-     * @param channel The [SendChannel] that emissions should be sent to.
-     * @param stopCode The `stopCode` to obtain [StopName] for.
+     * @param stopCode The stop code to get the name for.
+     * @return The [StopName] for the stop, or `null` if it's not available.
      */
-    private suspend fun getAndSendNameForStop(
-            channel: SendChannel<StopName?>,
-            stopCode: String) {
-        channel.send(busStopsDao.getNameForStop(stopCode))
-    }
-
-    /**
-     * A suspended function which gets [StopDetails] for the given `stopCode` and sends these
-     * details to the given `channel`. This might send `null` to the channel when no details were
-     * found for the given `stopCode`.
-     *
-     * @param channel The [SendChannel] that emissions should be sent to.
-     * @param stopCode The `stopCode` to obtain [StopDetails] for.
-     */
-    private suspend fun getAndSendStopDetails(
-            channel: SendChannel<StopDetails?>,
-            stopCode: String) {
-        channel.send(busStopsDao.getStopDetails(stopCode))
-    }
-
-    /**
-     * A suspended function which gets [StopDetails] for the given `stopCodes` and sends these
-     * details to the given `channel`. This might send `null` to the channel when no details were
-     * found for the given `stopCodes`.
-     *
-     * @param channel The [SendChannel] that emissions should be sent to.
-     * @param stopCodes The `stopCodse` to obtain [StopDetails] for.
-     */
-    private suspend fun getAndSendStopDetails(
-            channel: SendChannel<Map<String, StopDetails>?>,
-            stopCodes: Set<String>) {
-        channel.send(busStopsDao.getStopDetails(stopCodes))
-    }
+    suspend fun getNameForStop(stopCode: String): StopName? =
+        stopDao.getNameForStopFlow(stopCode).first()
 }

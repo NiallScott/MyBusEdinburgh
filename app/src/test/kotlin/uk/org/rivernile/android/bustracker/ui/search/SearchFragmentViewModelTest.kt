@@ -38,8 +38,9 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearchResult
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.testutils.test
@@ -68,7 +69,7 @@ class SearchFragmentViewModelTest {
 
     @Test
     fun onItemClickedShowsStopDetails() {
-        val item = UiSearchResult("123456", null, 0, null)
+        val item = UiSearchResult("123456", null, StopOrientation.UNKNOWN, null)
         val viewModel = createViewModel()
 
         val observer = viewModel.showStopLiveData.test()
@@ -154,12 +155,12 @@ class SearchFragmentViewModelTest {
                     SEARCH_PROGRESS_DELAY_MILLIS + 1,
                     0L,
                     listOf(
-                        StopSearchResult(
+                        MockStopSearchResult(
                             "123456",
-                            StopName(
+                            MockStopName(
                                 "Name 1",
                                 "Locality 1"),
-                            1,
+                            StopOrientation.NORTH,
                             "1, 2, 3")
                 ))
             )
@@ -167,10 +168,10 @@ class SearchFragmentViewModelTest {
         val expectedResults = listOf(
             UiSearchResult(
                 "123456",
-                StopName(
+                MockStopName(
                     "Name 1",
                     "Locality 1"),
-                1,
+                StopOrientation.NORTH,
                 "1, 2, 3"))
 
         val uiStateObserver = viewModel.uiStateLiveData.test()
@@ -188,19 +189,19 @@ class SearchFragmentViewModelTest {
 
     @Test
     fun uiStateFlowEmitsContentUpdates() = runTest {
-        val searchResult1 = StopSearchResult(
+        val searchResult1 = MockStopSearchResult(
             "123456",
-            StopName(
+            MockStopName(
                 "Name 1",
                 "Locality 1"),
-            1,
+            StopOrientation.NORTH,
             "1, 2, 3")
-        val searchResult2 = StopSearchResult(
+        val searchResult2 = MockStopSearchResult(
             "987654",
-            StopName(
+            MockStopName(
                 "Name 2",
                 "Locality 2"),
-            2,
+            StopOrientation.NORTH_EAST,
             "4, 5, 6")
         whenever(busStopsRepository.getStopSearchResultsFlow("abc"))
             .thenReturn(
@@ -213,17 +214,17 @@ class SearchFragmentViewModelTest {
         val viewModel = createViewModel()
         val expectedResult1 = UiSearchResult(
             "123456",
-            StopName(
+            MockStopName(
                 "Name 1",
                 "Locality 1"),
-            1,
+            StopOrientation.NORTH,
             "1, 2, 3")
         val expectedResult2 = UiSearchResult(
             "987654",
-            StopName(
+            MockStopName(
                 "Name 2",
                 "Locality 2"),
-            2,
+            StopOrientation.NORTH_EAST,
             "4, 5, 6")
         val expectedResults1 = listOf(expectedResult1)
         val expectedResults2 = listOf(expectedResult1, expectedResult2)
@@ -247,19 +248,19 @@ class SearchFragmentViewModelTest {
 
     @Test
     fun uiStateFlowBehavesCorrectlyWhenSearchTermChanges() = runTest {
-        val searchResult1 = StopSearchResult(
+        val searchResult1 = MockStopSearchResult(
             "123456",
-            StopName(
+            MockStopName(
                 "Name 1",
                 "Locality 1"),
-            1,
+            StopOrientation.NORTH,
             "1, 2, 3")
-        val searchResult2 = StopSearchResult(
+        val searchResult2 = MockStopSearchResult(
             "987654",
-            StopName(
+            MockStopName(
                 "Name 2",
                 "Locality 2"),
-            2,
+            StopOrientation.NORTH_EAST,
             "4, 5, 6")
         whenever(busStopsRepository.getStopSearchResultsFlow("abc"))
             .thenReturn(
@@ -270,17 +271,17 @@ class SearchFragmentViewModelTest {
         val viewModel = createViewModel()
         val expectedResult1 = UiSearchResult(
             "123456",
-            StopName(
+            MockStopName(
                 "Name 1",
                 "Locality 1"),
-            1,
+            StopOrientation.NORTH,
             "1, 2, 3")
         val expectedResult2 = UiSearchResult(
             "987654",
-            StopName(
+            MockStopName(
                 "Name 2",
                 "Locality 2"),
-            2,
+            StopOrientation.NORTH_EAST,
             "4, 5, 6")
         val expectedResults1 = listOf(expectedResult1)
         val expectedResults2 = listOf(expectedResult2)
@@ -307,4 +308,14 @@ class SearchFragmentViewModelTest {
             savedState,
             busStopsRepository,
             coroutineRule.testDispatcher)
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
+
+    private data class MockStopSearchResult(
+        override val stopCode: String,
+        override val stopName: StopName,
+        override val orientation: StopOrientation,
+        override val serviceListing: String?) : StopSearchResult
 }

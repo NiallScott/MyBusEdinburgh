@@ -27,20 +27,20 @@
 package uk.org.rivernile.android.bustracker.core.alerts.proximity
 
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
+import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import javax.inject.Inject
 
 /**
  * This deals with the tracking and untracking of proximity alerts.
  *
- * @param busStopsDao Used to access the bus stop data store.
+ * @param busStopsRepository Used to access the bus stop data.
  * @param geofencingManager Used to set and remove geofences.
  * @param timeUtils Used to obtain timestamps.
  * @author Niall Scott
  */
 internal class ProximityAlertTracker @Inject constructor(
-    private val busStopsDao: BusStopsDao,
+    private val busStopsRepository: BusStopsRepository,
     private val geofencingManager: GeofencingManager,
     private val timeUtils: TimeUtils) {
 
@@ -55,7 +55,7 @@ internal class ProximityAlertTracker @Inject constructor(
      * @param alert The alert to track.
      */
     suspend fun trackProximityAlert(alert: ProximityAlert) {
-        busStopsDao.getLocationForStop(alert.stopCode)
+        busStopsRepository.getStopLocation(alert.stopCode)
             ?.let {
                 val duration = alert.timeAdded + MAX_DURATION_MILLIS - timeUtils.currentTimeMills
 

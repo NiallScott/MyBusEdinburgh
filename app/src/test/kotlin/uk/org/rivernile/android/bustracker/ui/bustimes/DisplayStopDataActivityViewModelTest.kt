@@ -41,8 +41,10 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
@@ -151,16 +153,17 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun busStopDetailsWithStopCodeWhichIsFoundReturnsDetails() = runTest {
-        val details = StopDetails(
-                "123456",
-                StopName(
-                        "Name",
-                        "Locality"),
+        val details = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flowOf(details))
+            .thenReturn(flowOf(details))
         val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
@@ -171,16 +174,17 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun busStopDetailsWithStopCodesCanUpdateData() = runTest {
-        val details = StopDetails(
-                "123456",
-                StopName(
-                        "Name",
-                        "Locality"),
+        val details = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(intervalFlowOf(0L, 10L, null, details, null))
+            .thenReturn(intervalFlowOf(0L, 10L, null, details, null))
         val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
@@ -587,14 +591,16 @@ class DisplayStopDataActivityViewModelTest {
 
     @Test
     fun onStreetViewMenuItemClickedShowsStreetViewWhenStopDetailsIsNotNull() = runTest {
-        val details = StopDetails(
+        val details = MockStopDetails(
                 "123456",
-                StopName(
+                MockStopName(
                         "Name",
                         "Locality"),
-                1.2,
-                3.4,
-                5)
+                MockStopLocation(
+                    1.2,
+                    3.4
+                ),
+                StopOrientation.SOUTH)
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
                 .thenReturn(flowOf(details))
         val showStreetView = viewModel.showStreetViewLiveData.test()
@@ -607,4 +613,18 @@ class DisplayStopDataActivityViewModelTest {
 
         showStreetView.assertValues(details)
     }
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
+
+    private data class MockStopLocation(
+        override val latitude: Double,
+        override val longitude: Double) : StopLocation
+
+    private data class MockStopDetails(
+        override val stopCode: String,
+        override val stopName: StopName,
+        override val location: StopLocation,
+        override val orientation: StopOrientation) : StopDetails
 }

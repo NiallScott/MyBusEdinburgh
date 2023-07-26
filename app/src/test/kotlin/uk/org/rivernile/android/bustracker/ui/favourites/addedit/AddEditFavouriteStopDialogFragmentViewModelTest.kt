@@ -44,7 +44,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -108,7 +108,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                 .thenReturn(flow {
                     emit(UiState.InProgress)
                     delay(100L)
-                    emit(UiState.Mode.Add("123456", StopName("Name", "Locality")))
+                    emit(UiState.Mode.Add("123456", MockStopName("Name", "Locality")))
                 })
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -117,7 +117,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
 
         observer.assertValues(
                 UiState.InProgress,
-                UiState.Mode.Add("123456", StopName("Name", "Locality")))
+                UiState.Mode.Add("123456", MockStopName("Name", "Locality")))
     }
 
     @Test
@@ -207,7 +207,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     @Test
     fun prePopulatedNameLiveDataEmitsStopCodeOnFirstLoadForStopCodeInAddModeWithNonNullStopName() =
             runTest {
-        val stopName = StopName("Stop name", "Locality")
+        val stopName = MockStopName("Stop name", "Locality")
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Add("123456", stopName)))
@@ -223,7 +223,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
 
     @Test
     fun prePopulatedNameLiveDataDoesNotEmitFurtherUpdateFrStopCodeInAddMode() = runTest {
-        val stopName = StopName("Stop name", "Locality")
+        val stopName = MockStopName("Stop name", "Locality")
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
                         UiState.Mode.Add("123456", stopName)))
@@ -243,7 +243,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
                                 "123456",
-                                StopName("Stop name", "Locality"),
+                                MockStopName("Stop name", "Locality"),
                                 FavouriteStop("123456", "Saved name"))))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -259,7 +259,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
                                 "123456",
-                                StopName("Stop name", "Locality"),
+                                MockStopName("Stop name", "Locality"),
                                 FavouriteStop("123456", "Saved name"))))
         val savedState = SavedStateHandle(
                 mapOf(STATE_PRE_POPULATED_STOP_CODE to "123456"))
@@ -320,7 +320,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     fun onSubmitClickedWhenInAddModeWithNullNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
-                        UiState.Mode.Add("123456", StopName("Stop name", "Locality"))))
+                        UiState.Mode.Add("123456", MockStopName("Stop name", "Locality"))))
         val viewModel = createViewModel(stopCode = "123456")
 
         viewModel.uiStateLiveData.test()
@@ -336,7 +336,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     fun onSubmitClickedWhenInAddModeWithEmptyNameDoesNothing() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
-                        UiState.Mode.Add("123456", StopName("Stop name", "Locality"))))
+                        UiState.Mode.Add("123456", MockStopName("Stop name", "Locality"))))
         val viewModel = createViewModel(stopCode = "123456")
 
         viewModel.uiStateLiveData.test()
@@ -352,7 +352,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
     fun onSubmitClickedWhenInAddModeWithPopulatedNameAddsFavouriteStop() = runTest {
         whenever(fetcher.loadFavouriteStopAndDetails("123456"))
                 .thenReturn(flowOf(
-                        UiState.Mode.Add("123456", StopName("Stop name", "Locality"))))
+                        UiState.Mode.Add("123456", MockStopName("Stop name", "Locality"))))
         val viewModel = createViewModel(stopCode = "123456")
 
         viewModel.uiStateLiveData.test()
@@ -374,7 +374,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
                                 "123456",
-                                StopName("Stop name", "Locality"),
+                                MockStopName("Stop name", "Locality"),
                                 FavouriteStop("123456", "Saved name"))))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -395,7 +395,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
                                 "123456",
-                                StopName("Stop name", "Locality"),
+                                MockStopName("Stop name", "Locality"),
                                 FavouriteStop("123456", "Saved name"))))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -416,7 +416,7 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
                 .thenReturn(flowOf(
                         UiState.Mode.Edit(
                                 "123456",
-                                StopName("Stop name", "Locality"),
+                                MockStopName("Stop name", "Locality"),
                                 FavouriteStop("123456", "Saved name"))))
         val viewModel = createViewModel(stopCode = "123456")
 
@@ -445,4 +445,8 @@ class AddEditFavouriteStopDialogFragmentViewModelTest {
             coroutineRule.scope
         )
     }
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
 }

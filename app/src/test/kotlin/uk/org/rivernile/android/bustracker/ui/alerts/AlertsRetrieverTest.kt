@@ -41,8 +41,10 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -131,20 +133,21 @@ class AlertsRetrieverTest {
     @Test
     fun allAlertsWithArrivalAlertAndStopDetailsEmitsFullObject() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
-        val stopDetails = StopDetails(
-                "123456",
-                StopName(
-                        "Stop name",
-                        "Locality"),
+        val stopDetails = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Stop name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(alertsRepository.allAlertsFlow)
-                .thenReturn(flowOf(listOf(arrivalAlert)))
+            .thenReturn(flowOf(listOf(arrivalAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-                .thenReturn(flowOf(mapOf("123456" to stopDetails)))
+            .thenReturn(flowOf(mapOf("123456" to stopDetails)))
         val expected = listOf(
-                UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 5))
+            UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 5))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
         advanceUntilIdle()
@@ -157,22 +160,23 @@ class AlertsRetrieverTest {
     fun allAlertsWithArrivalAlertsEmitsUpdatedArrivalAlertDetails() = runTest {
         val arrivalAlert1 = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         val arrivalAlert2 = ArrivalAlert(1, 123L, "123456", listOf("1"), 10)
-        val stopDetails = StopDetails(
-                "123456",
-                StopName(
-                        "Stop name",
-                        "Locality"),
+        val stopDetails = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Stop name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(alertsRepository.allAlertsFlow)
-                .thenReturn(flowOf(listOf(arrivalAlert1), listOf(arrivalAlert2)))
+            .thenReturn(flowOf(listOf(arrivalAlert1), listOf(arrivalAlert2)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-                .thenReturn(flowOf(mapOf("123456" to stopDetails)))
+            .thenReturn(flowOf(mapOf("123456" to stopDetails)))
         val expected1 = listOf(
-                UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 5))
+            UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 5))
         val expected2 = listOf(
-                UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 10))
+            UiAlert.ArrivalAlert(1, "123456", stopDetails, listOf("1"), 10))
 
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
@@ -185,31 +189,33 @@ class AlertsRetrieverTest {
     @Test
     fun allAlertsWithArrivalAlertEmitsUpdatedStopDetails() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
-        val stopDetails1 = StopDetails(
-                "123456",
-                StopName(
-                        "Stop name",
-                        "Locality"),
+        val stopDetails1 = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Stop name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
-        val stopDetails2 = StopDetails(
-                "123456",
-                StopName(
-                        "New stop name",
-                        "New locality"),
+                3.4),
+            StopOrientation.SOUTH)
+        val stopDetails2 = MockStopDetails(
+            "123456",
+            MockStopName(
+                "New stop name",
+                "New locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(alertsRepository.allAlertsFlow)
-                .thenReturn(flowOf(listOf(arrivalAlert)))
+            .thenReturn(flowOf(listOf(arrivalAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-                .thenReturn(
-                        flowOf(mapOf("123456" to stopDetails1), mapOf("123456" to stopDetails2)))
+            .thenReturn(
+                flowOf(mapOf("123456" to stopDetails1), mapOf("123456" to stopDetails2)))
         val expected1 = listOf(
-                UiAlert.ArrivalAlert(1, "123456", stopDetails1, listOf("1"), 5))
+            UiAlert.ArrivalAlert(1, "123456", stopDetails1, listOf("1"), 5))
         val expected2 = listOf(
-                UiAlert.ArrivalAlert(1, "123456", stopDetails2, listOf("1"), 5))
+            UiAlert.ArrivalAlert(1, "123456", stopDetails2, listOf("1"), 5))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
         advanceUntilIdle()
@@ -255,14 +261,15 @@ class AlertsRetrieverTest {
     @Test
     fun allAlertsWithProximityAlertAndStopDetailsEmitsFullObject() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
-        val stopDetails = StopDetails(
-                "123456",
-                StopName(
-                        "Stop name",
-                        "Locality"),
+        val stopDetails = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Stop name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
@@ -281,22 +288,23 @@ class AlertsRetrieverTest {
     fun allAlertsWithProximityAlertsEmitsUpdatedProximityAlertDetails() = runTest {
         val proximityAlert1 = ProximityAlert(1, 123L, "123456", 250)
         val proximityAlert2 = ProximityAlert(1, 123L, "123456", 500)
-        val stopDetails = StopDetails(
-                "123456",
-                StopName(
-                        "Stop name",
-                        "Locality"),
+        val stopDetails = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Stop name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(alertsRepository.allAlertsFlow)
-                .thenReturn(flowOf(listOf(proximityAlert1), listOf(proximityAlert2)))
+            .thenReturn(flowOf(listOf(proximityAlert1), listOf(proximityAlert2)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-                .thenReturn(flowOf(mapOf("123456" to stopDetails)))
+            .thenReturn(flowOf(mapOf("123456" to stopDetails)))
         val expected1 = listOf(
-                UiAlert.ProximityAlert(1, "123456", stopDetails, 250))
+            UiAlert.ProximityAlert(1, "123456", stopDetails, 250))
         val expected2 = listOf(
-                UiAlert.ProximityAlert(1, "123456", stopDetails, 500))
+            UiAlert.ProximityAlert(1, "123456", stopDetails, 500))
 
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
@@ -309,31 +317,33 @@ class AlertsRetrieverTest {
     @Test
     fun allAlertsWithProximityAlertEmitsUpdatedStopDetails() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
-        val stopDetails1 = StopDetails(
-                "123456",
-                StopName(
-                        "Stop name",
-                        "Locality"),
+        val stopDetails1 = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Stop name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
-        val stopDetails2 = StopDetails(
-                "123456",
-                StopName(
-                        "New stop name",
-                        "New locality"),
+                3.4),
+            StopOrientation.SOUTH)
+        val stopDetails2 = MockStopDetails(
+            "123456",
+            MockStopName(
+                "New stop name",
+                "New locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(alertsRepository.allAlertsFlow)
-                .thenReturn(flowOf(listOf(proximityAlert)))
+            .thenReturn(flowOf(listOf(proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
-                .thenReturn(
-                        flowOf(mapOf("123456" to stopDetails1), mapOf("123456" to stopDetails2)))
+            .thenReturn(
+                flowOf(mapOf("123456" to stopDetails1), mapOf("123456" to stopDetails2)))
         val expected1 = listOf(
-                UiAlert.ProximityAlert(1, "123456", stopDetails1, 250))
+            UiAlert.ProximityAlert(1, "123456", stopDetails1, 250))
         val expected2 = listOf(
-                UiAlert.ProximityAlert(1, "123456", stopDetails2, 250))
+            UiAlert.ProximityAlert(1, "123456", stopDetails2, 250))
 
         val observer = alertsRetriever.allAlertsFlow.test(this)
         advanceUntilIdle()
@@ -346,22 +356,24 @@ class AlertsRetrieverTest {
     fun allAlertsPropagatesStopDetailsUpdateToAllRelevantStops() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         val proximityAlert = ProximityAlert(2, 124L, "123456", 250)
-        val stopDetails1 = StopDetails(
-                "123456",
-                StopName(
-                        "Stop name",
-                        "Locality"),
+        val stopDetails1 = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Stop name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
-        val stopDetails2 = StopDetails(
-                "123456",
-                StopName(
-                        "New stop name",
-                        "New locality"),
+                3.4),
+            StopOrientation.SOUTH)
+        val stopDetails2 = MockStopDetails(
+            "123456",
+            MockStopName(
+                "New stop name",
+                "New locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert, proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456")))
@@ -385,30 +397,33 @@ class AlertsRetrieverTest {
     fun allAlertsPropagatesStopDetailsUpdateOnlyToRelevantStops() = runTest {
         val arrivalAlert = ArrivalAlert(1, 123L, "123456", listOf("1"), 5)
         val proximityAlert = ProximityAlert(2, 124L, "987654", 250)
-        val stopDetails1 = StopDetails(
-                "123456",
-                StopName(
-                        "Stop name",
-                        "Locality"),
+        val stopDetails1 = MockStopDetails(
+            "123456",
+            MockStopName(
+                "Stop name",
+                "Locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
-        val stopDetails2 = StopDetails(
-                "987654",
-                StopName(
-                        "Stop name 2",
-                        "Locality 2"),
+                3.4),
+            StopOrientation.SOUTH)
+        val stopDetails2 = MockStopDetails(
+            "987654",
+            MockStopName(
+                "Stop name 2",
+                "Locality 2"),
+            MockStopLocation(
                 9.8,
-                7.6,
-                0)
-        val stopDetails3 = StopDetails(
-                "123456",
-                StopName(
-                        "New stop name",
-                        "New locality"),
+                7.6),
+            StopOrientation.UNKNOWN)
+        val stopDetails3 = MockStopDetails(
+            "123456",
+            MockStopName(
+                "New stop name",
+                "New locality"),
+            MockStopLocation(
                 1.2,
-                3.4,
-                5)
+                3.4),
+            StopOrientation.SOUTH)
         whenever(alertsRepository.allAlertsFlow)
                 .thenReturn(flowOf(listOf(arrivalAlert, proximityAlert)))
         whenever(busStopsRepository.getBusStopDetailsFlow(setOf("123456", "987654")))
@@ -433,4 +448,18 @@ class AlertsRetrieverTest {
 
         observer.assertValues(null, expected1, expected2)
     }
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
+
+    private data class MockStopLocation(
+        override val latitude: Double,
+        override val longitude: Double) : StopLocation
+
+    private data class MockStopDetails(
+        override val stopCode: String,
+        override val stopName: StopName,
+        override val location: StopLocation,
+        override val orientation: StopOrientation) : StopDetails
 }

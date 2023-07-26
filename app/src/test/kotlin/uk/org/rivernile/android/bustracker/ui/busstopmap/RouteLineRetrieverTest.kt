@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServicePoint
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePoint
 import uk.org.rivernile.android.bustracker.core.servicepoints.ServicePointsRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -110,18 +110,18 @@ class RouteLineRetrieverTest {
     fun getRouteLinesFlowWithServicePointAndNullColoursEmitsCorrectValue() = runTest {
         val selectedServices = setOf("1", "2", "3")
         whenever(servicePointsRepository.getServicePointsFlow(selectedServices))
-                .thenReturn(flowOf(listOf(
-                        ServicePoint("1", 1, 1.1, 2.2))))
+            .thenReturn(flowOf(listOf(
+                MockServicePoint("1", 1, 1.1, 2.2))))
         whenever(servicesRepository.getColoursForServicesFlow(selectedServices))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         val expected = listOf(
-                UiServiceRoute(
-                        "1",
-                        null,
+            UiServiceRoute(
+                "1",
+                null,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2))))))
+                            UiLatLon(1.1, 2.2))))))
 
         val observer = retriever.getRouteLinesFlow(selectedServices).test(this)
         advanceUntilIdle()
@@ -134,18 +134,18 @@ class RouteLineRetrieverTest {
     fun getRouteLinesFlowWithServicePointAndEmptyColoursEmitsCorrectValue() = runTest {
         val selectedServices = setOf("1", "2", "3")
         whenever(servicePointsRepository.getServicePointsFlow(selectedServices))
-                .thenReturn(flowOf(listOf(
-                        ServicePoint("1", 1, 1.1, 2.2))))
+            .thenReturn(flowOf(listOf(
+                MockServicePoint("1", 1, 1.1, 2.2))))
         whenever(servicesRepository.getColoursForServicesFlow(selectedServices))
-                .thenReturn(flowOf(emptyMap()))
+            .thenReturn(flowOf(emptyMap()))
         val expected = listOf(
-                UiServiceRoute(
-                        "1",
-                        null,
+            UiServiceRoute(
+                "1",
+                null,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2))))))
+                            UiLatLon(1.1, 2.2))))))
 
         val observer = retriever.getRouteLinesFlow(selectedServices).test(this)
         advanceUntilIdle()
@@ -158,18 +158,18 @@ class RouteLineRetrieverTest {
     fun getRouteLinesFlowWithServicePointAndPopulatedColoursEmitsCorrectValue() = runTest {
         val selectedServices = setOf("1", "2", "3")
         whenever(servicePointsRepository.getServicePointsFlow(selectedServices))
-                .thenReturn(flowOf(listOf(
-                        ServicePoint("1", 1, 1.1, 2.2))))
+            .thenReturn(flowOf(listOf(
+                MockServicePoint("1", 1, 1.1, 2.2))))
         whenever(servicesRepository.getColoursForServicesFlow(selectedServices))
-                .thenReturn(flowOf(mapOf("1" to 100)))
+            .thenReturn(flowOf(mapOf("1" to 100)))
         val expected = listOf(
-                UiServiceRoute(
-                        "1",
-                        100,
+            UiServiceRoute(
+                "1",
+                100,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2))))))
+                            UiLatLon(1.1, 2.2))))))
 
         val observer = retriever.getRouteLinesFlow(selectedServices).test(this)
         advanceUntilIdle()
@@ -182,22 +182,22 @@ class RouteLineRetrieverTest {
     fun getRouteLinesFlowWithMultiplePointsEmitsCorrectValue() = runTest {
         val selectedServices = setOf("1", "2", "3")
         whenever(servicePointsRepository.getServicePointsFlow(selectedServices))
-                .thenReturn(flowOf(listOf(
-                        ServicePoint("1", 1, 1.1, 2.2),
-                        ServicePoint("1", 1, 3.3, 4.4),
-                        ServicePoint("1", 1, 5.5, 6.6))))
+            .thenReturn(flowOf(listOf(
+                MockServicePoint("1", 1, 1.1, 2.2),
+                MockServicePoint("1", 1, 3.3, 4.4),
+                MockServicePoint("1", 1, 5.5, 6.6))))
         whenever(servicesRepository.getColoursForServicesFlow(selectedServices))
-                .thenReturn(flowOf(mapOf("1" to 100)))
+            .thenReturn(flowOf(mapOf("1" to 100)))
         val expected = listOf(
-                UiServiceRoute(
-                        "1",
-                        100,
+            UiServiceRoute(
+                "1",
+                100,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2),
-                                                UiLatLon(3.3, 4.4),
-                                                UiLatLon(5.5, 6.6))))))
+                            UiLatLon(1.1, 2.2),
+                            UiLatLon(3.3, 4.4),
+                            UiLatLon(5.5, 6.6))))))
 
         val observer = retriever.getRouteLinesFlow(selectedServices).test(this)
         advanceUntilIdle()
@@ -210,38 +210,38 @@ class RouteLineRetrieverTest {
     fun getRouteLinesFlowWithMultipleLinesEmitsCorrectValue() = runTest {
         val selectedServices = setOf("1", "2", "3")
         whenever(servicePointsRepository.getServicePointsFlow(selectedServices))
-                .thenReturn(flowOf(listOf(
-                        ServicePoint("1", 1, 1.1, 2.2),
-                        ServicePoint("1", 1, 3.3, 4.4),
-                        ServicePoint("1", 1, 5.5, 6.6),
-                        ServicePoint("1", 2, 7.7, 8.8),
-                        ServicePoint("1", 2, 9.9, 10.10),
-                        ServicePoint("1", 2, 11.11, 12.12),
-                        ServicePoint("1", 3, 13.13, 14.14),
-                        ServicePoint("1", 3, 15.15, 16.16),
-                        ServicePoint("1", 3, 17.17, 18.18))))
+            .thenReturn(flowOf(listOf(
+                MockServicePoint("1", 1, 1.1, 2.2),
+                MockServicePoint("1", 1, 3.3, 4.4),
+                MockServicePoint("1", 1, 5.5, 6.6),
+                MockServicePoint("1", 2, 7.7, 8.8),
+                MockServicePoint("1", 2, 9.9, 10.10),
+                MockServicePoint("1", 2, 11.11, 12.12),
+                MockServicePoint("1", 3, 13.13, 14.14),
+                MockServicePoint("1", 3, 15.15, 16.16),
+                MockServicePoint("1", 3, 17.17, 18.18))))
         whenever(servicesRepository.getColoursForServicesFlow(selectedServices))
-                .thenReturn(flowOf(mapOf("1" to 100)))
+            .thenReturn(flowOf(mapOf("1" to 100)))
         val expected = listOf(
-                UiServiceRoute(
-                        "1",
-                        100,
+            UiServiceRoute(
+                "1",
+                100,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2),
-                                                UiLatLon(3.3, 4.4),
-                                                UiLatLon(5.5, 6.6))),
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(7.7, 8.8),
-                                                UiLatLon(9.9, 10.10),
-                                                UiLatLon(11.11, 12.12))),
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(13.13, 14.14),
-                                                UiLatLon(15.15, 16.16),
-                                                UiLatLon(17.17, 18.18))))))
+                            UiLatLon(1.1, 2.2),
+                            UiLatLon(3.3, 4.4),
+                            UiLatLon(5.5, 6.6))),
+                    UiServiceLine(
+                        listOf(
+                            UiLatLon(7.7, 8.8),
+                            UiLatLon(9.9, 10.10),
+                            UiLatLon(11.11, 12.12))),
+                    UiServiceLine(
+                        listOf(
+                            UiLatLon(13.13, 14.14),
+                            UiLatLon(15.15, 16.16),
+                            UiLatLon(17.17, 18.18))))))
 
         val observer = retriever.getRouteLinesFlow(selectedServices).test(this)
         advanceUntilIdle()
@@ -254,48 +254,48 @@ class RouteLineRetrieverTest {
     fun getRouteLinesFlowWithMultipleServicesEmitsCorrectValue() = runTest {
         val selectedServices = setOf("1", "2", "3")
         whenever(servicePointsRepository.getServicePointsFlow(selectedServices))
-                .thenReturn(flowOf(listOf(
-                        ServicePoint("1", 1, 1.1, 2.2),
-                        ServicePoint("1", 1, 3.3, 4.4),
-                        ServicePoint("1", 1, 5.5, 6.6),
-                        ServicePoint("2", 1, 7.7, 8.8),
-                        ServicePoint("2", 1, 9.9, 10.10),
-                        ServicePoint("2", 1, 11.11, 12.12),
-                        ServicePoint("3", 1, 13.13, 14.14),
-                        ServicePoint("3", 1, 15.15, 16.16),
-                        ServicePoint("3", 1, 17.17, 18.18))))
+            .thenReturn(flowOf(listOf(
+                MockServicePoint("1", 1, 1.1, 2.2),
+                MockServicePoint("1", 1, 3.3, 4.4),
+                MockServicePoint("1", 1, 5.5, 6.6),
+                MockServicePoint("2", 1, 7.7, 8.8),
+                MockServicePoint("2", 1, 9.9, 10.10),
+                MockServicePoint("2", 1, 11.11, 12.12),
+                MockServicePoint("3", 1, 13.13, 14.14),
+                MockServicePoint("3", 1, 15.15, 16.16),
+                MockServicePoint("3", 1, 17.17, 18.18))))
         whenever(servicesRepository.getColoursForServicesFlow(selectedServices))
-                .thenReturn(flowOf(mapOf(
-                        "1" to 100,
-                        "3" to 300)))
+            .thenReturn(flowOf(mapOf(
+                "1" to 100,
+                "3" to 300)))
         val expected = listOf(
-                UiServiceRoute(
-                        "1",
-                        100,
+            UiServiceRoute(
+                "1",
+                100,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2),
-                                                UiLatLon(3.3, 4.4),
-                                                UiLatLon(5.5, 6.6))))),
-                UiServiceRoute(
-                        "2",
-                        null,
+                            UiLatLon(1.1, 2.2),
+                            UiLatLon(3.3, 4.4),
+                            UiLatLon(5.5, 6.6))))),
+            UiServiceRoute(
+                "2",
+                null,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(7.7, 8.8),
-                                                UiLatLon(9.9, 10.10),
-                                                UiLatLon(11.11, 12.12))))),
-                UiServiceRoute(
-                        "3",
-                        300,
+                            UiLatLon(7.7, 8.8),
+                            UiLatLon(9.9, 10.10),
+                            UiLatLon(11.11, 12.12))))),
+            UiServiceRoute(
+                "3",
+                300,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(13.13, 14.14),
-                                                UiLatLon(15.15, 16.16),
-                                                UiLatLon(17.17, 18.18))))))
+                            UiLatLon(13.13, 14.14),
+                            UiLatLon(15.15, 16.16),
+                            UiLatLon(17.17, 18.18))))))
 
         val observer = retriever.getRouteLinesFlow(selectedServices).test(this)
         advanceUntilIdle()
@@ -308,39 +308,39 @@ class RouteLineRetrieverTest {
     fun getRouteLinesFlowWithServicePointAndChangingColoursEmitsNewValues() = runTest {
         val selectedServices = setOf("1", "2", "3")
         whenever(servicePointsRepository.getServicePointsFlow(selectedServices))
-                .thenReturn(flowOf(listOf(
-                        ServicePoint("1", 1, 1.1, 2.2))))
+            .thenReturn(flowOf(listOf(
+                MockServicePoint("1", 1, 1.1, 2.2))))
         whenever(servicesRepository.getColoursForServicesFlow(selectedServices))
-                .thenReturn(intervalFlowOf(
-                        0L,
-                        10L,
-                        mapOf("1" to 100),
-                        null,
-                        mapOf("1" to 200)))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                mapOf("1" to 100),
+                null,
+                mapOf("1" to 200)))
         val expected1 = listOf(
-                UiServiceRoute(
-                        "1",
-                        100,
+            UiServiceRoute(
+                "1",
+                100,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2))))))
+                            UiLatLon(1.1, 2.2))))))
         val expected2 = listOf(
-                UiServiceRoute(
-                        "1",
-                        null,
+            UiServiceRoute(
+                "1",
+                null,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2))))))
+                            UiLatLon(1.1, 2.2))))))
         val expected3 = listOf(
-                UiServiceRoute(
-                        "1",
-                        200,
+            UiServiceRoute(
+                "1",
+                200,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2))))))
+                            UiLatLon(1.1, 2.2))))))
 
         val observer = retriever.getRouteLinesFlow(selectedServices).test(this)
         advanceUntilIdle()
@@ -353,38 +353,38 @@ class RouteLineRetrieverTest {
     fun getRouteLinesFlowWithColoursAndChangingServicePointsEmitsNewValues() = runTest {
         val selectedServices = setOf("1", "2", "3")
         whenever(servicePointsRepository.getServicePointsFlow(selectedServices))
-                .thenReturn(intervalFlowOf(
-                        0L,
-                        10L,
-                        listOf(ServicePoint("1", 1, 1.1, 2.2)),
-                        listOf(ServicePoint("1", 1, 10.1, 20.2)),
-                        listOf(ServicePoint("1", 1, 1.1, 2.2))))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                listOf(MockServicePoint("1", 1, 1.1, 2.2)),
+                listOf(MockServicePoint("1", 1, 10.1, 20.2)),
+                listOf(MockServicePoint("1", 1, 1.1, 2.2))))
         whenever(servicesRepository.getColoursForServicesFlow(selectedServices))
-                .thenReturn(flowOf(mapOf("1" to 100)))
+            .thenReturn(flowOf(mapOf("1" to 100)))
         val expected1 = listOf(
-                UiServiceRoute(
-                        "1",
-                        100,
+            UiServiceRoute(
+                "1",
+                100,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2))))))
+                            UiLatLon(1.1, 2.2))))))
         val expected2 = listOf(
-                UiServiceRoute(
-                        "1",
-                        100,
+            UiServiceRoute(
+                "1",
+                100,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(10.1, 20.2))))))
+                            UiLatLon(10.1, 20.2))))))
         val expected3 = listOf(
-                UiServiceRoute(
-                        "1",
-                        100,
+            UiServiceRoute(
+                "1",
+                100,
+                listOf(
+                    UiServiceLine(
                         listOf(
-                                UiServiceLine(
-                                        listOf(
-                                                UiLatLon(1.1, 2.2))))))
+                            UiLatLon(1.1, 2.2))))))
 
         val observer = retriever.getRouteLinesFlow(selectedServices).test(this)
         advanceUntilIdle()
@@ -392,4 +392,10 @@ class RouteLineRetrieverTest {
 
         observer.assertValues(expected1, expected2, expected3)
     }
+
+    private data class MockServicePoint(
+        override val serviceName: String,
+        override val chainage: Int,
+        override val latitude: Double,
+        override val longitude: Double) : ServicePoint
 }

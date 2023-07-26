@@ -45,7 +45,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
@@ -852,7 +852,7 @@ class BusStopMapViewModelTest {
     @Test
     fun showStopShowsInfoWindowAndMovesCameraToStopLocation() = runTest {
         whenever(busStopsRepository.getStopLocation("123456"))
-            .thenReturn(StopLocation("123456", 1.1, 2.2))
+            .thenReturn(MockStopLocation(1.1, 2.2))
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
@@ -887,7 +887,7 @@ class BusStopMapViewModelTest {
     @Test
     fun onStopSearchResultShowsInfoWindowAndMovesCameraToStopLocation() = runTest {
         whenever(busStopsRepository.getStopLocation("123456"))
-            .thenReturn(StopLocation("123456", 1.1, 2.2))
+            .thenReturn(MockStopLocation(1.1, 2.2))
         val viewModel = createViewModel()
 
         val showStopMarkerInfoWindowObserver = viewModel.showStopMarkerInfoWindowLiveData.test()
@@ -964,4 +964,8 @@ class BusStopMapViewModelTest {
                     preferenceRepository,
                     coroutineRule.scope,
                     coroutineRule.testDispatcher)
+
+    private data class MockStopLocation(
+        override val latitude: Double,
+        override val longitude: Double) : StopLocation
 }

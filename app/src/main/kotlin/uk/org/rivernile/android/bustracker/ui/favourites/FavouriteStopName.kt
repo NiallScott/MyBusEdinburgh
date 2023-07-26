@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.entities
+package uk.org.rivernile.android.bustracker.ui.favourites
+
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 
 /**
- * This class describes a stop search result
+ * An implementation of [StopName] so that the favourite stop name can be displayed properly. This
+ * should be refactored later as this shouldn't be implementating an interface from the database.
  *
- * @property stopCode The stop code.
- * @property stopName The name details for the stop.
- * @property orientation The stop orientation.
- * @property serviceListing A [String] which lists the known services for the stop.
+ * @property name The stop name.
+ * @property locality The locality of the stop.
  * @author Niall Scott
  */
-data class StopSearchResult(
-        val stopCode: String,
-        val stopName: StopName,
-        val orientation: Int,
-        val serviceListing: String?)
+data class FavouriteStopName(
+    override val name: String,
+    override val locality: String?) : StopName

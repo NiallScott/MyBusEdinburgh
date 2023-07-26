@@ -177,18 +177,36 @@ class DatabaseUpdaterTest {
     }
 
     @Test
+    fun returnsFalseAndDeletesDownloadFileWhenReplaceDatabaseReturnsFalse() = runTest {
+        whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
+            .thenReturn(FileDownloadResponse.Success)
+        whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
+            .thenReturn(true)
+        whenever(databaseRepository.replaceDatabase(downloadFile))
+            .thenReturn(false)
+
+        val result = updater.updateDatabase(databaseVersion, null)
+
+        assertFalse(result)
+        verify(fileConsistencyChecker)
+            .checkFileMatchesHash(downloadFile, "xyz789")
+        verify(downloadFile)
+            .delete()
+    }
+
+    @Test
     fun returnsTrueAndReplacesDatabaseWhenDownloadIsSuccessfulAndFileConsistencyPasses() = runTest {
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
                 .thenReturn(FileDownloadResponse.Success)
         whenever(fileConsistencyChecker.checkFileMatchesHash(downloadFile, "xyz789"))
                 .thenReturn(true)
+        whenever(databaseRepository.replaceDatabase(downloadFile))
+            .thenReturn(true)
 
         val result = updater.updateDatabase(databaseVersion, null)
 
         assertTrue(result)
         verify(downloadFile, never())
                 .delete()
-        verify(databaseRepository)
-                .replaceDatabase(downloadFile)
     }
 }

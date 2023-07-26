@@ -31,7 +31,6 @@ plugins {
     kotlin("android")
     kotlin("plugin.parcelize")
     kotlin("kapt")
-    kotlin("plugin.allopen")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
@@ -132,10 +131,6 @@ androidComponents {
                 .findProperty("mybus.${variant.flavorName}.${variant.buildType}.mapsKey") as? String
                 ?: "undefined")
     }
-}
-
-allOpen {
-    annotation("uk.org.rivernile.android.bustracker.core.utils.OpenClass")
 }
 
 dependencies {

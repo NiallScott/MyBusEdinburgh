@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,8 +43,10 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -248,7 +250,7 @@ class UiItemRetrieverTest {
                         UiItem.Map(
                                 1.1,
                                 2.2,
-                                3),
+                                StopOrientation.EAST),
                         UiItem.Distance.Known(1.2f),
                         UiItem.NoServices))
     }
@@ -285,7 +287,7 @@ class UiItemRetrieverTest {
                         UiItem.Map(
                                 1.1,
                                 2.2,
-                                3),
+                                StopOrientation.EAST),
                         UiItem.Distance.Known(1.2f),
                         service1,
                         service2,
@@ -299,12 +301,27 @@ class UiItemRetrieverTest {
                 .thenReturn(isAvailable)
     }
 
-    private fun createStopDetails() = StopDetails(
-            "123456",
-            StopName(
-                    "Stop name",
-                    "Locality"),
+    private fun createStopDetails() = MockStopDetails(
+        "123456",
+        MockStopName(
+            "Stop name",
+            "Locality"),
+        MockStopLocation(
             1.1,
-            2.2,
-            3)
+            2.2),
+        StopOrientation.EAST)
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
+
+    private data class MockStopLocation(
+        override val latitude: Double,
+        override val longitude: Double) : StopLocation
+
+    private data class MockStopDetails(
+        override val stopCode: String,
+        override val stopName: StopName,
+        override val location: StopLocation,
+        override val orientation: StopOrientation) : StopDetails
 }

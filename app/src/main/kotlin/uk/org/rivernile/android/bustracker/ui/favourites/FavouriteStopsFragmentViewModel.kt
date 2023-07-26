@@ -46,7 +46,6 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -442,13 +441,14 @@ class FavouriteStopsFragmentViewModel @Inject constructor(
             UiFavouriteName? {
         return stopCode?.ifEmpty { null }?.let { sc ->
             favourites?.firstOrNull { it.favouriteStop.stopCode == sc }
-                    ?.let {
-                        UiFavouriteName(
-                                sc,
-                                StopName(
-                                        it.favouriteStop.stopName,
-                                        null))
-                    }
+                ?.let {
+                    UiFavouriteName(
+                        sc,
+                        FavouriteStopName(
+                            it.favouriteStop.stopName,
+                            null)
+                    )
+            }
         }
     }
 

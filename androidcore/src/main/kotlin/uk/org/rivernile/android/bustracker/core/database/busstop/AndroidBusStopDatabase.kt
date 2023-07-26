@@ -125,9 +125,10 @@ internal class AndroidBusStopDatabase @Inject constructor(
      *
      * @param newDatabaseFile The new database file. This is assumed to already be in the database
      * directory.
+     * @return `true` if the database was replaced, `false` if not.
      */
-    suspend fun replaceDatabase(newDatabaseFile: File) {
-        databaseMutex.withLock {
+    suspend fun replaceDatabase(newDatabaseFile: File): Boolean {
+        return databaseMutex.withLock {
             var deleteNewDatabase: Boolean
 
             createRoomDatabase(newDatabaseFile.name, false)
@@ -143,10 +144,14 @@ internal class AndroidBusStopDatabase @Inject constructor(
 
                 database = createRoomDatabase(DATABASE_NAME, true)
                 _isDatabaseOpenFlow.value = true
+
+                true
             } else {
                 withContext(ioDispatcher) {
                     newDatabaseFile.delete()
                 }
+
+                false
             }
         }
     }

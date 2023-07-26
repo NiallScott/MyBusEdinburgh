@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,8 +40,10 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -270,12 +272,28 @@ class DistanceRetrieverTest {
     private val grantedPermissionsState get() =
         PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
 
-    private val stopDetails get() = StopDetails(
-            "123456",
-            StopName(
-                    "Name",
-                    "Locality"),
+    private val stopDetails get() = MockStopDetails(
+        "123456",
+        MockStopName(
+            "Name",
+            "Locality"),
+        MockStopLocation(
             1.0,
-            2.0,
-            3)
+            2.0),
+        StopOrientation.EAST)
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
+
+    private data class MockStopLocation(
+        override val latitude: Double,
+        override val longitude: Double) : StopLocation
+
+    private data class MockStopDetails(
+        override val stopCode: String,
+        override val stopName: StopName,
+        override val location: StopLocation,
+        override val orientation: StopOrientation
+    ) : StopDetails
 }

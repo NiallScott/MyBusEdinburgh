@@ -37,7 +37,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
 import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import java.util.*
@@ -151,9 +151,9 @@ class AboutViewModel @Inject constructor(
                     UiAboutItem.TwoLinesItem.Website,
                     UiAboutItem.TwoLinesItem.Twitter,
                     UiAboutItem.TwoLinesItem.DatabaseVersion(
-                            databaseMetadata?.databaseVersion?.let(::Date)),
+                            databaseMetadata?.updateTimestamp?.let(::Date)),
                     UiAboutItem.TwoLinesItem.TopologyVersion(
-                            databaseMetadata?.topologyVersion),
+                            databaseMetadata?.topologyVersionId),
                     UiAboutItem.OneLineItem.Credits,
                     UiAboutItem.OneLineItem.PrivacyPolicy,
                     UiAboutItem.OneLineItem.OpenSourceLicences)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.search
 
 import androidx.recyclerview.widget.RecyclerView
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.map.StopMapMarkerDecorator
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -73,6 +74,7 @@ class SearchResultViewHolder(
 
                 imgDirection.setImageResource(
                         stopMapMarkerDecorator.getStopDirectionDrawableResourceId(orientation))
+                imgDirection.contentDescription = getDirectionString(orientation)
 
                 text1.text = textFormattingUtils.formatBusStopNameWithStopCode(
                         it.stopCode,
@@ -80,12 +82,6 @@ class SearchResultViewHolder(
 
                 text2.text = it.services?.ifBlank { null }
                         ?: viewBinding.root.context.getString(R.string.search_item_no_services)
-
-                if (orientation >= 0 && orientation < directionStrings.size) {
-                    directionStrings[orientation]
-                } else {
-                    viewBinding.root.context.getString(R.string.orientation_unknown)
-                }.let(imgDirection::setContentDescription)
             } ?: run {
                 imgDirection.setImageResource(0)
                 imgDirection.contentDescription = null
@@ -100,5 +96,23 @@ class SearchResultViewHolder(
      */
     private fun handleClick() {
         item?.let(clickListener::onItemClicked)
+    }
+
+    /**
+     * Get the direction [String] for the given [orientation].
+     *
+     * @param orientation The orientation to get the string for.
+     * @return The string for the orientation.
+     */
+    private fun getDirectionString(orientation: StopOrientation) = when (orientation) {
+        StopOrientation.NORTH -> directionStrings[0]
+        StopOrientation.NORTH_EAST -> directionStrings[1]
+        StopOrientation.EAST -> directionStrings[2]
+        StopOrientation.SOUTH_EAST -> directionStrings[3]
+        StopOrientation.SOUTH -> directionStrings[4]
+        StopOrientation.SOUTH_WEST -> directionStrings[5]
+        StopOrientation.WEST -> directionStrings[6]
+        StopOrientation.NORTH_WEST -> directionStrings[7]
+        else -> viewBinding.root.context.getString(R.string.orientation_unknown)
     }
 }

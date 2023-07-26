@@ -26,7 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.ui.alerts
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
 
 /**
  * The base class for a UI alert.
@@ -50,11 +50,11 @@ sealed interface UiAlert {
      * @property timeTrigger The time trigger this alert triggers for.
      */
     data class ArrivalAlert(
-            override val id: Int,
-            val stopCode: String,
-            val stopDetails: StopDetails?,
-            val services: List<String>,
-            val timeTrigger: Int) : UiAlert
+        override val id: Int,
+        val stopCode: String,
+        val stopDetails: StopDetails?,
+        val services: List<String>,
+        val timeTrigger: Int) : UiAlert
 
     /**
      * A proximity alert.
@@ -65,8 +65,8 @@ sealed interface UiAlert {
      * @property distanceFrom The distance trigger this alert triggers for.
      */
     data class ProximityAlert(
-            override val id: Int,
-            val stopCode: String,
-            val stopDetails: StopDetails?,
-            val distanceFrom: Int) : UiAlert
+        override val id: Int,
+        val stopCode: String,
+        val stopDetails: StopDetails?,
+        val distanceFrom: Int) : UiAlert
 }

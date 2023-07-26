@@ -28,7 +28,6 @@ plugins {
     id("com.android.library")
     kotlin("android")
     kotlin("kapt")
-    kotlin("plugin.allopen")
     id("com.google.dagger.hilt.android")
 }
 
@@ -103,10 +102,6 @@ android {
 
     @Suppress("UnstableApiUsage")
     useLibrary("android.test.mock")
-}
-
-allOpen {
-    annotation("uk.org.rivernile.android.bustracker.core.utils.OpenClass")
 }
 
 dependencies {

@@ -144,7 +144,7 @@ class NearestStopsFragmentViewModel @Inject constructor(
 
     private val uiStateFlow = uiStateRetriever.getUiStateFlow(
             permissionsStateFlow.filterNotNull(),
-            selectedServicesLiveData.asFlow())
+            selectedServicesLiveData.asFlow().map { it?.toSet() })
             .distinctUntilChanged()
             .flowOn(defaultDispatcher)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState.InProgress)

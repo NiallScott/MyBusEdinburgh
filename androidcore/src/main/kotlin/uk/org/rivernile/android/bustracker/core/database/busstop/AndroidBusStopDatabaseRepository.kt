@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
-import android.content.Context
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import kotlinx.coroutines.flow.first
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,26 +37,22 @@ import javax.inject.Singleton
 /**
  * This class represents an Android-specific implementation of the bus stop database repository.
  *
- * @param context The application [Context].
- * @param contract The contract for the bus stop database.
- * @param databaseInformationDao The DAO for accessing database information.
+ * @param database The [AndroidBusStopDatabase].
+ * @param databaseDao The DAO for accessing database information.
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidBusStopDatabaseRepository @Inject constructor(
-        private val context: Context,
-        private val contract: BusStopDatabaseContract,
-        private val databaseInformationDao: DatabaseInformationDao,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher)
+        private val database: AndroidBusStopDatabase,
+        private val databaseDao: DatabaseDao)
     : BusStopDatabaseRepository {
 
-    override suspend fun replaceDatabase(newDatabase: File) {
-        withContext(ioDispatcher) {
-            context.contentResolver.call(contract.getContentUri(),
-                    BusStopDatabaseContract.METHOD_REPLACE_DATABASE, newDatabase.absolutePath, null)
-        }
-    }
+    override suspend fun replaceDatabase(newDatabase: File) =
+        database.replaceDatabase(newDatabase)
 
     override val databaseMetadataFlow: Flow<DatabaseMetadata?> get() =
-            databaseInformationDao.databaseMetadataFlow
+        databaseDao.databaseMetadataFlow
+
+    override suspend fun getTopologyVersionId() =
+        databaseDao.topologyIdFlow.first()
 }

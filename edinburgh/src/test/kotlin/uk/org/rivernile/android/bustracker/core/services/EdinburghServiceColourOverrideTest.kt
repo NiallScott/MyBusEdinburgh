@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.services
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,11 +42,6 @@ import org.mockito.kotlin.whenever
 @RunWith(MockitoJUnitRunner::class)
 class EdinburghServiceColourOverrideTest {
 
-    companion object {
-
-        private const val COLOUR_NIGHT_SERVICE = 0x000000
-    }
-
     @Mock
     private lateinit var serviceColourProvider: ServiceColourProvider
 
@@ -59,150 +53,36 @@ class EdinburghServiceColourOverrideTest {
     }
 
     @Test
-    fun overrideServiceColoursReturnsNullWhenServicesIsNullAndServicesColoursIsNull() {
-        val result = colourOverride.overrideServiceColours(null, null)
+    fun overrideServiceColourReturnsCurrentColourWhenServiceIsNumeric() {
+        val result = colourOverride.overrideServiceColour("1", 1)
 
-        assertNull(result)
+        assertEquals(1, result)
     }
 
     @Test
-    fun overrideServiceColoursReturnsNullWhenServicesIsEmptyAndServiceColoursIsNull() {
-        val result = colourOverride.overrideServiceColours(emptySet(), null)
+    fun overrideServiceColourReturnsCurrentColourWhenServiceIsTextButNotNightService() {
+        val result = colourOverride.overrideServiceColour("abc123", 1)
 
-        assertNull(result)
+        assertEquals(1, result)
     }
 
     @Test
-    fun overrideServiceColoursReturnsServiceColoursWhenServicesIsNullAndServiceColoursIsNotNull() {
-        val serviceColours = mapOf(
-                "1" to 0x000000,
-                "2" to 0xFFFFFF)
-
-        val result = colourOverride.overrideServiceColours(null, serviceColours)
-
-        assertEquals(serviceColours, result)
-    }
-
-    @Test
-    fun overrideServiceColoursReturnsServiceColoursWhenServicesIsEmptyAndServiceColoursIsNotNull() {
-        val serviceColours = mapOf(
-                "1" to 0x000000,
-                "2" to 0xFFFFFF)
-
-        val result = colourOverride.overrideServiceColours(emptySet(), serviceColours)
-
-        assertEquals(serviceColours, result)
-    }
-
-    @Test
-    fun overrideServiceColoursReturnsNullWhenServicesIsPopulatedAndServiceColoursIsEmpty() {
-        val result = colourOverride.overrideServiceColours(setOf("1", "2"), emptyMap())
-
-        assertNull(result)
-    }
-
-    @Test
-    fun overrideServiceColoursReturnsInputMapWhenNoNightServices() {
-        val serviceColours = mapOf(
-                "1" to 0x000000,
-                "2" to 0xFFFFFF,
-                "3" to 0x0000FF)
-
-        val result = colourOverride.overrideServiceColours(setOf("1", "2", "3", "4"),
-                serviceColours)
-
-        assertEquals(serviceColours, result)
-    }
-
-    @Test
-    fun overrideServiceColoursDoesNotOverwriteNightServiceColourFromInput() {
-        val serviceColours = mapOf(
-                "1" to 0x0000FF,
-                "2" to 0xFFFFFF,
-                "N3" to 0x00FF00)
-
-        val result = colourOverride.overrideServiceColours(setOf("1", "2", "N3"),
-                serviceColours)
-
-        assertEquals(serviceColours, result)
-    }
-
-    @Test
-    fun overrideServiceColoursInsertsMissingNightServicesWhenInputIsNull() {
-        givenServiceColourProviderReturnsColourForNightService()
-        val serviceColours = mapOf(
-                "N1" to COLOUR_NIGHT_SERVICE,
-                "N2" to COLOUR_NIGHT_SERVICE,
-                "N3" to COLOUR_NIGHT_SERVICE)
-
-        val result = colourOverride.overrideServiceColours(setOf("N1", "N2", "N3"), null)
-
-        assertEquals(serviceColours, result)
-    }
-
-    @Test
-    fun overrideServiceColoursInsertsMissingNightServicesWhenInputIsEmpty() {
-        givenServiceColourProviderReturnsColourForNightService()
-        val serviceColours = mapOf(
-                "N1" to COLOUR_NIGHT_SERVICE,
-                "N2" to COLOUR_NIGHT_SERVICE,
-                "N3" to COLOUR_NIGHT_SERVICE)
-
-        val result = colourOverride.overrideServiceColours(setOf("N1", "N2", "N3"), emptyMap())
-
-        assertEquals(serviceColours, result)
-    }
-
-    @Test
-    fun overrideServiceColoursInsertsMissingNightServiceCaseInsensitive() {
-        givenServiceColourProviderReturnsColourForNightService()
-        val serviceColours = mapOf(
-                "n1" to COLOUR_NIGHT_SERVICE)
-
-        val result = colourOverride.overrideServiceColours(setOf("n1"), null)
-
-        assertEquals(serviceColours, result)
-    }
-
-    @Test
-    fun overrideServiceColoursInsertsMissingNightServiceWithTrailingCharacters() {
-        givenServiceColourProviderReturnsColourForNightService()
-        val serviceColours = mapOf(
-                "n1abc" to COLOUR_NIGHT_SERVICE)
-
-        val result = colourOverride.overrideServiceColours(setOf("n1abc"), null)
-
-        assertEquals(serviceColours, result)
-    }
-
-    @Test
-    fun overrideServiceColoursDoesNotAddNonNightService() {
-        val result = colourOverride.overrideServiceColours(setOf("1"), null)
-
-        assertNull(result)
-    }
-
-    @Test
-    fun overrideServiceColoursBehavesCorrectlyWithRepresentativeExample() {
-        givenServiceColourProviderReturnsColourForNightService()
-        val serviceColours = mapOf(
-                "1" to 0x0000FF,
-                "2" to 0xFF0000,
-                "N3" to 0x00FF00)
-        val expected = mapOf(
-                "1" to 0x0000FF,
-                "2" to 0xFF0000,
-                "N3" to 0x00FF00,
-                "N4" to COLOUR_NIGHT_SERVICE)
-
-        val result = colourOverride.overrideServiceColours(setOf("1", "2", "N3", "N4"),
-                serviceColours)
-
-        assertEquals(expected, result)
-    }
-
-    private fun givenServiceColourProviderReturnsColourForNightService() {
+    fun overrideServiceColourReturnsNightServiceColourWhenServiceIsNightServiceLowercase() {
         whenever(serviceColourProvider.nightServiceColour)
-                .thenReturn(COLOUR_NIGHT_SERVICE)
+            .thenReturn(2)
+
+        val result = colourOverride.overrideServiceColour("n25", 1)
+
+        assertEquals(2, result)
+    }
+
+    @Test
+    fun overrideServiceColourReturnsNightServiceColourWhenServiceIsNightServiceUppercase() {
+        whenever(serviceColourProvider.nightServiceColour)
+            .thenReturn(2)
+
+        val result = colourOverride.overrideServiceColour("N25", 1)
+
+        assertEquals(2, result)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,8 +39,10 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
@@ -68,30 +70,33 @@ class StopMarkersRetrieverTest {
     @Mock
     private lateinit var serviceListingRetriever: ServiceListingRetriever
 
-    private val stopDetails1 = StopDetails(
-            "123456",
-            StopName(
-                    "Stop name 1",
-                    "Locality 1"),
+    private val stopDetails1 = MockStopDetails(
+        "123456",
+        MockStopName(
+            "Stop name 1",
+            "Locality 1"),
+        MockStopLocation(
             1.1,
-            2.1,
-            1)
-    private val stopDetails2 = StopDetails(
-            "987654",
-            StopName(
-                    "Stop name 2",
-                    "Locality 2"),
+            2.1),
+        StopOrientation.NORTH)
+    private val stopDetails2 = MockStopDetails(
+        "987654",
+        MockStopName(
+            "Stop name 2",
+            "Locality 2"),
+        MockStopLocation(
             1.2,
-            2.2,
-            2)
-    private val stopDetails3 = StopDetails(
-            "246802",
-            StopName(
-                    "Stop name 3",
-                    "Locality 4"),
+            2.2),
+        StopOrientation.NORTH_EAST)
+    private val stopDetails3 = MockStopDetails(
+        "246802",
+        MockStopName(
+            "Stop name 3",
+            "Locality 4"),
+        MockStopLocation(
             1.3,
-            2.3,
-            3)
+            2.3),
+        StopOrientation.EAST)
 
     @Test
     fun stopMarkersFlowEmitsNullWhenStopsAreNull() = runTest {
@@ -132,29 +137,29 @@ class StopMarkersRetrieverTest {
                 .thenReturn(flowOf(null))
         val retriever = createRetriever()
         val expected1 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                null)
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            null)
         val expected2 = UiStopMarker(
-                "987654",
-                StopName(
-                        "Stop name 2",
-                        "Locality 2"),
-                LatLng(1.2, 2.2),
-                2,
-                null)
+            "987654",
+            MockStopName(
+                "Stop name 2",
+                "Locality 2"),
+            LatLng(1.2, 2.2),
+            StopOrientation.NORTH_EAST,
+            null)
         val expected3 = UiStopMarker(
-                "246802",
-                StopName(
-                        "Stop name 3",
-                        "Locality 3"),
-                LatLng(1.3, 2.3),
-                3,
-                null)
+            "246802",
+            MockStopName(
+                "Stop name 3",
+                "Locality 3"),
+            LatLng(1.3, 2.3),
+            StopOrientation.EAST,
+            null)
 
         val observer = retriever.stopMarkersFlow.test(this)
         advanceUntilIdle()
@@ -167,66 +172,66 @@ class StopMarkersRetrieverTest {
     @Test
     fun stopMarkersEmitsStopsWithFilteredServicesFromState() = runTest {
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")))
-                .thenReturn(flowOf(
-                        listOf(stopDetails1)))
+            .thenReturn(flowOf(
+                listOf(stopDetails1)))
         whenever(serviceListingRetriever.getServiceListingFlow(null))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         val retriever = createRetriever(
-                SavedStateHandle(
-                        mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2", "3"))))
+            SavedStateHandle(
+                mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2", "3"))))
         val expected1 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                null)
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            null)
 
         val observer = retriever.stopMarkersFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                listOf(expected1))
+            listOf(expected1))
     }
 
     @Test
     fun stopMarkersFlowEmitsStopsWithFilteredServices() = runTest {
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(null))
-                .thenReturn(flowOf(
-                        listOf(stopDetails1, stopDetails2, stopDetails3)))
+            .thenReturn(flowOf(
+                listOf(stopDetails1, stopDetails2, stopDetails3)))
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")))
-                .thenReturn(flowOf(
-                        listOf(stopDetails1)))
+            .thenReturn(flowOf(
+                listOf(stopDetails1)))
         whenever(serviceListingRetriever.getServiceListingFlow(null))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         val savedState = SavedStateHandle()
         val retriever = createRetriever(savedState)
         val expected1 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                null)
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            null)
         val expected2 = UiStopMarker(
-                "987654",
-                StopName(
-                        "Stop name 2",
-                        "Locality 2"),
-                LatLng(1.2, 2.2),
-                2,
-                null)
+            "987654",
+            MockStopName(
+                "Stop name 2",
+                "Locality 2"),
+            LatLng(1.2, 2.2),
+            StopOrientation.NORTH_EAST,
+            null)
         val expected3 = UiStopMarker(
-                "246802",
-                StopName(
-                        "Stop name 3",
-                        "Locality 3"),
-                LatLng(1.3, 2.3),
-                3,
-                null)
+            "246802",
+            MockStopName(
+                "Stop name 3",
+                "Locality 3"),
+            LatLng(1.3, 2.3),
+            StopOrientation.EAST,
+            null)
 
         val observer = retriever.stopMarkersFlow.test(this)
         advanceUntilIdle()
@@ -235,140 +240,140 @@ class StopMarkersRetrieverTest {
         observer.finish()
 
         observer.assertValues(
-                listOf(expected1, expected2, expected3),
-                listOf(expected1))
+            listOf(expected1, expected2, expected3),
+            listOf(expected1))
     }
 
     @Test
     fun stopMarkersFlowDoesNotApplyServiceListingToNonMatchingStopCodes() = runTest {
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(null))
-                .thenReturn(flowOf(
-                        listOf(stopDetails1)))
+            .thenReturn(flowOf(
+                listOf(stopDetails1)))
         whenever(serviceListingRetriever.getServiceListingFlow(null))
-                .thenReturn(intervalFlowOf(
-                        0L,
-                        10L,
-                        UiServiceListing.InProgress("192837"),
-                        UiServiceListing.Empty("192837"),
-                        UiServiceListing.Success("192837", listOf("1", "2", "3"))))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                UiServiceListing.InProgress("192837"),
+                UiServiceListing.Empty("192837"),
+                UiServiceListing.Success("192837", listOf("1", "2", "3"))))
         val retriever = createRetriever()
         val expected = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                null)
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            null)
 
         val observer = retriever.stopMarkersFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                listOf(expected),
-                listOf(expected),
-                listOf(expected))
+            listOf(expected),
+            listOf(expected),
+            listOf(expected))
     }
 
     @Test
     fun stopMarkersFlowAppliesServiceListingToMatchingStopCodesFromState() = runTest {
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(null))
-                .thenReturn(flowOf(
-                        listOf(stopDetails1)))
+            .thenReturn(flowOf(
+                listOf(stopDetails1)))
         whenever(serviceListingRetriever.getServiceListingFlow("123456"))
-                .thenReturn(intervalFlowOf(
-                        0L,
-                        10L,
-                        UiServiceListing.InProgress("123456"),
-                        UiServiceListing.Empty("123456"),
-                        UiServiceListing.Success("123456", listOf("1", "2", "3"))))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                UiServiceListing.InProgress("123456"),
+                UiServiceListing.Empty("123456"),
+                UiServiceListing.Success("123456", listOf("1", "2", "3"))))
         val retriever = createRetriever(
-                SavedStateHandle(
-                        mapOf(STATE_SELECTED_STOP_CODE to "123456")))
+            SavedStateHandle(
+                mapOf(STATE_SELECTED_STOP_CODE to "123456")))
         val expected1 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                UiServiceListing.InProgress("123456"))
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            UiServiceListing.InProgress("123456"))
         val expected2 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                UiServiceListing.Empty("123456"))
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            UiServiceListing.Empty("123456"))
         val expected3 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                UiServiceListing.Success("123456", listOf("1", "2", "3")))
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            UiServiceListing.Success("123456", listOf("1", "2", "3")))
 
         val observer = retriever.stopMarkersFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                listOf(expected1),
-                listOf(expected2),
-                listOf(expected3))
+            listOf(expected1),
+            listOf(expected2),
+            listOf(expected3))
     }
 
     @Test
     fun stopMarkersFlowAppliesServiceListingToMatchingStopCodes() = runTest {
         whenever(busStopsRepository.getStopDetailsWithServiceFilterFlow(null))
-                .thenReturn(flowOf(
-                        listOf(stopDetails1)))
+            .thenReturn(flowOf(
+                listOf(stopDetails1)))
         whenever(serviceListingRetriever.getServiceListingFlow(null))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         whenever(serviceListingRetriever.getServiceListingFlow("123456"))
-                .thenReturn(intervalFlowOf(
-                        0L,
-                        10L,
-                        UiServiceListing.InProgress("123456"),
-                        UiServiceListing.Empty("123456"),
-                        UiServiceListing.Success("123456", listOf("1", "2", "3"))))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                UiServiceListing.InProgress("123456"),
+                UiServiceListing.Empty("123456"),
+                UiServiceListing.Success("123456", listOf("1", "2", "3"))))
         val savedState = SavedStateHandle()
         val retriever = createRetriever(savedState)
         val expected1 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                null)
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            null)
         val expected2 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                UiServiceListing.InProgress("123456"))
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            UiServiceListing.InProgress("123456"))
         val expected3 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                UiServiceListing.Empty("123456"))
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            UiServiceListing.Empty("123456"))
         val expected4 = UiStopMarker(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                LatLng(1.1, 2.1),
-                1,
-                UiServiceListing.Success("123456", listOf("1", "2", "3")))
+            "123456",
+            MockStopName(
+                "Stop name 1",
+                "Locality 1"),
+            LatLng(1.1, 2.1),
+            StopOrientation.NORTH,
+            UiServiceListing.Success("123456", listOf("1", "2", "3")))
 
         val observer = retriever.stopMarkersFlow.test(this)
         advanceUntilIdle()
@@ -388,4 +393,18 @@ class StopMarkersRetrieverTest {
                     savedStateHandle,
                     busStopsRepository,
                     serviceListingRetriever)
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
+
+    private data class MockStopLocation(
+        override val latitude: Double,
+        override val longitude: Double) : StopLocation
+
+    private data class MockStopDetails(
+        override val stopCode: String,
+        override val stopName: StopName,
+        override val location: StopLocation,
+        override val orientation: StopOrientation) : StopDetails
 }

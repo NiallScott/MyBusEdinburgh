@@ -32,7 +32,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import uk.org.rivernile.android.bustracker.androidcore.R
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
+import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
@@ -47,19 +47,19 @@ import javax.inject.Inject
  * @param notificationManager The [NotificationManagerCompat].
  * @param notificationPreferences An implementation of [NotificationPreferences]. This may be `null`
  * when no implementation is available.
- * @param busStopsDao The DAO to access bus stop information.
+ * @param busStopsRepository The repository to access bus stop data.
  * @param deeplinkIntentFactory An implementation which creates [Intent]s for deeplinking.
  * @param textFormattingUtils Utility class for formatting text of stop name.
  * @author Niall Scott
  */
 internal class AndroidAlertNotificationDispatcher @Inject constructor(
-        private val context: Context,
-        private val notificationManager: NotificationManagerCompat,
-        private val notificationPreferences: NotificationPreferences?,
-        private val busStopsDao: BusStopsDao,
-        private val permissionChecker: AndroidPermissionChecker,
-        private val deeplinkIntentFactory: DeeplinkIntentFactory,
-        private val textFormattingUtils: TextFormattingUtils) : AlertNotificationDispatcher {
+    private val context: Context,
+    private val notificationManager: NotificationManagerCompat,
+    private val notificationPreferences: NotificationPreferences?,
+    private val busStopsRepository: BusStopsRepository,
+    private val permissionChecker: AndroidPermissionChecker,
+    private val deeplinkIntentFactory: DeeplinkIntentFactory,
+    private val textFormattingUtils: TextFormattingUtils) : AlertNotificationDispatcher {
 
     companion object {
 
@@ -174,7 +174,7 @@ internal class AndroidAlertNotificationDispatcher @Inject constructor(
     private suspend fun getDisplayableStopName(stopCode: String): String {
         return textFormattingUtils.formatBusStopNameWithStopCode(
             stopCode,
-            busStopsDao.getNameForStop(stopCode))
+            busStopsRepository.getNameForStop(stopCode))
     }
 
     /**

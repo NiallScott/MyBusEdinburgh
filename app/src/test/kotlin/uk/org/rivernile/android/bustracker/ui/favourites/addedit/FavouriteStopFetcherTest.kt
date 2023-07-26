@@ -40,7 +40,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -104,7 +104,7 @@ class FavouriteStopFetcherTest {
 
     @Test
     fun loadFavouriteStopAndDetailsWithNoFavouriteButStopNameEmitsAddMode() = runTest {
-        val stopName = StopName("Name", "Locality")
+        val stopName = MockStopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flowOf(null))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
@@ -139,7 +139,7 @@ class FavouriteStopFetcherTest {
     @Test
     fun loadFavouriteStopAndDetailsWithFavouriteAndStopNameEmitsEditMode() = runTest {
         val favouriteStop = FavouriteStop("123456", "Stored name")
-        val stopName = StopName("Name", "Locality")
+        val stopName = MockStopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flowOf(favouriteStop))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
@@ -158,7 +158,7 @@ class FavouriteStopFetcherTest {
     fun loadFavouriteStopAndDetailsPropagatesUpdatesToFavouriteStop() = runTest {
         val favouriteStop1 = FavouriteStop("123456", "Stored name 1")
         val favouriteStop2 = FavouriteStop("123456", "Stored name 2")
-        val stopName = StopName("Name", "Locality")
+        val stopName = MockStopName("Name", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flow {
                     emit(favouriteStop1)
@@ -184,9 +184,9 @@ class FavouriteStopFetcherTest {
     @Test
     fun loadFavouriteStopAndDetailsPropagatesUpdatesToStopName() = runTest {
         val favouriteStop = FavouriteStop("123456", "Stored name")
-        val stopName1 = StopName("Name 1", "Locality")
-        val stopName2 = StopName("Name 2", "Locality")
-        val stopName3 = StopName("Name 3", "Locality")
+        val stopName1 = MockStopName("Name 1", "Locality")
+        val stopName2 = MockStopName("Name 2", "Locality")
+        val stopName3 = MockStopName("Name 3", "Locality")
         whenever(favouritesRepository.getFavouriteStopFlow("123456"))
                 .thenReturn(flowOf(favouriteStop))
         whenever(busStopsRepository.getNameForStopFlow("123456"))
@@ -208,4 +208,8 @@ class FavouriteStopFetcherTest {
                 UiState.Mode.Edit("123456", stopName2, favouriteStop),
                 UiState.Mode.Edit("123456", stopName3, favouriteStop))
     }
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
 }

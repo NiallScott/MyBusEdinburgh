@@ -48,7 +48,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
 import uk.org.rivernile.android.bustracker.ui.alerts.proximity.AddProximityAlertDialogFragment
@@ -309,7 +309,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
     private fun configureStreetViewMenuItem(details: StopDetails?) {
         streetViewMenuItem?.let { menuItem ->
             menuItem.isVisible = details?.let {
-                buildStreetViewIntent(it.latitude, it.longitude)
+                buildStreetViewIntent(it.location.latitude, it.location.longitude)
                         .resolveActivity(packageManager) != null
             } ?: false
         }
@@ -404,7 +404,7 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
      * @param details The [StopDetails] to launch Street View with.
      */
     private fun showStreetView(details: StopDetails) {
-        val intent = buildStreetViewIntent(details.latitude, details.longitude)
+        val intent = buildStreetViewIntent(details.location.latitude, details.location.longitude)
 
         try {
             startActivity(intent)

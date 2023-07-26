@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import androidx.annotation.DrawableRes
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.edinburghbustracker.android.R
 import javax.inject.Inject
 
@@ -47,11 +48,9 @@ class StopMapMarkerDecorator @Inject constructor() {
      * orientation.
      *
      * @param markerOptions The [MarkerOptions] to apply the direction icon to.
-     * @param orientation The orientation of the stop, in the range of `0` (north) to `7`
-     * (north-west), going clockwise. Any other number will be treated as unknown and the
-     * stop will be given a generic icon instead.
+     * @param orientation The orientation of the stop.
      */
-    fun applyStopDirectionToMarker(markerOptions: MarkerOptions, orientation: Int) {
+    fun applyStopDirectionToMarker(markerOptions: MarkerOptions, orientation: StopOrientation) {
         markerOptions.icon(BitmapDescriptorFactory.fromResource(
                 getStopDirectionDrawableResourceId(orientation)))
     }
@@ -60,11 +59,9 @@ class StopMapMarkerDecorator @Inject constructor() {
      * Apply the correct direction icon to the [Marker] object based on the supplied orientation.
      *
      * @param marker The [Marker] to apply the direction icon to.
-     * @param orientation The orientation of the stop, in the range of `0` (north) to `7`
-     * (north-west), going clockwise. Any other number will be treated as unknown and the
-     * stop will be given a generic icon instead.
+     * @param orientation The orientation of the stop.
      */
-    fun applyStopDirectionToMarker(marker: Marker, orientation: Int) {
+    fun applyStopDirectionToMarker(marker: Marker, orientation: StopOrientation) {
         marker.setIcon(BitmapDescriptorFactory.fromResource(
                 getStopDirectionDrawableResourceId(orientation)))
     }
@@ -72,20 +69,19 @@ class StopMapMarkerDecorator @Inject constructor() {
     /**
      * Get a drawable resource ID for a given orientation.
      *
-     * @param orientation The orientation, expressed as a number between `0` and `7`, with `0` being
-     * north and `7` being north-west, going clockwise.
+     * @param orientation The orientation.
      * @return A drawable resource ID for a given orientation.
      */
     @DrawableRes
-    fun getStopDirectionDrawableResourceId(orientation: Int) = when (orientation) {
-        0 -> R.drawable.mapmarker_n
-        1 -> R.drawable.mapmarker_ne
-        2 -> R.drawable.mapmarker_e
-        3 -> R.drawable.mapmarker_se
-        4 -> R.drawable.mapmarker_s
-        5 -> R.drawable.mapmarker_sw
-        6 -> R.drawable.mapmarker_w
-        7 -> R.drawable.mapmarker_nw
+    fun getStopDirectionDrawableResourceId(orientation: StopOrientation) = when (orientation) {
+        StopOrientation.NORTH -> R.drawable.mapmarker_n
+        StopOrientation.NORTH_EAST -> R.drawable.mapmarker_ne
+        StopOrientation.EAST -> R.drawable.mapmarker_e
+        StopOrientation.SOUTH_EAST -> R.drawable.mapmarker_se
+        StopOrientation.SOUTH -> R.drawable.mapmarker_s
+        StopOrientation.SOUTH_WEST -> R.drawable.mapmarker_sw
+        StopOrientation.WEST -> R.drawable.mapmarker_w
+        StopOrientation.NORTH_WEST -> R.drawable.mapmarker_nw
         else -> R.drawable.mapmarker
     }
 }

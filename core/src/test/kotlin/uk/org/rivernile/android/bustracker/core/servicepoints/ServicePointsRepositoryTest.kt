@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,8 +35,8 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServicePointsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServicePoint
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePoint
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
 
 /**
  * Tests for [ServicePointsRepository].
@@ -47,19 +47,19 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.Servic
 class ServicePointsRepositoryTest {
 
     @Mock
-    private lateinit var servicePointsDao: ServicePointsDao
+    private lateinit var servicePointDao: ServicePointDao
 
     private lateinit var repository: ServicePointsRepository
 
     @Before
     fun setUp() {
-        repository = ServicePointsRepository(servicePointsDao)
+        repository = ServicePointsRepository(servicePointDao)
     }
 
     @Test
     fun getServicePointsFlowReturnsFlowInstanceFromDao() {
         val flow = mock<Flow<List<ServicePoint>?>>()
-        whenever(servicePointsDao.getServicePointsFlow(setOf("1", "2", "3")))
+        whenever(servicePointDao.getServicePointsFlow(setOf("1", "2", "3")))
                 .thenReturn(flow)
 
         val result = repository.getServicePointsFlow(setOf("1", "2", "3"))

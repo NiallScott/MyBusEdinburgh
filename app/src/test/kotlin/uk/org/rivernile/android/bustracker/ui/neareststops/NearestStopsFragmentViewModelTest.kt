@@ -44,7 +44,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -122,30 +123,30 @@ class NearestStopsFragmentViewModelTest {
         val items = listOf(
                 UiNearestStop(
                         "111111",
-                        StopName(
+                        MockStopName(
                                 "Stop name 1",
                                 "Locality 1"),
                         "1, 2, 3",
                         1,
-                        1,
+                        StopOrientation.NORTH_EAST,
                         false),
                 UiNearestStop(
                         "222222",
-                        StopName(
+                        MockStopName(
                                 "Stop name 2",
                                 "Locality 3"),
                         "1, 2, 3",
                         2,
-                        2,
+                        StopOrientation.EAST,
                         false),
                 UiNearestStop(
                         "333333",
-                        StopName(
+                        MockStopName(
                                 "Stop name 3",
                                 "Locality 3"),
                         "1, 2, 3",
                         3,
-                        3,
+                        StopOrientation.SOUTH_EAST,
                         false))
         whenever(uiStateRetriever.getUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.Success(items)))
@@ -164,58 +165,58 @@ class NearestStopsFragmentViewModelTest {
         val items1 = listOf(
                 UiNearestStop(
                         "111111",
-                        StopName(
+                        MockStopName(
                                 "Stop name 1",
                                 "Locality 1"),
                         "1, 2, 3",
                         1,
-                        1,
+                        StopOrientation.NORTH_EAST,
                         false),
                 UiNearestStop(
                         "222222",
-                        StopName(
+                        MockStopName(
                                 "Stop name 2",
                                 "Locality 3"),
                         "1, 2, 3",
                         2,
-                        2,
+                        StopOrientation.EAST,
                         false),
                 UiNearestStop(
                         "333333",
-                        StopName(
+                        MockStopName(
                                 "Stop name 3",
                                 "Locality 3"),
                         "1, 2, 3",
                         3,
-                        3,
+                        StopOrientation.SOUTH_EAST,
                         false))
         val items2 = listOf(
                 UiNearestStop(
                         "111111",
-                        StopName(
+                        MockStopName(
                                 "Stop name 1",
                                 "Locality 1"),
                         "1, 2, 3",
                         1,
-                        1,
+                        StopOrientation.NORTH_EAST,
                         false),
                 UiNearestStop(
                         "222222",
-                        StopName(
+                        MockStopName(
                                 "Stop name 2",
                                 "Locality 3"),
                         "1, 2, 3",
                         2,
-                        2,
+                        StopOrientation.EAST,
                         true),
                 UiNearestStop(
                         "333333",
-                        StopName(
+                        MockStopName(
                                 "Stop name 3",
                                 "Locality 3"),
                         "1, 2, 3",
                         3,
-                        3,
+                        StopOrientation.SOUTH_EAST,
                         false))
         whenever(uiStateRetriever.getUiStateFlow(any(), any()))
                 .thenReturn(flowOf(UiState.Success(items1)))
@@ -614,7 +615,7 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun selectedStopNameLiveDataEmitsStopNameWhenHasSelectedStopCodeState() = runTest {
-        val stopName = StopName("Name", "Locality")
+        val stopName = MockStopName("Name", "Locality")
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(stopName))
         val viewModel = createViewModel(
@@ -630,14 +631,14 @@ class NearestStopsFragmentViewModelTest {
                         null),
                 UiNearestStopName(
                         "123456",
-                        StopName(
+                        MockStopName(
                                 "Name",
                                 "Locality")))
     }
 
     @Test
     fun selectedStopNameLiveDataEmitsStopNameWhenStopIsSelected() = runTest {
-        val stopName = StopName("Name", "Locality")
+        val stopName = MockStopName("Name", "Locality")
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(stopName))
         val viewModel = createViewModel()
@@ -654,14 +655,14 @@ class NearestStopsFragmentViewModelTest {
                         null),
                 UiNearestStopName(
                         "123456",
-                        StopName(
+                        MockStopName(
                                 "Name",
                                 "Locality")))
     }
 
     @Test
     fun selectedStopNameLiveDataEmitsNullWhenStopIsUnselected() = runTest {
-        val stopName = StopName("Name", "Locality")
+        val stopName = MockStopName("Name", "Locality")
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flowOf(stopName))
         val viewModel = createViewModel()
@@ -680,7 +681,7 @@ class NearestStopsFragmentViewModelTest {
                         null),
                 UiNearestStopName(
                         "123456",
-                        StopName(
+                        MockStopName(
                                 "Name",
                                 "Locality")),
                 null)
@@ -814,7 +815,7 @@ class NearestStopsFragmentViewModelTest {
                 null,
                 null,
                 0,
-                0,
+                StopOrientation.NORTH,
                 false)
 
         viewModel.onNearestStopLongClicked("123456")
@@ -832,7 +833,7 @@ class NearestStopsFragmentViewModelTest {
                 null,
                 null,
                 0,
-                0,
+                StopOrientation.NORTH,
                 false)
 
         val observer = viewModel.showStopDataLiveData.test()
@@ -1461,4 +1462,8 @@ class NearestStopsFragmentViewModelTest {
                     preferenceRepository,
                     uiStateRetriever,
                     coroutineRule.testDispatcher)
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
 }

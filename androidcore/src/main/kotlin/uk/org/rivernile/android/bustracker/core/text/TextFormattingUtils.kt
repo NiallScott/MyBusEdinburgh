@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.core.text
 
 import android.content.Context
 import uk.org.rivernile.android.bustracker.androidcore.R
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 import javax.inject.Inject
 
 /**
@@ -47,11 +47,11 @@ class TextFormattingUtils @Inject internal constructor(
      * @return The formatted stop name, excluding the stop code.
      */
     fun formatBusStopName(stopName: StopName) =
-            stopName.locality
-                    ?.ifEmpty { null }
-                    ?.let {
-                context.getString(R.string.busstop_name_only_with_locality, stopName.name, it)
-            } ?: stopName.name
+        stopName.locality
+                ?.ifEmpty { null }
+                ?.let {
+            context.getString(R.string.busstop_name_only_with_locality, stopName.name, it)
+        } ?: stopName.name
 
     /**
      * Format a bus stop name [String] containing the stop code.
@@ -61,11 +61,11 @@ class TextFormattingUtils @Inject internal constructor(
      * @return The formatted stop name, containing the stop code.
      */
     fun formatBusStopNameWithStopCode(stopCode: String, stopName: StopName?) =
-            stopName?.let {
-                it.locality
-                        ?.ifEmpty { null }
-                        ?.let { locality ->
-                    context.getString(R.string.busstop_locality, it.name, locality, stopCode)
-                } ?: context.getString(R.string.busstop, it.name, stopCode)
-            } ?: stopCode
+        stopName?.let {
+            it.locality
+                    ?.ifEmpty { null }
+                    ?.let { locality ->
+                context.getString(R.string.busstop_locality, it.name, locality, stopCode)
+            } ?: context.getString(R.string.busstop, it.name, stopCode)
+        } ?: stopCode
 }

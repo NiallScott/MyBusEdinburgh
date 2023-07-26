@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersionResponse
 import javax.inject.Inject
@@ -38,14 +37,14 @@ import javax.net.SocketFactory
  *
  * @param apiEndpoint The endpoint to get the database metadata from, which describes the latest
  * database.
- * @param databaseInformationDao A DAO for accessing the current topology metadata.
+ * @param databaseRepository Used to access information about the bus stop database.
  * @param databaseUpdater The implementation to download and update the database.
  * @author Niall Scott
  */
 class DatabaseUpdateChecker @Inject constructor(
-        private val apiEndpoint: ApiEndpoint,
-        private val databaseInformationDao: DatabaseInformationDao,
-        private val databaseUpdater: DatabaseUpdater) {
+    private val apiEndpoint: ApiEndpoint,
+    private val databaseRepository: BusStopDatabaseRepository,
+    private val databaseUpdater: DatabaseUpdater) {
 
     /**
      * Check for any new database updates, and if an update is available, update the database.
@@ -63,7 +62,7 @@ class DatabaseUpdateChecker @Inject constructor(
             return false
         }
 
-        val currentTopologyId = databaseInformationDao.getTopologyId()
+        val currentTopologyId = databaseRepository.getTopologyVersionId()
 
         return if (!databaseVersion.topologyId.equals(currentTopologyId, true)) {
             databaseUpdater.updateDatabase(databaseVersion, socketFactory)

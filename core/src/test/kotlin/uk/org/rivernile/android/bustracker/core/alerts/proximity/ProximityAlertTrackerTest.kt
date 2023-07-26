@@ -38,8 +38,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
+import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
@@ -60,7 +60,7 @@ class ProximityAlertTrackerTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var busStopsDao: BusStopsDao
+    private lateinit var busStopsRepository: BusStopsRepository
     @Mock
     private lateinit var geofencingManager: GeofencingManager
     @Mock
@@ -70,13 +70,13 @@ class ProximityAlertTrackerTest {
 
     @Before
     fun setUp() {
-        tracker = ProximityAlertTracker(busStopsDao, geofencingManager, timeUtils)
+        tracker = ProximityAlertTracker(busStopsRepository, geofencingManager, timeUtils)
     }
 
     @Test
     fun trackProximityAlertWithNoLocationInBusStopDaoDoesNotAddGeofence() = runTest {
         val alert = ProximityAlert(1, 101L, "123456", 50)
-        whenever(busStopsDao.getLocationForStop("123456"))
+        whenever(busStopsRepository.getStopLocation("123456"))
                 .thenReturn(null)
 
         tracker.trackProximityAlert(alert)
@@ -88,8 +88,8 @@ class ProximityAlertTrackerTest {
     @Test
     fun trackProximityAlertOutwithTimeRangeDoesNotAddGeofence() = runTest {
         val alert = ProximityAlert(1, 100L, "123456", 50)
-        val location = StopLocation("123456", 1.0, 2.0)
-        whenever(busStopsDao.getLocationForStop("123456"))
+        val location = MockStopLocation(1.0, 2.0)
+        whenever(busStopsRepository.getStopLocation("123456"))
                 .thenReturn(location)
         whenever(timeUtils.currentTimeMills)
                 .thenReturn(MAX_DURATION_MILLIS + 101L)
@@ -103,8 +103,8 @@ class ProximityAlertTrackerTest {
     @Test
     fun trackProximityAlertWithinTimeRangeAddsGeofence() = runTest {
         val alert = ProximityAlert(1, 100L, "123456", 50)
-        val location = StopLocation("123456", 1.0, 2.0)
-        whenever(busStopsDao.getLocationForStop("123456"))
+        val location = MockStopLocation(1.0, 2.0)
+        whenever(busStopsRepository.getStopLocation("123456"))
                 .thenReturn(location)
         whenever(timeUtils.currentTimeMills)
                 .thenReturn(MAX_DURATION_MILLIS)
@@ -122,4 +122,8 @@ class ProximityAlertTrackerTest {
         verify(geofencingManager)
                 .removeGeofence(1)
     }
+
+    private data class MockStopLocation(
+        override val latitude: Double,
+        override val longitude: Double) : StopLocation
 }

@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import javax.inject.Inject

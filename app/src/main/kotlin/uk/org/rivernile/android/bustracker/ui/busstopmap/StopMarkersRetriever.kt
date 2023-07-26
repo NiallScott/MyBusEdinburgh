@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
 import javax.inject.Inject
 
 /**
@@ -88,13 +88,13 @@ class StopMarkersRetriever @Inject constructor(
      * @return The mapped [List] of [UiStopMarker], or `null`.
      */
     private fun mapToUiStopMarkers(
-            stopDetails: List<StopDetails>?,
-            serviceListing: UiServiceListing?) =
-            stopDetails?.map { sd ->
-                val sl = serviceListing?.takeIf { it.stopCode == sd.stopCode }
+        stopDetails: List<StopDetails>?,
+        serviceListing: UiServiceListing?) =
+        stopDetails?.map { sd ->
+            val sl = serviceListing?.takeIf { it.stopCode == sd.stopCode }
 
-                mapToUiStopMarker(sd, sl)
-            }?.ifEmpty { null }
+            mapToUiStopMarker(sd, sl)
+        }?.ifEmpty { null }
 
     /**
      * Given a [StopDetails], map this to a [UiStopMarker]. If [serviceListing] is not `null`, this
@@ -105,12 +105,12 @@ class StopMarkersRetriever @Inject constructor(
      * @return The mapped [UiStopMarker].
      */
     private fun mapToUiStopMarker(
-            stopDetails: StopDetails,
-            serviceListing: UiServiceListing?) =
-            UiStopMarker(
-                    stopDetails.stopCode,
-                    stopDetails.stopName,
-                    LatLng(stopDetails.latitude, stopDetails.longitude),
-                    stopDetails.orientation,
-                    serviceListing)
+        stopDetails: StopDetails,
+        serviceListing: UiServiceListing?) =
+        UiStopMarker(
+            stopDetails.stopCode,
+            stopDetails.stopName,
+            LatLng(stopDetails.location.latitude, stopDetails.location.longitude),
+            stopDetails.orientation,
+            serviceListing)
 }

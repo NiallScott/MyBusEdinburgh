@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 
 /**
  * This class describes a nearest stop item.
@@ -40,9 +41,9 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopNa
  * @author Niall Scott
  */
 data class UiNearestStop(
-        val stopCode: String,
-        val stopName: StopName?,
-        val services: String?,
-        val distance: Int,
-        val orientation: Int,
-        val isSelected: Boolean)
+    val stopCode: String,
+    val stopName: StopName?,
+    val services: String?,
+    val distance: Int,
+    val orientation: StopOrientation,
+    val isSelected: Boolean)

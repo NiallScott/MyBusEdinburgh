@@ -48,7 +48,7 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.FlowTestObserver
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -119,14 +119,14 @@ class AddProximityAlertDialogFragmentViewModelTest {
     fun stopDetailsLiveDataEmitsStopDetailsWithNameWhenRepositoryReturnsName() = runTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
-                .thenReturn(flowOf(StopName("Name", "Locality")))
+                .thenReturn(flowOf(MockStopName("Name", "Locality")))
         val viewModel = createViewModel()
         val observer = viewModel.stopDetailsLiveData.test()
 
         viewModel.stopCode = "123456"
         advanceUntilIdle()
 
-        observer.assertValues(null, StopDetails("123456", StopName("Name", "Locality")))
+        observer.assertValues(null, StopDetails("123456", MockStopName("Name", "Locality")))
     }
 
     @Test
@@ -134,12 +134,12 @@ class AddProximityAlertDialogFragmentViewModelTest {
         givenPermissionsTrackerFlowHasDefaultPermissionState()
         whenever(busStopsRepository.getNameForStopFlow("123456"))
                 .thenReturn(flow {
-                    emit(StopName("Name", "Locality"))
+                    emit(MockStopName("Name", "Locality"))
                     delay(10L)
-                    emit(StopName("Name 2", null))
+                    emit(MockStopName("Name 2", null))
                 })
         whenever(busStopsRepository.getNameForStopFlow("987654"))
-                .thenReturn(flowOf(StopName("Name 3", "Locality 3")))
+                .thenReturn(flowOf(MockStopName("Name 3", "Locality 3")))
         val viewModel = createViewModel()
 
         val observer = viewModel.stopDetailsLiveData.test()
@@ -150,10 +150,10 @@ class AddProximityAlertDialogFragmentViewModelTest {
 
         observer.assertValues(
                 null,
-                StopDetails("123456", StopName("Name", "Locality")),
-                StopDetails("123456", StopName("Name 2", null)),
+                StopDetails("123456", MockStopName("Name", "Locality")),
+                StopDetails("123456", MockStopName("Name 2", null)),
                 null,
-                StopDetails("987654", StopName("Name 3", "Locality 3")))
+                StopDetails("987654", MockStopName("Name 3", "Locality 3")))
     }
 
     @Test
@@ -435,4 +435,8 @@ class AddProximityAlertDialogFragmentViewModelTest {
                     alertsRepository,
                     coroutineRule.scope,
                     coroutineRule.testDispatcher)
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?): StopName
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,17 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.busstop.entities
+package uk.org.rivernile.android.bustracker.core.services
 
 /**
- * This class describes a stop location, which is its latitude and longitude.
+ * Details for a service.
  *
- * @property stopCode The code of the stop.
- * @property latitude The latitude of the stop.
- * @property longitude The longitude of the stop.
+ * @property name The display name of the service.
+ * @property description The service description.
+ * @property colour The display colour of the service. This may be `null` if no colour is
+ * attributed.
  * @author Niall Scott
  */
-data class StopLocation(
-        val stopCode: String,
-        val latitude: Double,
-        val longitude: Double)
+data class ServiceDetails(
+    val name: String,
+    val description: String?,
+    val colour: Int?)

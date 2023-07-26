@@ -90,7 +90,11 @@ class DatabaseUpdater @Inject internal constructor(
             return false
         }
 
-        databaseRepository.replaceDatabase(downloadFile)
+        if (!databaseRepository.replaceDatabase(downloadFile)) {
+            downloadFile.deleteSuspend()
+
+            return false
+        }
 
         return true
     }

@@ -28,7 +28,8 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 
 /**
  * This class describes a stop marker on the Google Map.
@@ -57,11 +58,11 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopNa
  * @author Niall Scott
  */
 class UiStopMarker(
-        val stopCode: String,
-        val stopName: StopName,
-        val latLng: LatLng,
-        val orientation: Int,
-        val serviceListing: UiServiceListing?) : ClusterItem {
+    val stopCode: String,
+    val stopName: StopName,
+    val latLng: LatLng,
+    val orientation: StopOrientation,
+    val serviceListing: UiServiceListing?) : ClusterItem {
 
     override fun getPosition() = latLng
 
@@ -98,12 +99,12 @@ class UiStopMarker(
 
     override fun toString(): String {
         return "UiStopMarker(" +
-                "stopCode='$stopCode', " +
-                "stopName=$stopName, " +
-                "latLng=$latLng, " +
-                "orientation=$orientation, " +
-                "serviceListing=$serviceListing, " +
-                "isInfoWindowShown=$isInfoWindowShown)"
+            "stopCode='$stopCode', " +
+            "stopName=$stopName, " +
+            "latLng=$latLng, " +
+            "orientation=$orientation, " +
+            "serviceListing=$serviceListing, " +
+            "isInfoWindowShown=$isInfoWindowShown)"
     }
 
     /**
@@ -128,9 +129,9 @@ class UiStopMarker(
         other as UiStopMarker
 
         return stopCode == other.stopCode &&
-                stopName == other.stopName &&
-                latLng == other.latLng &&
-                orientation == other.orientation &&
-                serviceListing == other.serviceListing
+            stopName == other.stopName &&
+            latLng == other.latLng &&
+            orientation == other.orientation &&
+            serviceListing == other.serviceListing
     }
 }

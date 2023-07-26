@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -143,7 +143,7 @@ class DistanceRetriever @Inject constructor(
             location: DeviceLocation,
             stopDetails: StopDetails?): UiItem.Distance {
         val stopLocation = stopDetails?.let {
-            DeviceLocation(it.latitude, it.longitude)
+            DeviceLocation(it.location.latitude, it.location.longitude)
         } ?: return UiItem.Distance.Unknown
 
         val distanceBetweenMeters = locationRepository.distanceBetween(location, stopLocation)

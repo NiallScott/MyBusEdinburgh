@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,13 +27,9 @@
 package uk.org.rivernile.android.bustracker.core.busstops
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -41,18 +37,18 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetailsWithServices
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopSearchResult
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearchResult
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
@@ -68,262 +64,224 @@ class BusStopsRepositoryTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var busStopsDao: BusStopsDao
+    private lateinit var stopsDao: StopDao
 
     private lateinit var repository: BusStopsRepository
 
     @Before
     fun setUp() {
-        repository = BusStopsRepository(busStopsDao)
+        repository = BusStopsRepository(stopsDao)
     }
 
     @Test
-    fun getNameForStopFlowGetsInitialValue() = runTest {
-        val expected = createStopName()
-        whenever(busStopsDao.getNameForStop("123456"))
-                .thenReturn(expected)
+    fun getNameForStopFlowEmitsItems() = runTest {
+        val stopName1 = mock<StopName>()
+        val stopName2 = mock<StopName>()
+        whenever(stopsDao.getNameForStopFlow("123456"))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                stopName1,
+                stopName2))
 
         val observer = repository.getNameForStopFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(expected)
-        verify(busStopsDao)
-                .removeOnBusStopsChangedListener(any())
+        observer.assertValues(
+            null,
+            stopName1,
+            stopName2)
     }
 
     @Test
-    fun getNameForStopFlowRespondsToBusStopsChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
-            listener.onBusStopsChanged()
-            listener.onBusStopsChanged()
-        }.whenever(busStopsDao).addOnBusStopsChangedListener(any())
-        val expected1 = createStopName()
-        val expected3 = expected1.copy(locality = null)
-        whenever(busStopsDao.getNameForStop("123456"))
-                .thenReturn(expected1, null, expected3)
-
-        val observer = repository.getNameForStopFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(expected1, null, expected3)
-        verify(busStopsDao)
-                .removeOnBusStopsChangedListener(any())
-    }
-
-    @Test
-    fun getBusStopDetailsFlowGetsInitialValue() = runTest {
-        val expected = createStopDetails()
-        whenever(busStopsDao.getStopDetails("123456"))
-                .thenReturn(expected)
+    fun getBusStopDetailsFlowEmitsItems() = runTest {
+        val stopDetails1 = mock<StopDetails>()
+        val stopDetails2 = mock<StopDetails>()
+        whenever(stopsDao.getStopDetailsFlow("123456"))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                stopDetails1,
+                stopDetails2))
 
         val observer = repository.getBusStopDetailsFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(expected)
-        verify(busStopsDao)
-                .removeOnBusStopsChangedListener(any())
+        observer.assertValues(
+            null,
+            stopDetails1,
+            stopDetails2)
     }
 
     @Test
-    fun getBusStopDetailsFlowRespondsToBusStopsChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
-            listener.onBusStopsChanged()
-            listener.onBusStopsChanged()
-        }.whenever(busStopsDao).addOnBusStopsChangedListener(any())
-        val expected1 = createStopDetails()
-        val expected3 = expected1.copy(stopName = StopName("Stop name", null))
-        whenever(busStopsDao.getStopDetails("123456"))
-                .thenReturn(expected1, null, expected3)
+    fun getBusStopDetailsFlowWithStopCodeSetEmitsItems() = runTest {
+        val stopDetails1 = mapOf<String, StopDetails>()
+        val stopDetails2 = mapOf<String, StopDetails>()
+        whenever(stopsDao.getStopDetailsFlow(setOf("123456", "987654")))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                stopDetails1,
+                stopDetails2))
 
-        val observer = repository.getBusStopDetailsFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(expected1, null, expected3)
-        verify(busStopsDao)
-                .removeOnBusStopsChangedListener(any())
-    }
-
-    @Test
-    fun getBusStopDetailsFlowMultiGetsInitialValue() = runTest {
-        val expected = mapOf("123456" to StopDetails(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                1.2,
-                3.4,
-                4))
-        whenever(busStopsDao.getStopDetails(setOf("123456", "123457")))
-                .thenReturn(expected)
-
-        val observer = repository.getBusStopDetailsFlow(setOf("123456", "123457")).test(this)
+        val observer = repository.getBusStopDetailsFlow(setOf("123456", "987654")).test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(expected)
-        verify(busStopsDao)
-                .removeOnBusStopsChangedListener(any())
+        observer.assertValues(
+            null,
+            stopDetails1,
+            stopDetails2)
     }
 
     @Test
-    fun getBusStopDetailsFlowMultiRespondsToBusStopsChanged() = runTest {
-        doAnswer {
-            val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
-            listener.onBusStopsChanged()
-            listener.onBusStopsChanged()
-        }.whenever(busStopsDao).addOnBusStopsChangedListener(any())
-        val expected1 = mapOf("123456" to StopDetails(
-                "123456",
-                StopName(
-                        "Stop name 1",
-                        "Locality 1"),
-                1.2,
-                3.4,
-                4))
-        val expected3 = mapOf(
-                "123456" to StopDetails(
-                        "123456",
-                        StopName(
-                                "Stop name 1",
-                                "Locality 1"),
-                        1.2,
-                        3.4,
-                        4),
-                "123457" to StopDetails(
-                        "123457",
-                        StopName(
-                                "Stop name 2",
-                                "Locality 2"),
-                        1.3,
-                        3.5,
-                        5))
-        whenever(busStopsDao.getStopDetails(setOf("123456", "123457")))
-                .thenReturn(expected1, null, expected3)
+    fun getStopDetailsWithinSpanFlowWithNullServiceFilterEmitsItems() = runTest {
+        val stopDetails1 = mock<StopDetailsWithServices>()
+        val stopDetails2 = mock<StopDetailsWithServices>()
+        whenever(stopsDao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                listOf(stopDetails1),
+                listOf(stopDetails1, stopDetails2)))
 
-        val observer = repository.getBusStopDetailsFlow(setOf("123456", "123457")).test(this)
+        val observer = repository.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, null).test(this)
         advanceUntilIdle()
         observer.finish()
+
+        observer.assertValues(
+            null,
+            listOf(stopDetails1),
+            listOf(stopDetails1, stopDetails2))
+        verify(stopsDao, never())
+            .getStopDetailsWithinSpanFlow(any(), any(), any(), any(), any())
+    }
+
+    @Test
+    fun getStopDetailsWithinSpanFlowWithEmptyServiceFilterEmitsItems() = runTest {
+        val stopDetails1 = mock<StopDetailsWithServices>()
+        val stopDetails2 = mock<StopDetailsWithServices>()
+        whenever(stopsDao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                listOf(stopDetails1),
+                listOf(stopDetails1, stopDetails2)))
+
+        val observer = repository.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, emptySet())
+            .test(this)
         advanceUntilIdle()
+        observer.finish()
 
-        observer.assertValues(expected1, null, expected3)
-        verify(busStopsDao)
-                .removeOnBusStopsChangedListener(any())
+        observer.assertValues(
+            null,
+            listOf(stopDetails1),
+            listOf(stopDetails1, stopDetails2))
+        verify(stopsDao, never())
+            .getStopDetailsWithinSpanFlow(any(), any(), any(), any(), any())
     }
 
     @Test
-    fun getStopDetailsWithinSpanFlowDoesNotUseServiceFilterWhenItIsNull() {
-        val stopDetailsFlow = mock<Flow<List<StopDetailsWithServices>?>>()
-        whenever(busStopsDao.getStopDetailsWithinSpanFlow(
-                any(),
-                any(),
-                any(),
-                any()))
-                .thenReturn(stopDetailsFlow)
+    fun getStopDetailsWithinSpanFlowWithServiceFilterEmitsItems() = runTest {
+        val stopDetails1 = mock<StopDetailsWithServices>()
+        val stopDetails2 = mock<StopDetailsWithServices>()
+        whenever(stopsDao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, setOf("1", "2", "3")))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                listOf(stopDetails1),
+                listOf(stopDetails1, stopDetails2)))
 
-        val result = repository.getStopDetailsWithinSpanFlow(1.0, 2.0, 3.0, 4.0, null)
+        val observer = repository.getStopDetailsWithinSpanFlow(
+            1.1,
+            2.2,
+            3.3,
+            4.4,
+            setOf("1", "2", "3"))
+            .test(this)
+        advanceUntilIdle()
+        observer.finish()
 
-        assertNotNull(result)
-        verify(busStopsDao, never())
-                .getStopDetailsWithinSpanFlow(any(), any(), any(), any(), any())
+        observer.assertValues(
+            null,
+            listOf(stopDetails1),
+            listOf(stopDetails1, stopDetails2))
+        verify(stopsDao, never())
+            .getStopDetailsWithinSpanFlow(any(), any(), any(), any())
     }
 
     @Test
-    fun getStopDetailsWithinSpanFlowDoesNotUseServiceFilterWhenItIsEmpty() {
-        val stopDetailsFlow = mock<Flow<List<StopDetailsWithServices>?>>()
-        whenever(busStopsDao.getStopDetailsWithinSpanFlow(
-                any(),
-                any(),
-                any(),
-                any()))
-                .thenReturn(stopDetailsFlow)
+    fun getStopDetailsWithServiceFilterFlowEmitsItems() = runTest {
+        val stopDetails1 = mock<StopDetails>()
+        val stopDetails2 = mock<StopDetails>()
+        whenever(stopsDao.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                listOf(stopDetails1),
+                listOf(stopDetails1, stopDetails2)))
 
-        val result = repository.getStopDetailsWithinSpanFlow(1.0, 2.0, 3.0, 4.0, emptyList())
+        val observer = repository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3"))
+            .test(this)
+        advanceUntilIdle()
+        observer.finish()
 
-        assertNotNull(result)
-        verify(busStopsDao, never())
-                .getStopDetailsWithinSpanFlow(any(), any(), any(), any(), any())
+        observer.assertValues(
+            null,
+            listOf(stopDetails1),
+            listOf(stopDetails1, stopDetails2))
     }
 
     @Test
-    fun getStopDetailsWithinSpanFlowUsesServiceFilterWithItIsPopulated() {
-        val stopDetailsFlow = mock<Flow<List<StopDetailsWithServices>?>>()
-        whenever(busStopsDao.getStopDetailsWithinSpanFlow(
-                any(),
-                any(),
-                any(),
-                any(),
-                any()))
-                .thenReturn(stopDetailsFlow)
+    fun getStopSearchResultsFlowEmitsItems() = runTest {
+        val searchResult1 = mock<StopSearchResult>()
+        val searchResult2 = mock<StopSearchResult>()
+        whenever(stopsDao.getStopSearchResultsFlow("search term"))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                listOf(searchResult1),
+                listOf(searchResult1, searchResult2)))
 
-        val result = repository.getStopDetailsWithinSpanFlow(1.0, 2.0, 3.0, 4.0, listOf("1", "2"))
+        val observer = repository.getStopSearchResultsFlow("search term").test(this)
+        advanceUntilIdle()
+        observer.finish()
 
-        assertNotNull(result)
-        verify(busStopsDao, never())
-                .getStopDetailsWithinSpanFlow(any(), any(), any(), any())
+        observer.assertValues(
+            null,
+            listOf(searchResult1),
+            listOf(searchResult1, searchResult2))
     }
 
     @Test
-    fun getStopDetailsWithServiceFilterFlowUsesFlowFromDao() {
-        val stopDetailsFlow = mock<Flow<List<StopDetails>?>>()
-        whenever(busStopsDao.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")))
-                .thenReturn(stopDetailsFlow)
-
-        val result = repository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3"))
-        assertNotNull(result)
-    }
-
-    @Test
-    fun getStopSearchResultsFlowReturnsFlowFromBusStopsDao() {
-        val stopSearchResultsFlow = mock<Flow<List<StopSearchResult>?>>()
-        whenever(busStopsDao.getStopSearchResultsFlow("123456"))
-                .thenReturn(stopSearchResultsFlow)
-
-        val result = repository.getStopSearchResultsFlow("123456")
-
-        assertSame(stopSearchResultsFlow, result)
-    }
-
-    @Test
-    fun getStopLocationReturnsNullWhenDaoReturnsNull() = runTest {
-        whenever(busStopsDao.getLocationForStop("123456"))
-                .thenReturn(null)
-
-        val result = repository.getStopLocation("123456")
-
-        assertNull(result)
-    }
-
-    @Test
-    fun getStopLocationReturnsValueFromDao() = runTest {
-        val stopLocation = StopLocation("123456", 1.1, 2.2)
-        whenever(busStopsDao.getLocationForStop("123456"))
-                .thenReturn(stopLocation)
+    fun getStopLocationReturnsStopLocation() = runTest {
+        val stopLocation = mock<StopLocation>()
+        whenever(stopsDao.getLocationForStopFlow("123456"))
+            .thenReturn(intervalFlowOf(10L, 10L, stopLocation))
 
         val result = repository.getStopLocation("123456")
 
         assertEquals(stopLocation, result)
     }
 
-    private fun createStopName() = StopName("Name", "Locality")
+    @Test
+    fun getNameForStopReturnsStopName() = runTest {
+        val stopName = mock<StopName>()
+        whenever(stopsDao.getNameForStopFlow("123456"))
+            .thenReturn(intervalFlowOf(10L, 10L, stopName))
 
-    private fun createStopDetails() =
-            StopDetails(
-                    "123456",
-                    StopName(
-                            "Stop name",
-                            "Locality"),
-                    1.2,
-                    3.4,
-                    5)
+        val result = repository.getNameForStop("123456")
+
+        assertEquals(stopName, result)
+    }
 }

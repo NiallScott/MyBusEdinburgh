@@ -37,7 +37,7 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ArrivalAlert
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
 import javax.inject.Inject
 
 /**

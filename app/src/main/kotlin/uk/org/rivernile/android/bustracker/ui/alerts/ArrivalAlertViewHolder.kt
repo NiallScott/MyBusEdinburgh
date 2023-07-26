@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -118,7 +118,7 @@ class ArrivalAlertViewHolder(
         marker?.remove()
 
         alert?.stopDetails?.let {
-            val latLon = LatLng(it.latitude, it.longitude)
+            val latLon = LatLng(it.location.latitude, it.location.longitude)
             map.moveCamera(CameraUpdateFactory.newLatLng(latLon))
 
             marker = MarkerOptions()

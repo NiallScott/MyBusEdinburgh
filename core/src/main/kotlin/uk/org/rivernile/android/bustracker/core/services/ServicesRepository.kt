@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,27 +26,24 @@
 
 package uk.org.rivernile.android.bustracker.core.services
 
-import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServicesDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
+import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDetails as StoredServiceDetails
 import javax.inject.Inject
 
 /**
  * This repository is used to access services data.
  *
- * @param servicesDao The DAO to access the services data store.
+ * @param serviceDao The DAO to access the services data store.
  * @param serviceColourOverride An implementation which may override the loaded service colours with
  * a hard-wired implementation. The actual implementation will most likely be defined per product
  * flavour.
  * @author Niall Scott
  */
 class ServicesRepository @Inject internal constructor(
-        private val servicesDao: ServicesDao,
-        private val serviceColourOverride: ServiceColourOverride?) {
+    private val serviceDao: ServiceDao,
+    private val serviceColourOverride: ServiceColourOverride?) {
 
     /**
      * Get a [Flow] which returns a [Map] of service names to colours for the service, and will emit
@@ -56,21 +53,16 @@ class ServicesRepository @Inject internal constructor(
      * services will be returned.
      * @return The [Flow] which emits the service-colour mapping.
      */
-    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> = callbackFlow {
-        val listener = object : ServicesDao.OnServicesChangedListener {
-            override fun onServicesChanged() {
-                launch {
-                    getAndSendColoursForServices(channel, services)
+    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> {
+        val flow = serviceDao.getColoursForServicesFlow(services)
+
+        return serviceColourOverride?.let { override ->
+            flow.map { coloursForServices ->
+                coloursForServices?.mapValues {
+                    override.overrideServiceColour(it.key, it.value) ?: it.value
                 }
             }
-        }
-
-        servicesDao.addOnServicesChangedListener(listener)
-        getAndSendColoursForServices(channel, services)
-
-        awaitClose {
-            servicesDao.removeOnServicesChangedListener(listener)
-        }
+        } ?: flow
     }
 
     /**
@@ -81,60 +73,32 @@ class ServicesRepository @Inject internal constructor(
      * @return The [Flow] which emits the service details.
      */
     fun getServiceDetailsFlow(services: Set<String>): Flow<Map<String, ServiceDetails>?> {
-        return callbackFlow {
-            val listener = object : ServicesDao.OnServicesChangedListener {
-                override fun onServicesChanged() {
-                    launch {
-                        getAndSendServiceDetails(channel, services)
-                    }
+        return serviceDao.getServiceDetailsFlow(services)
+            .map { serviceDetails ->
+                serviceDetails?.mapValues {
+                    mapToServiceDetails(it.value)
                 }
             }
-
-            servicesDao.addOnServicesChangedListener(listener)
-            getAndSendServiceDetails(channel, services)
-
-            awaitClose {
-                servicesDao.removeOnServicesChangedListener(listener)
-            }
-        }
     }
 
     /**
      * This provides a [Flow] which emits a [List] containing all known service names.
      */
-    val allServiceNamesFlow get() = servicesDao.allServiceNamesFlow
+    val allServiceNamesFlow: Flow<List<String>?> get() = serviceDao.allServiceNamesFlow
 
     /**
-     * A suspended function which obtains the colours for services and then sends it to the given
-     * [channel].
+     * Map a [StoredServiceDetails] to [ServiceDetails].
      *
-     * @param channel The [SendChannel] that emissions should be sent to.
-     * @param services The services to get colours for. If `null`, gets colours for all known
-     * services.
+     * @param details The object to map.
+     * @return The mapped result.
      */
-    private suspend fun getAndSendColoursForServices(
-            channel: SendChannel<Map<String, Int>?>,
-            services: Set<String>?) {
-        val serviceColoursFromDao = servicesDao.getColoursForServices(services)
-        val serviceColours = if (serviceColourOverride != null) {
-            serviceColourOverride.overrideServiceColours(services, serviceColoursFromDao)
-        } else {
-            serviceColoursFromDao
-        }
+    private fun mapToServiceDetails(details: StoredServiceDetails): ServiceDetails {
+        val colour = serviceColourOverride?.overrideServiceColour(details.name, details.colour)
+            ?: details.colour
 
-        channel.send(serviceColours)
-    }
-
-    /**
-     * A suspended function which obtains the [ServiceDetails] for services and then sends it to the
-     * given [channel].
-     *
-     * @param channel The [SendChannel] that emissions should be sent to.
-     * @param services The services to get details for.
-     */
-    private suspend fun getAndSendServiceDetails(
-            channel: SendChannel<Map<String, ServiceDetails>?>,
-            services: Set<String>) {
-        channel.send(servicesDao.getServiceDetails(services))
+        return ServiceDetails(
+            details.name,
+            details.description,
+            colour)
     }
 }

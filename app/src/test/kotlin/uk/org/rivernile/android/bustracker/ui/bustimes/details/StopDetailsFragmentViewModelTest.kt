@@ -39,6 +39,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.testutils.test
@@ -137,7 +138,7 @@ class StopDetailsFragmentViewModelTest {
                 UiItem.Map(
                         1.1,
                         2.2,
-                        2),
+                        StopOrientation.EAST),
                 UiItem.Distance.Known(3.4f),
                 UiItem.Service(
                         1,
@@ -181,7 +182,7 @@ class StopDetailsFragmentViewModelTest {
                 UiItem.Map(
                         1.1,
                         2.2,
-                        2),
+                        StopOrientation.EAST),
                 UiItem.Distance.Known(3.4f),
                 UiItem.Service(
                         1,

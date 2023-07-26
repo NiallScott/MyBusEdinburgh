@@ -41,7 +41,6 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -328,7 +327,7 @@ class FavouriteStopsFragmentViewModelTest {
         viewModel.onFavouriteStopUnselected()
         advanceUntilIdle()
 
-        observer.assertValues(UiFavouriteName("222222", StopName("Name 2", null)), null)
+        observer.assertValues(UiFavouriteName("222222", FavouriteStopName("Name 2", null)), null)
     }
 
     @Test
@@ -385,7 +384,7 @@ class FavouriteStopsFragmentViewModelTest {
         viewModel.onFavouriteStopLongClicked("222222")
         advanceUntilIdle()
 
-        observer.assertValues(null, UiFavouriteName("222222", StopName("Name 2", null)))
+        observer.assertValues(null, UiFavouriteName("222222", FavouriteStopName("Name 2", null)))
     }
 
     @Test
@@ -406,7 +405,9 @@ class FavouriteStopsFragmentViewModelTest {
         viewModel.onFavouriteStopUnselected()
         advanceUntilIdle()
 
-        observer.assertValues(null, UiFavouriteName("222222", StopName("Name 2", null)), null)
+        observer.assertValues(
+            null,
+            UiFavouriteName("222222", FavouriteStopName("Name 2", null)), null)
     }
 
     @Test

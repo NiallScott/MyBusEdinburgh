@@ -39,7 +39,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
@@ -167,7 +167,7 @@ class UiStateCalculatorTest {
             delay(400L)
             emit(StopDetails("123456", null))
             delay(100L)
-            emit(StopDetails("123456", StopName("Name", "Locality")))
+            emit(StopDetails("123456", MockStopName("Name", "Locality")))
         }
 
         val observer = calculator.createUiStateFlow(permissionStateFlow, stopDetailsFlow).test(this)
@@ -181,4 +181,8 @@ class UiStateCalculatorTest {
                 UiState.PROGRESS,
                 UiState.CONTENT)
     }
+
+    private data class MockStopName(
+        override val name: String,
+        override val locality: String?) : StopName
 }

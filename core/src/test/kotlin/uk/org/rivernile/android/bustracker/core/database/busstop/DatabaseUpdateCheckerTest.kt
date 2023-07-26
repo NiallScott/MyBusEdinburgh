@@ -41,7 +41,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
 import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersionResponse
@@ -61,7 +60,7 @@ class DatabaseUpdateCheckerTest {
     @Mock
     private lateinit var apiEndpoint: ApiEndpoint
     @Mock
-    private lateinit var databaseInformationDao: DatabaseInformationDao
+    private lateinit var databaseRepository: BusStopDatabaseRepository
     @Mock
     private lateinit var databaseUpdater: DatabaseUpdater
 
@@ -71,7 +70,7 @@ class DatabaseUpdateCheckerTest {
     fun setUp() {
         checker = DatabaseUpdateChecker(
                 apiEndpoint,
-                databaseInformationDao,
+                databaseRepository,
                 databaseUpdater)
     }
 
@@ -90,7 +89,7 @@ class DatabaseUpdateCheckerTest {
         val databaseVersion = createDatabaseVersion()
         whenever(apiEndpoint.getDatabaseVersion(anyOrNull()))
                 .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
-        whenever(databaseInformationDao.getTopologyId())
+        whenever(databaseRepository.getTopologyVersionId())
                 .thenReturn("abc123")
 
         val result = checker.checkForDatabaseUpdates()
@@ -105,7 +104,7 @@ class DatabaseUpdateCheckerTest {
         val databaseVersion = createDatabaseVersion()
         whenever(apiEndpoint.getDatabaseVersion(anyOrNull()))
                 .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
-        whenever(databaseInformationDao.getTopologyId())
+        whenever(databaseRepository.getTopologyVersionId())
                 .thenReturn("xyz789")
         whenever(databaseUpdater.updateDatabase(eq(databaseVersion), anyOrNull()))
                 .thenReturn(true)
@@ -122,7 +121,7 @@ class DatabaseUpdateCheckerTest {
         val databaseVersion = createDatabaseVersion()
         whenever(apiEndpoint.getDatabaseVersion(anyOrNull()))
                 .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
-        whenever(databaseInformationDao.getTopologyId())
+        whenever(databaseRepository.getTopologyVersionId())
                 .thenReturn("xyz789")
         whenever(databaseUpdater.updateDatabase(eq(databaseVersion), anyOrNull()))
                 .thenReturn(false)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServicePoint
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePoint
 import uk.org.rivernile.android.bustracker.core.servicepoints.ServicePointsRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
@@ -70,8 +70,8 @@ class RouteLineRetriever @Inject constructor(
      * [servicePoints].
      */
     private fun mapToRouteLines(
-            servicePoints: List<ServicePoint>?,
-            serviceColours: Map<String, Int>?): List<UiServiceRoute>? {
+        servicePoints: List<ServicePoint>?,
+        serviceColours: Map<String, Int>?): List<UiServiceRoute>? {
         return servicePoints?.ifEmpty { null }?.let { points ->
             val result = mutableMapOf<String, MutableUiServiceRoute>()
 

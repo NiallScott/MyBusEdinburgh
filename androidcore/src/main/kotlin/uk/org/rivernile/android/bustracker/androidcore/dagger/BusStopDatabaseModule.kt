@@ -26,32 +26,19 @@
 
 package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import android.content.Context
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
-import uk.org.rivernile.android.bustracker.core.di.ForBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidBusStopsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidDatabaseInformationDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidServicePointsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidServiceStopsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.AndroidServicesDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.DatabaseInformationDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServicePointsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServiceStopsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServicesDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
-import javax.inject.Singleton
 
 /**
  * This is a Dagger [Module] to provide dependencies for the bus stop database.
@@ -61,11 +48,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 internal class BusStopDatabaseModule {
-
-    @Provides
-    @Singleton
-    @ForBusStopDatabase
-    fun provideAuthority(context: Context) = "${context.packageName}.provider.busstop"
 
     @Provides
     fun provideDatabaseDao(database: AndroidBusStopDatabase): DatabaseDao =
@@ -94,29 +76,7 @@ internal class BusStopDatabaseModule {
         @Suppress("unused")
         @Binds
         fun bindBusStopDatabaseRepository(
-                androidBusStopDatabaseRepository: AndroidBusStopDatabaseRepository)
-                : BusStopDatabaseRepository
-
-        @Suppress("unused")
-        @Binds
-        fun bindDatabaseInformationDao(
-                androidDatabaseInformationDao: AndroidDatabaseInformationDao)
-                : DatabaseInformationDao
-
-        @Suppress("unused")
-        @Binds
-        fun bindBusStopsDao(androidBusStopsDao: AndroidBusStopsDao): BusStopsDao
-
-        @Suppress("unused")
-        @Binds
-        fun bindServicesDao(androidServicesDao: AndroidServicesDao): ServicesDao
-
-        @Suppress("unused")
-        @Binds
-        fun bindServicePointsDao(androidServicePointsDao: AndroidServicePointsDao): ServicePointsDao
-
-        @Suppress("unused")
-        @Binds
-        fun bindServiceStopsDao(androidServiceStopsDao: AndroidServiceStopsDao): ServiceStopsDao
+            androidBusStopDatabaseRepository: AndroidBusStopDatabaseRepository):
+                BusStopDatabaseRepository
     }
 }

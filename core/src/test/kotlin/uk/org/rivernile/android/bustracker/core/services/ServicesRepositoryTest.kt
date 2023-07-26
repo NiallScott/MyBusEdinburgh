@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,14 +36,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServicesDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDetails as StoredServiceDetails
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
@@ -59,194 +57,132 @@ class ServicesRepositoryTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var servicesDao: ServicesDao
+    private lateinit var serviceDao: ServiceDao
     @Mock
     private lateinit var serviceColourOverride: ServiceColourOverride
 
     @Test
-    fun getColoursForServicesFlowGetsInitialValueWhenServiceColourOverrideIsNull() = runTest {
-        val serviceColours = mapOf(
-                "1" to 0x000000,
-                "2" to 0xFFFFFF)
-        whenever(servicesDao.getColoursForServices(setOf("1", "2")))
-                .thenReturn(serviceColours)
-        val repository = ServicesRepository(servicesDao, null)
-
-        val observer = repository.getColoursForServicesFlow(setOf("1", "2")).test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(serviceColours)
-        verify(servicesDao)
-                .removeOnServicesChangedListener(any())
-    }
-
-    @Test
-    fun getColoursForServicesFlowGetsInitialValueWhenServiceColourOverrideIsNotNull() = runTest {
-        val initialServiceColours = mapOf(
-                "1" to 0x000000,
-                "2" to 0xFFFFFF)
-        val overriddenServiceColours = mapOf(
-                "1" to 0x000000,
-                "2" to 0xFFFFFF,
-                "3" to 0x0000FF)
-        whenever(servicesDao.getColoursForServices(setOf("1", "2", "3")))
-                .thenReturn(initialServiceColours)
-        whenever(serviceColourOverride.overrideServiceColours(setOf("1", "2", "3"),
-                initialServiceColours))
-                .thenReturn(overriddenServiceColours)
-        val repository = ServicesRepository(
-                servicesDao,
-                serviceColourOverride)
+    fun getColoursForServicesFlowReturnsValuesFromDaoWhenOverrideIsNull() = runTest {
+        val repository = ServicesRepository(serviceDao, null)
+        whenever(serviceDao.getColoursForServicesFlow(setOf("1", "2", "3")))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                mapOf("1" to 1),
+                mapOf(
+                    "1" to 1,
+                    "2" to 2)))
 
         val observer = repository.getColoursForServicesFlow(setOf("1", "2", "3")).test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(overriddenServiceColours)
-        verify(servicesDao)
-                .removeOnServicesChangedListener(any())
+        observer.assertValues(
+            null,
+            mapOf("1" to 1),
+            mapOf(
+                "1" to 1,
+                "2" to 2))
     }
 
     @Test
-    fun getColoursForServicesFlowResponseToChangesWhenServiceColourOverrideIsNull() = runTest {
-        doAnswer {
-            it.getArgument<ServicesDao.OnServicesChangedListener>(0).let { listener ->
-                listener.onServicesChanged()
-                listener.onServicesChanged()
-            }
-        }.whenever(servicesDao).addOnServicesChangedListener(any())
-        val serviceColours1 = mapOf(
-                "1" to 0x000000,
-                "2" to 0xFFFFFF)
-        val serviceColours2 = mapOf(
-                "3" to 0xFF0000,
-                "4" to 0x00FF00)
-        val serviceColours3 = mapOf(
-                "5" to 0x0000FF)
-        whenever(servicesDao.getColoursForServices(setOf("1", "2", "3", "4", "5")))
-                .thenReturn(serviceColours1, serviceColours2, serviceColours3)
-        val repository = ServicesRepository(
-                servicesDao,
-                null)
+    fun getColoursForServicesFlowReturnsValuesFromDaoWhenOverrideIsNotNull() = runTest {
+        val repository = ServicesRepository(serviceDao, serviceColourOverride)
+        whenever(serviceColourOverride.overrideServiceColour("1", 1))
+            .thenReturn(10)
+        whenever(serviceColourOverride.overrideServiceColour("2", 2))
+            .thenReturn(20)
+        whenever(serviceDao.getColoursForServicesFlow(setOf("1", "2", "3")))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                mapOf("1" to 1),
+                mapOf(
+                    "1" to 1,
+                    "2" to 2)))
 
-        val observer = repository.getColoursForServicesFlow(setOf("1", "2", "3", "4", "5"))
-                .test(this)
+        val observer = repository.getColoursForServicesFlow(setOf("1", "2", "3")).test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(serviceColours1, serviceColours2, serviceColours3)
-        verify(servicesDao)
-                .removeOnServicesChangedListener(any())
+        observer.assertValues(
+            null,
+            mapOf("1" to 10),
+            mapOf(
+                "1" to 10,
+                "2" to 20))
     }
 
     @Test
-    fun getColoursForServicesFlowResponseToChangesWhenServiceColourOverrideIsNotNull() = runTest {
-        doAnswer {
-            it.getArgument<ServicesDao.OnServicesChangedListener>(0).let { listener ->
-                listener.onServicesChanged()
-                listener.onServicesChanged()
-            }
-        }.whenever(servicesDao).addOnServicesChangedListener(any())
-        val daoServiceColours1 = mapOf(
-                "1" to 0x000000,
-                "2" to 0xFFFFFF)
-        val daoServiceColours2 = mapOf(
-                "3" to 0xFF0000,
-                "4" to 0x00FF00)
-        val overriddenServiceColours2 = mapOf(
-                "1" to 0x000002,
-                "2" to 0xFFFFF2,
-                "3" to 0xFF0000,
-                "4" to 0x00FF00)
-        val daoServiceColours3 = mapOf(
-                "5" to 0x0000FF)
-        whenever(servicesDao.getColoursForServices(setOf("1", "2", "3", "4", "5")))
-                .thenReturn(daoServiceColours1, daoServiceColours2, daoServiceColours3)
-        whenever(serviceColourOverride.overrideServiceColours(setOf("1", "2", "3", "4", "5"),
-                daoServiceColours1))
-                .thenReturn(daoServiceColours1)
-        whenever(serviceColourOverride.overrideServiceColours(setOf("1", "2", "3", "4", "5"),
-                daoServiceColours2))
-                .thenReturn(overriddenServiceColours2)
-        whenever(serviceColourOverride.overrideServiceColours(setOf("1", "2", "3", "4", "5"),
-                daoServiceColours3))
-                .thenReturn(null)
-        val repository = ServicesRepository(
-                servicesDao,
-                serviceColourOverride)
-
-        val observer = repository.getColoursForServicesFlow(setOf("1", "2", "3", "4", "5"))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(daoServiceColours1, overriddenServiceColours2, null)
-        verify(servicesDao)
-                .removeOnServicesChangedListener(any())
-    }
-
-    @Test
-    fun getServiceDetailsFlowGetsInitialValue() = runTest {
-        val expected = mapOf(
-                "1" to ServiceDetails("1", "Route 1", 1),
-                "2" to ServiceDetails("2", "Route 2", 2),
-                "3" to ServiceDetails("3", "Route 3", 3))
-        whenever(servicesDao.getServiceDetails(setOf("1", "2", "3")))
-                .thenReturn(expected)
-        val repository = ServicesRepository(servicesDao, null)
+    fun getServiceDetailsFlowEmitsExpectedValuesWhenOverrideIsNull() = runTest {
+        val repository = ServicesRepository(serviceDao, null)
+        whenever(serviceDao.getServiceDetailsFlow(setOf("1", "2", "3")))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                mapOf("1" to MockServiceDetails("1", "Route", 1)),
+                mapOf(
+                    "1" to MockServiceDetails("1", "Route", 1),
+                    "2" to MockServiceDetails("2", "Route 2", 2))))
 
         val observer = repository.getServiceDetailsFlow(setOf("1", "2", "3")).test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(expected)
-        verify(servicesDao)
-                .removeOnServicesChangedListener(any())
+        observer.assertValues(
+            null,
+            mapOf("1" to ServiceDetails("1", "Route", 1)),
+            mapOf(
+                "1" to ServiceDetails("1", "Route", 1),
+                "2" to ServiceDetails("2", "Route 2", 2)))
     }
 
     @Test
-    fun getServiceDetailsFlowRespondsToServiceChanges() = runTest {
-        doAnswer {
-            val listener = it.getArgument<ServicesDao.OnServicesChangedListener>(0)
-            listener.onServicesChanged()
-            listener.onServicesChanged()
-        }.whenever(servicesDao).addOnServicesChangedListener(any())
-        val expected1 = mapOf(
-                "1" to ServiceDetails("1", "Route 1", 1),
-                "2" to ServiceDetails("2", "Route 2", 2),
-                "3" to ServiceDetails("3", "Route 3", 3))
-        val expected3 = mapOf(
-                "1" to ServiceDetails("1", "Route 1", 1),
-                "3" to ServiceDetails("3", "Route 3", 3))
-        whenever(servicesDao.getServiceDetails(setOf("1", "2", "3")))
-                .thenReturn(expected1, null, expected3)
-        val repository = ServicesRepository(servicesDao, null)
+    fun getServiceDetailsFlowEmitsExpectedValuesWhenOverrideIsNotNull() = runTest {
+        val repository = ServicesRepository(serviceDao, serviceColourOverride)
+        whenever(serviceColourOverride.overrideServiceColour("1", 1))
+            .thenReturn(10)
+        whenever(serviceColourOverride.overrideServiceColour("2", 2))
+            .thenReturn(20)
+        whenever(serviceDao.getServiceDetailsFlow(setOf("1", "2", "3")))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                mapOf("1" to MockServiceDetails("1", "Route", 1)),
+                mapOf(
+                    "1" to MockServiceDetails("1", "Route", 1),
+                    "2" to MockServiceDetails("2", "Route 2", 2))))
 
         val observer = repository.getServiceDetailsFlow(setOf("1", "2", "3")).test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(expected1, null, expected3)
-        verify(servicesDao)
-                .removeOnServicesChangedListener(any())
+        observer.assertValues(
+            null,
+            mapOf("1" to ServiceDetails("1", "Route", 10)),
+            mapOf(
+                "1" to ServiceDetails("1", "Route", 10),
+                "2" to ServiceDetails("2", "Route 2", 20)))
     }
 
     @Test
     fun allServiceNameFlowGetsFlowFromDao() {
-        val repository = ServicesRepository(servicesDao, null)
+        val repository = ServicesRepository(serviceDao, null)
         val mockFlow = mock<Flow<List<String>?>>()
-        whenever(servicesDao.allServiceNamesFlow)
+        whenever(serviceDao.allServiceNamesFlow)
                 .thenReturn(mockFlow)
 
         val result = repository.allServiceNamesFlow
 
         assertSame(mockFlow, result)
     }
+
+    private data class MockServiceDetails(
+        override val name: String,
+        override val description: String?,
+        override val colour: Int?) : StoredServiceDetails
 }

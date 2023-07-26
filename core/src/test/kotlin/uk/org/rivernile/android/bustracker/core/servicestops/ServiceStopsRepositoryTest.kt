@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,13 +35,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.BusStopsDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.daos.ServiceStopsDao
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
 
 /**
@@ -57,100 +54,56 @@ class ServiceStopsRepositoryTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var serviceStopsDao: ServiceStopsDao
-    @Mock
-    private lateinit var busStopsDao: BusStopsDao
+    private lateinit var serviceStopDao: ServiceStopDao
 
     private lateinit var repository: ServiceStopsRepository
 
     @Before
     fun setUp() {
-        repository = ServiceStopsRepository(serviceStopsDao, busStopsDao)
+        repository = ServiceStopsRepository(serviceStopDao)
     }
 
     @Test
-    fun getServicesForStopFlowGetsInitialValue() = runTest {
-        val expected = listOf("1", "2", "3")
-        whenever(serviceStopsDao.getServicesForStop("123456"))
-                .thenReturn(expected)
+    fun getServicesForStopFlowReturnsFlowFromDao() = runTest {
+        whenever(serviceStopDao.getServicesForStopFlow("123456"))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                listOf("1"),
+                listOf("1", "2")))
 
         val observer = repository.getServicesForStopFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(expected)
-        verify(serviceStopsDao)
-                .removeOnServiceStopsChangedListener(any())
+        observer.assertValues(
+            null,
+            listOf("1"),
+            listOf("1", "2"))
     }
 
     @Test
-    fun getServicesForStopFlowRespondsToDataChanges() = runTest {
-        doAnswer {
-            val listener = it.getArgument<ServiceStopsDao.OnServiceStopsChangedListener>(0)
-            listener.onServiceStopsChanged()
-            listener.onServiceStopsChanged()
-        }.whenever(serviceStopsDao).addOnServiceStopsChangedListener(any())
-        val expected1 = listOf("1")
-        val expected3 = listOf("1", "3", "5")
-        whenever(serviceStopsDao.getServicesForStop("123456"))
-                .thenReturn(expected1, null, expected3)
+    fun getServicesForStopsFlowReturnsFlowFromDao() = runTest {
+        whenever(serviceStopDao.getServicesForStopsFlow(setOf("123456", "987654")))
+            .thenReturn(intervalFlowOf(
+                0L,
+                10L,
+                null,
+                mapOf("123456" to listOf("1")),
+                mapOf(
+                    "123456" to listOf("1"),
+                    "987654" to listOf("1", "2"))))
 
-        val observer = repository.getServicesForStopFlow("123456").test(this)
+        val observer = repository.getServicesForStopsFlow(setOf("123456", "987654")).test(this)
         advanceUntilIdle()
         observer.finish()
-        advanceUntilIdle()
 
-        observer.assertValues(expected1, null, expected3)
-        verify(serviceStopsDao)
-                .removeOnServiceStopsChangedListener(any())
-    }
-
-    @Test
-    fun getServicesForStopsFlowGetsInitialValue() = runTest {
-        val expected = mapOf(
-                "111111" to listOf("1", "2", "3"),
-                "222222" to listOf("4", "5", "6"),
-                "333333" to listOf("7", "8", "9"))
-        val stopCodes = setOf("111111", "222222", "333333")
-        whenever(busStopsDao.getServicesForStops(stopCodes))
-                .thenReturn(expected)
-
-        val observer = repository.getServicesForStopsFlow(stopCodes).test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(expected)
-        verify(busStopsDao)
-                .removeOnBusStopsChangedListener(any())
-    }
-
-    @Test
-    fun getServicesForStopsFlowRespondsToDataChanges() = runTest {
-        doAnswer {
-            val listener = it.getArgument<BusStopsDao.OnBusStopsChangedListener>(0)
-            listener.onBusStopsChanged()
-            listener.onBusStopsChanged()
-        }.whenever(busStopsDao).addOnBusStopsChangedListener(any())
-        val expected1 = mapOf(
-                "111111" to listOf("1", "2", "3"),
-                "222222" to listOf("4", "5", "6"),
-                "333333" to listOf("7", "8", "9"))
-        val expected3 = mapOf(
-                "111111" to listOf("1", "2", "3"),
-                "222222" to listOf("4", "5", "7"))
-        val stopCodes = setOf("111111", "222222", "333333")
-        whenever(busStopsDao.getServicesForStops(stopCodes))
-                .thenReturn(expected1, null, expected3)
-
-        val observer = repository.getServicesForStopsFlow(stopCodes).test(this)
-        advanceUntilIdle()
-        observer.finish()
-        advanceUntilIdle()
-
-        observer.assertValues(expected1, null, expected3)
-        verify(busStopsDao)
-                .removeOnBusStopsChangedListener(any())
+        observer.assertValues(
+            null,
+            mapOf("123456" to listOf("1")),
+            mapOf(
+                "123456" to listOf("1"),
+                "987654" to listOf("1", "2")))
     }
 }
