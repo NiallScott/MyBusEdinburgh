@@ -181,12 +181,6 @@
             android:label="@string/about_title"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
 
-        <!-- BusStopProvider, to provide bus stop data. -->
-        <provider
-            android:name="uk.org.rivernile.android.bustracker.database.busstop.BusStopProvider"
-            android:authorities="${applicationId}.provider.busstop"
-            android:exported="false" />
-
         <!-- Removes the WorkManager initialiser, as we initialise this ourselves. -->
         <provider
             android:name="androidx.startup.InitializationProvider"

@@ -111,8 +111,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-
-    useLibrary("android.test.mock")
 }
 
 androidComponents {
@@ -144,6 +142,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.viewpager2)
+    implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.palette.ktx)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.preference)
@@ -163,8 +162,6 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
-
-    implementation(libs.fetchutils)
 
     // Image loading
     implementation(libs.picasso)

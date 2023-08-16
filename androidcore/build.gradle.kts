@@ -86,8 +86,6 @@ android {
                 "win32-x86/attach_hotspot_windows.dll")
         }
     }
-
-    useLibrary("android.test.mock")
 }
 
 ksp {
