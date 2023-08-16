@@ -57,7 +57,8 @@ import javax.inject.Singleton
  *
  * @param context The application [Context].
  * @param migration1To2 An implementation which migrates the database from version 1 to 2.
- * @param versionCheckOpenHelperFactory The open helper.
+ * @param bundledDatabaseOpenHelperFactory The open helper used to copy the bundled database if
+ * required.
  * @param exceptionLogger Used to log exceptions.
  * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
@@ -66,7 +67,7 @@ import javax.inject.Singleton
 internal class AndroidBusStopDatabase @Inject constructor(
     private val context: Context,
     private val migration1To2: Migration1To2,
-    private val versionCheckOpenHelperFactory: VersionCheckOpenHelperFactory,
+    private val bundledDatabaseOpenHelperFactory: BundledDatabaseOpenHelperFactory,
     private val exceptionLogger: ExceptionLogger,
     @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
@@ -172,8 +173,7 @@ internal class AndroidBusStopDatabase @Inject constructor(
             .addMigrations(migration1To2)
 
         if (allowAssetExtraction) {
-            builder.openHelperFactory(versionCheckOpenHelperFactory)
-                .createFromAsset(DATABASE_NAME)
+            builder.openHelperFactory(bundledDatabaseOpenHelperFactory)
         }
 
         return builder.build()

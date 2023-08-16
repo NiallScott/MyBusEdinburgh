@@ -34,25 +34,31 @@ import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
 
 /**
- * A [SupportSQLiteOpenHelper.Factory] which creates [VersionCheckOpenHelper] instances.
+ * A [SupportSQLiteOpenHelper.Factory] which creates [BundledDatabaseOpenHelper] instances.
  *
  * @param context The application [Context].
  * @param frameworkSQLiteOpenHelperFactory Used to open framework connections to databases.
  * @param exceptionLogger Used to log handled exceptions.
  * @author Niall Scott
  */
-internal class VersionCheckOpenHelperFactory @Inject constructor(
+internal class BundledDatabaseOpenHelperFactory @Inject constructor(
     private val context: Context,
     private val frameworkSQLiteOpenHelperFactory: FrameworkSQLiteOpenHelperFactory,
     private val exceptionLogger: ExceptionLogger)
     : SupportSQLiteOpenHelper.Factory {
 
+    companion object {
+
+        private const val ASSET_PREPACKAGED_DATABASE_PATH = "busstops10.db"
+    }
+
     override fun create(
         configuration: SupportSQLiteOpenHelper.Configuration): SupportSQLiteOpenHelper {
-        return VersionCheckOpenHelper(
+        return BundledDatabaseOpenHelper(
             context,
             frameworkSQLiteOpenHelperFactory.create(configuration),
             context.getString(R.string.asset_db_version).toLong(),
+            ASSET_PREPACKAGED_DATABASE_PATH,
             exceptionLogger)
     }
 }
