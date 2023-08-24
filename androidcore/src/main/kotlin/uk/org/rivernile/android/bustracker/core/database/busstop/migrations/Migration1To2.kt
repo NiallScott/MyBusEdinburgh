@@ -113,7 +113,8 @@ internal class Migration1To2 @Inject constructor() : Migration(1, 2) {
         execSQL("""
             CREATE TABLE IF NOT EXISTS `temp_database_info` (
                 `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                `topologyId` TEXT, `updateTimestamp` INTEGER NOT NULL)
+                `topologyId` TEXT, 
+                `updateTimestamp` INTEGER NOT NULL)
         """.trimIndent())
 
         execSQL("""
@@ -175,11 +176,12 @@ internal class Migration1To2 @Inject constructor() : Migration(1, 2) {
 
         execSQL("""
             INSERT INTO temp_service (id, name, description, hexColour) 
-            SELECT DISTINCT service._id, name, desc, service_colour.hex_colour 
+            SELECT service._id, name, desc, service_colour.hex_colour 
             FROM service 
             LEFT JOIN service_colour ON service._id = service_colour._id 
             WHERE service._id NOT NULL 
-            AND name NOT NULL
+            AND name NOT NULL 
+            GROUP BY service._id
         """.trimIndent())
 
         execSQL("DROP TABLE service")

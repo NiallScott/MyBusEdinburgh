@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database.settings.migrations
+package uk.org.rivernile.android.bustracker.core.database
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper

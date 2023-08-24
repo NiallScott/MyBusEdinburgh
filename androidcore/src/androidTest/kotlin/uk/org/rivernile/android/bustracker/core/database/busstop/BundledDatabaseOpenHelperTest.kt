@@ -125,6 +125,7 @@ class BundledDatabaseOpenHelperTest {
                 }
 
             db.ensureExtractedDatabaseLooksSane()
+            assertEquals(2, db.version)
         }
 
         verify(exceptionLogger, never())
@@ -152,6 +153,7 @@ class BundledDatabaseOpenHelperTest {
                 }
 
             db.ensureExtractedDatabaseLooksSane()
+            assertEquals(2, db.version)
         }
 
         verify(exceptionLogger)
@@ -179,6 +181,7 @@ class BundledDatabaseOpenHelperTest {
                 }
 
             db.ensureExtractedDatabaseLooksSane()
+            assertEquals(2, db.version)
         }
 
         verify(exceptionLogger)
@@ -218,6 +221,7 @@ class BundledDatabaseOpenHelperTest {
                 }
 
             db.ensureExtractedDatabaseLooksSane()
+            assertEquals(2, db.version)
         }
 
         verify(exceptionLogger)
@@ -264,6 +268,7 @@ class BundledDatabaseOpenHelperTest {
                 }
 
             db.ensureExtractedDatabaseLooksSane()
+            assertEquals(2, db.version)
         }
     }
 
@@ -307,6 +312,7 @@ class BundledDatabaseOpenHelperTest {
                 }
 
             db.ensureExtractedDatabaseLooksSane()
+            assertEquals(2, db.version)
         }
     }
 
@@ -354,6 +360,8 @@ class BundledDatabaseOpenHelperTest {
                     assertTrue(it.moveToFirst())
                     assertEquals(expectedUpdateTimestamp, it.getLong(0))
                 }
+
+            assertEquals(2, db.version)
         }
 
         verify(exceptionLogger, never())
@@ -404,6 +412,8 @@ class BundledDatabaseOpenHelperTest {
                     assertTrue(it.moveToFirst())
                     assertEquals(expectedUpdateTimestamp, it.getLong(0))
                 }
+
+            assertEquals(2, db.version)
         }
 
         verify(exceptionLogger, never())
