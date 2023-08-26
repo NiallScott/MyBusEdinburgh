@@ -30,14 +30,12 @@ import android.content.Context
 import android.database.SQLException
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import okio.IOException
 import okio.buffer
 import okio.sink
 import okio.source
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
-import java.nio.ByteBuffer
 
 /**
  * This [SupportSQLiteOpenHelper] performs the extraction of the bundled database in the following
@@ -57,6 +55,8 @@ import java.nio.ByteBuffer
  * has a timestamp less than this, it will be replaced.
  * @param bundledDatabaseAssetPath The path within the application assets where the bundled database
  * is located.
+ * @param databaseOpener An implementation used to open the database to peek in to it before it is
+ * handed off to Room.
  * @param exceptionLogger Used to log exceptions.
  * @author Niall Scott
  */
@@ -65,6 +65,7 @@ internal class BundledDatabaseOpenHelper(
     private val delegate: SupportSQLiteOpenHelper,
     private val minimumUpdateTimestamp: Long,
     private val bundledDatabaseAssetPath: String,
+    private val databaseOpener: DatabaseOpener,
     private val exceptionLogger: ExceptionLogger)
     : SupportSQLiteOpenHelper by delegate {
 
@@ -142,7 +143,7 @@ internal class BundledDatabaseOpenHelper(
         var deleteDatabase = false
 
         try {
-            createFrameworkOpenHelper(databaseFile).readableDatabase.use { db ->
+            databaseOpener.createOpenHelper(databaseFile).readableDatabase.use { db ->
                 val updateTimestamp = db.updateTimestamp
 
                 if (updateTimestamp == null || updateTimestamp < minimumUpdateTimestamp) {
@@ -198,7 +199,7 @@ internal class BundledDatabaseOpenHelper(
 
             // We open and immediately close the database so that its version code is set to 1. This
             // means that downstream Room will run the migration code for us.
-            createFrameworkOpenHelper(intermediateFile).writableDatabase.close()
+            databaseOpener.createOpenHelper(intermediateFile).writableDatabase.close()
         } catch (e: IOException) {
             intermediateFile.delete()
             throw e
@@ -228,60 +229,6 @@ internal class BundledDatabaseOpenHelper(
 
         if (parent != null && !parent.exists() && !parent.mkdirs()) {
             throw IOException("Failed to create directories for ${destinationFile.path}")
-        }
-    }
-
-    /**
-     * Create an instance of the [SupportSQLiteOpenHelper], which allows a database to be opened.
-     *
-     * @param databaseFile A [File] object representing the disk location of the database.
-     * @return A new instance of [SupportSQLiteOpenHelper] which can be used to open the database.
-     * @throws IOException When the database file could not be accessed.
-     */
-    @Throws(IOException::class)
-    private fun createFrameworkOpenHelper(databaseFile: File): SupportSQLiteOpenHelper {
-        val version = readVersion(databaseFile)
-        val configuration = SupportSQLiteOpenHelper.Configuration.builder(context)
-            .name(databaseFile.absolutePath)
-            .callback(object : SupportSQLiteOpenHelper.Callback(version.coerceAtLeast(1)) {
-                override fun onCreate(db: SupportSQLiteDatabase) { }
-
-                override fun onUpgrade(
-                    db: SupportSQLiteDatabase,
-                    oldVersion: Int,
-                    newVersion: Int) { }
-            })
-            .build()
-
-        return FrameworkSQLiteOpenHelperFactory().create(configuration)
-    }
-
-    /**
-     * (Copied from DBUtil.kt in Room)
-     *
-     * Reads the user version number out of the database header from the given file.
-     *
-     * @param databaseFile The database file.
-     * @return The database version
-     * @throws IOException If something goes wrong reading the file, such as bad database header or
-     * missing permissions.
-     * @see [User Version Number](https://www.sqlite.org/fileformat.html.user_version_number).
-     */
-    @Throws(IOException::class)
-    private fun readVersion(databaseFile: File): Int {
-        return databaseFile.inputStream().channel.use { input ->
-            val buffer = ByteBuffer.allocate(4)
-            input.tryLock(60, 4, true)
-            input.position(60)
-            val read = input.read(buffer)
-
-            if (read != 4) {
-                throw IOException("Bad database header, unable to read 4 bytes at offset 60")
-            }
-
-            buffer.rewind()
-
-            buffer.int // ByteBuffer is big-endian by default
         }
     }
 

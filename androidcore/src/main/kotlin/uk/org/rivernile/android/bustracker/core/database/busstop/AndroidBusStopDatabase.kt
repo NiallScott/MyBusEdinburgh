@@ -27,8 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
 import android.content.Context
-import android.database.sqlite.SQLiteException
-import androidx.room.Room
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +35,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.ProxyDatabaseDao
-import uk.org.rivernile.android.bustracker.core.database.busstop.migrations.Migration1To2
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ProxyServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ProxyServicePointDao
@@ -47,7 +44,6 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.Ser
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.ProxyStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -56,19 +52,17 @@ import javax.inject.Singleton
  * This is the Android-specific implementation of the bus stop database.
  *
  * @param context The application [Context].
- * @param migration1To2 An implementation which migrates the database from version 1 to 2.
- * @param bundledDatabaseOpenHelperFactory The open helper used to copy the bundled database if
- * required.
- * @param exceptionLogger Used to log exceptions.
+ * @param databaseFactory Used to construct [RoomBusStopDatabase] instances.
+ * @param downloadedDatabasePreparer Used to prepare downloaded databases by migrating them to the
+ * expected schema.
  * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
 @Singleton
 internal class AndroidBusStopDatabase @Inject constructor(
     private val context: Context,
-    private val migration1To2: Migration1To2,
-    private val bundledDatabaseOpenHelperFactory: BundledDatabaseOpenHelperFactory,
-    private val exceptionLogger: ExceptionLogger,
+    private val databaseFactory: RoomBusStopDatabaseFactory,
+    private val downloadedDatabasePreparer: DownloadedDatabasePreparer,
     @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     companion object {
@@ -79,7 +73,7 @@ internal class AndroidBusStopDatabase @Inject constructor(
     // Creates the RoomBusStopDatabase. Calling createRoomDatabase does not do IO blocking as the
     // database is lazily opened on the first query. This just creates a reference to allow us to
     // talk to the database.
-    private var database = createRoomDatabase(DATABASE_NAME, true)
+    private var database = databaseFactory.createRoomBusStopDatabase(DATABASE_NAME, true)
     private val databaseMutex = Mutex()
     private val _isDatabaseOpenFlow = MutableStateFlow(true)
 
@@ -130,20 +124,12 @@ internal class AndroidBusStopDatabase @Inject constructor(
      */
     suspend fun replaceDatabase(newDatabaseFile: File): Boolean {
         return databaseMutex.withLock {
-            var deleteNewDatabase: Boolean
-
-            createRoomDatabase(newDatabaseFile.name, false)
-                .apply {
-                    deleteNewDatabase = !tryTestQuery()
-                }
-                .close()
-
-            if (!deleteNewDatabase) {
+            if (downloadedDatabasePreparer.prepareDownloadedDatabase(newDatabaseFile)) {
                 database.close()
                 _isDatabaseOpenFlow.value = false
                 replaceDatabaseFile(newDatabaseFile)
 
-                database = createRoomDatabase(DATABASE_NAME, true)
+                database = databaseFactory.createRoomBusStopDatabase(DATABASE_NAME, true)
                 _isDatabaseOpenFlow.value = true
 
                 true
@@ -152,47 +138,6 @@ internal class AndroidBusStopDatabase @Inject constructor(
                     newDatabaseFile.delete()
                 }
 
-                false
-            }
-        }
-    }
-
-    /**
-     * Create an instance of [RoomBusStopDatabase].
-     *
-     * @param databaseName The name of the database. This is the name of the file contained within
-     * the database path.
-     * @param allowAssetExtraction Should it be allowed for the database to be extracted from assets
-     * if it doesn't yet exist?
-     * @return A new [RoomBusStopDatabase] instance.
-     */
-    private fun createRoomDatabase(
-        databaseName: String,
-        allowAssetExtraction: Boolean): RoomBusStopDatabase {
-        val builder = Room.databaseBuilder(context, RoomBusStopDatabase::class.java, databaseName)
-            .addMigrations(migration1To2)
-
-        if (allowAssetExtraction) {
-            builder.openHelperFactory(bundledDatabaseOpenHelperFactory)
-        }
-
-        return builder.build()
-    }
-
-    /**
-     * Try a test query out on the database. If this query runs without encountering any exceptions
-     * then it is deemed to pass and `true` will be returned. Conversely, if an exception is thrown
-     * during the test, the test fails and `false` is returned.
-     *
-     * @return `true` if the test passed, otherwise `false`.
-     */
-    private suspend fun RoomBusStopDatabase.tryTestQuery(): Boolean {
-        return withContext(ioDispatcher) {
-            try {
-                query("SELECT 1 FROM database_info", null).close()
-                true
-            } catch (e: SQLiteException) {
-                exceptionLogger.log(e)
                 false
             }
         }

@@ -34,6 +34,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import uk.org.rivernile.android.bustracker.core.database.busstop.BundledDatabaseOpenHelperFactory
+import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseOpener
 import uk.org.rivernile.android.bustracker.core.database.busstop.RoomBusStopDatabase
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import kotlin.test.fail
@@ -65,6 +66,9 @@ class AllMigrationsTest {
         val openHelperFactory = BundledDatabaseOpenHelperFactory(
             context,
             FrameworkSQLiteOpenHelperFactory(),
+            DatabaseOpener(
+                context,
+                FrameworkSQLiteOpenHelperFactory()),
             exceptionLogger)
 
         Room.databaseBuilder(

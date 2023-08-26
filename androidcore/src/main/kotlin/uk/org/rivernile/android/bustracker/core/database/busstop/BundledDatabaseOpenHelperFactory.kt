@@ -38,12 +38,15 @@ import javax.inject.Inject
  *
  * @param context The application [Context].
  * @param frameworkSQLiteOpenHelperFactory Used to open framework connections to databases.
+ * @param databaseOpener An implementation used to open the database to peek in to it before it is
+ * handed off to Room.
  * @param exceptionLogger Used to log handled exceptions.
  * @author Niall Scott
  */
 internal class BundledDatabaseOpenHelperFactory @Inject constructor(
     private val context: Context,
     private val frameworkSQLiteOpenHelperFactory: FrameworkSQLiteOpenHelperFactory,
+    private val databaseOpener: DatabaseOpener,
     private val exceptionLogger: ExceptionLogger)
     : SupportSQLiteOpenHelper.Factory {
 
@@ -59,6 +62,7 @@ internal class BundledDatabaseOpenHelperFactory @Inject constructor(
             frameworkSQLiteOpenHelperFactory.create(configuration),
             context.getString(R.string.asset_db_version).toLong(),
             ASSET_PREPACKAGED_DATABASE_PATH,
+            databaseOpener,
             exceptionLogger)
     }
 }

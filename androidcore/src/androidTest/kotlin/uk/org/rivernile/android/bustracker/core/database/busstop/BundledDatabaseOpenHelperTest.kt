@@ -84,11 +84,16 @@ class BundledDatabaseOpenHelperTest {
             })
             .build()
 
+        val databaseOpener = DatabaseOpener(
+            context,
+            FrameworkSQLiteOpenHelperFactory())
+
         openHelper = BundledDatabaseOpenHelper(
             context,
             FrameworkSQLiteOpenHelperFactory().create(dbConfiguration),
             context.getString(R.string.asset_db_version).toLong(),
             ASSET_PREPACKAGED_DATABASE_PATH,
+            databaseOpener,
             exceptionLogger)
     }
 
