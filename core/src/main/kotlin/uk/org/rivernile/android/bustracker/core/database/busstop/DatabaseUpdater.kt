@@ -36,7 +36,6 @@ import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
-import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
 import java.io.File
 import javax.inject.Inject
 import javax.net.SocketFactory
@@ -48,19 +47,17 @@ import javax.net.SocketFactory
  * @param fileDownloader An implementation for downloading files to a path.
  * @param fileConsistencyChecker An implementation for checking the consistency of files.
  * @param databaseRepository The repository which represents this database.
- * @param timeUtils Used to access timestamps.
  * @param exceptionLogger Used to log exceptions.
  * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
 class DatabaseUpdater @Inject internal constructor(
-        private val databaseUtils: DatabaseUtils,
-        private val fileDownloader: FileDownloader,
-        private val fileConsistencyChecker: FileConsistencyChecker,
-        private val databaseRepository: BusStopDatabaseRepository,
-        private val timeUtils: TimeUtils,
-        private val exceptionLogger: ExceptionLogger,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+    private val databaseUtils: DatabaseUtils,
+    private val fileDownloader: FileDownloader,
+    private val fileConsistencyChecker: FileConsistencyChecker,
+    private val databaseRepository: BusStopDatabaseRepository,
+    private val exceptionLogger: ExceptionLogger,
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
      * Given a [DatabaseVersion] descriptor object, which supplies the database URL and expected
@@ -69,16 +66,19 @@ class DatabaseUpdater @Inject internal constructor(
      * @return `true` when the update succeeded, otherwise `false`.
      */
     suspend fun updateDatabase(
-            databaseVersion: DatabaseVersion,
-            socketFactory: SocketFactory? = null): Boolean {
-        val downloadFile = databaseUtils.getDatabasePath(
-                "busstops.${timeUtils.currentTimeMills}.db_temp")
-        databaseUtils.ensureDatabasePathExists()
+        databaseVersion: DatabaseVersion,
+        socketFactory: SocketFactory? = null): Boolean {
+        val downloadFile = try {
+            databaseUtils.createTemporaryFile("mybus-database-download")
+        } catch (e: IOException) {
+            exceptionLogger.log(e)
+            return false
+        }
 
         if (fileDownloader.downloadFile(
-                        databaseVersion.databaseUrl,
-                        downloadFile,
-                        socketFactory) !is FileDownloadResponse.Success) {
+                databaseVersion.databaseUrl,
+                downloadFile,
+                socketFactory) !is FileDownloadResponse.Success) {
             downloadFile.deleteSuspend()
 
             return false

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,6 +26,7 @@
 
 package uk.org.rivernile.android.bustracker.core.database
 
+import okio.IOException
 import java.io.File
 
 /**
@@ -36,9 +37,15 @@ import java.io.File
 interface DatabaseUtils {
 
     /**
-     * Ensure the database path exists by creating it if it doesn't exist.
+     * Create a temporary [File] where database updates should be performed. This [File] will have
+     * [File.deleteOnExit] already called on it, so it will be deleted when the VM dies.
+     *
+     * @param prefix The filename prefix of the temporary file.
+     * @return A [File] pointing to the new temporary file.
+     * @throws IOException When the temporary file could not be created.
      */
-    suspend fun ensureDatabasePathExists()
+    @Throws(IOException::class)
+    suspend fun createTemporaryFile(prefix: String): File
 
     /**
      * Given the name of a database, return a [File] object representing this database on the file

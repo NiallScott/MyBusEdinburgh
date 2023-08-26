@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,8 +31,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,16 +46,12 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.database.Databa
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 import java.io.File
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 /**
  * Tests for [AndroidBusStopDatabaseRepository].
  *
  * @author Niall Scott
  */
-@Ignore("Cannot mock/spy class uk.org.rivernile.android.bustracker.core.database.busstop" +
-        ".AndroidBusStopDatabase")
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AndroidBusStopDatabaseRepositoryTest {

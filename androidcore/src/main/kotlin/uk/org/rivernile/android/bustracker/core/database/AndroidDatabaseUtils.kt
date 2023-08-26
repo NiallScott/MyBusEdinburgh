@@ -27,9 +27,9 @@
 package uk.org.rivernile.android.bustracker.core.database
 
 import android.content.Context
-import android.database.sqlite.SQLiteException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import okio.IOException
 import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
@@ -48,21 +48,13 @@ internal class AndroidDatabaseUtils @Inject constructor(
     private val exceptionLogger: ExceptionLogger,
     @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): DatabaseUtils {
 
-    companion object {
-
-        private const val TEMP_DB = "temp.db"
-    }
-
-    override suspend fun ensureDatabasePathExists() {
-        withContext(ioDispatcher) {
-            try {
-                context.openOrCreateDatabase(TEMP_DB, Context.MODE_PRIVATE, null).close()
-            } catch (e: SQLiteException) {
-                exceptionLogger.log(e)
-                // Nothing to do here.
+    @Throws(IOException::class)
+    override suspend fun createTemporaryFile(prefix: String): File {
+        return withContext(ioDispatcher) {
+            @Suppress("BlockingMethodInNonBlockingContext")
+            File.createTempFile(prefix, ".tmp", context.cacheDir).also {
+                it.deleteOnExit()
             }
-
-            context.deleteDatabase(TEMP_DB)
         }
     }
 
