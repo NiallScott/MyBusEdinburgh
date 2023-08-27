@@ -5,7 +5,7 @@ min_sdk_version = "23"
 target_sdk_version = "33"
 build_tools_version = "33.0.2"
 
-android_gradle_plugin = "8.1.0"
+android_gradle_plugin = "8.1.1"
 kotlin = "1.8.21"
 ksp = "1.8.21-1.0.11"
 dagger = "2.46.1"
@@ -32,13 +32,13 @@ recyclerview = "1.3.1"
 viewpager2 = "1.1.0-beta02"
 palette = "1.0.0"
 constraintlayout = "2.1.4"
-preference = "1.2.0"
+preference = "1.2.1"
 
 # Material Design
 material = "1.9.0"
 
 # Firebase
-firebase-bom = "32.2.0"
+firebase-bom = "32.2.3"
 
 # Play Services
 play-services-location = "21.0.1"
@@ -52,7 +52,7 @@ picasso = "2.71828"
 
 # Testing versions.
 junit = "4.13.2"
-mockito = "5.3.1"
+mockito = "5.5.0"
 mockito_kotlin = "4.1.0"
 androidx-test-runner = "1.5.2"
 androidx-test-core = "1.5.0"
