@@ -52,8 +52,9 @@ picasso = "2.71828"
 
 # Testing versions.
 junit = "4.13.2"
-mockito = "5.3.1"
+mockito = "5.5.0"
 mockito_kotlin = "4.1.0"
+mockk = "1.13.5"
 androidx-test-runner = "1.5.2"
 androidx-test-core = "1.5.0"
 espresso = "3.5.1"
@@ -130,11 +131,13 @@ coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", ve
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito_kotlin" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockito" }
+mockk-android = { module =  "io.mockk:mockk-android", version.ref = "mockk" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
 androidx-test-core = { module = "androidx.test:core-ktx", version.ref = "androidx-test-core" }
 androidx-room-test = { module = "androidx.room:room-testing", version.ref = "room" }
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version.ref = "arch-core" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragment" }
+androidx-work-test = { module = "androidx.work:work-testing", version.ref = "work-manager" }
 hilt-test = { module = "com.google.dagger:hilt-android-testing", version.ref = "dagger" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "dagger" }
 espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }

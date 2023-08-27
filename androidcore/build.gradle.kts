@@ -80,6 +80,8 @@ android {
         resources {
             excludes += setOf(
                 "META-INF/AL2.0",
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
                 "META-INF/LGPL2.1",
                 "META-INF/licenses/ASM",
                 "win32-x86-64/attach_hotspot_windows.dll",
@@ -147,7 +149,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.androidx.room.test)
+    androidTestImplementation(libs.androidx.work.test)
     androidTestImplementation(libs.hilt.test)
     kaptAndroidTest(libs.hilt.android.compiler)
 
