@@ -44,8 +44,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 /**
  * Tests for [StopDatabaseUpdateWorker].
  *
- * This only runs on Android P+ due to requiring mocking of final classes.
- *
  * @author Niall Scott
  */
 class StopDatabaseUpdateWorkerTest {
