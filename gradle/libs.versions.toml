@@ -5,7 +5,7 @@ min_sdk_version = "23"
 target_sdk_version = "33"
 build_tools_version = "33.0.2"
 
-android_gradle_plugin = "8.1.0"
+android_gradle_plugin = "8.1.1"
 kotlin = "1.8.21"
 ksp = "1.8.21-1.0.11"
 dagger = "2.46.1"
@@ -32,13 +32,13 @@ viewpager2 = "1.1.0-beta02"
 swipeRefreshLayout = "1.1.0"
 palette = "1.0.0"
 constraintlayout = "2.1.4"
-preference = "1.2.0"
+preference = "1.2.1"
 
 # Material Design
 material = "1.9.0"
 
 # Firebase
-firebase-bom = "32.2.0"
+firebase-bom = "32.2.3"
 
 # Play Services
 play-services-location = "21.0.1"
