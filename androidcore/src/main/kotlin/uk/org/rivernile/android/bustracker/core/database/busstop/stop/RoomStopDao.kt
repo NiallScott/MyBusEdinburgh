@@ -89,7 +89,7 @@ internal abstract class RoomStopDao {
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation, (
-            SELECT group_concat(serviceName) 
+            SELECT group_concat(serviceName, ', ') 
             FROM (
                 SELECT stopCode, serviceName 
                 FROM service_stop 
@@ -110,7 +110,7 @@ internal abstract class RoomStopDao {
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation, (
-            SELECT group_concat(serviceName) 
+            SELECT group_concat(serviceName, ', ') 
             FROM (
                 SELECT stopCode, serviceName 
                 FROM service_stop 
@@ -137,7 +137,7 @@ internal abstract class RoomStopDao {
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, orientation, (
-            SELECT group_concat(serviceName) 
+            SELECT group_concat(serviceName, ', ') 
             FROM (
                 SELECT stopCode, serviceName 
                 FROM service_stop 
