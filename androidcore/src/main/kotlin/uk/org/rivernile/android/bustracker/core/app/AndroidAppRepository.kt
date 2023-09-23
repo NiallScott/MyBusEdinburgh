@@ -44,9 +44,9 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class AndroidAppRepository @Inject constructor(
-        private val context: Context,
-        private val packageManager: PackageManager,
-        private val exceptionLogger: ExceptionLogger) : AppRepository {
+    private val context: Context,
+    private val packageManager: PackageManager,
+    private val exceptionLogger: ExceptionLogger) : AppRepository {
 
     override val appVersion get() = try {
         packageManager.getPackageInfoCompat(context.packageName, 0).let {

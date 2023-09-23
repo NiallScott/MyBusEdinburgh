@@ -39,8 +39,6 @@ import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
-import uk.org.rivernile.android.bustracker.core.log.CrashlyticsExceptionLogger
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.networking.V24ConnectivityChecker
@@ -98,11 +96,6 @@ class AndroidCoreModule {
     @InstallIn(SingletonComponent::class)
     @Module
     internal interface Bindings {
-
-        @Suppress("unused")
-        @Binds
-        fun bindExceptionLogger(
-            crashlyticsExceptionLogger: CrashlyticsExceptionLogger): ExceptionLogger
 
         @Suppress("unused")
         @Binds

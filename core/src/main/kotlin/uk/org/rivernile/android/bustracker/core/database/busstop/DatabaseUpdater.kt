@@ -54,13 +54,13 @@ import javax.net.SocketFactory
  * @author Niall Scott
  */
 class DatabaseUpdater @Inject internal constructor(
-        private val databaseUtils: DatabaseUtils,
-        private val fileDownloader: FileDownloader,
-        private val fileConsistencyChecker: FileConsistencyChecker,
-        private val databaseRepository: BusStopDatabaseRepository,
-        private val timeUtils: TimeUtils,
-        private val exceptionLogger: ExceptionLogger,
-        @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+    private val databaseUtils: DatabaseUtils,
+    private val fileDownloader: FileDownloader,
+    private val fileConsistencyChecker: FileConsistencyChecker,
+    private val databaseRepository: BusStopDatabaseRepository,
+    private val timeUtils: TimeUtils,
+    private val exceptionLogger: ExceptionLogger,
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**
      * Given a [DatabaseVersion] descriptor object, which supplies the database URL and expected

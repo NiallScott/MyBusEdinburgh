@@ -91,6 +91,7 @@ allOpen {
 dependencies {
     // Our code module
     api(project(":core"))
+    implementation(project(":core:logging-android"))
     implementation(project(":database:settings-db-android"))
 
     // Kotlin

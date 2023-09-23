@@ -33,6 +33,7 @@ plugins {
 dependencies {
 
     api(project(":core:coroutines"))
+    api(project(":core:logging"))
     api(project(":database:settings-db-core"))
 
     // Kotlin

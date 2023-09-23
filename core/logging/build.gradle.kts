@@ -24,35 +24,6 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-    }
+plugins {
+    kotlin("jvm")
 }
-
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-rootProject.name = "MyBusEdinburgh"
-
-include(
-    ":app",
-    ":core",
-    ":core:coroutines",
-    ":core:logging",
-    ":core:logging-android",
-    ":database:settings-db-android",
-    ":database:settings-db-core",
-    ":edinburgh",
-    ":androidcore",
-    ":testutils")

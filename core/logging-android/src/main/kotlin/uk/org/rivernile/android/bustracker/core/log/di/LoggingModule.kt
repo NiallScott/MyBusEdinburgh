@@ -24,35 +24,25 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-    }
+package uk.org.rivernile.android.bustracker.core.log.di
+
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.log.CrashlyticsExceptionLogger
+import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+
+/**
+ * This module provides dependencies related to logging.
+ *
+ * @author Niall Scott
+ */
+@InstallIn(SingletonComponent::class)
+@Module
+internal interface LoggingModule {
+
+    @Suppress("unused")
+    @Binds
+    fun bindExceptionLogger(crashlyticsExceptionLogger: CrashlyticsExceptionLogger): ExceptionLogger
 }
-
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-rootProject.name = "MyBusEdinburgh"
-
-include(
-    ":app",
-    ":core",
-    ":core:coroutines",
-    ":core:logging",
-    ":core:logging-android",
-    ":database:settings-db-android",
-    ":database:settings-db-core",
-    ":edinburgh",
-    ":androidcore",
-    ":testutils")

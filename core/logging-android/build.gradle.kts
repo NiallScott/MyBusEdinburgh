@@ -24,35 +24,42 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
+}
+
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.logging"
+
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+
+        getByName("debug") {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
     }
 }
 
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+dependencies {
 
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-    }
+    api(project(":core:logging"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
 }
-
-rootProject.name = "MyBusEdinburgh"
-
-include(
-    ":app",
-    ":core",
-    ":core:coroutines",
-    ":core:logging",
-    ":core:logging-android",
-    ":database:settings-db-android",
-    ":database:settings-db-core",
-    ":edinburgh",
-    ":androidcore",
-    ":testutils")
