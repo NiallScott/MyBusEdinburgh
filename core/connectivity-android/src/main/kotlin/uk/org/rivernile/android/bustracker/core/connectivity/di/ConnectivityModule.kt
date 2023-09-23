@@ -24,37 +24,36 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
+package uk.org.rivernile.android.bustracker.core.connectivity.di
+
+import android.os.Build
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
+import uk.org.rivernile.android.bustracker.core.networking.V24ConnectivityChecker
+import javax.inject.Provider
+
+/**
+ * This module provides dependencies related to connectivity.
+ *
+ * @author Niall Scott
+ */
+@InstallIn(SingletonComponent::class)
+@Module
+internal class ConnectivityModule {
+
+    @Provides
+    fun provideConnectivityChecker(
+        legacyConnectivityChecker: Provider<LegacyConnectivityChecker>,
+        v24ConnectivityChecker: Provider<V24ConnectivityChecker>
+    ): ConnectivityChecker {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            v24ConnectivityChecker.get()
+        } else {
+            legacyConnectivityChecker.get()
+        }
     }
 }
-
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
-rootProject.name = "MyBusEdinburgh"
-
-include(
-    ":app",
-    ":core",
-    ":core:connectivity",
-    ":core:connectivity-android",
-    ":core:coroutines",
-    ":core:logging",
-    ":core:logging-android",
-    ":database:settings-db-android",
-    ":database:settings-db-core",
-    ":edinburgh",
-    ":androidcore",
-    ":testutils")

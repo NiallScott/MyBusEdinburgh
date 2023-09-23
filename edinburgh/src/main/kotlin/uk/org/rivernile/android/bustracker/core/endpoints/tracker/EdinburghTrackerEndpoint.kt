@@ -48,13 +48,13 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class EdinburghTrackerEndpoint @Inject constructor(
-        private val api: EdinburghBusTrackerApi,
-        private val apiKeyGenerator: ApiKeyGenerator,
-        private val liveTimesMapper: LiveTimesMapper,
-        private val errorMapper: ErrorMapper,
-        private val responseHandler: ResponseHandler,
-        private val connectivityRepository: ConnectivityRepository,
-        private val exceptionLogger: ExceptionLogger): TrackerEndpoint {
+    private val api: EdinburghBusTrackerApi,
+    private val apiKeyGenerator: ApiKeyGenerator,
+    private val liveTimesMapper: LiveTimesMapper,
+    private val errorMapper: ErrorMapper,
+    private val responseHandler: ResponseHandler,
+    private val connectivityRepository: ConnectivityRepository,
+    private val exceptionLogger: ExceptionLogger): TrackerEndpoint {
 
     override suspend fun getLiveTimes(
         stopCode: String,

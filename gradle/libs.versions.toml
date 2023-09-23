@@ -70,6 +70,7 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "dagge
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "dagger" }
 hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hilt_androidx" }
 hilt-androidx-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hilt_androidx" }
+javax-inject = { module = "javax.inject:javax.inject", version = "1" }
 
 # Okhttp
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }

@@ -24,37 +24,21 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-    }
+plugins {
+    kotlin("jvm")
 }
 
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+dependencies {
 
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-    }
+    implementation(project(":core:coroutines"))
+
+    // Dependency injection
+    implementation(libs.javax.inject)
+
+    // Testing dependencies
+    testImplementation(project(":testutils"))
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
 }
-
-rootProject.name = "MyBusEdinburgh"
-
-include(
-    ":app",
-    ":core",
-    ":core:connectivity",
-    ":core:connectivity-android",
-    ":core:coroutines",
-    ":core:logging",
-    ":core:logging-android",
-    ":database:settings-db-android",
-    ":database:settings-db-core",
-    ":edinburgh",
-    ":androidcore",
-    ":testutils")

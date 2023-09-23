@@ -32,7 +32,7 @@ plugins {
 dependencies {
 
     // Kotlin
-    implementation(libs.coroutines.core)
+    api(libs.coroutines.core)
 
     // Dagger 2
     implementation(libs.dagger.core)

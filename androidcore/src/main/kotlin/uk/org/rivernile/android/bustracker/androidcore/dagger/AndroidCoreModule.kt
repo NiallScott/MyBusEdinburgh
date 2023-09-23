@@ -39,9 +39,6 @@ import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
-import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
-import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
-import uk.org.rivernile.android.bustracker.core.networking.V24ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.LegacyAppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotificationChannels
@@ -67,17 +64,6 @@ class AndroidCoreModule {
             V26AppNotificationChannels(context, notificationManager.get())
         } else {
             LegacyAppNotificationChannels()
-        }
-    }
-
-    @Provides
-    internal fun provideConnectivityChecker(
-            legacyConnectivityChecker: Provider<LegacyConnectivityChecker>,
-            v24ConnectivityChecker: Provider<V24ConnectivityChecker>): ConnectivityChecker {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            v24ConnectivityChecker.get()
-        } else {
-            legacyConnectivityChecker.get()
         }
     }
 

@@ -51,12 +51,12 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class ApiTwitterEndpoint @Inject constructor(
-        private val twitterService: TwitterService,
-        private val connectivityRepository: ConnectivityRepository,
-        private val apiKeyGenerator: ApiKeyGenerator,
-        @ForApiAppName private val appName: String,
-        private val tweetsMapper: TweetsMapper,
-        private val exceptionLogger: ExceptionLogger) : TwitterEndpoint {
+    private val twitterService: TwitterService,
+    private val connectivityRepository: ConnectivityRepository,
+    private val apiKeyGenerator: ApiKeyGenerator,
+    @ForApiAppName private val appName: String,
+    private val tweetsMapper: TweetsMapper,
+    private val exceptionLogger: ExceptionLogger) : TwitterEndpoint {
 
     override suspend fun getLatestTweets(): LatestTweetsResponse {
         return if (connectivityRepository.hasInternetConnectivity) {
