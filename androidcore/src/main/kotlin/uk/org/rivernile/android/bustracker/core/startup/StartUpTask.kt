@@ -32,8 +32,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseWorkScheduler
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import javax.inject.Inject
 
@@ -54,12 +54,12 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class StartUpTask @Inject internal constructor(
-        private val appNotificationChannels: AppNotificationChannels,
-        private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseWorkScheduler,
-        private val cleanUpTask: CleanUpTask?,
-        private val alertsRepository: AlertsRepository,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
+    private val appNotificationChannels: AppNotificationChannels,
+    private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseWorkScheduler,
+    private val cleanUpTask: CleanUpTask?,
+    private val alertsRepository: AlertsRepository,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) {
 
     /**
      * Run the app startup tasks. The tasks will be executed on the default [CoroutineDispatcher].

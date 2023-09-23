@@ -36,9 +36,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import uk.org.rivernile.android.bustracker.core.app.AppRepository
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import java.util.*
 import javax.inject.Inject
@@ -53,9 +53,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AboutViewModel @Inject constructor(
-        private val appRepository: AppRepository,
-        private val busStopDatabaseRepository: BusStopDatabaseRepository,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher): ViewModel() {
+    private val appRepository: AppRepository,
+    private val busStopDatabaseRepository: BusStopDatabaseRepository,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher): ViewModel() {
 
     /**
      * This [LiveData] emits the 'about' items to be displayed.

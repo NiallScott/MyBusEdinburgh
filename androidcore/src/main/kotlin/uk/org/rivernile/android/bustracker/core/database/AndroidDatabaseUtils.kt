@@ -30,7 +30,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
 import javax.inject.Inject

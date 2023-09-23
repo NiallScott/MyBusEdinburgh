@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,17 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.di
+plugins {
+    kotlin("jvm")
+    kotlin("kapt")
+}
 
-import javax.inject.Qualifier
-import kotlin.annotation.MustBeDocumented
-import kotlin.annotation.Retention
+dependencies {
 
-/**
- * This annotation defines a Dagger qualifier for the default Kotlin coroutine dispatcher.
- *
- * @author Niall Scott
- */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class ForDefaultDispatcher
+    // Kotlin
+    implementation(libs.coroutines.core)
+
+    // Dagger 2
+    implementation(libs.dagger.core)
+    kapt(libs.dagger.compiler)
+}

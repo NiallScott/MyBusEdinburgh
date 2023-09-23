@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ import android.content.Context
 import android.provider.Settings
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import javax.inject.Inject
 
 /**
@@ -46,16 +46,18 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class LegacyIsLocationEnabledFetcher @Inject constructor(
-        private val context: Context,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
+    private val context: Context,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : IsLocationEnabledFetcher {
 
     // Settings.Secure.LOCATION_MODE is deprecated in newer Android versions, hence this
     // implementation.
     @Suppress("DEPRECATION")
     override suspend fun isLocationEnabled() = withContext(defaultDispatcher) {
-        val mode = Settings.Secure.getInt(context.contentResolver, Settings.Secure.LOCATION_MODE,
-                Settings.Secure.LOCATION_MODE_OFF)
+        val mode = Settings.Secure.getInt(
+            context.contentResolver,
+            Settings.Secure.LOCATION_MODE,
+            Settings.Secure.LOCATION_MODE_OFF)
 
         mode != Settings.Secure.LOCATION_MODE_OFF
     }

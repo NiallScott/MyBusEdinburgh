@@ -48,6 +48,7 @@ rootProject.name = "MyBusEdinburgh"
 include(
     ":app",
     ":core",
+    ":core:coroutines",
     ":database:settings-db-android",
     ":database:settings-db-core",
     ":edinburgh",

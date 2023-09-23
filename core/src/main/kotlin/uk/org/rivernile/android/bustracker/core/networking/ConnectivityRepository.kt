@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.shareIn
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,8 +45,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class ConnectivityRepository @Inject internal constructor(
-        private val connectivityChecker: ConnectivityChecker,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope) {
+    private val connectivityChecker: ConnectivityChecker,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope) {
 
     /**
      * Is there internet connectivity available?
@@ -58,10 +58,10 @@ class ConnectivityRepository @Inject internal constructor(
      */
     val hasInternetConnectivityFlow: Flow<Boolean> by lazy {
         connectivityChecker.hasInternetConnectivityFlow
-                .distinctUntilChanged()
-                .shareIn(
-                        applicationCoroutineScope,
-                        SharingStarted.WhileSubscribed(replayExpirationMillis = 0L),
-                        1)
+            .distinctUntilChanged()
+            .shareIn(
+                applicationCoroutineScope,
+                SharingStarted.WhileSubscribed(replayExpirationMillis = 0L),
+                1)
     }
 }

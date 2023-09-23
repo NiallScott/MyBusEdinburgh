@@ -45,7 +45,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.ServicesContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.ServiceDetails
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
 import javax.inject.Singleton

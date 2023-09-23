@@ -44,8 +44,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.core.text.TextFormattingUtils
@@ -65,12 +65,12 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AddEditFavouriteStopDialogFragmentViewModel @Inject constructor(
-        private val savedState: SavedStateHandle,
-        private val favouritesRepository: FavouritesRepository,
-        private val fetcher: FavouriteStopFetcher,
-        private val textFormattingUtils: TextFormattingUtils,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope)
+    private val savedState: SavedStateHandle,
+    private val favouritesRepository: FavouritesRepository,
+    private val fetcher: FavouriteStopFetcher,
+    private val textFormattingUtils: TextFormattingUtils,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope)
     : ViewModel() {
 
     companion object {

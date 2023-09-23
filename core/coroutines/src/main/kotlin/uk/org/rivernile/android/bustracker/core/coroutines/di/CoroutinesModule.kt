@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.coroutines.di
 
 import dagger.Module
 import dagger.Provides
@@ -32,10 +32,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
 import javax.inject.Singleton
 
 /**
@@ -44,7 +40,7 @@ import javax.inject.Singleton
  * @author Niall Scott
  */
 @Module
-internal class CoroutinesModule {
+class CoroutinesModule {
 
     @Provides
     @Singleton

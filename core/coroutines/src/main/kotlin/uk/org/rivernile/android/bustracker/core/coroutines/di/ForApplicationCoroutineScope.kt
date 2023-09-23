@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,19 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.coroutines.di
 
-import dagger.Module
-import uk.org.rivernile.android.bustracker.core.coroutines.di.CoroutinesModule
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * The core Dagger [Module].
+ * This annotation defines a Dagger qualifier for the application Kotlin coroutine scope.
  *
  * @author Niall Scott
  */
-@Module(includes = [
-    ApiModule::class,
-    CoroutinesModule::class,
-    TwitterModule::class
-])
-interface CoreModule
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForApplicationCoroutineScope

@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
 import uk.org.rivernile.android.bustracker.core.twitter.LatestTweetsResult
 import uk.org.rivernile.android.bustracker.core.twitter.TwitterRepository
@@ -62,9 +62,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class TwitterUpdatesFragmentViewModel @Inject constructor(
-        private val twitterRepository: TwitterRepository,
-        private val timeUtils: TimeUtils,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
+    private val twitterRepository: TwitterRepository,
+    private val timeUtils: TimeUtils,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModel() {
 
     private val refreshTweetsFlow = MutableStateFlow(-1L)

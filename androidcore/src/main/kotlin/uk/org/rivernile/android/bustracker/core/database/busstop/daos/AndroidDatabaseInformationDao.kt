@@ -42,7 +42,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.database.busstop.DatabaseInformationContract
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.DatabaseMetadata
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume

@@ -49,9 +49,9 @@ import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.proximity.ProximityAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.database.busstop.entities.StopName
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
 
@@ -69,13 +69,13 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AddProximityAlertDialogFragmentViewModel @Inject constructor(
-        private val savedState: SavedStateHandle,
-        private val permissionsTracker: PermissionsTracker,
-        private val busStopsRepository: BusStopsRepository,
-        private val uiStateCalculator: UiStateCalculator,
-        private val alertsRepository: AlertsRepository,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    private val savedState: SavedStateHandle,
+    private val permissionsTracker: PermissionsTracker,
+    private val busStopsRepository: BusStopsRepository,
+    private val uiStateCalculator: UiStateCalculator,
+    private val alertsRepository: AlertsRepository,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
 

@@ -33,8 +33,8 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForServiceCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForMainDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForServiceCoroutineScope
 
 /**
  * This [Module] provides dependencies for [android.app.Service]s.
