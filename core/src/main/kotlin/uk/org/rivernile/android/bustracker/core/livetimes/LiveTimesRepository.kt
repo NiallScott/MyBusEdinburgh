@@ -40,8 +40,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class LiveTimesRepository @Inject internal constructor(
-        private val trackerEndpoint: TrackerEndpoint,
-        private val liveTimesMapper: LiveTimesMapper) {
+    private val trackerEndpoint: TrackerEndpoint,
+    private val liveTimesMapper: LiveTimesMapper) {
 
     /**
      * Get a [Flow] object which contains the [LiveTimesResult] of loading [LiveTimes].

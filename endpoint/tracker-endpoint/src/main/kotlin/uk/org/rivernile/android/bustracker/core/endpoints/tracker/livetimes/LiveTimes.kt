@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,36 +24,18 @@
  *
  */
 
-plugins {
-    kotlin("jvm")
-    kotlin("kapt")
-    id("kotlinx-serialization")
-}
+package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
-dependencies {
-
-    api(project(":core:connectivity"))
-    api(project(":core:coroutines"))
-    api(project(":core:logging"))
-    api(project(":database:settings-db-core"))
-    api(project(":endpoint:tracker-endpoint"))
-
-    // Kotlin
-    api(libs.coroutines.core)
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-
-    // (De-)serialisation
-    api(libs.kotlin.serialization.json)
-
-    // Okhttp
-    api(libs.okhttp)
-
-    // Retrofit
-    api(libs.retrofit)
-
-    // Testing
-    testImplementation(project(":testutils"))
-}
+/**
+ * `LiveTimes` maps unique stop codes to [Stop] instances. It also returns data that is global to
+ * the live times request.
+ *
+ * @property stops A [Map] of stop code to the stop result.
+ * @property receiveTime The time this data was received at.
+ * @property hasGlobalDisruption `true` if there is a global disruption on the network.
+ * @author Niall Scott
+ */
+data class LiveTimes(
+    val stops: Map<String, Stop>,
+    val receiveTime: Long,
+    val hasGlobalDisruption: Boolean)

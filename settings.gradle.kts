@@ -56,5 +56,6 @@ include(
     ":database:settings-db-android",
     ":database:settings-db-core",
     ":edinburgh",
+    ":endpoint:tracker-endpoint",
     ":androidcore",
     ":testutils")

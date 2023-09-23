@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,15 +27,21 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 /**
- * `LiveTimes` maps unique stop codes to [Stop] instances. It also returns data that is global to
- * the live times request.
+ * A `Service` represents a single service that stops at a single stop. It holds a collection of
+ * [Vehicle]s (or rather, live vehicle departures).
  *
- * @property stops A [Map] of stop code to the stop result.
- * @property receiveTime The time this data was received at.
- * @property hasGlobalDisruption `true` if there is a global disruption on the network.
+ * @property serviceName The display name of the service.
+ * @property vehicles A [List] of [Vehicle]s for this service.
+ * @property operator An optional operator name for the service.
+ * @property routeDescription An optional textual description of the route.
+ * @property isDisrupted `true` if the service is currently disrupted.
+ * @property isDiverted `true` if the service is currently diverted from its published route.
  * @author Niall Scott
  */
-data class LiveTimes(
-        val stops: Map<String, Stop>,
-        val receiveTime: Long,
-        val hasGlobalDisruption: Boolean)
+data class Service(
+    val serviceName: String,
+    val vehicles: List<Vehicle>,
+    val operator: String?,
+    val routeDescription: String?,
+    val isDisrupted: Boolean,
+    val isDiverted: Boolean)

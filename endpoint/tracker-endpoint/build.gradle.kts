@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,20 +24,11 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
+plugins {
+    kotlin("jvm")
+}
 
-/**
- * A `Stop` represents a single stop returned from the real-time system. It holds a [List] of
- * [Service]s which in turn hold a [List] of [Vehicle]s which hold the departure times.
- *
- * @property stopCode The unique identifier of the stop.
- * @property stopName The display name of the stop.
- * @property services The [List] of [Service]s for this stop.
- * @property isDisrupted `true` if there is a current disruption affecting this stop.
- * @author Niall Scott
- */
-data class Stop(
-        val stopCode: String,
-        val stopName: String?,
-        val services: List<Service>,
-        val isDisrupted: Boolean)
+dependencies {
+
+    implementation(project(":core:coroutines"))
+}

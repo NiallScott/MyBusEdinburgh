@@ -31,6 +31,7 @@ plugins {
 
 dependencies {
     api(project(":core"))
+    implementation(project(":endpoint:tracker-endpoint"))
 
     // Dagger 2
     implementation(libs.dagger.core)
