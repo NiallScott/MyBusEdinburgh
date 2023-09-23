@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.database.settings.di
 
 import android.content.Context
 import androidx.room.Room

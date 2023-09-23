@@ -29,7 +29,6 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     kotlin("plugin.allopen")
-    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
 
@@ -71,12 +70,6 @@ android {
         }
     }
 
-    sourceSets {
-        // This adds the generated Room schema files to the instrumentation test assets so that they
-        // can be loaded at test time.
-        getByName("androidTest").assets.srcDir("$projectDir/schemas")
-    }
-
     packaging {
         resources {
             excludes += setOf(
@@ -91,16 +84,6 @@ android {
     useLibrary("android.test.mock")
 }
 
-ksp {
-    /*
-     * This is used to export the Room schema out to a JSON file in the module's "schemas"
-     * directory. We want to do this so that we can compare schema versions after upgrades.
-     * It's also possible for us to do automated testing using the JSON files to test database
-     * migrations.
-     */
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
 allOpen {
     annotation("uk.org.rivernile.android.bustracker.core.utils.OpenClass")
 }
@@ -108,6 +91,7 @@ allOpen {
 dependencies {
     // Our code module
     api(project(":core"))
+    implementation(project(":database:settings-db-android"))
 
     // Kotlin
     implementation(libs.coroutines.android)
@@ -123,10 +107,6 @@ dependencies {
 
     // AndroidX
     implementation(libs.androidx.appcompat)
-
-    // Room (ORM)
-    implementation(libs.androidx.room.core)
-    ksp(libs.androidx.room.compiler)
 
     // WorkManager
     api(libs.androidx.work)
@@ -154,7 +134,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.mockito.android)
-    androidTestImplementation(libs.androidx.room.test)
     androidTestImplementation(libs.hilt.test)
     kaptAndroidTest(libs.hilt.android.compiler)
 

@@ -181,7 +181,6 @@ dependencies {
     androidTestImplementation(libs.androidx.fragment.testing)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.espresso.intents)
-    androidTestImplementation(libs.hamcrest)
     androidTestImplementation(libs.mockito.android)
 
     testImplementation(project(":testutils"))
