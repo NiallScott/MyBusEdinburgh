@@ -32,6 +32,8 @@ plugins {
 
 dependencies {
 
+    api(project(":database:settings-db-core"))
+
     // Kotlin
     api(libs.coroutines.core)
 
