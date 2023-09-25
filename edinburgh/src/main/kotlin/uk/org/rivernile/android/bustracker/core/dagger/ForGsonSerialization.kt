@@ -24,25 +24,14 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.dagger
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import javax.inject.Qualifier
 
 /**
- * A [Module] for providing serialisation dependencies.
- *
- * @author Niall Scott
+ * This annotation defines a Dagger qualifier for Kotlin JSON serialisation.
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
-
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForGsonSerialization

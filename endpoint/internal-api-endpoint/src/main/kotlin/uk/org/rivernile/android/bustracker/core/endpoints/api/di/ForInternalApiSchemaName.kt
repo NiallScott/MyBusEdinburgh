@@ -24,25 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.api.di
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This annotation defines a Dagger qualifier for the API schema name.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
-
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForInternalApiSchemaName

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This class describes a user object within the Twitter API.
  *
+ * @property name The user's display name.
+ * @property profileImageUrl The URL of the profile image.
+ * @property screenName The username.
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
-
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
-}
+@Serializable
+internal data class JsonUser(
+    @SerialName("name") val name: String? = null,
+    @SerialName("profile_image_url_https") val profileImageUrl: String? = null,
+    @SerialName("screen_name") val screenName: String? = null)

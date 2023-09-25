@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
-
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.core.endpoints.api
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This data class describes the latest database available for this app.
  *
+ * @property schemaVersion The version of the database schema.
+ * @property topologyId The topology ID to represent the version of the data.
+ * @property databaseUrl The URL of the database.
+ * @property checksum A checksum to use to verify the consistency of the database file.
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
-
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
-}
+data class DatabaseVersion(
+    val schemaVersion: String,
+    val topologyId: String,
+    val databaseUrl: String,
+    val checksum: String)

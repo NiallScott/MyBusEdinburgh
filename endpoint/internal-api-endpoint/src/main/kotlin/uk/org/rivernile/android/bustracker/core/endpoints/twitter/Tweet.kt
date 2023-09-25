@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.twitter
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import java.util.Date
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This class defines a Tweet returned from the Twitter API.
  *
+ * @property body The body of the Tweet.
+ * @property displayName The display name of the Tweet author.
+ * @property time The create time of the Tweet.
+ * @property profileImageUrl A URL to the profile image.
+ * @property profileUrl A URL to the profile.
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
-
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
-}
+data class Tweet(
+    val body: String,
+    val displayName: String,
+    val time: Date,
+    val profileImageUrl: String?,
+    val profileUrl: String)

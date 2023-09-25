@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,28 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This interface defines a Retrofit interface for accessing Tweets.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
+internal interface TwitterService {
 
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
+    /**
+     * Get the latest Tweets.
+     *
+     * @param apiKey The API key.
+     * @param appName The app name, so the server knows which Tweets to return.
+     * @return A Retrofit [Response] object.
+     */
+    @GET("TwitterStatuses")
+    suspend fun getLatestTweets(
+        @Query("key") apiKey: String,
+        @Query("appName") appName: String): Response<List<JsonTweet>?>
 }

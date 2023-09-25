@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,36 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+plugins {
+    kotlin("jvm")
+    kotlin("kapt")
+    id("kotlinx-serialization")
+}
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+dependencies {
 
-/**
- * A [Module] for providing serialisation dependencies.
- *
- * @author Niall Scott
- */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
+    implementation(project(":core:connectivity"))
+    implementation(project(":core:coroutines"))
+    implementation(project(":core:http-core"))
+    implementation(project(":core:logging"))
 
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
+    // Dagger 2
+    implementation(libs.dagger.core)
+    kapt(libs.dagger.compiler)
+
+    // Retrofit
+    implementation(libs.retrofit)
+
+    // Okhttp
+    implementation(libs.okhttp)
+
+    // (De-)serialisation
+    implementation(libs.kotlin.serialization.json)
+
+    // Testing dependencies
+    testImplementation(project(":testutils"))
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
 }

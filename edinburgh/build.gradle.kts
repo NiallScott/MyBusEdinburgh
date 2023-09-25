@@ -37,8 +37,14 @@ dependencies {
     implementation(libs.dagger.core)
     kapt(libs.dagger.compiler)
 
+    // Retrofit
+    implementation(libs.retrofit.converter.gson)
+
     // Edinburgh APIs
     api(libs.edinburgh.bus.tracker.api)
+
+    // (De-)serialisation
+    implementation(libs.gson)
 
     // Tests
     testImplementation(project(":testutils"))

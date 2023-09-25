@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.api.json
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This class represents the JSON structure of the database version.
  *
+ * @property schemaVersion The version of the database schema.
+ * @property topologyId The topology ID to represent the version of the data.
+ * @property databaseUrl The URL of the database.
+ * @property checksum A checksum to use to verify the consistency of the database file.
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
-
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
-}
+@Serializable
+internal data class JsonDatabaseVersion(
+    @SerialName("db_schema_version") val schemaVersion: String? = null,
+    @SerialName("topo_id") val topologyId: String? = null,
+    @SerialName("db_url") val databaseUrl: String? = null,
+    @SerialName("checksum") val checksum: String? = null)

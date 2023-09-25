@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
-
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.core.endpoints.twitter
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This defines an interface to interact with an endpoint which contains [Tweet]s.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
+interface TwitterEndpoint {
 
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
+    /**
+     * Get the latest tweets.
+     *
+     * @return The [LatestTweetsResponse] which describes the response.
+     */
+    suspend fun getLatestTweets(): LatestTweetsResponse
 }

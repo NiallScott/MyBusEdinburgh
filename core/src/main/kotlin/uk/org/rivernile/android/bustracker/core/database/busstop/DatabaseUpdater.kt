@@ -69,8 +69,8 @@ class DatabaseUpdater @Inject internal constructor(
      * @return `true` when the update succeeded, otherwise `false`.
      */
     suspend fun updateDatabase(
-            databaseVersion: DatabaseVersion,
-            socketFactory: SocketFactory? = null): Boolean {
+        databaseVersion: DatabaseVersion,
+        socketFactory: SocketFactory? = null): Boolean {
         val downloadFile = databaseUtils.getDatabasePath(
                 "busstops.${timeUtils.currentTimeMills}.db_temp")
         databaseUtils.ensureDatabasePathExists()

@@ -51,11 +51,13 @@ include(
     ":core:connectivity",
     ":core:connectivity-android",
     ":core:coroutines",
+    ":core:http-core",
     ":core:logging",
     ":core:logging-android",
     ":database:settings-db-android",
     ":database:settings-db-core",
     ":edinburgh",
+    ":endpoint:internal-api-endpoint",
     ":endpoint:tracker-endpoint",
     ":androidcore",
     ":testutils")

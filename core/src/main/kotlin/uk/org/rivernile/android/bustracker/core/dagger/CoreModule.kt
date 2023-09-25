@@ -28,6 +28,9 @@ package uk.org.rivernile.android.bustracker.core.dagger
 
 import dagger.Module
 import uk.org.rivernile.android.bustracker.core.coroutines.di.CoroutinesModule
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ApiModule
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModule
+import uk.org.rivernile.android.bustracker.core.http.di.CoreHttpModule
 
 /**
  * The core Dagger [Module].
@@ -37,6 +40,7 @@ import uk.org.rivernile.android.bustracker.core.coroutines.di.CoroutinesModule
 @Module(includes = [
     ApiModule::class,
     CoroutinesModule::class,
+    CoreHttpModule::class,
     TwitterModule::class
 ])
 interface CoreModule

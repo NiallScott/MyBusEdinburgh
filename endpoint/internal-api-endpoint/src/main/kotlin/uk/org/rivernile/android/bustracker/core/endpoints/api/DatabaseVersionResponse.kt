@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
-
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+package uk.org.rivernile.android.bustracker.core.endpoints.api
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This sealed interface and its children define the possible response from requesting the database
+ * version.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
+sealed interface DatabaseVersionResponse {
 
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
+    /**
+     * The response was successful.
+     *
+     * @property databaseVersion The database version properties.
+     */
+    data class Success(
+        val databaseVersion: DatabaseVersion) : DatabaseVersionResponse
+
+    /**
+     * This interface describes error which can arise from getting the database version.
+     */
+    sealed interface Error : DatabaseVersionResponse {
+
+        /**
+         * This response was not successful due to an IO error.
+         *
+         * @property throwable The [Throwable] which caused this error.
+         */
+        data class Io(
+            val throwable: Throwable) : Error
+
+        /**
+         * There was an error from the server.
+         */
+        object ServerError : Error
+    }
 }

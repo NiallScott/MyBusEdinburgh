@@ -83,6 +83,7 @@ retrofit-converter-kotlin-serialization = { module = "com.jakewharton.retrofit:r
 
 # (De-)serialisation
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlin-serialization" }
+gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
 
 # Edinburgh Bus Tracker API
 edinburgh-bus-tracker-api = { module = "uk.org.rivernile.edinburghbustrackerapi:api", version.ref = "edinburgh_bus_tracker_api" }

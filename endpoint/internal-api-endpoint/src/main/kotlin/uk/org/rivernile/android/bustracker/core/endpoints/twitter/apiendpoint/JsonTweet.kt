@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,23 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.twitter.apiendpoint
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
- * A [Module] for providing serialisation dependencies.
+ * This object describes a Tweet object within the Twitter API.
  *
+ * @property createdAt The timestamp given as a [String].
+ * @property text The Tweet body text.
+ * @property entities Optional included Tweet entities.
+ * @property user Tweet author user details.
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module
-class SerialisationModule {
-
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
-}
+@Serializable
+internal data class JsonTweet internal constructor(
+    @SerialName("created_at") internal val createdAt: String? = null,
+    @SerialName("text") internal val text: String? = null,
+    @SerialName("entities") internal val entities: JsonEntities? = null,
+    @SerialName("user") internal val user: JsonUser? = null)

@@ -34,8 +34,10 @@ dependencies {
 
     api(project(":core:connectivity"))
     api(project(":core:coroutines"))
+    api(project(":core:http-core"))
     api(project(":core:logging"))
     api(project(":database:settings-db-core"))
+    api(project(":endpoint:internal-api-endpoint"))
     api(project(":endpoint:tracker-endpoint"))
 
     // Kotlin

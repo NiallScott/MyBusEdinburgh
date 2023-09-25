@@ -24,65 +24,41 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.api.di
 
-import com.google.gson.Gson
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
-import uk.org.rivernile.android.bustracker.core.di.ForTracker
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
-import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
-import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
-import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
+import uk.org.rivernile.android.bustracker.core.endpoints.api.ApiEndpoint
+import uk.org.rivernile.android.bustracker.core.endpoints.api.json.JsonApiEndpoint
+import uk.org.rivernile.android.bustracker.core.http.di.ForKotlinJsonSerialization
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 /**
- * This [Module] provides dependencies for the Edinburgh Bus Tracker API.
+ * This [Module] provides dependencies for the API.
  *
  * @author Niall Scott
  */
-@Module(includes = [ BusTrackerModule.Bindings::class ])
-internal class BusTrackerModule {
+@Module(includes = [ ApiModule.Bindings::class ])
+class ApiModule {
 
     @Provides
-    @Singleton
-    fun provideGson(): Gson = Gson()
-
-    @Provides
-    @Singleton
-    @ForGsonSerialization
-    fun provideGsonConverterFactory(gson: Gson): Converter.Factory =
-        GsonConverterFactory.create(gson)
-
-    @Provides
-    fun provideApiKeyGenerator(@ForBusTrackerApiKey apiKey: String): ApiKeyGenerator =
-        ApiKeyGenerator(apiKey)
-
-    @Provides
-    fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghBusTrackerApi =
-        retrofit.create()
-
-    @Provides
-    @ForTracker
+    @ForInternalApi
     fun provideRetrofit(
-        @ForTracker baseUrl: String,
-        @ForTracker okHttpClient: OkHttpClient,
-        @ForGsonSerialization gsonConverterFactory: Converter.Factory): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(okHttpClient)
-            .addConverterFactory(gsonConverterFactory)
-            .build()
+        @ForInternalApi baseUrl: String,
+        @ForInternalApi okHttpClient: OkHttpClient,
+        @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory): Retrofit =
+            Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .client(okHttpClient)
+                .addConverterFactory(jsonConverterFactory)
+                .build()
 
     @Provides
-    @ForTracker
+    @ForInternalApi
     fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
         okHttpClient.newBuilder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -92,10 +68,10 @@ internal class BusTrackerModule {
             .build()
 
     @Module
-    interface Bindings {
+    internal interface Bindings {
 
         @Suppress("unused")
         @Binds
-        fun bindTrackerEndpoint(edinburghTrackerEndpoint: EdinburghTrackerEndpoint): TrackerEndpoint
+        fun bindApiEndpoint(jsonApiEndpoint: JsonApiEndpoint): ApiEndpoint
     }
 }
