@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,15 +24,41 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.location
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    kotlin("kapt")
+}
 
-/**
- * This class contains properties for a device's location.
- *
- * @property latitude The latitude.
- * @property longitude The longitude.
- * @author Niall Scott
- */
-data class DeviceLocation(
-        val latitude: Double,
-        val longitude: Double)
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.location"
+
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+
+        getByName("debug") {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    implementation(project(":core:coroutines"))
+    api(project(":core:location"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Play Services
+    implementation(libs.play.services.location)
+}

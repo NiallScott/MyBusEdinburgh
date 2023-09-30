@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,9 +41,9 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.launch
+import uk.org.rivernile.android.bustracker.core.location.AndroidLocationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
-import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import javax.inject.Inject
 
 /**
@@ -56,8 +56,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class PlatformLocationSource @Inject constructor(
-        private val locationManager: LocationManager,
-        private val permissionChecker: AndroidPermissionChecker) : LocationSource {
+    private val locationManager: LocationManager,
+    private val permissionChecker: AndroidLocationPermissionChecker) : LocationSource {
 
     companion object {
 
@@ -117,11 +117,11 @@ internal class PlatformLocationSource @Inject constructor(
                         // as a coroutine is immediately launched from there, thus not blocking the
                         // thread.
                         locationManager.requestLocationUpdates(
-                                it,
-                                USER_VISIBLE_LOCATION_MIN_TIME_MILLIS,
-                                USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS,
-                                locationListener,
-                                Looper.getMainLooper())
+                            it,
+                            USER_VISIBLE_LOCATION_MIN_TIME_MILLIS,
+                            USER_VISIBLE_LOCATION_MIN_DISTANCE_METERS,
+                            locationListener,
+                            Looper.getMainLooper())
                     }
                 }
 
@@ -156,7 +156,7 @@ internal class PlatformLocationSource @Inject constructor(
     private fun getBestInitialLocation(): Location? {
         return locationManager.allProviders.fold<String, Location?>(null) { best, provider ->
             locationManager.getLastKnownLocation(provider)
-                    ?.takeIf { isBetterLocation(it, best) } ?: best
+                ?.takeIf { isBetterLocation(it, best) } ?: best
         }
     }
 
@@ -194,8 +194,8 @@ internal class PlatformLocationSource @Inject constructor(
 
         // Determine location quality using a combination of timeliness and accuracy.
         return accuracyDelta < 0f ||
-                (isNewer && !isLessAccurate) ||
-                (isNewer && !isSignificantlyLessAccurate &&
-                        newLocation.provider == currentBest.provider)
+            (isNewer && !isLessAccurate) ||
+            (isNewer && !isSignificantlyLessAccurate &&
+                newLocation.provider == currentBest.provider)
     }
 }

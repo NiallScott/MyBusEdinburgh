@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,43 +24,25 @@
  *
  */
 
-plugins {
-    kotlin("jvm")
-    kotlin("kapt")
-    id("kotlinx-serialization")
-}
+package uk.org.rivernile.android.bustracker.core.location
 
-dependencies {
+import android.location.LocationManager
+import android.os.Build
+import androidx.annotation.RequiresApi
+import javax.inject.Inject
 
-    api(project(":core:connectivity"))
-    api(project(":core:coroutines"))
-    api(project(":core:http-core"))
-    api(project(":core:http-file-downloader"))
-    api(project(":core:livetimes"))
-    api(project(":core:location"))
-    api(project(":core:logging"))
-    api(project(":core:time"))
-    api(project(":core:twitter"))
-    api(project(":database:settings-db-core"))
-    api(project(":endpoint:internal-api-endpoint"))
-    api(project(":endpoint:tracker-endpoint"))
+/**
+ * This is the [Build.VERSION_CODES.P] and above implementation of [IsLocationEnabledFetcher].
+ *
+ * [LocationManager.isLocationEnabled] was introduced in [Build.VERSION_CODES.P], which is now the
+ * preferred way to get the location enabled state.
+ *
+ * @param locationManager The platform [LocationManager].
+ * @author Niall Scott
+ */
+@RequiresApi(Build.VERSION_CODES.P)
+internal class V28IsLocationEnabledFetcher @Inject constructor(
+    private val locationManager: LocationManager) : IsLocationEnabledFetcher {
 
-    // Kotlin
-    api(libs.coroutines.core)
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-
-    // (De-)serialisation
-    api(libs.kotlin.serialization.json)
-
-    // Okhttp
-    api(libs.okhttp)
-
-    // Retrofit
-    api(libs.retrofit)
-
-    // Testing
-    testImplementation(project(":testutils"))
+    override suspend fun isLocationEnabled() = locationManager.isLocationEnabled
 }

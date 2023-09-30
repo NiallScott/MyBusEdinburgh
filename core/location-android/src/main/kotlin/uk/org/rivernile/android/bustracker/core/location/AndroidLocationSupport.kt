@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -52,10 +52,10 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class AndroidLocationSupport @Inject constructor(
-        private val context: Context,
-        private val packageManager: PackageManager,
-        private val locationManager: LocationManager,
-        private val isLocationEnabledFetcher: IsLocationEnabledFetcher)
+    private val context: Context,
+    private val packageManager: PackageManager,
+    private val locationManager: LocationManager,
+    private val isLocationEnabledFetcher: IsLocationEnabledFetcher)
     : HasLocationFeatureDetector, IsLocationEnabledDetector, DistanceCalculator {
 
     override val hasLocationFeature get() =
@@ -74,7 +74,7 @@ internal class AndroidLocationSupport @Inject constructor(
         }
 
         context.registerReceiver(locationEnabledReceiver,
-                IntentFilter(LocationManager.MODE_CHANGED_ACTION))
+            IntentFilter(LocationManager.MODE_CHANGED_ACTION))
         getAndSendIsLocationEnabled(channel)
 
         awaitClose {
@@ -88,11 +88,11 @@ internal class AndroidLocationSupport @Inject constructor(
     override fun distanceBetween(first: DeviceLocation, second: DeviceLocation): Float {
         val results = FloatArray(1)
         Location.distanceBetween(
-                first.latitude,
-                first.longitude,
-                second.latitude,
-                second.longitude,
-                results)
+            first.latitude,
+            first.longitude,
+            second.latitude,
+            second.longitude,
+            results)
 
         return results[0]
     }

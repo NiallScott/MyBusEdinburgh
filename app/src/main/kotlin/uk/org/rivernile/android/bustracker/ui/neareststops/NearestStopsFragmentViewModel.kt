@@ -78,16 +78,16 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class NearestStopsFragmentViewModel @Inject constructor(
-        private val savedState: SavedStateHandle,
-        servicesRepository: ServicesRepository,
-        private val busStopsRepository: BusStopsRepository,
-        favouritesStateRetriever: FavouritesStateRetriever,
-        alertsStateRetriever: AlertsStateRetriever,
-        featureRepository: FeatureRepository,
-        private val locationRepository: LocationRepository,
-        private val preferenceRepository: PreferenceRepository,
-        uiStateRetriever: UiStateRetriever,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    private val savedState: SavedStateHandle,
+    servicesRepository: ServicesRepository,
+    private val busStopsRepository: BusStopsRepository,
+    favouritesStateRetriever: FavouritesStateRetriever,
+    alertsStateRetriever: AlertsStateRetriever,
+    featureRepository: FeatureRepository,
+    private val locationRepository: LocationRepository,
+    private val preferenceRepository: PreferenceRepository,
+    uiStateRetriever: UiStateRetriever,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
 

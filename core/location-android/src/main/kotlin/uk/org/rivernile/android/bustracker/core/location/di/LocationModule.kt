@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.location.di
 
 import android.content.Context
 import android.os.Build
@@ -58,8 +58,8 @@ internal class LocationModule {
 
     @Provides
     fun provideIsLocationEnabledFetcher(
-            legacyIsLocationEnabledFetcher: Provider<LegacyIsLocationEnabledFetcher>,
-            v28IsLocationEnabledFetcher: Provider<V28IsLocationEnabledFetcher>)
+        legacyIsLocationEnabledFetcher: Provider<LegacyIsLocationEnabledFetcher>,
+        v28IsLocationEnabledFetcher: Provider<V28IsLocationEnabledFetcher>)
             : IsLocationEnabledFetcher {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             v28IsLocationEnabledFetcher.get()
@@ -70,9 +70,9 @@ internal class LocationModule {
 
     @Provides
     fun provideLocationSource(
-            context: Context,
-            platformLocationSourceProvider: Provider<PlatformLocationSource>,
-            googlePlayLocationSourceProvider: Provider<GooglePlayLocationSource>): LocationSource {
+        context: Context,
+        platformLocationSourceProvider: Provider<PlatformLocationSource>,
+        googlePlayLocationSourceProvider: Provider<GooglePlayLocationSource>): LocationSource {
         return if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) ==
                 ConnectionResult.SUCCESS) {
             googlePlayLocationSourceProvider.get()
@@ -88,16 +88,16 @@ internal class LocationModule {
         @Suppress("unused")
         @Binds
         fun bindHasLocationFeatureDetector(
-                androidLocationSupport: AndroidLocationSupport): HasLocationFeatureDetector
+            androidLocationSupport: AndroidLocationSupport): HasLocationFeatureDetector
 
         @Suppress("unused")
         @Binds
         fun bindIsLocationEnabledDetector(
-                androidLocationSupport: AndroidLocationSupport): IsLocationEnabledDetector
+            androidLocationSupport: AndroidLocationSupport): IsLocationEnabledDetector
 
         @Suppress("unused")
         @Binds
         fun bindDistanceCalculator(
-                androidLocationSupport: AndroidLocationSupport): DistanceCalculator
+            androidLocationSupport: AndroidLocationSupport): DistanceCalculator
     }
 }

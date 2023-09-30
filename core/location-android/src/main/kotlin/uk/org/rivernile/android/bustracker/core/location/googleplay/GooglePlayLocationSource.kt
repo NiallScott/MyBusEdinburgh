@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,9 +44,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import uk.org.rivernile.android.bustracker.core.location.AndroidLocationPermissionChecker
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationSource
-import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -60,8 +60,8 @@ import kotlin.coroutines.suspendCoroutine
  * @author Niall Scott
  */
 internal class GooglePlayLocationSource @Inject constructor(
-        private val fusedLocationProviderClient: FusedLocationProviderClient,
-        private val permissionChecker: AndroidPermissionChecker) : LocationSource {
+    private val fusedLocationProviderClient: FusedLocationProviderClient,
+    private val permissionChecker: AndroidLocationPermissionChecker) : LocationSource {
 
     companion object {
 
@@ -72,11 +72,11 @@ internal class GooglePlayLocationSource @Inject constructor(
 
     private val userVisibleLocationRequest by lazy {
         LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                USER_VISIBLE_LOCATION_INTERVAL_MILLIS)
-                .setMinUpdateIntervalMillis(USER_VISIBLE_LOCATION_FASTEST_INTERVAL_MILLIS)
-                .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-                .build()
+            Priority.PRIORITY_HIGH_ACCURACY,
+            USER_VISIBLE_LOCATION_INTERVAL_MILLIS)
+            .setMinUpdateIntervalMillis(USER_VISIBLE_LOCATION_FASTEST_INTERVAL_MILLIS)
+            .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+            .build()
     }
 
     override val userVisibleLocationFlow: Flow<DeviceLocation> get() {
@@ -101,9 +101,9 @@ internal class GooglePlayLocationSource @Inject constructor(
                 }
 
                 fusedLocationProviderClient.requestLocationUpdates(
-                        userVisibleLocationRequest,
-                        callback,
-                        Looper.getMainLooper())
+                    userVisibleLocationRequest,
+                    callback,
+                    Looper.getMainLooper())
 
                 awaitClose {
                     fusedLocationProviderClient.removeLocationUpdates(callback)

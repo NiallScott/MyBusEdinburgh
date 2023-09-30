@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -48,10 +48,10 @@ import javax.inject.Singleton
  */
 @Singleton
 class LocationRepository @Inject internal constructor(
-        private val hasLocationFeatureDetector: HasLocationFeatureDetector,
-        private val isLocationEnabledDetector: IsLocationEnabledDetector,
-        private val locationSource: LocationSource,
-        private val distanceCalculator: DistanceCalculator) {
+    private val hasLocationFeatureDetector: HasLocationFeatureDetector,
+    private val isLocationEnabledDetector: IsLocationEnabledDetector,
+    private val locationSource: LocationSource,
+    private val distanceCalculator: DistanceCalculator) {
 
     /**
      * Does this device have location-aware features or not?
@@ -90,8 +90,8 @@ class LocationRepository @Inject internal constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val userVisibleLocationFlow: Flow<DeviceLocation> get() = if (hasLocationFeature) {
         isLocationEnabledFlow
-                .distinctUntilChanged()
-                .flatMapLatest(this::createUserVisibleLocationFlow)
+            .distinctUntilChanged()
+            .flatMapLatest(this::createUserVisibleLocationFlow)
     } else {
         // The location feature detection is a hard no in this case. Return an empty Flow.
         emptyFlow()
@@ -106,7 +106,7 @@ class LocationRepository @Inject internal constructor(
      * distance could not be calculated.
      */
     fun distanceBetween(first: DeviceLocation, second: DeviceLocation): Float =
-            distanceCalculator.distanceBetween(first, second)
+        distanceCalculator.distanceBetween(first, second)
 
     /**
      * Create a [Flow] which emits [DeviceLocation] objects for user visible features. This is

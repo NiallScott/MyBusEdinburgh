@@ -46,9 +46,9 @@ import javax.inject.Inject
  */
 @ViewModelScoped
 class PermissionHandler @Inject constructor(
-        private val savedState: SavedStateHandle,
-        private val locationRepository: LocationRepository,
-        private val timeUtils: TimeUtils) {
+    private val savedState: SavedStateHandle,
+    private val locationRepository: LocationRepository,
+    private val timeUtils: TimeUtils) {
 
     companion object {
 
