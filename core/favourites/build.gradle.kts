@@ -24,47 +24,22 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
-    }
+plugins {
+    kotlin("jvm")
 }
 
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+dependencies {
 
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-    }
+    implementation(project(":core:coroutines"))
+    implementation(project(":database:settings-db-core"))
+
+    // Dependency injection
+    implementation(libs.javax.inject)
+
+    // Testing dependencies
+    testImplementation(project(":testutils"))
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
 }
-
-rootProject.name = "MyBusEdinburgh"
-
-include(
-    ":app",
-    ":core",
-    ":core:connectivity",
-    ":core:connectivity-android",
-    ":core:coroutines",
-    ":core:favourites",
-    ":core:http-core",
-    ":core:http-file-downloader",
-    ":core:livetimes",
-    ":core:location",
-    ":core:location-android",
-    ":core:logging",
-    ":core:logging-android",
-    ":core:time",
-    ":core:twitter",
-    ":database:settings-db-android",
-    ":database:settings-db-core",
-    ":edinburgh",
-    ":endpoint:internal-api-endpoint",
-    ":endpoint:tracker-endpoint",
-    ":androidcore",
-    ":testutils")

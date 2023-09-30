@@ -59,10 +59,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class DisplayStopDataActivityViewModel @Inject constructor(
-        private val busStopsRepository: BusStopsRepository,
-        private val favouritesRepository: FavouritesRepository,
-        private val alertsRepository: AlertsRepository,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    private val busStopsRepository: BusStopsRepository,
+    private val favouritesRepository: FavouritesRepository,
+    private val alertsRepository: AlertsRepository,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     /**
      * This property is used to get and set the stop code which should be shown.

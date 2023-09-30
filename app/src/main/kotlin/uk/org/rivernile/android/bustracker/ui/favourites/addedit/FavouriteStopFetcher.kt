@@ -49,8 +49,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class FavouriteStopFetcher @Inject constructor(
-        private val favouritesRepository: FavouritesRepository,
-        private val busStopsRepository: BusStopsRepository) {
+    private val favouritesRepository: FavouritesRepository,
+    private val busStopsRepository: BusStopsRepository) {
 
     /**
      * Load combined stop details for the given stop code.
@@ -82,9 +82,9 @@ class FavouriteStopFetcher @Inject constructor(
      * @return A new [Flow] which loads the [FavouriteStop] for the given stop code.
      */
     private fun createFavouriteStopFlow(stopCode: String): Flow<FavouriteResult> =
-            favouritesRepository.getFavouriteStopFlow(stopCode)
-                    .map { FavouriteResult.Item(it) }
-                    .onStart<FavouriteResult> { emit(FavouriteResult.InProgress) }
+        favouritesRepository.getFavouriteStopFlow(stopCode)
+            .map { FavouriteResult.Item(it) }
+            .onStart<FavouriteResult> { emit(FavouriteResult.InProgress) }
 
     /**
      * Create a new [Flow] which loads the [StopName] for the given stop code and emits
@@ -94,9 +94,9 @@ class FavouriteStopFetcher @Inject constructor(
      * @return A new [Flow] which loads the [StopName] for the given stop code.
      */
     private fun createStopNameFlow(stopCode: String): Flow<StopNameResult> =
-            busStopsRepository.getNameForStopFlow(stopCode)
-                    .map { StopNameResult.Item(it) }
-                    .onStart<StopNameResult> { emit(StopNameResult.InProgress) }
+        busStopsRepository.getNameForStopFlow(stopCode)
+            .map { StopNameResult.Item(it) }
+            .onStart<StopNameResult> { emit(StopNameResult.InProgress) }
 
     /**
      * This class encapsulates a result from loading a [FavouriteStop] from storage.
@@ -116,7 +116,7 @@ class FavouriteStopFetcher @Inject constructor(
          * @property favouriteStop The loaded [FavouriteStop]. This may be `null` if it does not exist.
          */
         data class Item(
-                val favouriteStop: FavouriteStop?) : FavouriteResult
+            val favouriteStop: FavouriteStop?) : FavouriteResult
     }
 
     /**
@@ -137,6 +137,6 @@ class FavouriteStopFetcher @Inject constructor(
          * @property stopName The loaded [StopName]. This may be `null` if it does not exist.
          */
         data class Item(
-                val stopName: StopName?) : StopNameResult
+            val stopName: StopName?) : StopNameResult
     }
 }

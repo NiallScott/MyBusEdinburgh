@@ -46,17 +46,17 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class FavouriteStopsRetriever @Inject constructor(
-        private val favouritesRepository: FavouritesRepository,
-        private val serviceStopsRepository: ServiceStopsRepository) {
+    private val favouritesRepository: FavouritesRepository,
+    private val serviceStopsRepository: ServiceStopsRepository) {
 
     /**
      * This produces a [Flow] which emits [List]s of [UiFavouriteStop]s.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val allFavouriteStopsFlow: Flow<List<UiFavouriteStop>?> get() =
-            favouritesRepository.allFavouriteStopsFlow
-                    .flatMapLatest(this::loadServices)
-                    .onStart { emit(null) }
+        favouritesRepository.allFavouriteStopsFlow
+            .flatMapLatest(this::loadServices)
+            .onStart { emit(null) }
 
     /**
      * Given a [List] of [FavouriteStop]s, load the service listing for each favourite stop and
@@ -74,7 +74,7 @@ class FavouriteStopsRetriever @Inject constructor(
             val stopCodes = f.map(FavouriteStop::stopCode).toHashSet()
 
             serviceStopsRepository.getServicesForStopsFlow(stopCodes)
-                    .map { combineFavouritesAndServices(f, it) }
+                .map { combineFavouritesAndServices(f, it) }
         } ?: flowOf(emptyList())
     }
 
@@ -89,12 +89,12 @@ class FavouriteStopsRetriever @Inject constructor(
      * listing for that stop.
      */
     private fun combineFavouritesAndServices(
-            favouriteStops: List<FavouriteStop>,
-            stopServices: Map<String, List<String>>?) =
+        favouriteStops: List<FavouriteStop>,
+        stopServices: Map<String, List<String>>?) =
             favouriteStops.map {
                 UiFavouriteStop(
-                        it,
-                        stopServices?.get(it.stopCode),
-                        false)
+                    it,
+                    stopServices?.get(it.stopCode),
+                    false)
             }
 }
