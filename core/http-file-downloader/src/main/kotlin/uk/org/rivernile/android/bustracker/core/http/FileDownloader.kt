@@ -64,13 +64,13 @@ class FileDownloader @Inject internal constructor(
      * @return The response from performing this download, to indicate status.
      */
     suspend fun downloadFile(
-            url: String,
-            toLocation: File,
-            socketFactory: SocketFactory? = null): FileDownloadResponse {
+        url: String,
+        toLocation: File,
+        socketFactory: SocketFactory? = null): FileDownloadResponse {
         val okHttpClient = socketFactory?.let {
             this.okHttpClient.newBuilder()
-                    .socketFactory(it)
-                    .build()
+                .socketFactory(it)
+                .build()
         } ?: this.okHttpClient
 
         return withContext(ioDispatcher) {
@@ -81,8 +81,8 @@ class FileDownloader @Inject internal constructor(
                 return@withContext FileDownloadResponse.Error.IoError(e)
             }.use { fileSink ->
                 val request = Request.Builder()
-                        .url(url)
-                        .build()
+                    .url(url)
+                    .build()
 
                 try {
                     val response = okHttpClient.newCall(request).executeAsync()

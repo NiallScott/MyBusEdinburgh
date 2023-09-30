@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -69,100 +69,100 @@ class TwitterRepositoryTest {
     @Test
     fun latestTweetsFlowWithNullListOfTweetsEmitsSuccess() = runTest {
         whenever(twitterEndpoint.getLatestTweets())
-                .thenReturn(LatestTweetsResponse.Success(null))
+            .thenReturn(LatestTweetsResponse.Success(null))
 
         val observer = repository.latestTweetsFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                LatestTweetsResult.InProgress,
-                LatestTweetsResult.Success(null))
+            LatestTweetsResult.InProgress,
+            LatestTweetsResult.Success(null))
     }
 
     @Test
     fun latestTweetsFlowWithEmptyListOfTweetsEmitsSuccess() = runTest {
         whenever(twitterEndpoint.getLatestTweets())
-                .thenReturn(LatestTweetsResponse.Success(emptyList()))
+            .thenReturn(LatestTweetsResponse.Success(emptyList()))
 
         val observer = repository.latestTweetsFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                LatestTweetsResult.InProgress,
-                LatestTweetsResult.Success(emptyList()))
+            LatestTweetsResult.InProgress,
+            LatestTweetsResult.Success(emptyList()))
     }
 
     @Test
     fun latestTweetsFlowWithPopulatedListOfTweetsEmitsSuccess() = runTest {
         val result = listOf(mock<Tweet>())
         whenever(twitterEndpoint.getLatestTweets())
-                .thenReturn(LatestTweetsResponse.Success(result))
+            .thenReturn(LatestTweetsResponse.Success(result))
 
         val observer = repository.latestTweetsFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                LatestTweetsResult.InProgress,
-                LatestTweetsResult.Success(result))
+            LatestTweetsResult.InProgress,
+            LatestTweetsResult.Success(result))
     }
 
     @Test
     fun latestTweetsFlowWithNoConnectivityEmitsNoConnectivityError() = runTest {
         whenever(twitterEndpoint.getLatestTweets())
-                .thenReturn(LatestTweetsResponse.Error.NoConnectivity)
+            .thenReturn(LatestTweetsResponse.Error.NoConnectivity)
 
         val observer = repository.latestTweetsFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                LatestTweetsResult.InProgress,
-                LatestTweetsResult.Error.NoConnectivity)
+            LatestTweetsResult.InProgress,
+            LatestTweetsResult.Error.NoConnectivity)
     }
 
     @Test
     fun latestTweetsFlowWithIoErrorEmitsIoError() = runTest {
         val exception = IOException()
         whenever(twitterEndpoint.getLatestTweets())
-                .thenReturn(LatestTweetsResponse.Error.Io(exception))
+            .thenReturn(LatestTweetsResponse.Error.Io(exception))
 
         val observer = repository.latestTweetsFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                LatestTweetsResult.InProgress,
-                LatestTweetsResult.Error.Io(exception))
+            LatestTweetsResult.InProgress,
+            LatestTweetsResult.Error.Io(exception))
     }
 
     @Test
     fun latestTweetsFlowWithAuthenticationErrorEmitsServerError() = runTest {
         whenever(twitterEndpoint.getLatestTweets())
-                .thenReturn(LatestTweetsResponse.Error.Authentication)
+            .thenReturn(LatestTweetsResponse.Error.Authentication)
 
         val observer = repository.latestTweetsFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                LatestTweetsResult.InProgress,
-                LatestTweetsResult.Error.Server)
+            LatestTweetsResult.InProgress,
+            LatestTweetsResult.Error.Server)
     }
 
     @Test
     fun latestTweetsFlowWithUnrecognisedServerErrorEmitsServerError() = runTest {
         whenever(twitterEndpoint.getLatestTweets())
-                .thenReturn(LatestTweetsResponse.Error.UnrecognisedServerError)
+            .thenReturn(LatestTweetsResponse.Error.UnrecognisedServerError)
 
         val observer = repository.latestTweetsFlow.test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                LatestTweetsResult.InProgress,
-                LatestTweetsResult.Error.Server)
+            LatestTweetsResult.InProgress,
+            LatestTweetsResult.Error.Server)
     }
 }

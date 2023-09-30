@@ -26,24 +26,21 @@
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
 }
 
 dependencies {
 
     implementation(project(":core:coroutines"))
+    implementation(project(":core:time"))
+    implementation(project(":endpoint:tracker-endpoint"))
 
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
+    // Dependency injection
+    implementation(libs.javax.inject)
 
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.kotlin.serialization)
-
-    // Okhttp
-    implementation(libs.okhttp)
-
-    // (De-)serialisation
-    implementation(libs.kotlin.serialization.json)
+    // Testing dependencies
+    testImplementation(project(":testutils"))
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
 }

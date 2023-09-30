@@ -47,9 +47,9 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class LiveTimesRetriever @Inject constructor(
-        private val liveTimesRepository: LiveTimesRepository,
-        private val servicesRepository: ServicesRepository,
-        private val liveTimesMapper: LiveTimesMapper) {
+    private val liveTimesRepository: LiveTimesRepository,
+    private val servicesRepository: ServicesRepository,
+    private val liveTimesMapper: LiveTimesMapper) {
 
     /**
      * Attempt a fetch of [LiveTimes] and then emit the results as a [UiResult] via a [Flow]. This

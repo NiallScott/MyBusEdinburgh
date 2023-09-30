@@ -35,7 +35,7 @@ import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
-import uk.org.rivernile.android.bustracker.core.di.ForTracker
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator

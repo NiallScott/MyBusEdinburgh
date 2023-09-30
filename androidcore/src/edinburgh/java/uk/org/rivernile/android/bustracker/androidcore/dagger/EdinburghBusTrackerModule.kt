@@ -32,7 +32,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
 import uk.org.rivernile.android.bustracker.core.dagger.ForBusTrackerApiKey
-import uk.org.rivernile.android.bustracker.core.di.ForTracker
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
 
 /**
  * This [Module] provides dependencies for the Edinburgh Bus Tracker API.

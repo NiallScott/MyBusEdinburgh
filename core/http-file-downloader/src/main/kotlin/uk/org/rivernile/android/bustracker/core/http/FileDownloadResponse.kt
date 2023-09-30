@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,51 +24,37 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.twitter
-
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.Tweet
+package uk.org.rivernile.android.bustracker.core.http
 
 /**
- * This sealed interface encapsulates the result types when obtaining the latest tweets.
+ * This sealed interface and its children define the possible responses from performing a file
+ * download.
  *
  * @author Niall Scott
  */
-sealed interface LatestTweetsResult {
+sealed interface FileDownloadResponse {
 
     /**
-     * The request is in progress.
+     * The response was successful.
      */
-    object InProgress : LatestTweetsResult
+    object Success : FileDownloadResponse
 
     /**
-     * The result is successful.
-     *
-     * @property tweets The tweet data.
+     * This interface describes errors which can arise from downloading a file.
      */
-    data class Success(
-            val tweets: List<Tweet>?) : LatestTweetsResult
-
-    /**
-     * This interface describes errors which can arise from getting the latest tweets.
-     */
-    sealed interface Error : LatestTweetsResult {
+    sealed interface Error : FileDownloadResponse {
 
         /**
-         * The result is not successful due to no connectivity.
-         */
-        object NoConnectivity : Error
-
-        /**
-         * The result is not successful due to an IO error.
+         * This response was not successful due to an IO error.
          *
-         * @property throwable The [Throwable] which caused this error.
+         * @property throwable The [Throwable] which causes this error.
          */
-        data class Io(
-                val throwable: Throwable) : Error
+        data class IoError(
+            val throwable: Throwable) : Error
 
         /**
-         * The result is not successful because of a server error.
+         * The file download failed due to an error from the server.
          */
-        object Server : Error
+        object ServerError : Error
     }
 }

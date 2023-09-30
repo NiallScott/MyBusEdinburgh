@@ -71,21 +71,21 @@ class TwitterUpdatesFragmentViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val tweetDataFlow = refreshTweetsFlow
-            .flatMapLatest { twitterRepository.latestTweetsFlow }
-            .flowOn(defaultDispatcher)
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+        .flatMapLatest { twitterRepository.latestTweetsFlow }
+        .flowOn(defaultDispatcher)
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     private val tweetsFlow = tweetDataFlow
-            .filterIsInstance<LatestTweetsResult.Success>()
-            .map { it.tweets?.ifEmpty { null } }
-            .onStart { emit(null) }
-            .distinctUntilChanged()
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+        .filterIsInstance<LatestTweetsResult.Success>()
+        .map { it.tweets?.ifEmpty { null } }
+        .onStart { emit(null) }
+        .distinctUntilChanged()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     private val uiStateFlow = tweetDataFlow
-            .combine(tweetsFlow, this::calculateUiState)
-            .distinctUntilChanged()
-            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
+        .combine(tweetsFlow, this::calculateUiState)
+        .distinctUntilChanged()
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), 1)
 
     /**
      * This [LiveData] emits the current tweet data.
@@ -101,40 +101,40 @@ class TwitterUpdatesFragmentViewModel @Inject constructor(
      * This [LiveData] emits the current error.
      */
     val errorLiveData = tweetDataFlow
-            .combine(tweetsFlow, this::calculateError)
-            .onStart { emit(null) }
-            .distinctUntilChanged()
-            .asLiveData(viewModelScope.coroutineContext)
+        .combine(tweetsFlow, this::calculateError)
+        .onStart { emit(null) }
+        .distinctUntilChanged()
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] emits the error to be shown by the snackbar.
      */
     val snackbarErrorLiveData = tweetDataFlow
-            .combine(uiStateFlow, this::calculateSnackbarError)
-            .filterNotNull()
-            .map { Event(it) }
-            .asLiveData(viewModelScope.coroutineContext)
+        .combine(uiStateFlow, this::calculateSnackbarError)
+        .filterNotNull()
+        .map { Event(it) }
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] emits the enabled state of the refresh menu item.
      */
     val isRefreshMenuItemEnabledLiveData = tweetDataFlow
-            .map { it !is LatestTweetsResult.InProgress }
-            .asLiveData(viewModelScope.coroutineContext)
+        .map { it !is LatestTweetsResult.InProgress }
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] emits the refresh state of the refresh menu item.
      */
     val isRefreshMenuItemRefreshingLiveData = tweetDataFlow
-            .map { it is LatestTweetsResult.InProgress }
-            .asLiveData(viewModelScope.coroutineContext)
+        .map { it is LatestTweetsResult.InProgress }
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * This [LiveData] emits the current refreshing state of swipe to refresh.
      */
     val isSwipeToRefreshRefreshingLiveData = tweetDataFlow
-            .map { it is LatestTweetsResult.InProgress }
-            .asLiveData(viewModelScope.coroutineContext)
+        .map { it is LatestTweetsResult.InProgress }
+        .asLiveData(viewModelScope.coroutineContext)
 
     /**
      * Called when the refresh menu item has been clicked.
@@ -168,7 +168,7 @@ class TwitterUpdatesFragmentViewModel @Inject constructor(
             tweets != null -> UiState.CONTENT
             tweetData is LatestTweetsResult.Error -> UiState.ERROR
             tweetData is LatestTweetsResult.Success &&
-                    tweetData.tweets?.ifEmpty { null } == null -> UiState.ERROR
+                tweetData.tweets?.ifEmpty { null } == null -> UiState.ERROR
             else -> UiState.PROGRESS
         }
     }
@@ -199,8 +199,8 @@ class TwitterUpdatesFragmentViewModel @Inject constructor(
      * @return The [Error] to be shown by the snackbar, or `null` if no error is to be shown.
      */
     private fun calculateSnackbarError(
-            tweetData: LatestTweetsResult,
-            uiState: UiState): Error? {
+        tweetData: LatestTweetsResult,
+        uiState: UiState): Error? {
         return if (uiState == UiState.CONTENT) {
             when (tweetData) {
                 is LatestTweetsResult.Error.NoConnectivity -> Error.NO_CONNECTIVITY

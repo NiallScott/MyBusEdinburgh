@@ -26,24 +26,10 @@
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
 }
 
 dependencies {
 
-    implementation(project(":core:coroutines"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.kotlin.serialization)
-
-    // Okhttp
-    implementation(libs.okhttp)
-
-    // (De-)serialisation
-    implementation(libs.kotlin.serialization.json)
+    // Dependency injection
+    implementation(libs.javax.inject)
 }

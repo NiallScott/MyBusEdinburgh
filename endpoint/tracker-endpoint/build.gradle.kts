@@ -31,4 +31,7 @@ plugins {
 dependencies {
 
     implementation(project(":core:coroutines"))
+
+    // Dependency injection
+    implementation(libs.javax.inject)
 }
