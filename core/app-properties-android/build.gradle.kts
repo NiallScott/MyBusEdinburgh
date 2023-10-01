@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,28 +24,38 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.config
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    kotlin("kapt")
+}
 
-import javax.inject.Inject
-import javax.inject.Singleton
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.appproperties"
 
-/**
- * This repository contains properties which pertain to how the application is configured.
- *
- * @param buildConfiguration The configuration generated at build time.
- * @author Niall Scott
- */
-@Singleton
-class ConfigRepository @Inject internal constructor(
-        private val buildConfiguration: BuildConfiguration) {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
+    }
 
-    /**
-     * The nearest stops latitude span.
-     */
-    val nearestStopsLatitudeSpan get() = buildConfiguration.nearestStopsLatitudeSpan
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
 
-    /**
-     * The nearest stops longitude span.
-     */
-    val nearestStopsLongitudeSpan get() = buildConfiguration.nearestStopsLongitudeSpan
+        getByName("debug") {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    api(project(":core:app-properties"))
+    implementation(project(":core:logging"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 }

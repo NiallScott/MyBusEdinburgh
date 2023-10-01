@@ -51,8 +51,8 @@ internal class AndroidAppRepository @Inject constructor(
     override val appVersion get() = try {
         packageManager.getPackageInfoCompat(context.packageName, 0).let {
             AppVersion(
-                    it.versionName,
-                    PackageInfoCompat.getLongVersionCode(it))
+                it.versionName,
+                PackageInfoCompat.getLongVersionCode(it))
         }
     } catch (e: PackageManager.NameNotFoundException) {
         exceptionLogger.log(e)

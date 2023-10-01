@@ -24,46 +24,23 @@
  *
  */
 
-plugins {
-    kotlin("jvm")
-    kotlin("kapt")
-    id("kotlinx-serialization")
-}
+package uk.org.rivernile.android.bustracker.core.app
 
-dependencies {
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
-    api(project(":core:app-properties"))
-    api(project(":core:config"))
-    api(project(":core:connectivity"))
-    api(project(":core:coroutines"))
-    api(project(":core:favourites"))
-    api(project(":core:http-core"))
-    api(project(":core:http-file-downloader"))
-    api(project(":core:livetimes"))
-    api(project(":core:location"))
-    api(project(":core:logging"))
-    api(project(":core:time"))
-    api(project(":core:twitter"))
-    api(project(":database:settings-db-core"))
-    api(project(":endpoint:internal-api-endpoint"))
-    api(project(":endpoint:tracker-endpoint"))
+/**
+ * A Dagger [Module] for providing dependencies related to app properties.
+ *
+ * @author Niall Scott
+ */
+@InstallIn(SingletonComponent::class)
+@Module
+internal interface AppPropertiesModule {
 
-    // Kotlin
-    api(libs.coroutines.core)
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-
-    // (De-)serialisation
-    api(libs.kotlin.serialization.json)
-
-    // Okhttp
-    api(libs.okhttp)
-
-    // Retrofit
-    api(libs.retrofit)
-
-    // Testing
-    testImplementation(project(":testutils"))
+    @Suppress("unused")
+    @Binds
+    fun bindAppRepository(androidAppRepository: AndroidAppRepository): AppRepository
 }

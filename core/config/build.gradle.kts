@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,15 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.app
+plugins {
+    kotlin("jvm")
+}
 
-/**
- * This contains the version details for an app.
- *
- * @property versionName The human-readable version name.
- * @property versionCode The version code.
- * @author Niall Scott
- */
-data class AppVersion(
-        val versionName: String,
-        val versionCode: Long)
+dependencies {
+
+    // Dependency injection
+    implementation(libs.javax.inject)
+
+    // Testing dependencies
+    testImplementation(project(":testutils"))
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
+}

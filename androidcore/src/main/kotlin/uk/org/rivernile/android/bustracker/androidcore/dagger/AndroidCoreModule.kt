@@ -34,8 +34,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.app.AndroidAppRepository
-import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
@@ -87,9 +85,5 @@ class AndroidCoreModule {
         @Binds
         fun bindFeatureRepository(
             androidFeatureRepository: AndroidFeatureRepository): FeatureRepository
-
-        @Suppress("unused")
-        @Binds
-        fun bindAppRepository(androidAppRepository: AndroidAppRepository): AppRepository
     }
 }

@@ -48,6 +48,9 @@ rootProject.name = "MyBusEdinburgh"
 include(
     ":app",
     ":core",
+    ":core:app-properties",
+    ":core:app-properties-android",
+    ":core:config",
     ":core:connectivity",
     ":core:connectivity-android",
     ":core:coroutines",
