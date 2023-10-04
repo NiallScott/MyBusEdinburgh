@@ -24,22 +24,19 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.httplogging.di
 
-import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
-import okhttp3.logging.HttpLoggingInterceptor
 import uk.org.rivernile.android.bustracker.core.http.di.ForHttpLogging
 import javax.inject.Singleton
 
 /**
- * This is a Dagger [Module] which supplies HTTP logging dependencies.
- *
- * This is the debug version of this class. The release version does not do HTTP logging.
+ * This Dagger module would supply HTTP logging dependencies in debug mode, but as this is release
+ * mode, it instead stubs this out by returning `null` dependencies.
  *
  * @author Niall Scott
  */
@@ -47,18 +44,13 @@ import javax.inject.Singleton
 @Module
 internal class HttpLoggingModule {
 
-    companion object {
-
-        private const val HTTP_LOG_TAG = "MyBusHttp"
-    }
-
+    /**
+     * As this is in release mode, this method returns `null`.
+     *
+     * @return `null`. No HTTP logging interceptor here.
+     */
     @Provides
     @Singleton
     @ForHttpLogging
-    fun provideLoggingInterceptor(): Interceptor =
-            HttpLoggingInterceptor { message ->
-                Log.v(HTTP_LOG_TAG, message)
-            }.apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }
+    fun provideLoggingInterceptor(): Interceptor? = null
 }

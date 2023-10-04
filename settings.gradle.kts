@@ -57,6 +57,7 @@ include(
     ":core:favourites",
     ":core:http-core",
     ":core:http-file-downloader",
+    ":core:http-logging-android",
     ":core:livetimes",
     ":core:location",
     ":core:location-android",

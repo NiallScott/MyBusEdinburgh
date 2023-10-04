@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,33 +24,41 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    kotlin("kapt")
+}
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import okhttp3.Interceptor
-import uk.org.rivernile.android.bustracker.core.http.di.ForHttpLogging
-import javax.inject.Singleton
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.httplogging"
 
-/**
- * This Dagger module would supply HTTP logging dependencies in debug mode, but as this is release
- * mode, it instead stubs this out by returning `null` dependencies.
- *
- * @author Niall Scott
- */
-@InstallIn(SingletonComponent::class)
-@Module
-internal class HttpLoggingModule {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
+    }
 
-    /**
-     * As this is in release mode, this method returns `null`.
-     *
-     * @return `null`. No HTTP logging interceptor here.
-     */
-    @Provides
-    @Singleton
-    @ForHttpLogging
-    fun provideLoggingInterceptor(): Interceptor? = null
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+
+        getByName("debug") {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    implementation(project(":core:http-core"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // Okhttp
+    implementation(libs.okhttp)
+    debugImplementation(libs.okhttp.logging)
 }

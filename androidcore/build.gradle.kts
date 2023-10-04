@@ -93,6 +93,7 @@ dependencies {
     api(project(":core"))
     implementation(project(":core:app-properties-android"))
     implementation(project(":core:connectivity-android"))
+    implementation(project(":core:http-logging-android"))
     implementation(project(":core:location-android"))
     implementation(project(":core:logging-android"))
     implementation(project(":database:settings-db-android"))
@@ -121,13 +122,6 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
-
-    // Okhttp
-    debugImplementation(libs.okhttp.logging)
-
-    // Retrofit
-    api(libs.retrofit.converter.gson)
-    implementation(libs.retrofit.converter.kotlin.serialization)
 
     // Play Services
     api(libs.play.services.location)
