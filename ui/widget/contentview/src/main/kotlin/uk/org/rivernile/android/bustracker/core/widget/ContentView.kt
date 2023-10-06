@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,7 +32,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.IdRes
 import androidx.annotation.IntDef
-import uk.org.rivernile.android.bustracker.androidcore.R
+import uk.org.rivernile.android.bustracker.ui.widget.contentview.R
 
 /**
  * This [View] allows easy management of a common content view of progress, content and error
@@ -42,10 +42,11 @@ import uk.org.rivernile.android.bustracker.androidcore.R
  * @author Niall Scott
  */
 class ContentView @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = R.attr.contentViewStyle,
-        defStyleRes: Int = 0): FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = R.attr.contentViewStyle,
+    defStyleRes: Int = 0)
+    : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
     companion object {
 
@@ -111,8 +112,11 @@ class ContentView @JvmOverloads constructor(
 
     init {
         attrs?.let {
-            val a = context.theme.obtainStyledAttributes(it, R.styleable.ContentView,
-                    defStyleAttr, defStyleRes)
+            val a = context.theme.obtainStyledAttributes(
+                it,
+                R.styleable.ContentView,
+                defStyleAttr,
+                defStyleRes)
             contentLayout = a.getInt(R.styleable.ContentView_contentLayout, CONTENT_VIEW_PROGRESS)
             progressLayoutId = a.getResourceId(R.styleable.ContentView_progressView, View.NO_ID)
             contentLayoutId = a.getResourceId(R.styleable.ContentView_contentView, View.NO_ID)
@@ -168,12 +172,12 @@ class ContentView @JvmOverloads constructor(
      */
     private fun applyProgressLayoutState() {
         if (progressLayoutId != View.NO_ID) {
-            findViewById<View>(progressLayoutId)
-                    ?.visibility = if (contentLayout == CONTENT_VIEW_PROGRESS) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            findViewById<View>(progressLayoutId)?.visibility =
+                if (contentLayout == CONTENT_VIEW_PROGRESS) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
         }
     }
 
@@ -182,12 +186,12 @@ class ContentView @JvmOverloads constructor(
      */
     private fun applyContentLayoutState() {
         if (contentLayoutId != View.NO_ID) {
-            findViewById<View>(contentLayoutId)
-                    ?.visibility = if (contentLayout == CONTENT_VIEW_CONTENT) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            findViewById<View>(contentLayoutId)?.visibility =
+                if (contentLayout == CONTENT_VIEW_CONTENT) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
         }
     }
 
@@ -196,12 +200,12 @@ class ContentView @JvmOverloads constructor(
      */
     private fun applyErrorLayoutState() {
         if (errorLayoutId != View.NO_ID) {
-            findViewById<View>(errorLayoutId)
-                    ?.visibility = if (contentLayout == CONTENT_VIEW_ERROR) {
-                View.VISIBLE
-            } else {
-                View.GONE
-            }
+            findViewById<View>(errorLayoutId)?.visibility =
+                if (contentLayout == CONTENT_VIEW_ERROR) {
+                    View.VISIBLE
+                } else {
+                    View.GONE
+                }
         }
     }
 }

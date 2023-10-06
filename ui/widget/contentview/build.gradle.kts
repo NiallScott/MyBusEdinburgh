@@ -24,52 +24,32 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        google()
-        mavenCentral()
+plugins {
+    id("com.android.library")
+    kotlin("android")
+}
+
+android {
+    namespace = "uk.org.rivernile.android.bustracker.ui.widget.contentview"
+
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+
+        getByName("debug") {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
     }
 }
 
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+dependencies {
 
-    @Suppress("UnstableApiUsage")
-    repositories {
-        google()
-        mavenCentral()
-    }
+    implementation(libs.androidx.annotation)
 }
-
-rootProject.name = "MyBusEdinburgh"
-
-include(
-    ":app",
-    ":core",
-    ":core:app-properties",
-    ":core:app-properties-android",
-    ":core:config",
-    ":core:connectivity",
-    ":core:connectivity-android",
-    ":core:coroutines",
-    ":core:favourites",
-    ":core:http-core",
-    ":core:http-file-downloader",
-    ":core:http-logging-android",
-    ":core:livetimes",
-    ":core:location",
-    ":core:location-android",
-    ":core:logging",
-    ":core:logging-android",
-    ":core:time",
-    ":core:twitter",
-    ":database:settings-db-android",
-    ":database:settings-db-core",
-    ":edinburgh",
-    ":endpoint:internal-api-endpoint",
-    ":endpoint:tracker-endpoint",
-    ":androidcore",
-    ":testutils",
-    ":ui:widget:contentview")

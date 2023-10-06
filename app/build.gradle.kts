@@ -136,6 +136,7 @@ allOpen {
 
 dependencies {
     implementation(project(":androidcore"))
+    implementation(project(":ui:widget:contentview"))
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
