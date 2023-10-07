@@ -72,4 +72,5 @@ include(
     ":endpoint:tracker-endpoint",
     ":androidcore",
     ":testutils",
-    ":ui:widget:contentview")
+    ":ui:widget:contentview",
+    ":ui:widget:expandcollapseindicator")

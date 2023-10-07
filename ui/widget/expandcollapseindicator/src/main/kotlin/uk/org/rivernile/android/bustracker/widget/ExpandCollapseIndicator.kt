@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,7 +30,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.animation.LinearInterpolator
 import androidx.appcompat.widget.AppCompatImageView
-import uk.org.rivernile.edinburghbustracker.android.R
+import uk.org.rivernile.android.bustracker.ui.widget.expandcollapseindicator.R
 
 /**
  * This [android.view.View], which is an extension of [AppCompatImageView], shows an expand/collapse
@@ -44,9 +44,9 @@ import uk.org.rivernile.edinburghbustracker.android.R
  * @author Niall Scott
  */
 class ExpandCollapseIndicator @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = R.attr.expandCollapseIndicatorStyle)
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = R.attr.expandCollapseIndicatorStyle)
     : AppCompatImageView(context, attrs, defStyleAttr) {
 
     companion object {
@@ -59,8 +59,9 @@ class ExpandCollapseIndicator @JvmOverloads constructor(
     }
 
     private val interpolator = LinearInterpolator()
-    private val animationDuration = context.resources.getInteger(
-            android.R.integer.config_shortAnimTime).toLong()
+    private val animationDuration = context
+        .resources
+        .getInteger(android.R.integer.config_shortAnimTime).toLong()
     private var collapsedContentDescription: CharSequence? = null
     private var expandedContentDescription: CharSequence? = null
 
@@ -68,14 +69,20 @@ class ExpandCollapseIndicator @JvmOverloads constructor(
 
     init {
         attrs?.also {
-            val a = context.theme.obtainStyledAttributes(it, R.styleable.ExpandCollapseIndicator,
-                    defStyleAttr, 0)
-            setState(a.getInt(R.styleable.ExpandCollapseIndicator_expandedState, STATE_COLLAPSED),
-                    false)
+            val a = context.theme.obtainStyledAttributes(
+                it,
+                R.styleable.ExpandCollapseIndicator,
+                defStyleAttr,
+                0)
+            setState(
+                a.getInt(
+                    R.styleable.ExpandCollapseIndicator_expandedState,
+                    STATE_COLLAPSED),
+                false)
             setCollapsedContentDescription(
-                    a.getText(R.styleable.ExpandCollapseIndicator_collapsedContentDescription))
+                a.getText(R.styleable.ExpandCollapseIndicator_collapsedContentDescription))
             setExpandedContentDescription(
-                    a.getText(R.styleable.ExpandCollapseIndicator_expandedContentDescription))
+                a.getText(R.styleable.ExpandCollapseIndicator_expandedContentDescription))
             a.recycle()
         } ?: run {
             setState(STATE_COLLAPSED, false)
@@ -166,12 +173,13 @@ class ExpandCollapseIndicator @JvmOverloads constructor(
      */
     private fun performExpandArrowAnimation() {
         if (rotation != EXPANDED_DEGREES) {
-            animate().setInterpolator(interpolator)
-                    .setDuration(animationDuration)
-                    .rotation(EXPANDED_DEGREES)
-                    .withEndAction {
-                        applyExpandedState()
-                    }
+            animate()
+                .setInterpolator(interpolator)
+                .setDuration(animationDuration)
+                .rotation(EXPANDED_DEGREES)
+                .withEndAction {
+                    applyExpandedState()
+                }
         }
     }
 
@@ -181,12 +189,13 @@ class ExpandCollapseIndicator @JvmOverloads constructor(
      */
     private fun performCollapseArrowAnimation() {
         if (rotation != COLLAPSED_DEGREES) {
-            animate().setInterpolator(interpolator)
-                    .setDuration(animationDuration)
-                    .rotation(COLLAPSED_DEGREES)
-                    .withEndAction {
-                        applyCollapsedState()
-                    }
+            animate()
+                .setInterpolator(interpolator)
+                .setDuration(animationDuration)
+                .rotation(COLLAPSED_DEGREES)
+                .withEndAction {
+                    applyCollapsedState()
+                }
         }
     }
 
@@ -199,7 +208,7 @@ class ExpandCollapseIndicator @JvmOverloads constructor(
     }
 
     /**
-     * Apply yhe necessary state updates for the expanded state.
+     * Apply the necessary state updates for the expanded state.
      */
     private fun applyExpandedState() {
         currentState = STATE_EXPANDED

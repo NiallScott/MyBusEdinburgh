@@ -135,8 +135,10 @@ allOpen {
 }
 
 dependencies {
+
     implementation(project(":androidcore"))
     implementation(project(":ui:widget:contentview"))
+    implementation(project(":ui:widget:expandcollapseindicator"))
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
