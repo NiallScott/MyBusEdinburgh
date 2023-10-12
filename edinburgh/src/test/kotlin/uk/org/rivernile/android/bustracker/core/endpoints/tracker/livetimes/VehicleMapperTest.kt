@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,23 +59,33 @@ internal class VehicleMapperTest {
     }
 
     @Test
+    fun mapToVehicleReturnsNullWhenMinutesIsNull() {
+        whenever(timeData.minutes)
+            .thenReturn(null)
+
+        val result = vehicleMapper.mapToVehicle(timeData)
+
+        assertNull(result)
+    }
+
+    @Test
     fun mapToVehicleReturnsVehicleWhenMinimumIsSupplied() {
         whenever(timeData.minutes)
-                .thenReturn(5)
+            .thenReturn(5)
         val departureTime = Date()
         whenever(departureTimeCalculator.calculateDepartureTime(5))
-                .thenReturn(departureTime)
+            .thenReturn(departureTime)
         val expected = Vehicle(
-                null,
-                departureTime,
-                5,
-                null,
-                null,
-                isEstimatedTime = false,
-                isDelayed = false,
-                isDiverted = false,
-                isTerminus = false,
-                isPartRoute = false)
+            null,
+            departureTime,
+            5,
+            null,
+            null,
+            isEstimatedTime = false,
+            isDelayed = false,
+            isDiverted = false,
+            isTerminus = false,
+            isPartRoute = false)
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -84,27 +95,27 @@ internal class VehicleMapperTest {
     @Test
     fun mapToVehicleReturnsVehicleWithValuesPopulated() {
         whenever(timeData.minutes)
-                .thenReturn(5)
+            .thenReturn(5)
         whenever(timeData.nameDest)
-                .thenReturn("Destination")
+            .thenReturn("Destination")
         whenever(timeData.terminus)
-                .thenReturn("123456")
+            .thenReturn("123456")
         whenever(timeData.journeyId)
-                .thenReturn("9876")
+            .thenReturn("9876")
         val departureTime = Date()
         whenever(departureTimeCalculator.calculateDepartureTime(5))
-                .thenReturn(departureTime)
+            .thenReturn(departureTime)
         val expected = Vehicle(
-                "Destination",
-                departureTime,
-                5,
-                "123456",
-                "9876",
-                isEstimatedTime = false,
-                isDelayed = false,
-                isDiverted = false,
-                isTerminus = false,
-                isPartRoute = false)
+            "Destination",
+            departureTime,
+            5,
+            "123456",
+            "9876",
+            isEstimatedTime = false,
+            isDelayed = false,
+            isDiverted = false,
+            isTerminus = false,
+            isPartRoute = false)
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -114,23 +125,23 @@ internal class VehicleMapperTest {
     @Test
     fun mapToVehicleSetsEstimatedTimeFlagAsTrueWhenPresentInPayload() {
         whenever(timeData.minutes)
-                .thenReturn(5)
+            .thenReturn(5)
         whenever(timeData.reliability)
-                .thenReturn(TimeData.RELIABILITY_ESTIMATED_TIME.toString())
+            .thenReturn(TimeData.RELIABILITY_ESTIMATED_TIME.toString())
         val departureTime = Date()
         whenever(departureTimeCalculator.calculateDepartureTime(5))
-                .thenReturn(departureTime)
+            .thenReturn(departureTime)
         val expected = Vehicle(
-                null,
-                departureTime,
-                5,
-                null,
-                null,
-                isEstimatedTime = true,
-                isDelayed = false,
-                isDiverted = false,
-                isTerminus = false,
-                isPartRoute = false)
+            null,
+            departureTime,
+            5,
+            null,
+            null,
+            isEstimatedTime = true,
+            isDelayed = false,
+            isDiverted = false,
+            isTerminus = false,
+            isPartRoute = false)
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -140,23 +151,23 @@ internal class VehicleMapperTest {
     @Test
     fun mapToVehicleSetsIsDelayedFlagAsTrueWhenPresentInPayload() {
         whenever(timeData.minutes)
-                .thenReturn(5)
+            .thenReturn(5)
         whenever(timeData.reliability)
-                .thenReturn(TimeData.RELIABILITY_DELAYED.toString())
+            .thenReturn(TimeData.RELIABILITY_DELAYED.toString())
         val departureTime = Date()
         whenever(departureTimeCalculator.calculateDepartureTime(5))
-                .thenReturn(departureTime)
+            .thenReturn(departureTime)
         val expected = Vehicle(
-                null,
-                departureTime,
-                5,
-                null,
-                null,
-                isEstimatedTime = false,
-                isDelayed = true,
-                isDiverted = false,
-                isTerminus = false,
-                isPartRoute = false)
+            null,
+            departureTime,
+            5,
+            null,
+            null,
+            isEstimatedTime = false,
+            isDelayed = true,
+            isDiverted = false,
+            isTerminus = false,
+            isPartRoute = false)
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -166,23 +177,23 @@ internal class VehicleMapperTest {
     @Test
     fun mapToVehicleSetsIsDivertedFlagAsTrueWhenPresentInPayload() {
         whenever(timeData.minutes)
-                .thenReturn(5)
+            .thenReturn(5)
         whenever(timeData.reliability)
-                .thenReturn(TimeData.RELIABILITY_DIVERTED.toString())
+            .thenReturn(TimeData.RELIABILITY_DIVERTED.toString())
         val departureTime = Date()
         whenever(departureTimeCalculator.calculateDepartureTime(5))
-                .thenReturn(departureTime)
+            .thenReturn(departureTime)
         val expected = Vehicle(
-                null,
-                departureTime,
-                5,
-                null,
-                null,
-                isEstimatedTime = false,
-                isDelayed = false,
-                isDiverted = true,
-                isTerminus = false,
-                isPartRoute = false)
+            null,
+            departureTime,
+            5,
+            null,
+            null,
+            isEstimatedTime = false,
+            isDelayed = false,
+            isDiverted = true,
+            isTerminus = false,
+            isPartRoute = false)
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -192,23 +203,23 @@ internal class VehicleMapperTest {
     @Test
     fun mapToVehicleSetsIsTerminusFlagAsTrueWhenPresentInPayload() {
         whenever(timeData.minutes)
-                .thenReturn(5)
+            .thenReturn(5)
         whenever(timeData.type)
-                .thenReturn(TimeData.TYPE_TERMINUS_STOP.toString())
+            .thenReturn(TimeData.TYPE_TERMINUS_STOP.toString())
         val departureTime = Date()
         whenever(departureTimeCalculator.calculateDepartureTime(5))
-                .thenReturn(departureTime)
+            .thenReturn(departureTime)
         val expected = Vehicle(
-                null,
-                departureTime,
-                5,
-                null,
-                null,
-                isEstimatedTime = false,
-                isDelayed = false,
-                isDiverted = false,
-                isTerminus = true,
-                isPartRoute = false)
+            null,
+            departureTime,
+            5,
+            null,
+            null,
+            isEstimatedTime = false,
+            isDelayed = false,
+            isDiverted = false,
+            isTerminus = true,
+            isPartRoute = false)
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -218,23 +229,23 @@ internal class VehicleMapperTest {
     @Test
     fun mapToVehicleSetsIsPartRouteFlagAsTrueWhenPresentInPayload() {
         whenever(timeData.minutes)
-                .thenReturn(5)
+            .thenReturn(5)
         whenever(timeData.type)
-                .thenReturn(TimeData.TYPE_PART_ROUTE.toString())
+            .thenReturn(TimeData.TYPE_PART_ROUTE.toString())
         val departureTime = Date()
         whenever(departureTimeCalculator.calculateDepartureTime(5))
-                .thenReturn(departureTime)
+            .thenReturn(departureTime)
         val expected = Vehicle(
-                null,
-                departureTime,
-                5,
-                null,
-                null,
-                isEstimatedTime = false,
-                isDelayed = false,
-                isDiverted = false,
-                isTerminus = false,
-                isPartRoute = true)
+            null,
+            departureTime,
+            5,
+            null,
+            null,
+            isEstimatedTime = false,
+            isDelayed = false,
+            isDiverted = false,
+            isTerminus = false,
+            isPartRoute = true)
 
         val result = vehicleMapper.mapToVehicle(timeData)
 
@@ -244,40 +255,40 @@ internal class VehicleMapperTest {
     @Test
     fun mapToVehicleReturnsVehicleWithRepresentativeDataSet() {
         val reliability = arrayOf(
-                TimeData.RELIABILITY_ESTIMATED_TIME,
-                TimeData.RELIABILITY_DELAYED,
-                TimeData.RELIABILITY_DIVERTED)
-                .joinToString("")
+            TimeData.RELIABILITY_ESTIMATED_TIME,
+            TimeData.RELIABILITY_DELAYED,
+            TimeData.RELIABILITY_DIVERTED)
+            .joinToString("")
         val type = arrayOf(
-                TimeData.TYPE_TERMINUS_STOP,
-                TimeData.TYPE_PART_ROUTE)
-                .joinToString("")
+            TimeData.TYPE_TERMINUS_STOP,
+            TimeData.TYPE_PART_ROUTE)
+            .joinToString("")
         whenever(timeData.minutes)
-                .thenReturn(5)
+            .thenReturn(5)
         whenever(timeData.nameDest)
-                .thenReturn("Destination")
+            .thenReturn("Destination")
         whenever(timeData.terminus)
-                .thenReturn("123456")
+            .thenReturn("123456")
         whenever(timeData.journeyId)
-                .thenReturn("9876")
+            .thenReturn("9876")
         whenever(timeData.reliability)
-                .thenReturn(reliability)
+            .thenReturn(reliability)
         whenever(timeData.type)
-                .thenReturn(type)
+            .thenReturn(type)
         val departureTime = Date()
         whenever(departureTimeCalculator.calculateDepartureTime(5))
-                .thenReturn(departureTime)
+            .thenReturn(departureTime)
         val expected = Vehicle(
-                "Destination",
-                departureTime,
-                5,
-                "123456",
-                "9876",
-                isEstimatedTime = true,
-                isDelayed = true,
-                isDiverted = true,
-                isTerminus = true,
-                isPartRoute = true)
+            "Destination",
+            departureTime,
+            5,
+            "123456",
+            "9876",
+            isEstimatedTime = true,
+            isDelayed = true,
+            isDiverted = true,
+            isTerminus = true,
+            isPartRoute = true)
 
         val result = vehicleMapper.mapToVehicle(timeData)
 

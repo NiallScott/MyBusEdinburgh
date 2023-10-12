@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,16 +36,17 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class VehicleMapper @Inject constructor(
-        private val departureTimeCalculator: DepartureTimeCalculator) {
+    private val departureTimeCalculator: DepartureTimeCalculator) {
 
     /**
      * Given a [TimeData] object, map it to a [Vehicle] object.
      *
      * @param timeData The [TimeData] object representing a single [Vehicle].
-     * @return A [Vehicle] object representing the [TimeData] object.
+     * @return A [Vehicle] object representing the [TimeData] object, or `null` if it could not be
+     * mapped.
      */
-    fun mapToVehicle(timeData: TimeData): Vehicle {
-        val departureMinutes = timeData.minutes
+    fun mapToVehicle(timeData: TimeData): Vehicle? {
+        val departureMinutes = timeData.minutes ?: return null
         val departureTime = departureTimeCalculator.calculateDepartureTime(departureMinutes)
 
         var isEstimatedTime = false
@@ -73,15 +74,15 @@ internal class VehicleMapper @Inject constructor(
         }
 
         return Vehicle(
-                timeData.nameDest,
-                departureTime,
-                departureMinutes,
-                timeData.terminus,
-                timeData.journeyId,
-                isEstimatedTime,
-                isDelayed,
-                isDiverted,
-                isTerminus,
-                isPartRoute)
+            timeData.nameDest,
+            departureTime,
+            departureMinutes,
+            timeData.terminus,
+            timeData.journeyId,
+            isEstimatedTime,
+            isDelayed,
+            isDiverted,
+            isTerminus,
+            isPartRoute)
     }
 }

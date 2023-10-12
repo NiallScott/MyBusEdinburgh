@@ -26,22 +26,20 @@
 
 package uk.org.rivernile.android.bustracker.core.dagger
 
-import com.google.gson.Gson
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
+import uk.org.rivernile.android.bustracker.core.http.di.ForKotlinJsonSerialization
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 import java.util.concurrent.TimeUnit
-import javax.inject.Singleton
 
 /**
  * This [Module] provides dependencies for the Edinburgh Bus Tracker API.
@@ -50,16 +48,6 @@ import javax.inject.Singleton
  */
 @Module(includes = [ BusTrackerModule.Bindings::class ])
 internal class BusTrackerModule {
-
-    @Provides
-    @Singleton
-    fun provideGson(): Gson = Gson()
-
-    @Provides
-    @Singleton
-    @ForGsonSerialization
-    fun provideGsonConverterFactory(gson: Gson): Converter.Factory =
-        GsonConverterFactory.create(gson)
 
     @Provides
     fun provideApiKeyGenerator(@ForBusTrackerApiKey apiKey: String): ApiKeyGenerator =
@@ -74,11 +62,11 @@ internal class BusTrackerModule {
     fun provideRetrofit(
         @ForTracker baseUrl: String,
         @ForTracker okHttpClient: OkHttpClient,
-        @ForGsonSerialization gsonConverterFactory: Converter.Factory): Retrofit =
+        @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory): Retrofit =
         Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)
-            .addConverterFactory(gsonConverterFactory)
+            .addConverterFactory(jsonConverterFactory)
             .build()
 
     @Provides

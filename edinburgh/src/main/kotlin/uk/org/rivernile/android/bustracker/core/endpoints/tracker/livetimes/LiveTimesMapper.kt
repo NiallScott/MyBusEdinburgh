@@ -41,9 +41,9 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class LiveTimesMapper @Inject constructor(
-        private val errorMapper: ErrorMapper,
-        private val serviceMapper: ServiceMapper,
-        private val timeUtils: TimeUtils) {
+    private val errorMapper: ErrorMapper,
+    private val serviceMapper: ServiceMapper,
+    private val timeUtils: TimeUtils) {
 
     /**
      * Given a [BusTimes] response object from the tracker service, map this in to our app-specific
@@ -67,18 +67,18 @@ internal class LiveTimesMapper @Inject constructor(
                 it.forEach { busTime ->
                     val stopCode = busTime.stopId
 
-                    if (stopCode != null && stopCode.isNotEmpty()) {
+                    if (!stopCode.isNullOrEmpty()) {
                         serviceMapper.mapToService(busTime)?.let { service ->
                             tempStops.getOrPut(stopCode) {
                                 TempStop(
-                                        stopCode,
-                                        busTime.stopName,
-                                        busTime.isBusStopDisruption)
+                                    stopCode,
+                                    busTime.stopName,
+                                    busTime.busStopDisruption ?: false)
                             }.apply {
                                 services.add(service)
                             }
 
-                            globalDisruption = busTime.isGlobalDisruption
+                            globalDisruption = busTime.globalDisruption ?: false
                         }
                     }
                 }
@@ -119,7 +119,7 @@ internal class LiveTimesMapper @Inject constructor(
      * @return The empty version of [LiveTimes].
      */
     private fun emptyLiveTimes(receiveTime: Long, globalDisruption: Boolean) =
-            LiveTimes(emptyMap(), receiveTime, globalDisruption)
+        LiveTimes(emptyMap(), receiveTime, globalDisruption)
 
     /**
      * A place to temporarily store stop parameters prior to finalising the stop data when a [Stop]
@@ -129,9 +129,10 @@ internal class LiveTimesMapper @Inject constructor(
      * @property stopName The name of the stop.
      * @property isDisrupted Is there a current disruption for this stop?
      */
-    private data class TempStop(var stopCode: String,
-                                var stopName: String?,
-                                var isDisrupted: Boolean) {
+    private data class TempStop(
+        var stopCode: String,
+        var stopName: String?,
+        var isDisrupted: Boolean) {
 
         /**
          * A [MutableList] to store services in.

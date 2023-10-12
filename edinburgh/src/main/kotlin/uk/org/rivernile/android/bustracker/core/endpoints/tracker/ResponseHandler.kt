@@ -52,9 +52,10 @@ internal class ResponseHandler @Inject constructor(
     @Throws(IOException::class)
     fun handleLiveTimesResponse(response: Response<BusTimes>): LiveTimesResponse {
         return if (response.isSuccessful) {
-            response.body()?.let {
-                liveTimesMapper.mapToLiveTimes(it)
-            } ?: liveTimesMapper.emptyLiveTimes()
+            response
+                .body()
+                ?.let(liveTimesMapper::mapToLiveTimes)
+                ?: liveTimesMapper.emptyLiveTimes()
         } else {
             errorMapper.mapHttpStatusCode(response.code())
         }

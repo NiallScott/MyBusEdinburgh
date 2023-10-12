@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.SerializationException
 import okio.IOException
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -122,6 +123,23 @@ class EdinburghTrackerEndpointTest {
     }
 
     @Test
+    fun getLiveBusTimesSingleWithSerializationExceptionReturnsIoError() = runTest {
+        whenever(connectivityRepository.hasInternetConnectivity)
+            .thenReturn(true)
+        whenever(apiKeyGenerator.hashedApiKey)
+            .thenReturn(MOCK_API_KEY)
+        val throwable = SerializationException()
+        whenever(api.getBusTimes(MOCK_API_KEY, 1, "123456"))
+            .thenAnswer { throw throwable }
+
+        val result = endpoint.getLiveTimes("123456", 1)
+
+        assertEquals(LiveTimesResponse.Error.Io(throwable), result)
+        verify(exceptionLogger)
+            .log(throwable)
+    }
+
+    @Test
     fun getLiveBusTimesMultipleWithNoConnectivityReturnsNoConnectivity() = runTest {
         whenever(connectivityRepository.hasInternetConnectivity)
             .thenReturn(false)
@@ -140,6 +158,30 @@ class EdinburghTrackerEndpointTest {
         whenever(apiKeyGenerator.hashedApiKey)
             .thenReturn(MOCK_API_KEY)
         val throwable = IOException()
+        whenever(api.getBusTimes(
+            MOCK_API_KEY,
+            1,
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"))
+            .thenAnswer { throw throwable }
+
+        val result = endpoint.getLiveTimes(listOf("1", "2", "3", "4", "5"), 1)
+
+        assertEquals(LiveTimesResponse.Error.Io(throwable), result)
+        verify(exceptionLogger)
+            .log(throwable)
+    }
+
+    @Test
+    fun getLiveBusTimesMultipleWithSerializationExceptionReturnsIoError() = runTest {
+        whenever(connectivityRepository.hasInternetConnectivity)
+            .thenReturn(true)
+        whenever(apiKeyGenerator.hashedApiKey)
+            .thenReturn(MOCK_API_KEY)
+        val throwable = SerializationException()
         whenever(api.getBusTimes(
             MOCK_API_KEY,
             1,

@@ -77,14 +77,17 @@ internal class LiveTimesMapperTest {
 
     @Before
     fun setUp() {
-        liveTimesMapper = LiveTimesMapper(errorMapper, serviceMapper, timeUtils)
+        liveTimesMapper = LiveTimesMapper(
+            errorMapper,
+            serviceMapper,
+            timeUtils)
     }
 
     @Test
     fun mapToLiveTimesThrowsExceptionWhenErrorIsFoundInData() {
         val expected = LiveTimesResponse.Error.ServerError.Other()
         whenever(errorMapper.extractError(busTimes))
-                .thenReturn(expected)
+            .thenReturn(expected)
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
@@ -95,7 +98,7 @@ internal class LiveTimesMapperTest {
     fun mapToLiveTimesReturnsEmptyTimesWhenBusTimesIsNull() {
         givenTimeUtilsReturnsTestTimestamp()
         whenever(busTimes.busTimes)
-                .thenReturn(null)
+            .thenReturn(null)
         val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
@@ -107,7 +110,7 @@ internal class LiveTimesMapperTest {
     fun mapToLiveTimesReturnsEmptyTimesWhenBusTimesIsEmpty() {
         givenTimeUtilsReturnsTestTimestamp()
         whenever(busTimes.busTimes)
-                .thenReturn(emptyList())
+            .thenReturn(emptyList())
         val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
@@ -119,43 +122,43 @@ internal class LiveTimesMapperTest {
     fun mapToLiveTimesReturnsEmptyTimesWhenSingleBusTimesHasNullStopCode() {
         givenTimeUtilsReturnsTestTimestamp()
         whenever(busTimes.busTimes)
-                .thenReturn(listOf(busTime))
+            .thenReturn(listOf(busTime))
         whenever(busTime.stopId)
-                .thenReturn(null)
+            .thenReturn(null)
         val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
         assertEquals(expected, result)
         verify(serviceMapper, never())
-                .mapToService(busTime)
+            .mapToService(busTime)
     }
 
     @Test
     fun mapToLiveTimesReturnsEmptyTimesWhenSingleBusTimesHasEmptyStopCode() {
         givenTimeUtilsReturnsTestTimestamp()
         whenever(busTimes.busTimes)
-                .thenReturn(listOf(busTime))
+            .thenReturn(listOf(busTime))
         whenever(busTime.stopId)
-                .thenReturn("")
+            .thenReturn("")
         val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
 
         assertEquals(expected, result)
         verify(serviceMapper, never())
-                .mapToService(busTime)
+            .mapToService(busTime)
     }
 
     @Test
     fun mapToLiveTimesReturnsEmptyTimesWhenServiceMapperReturnsNullForSingleBusTime() {
         givenTimeUtilsReturnsTestTimestamp()
         whenever(busTimes.busTimes)
-                .thenReturn(listOf(busTime))
+            .thenReturn(listOf(busTime))
         whenever(busTime.stopId)
-                .thenReturn(TEST_STOP_CODE)
+            .thenReturn(TEST_STOP_CODE)
         whenever(serviceMapper.mapToService(busTime))
-                .thenReturn(null)
+            .thenReturn(null)
         val expected = LiveTimesResponse.Success(LiveTimes(emptyMap(), TEST_TIMESTAMP, false))
 
         val result = liveTimesMapper.mapToLiveTimes(busTimes)
@@ -168,9 +171,9 @@ internal class LiveTimesMapperTest {
         givenTimeUtilsReturnsTestTimestamp()
         givenBusTimeIsSetUpWithValues(busTime, TEST_STOP_CODE, TEST_STOP_NAME)
         whenever(busTimes.busTimes)
-                .thenReturn(listOf(busTime))
+            .thenReturn(listOf(busTime))
         whenever(serviceMapper.mapToService(busTime))
-                .thenReturn(service)
+            .thenReturn(service)
         val expectedStop = Stop(TEST_STOP_CODE, TEST_STOP_NAME, listOf(service), true)
         val expectedLiveTimes = LiveTimesResponse.Success(
             LiveTimes(
@@ -193,19 +196,19 @@ internal class LiveTimesMapperTest {
         val service2 = mock<Service>()
         val service3 = mock<Service>()
         whenever(busTimes.busTimes)
-                .thenReturn(listOf(busTime1, busTime2, busTime3))
+            .thenReturn(listOf(busTime1, busTime2, busTime3))
         givenBusTimeIsSetUpWithValues(busTime1, TEST_STOP_CODE, TEST_STOP_NAME)
         givenBusTimeIsSetUpWithValues(busTime2, TEST_STOP_CODE, TEST_STOP_NAME)
         givenBusTimeIsSetUpWithValues(busTime3, TEST_STOP_CODE, TEST_STOP_NAME)
         givenServiceMapperReturnsMappings(mapOf(
-                busTime1 to service1,
-                busTime2 to service2,
-                busTime3 to service3))
+            busTime1 to service1,
+            busTime2 to service2,
+            busTime3 to service3))
         val expectedStop = Stop(
-                TEST_STOP_CODE,
-                TEST_STOP_NAME,
-                listOf(service1, service2, service3),
-                true)
+            TEST_STOP_CODE,
+            TEST_STOP_NAME,
+            listOf(service1, service2, service3),
+            true)
         val expectedLiveTimes = LiveTimesResponse.Success(
             LiveTimes(
                 mapOf(TEST_STOP_CODE to expectedStop),
@@ -227,35 +230,35 @@ internal class LiveTimesMapperTest {
         val service2 = mock<Service>()
         val service3 = mock<Service>()
         whenever(busTimes.busTimes)
-                .thenReturn(listOf(busTime1, busTime2, busTime3))
+            .thenReturn(listOf(busTime1, busTime2, busTime3))
         givenBusTimeIsSetUpWithValues(busTime1, TEST_STOP_CODE, TEST_STOP_NAME)
         givenBusTimeIsSetUpWithValues(busTime2, TEST_STOP_CODE_2, TEST_STOP_NAME_2)
         givenBusTimeIsSetUpWithValues(busTime3, TEST_STOP_CODE_3, null)
         givenServiceMapperReturnsMappings(mapOf(
-                busTime1 to service1,
-                busTime2 to service2,
-                busTime3 to service3))
+            busTime1 to service1,
+            busTime2 to service2,
+            busTime3 to service3))
         val expectedStop1 = Stop(
-                TEST_STOP_CODE,
-                TEST_STOP_NAME,
-                listOf(service1),
-                true)
+            TEST_STOP_CODE,
+            TEST_STOP_NAME,
+            listOf(service1),
+            true)
         val expectedStop2 = Stop(
-                TEST_STOP_CODE_2,
-                TEST_STOP_NAME_2,
-                listOf(service2),
-                true)
+            TEST_STOP_CODE_2,
+            TEST_STOP_NAME_2,
+            listOf(service2),
+            true)
         val expectedStop3 = Stop(
-                TEST_STOP_CODE_3,
-                null,
-                listOf(service3),
-                true)
+            TEST_STOP_CODE_3,
+            null,
+            listOf(service3),
+            true)
         val expectedLiveTimes = LiveTimesResponse.Success(
             LiveTimes(
                 mapOf(
-                        TEST_STOP_CODE to expectedStop1,
-                        TEST_STOP_CODE_2 to expectedStop2,
-                        TEST_STOP_CODE_3 to expectedStop3),
+                    TEST_STOP_CODE to expectedStop1,
+                    TEST_STOP_CODE_2 to expectedStop2,
+                    TEST_STOP_CODE_3 to expectedStop3),
                 TEST_TIMESTAMP,
                 true))
 
@@ -277,33 +280,33 @@ internal class LiveTimesMapperTest {
         val service4 = mock<Service>()
         val service5 = mock<Service>()
         whenever(busTimes.busTimes)
-                .thenReturn(listOf(busTime1, busTime2, busTime3, busTime4, busTime5))
+            .thenReturn(listOf(busTime1, busTime2, busTime3, busTime4, busTime5))
         givenBusTimeIsSetUpWithValues(busTime1, TEST_STOP_CODE, TEST_STOP_NAME)
         givenBusTimeIsSetUpWithValues(busTime2, TEST_STOP_CODE_2, TEST_STOP_NAME_2)
         givenBusTimeIsSetUpWithValues(busTime3, TEST_STOP_CODE_3, null)
         givenBusTimeIsSetUpWithValues(busTime4, TEST_STOP_CODE, TEST_STOP_NAME)
         givenBusTimeIsSetUpWithValues(busTime5, TEST_STOP_CODE, TEST_STOP_NAME)
         givenServiceMapperReturnsMappings(mapOf(
-                busTime1 to service1,
-                busTime2 to null,
-                busTime3 to service3,
-                busTime4 to service4,
-                busTime5 to service5))
+            busTime1 to service1,
+            busTime2 to null,
+            busTime3 to service3,
+            busTime4 to service4,
+            busTime5 to service5))
         val expectedStop1 = Stop(
-                TEST_STOP_CODE,
-                TEST_STOP_NAME,
-                listOf(service1, service4, service5),
-                true)
+            TEST_STOP_CODE,
+            TEST_STOP_NAME,
+            listOf(service1, service4, service5),
+            true)
         val expectedStop2 = Stop(
-                TEST_STOP_CODE_3,
-                null,
-                listOf(service3),
-                true)
+            TEST_STOP_CODE_3,
+            null,
+            listOf(service3),
+            true)
         val expectedLiveTimes = LiveTimesResponse.Success(
             LiveTimes(
                 mapOf(
-                        TEST_STOP_CODE to expectedStop1,
-                        TEST_STOP_CODE_3 to expectedStop2),
+                    TEST_STOP_CODE to expectedStop1,
+                    TEST_STOP_CODE_3 to expectedStop2),
                 TEST_TIMESTAMP,
                 true))
 
@@ -324,26 +327,27 @@ internal class LiveTimesMapperTest {
 
     private fun givenTimeUtilsReturnsTestTimestamp() {
         whenever(timeUtils.currentTimeMills)
-                .thenReturn(TEST_TIMESTAMP)
+            .thenReturn(TEST_TIMESTAMP)
     }
 
-    private fun givenBusTimeIsSetUpWithValues(busTime: BusTime,
-                                              stopCode: String?,
-                                              stopName: String?) {
+    private fun givenBusTimeIsSetUpWithValues(
+        busTime: BusTime,
+        stopCode: String?,
+        stopName: String?) {
         whenever(busTime.stopId)
-                .thenReturn(stopCode)
+            .thenReturn(stopCode)
         whenever(busTime.stopName)
-                .thenReturn(stopName)
-        whenever(busTime.isBusStopDisruption)
-                .thenReturn(true)
-        whenever(busTime.isGlobalDisruption)
-                .thenReturn(true)
+            .thenReturn(stopName)
+        whenever(busTime.busStopDisruption)
+            .thenReturn(true)
+        whenever(busTime.globalDisruption)
+            .thenReturn(true)
     }
 
     private fun givenServiceMapperReturnsMappings(mappings: Map<BusTime, Service?>) {
         for ((k, v) in mappings) {
             whenever(serviceMapper.mapToService(k))
-                    .thenReturn(v)
+                .thenReturn(v)
         }
     }
 }

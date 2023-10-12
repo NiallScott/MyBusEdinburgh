@@ -26,8 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.endpoints.tracker
 
+import kotlinx.serialization.SerializationException
 import okio.IOException
-import retrofit2.awaitResponse
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesMapper
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimesResponse
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
@@ -65,10 +65,12 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
                     apiKeyGenerator.hashedApiKey,
                     numberOfDepartures,
                     stopCode)
-                    .awaitResponse()
 
                 responseHandler.handleLiveTimesResponse(response)
             } catch (e: IOException) {
+                exceptionLogger.log(e)
+                LiveTimesResponse.Error.Io(e)
+            } catch (e: SerializationException) {
                 exceptionLogger.log(e)
                 LiveTimesResponse.Error.Io(e)
             }
@@ -85,15 +87,17 @@ internal class EdinburghTrackerEndpoint @Inject constructor(
                 val response = api.getBusTimes(
                     apiKeyGenerator.hashedApiKey,
                     numberOfDepartures,
-                    stopCodes.getOrNull(0),
+                    stopCodes[0],
                     stopCodes.getOrNull(1),
                     stopCodes.getOrNull(2),
                     stopCodes.getOrNull(3),
                     stopCodes.getOrNull(4))
-                    .awaitResponse()
 
                 responseHandler.handleLiveTimesResponse(response)
             } catch (e: IOException) {
+                exceptionLogger.log(e)
+                LiveTimesResponse.Error.Io(e)
+            } catch (e: SerializationException) {
                 exceptionLogger.log(e)
                 LiveTimesResponse.Error.Io(e)
             }
