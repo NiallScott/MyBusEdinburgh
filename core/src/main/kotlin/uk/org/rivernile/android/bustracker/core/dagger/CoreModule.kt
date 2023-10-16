@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,13 +27,20 @@
 package uk.org.rivernile.android.bustracker.core.dagger
 
 import dagger.Module
+import uk.org.rivernile.android.bustracker.core.coroutines.di.CoroutinesModule
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ApiModule
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModule
+import uk.org.rivernile.android.bustracker.core.http.di.CoreHttpModule
 
 /**
+ * The core Dagger [Module].
+ *
  * @author Niall Scott
  */
 @Module(includes = [
     ApiModule::class,
     CoroutinesModule::class,
+    CoreHttpModule::class,
     TwitterModule::class
 ])
 interface CoreModule

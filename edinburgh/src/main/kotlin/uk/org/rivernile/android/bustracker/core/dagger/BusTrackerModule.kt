@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,11 +33,10 @@ import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
 import retrofit2.create
-import uk.org.rivernile.android.bustracker.core.di.ForApiKey
-import uk.org.rivernile.android.bustracker.core.di.ForGsonSerialization
-import uk.org.rivernile.android.bustracker.core.di.ForTracker
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.EdinburghTrackerEndpoint
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.TrackerEndpoint
+import uk.org.rivernile.android.bustracker.core.http.di.ForKotlinJsonSerialization
 import uk.org.rivernile.edinburghbustrackerapi.ApiKeyGenerator
 import uk.org.rivernile.edinburghbustrackerapi.EdinburghBusTrackerApi
 import java.util.concurrent.TimeUnit
@@ -51,33 +50,34 @@ import java.util.concurrent.TimeUnit
 internal class BusTrackerModule {
 
     @Provides
-    fun provideApiKeyGenerator(@ForApiKey apiKey: String): ApiKeyGenerator = ApiKeyGenerator(apiKey)
+    fun provideApiKeyGenerator(@ForBusTrackerApiKey apiKey: String): ApiKeyGenerator =
+        ApiKeyGenerator(apiKey)
 
     @Provides
     fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghBusTrackerApi =
-            retrofit.create()
+        retrofit.create()
 
     @Provides
     @ForTracker
     fun provideRetrofit(
-            @ForTracker baseUrl: String,
-            @ForTracker okHttpClient: OkHttpClient,
-            @ForGsonSerialization gsonConverterFactory: Converter.Factory): Retrofit =
-            Retrofit.Builder()
-                    .baseUrl(baseUrl)
-                    .client(okHttpClient)
-                    .addConverterFactory(gsonConverterFactory)
-                    .build()
+        @ForTracker baseUrl: String,
+        @ForTracker okHttpClient: OkHttpClient,
+        @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory): Retrofit =
+        Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .client(okHttpClient)
+            .addConverterFactory(jsonConverterFactory)
+            .build()
 
     @Provides
     @ForTracker
     fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
-            okHttpClient.newBuilder()
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .writeTimeout(30, TimeUnit.SECONDS)
-                    .followRedirects(false)
-                    .build()
+        okHttpClient.newBuilder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .followRedirects(false)
+            .build()
 
     @Module
     interface Bindings {

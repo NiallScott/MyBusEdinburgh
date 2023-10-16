@@ -51,7 +51,7 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class DistanceRetriever @Inject constructor(
-        private val locationRepository: LocationRepository) {
+    private val locationRepository: LocationRepository) {
 
     /**
      * Create a [Flow] which emits [UiItem.Distance] items. As a pre-requisite, it requires the
@@ -66,13 +66,13 @@ class DistanceRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun createDistanceFlow(
-            permissionsStateFlow: Flow<PermissionsState>,
-            stopDetailsFlow: Flow<StopDetails?>): Flow<UiItem.Distance> {
+        permissionsStateFlow: Flow<PermissionsState>,
+        stopDetailsFlow: Flow<StopDetails?>): Flow<UiItem.Distance> {
         return if (locationRepository.hasLocationFeature) {
             permissionsStateFlow
-                    .map(this::isPermissionsSufficient)
-                    .distinctUntilChanged()
-                    .flatMapLatest { handlePermissionsStateChanged(it, stopDetailsFlow) }
+                .map(this::isPermissionsSufficient)
+                .distinctUntilChanged()
+                .flatMapLatest { handlePermissionsStateChanged(it, stopDetailsFlow) }
         } else {
             flowOf(UiItem.Distance.NoLocationFeature)
         }
@@ -92,12 +92,12 @@ class DistanceRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handlePermissionsStateChanged(
-            isPermissionsSufficient: Boolean,
-            stopDetailsFlow: Flow<StopDetails?>): Flow<UiItem.Distance> {
+        isPermissionsSufficient: Boolean,
+        stopDetailsFlow: Flow<StopDetails?>): Flow<UiItem.Distance> {
         return if (isPermissionsSufficient) {
             locationRepository.isLocationEnabledFlow
-                    .distinctUntilChanged()
-                    .flatMapLatest { handleLocationEnabled(it, stopDetailsFlow) }
+                .distinctUntilChanged()
+                .flatMapLatest { handleLocationEnabled(it, stopDetailsFlow) }
         } else {
             flowOf(UiItem.Distance.PermissionDenied)
         }
@@ -115,12 +115,12 @@ class DistanceRetriever @Inject constructor(
      * @return A [Flow] of [UiItem.Distance].
      */
     private fun handleLocationEnabled(
-            isEnabled: Boolean,
-            stopDetailsFlow: Flow<StopDetails?>) = if (isEnabled) {
+        isEnabled: Boolean,
+        stopDetailsFlow: Flow<StopDetails?>) = if (isEnabled) {
         locationRepository.userVisibleLocationFlow
-                .combine(stopDetailsFlow, this::calculateDistanceBetween)
-                .onStart { emit(UiItem.Distance.Unknown) }
-                .distinctUntilChanged()
+            .combine(stopDetailsFlow, this::calculateDistanceBetween)
+            .onStart { emit(UiItem.Distance.Unknown) }
+            .distinctUntilChanged()
     } else {
         flowOf(UiItem.Distance.LocationOff)
     }
@@ -140,8 +140,8 @@ class DistanceRetriever @Inject constructor(
      * [UiItem.Distance.Unknown].
      */
     private fun calculateDistanceBetween(
-            location: DeviceLocation,
-            stopDetails: StopDetails?): UiItem.Distance {
+        location: DeviceLocation,
+        stopDetails: StopDetails?): UiItem.Distance {
         val stopLocation = stopDetails?.let {
             DeviceLocation(it.location.latitude, it.location.longitude)
         } ?: return UiItem.Distance.Unknown
@@ -163,6 +163,6 @@ class DistanceRetriever @Inject constructor(
      * @return `true` if the permissions are sufficient, otherwise `false`.
      */
     private fun isPermissionsSufficient(permissionsState: PermissionsState) =
-            permissionsState.coarseLocationPermission == PermissionState.GRANTED ||
-                    permissionsState.fineLocationPermission == PermissionState.GRANTED
+        permissionsState.coarseLocationPermission == PermissionState.GRANTED ||
+                permissionsState.fineLocationPermission == PermissionState.GRANTED
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,9 +42,9 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class AndroidFeatureRepository @Inject constructor(
-        private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
-        private val locationRepository: LocationRepository,
-        private val packageManager: PackageManager) : FeatureRepository {
+    private val stopMapFeatureAvailabilityProvider: StopMapFeatureAvailabilityProvider,
+    private val locationRepository: LocationRepository,
+    private val packageManager: PackageManager) : FeatureRepository {
 
     override val hasStopMapUiFeature get() =
         stopMapFeatureAvailabilityProvider.isStopMapFeatureAvailable()

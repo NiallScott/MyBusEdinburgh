@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,8 +38,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class ServiceMapper @Inject constructor(
-        private val vehicleMapper: VehicleMapper,
-        private val serviceNameFixer: ServiceNameFixer) {
+    private val vehicleMapper: VehicleMapper,
+    private val serviceNameFixer: ServiceNameFixer) {
 
     /**
      * Given a [BusTime] object, extract the data from it required to build a [Service] object.
@@ -51,19 +51,19 @@ internal class ServiceMapper @Inject constructor(
      * was an issue parsing the object.
      */
     fun mapToService(busTime: BusTime) =
-            busTime.timeDatas?.map(vehicleMapper::mapToVehicle)?.sorted()?.let { services ->
-
-        if (services.isNotEmpty()) {
-            serviceNameFixer.correctServiceName(busTime.mnemoService)?.let { serviceName ->
-                Service(serviceName,
+        busTime
+            .timeDatas
+            ?.mapNotNull(vehicleMapper::mapToVehicle)
+            ?.sorted()
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { services ->
+                serviceNameFixer.correctServiceName(busTime.mnemoService)?.let { serviceName ->
+                    Service(serviceName,
                         services,
                         busTime.operatorId,
                         busTime.nameService,
-                        busTime.isServiceDisruption,
-                        busTime.isServiceDiversion)
+                        busTime.serviceDisruption ?: false,
+                        busTime.serviceDiversion ?: false)
+                }
             }
-        } else {
-            null
-        }
-    }
 }

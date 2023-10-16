@@ -47,8 +47,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.preferences.LastMapCameraLocation
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
@@ -75,17 +75,17 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class BusStopMapViewModel @Inject constructor(
-        private val savedState: SavedStateHandle,
-        private val permissionHandler: PermissionHandler,
-        playServicesAvailabilityChecker: PlayServicesAvailabilityChecker,
-        servicesRepository: ServicesRepository,
-        private val busStopsRepository: BusStopsRepository,
-        stopMarkersRetriever: StopMarkersRetriever,
-        private val routeLineRetriever: RouteLineRetriever,
-        isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
-        private val preferenceRepository: PreferenceRepository,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
+    private val savedState: SavedStateHandle,
+    private val permissionHandler: PermissionHandler,
+    playServicesAvailabilityChecker: PlayServicesAvailabilityChecker,
+    servicesRepository: ServicesRepository,
+    private val busStopsRepository: BusStopsRepository,
+    stopMarkersRetriever: StopMarkersRetriever,
+    private val routeLineRetriever: RouteLineRetriever,
+    isMyLocationEnabledDetector: IsMyLocationEnabledDetector,
+    private val preferenceRepository: PreferenceRepository,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
     : ViewModel() {
 
     companion object {

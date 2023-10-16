@@ -51,8 +51,8 @@ import kotlinx.coroutines.launch
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.arrivals.ArrivalAlertRequest
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -72,14 +72,14 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AddTimeAlertDialogFragmentViewModel @Inject constructor(
-        private val savedState: SavedStateHandle,
-        private val permissionsTracker: PermissionsTracker,
-        private val busStopsRepository: BusStopsRepository,
-        private val serviceStopsRepository: ServiceStopsRepository,
-        uiStateCalculator: UiStateCalculator,
-        private val alertsRepository: AlertsRepository,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    private val savedState: SavedStateHandle,
+    private val permissionsTracker: PermissionsTracker,
+    private val busStopsRepository: BusStopsRepository,
+    private val serviceStopsRepository: ServiceStopsRepository,
+    uiStateCalculator: UiStateCalculator,
+    private val alertsRepository: AlertsRepository,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
 

@@ -41,8 +41,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceDataStoreSource
 import javax.inject.Inject
 

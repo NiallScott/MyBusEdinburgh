@@ -30,7 +30,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.IOException
 import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader

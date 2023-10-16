@@ -37,6 +37,6 @@ import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
  * @author Niall Scott
  */
 data class UiFavouriteStop(
-        val favouriteStop: FavouriteStop,
-        val services: List<String>?,
-        val isSelected: Boolean)
+    val favouriteStop: FavouriteStop,
+    val services: List<String>?,
+    val isSelected: Boolean)

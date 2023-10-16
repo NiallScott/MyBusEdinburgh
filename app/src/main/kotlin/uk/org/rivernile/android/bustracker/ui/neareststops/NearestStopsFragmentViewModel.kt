@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
@@ -78,16 +78,16 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class NearestStopsFragmentViewModel @Inject constructor(
-        private val savedState: SavedStateHandle,
-        servicesRepository: ServicesRepository,
-        private val busStopsRepository: BusStopsRepository,
-        favouritesStateRetriever: FavouritesStateRetriever,
-        alertsStateRetriever: AlertsStateRetriever,
-        featureRepository: FeatureRepository,
-        private val locationRepository: LocationRepository,
-        private val preferenceRepository: PreferenceRepository,
-        uiStateRetriever: UiStateRetriever,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    private val savedState: SavedStateHandle,
+    servicesRepository: ServicesRepository,
+    private val busStopsRepository: BusStopsRepository,
+    favouritesStateRetriever: FavouritesStateRetriever,
+    alertsStateRetriever: AlertsStateRetriever,
+    featureRepository: FeatureRepository,
+    private val locationRepository: LocationRepository,
+    private val preferenceRepository: PreferenceRepository,
+    uiStateRetriever: UiStateRetriever,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
 

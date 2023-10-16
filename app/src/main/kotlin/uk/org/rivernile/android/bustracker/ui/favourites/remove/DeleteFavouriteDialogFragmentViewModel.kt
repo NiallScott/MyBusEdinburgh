@@ -32,8 +32,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import javax.inject.Inject
 
@@ -48,10 +48,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class DeleteFavouriteDialogFragmentViewModel @Inject constructor(
-        private val savedStateHandle: SavedStateHandle,
-        private val favouritesRepository: FavouritesRepository,
-        @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    private val savedStateHandle: SavedStateHandle,
+    private val favouritesRepository: FavouritesRepository,
+    @ForApplicationCoroutineScope private val applicationCoroutineScope: CoroutineScope,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     companion object {
 

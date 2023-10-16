@@ -53,9 +53,9 @@ import kotlin.math.absoluteValue
  * @author Niall Scott
  */
 class UiStateRetriever @Inject constructor(
-        private val locationRepository: LocationRepository,
-        private val busStopsRepository: BusStopsRepository,
-        private val configRepository: ConfigRepository) {
+    private val locationRepository: LocationRepository,
+    private val busStopsRepository: BusStopsRepository,
+    private val configRepository: ConfigRepository) {
 
     /**
      * Return a [Flow] which emits [UiState]s. This is based upon the state of the provided
@@ -67,12 +67,12 @@ class UiStateRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getUiStateFlow(
-            permissionStateFlow: Flow<PermissionsState>,
-            serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
+        permissionStateFlow: Flow<PermissionsState>,
+        serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
         return if (locationRepository.hasLocationFeature) {
             permissionStateFlow
-                    .map(this::isPermissionsSufficient)
-                    .flatMapLatest { handlePermissionsStateChanged(it, serviceFilterFlow) }
+                .map(this::isPermissionsSufficient)
+                .flatMapLatest { handlePermissionsStateChanged(it, serviceFilterFlow) }
         } else {
             flowOf(UiState.Error.NoLocationFeature)
         }
@@ -91,12 +91,12 @@ class UiStateRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handlePermissionsStateChanged(
-            isPermissionsSufficient: Boolean,
-            serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
+        isPermissionsSufficient: Boolean,
+        serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
         return if (isPermissionsSufficient) {
             locationRepository.isLocationEnabledFlow
-                    .distinctUntilChanged()
-                    .flatMapLatest { handleLocationEnabled(it, serviceFilterFlow) }
+                .distinctUntilChanged()
+                .flatMapLatest { handleLocationEnabled(it, serviceFilterFlow) }
         } else {
             flowOf(UiState.Error.InsufficientLocationPermissions)
         }
@@ -114,13 +114,13 @@ class UiStateRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handleLocationEnabled(
-            isEnabled: Boolean,
-            serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
+        isEnabled: Boolean,
+        serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
         return if (isEnabled) {
             locationRepository.userVisibleLocationFlow
-                    .flatMapLatest { loadNearestStops(it, serviceFilterFlow) }
-                    .onStart { emit(UiState.Error.LocationUnknown) }
-                    .distinctUntilChanged()
+                .flatMapLatest { loadNearestStops(it, serviceFilterFlow) }
+                .onStart { emit(UiState.Error.LocationUnknown) }
+                .distinctUntilChanged()
         } else {
             flowOf(UiState.Error.LocationOff)
         }
@@ -137,10 +137,10 @@ class UiStateRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadNearestStops(
-            location: DeviceLocation,
-            serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
+        location: DeviceLocation,
+        serviceFilterFlow: Flow<Set<String>?>): Flow<UiState> {
         return serviceFilterFlow
-                .flatMapLatest { loadNearestStops(location, it) }
+            .flatMapLatest { loadNearestStops(location, it) }
     }
 
     /**
@@ -154,8 +154,8 @@ class UiStateRetriever @Inject constructor(
      * @return A [Flow] which emits [UiState]s.
      */
     private fun loadNearestStops(
-            location: DeviceLocation,
-            serviceFilter: Set<String>?): Flow<UiState> {
+        location: DeviceLocation,
+        serviceFilter: Set<String>?): Flow<UiState> {
         val latitudeSpan = configRepository.nearestStopsLatitudeSpan
         val longitudeSpan = configRepository.nearestStopsLongitudeSpan
 
@@ -165,12 +165,12 @@ class UiStateRetriever @Inject constructor(
         val maxLongitude = location.longitude + longitudeSpan
 
         return busStopsRepository.getStopDetailsWithinSpanFlow(
-                minLatitude,
-                minLongitude,
-                maxLatitude,
-                maxLongitude,
-                serviceFilter)
-                .map { mapToNearestStops(it, location) }
+            minLatitude,
+            minLongitude,
+            maxLatitude,
+            maxLongitude,
+            serviceFilter)
+            .map { mapToNearestStops(it, location) }
     }
 
     /**
@@ -186,12 +186,12 @@ class UiStateRetriever @Inject constructor(
      * @return [UiState.Success] when there are stops, otherwise [UiState.Error.NoNearestStops].
      */
     private fun mapToNearestStops(
-            stops: List<StopDetailsWithServices>?,
-            location: DeviceLocation): UiState {
+        stops: List<StopDetailsWithServices>?,
+        location: DeviceLocation): UiState {
         return stops?.ifEmpty { null }?.let { stopsNonNull ->
             stopsNonNull.map { mapToNearestStop(it, location) }
-                    .sortedBy { it.distance }
-                    .let { UiState.Success(it) }
+                .sortedBy { it.distance }
+                .let { UiState.Success(it) }
         } ?: UiState.Error.NoNearestStops
     }
 
@@ -225,6 +225,6 @@ class UiStateRetriever @Inject constructor(
      * @return `true` if the permissions are sufficient, otherwise `false`.
      */
     private fun isPermissionsSufficient(permissionsState: PermissionsState) =
-            permissionsState.coarseLocationPermission == PermissionState.GRANTED ||
-                    permissionsState.fineLocationPermission == PermissionState.GRANTED
+        permissionsState.coarseLocationPermission == PermissionState.GRANTED ||
+                permissionsState.fineLocationPermission == PermissionState.GRANTED
 }

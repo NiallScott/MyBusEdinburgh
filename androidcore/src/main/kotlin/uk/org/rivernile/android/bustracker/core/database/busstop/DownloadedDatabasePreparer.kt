@@ -30,7 +30,7 @@ import android.database.SQLException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.IOException
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
 import javax.inject.Inject

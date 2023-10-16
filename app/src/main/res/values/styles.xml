@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,13 +31,6 @@
     * Widget styles *
     *****************
     -->
-    <style name="Widget.MyBus.ExpandCollapseIndicator" parent="@android:style/Widget">
-        <item name="android:contentDescription">@null</item>
-        <item name="expandedState">collapsed</item>
-        <item name="collapsedContentDescription">@string/expandcollapseindicator_contentdescription_collapsed</item>
-        <item name="expandedContentDescription">@string/expandcollapseindicator_contentdescription_expanded</item>
-    </style>
-
     <style name="Widget.MyBus.TextView.Error" parent="Widget.AppCompat.TextView">
         <item name="android:textAppearance">?textAppearanceBodyLarge</item>
         <item name="android:textColor">?colorOnSurface</item>

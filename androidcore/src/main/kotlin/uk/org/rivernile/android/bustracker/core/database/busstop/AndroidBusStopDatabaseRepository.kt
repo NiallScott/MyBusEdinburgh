@@ -43,8 +43,8 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class AndroidBusStopDatabaseRepository @Inject constructor(
-        private val database: AndroidBusStopDatabase,
-        private val databaseDao: DatabaseDao)
+    private val database: AndroidBusStopDatabase,
+    private val databaseDao: DatabaseDao)
     : BusStopDatabaseRepository {
 
     override suspend fun replaceDatabase(newDatabase: File) =

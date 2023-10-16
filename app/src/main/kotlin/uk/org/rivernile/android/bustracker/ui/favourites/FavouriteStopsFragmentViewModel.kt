@@ -46,7 +46,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.favourites.FavouriteStop
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent

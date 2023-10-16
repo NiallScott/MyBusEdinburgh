@@ -36,9 +36,9 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import uk.org.rivernile.android.bustracker.core.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
-import uk.org.rivernile.android.bustracker.core.di.ForMainDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForMainDispatcher
 import uk.org.rivernile.android.bustracker.core.preferences.AppTheme
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import javax.inject.Inject

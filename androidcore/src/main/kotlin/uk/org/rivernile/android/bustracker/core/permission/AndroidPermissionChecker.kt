@@ -43,8 +43,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class AndroidPermissionChecker @Inject internal constructor(
-        private val context: Context,
-        private val notificationPermissionChecker: NotificationPermissionChecker) {
+    private val context: Context,
+    private val notificationPermissionChecker: NotificationPermissionChecker) {
 
     /**
      * Has [Manifest.permission.ACCESS_FINE_LOCATION] been granted to us?
@@ -69,16 +69,6 @@ class AndroidPermissionChecker @Inject internal constructor(
                 context,
                 Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
-
-    /**
-     * Has either [Manifest.permission.ACCESS_FINE_LOCATION] or
-     * [Manifest.permission.ACCESS_COARSE_LOCATION] been granted to us?
-     *
-     * @return `true` if [Manifest.permission.ACCESS_FINE_LOCATION] or
-     * [Manifest.permission.ACCESS_COARSE_LOCATION] has been granted to us, otherwise `false`.
-     */
-    fun checkHasEitherFineOrCoarseLocationPermission() =
-            checkFineLocationPermission() || checkCoarseLocationPermission()
 
     /**
      * Do we have permission to post notifications? Prior to API level 33 this will always return

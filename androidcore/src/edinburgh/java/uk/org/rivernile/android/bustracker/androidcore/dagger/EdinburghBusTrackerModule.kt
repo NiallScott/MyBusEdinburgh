@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,7 +31,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
-import uk.org.rivernile.android.bustracker.core.di.ForTracker
+import uk.org.rivernile.android.bustracker.core.dagger.ForBusTrackerApiKey
+import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
 
 /**
  * This [Module] provides dependencies for the Edinburgh Bus Tracker API.
@@ -45,4 +46,8 @@ class EdinburghBusTrackerModule {
     @Provides
     @ForTracker
     fun provideTrackerBaseUrl(): String = BuildConfig.TRACKER_BASE_URL
+
+    @Provides
+    @ForBusTrackerApiKey
+    fun provideBusTrackerApiKey(): String = BuildConfig.API_KEY
 }

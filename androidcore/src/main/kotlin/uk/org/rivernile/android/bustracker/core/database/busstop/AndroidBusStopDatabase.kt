@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.ProxyDatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ProxyServiceDao
@@ -43,7 +44,6 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.Pro
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicestop.ServiceStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.ProxyStopDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
-import uk.org.rivernile.android.bustracker.core.di.ForIoDispatcher
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
-import uk.org.rivernile.android.bustracker.core.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.favourites.FavouritesRepository
 import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
@@ -59,10 +59,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class DisplayStopDataActivityViewModel @Inject constructor(
-        private val busStopsRepository: BusStopsRepository,
-        private val favouritesRepository: FavouritesRepository,
-        private val alertsRepository: AlertsRepository,
-        @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
+    private val busStopsRepository: BusStopsRepository,
+    private val favouritesRepository: FavouritesRepository,
+    private val alertsRepository: AlertsRepository,
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher) : ViewModel() {
 
     /**
      * This property is used to get and set the stop code which should be shown.

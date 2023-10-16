@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,6 @@
 
 package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,9 +44,5 @@ class SerialisationModule {
 
     @Provides
     @Singleton
-    fun provideGson() = Gson()
-
-    @Provides
-    @Singleton
-    fun provideKotlinJsonSerialisation() = Json { ignoreUnknownKeys = true }
+    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
 }

@@ -32,6 +32,22 @@ plugins {
 
 dependencies {
 
+    api(project(":core:app-properties"))
+    api(project(":core:config"))
+    api(project(":core:connectivity"))
+    api(project(":core:coroutines"))
+    api(project(":core:favourites"))
+    api(project(":core:http-core"))
+    api(project(":core:http-file-downloader"))
+    api(project(":core:livetimes"))
+    api(project(":core:location"))
+    api(project(":core:logging"))
+    api(project(":core:time"))
+    api(project(":core:twitter"))
+    api(project(":database:settings-db-core"))
+    api(project(":endpoint:internal-api-endpoint"))
+    api(project(":endpoint:tracker-endpoint"))
+
     // Kotlin
     api(libs.coroutines.core)
 

@@ -34,16 +34,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.app.AndroidAppRepository
-import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
-import uk.org.rivernile.android.bustracker.core.log.CrashlyticsExceptionLogger
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
-import uk.org.rivernile.android.bustracker.core.networking.ConnectivityChecker
-import uk.org.rivernile.android.bustracker.core.networking.LegacyConnectivityChecker
-import uk.org.rivernile.android.bustracker.core.networking.V24ConnectivityChecker
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.LegacyAppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotificationChannels
@@ -73,17 +66,6 @@ class AndroidCoreModule {
     }
 
     @Provides
-    internal fun provideConnectivityChecker(
-            legacyConnectivityChecker: Provider<LegacyConnectivityChecker>,
-            v24ConnectivityChecker: Provider<V24ConnectivityChecker>): ConnectivityChecker {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            v24ConnectivityChecker.get()
-        } else {
-            legacyConnectivityChecker.get()
-        }
-    }
-
-    @Provides
     internal fun provideNotificationPermissionChecker(
             legacyNotificationPermissionChecker: Provider<LegacyNotificationPermissionChecker>,
             v33NotificationPermissionChecker: Provider<V33NotificationPermissionChecker>):
@@ -101,16 +83,7 @@ class AndroidCoreModule {
 
         @Suppress("unused")
         @Binds
-        fun bindExceptionLogger(
-            crashlyticsExceptionLogger: CrashlyticsExceptionLogger): ExceptionLogger
-
-        @Suppress("unused")
-        @Binds
         fun bindFeatureRepository(
             androidFeatureRepository: AndroidFeatureRepository): FeatureRepository
-
-        @Suppress("unused")
-        @Binds
-        fun bindAppRepository(androidAppRepository: AndroidAppRepository): AppRepository
     }
 }
