@@ -47,9 +47,9 @@ import javax.inject.Inject
  */
 @ViewModelScoped
 class StopMarkersRetriever @Inject constructor(
-        private val savedState: SavedStateHandle,
-        private val busStopsRepository: BusStopsRepository,
-        private val serviceListingRetriever: ServiceListingRetriever) {
+    private val savedState: SavedStateHandle,
+    private val busStopsRepository: BusStopsRepository,
+    private val serviceListingRetriever: ServiceListingRetriever) {
 
     companion object {
 

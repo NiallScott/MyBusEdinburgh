@@ -49,17 +49,17 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class AlertsRetriever @Inject constructor(
-        private val alertsRepository: AlertsRepository,
-        private val busStopsRepository: BusStopsRepository,) {
+    private val alertsRepository: AlertsRepository,
+    private val busStopsRepository: BusStopsRepository,) {
 
     /**
      * This produces a [Flow] which emits [List]s of [UiAlert]s.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val allAlertsFlow: Flow<List<UiAlert>?> get() =
-            alertsRepository.allAlertsFlow
-                    .flatMapLatest(this::loadStopDetailsForAlerts)
-                    .onStart<List<UiAlert>?> { emit(null) }
+        alertsRepository.allAlertsFlow
+            .flatMapLatest(this::loadStopDetailsForAlerts)
+            .onStart<List<UiAlert>?> { emit(null) }
 
     /**
      * Given a [List] of loaded [Alert]s, load the stop details for every alert and combine these
@@ -74,7 +74,7 @@ class AlertsRetriever @Inject constructor(
             val stopCodes = a.map(Alert::stopCode).toHashSet()
 
             busStopsRepository.getBusStopDetailsFlow(stopCodes)
-                    .map { combineAlertsAndStopDetails(a, it) }
+                .map { combineAlertsAndStopDetails(a, it) }
         } ?: flowOf(emptyList())
     }
 
@@ -108,14 +108,14 @@ class AlertsRetriever @Inject constructor(
      * @return An object containing the combined [ArrivalAlert] and [StopDetails].
      */
     private fun combineArrivalAlertAndStopDetails(
-            alert: ArrivalAlert,
-            stopDetails: StopDetails?) =
-            UiAlert.ArrivalAlert(
-                    alert.id,
-                    alert.stopCode,
-                    stopDetails,
-                    alert.serviceNames,
-                    alert.timeTrigger)
+        alert: ArrivalAlert,
+        stopDetails: StopDetails?) =
+        UiAlert.ArrivalAlert(
+            alert.id,
+            alert.stopCode,
+            stopDetails,
+            alert.serviceNames,
+            alert.timeTrigger)
 
     /**
      * Given a [ProximityAlert] and possible [StopDetails], combine them in to a single
@@ -126,11 +126,11 @@ class AlertsRetriever @Inject constructor(
      * @return An object containing the combined [ProximityAlert] and [StopDetails].
      */
     private fun combineProximityAlertAndStopDetails(
-            alert: ProximityAlert,
-            stopDetails: StopDetails?) =
-            UiAlert.ProximityAlert(
-                    alert.id,
-                    alert.stopCode,
-                    stopDetails,
-                    alert.distanceFrom)
+        alert: ProximityAlert,
+        stopDetails: StopDetails?) =
+        UiAlert.ProximityAlert(
+            alert.id,
+            alert.stopCode,
+            stopDetails,
+            alert.distanceFrom)
 }

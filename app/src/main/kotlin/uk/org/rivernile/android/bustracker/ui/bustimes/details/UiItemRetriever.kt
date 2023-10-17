@@ -51,10 +51,10 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class UiItemRetriever @Inject constructor(
-        private val busStopsRepository: BusStopsRepository,
-        private val distanceRetriever: DistanceRetriever,
-        private val servicesRetriever: ServicesRetriever,
-        private val featureRepository: FeatureRepository) {
+    private val busStopsRepository: BusStopsRepository,
+    private val distanceRetriever: DistanceRetriever,
+    private val servicesRetriever: ServicesRetriever,
+    private val featureRepository: FeatureRepository) {
 
     private val hasMapFeature by lazy { featureRepository.hasStopMapUiFeature }
 
@@ -72,21 +72,21 @@ class UiItemRetriever @Inject constructor(
             permissionsStateFlow: Flow<PermissionsState>,
             coroutineScope: CoroutineScope): Flow<List<UiItem>> {
         val busStopDetailsFlow = stopCodeFlow
-                .flatMapLatest(this::loadStop)
-                .shareIn(coroutineScope, SharingStarted.WhileSubscribed(), 1)
+            .flatMapLatest(this::loadStop)
+            .shareIn(coroutineScope, SharingStarted.WhileSubscribed(), 1)
 
         val distanceFlow = distanceRetriever.createDistanceFlow(
-                permissionsStateFlow,
-                busStopDetailsFlow)
+            permissionsStateFlow,
+            busStopDetailsFlow)
 
         val servicesFlow = stopCodeFlow
-                .flatMapLatest(this::loadServices)
+            .flatMapLatest(this::loadServices)
 
         return combine(
-                busStopDetailsFlow,
-                distanceFlow,
-                servicesFlow,
-                this::assembleItems)
+            busStopDetailsFlow,
+            distanceFlow,
+            servicesFlow,
+            this::assembleItems)
     }
 
     /**
@@ -131,9 +131,9 @@ class UiItemRetriever @Inject constructor(
             // map feature is on.
             if (hasMapFeature) {
                 items += UiItem.Map(
-                        it.location.latitude,
-                        it.location.longitude,
-                        it.orientation)
+                    it.location.latitude,
+                    it.location.longitude,
+                    it.orientation)
             }
         }
 
@@ -144,7 +144,7 @@ class UiItemRetriever @Inject constructor(
 
         // Add all the service items. If they don't exist, add a NoServices item instead.
         services?.ifEmpty { null }?.let(items::addAll)
-                ?: items.add(UiItem.NoServices)
+            ?: items.add(UiItem.NoServices)
 
         return items
     }
