@@ -24,8 +24,9 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.database.busstop.di
 
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -48,6 +49,10 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDao
 @InstallIn(SingletonComponent::class)
 @Module
 internal class BusStopDatabaseModule {
+
+    @Provides
+    fun provideFrameworkSQLiteOpenHelperFactory(): FrameworkSQLiteOpenHelperFactory =
+        FrameworkSQLiteOpenHelperFactory()
 
     @Provides
     fun provideDatabaseDao(database: AndroidBusStopDatabase): DatabaseDao =

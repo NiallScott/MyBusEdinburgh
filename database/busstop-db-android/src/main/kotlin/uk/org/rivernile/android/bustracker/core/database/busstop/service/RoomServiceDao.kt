@@ -31,7 +31,6 @@ import androidx.room.MapInfo
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import okhttp3.internal.toImmutableMap
 
 /**
  * This is the Room implementation of [ServiceDao].
@@ -99,7 +98,7 @@ internal abstract class RoomServiceDao {
                 }
 
                 result.ifEmpty { null }
-                    ?.toImmutableMap()
+                    ?.toMap()
             }
     }
 }

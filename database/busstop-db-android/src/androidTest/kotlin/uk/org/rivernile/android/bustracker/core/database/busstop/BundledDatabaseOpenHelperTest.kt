@@ -44,7 +44,6 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
-import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 
 /**

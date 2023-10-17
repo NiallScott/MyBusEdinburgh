@@ -44,6 +44,7 @@ dependencies {
     api(project(":core:logging"))
     api(project(":core:time"))
     api(project(":core:twitter"))
+    api(project(":database:busstop-db-core"))
     api(project(":database:settings-db-core"))
     api(project(":endpoint:internal-api-endpoint"))
     api(project(":endpoint:tracker-endpoint"))

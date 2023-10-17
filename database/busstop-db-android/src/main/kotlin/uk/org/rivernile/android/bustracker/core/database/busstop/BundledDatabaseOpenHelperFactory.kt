@@ -29,7 +29,6 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 import android.content.Context
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
-import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
 

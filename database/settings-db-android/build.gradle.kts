@@ -84,9 +84,10 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     // Test dependencies
+    androidTestImplementation(project(":database:database-test-android"))
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.room.test)
 
-    implementation(libs.junit)
+    testImplementation(libs.junit)
 }

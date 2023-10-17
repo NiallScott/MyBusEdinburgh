@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,25 +24,12 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+plugins {
+    kotlin("jvm")
+}
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.database.AndroidDatabaseUtils
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
+dependencies {
 
-/**
- * This is a Dagger [Module] for database dependencies.
- *
- * @author Niall Scott
- */
-@InstallIn(SingletonComponent::class)
-@Module
-internal interface DatabaseModule {
-
-    @Suppress("unused")
-    @Binds
-    fun bindDatabaseUtils(androidDatabaseUtils: AndroidDatabaseUtils): DatabaseUtils
+    // Kotlin
+    implementation(libs.coroutines.core)
 }

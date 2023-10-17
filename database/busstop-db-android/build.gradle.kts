@@ -28,14 +28,15 @@ plugins {
     id("com.android.library")
     kotlin("android")
     kotlin("kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
 }
 
 android {
-    namespace = "uk.org.rivernile.android.bustracker.androidcore"
+    namespace = "uk.org.rivernile.android.bustracker.core.database.busstop"
 
     defaultConfig {
-        testInstrumentationRunner = "uk.org.rivernile.android.bustracker.core.CoreTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles += file("proguard-consumer-rules.pro")
     }
 
@@ -55,18 +56,13 @@ android {
     productFlavors {
         create("edinburgh") {
             dimension = "city"
-
-            // URLs
-            buildConfigField("String", "API_BASE_URL", "\"http://edinb.us/api/\"")
-            buildConfigField("String", "TRACKER_BASE_URL", "\"http://ws.mybustracker.co.uk/\"")
-
-            // API keys
-            buildConfigField("String", "API_KEY", "\"${getApiKey("edinburgh")}\"")
-
-            // Other
-            buildConfigField("String", "SCHEMA_NAME", "\"MBE_10\"")
-            buildConfigField("String", "API_APP_NAME", "\"MBE\"")
         }
+    }
+
+    sourceSets {
+        // This adds the generated Room schema files to the instrumentation test assets so that they
+        // can be loaded at test time.
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
 
     packaging {
@@ -77,62 +73,48 @@ android {
     }
 }
 
+ksp {
+    /*
+     * This is used to export the Room schema out to a JSON file in the module's "schemas"
+     * directory. We want to do this so that we can compare schema versions after upgrades.
+     * It's also possible for us to do automated testing using the JSON files to test database
+     * migrations.
+     */
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
-    // Our code module
-    api(project(":core"))
-    implementation(project(":core:app-properties-android"))
-    implementation(project(":core:connectivity-android"))
-    implementation(project(":core:http-logging-android"))
-    implementation(project(":core:location-android"))
-    implementation(project(":core:logging-android"))
-    implementation(project(":database:busstop-db-android"))
-    implementation(project(":database:settings-db-android"))
+
+    implementation(project(":core:coroutines"))
+    implementation(project(":core:logging"))
+    implementation(project(":database:busstop-db-core"))
 
     // Kotlin
     implementation(libs.coroutines.android)
 
-    // City implementations
-    "edinburghApi"(project(":edinburgh"))
-
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-    api(libs.hilt.work)
-    kapt(libs.hilt.androidx.compiler)
 
-    // AndroidX
-    implementation(libs.androidx.appcompat)
+    // Room (ORM)
+    implementation(libs.androidx.room.core)
+    ksp(libs.androidx.room.compiler)
 
-    // WorkManager
-    api(libs.androidx.work)
-
-    // DataStore
-    implementation(libs.androidx.datastore.preferences)
-
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
-
-    // Play Services
-    api(libs.play.services.location)
+    // Okio
+    implementation(libs.okio)
 
     // Test dependencies
+    androidTestImplementation(project(":database:database-test-android"))
     androidTestImplementation(project(":testutils"))
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.room.test)
     androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.mockk.android)
-    androidTestImplementation(libs.androidx.work.test)
-    androidTestImplementation(libs.hilt.test)
-    kaptAndroidTest(libs.hilt.android.compiler)
 
     testImplementation(project(":testutils"))
-    testImplementation(libs.androidx.arch.core.test)
-}
-
-fun getApiKey(city: String): String {
-    // Populate the build config with API keys which is provided as a project property so that
-    // ApiKey.java can pick them up.
-    return project.findProperty("mybus.${city}.apiKey") as? String ?: "undefined"
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
 }
