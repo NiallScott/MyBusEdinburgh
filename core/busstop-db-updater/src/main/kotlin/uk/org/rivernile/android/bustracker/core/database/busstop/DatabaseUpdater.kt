@@ -29,13 +29,13 @@ package uk.org.rivernile.android.bustracker.core.database.busstop
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.IOException
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
+import uk.org.rivernile.android.bustracker.core.utils.TemporaryFileCreator
 import java.io.File
 import javax.inject.Inject
 import javax.net.SocketFactory
@@ -43,7 +43,7 @@ import javax.net.SocketFactory
 /**
  * This class updates the database with a new version which has been downloaded from the API server.
  *
- * @param databaseUtils Utilities for dealing with databases.
+ * @param temporaryFileCreator Utilities for creating temporary fies.
  * @param fileDownloader An implementation for downloading files to a path.
  * @param fileConsistencyChecker An implementation for checking the consistency of files.
  * @param databaseRepository The repository which represents this database.
@@ -52,7 +52,7 @@ import javax.net.SocketFactory
  * @author Niall Scott
  */
 class DatabaseUpdater @Inject internal constructor(
-    private val databaseUtils: DatabaseUtils,
+    private val temporaryFileCreator: TemporaryFileCreator,
     private val fileDownloader: FileDownloader,
     private val fileConsistencyChecker: FileConsistencyChecker,
     private val databaseRepository: BusStopDatabaseRepository,
@@ -69,7 +69,7 @@ class DatabaseUpdater @Inject internal constructor(
         databaseVersion: DatabaseVersion,
         socketFactory: SocketFactory? = null): Boolean {
         val downloadFile = try {
-            databaseUtils.createTemporaryFile("mybus-database-download")
+            temporaryFileCreator.createTemporaryFile("mybus-database-download")
         } catch (e: IOException) {
             exceptionLogger.log(e)
             return false

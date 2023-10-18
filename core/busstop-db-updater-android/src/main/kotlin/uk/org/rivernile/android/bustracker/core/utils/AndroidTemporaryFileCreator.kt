@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,29 +24,26 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database
+package uk.org.rivernile.android.bustracker.core.utils
 
 import android.content.Context
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import okio.IOException
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import java.io.File
 import javax.inject.Inject
 
 /**
- * This class is an Android specific implementation of [DatabaseUtils].
+ * This class is an Android specific implementation of [TemporaryFileCreator].
  *
  * @param context The application [Context].
- * @param exceptionLogger The exception logger.
  * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
-internal class AndroidDatabaseUtils @Inject constructor(
+internal class AndroidTemporaryFileCreator @Inject constructor(
     private val context: Context,
-    private val exceptionLogger: ExceptionLogger,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher): DatabaseUtils {
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : TemporaryFileCreator {
 
     @Throws(IOException::class)
     override suspend fun createTemporaryFile(prefix: String): File {
@@ -57,6 +54,4 @@ internal class AndroidDatabaseUtils @Inject constructor(
             }
         }
     }
-
-    override fun getDatabasePath(dbFileName: String): File = context.getDatabasePath(dbFileName)
 }

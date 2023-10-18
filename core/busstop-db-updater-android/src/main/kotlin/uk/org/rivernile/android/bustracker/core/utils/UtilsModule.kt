@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,24 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.database
+package uk.org.rivernile.android.bustracker.core.utils
 
-import okio.IOException
-import java.io.File
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
 /**
- * This interface contains methods for performing common database actions.
+ * A Hilt [Module] for supply utils dependencies.
  *
  * @author Niall Scott
  */
-interface DatabaseUtils {
+@InstallIn(SingletonComponent::class)
+@Module
+internal interface UtilsModule {
 
-    /**
-     * Create a temporary [File] where database updates should be performed. This [File] will have
-     * [File.deleteOnExit] already called on it, so it will be deleted when the VM dies.
-     *
-     * @param prefix The filename prefix of the temporary file.
-     * @return A [File] pointing to the new temporary file.
-     * @throws IOException When the temporary file could not be created.
-     */
-    @Throws(IOException::class)
-    suspend fun createTemporaryFile(prefix: String): File
-
-    /**
-     * Given the name of a database, return a [File] object representing this database on the file
-     * system.
-     *
-     * @param dbFileName The name of the database.
-     * @return A [File] object representing the database on the file system.
-     */
-    fun getDatabasePath(dbFileName: String): File
+    @Suppress("unused")
+    @Binds
+    fun provideTemporaryFileCreator(
+        androidTemporaryFileCreator: AndroidTemporaryFileCreator): TemporaryFileCreator
 }

@@ -26,9 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.startup
 
+import android.content.Context
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import javax.inject.Inject
 
@@ -38,20 +38,20 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class EdinburghCleanUpTask @Inject constructor(
-    private val databaseUtils: DatabaseUtils,
+    private val context: Context,
     @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : CleanUpTask {
 
     override suspend fun performCleanUp() {
         withContext(ioDispatcher) {
             arrayOf(
-                databaseUtils.getDatabasePath("suggestions.db"),
-                databaseUtils.getDatabasePath("suggestions.db-journal"),
-                databaseUtils.getDatabasePath("busstops.db"),
-                databaseUtils.getDatabasePath("busstops.db-journal"),
-                databaseUtils.getDatabasePath("busstops2.db"),
-                databaseUtils.getDatabasePath("busstops2.db-journal"),
-                databaseUtils.getDatabasePath("busstops8.db"),
-                databaseUtils.getDatabasePath("busstops8.db-journal")
+                context.getDatabasePath("suggestions.db"),
+                context.getDatabasePath("suggestions.db-journal"),
+                context.getDatabasePath("busstops.db"),
+                context.getDatabasePath("busstops.db-journal"),
+                context.getDatabasePath("busstops2.db"),
+                context.getDatabasePath("busstops2.db-journal"),
+                context.getDatabasePath("busstops8.db"),
+                context.getDatabasePath("busstops8.db-journal")
             ).forEach { it.delete() }
         }
     }

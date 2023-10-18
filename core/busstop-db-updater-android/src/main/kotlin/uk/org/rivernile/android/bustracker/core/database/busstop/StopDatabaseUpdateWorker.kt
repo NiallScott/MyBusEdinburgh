@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,9 +47,9 @@ import javax.net.SocketFactory
  */
 @HiltWorker
 class StopDatabaseUpdateWorker @AssistedInject constructor(
-        @Assisted context: Context,
-        @Assisted private val params: WorkerParameters,
-        private val updateChecker: DatabaseUpdateChecker)
+    @Assisted context: Context,
+    @Assisted private val params: WorkerParameters,
+    private val updateChecker: DatabaseUpdateChecker)
     : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {

@@ -81,6 +81,7 @@ dependencies {
     // Our code module
     api(project(":core"))
     implementation(project(":core:app-properties-android"))
+    implementation(project(":core:busstop-db-updater-android"))
     implementation(project(":core:connectivity-android"))
     implementation(project(":core:http-logging-android"))
     implementation(project(":core:location-android"))

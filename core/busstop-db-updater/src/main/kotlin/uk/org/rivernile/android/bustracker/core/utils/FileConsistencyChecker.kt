@@ -42,7 +42,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-class FileConsistencyChecker @Inject internal constructor(
+internal class FileConsistencyChecker @Inject constructor(
     @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
     /**

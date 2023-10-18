@@ -41,7 +41,7 @@ import javax.net.SocketFactory
  * @param databaseUpdater The implementation to download and update the database.
  * @author Niall Scott
  */
-class DatabaseUpdateChecker @Inject constructor(
+class DatabaseUpdateChecker @Inject internal constructor(
     private val apiEndpoint: ApiEndpoint,
     private val databaseRepository: BusStopDatabaseRepository,
     private val databaseUpdater: DatabaseUpdater) {

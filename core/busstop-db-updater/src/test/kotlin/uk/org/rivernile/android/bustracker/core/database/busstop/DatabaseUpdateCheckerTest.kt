@@ -69,15 +69,15 @@ class DatabaseUpdateCheckerTest {
     @Before
     fun setUp() {
         checker = DatabaseUpdateChecker(
-                apiEndpoint,
-                databaseRepository,
-                databaseUpdater)
+            apiEndpoint,
+            databaseRepository,
+            databaseUpdater)
     }
 
     @Test
     fun returnFalseWhenPerformingTheApiRequestFails() = runTest {
         whenever(apiEndpoint.getDatabaseVersion(anyOrNull()))
-                .thenReturn(DatabaseVersionResponse.Error.ServerError)
+            .thenReturn(DatabaseVersionResponse.Error.ServerError)
 
         val result = checker.checkForDatabaseUpdates()
 
@@ -88,49 +88,49 @@ class DatabaseUpdateCheckerTest {
     fun returnTrueButDontUpdateDatabaseWhenTopologyIdsAreSame() = runTest {
         val databaseVersion = createDatabaseVersion()
         whenever(apiEndpoint.getDatabaseVersion(anyOrNull()))
-                .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
+            .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
         whenever(databaseRepository.getTopologyVersionId())
-                .thenReturn("abc123")
+            .thenReturn("abc123")
 
         val result = checker.checkForDatabaseUpdates()
 
         assertTrue(result)
         verify(databaseUpdater, never())
-                .updateDatabase(any(), anyOrNull())
+            .updateDatabase(any(), anyOrNull())
     }
 
     @Test
     fun returnTrueWhenTopologyIdsAreDifferentAndDatabaseUpdateIsSuccessful() = runTest {
         val databaseVersion = createDatabaseVersion()
         whenever(apiEndpoint.getDatabaseVersion(anyOrNull()))
-                .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
+            .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
         whenever(databaseRepository.getTopologyVersionId())
-                .thenReturn("xyz789")
+            .thenReturn("xyz789")
         whenever(databaseUpdater.updateDatabase(eq(databaseVersion), anyOrNull()))
-                .thenReturn(true)
+            .thenReturn(true)
 
         val result = checker.checkForDatabaseUpdates()
 
         assertTrue(result)
         verify(databaseUpdater)
-                .updateDatabase(eq(databaseVersion), anyOrNull())
+            .updateDatabase(eq(databaseVersion), anyOrNull())
     }
 
     @Test
     fun returnFalseWhenTopologyIdsAreDifferentAndDatabaseUpdateFails() = runTest {
         val databaseVersion = createDatabaseVersion()
         whenever(apiEndpoint.getDatabaseVersion(anyOrNull()))
-                .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
+            .thenReturn(DatabaseVersionResponse.Success(databaseVersion))
         whenever(databaseRepository.getTopologyVersionId())
-                .thenReturn("xyz789")
+            .thenReturn("xyz789")
         whenever(databaseUpdater.updateDatabase(eq(databaseVersion), anyOrNull()))
-                .thenReturn(false)
+            .thenReturn(false)
 
         val result = checker.checkForDatabaseUpdates()
 
         assertFalse(result)
         verify(databaseUpdater)
-                .updateDatabase(eq(databaseVersion), anyOrNull())
+            .updateDatabase(eq(databaseVersion), anyOrNull())
     }
 
     private fun createDatabaseVersion() =

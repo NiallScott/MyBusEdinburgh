@@ -51,6 +51,8 @@ include(
     ":core:alerts",
     ":core:app-properties",
     ":core:app-properties-android",
+    ":core:busstop-db-updater",
+    ":core:busstop-db-updater-android",
     ":core:busstops",
     ":core:config",
     ":core:connectivity",

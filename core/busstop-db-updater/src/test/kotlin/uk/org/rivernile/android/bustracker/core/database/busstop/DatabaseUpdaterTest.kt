@@ -41,12 +41,12 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.DatabaseUtils
 import uk.org.rivernile.android.bustracker.core.endpoints.api.DatabaseVersion
 import uk.org.rivernile.android.bustracker.core.http.FileDownloadResponse
 import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
+import uk.org.rivernile.android.bustracker.core.utils.TemporaryFileCreator
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import java.io.File
 
@@ -67,7 +67,7 @@ class DatabaseUpdaterTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var databaseUtils: DatabaseUtils
+    private lateinit var temporaryFileCreator: TemporaryFileCreator
     @Mock
     private lateinit var fileDownloader: FileDownloader
     @Mock
@@ -87,7 +87,7 @@ class DatabaseUpdaterTest {
     @Before
     fun setUp() {
         updater = DatabaseUpdater(
-            databaseUtils,
+            temporaryFileCreator,
             fileDownloader,
             fileConsistencyChecker,
             databaseRepository,
@@ -97,7 +97,7 @@ class DatabaseUpdaterTest {
 
     @Test
     fun returnsFalseWhenTheTemporaryFileCouldNotBeCreated() = runTest {
-        whenever(databaseUtils.createTemporaryFile(TEMP_FILE_PREFIX))
+        whenever(temporaryFileCreator.createTemporaryFile(TEMP_FILE_PREFIX))
             .thenThrow(IOException::class.java)
 
         val result = updater.updateDatabase(databaseVersion, null)
@@ -204,7 +204,7 @@ class DatabaseUpdaterTest {
     }
 
     private suspend fun givenCreatesTemporaryFile() {
-        whenever(databaseUtils.createTemporaryFile(TEMP_FILE_PREFIX))
+        whenever(temporaryFileCreator.createTemporaryFile(TEMP_FILE_PREFIX))
             .thenReturn(downloadFile)
     }
 }
