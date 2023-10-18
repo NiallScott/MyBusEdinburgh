@@ -75,7 +75,7 @@ class AreaEnteredHandlerTest {
         handler.handleAreaEntered(1)
 
         verify(geofencingManager)
-                .removeGeofence(1)
+            .removeGeofence(1)
     }
 
     @Test
@@ -83,7 +83,7 @@ class AreaEnteredHandlerTest {
         handler.handleAreaEntered(1)
 
         verify(alertsRepository)
-                .removeProximityAlert(1)
+            .removeProximityAlert(1)
     }
 
     @Test
@@ -91,20 +91,20 @@ class AreaEnteredHandlerTest {
         handler.handleAreaEntered(1)
 
         verify(alertsRepository)
-                .getProximityAlert(1)
+            .getProximityAlert(1)
         verify(notificationDispatcher, never())
-                .dispatchProximityAlertNotification(any())
+            .dispatchProximityAlertNotification(any())
     }
 
     @Test
     fun handleAreaEnteredDispatchesNotificationWhenAlertDoesExist() = runTest {
         val proximityAlert = ProximityAlert(1, 123L, "123456", 250)
         whenever(alertsRepository.getProximityAlert(1))
-                .thenReturn(proximityAlert)
+            .thenReturn(proximityAlert)
 
         handler.handleAreaEntered(1)
 
         verify(notificationDispatcher)
-                .dispatchProximityAlertNotification(proximityAlert)
+            .dispatchProximityAlertNotification(proximityAlert)
     }
 }

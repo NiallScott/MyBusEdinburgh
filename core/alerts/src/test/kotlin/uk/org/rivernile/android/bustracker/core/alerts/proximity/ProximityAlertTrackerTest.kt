@@ -70,19 +70,22 @@ class ProximityAlertTrackerTest {
 
     @Before
     fun setUp() {
-        tracker = ProximityAlertTracker(busStopsRepository, geofencingManager, timeUtils)
+        tracker = ProximityAlertTracker(
+            busStopsRepository,
+            geofencingManager,
+            timeUtils)
     }
 
     @Test
     fun trackProximityAlertWithNoLocationInBusStopDaoDoesNotAddGeofence() = runTest {
         val alert = ProximityAlert(1, 101L, "123456", 50)
         whenever(busStopsRepository.getStopLocation("123456"))
-                .thenReturn(null)
+            .thenReturn(null)
 
         tracker.trackProximityAlert(alert)
 
         verify(geofencingManager, never())
-                .addGeofence(any(), any(), any(), any(), any())
+            .addGeofence(any(), any(), any(), any(), any())
     }
 
     @Test
@@ -90,14 +93,14 @@ class ProximityAlertTrackerTest {
         val alert = ProximityAlert(1, 100L, "123456", 50)
         val location = MockStopLocation(1.0, 2.0)
         whenever(busStopsRepository.getStopLocation("123456"))
-                .thenReturn(location)
+            .thenReturn(location)
         whenever(timeUtils.currentTimeMills)
-                .thenReturn(MAX_DURATION_MILLIS + 101L)
+            .thenReturn(MAX_DURATION_MILLIS + 101L)
 
         tracker.trackProximityAlert(alert)
 
         verify(geofencingManager, never())
-                .addGeofence(any(), any(), any(), any(), any())
+            .addGeofence(any(), any(), any(), any(), any())
     }
 
     @Test
@@ -105,14 +108,14 @@ class ProximityAlertTrackerTest {
         val alert = ProximityAlert(1, 100L, "123456", 50)
         val location = MockStopLocation(1.0, 2.0)
         whenever(busStopsRepository.getStopLocation("123456"))
-                .thenReturn(location)
+            .thenReturn(location)
         whenever(timeUtils.currentTimeMills)
-                .thenReturn(MAX_DURATION_MILLIS)
+            .thenReturn(MAX_DURATION_MILLIS)
 
         tracker.trackProximityAlert(alert)
 
         verify(geofencingManager)
-                .addGeofence(1, 1.0, 2.0, 50f, 100L)
+            .addGeofence(1, 1.0, 2.0, 50f, 100L)
     }
 
     @Test
@@ -120,7 +123,7 @@ class ProximityAlertTrackerTest {
         tracker.removeProximityAlert(1)
 
         verify(geofencingManager)
-                .removeGeofence(1)
+            .removeGeofence(1)
     }
 
     private data class MockStopLocation(

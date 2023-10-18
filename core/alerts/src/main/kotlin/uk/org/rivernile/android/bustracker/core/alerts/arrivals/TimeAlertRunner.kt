@@ -46,8 +46,8 @@ import kotlin.coroutines.coroutineContext
  * @author Niall Scott
  */
 class TimeAlertRunner @Inject internal constructor(
-        private val checkTimesTask: CheckTimesTask,
-        private val alertsRepository: AlertsRepository) {
+    private val checkTimesTask: CheckTimesTask,
+    private val alertsRepository: AlertsRepository) {
 
     companion object {
 

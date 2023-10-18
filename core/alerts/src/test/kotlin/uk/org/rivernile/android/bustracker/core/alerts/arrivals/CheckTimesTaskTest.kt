@@ -81,54 +81,54 @@ class CheckTimesTaskTest {
     @Test
     fun doesNotCreateRequestWhenArrivalAlertStopCodesIsNull() = runTest {
         whenever(alertsRepository.getAllArrivalAlertStopCodes())
-                .thenReturn(null)
+            .thenReturn(null)
 
         checkTimesTask.checkTimes()
 
         verify(trackerEndpoint, never())
-                .getLiveTimes(any<List<String>>(), any())
+            .getLiveTimes(any<List<String>>(), any())
     }
 
     @Test
     fun doesNotCreateRequestWhenArrivalAlertStopCodesIsEmpty() = runTest {
         whenever(alertsRepository.getAllArrivalAlertStopCodes())
-                .thenReturn(emptySet())
+            .thenReturn(emptySet())
 
         checkTimesTask.checkTimes()
 
         verify(trackerEndpoint, never())
-                .getLiveTimes(any<List<String>>(), any())
+            .getLiveTimes(any<List<String>>(), any())
     }
 
     @Test
     fun createsRequestWithExpectedStopCodeWhenSingleStopCodeIsSupplied() = runTest {
         val stopCodes = setOf("123456")
         whenever(alertsRepository.getAllArrivalAlertStopCodes())
-                .thenReturn(stopCodes)
+            .thenReturn(stopCodes)
 
         checkTimesTask.checkTimes()
 
         verify(trackerEndpoint)
-                .getLiveTimes(stopCodes.toList(), 1)
+            .getLiveTimes(stopCodes.toList(), 1)
     }
 
     @Test
     fun createsRequestWithExpectedStopCodesWhenMultipleStopCodesAreSupplied() = runTest {
         val stopCodes = setOf("123456", "987654", "246802")
         whenever(alertsRepository.getAllArrivalAlertStopCodes())
-                .thenReturn(stopCodes)
+            .thenReturn(stopCodes)
 
         checkTimesTask.checkTimes()
 
         verify(trackerEndpoint)
-                .getLiveTimes(stopCodes.toList(), 1)
+            .getLiveTimes(stopCodes.toList(), 1)
     }
 
     @Test
     fun failingRequestFailsSilently() = runTest {
         givenArrivalAlertStopCodes(setOf("123456"))
         whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
-                .thenReturn(LiveTimesResponse.Error.ServerError.Other())
+            .thenReturn(LiveTimesResponse.Error.ServerError.Other())
 
         checkTimesTask.checkTimes()
     }
@@ -141,9 +141,9 @@ class CheckTimesTaskTest {
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher, never())
-                .dispatchTimeAlertNotification(any(), any())
+            .dispatchTimeAlertNotification(any(), any())
         verify(alertsRepository, never())
-                .removeArrivalAlert(any<Int>())
+            .removeArrivalAlert(any<Int>())
     }
 
     @Test
@@ -154,9 +154,9 @@ class CheckTimesTaskTest {
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher, never())
-                .dispatchTimeAlertNotification(any(), any())
+            .dispatchTimeAlertNotification(any(), any())
         verify(alertsRepository, never())
-                .removeArrivalAlert(any<Int>())
+            .removeArrivalAlert(any<Int>())
     }
 
     @Test
@@ -169,14 +169,14 @@ class CheckTimesTaskTest {
         val stop = createStop("123456", listOf(service))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
         whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
-                .thenReturn(LiveTimesResponse.Success(liveTimes))
+            .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher, never())
-                .dispatchTimeAlertNotification(any(), any())
+            .dispatchTimeAlertNotification(any(), any())
         verify(alertsRepository, never())
-                .removeArrivalAlert(any<Int>())
+            .removeArrivalAlert(any<Int>())
     }
 
     @Test
@@ -189,14 +189,14 @@ class CheckTimesTaskTest {
         val stop = createStop("123456", listOf(service))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
         whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
-                .thenReturn(LiveTimesResponse.Success(liveTimes))
+            .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher)
-                .dispatchTimeAlertNotification(arrivalAlert, listOf(service))
+            .dispatchTimeAlertNotification(arrivalAlert, listOf(service))
         verify(alertsRepository)
-                .removeArrivalAlert(1)
+            .removeArrivalAlert(1)
     }
 
     @Test
@@ -209,14 +209,14 @@ class CheckTimesTaskTest {
         val stop = createStop("123456", listOf(service))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
         whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
-                .thenReturn(LiveTimesResponse.Success(liveTimes))
+            .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher)
-                .dispatchTimeAlertNotification(arrivalAlert, listOf(service))
+            .dispatchTimeAlertNotification(arrivalAlert, listOf(service))
         verify(alertsRepository)
-                .removeArrivalAlert(1)
+            .removeArrivalAlert(1)
     }
 
     @Test
@@ -229,14 +229,14 @@ class CheckTimesTaskTest {
         val stop = createStop("123456", listOf(service))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
         whenever(trackerEndpoint.getLiveTimes(listOf("987654"), 1))
-                .thenReturn(LiveTimesResponse.Success(liveTimes))
+            .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher, never())
-                .dispatchTimeAlertNotification(any(), any())
+            .dispatchTimeAlertNotification(any(), any())
         verify(alertsRepository, never())
-                .removeArrivalAlert(any<Int>())
+            .removeArrivalAlert(any<Int>())
     }
 
     @Test
@@ -252,14 +252,14 @@ class CheckTimesTaskTest {
         val stop = createStop("123456", listOf(service1, service2, service3))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
         whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
-                .thenReturn(LiveTimesResponse.Success(liveTimes))
+            .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher, never())
-                .dispatchTimeAlertNotification(any(), any())
+            .dispatchTimeAlertNotification(any(), any())
         verify(alertsRepository, never())
-                .removeArrivalAlert(any<Int>())
+            .removeArrivalAlert(any<Int>())
     }
 
     @Test
@@ -276,14 +276,14 @@ class CheckTimesTaskTest {
         val stop = createStop("123456", listOf(service1, service2, service3))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
         whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
-                .thenReturn(LiveTimesResponse.Success(liveTimes))
+            .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher)
-                .dispatchTimeAlertNotification(arrivalAlert, listOf(service2))
+            .dispatchTimeAlertNotification(arrivalAlert, listOf(service2))
         verify(alertsRepository)
-                .removeArrivalAlert(1)
+            .removeArrivalAlert(1)
     }
 
     @Test
@@ -300,14 +300,14 @@ class CheckTimesTaskTest {
         val stop = createStop("123456", listOf(service1, service2, service3))
         val liveTimes = createLiveTimes(mapOf("123456" to stop))
         whenever(trackerEndpoint.getLiveTimes(listOf("123456"), 1))
-                .thenReturn(LiveTimesResponse.Success(liveTimes))
+            .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher)
-                .dispatchTimeAlertNotification(arrivalAlert, listOf(service2, service3))
+            .dispatchTimeAlertNotification(arrivalAlert, listOf(service2, service3))
         verify(alertsRepository)
-                .removeArrivalAlert(1)
+            .removeArrivalAlert(1)
     }
 
     @Test
@@ -334,70 +334,70 @@ class CheckTimesTaskTest {
         val stop2 = createStop("456", listOf(service4, service5, service6))
         val stop3 = createStop("789", listOf(service7, service8, service9))
         val liveTimes = createLiveTimes(mapOf(
-                "123" to stop1,
-                "456" to stop2,
-                "789" to stop3))
+            "123" to stop1,
+            "456" to stop2,
+            "789" to stop3))
         whenever(trackerEndpoint.getLiveTimes(listOf("123", "456", "789"), 1))
-                .thenReturn(LiveTimesResponse.Success(liveTimes))
+            .thenReturn(LiveTimesResponse.Success(liveTimes))
 
         checkTimesTask.checkTimes()
 
         verify(alertNotificationDispatcher)
-                .dispatchTimeAlertNotification(arrivalAlert1, listOf(service1, service2, service3))
+            .dispatchTimeAlertNotification(arrivalAlert1, listOf(service1, service2, service3))
         verify(alertNotificationDispatcher, never())
-                .dispatchTimeAlertNotification(eq(arrivalAlert2), any())
+            .dispatchTimeAlertNotification(eq(arrivalAlert2), any())
         verify(alertNotificationDispatcher)
-                .dispatchTimeAlertNotification(arrivalAlert3, listOf(service9))
+            .dispatchTimeAlertNotification(arrivalAlert3, listOf(service9))
         verify(alertsRepository)
-                .removeArrivalAlert(1)
+            .removeArrivalAlert(1)
         verify(alertsRepository, never())
-                .removeArrivalAlert(2)
+            .removeArrivalAlert(2)
         verify(alertsRepository)
-                .removeArrivalAlert(3)
+            .removeArrivalAlert(3)
     }
 
     private suspend fun givenArrivalAlertStopCodes(stopCodes: Set<String>) {
         whenever(alertsRepository.getAllArrivalAlertStopCodes())
-                .thenReturn(stopCodes)
+            .thenReturn(stopCodes)
     }
 
     private suspend fun givenArrivalAlerts(arrivalAlerts: List<ArrivalAlert>?) {
         whenever(alertsRepository.getAllArrivalAlerts())
-                .thenReturn(arrivalAlerts)
+            .thenReturn(arrivalAlerts)
     }
 
     private fun createVehicle(departureMinutes: Int) =
-            Vehicle(
-                    "a",
-                    Date(),
-                    departureMinutes,
-                    null,
-                    null,
-                    isEstimatedTime = false,
-                    isDelayed = false,
-                    isDiverted = false,
-                    isTerminus = false,
-                    isPartRoute = false)
+        Vehicle(
+            "a",
+            Date(),
+            departureMinutes,
+            null,
+            null,
+            isEstimatedTime = false,
+            isDelayed = false,
+            isDiverted = false,
+            isTerminus = false,
+            isPartRoute = false)
 
     private fun createService(serviceName: String, vehicles: List<Vehicle>) =
-            Service(
-                    serviceName,
-                    vehicles,
-                    null,
-                    null,
-                    isDisrupted = false,
-                    isDiverted = false)
+        Service(
+            serviceName,
+            vehicles,
+            null,
+            null,
+            isDisrupted = false,
+            isDiverted = false)
 
     private fun createStop(stopCode: String, services: List<Service>) =
-            Stop(
-                    stopCode,
-                    null,
-                    services,
-                    false)
+        Stop(
+            stopCode,
+            null,
+            services,
+            false)
 
     private fun createLiveTimes(stops: Map<String, Stop>) =
-            LiveTimes(
-                    stops,
-                    123L,
-                    false)
+        LiveTimes(
+            stops,
+            123L,
+            false)
 }

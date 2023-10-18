@@ -110,13 +110,13 @@ class ManageProximityAlertsRunnerTest {
         advanceTimeBy(1L)
 
         verify(proximityAlertTracker)
-                .trackProximityAlert(alert1)
+            .trackProximityAlert(alert1)
         verify(proximityAlertTracker)
-                .trackProximityAlert(alert2)
+            .trackProximityAlert(alert2)
         verify(proximityAlertTracker)
-                .trackProximityAlert(alert3)
+            .trackProximityAlert(alert3)
         verify(proximityAlertTracker, never())
-                .removeProximityAlert(any())
+            .removeProximityAlert(any())
         job.cancel()
     }
 
@@ -135,11 +135,11 @@ class ManageProximityAlertsRunnerTest {
         advanceTimeBy(15L)
 
         verify(proximityAlertTracker)
-                .removeProximityAlert(1)
+            .removeProximityAlert(1)
         verify(proximityAlertTracker)
-                .removeProximityAlert(2)
+            .removeProximityAlert(2)
         verify(proximityAlertTracker)
-                .removeProximityAlert(3)
+            .removeProximityAlert(3)
         job.cancel()
     }
 
@@ -159,11 +159,11 @@ class ManageProximityAlertsRunnerTest {
         advanceTimeBy(15L)
 
         verify(proximityAlertTracker, never())
-                .removeProximityAlert(1)
+            .removeProximityAlert(1)
         verify(proximityAlertTracker)
-                .removeProximityAlert(2)
+            .removeProximityAlert(2)
         verify(proximityAlertTracker, never())
-                .removeProximityAlert(3)
+            .removeProximityAlert(3)
         job.cancel()
     }
 
@@ -183,13 +183,13 @@ class ManageProximityAlertsRunnerTest {
         advanceTimeBy(15L)
 
         verify(proximityAlertTracker)
-                .trackProximityAlert(alert1)
+            .trackProximityAlert(alert1)
         verify(proximityAlertTracker)
-                .trackProximityAlert(alert2)
+            .trackProximityAlert(alert2)
         verify(proximityAlertTracker)
-                .trackProximityAlert(alert3)
+            .trackProximityAlert(alert3)
         verify(proximityAlertTracker, never())
-                .removeProximityAlert(any())
+            .removeProximityAlert(any())
         job.cancel()
     }
 

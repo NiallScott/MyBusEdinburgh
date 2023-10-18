@@ -26,50 +26,23 @@
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
-    id("kotlinx-serialization")
 }
 
 dependencies {
 
-    api(project(":core:alerts"))
-    api(project(":core:app-properties"))
-    api(project(":core:busstops"))
-    api(project(":core:config"))
-    api(project(":core:connectivity"))
-    api(project(":core:coroutines"))
-    api(project(":core:favourites"))
-    api(project(":core:http-core"))
-    api(project(":core:http-file-downloader"))
-    api(project(":core:livetimes"))
-    api(project(":core:location"))
-    api(project(":core:logging"))
-    api(project(":core:services"))
-    api(project(":core:servicepoints"))
-    api(project(":core:servicestops"))
-    api(project(":core:time"))
-    api(project(":core:twitter"))
-    api(project(":database:busstop-db-core"))
-    api(project(":database:settings-db-core"))
-    api(project(":endpoint:internal-api-endpoint"))
-    api(project(":endpoint:tracker-endpoint"))
+    implementation(project(":core:busstops"))
+    implementation(project(":core:coroutines"))
+    implementation(project(":core:time"))
+    implementation(project(":database:busstop-db-core"))
+    implementation(project(":database:settings-db-core"))
+    implementation(project(":endpoint:tracker-endpoint"))
 
-    // Kotlin
-    api(libs.coroutines.core)
+    implementation(libs.javax.inject)
 
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-
-    // (De-)serialisation
-    api(libs.kotlin.serialization.json)
-
-    // Okhttp
-    api(libs.okhttp)
-
-    // Retrofit
-    api(libs.retrofit)
-
-    // Testing
+    // Testing dependencies
     testImplementation(project(":testutils"))
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
 }
