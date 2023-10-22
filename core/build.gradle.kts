@@ -45,6 +45,7 @@ dependencies {
     api(project(":core:livetimes"))
     api(project(":core:location"))
     api(project(":core:logging"))
+    api(project(":core:preferences"))
     api(project(":core:services"))
     api(project(":core:servicepoints"))
     api(project(":core:servicestops"))

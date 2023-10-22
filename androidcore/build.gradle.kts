@@ -86,6 +86,7 @@ dependencies {
     implementation(project(":core:http-logging-android"))
     implementation(project(":core:location-android"))
     implementation(project(":core:logging-android"))
+    api(project(":core:preferences-android"))
     implementation(project(":database:busstop-db-android"))
     implementation(project(":database:settings-db-android"))
 

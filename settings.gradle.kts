@@ -67,6 +67,8 @@ include(
     ":core:location-android",
     ":core:logging",
     ":core:logging-android",
+    ":core:preferences",
+    ":core:preferences-android",
     ":core:services",
     ":core:servicepoints",
     ":core:servicestops",

@@ -24,20 +24,48 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.preferences
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    kotlin("kapt")
+}
 
-const val PREF_BUS_STOP_DATABASE_WIFI_ONLY = "pref_bus_stop_database_wifi_only"
-const val PREF_APP_THEME = "pref_theme"
-const val PREF_ALERT_SOUND = "pref_alertsound_state"
-const val PREF_ALERT_VIBRATE = "pref_alertvibrate_state"
-const val PREF_ALERT_LED = "pref_alertled_state"
-const val PREF_AUTO_REFRESH = "pref_autorefresh_state"
-const val PREF_SHOW_NIGHT_BUSES = "pref_nightservices_state"
-const val PREF_SERVICE_SORTING = "pref_servicessorting_state"
-const val PREF_NUMBER_OF_SHOWN_DEPARTURES_PER_SERVICE = "pref_numberOfShownDeparturesPerService"
-const val PREF_ZOOM_BUTTONS = "pref_map_zoom_buttons_state"
-const val PREF_DISABLE_GPS_PROMPT = "neareststops_gps_prompt_disable"
-const val PREF_MAP_LAST_LATITUDE = "pref_map_last_latitude"
-const val PREF_MAP_LAST_LONGITUDE = "pref_map_last_longitude"
-const val PREF_MAP_LAST_ZOOM = "pref_map_last_zoom"
-const val PREF_MAP_LAST_MAP_TYPE = "pref_map_last_map_type"
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.preferences"
+
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+
+        getByName("debug") {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    api(project(":core:preferences"))
+    implementation(project(":core:logging"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
+    // Testing dependencies
+    testImplementation(project(":testutils"))
+    testImplementation(libs.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.mockito)
+    testImplementation(libs.mockito.kotlin)
+}

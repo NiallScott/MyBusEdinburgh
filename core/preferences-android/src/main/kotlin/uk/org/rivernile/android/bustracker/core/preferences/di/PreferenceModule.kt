@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.preferences.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
