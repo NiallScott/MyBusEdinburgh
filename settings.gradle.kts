@@ -67,6 +67,7 @@ include(
     ":core:location-android",
     ":core:logging",
     ":core:logging-android",
+    ":core:permission-android",
     ":core:preferences",
     ":core:preferences-android",
     ":core:services",
@@ -84,5 +85,6 @@ include(
     ":endpoint:tracker-endpoint",
     ":androidcore",
     ":testutils",
+    ":ui:text-formatting",
     ":ui:widget:contentview",
     ":ui:widget:expandcollapseindicator")

@@ -33,7 +33,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import uk.org.rivernile.android.bustracker.androidcore.R
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.deeplinking.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.permission.AndroidPermissionChecker

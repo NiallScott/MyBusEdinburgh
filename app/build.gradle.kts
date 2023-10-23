@@ -130,6 +130,8 @@ androidComponents {
 dependencies {
 
     implementation(project(":androidcore"))
+    implementation(project(":core:permission-android"))
+    implementation(project(":ui:text-formatting"))
     implementation(project(":ui:widget:contentview"))
     implementation(project(":ui:widget:expandcollapseindicator"))
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -65,11 +65,11 @@ internal class LegacyNotificationPermissionChecker @Inject constructor()
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 internal class V33NotificationPermissionChecker @Inject constructor(
-        private val context: Context) : NotificationPermissionChecker {
+    private val context: Context) : NotificationPermissionChecker {
 
     override fun checkPostNotificationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            context,
+            Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     }
 }

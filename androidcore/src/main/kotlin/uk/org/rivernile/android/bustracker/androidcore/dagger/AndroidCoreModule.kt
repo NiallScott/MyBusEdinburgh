@@ -40,9 +40,6 @@ import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.LegacyAppNotificationChannels
 import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotificationChannels
-import uk.org.rivernile.android.bustracker.core.permission.LegacyNotificationPermissionChecker
-import uk.org.rivernile.android.bustracker.core.permission.NotificationPermissionChecker
-import uk.org.rivernile.android.bustracker.core.permission.V33NotificationPermissionChecker
 import javax.inject.Provider
 
 /**
@@ -62,18 +59,6 @@ class AndroidCoreModule {
             V26AppNotificationChannels(context, notificationManager.get())
         } else {
             LegacyAppNotificationChannels()
-        }
-    }
-
-    @Provides
-    internal fun provideNotificationPermissionChecker(
-            legacyNotificationPermissionChecker: Provider<LegacyNotificationPermissionChecker>,
-            v33NotificationPermissionChecker: Provider<V33NotificationPermissionChecker>):
-            NotificationPermissionChecker {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            v33NotificationPermissionChecker.get()
-        } else {
-            legacyNotificationPermissionChecker.get()
         }
     }
 

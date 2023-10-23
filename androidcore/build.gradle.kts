@@ -86,9 +86,11 @@ dependencies {
     implementation(project(":core:http-logging-android"))
     implementation(project(":core:location-android"))
     implementation(project(":core:logging-android"))
+    implementation(project(":core:permission-android"))
     api(project(":core:preferences-android"))
     implementation(project(":database:busstop-db-android"))
     implementation(project(":database:settings-db-android"))
+    implementation(project(":ui:text-formatting"))
 
     // Kotlin
     implementation(libs.coroutines.android)

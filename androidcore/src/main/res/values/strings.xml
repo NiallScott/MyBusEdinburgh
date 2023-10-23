@@ -39,15 +39,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="remove_all">Remove all</string>
 
     <!--
-    ******************************************
-    * Strings for formatting bus stop names. *
-    ******************************************
-    -->
-    <string name="busstop" translatable="false">%1$s (%2$s)</string>
-    <string name="busstop_locality" translatable="false">%1$s, %2$s (%3$s)</string>
-    <string name="busstop_name_only_with_locality" translatable="false">%1$s, %2$s</string>
-
-    <!--
     *******************
     *******************
     ** Notifications **

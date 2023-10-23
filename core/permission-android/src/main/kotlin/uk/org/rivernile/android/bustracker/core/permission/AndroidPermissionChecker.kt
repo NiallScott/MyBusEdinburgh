@@ -54,8 +54,8 @@ class AndroidPermissionChecker @Inject internal constructor(
      */
     fun checkFineLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
     /**
@@ -66,8 +66,8 @@ class AndroidPermissionChecker @Inject internal constructor(
      */
      fun checkCoarseLocationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
     /**
@@ -79,5 +79,5 @@ class AndroidPermissionChecker @Inject internal constructor(
      * [Manifest.permission.POST_NOTIFICATIONS] has been granted to us, otherwise `false`.
      */
     fun checkPostNotificationPermission() =
-            notificationPermissionChecker.checkPostNotificationPermission()
+        notificationPermissionChecker.checkPostNotificationPermission()
 }
