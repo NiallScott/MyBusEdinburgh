@@ -38,11 +38,11 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = false
         }
 
-        getByName("debug") {
+        debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }

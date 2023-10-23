@@ -86,7 +86,7 @@ android {
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -99,7 +99,7 @@ android {
             }
         }
 
-        getByName("debug") {
+        debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
             enableUnitTestCoverage = true

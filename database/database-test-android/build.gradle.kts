@@ -33,7 +33,7 @@ android {
     namespace = "uk.org.rivernile.android.bustracker.core.database.test"
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = false
         }
     }
