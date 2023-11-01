@@ -57,8 +57,14 @@ class RemoveProximityAlertBroadcastReceiver : BroadcastReceiver() {
     lateinit var defaultDispatcher: CoroutineDispatcher
 
     override fun onReceive(context: Context, intent: Intent) {
+        val pendingResult = goAsync()
+
         applicationCoroutineScope.launch(defaultDispatcher) {
-            alertsRepository.removeAllProximityAlerts()
+            try {
+                alertsRepository.removeAllProximityAlerts()
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 }

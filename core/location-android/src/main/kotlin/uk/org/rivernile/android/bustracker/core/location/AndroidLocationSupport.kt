@@ -67,8 +67,14 @@ internal class AndroidLocationSupport @Inject constructor(
     override val isLocationEnabledFlow get() = callbackFlow {
         val locationEnabledReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
+                val pendingResult = goAsync()
+
                 launch {
-                    getAndSendIsLocationEnabled(channel)
+                    try {
+                        getAndSendIsLocationEnabled(channel)
+                    } finally {
+                        pendingResult.finish()
+                    }
                 }
             }
         }

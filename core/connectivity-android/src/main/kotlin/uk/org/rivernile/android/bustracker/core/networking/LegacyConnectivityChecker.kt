@@ -58,8 +58,14 @@ internal class LegacyConnectivityChecker @Inject constructor(
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (ConnectivityManager.CONNECTIVITY_ACTION == intent.action) {
+                    val pendingResult = goAsync()
+
                     launch {
-                        getAndSendHasInternetConnectivity()
+                        try {
+                            getAndSendHasInternetConnectivity()
+                        } finally {
+                            pendingResult.finish()
+                        }
                     }
                 }
             }

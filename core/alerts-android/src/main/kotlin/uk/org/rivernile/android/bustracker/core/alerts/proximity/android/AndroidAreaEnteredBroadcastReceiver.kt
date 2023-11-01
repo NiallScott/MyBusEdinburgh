@@ -81,8 +81,14 @@ class AndroidAreaEnteredBroadcastReceiver : BroadcastReceiver() {
             val isEntering = intent.getBooleanExtra(LocationManager.KEY_PROXIMITY_ENTERING, false)
 
             if (isEntering) {
+                val pendingResult = goAsync()
+
                 applicationCoroutineScope.launch(defaultDispatcher) {
-                    areaEnteredHandler.handleAreaEntered(alertId)
+                    try {
+                        areaEnteredHandler.handleAreaEntered(alertId)
+                    } finally {
+                        pendingResult.finish()
+                    }
                 }
             }
         }
