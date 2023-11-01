@@ -110,6 +110,7 @@ androidx-preference = { module = "androidx.preference:preference-ktx", version.r
 androidx-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "architecture_components" }
 androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version = "2.3.1" }
 androidx-test-monitor = { module = "androidx.test:monitor", version = "1.6.1" }
+androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.1.1" }
 
 # Material Design
 material = { module = "com.google.android.material:material", version.ref = "material" }

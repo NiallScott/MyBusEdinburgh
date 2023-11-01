@@ -34,7 +34,6 @@ import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseWorkScheduler
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForApplicationCoroutineScope
-import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import javax.inject.Inject
 
 /**
@@ -43,7 +42,6 @@ import javax.inject.Inject
  *
  * The task is begun in [performStartUpTasks] and this is executed on another thread.
  *
- * @param appNotificationChannels Implementation to set up notification channels.
  * @param busStopDatabaseUpdateJobScheduler Implementation to schedule updates to the bus stop
  * database.
  * @param cleanUpTask Implementation to perform clean up of app data - usually to remove data from
@@ -54,7 +52,6 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class StartUpTask @Inject internal constructor(
-    private val appNotificationChannels: AppNotificationChannels,
     private val busStopDatabaseUpdateJobScheduler: UpdateBusStopDatabaseWorkScheduler,
     private val cleanUpTask: CleanUpTask?,
     private val alertsRepository: AlertsRepository,
@@ -66,10 +63,6 @@ class StartUpTask @Inject internal constructor(
      */
     fun performStartUpTasks() {
         applicationCoroutineScope.launch(defaultDispatcher) {
-            // In-order tasks that are pre-requisites should be executed first, before launching
-            // the async tasks.
-            appNotificationChannels.createNotificationChannels()
-
             supervisorScope {
                 launchScheduleUpdateBusStopDatabaseAsync()
                 launchPerformCleanupAsync()

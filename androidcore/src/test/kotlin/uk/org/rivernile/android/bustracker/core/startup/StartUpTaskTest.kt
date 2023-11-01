@@ -37,7 +37,6 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.inOrder
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.database.busstop.UpdateBusStopDatabaseWorkScheduler
-import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 
 /**
@@ -53,8 +52,6 @@ class StartUpTaskTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var appNotificationChannels: AppNotificationChannels
-    @Mock
     private lateinit var busStopDatabaseJobScheduler: UpdateBusStopDatabaseWorkScheduler
     @Mock
     private lateinit var cleanUpTask: CleanUpTask
@@ -64,7 +61,6 @@ class StartUpTaskTest {
     @Test
     fun performsStartUpTasks() = runTest {
         val startUpTask = StartUpTask(
-                appNotificationChannels,
                 busStopDatabaseJobScheduler,
                 cleanUpTask,
                 alertsRepository,
@@ -75,12 +71,9 @@ class StartUpTaskTest {
         advanceUntilIdle()
 
         inOrder(
-            appNotificationChannels,
             busStopDatabaseJobScheduler,
             cleanUpTask,
             alertsRepository) {
-            verify(appNotificationChannels)
-                    .createNotificationChannels()
             verify(busStopDatabaseJobScheduler)
                     .scheduleUpdateBusStopDatabaseJob()
             verify(cleanUpTask)
@@ -93,7 +86,6 @@ class StartUpTaskTest {
     @Test
     fun doesNotThrowNullPointerExceptionWhenNoCleanUpTaskIsSupplied() {
         val startUpTask = StartUpTask(
-                appNotificationChannels,
                 busStopDatabaseJobScheduler,
                 null,
                 alertsRepository,

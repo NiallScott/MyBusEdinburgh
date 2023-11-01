@@ -35,7 +35,7 @@ android {
     namespace = "uk.org.rivernile.android.bustracker.androidcore"
 
     defaultConfig {
-        testInstrumentationRunner = "uk.org.rivernile.android.bustracker.core.CoreTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles += file("proguard-consumer-rules.pro")
     }
 
@@ -80,6 +80,7 @@ android {
 dependencies {
     // Our code module
     api(project(":core"))
+    implementation(project(":core:alerts-android"))
     implementation(project(":core:app-properties-android"))
     implementation(project(":core:busstop-db-updater-android"))
     implementation(project(":core:connectivity-android"))

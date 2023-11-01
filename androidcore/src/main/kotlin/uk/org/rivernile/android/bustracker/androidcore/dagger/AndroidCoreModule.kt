@@ -26,21 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.androidcore.dagger
 
-import android.content.Context
-import android.os.Build
-import androidx.core.app.NotificationManagerCompat
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
 import uk.org.rivernile.android.bustracker.core.features.AndroidFeatureRepository
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
-import uk.org.rivernile.android.bustracker.core.notifications.AppNotificationChannels
-import uk.org.rivernile.android.bustracker.core.notifications.LegacyAppNotificationChannels
-import uk.org.rivernile.android.bustracker.core.notifications.V26AppNotificationChannels
-import javax.inject.Provider
 
 /**
  * This Dagger module is the root module in the core project.
@@ -49,26 +41,10 @@ import javax.inject.Provider
  */
 @InstallIn(SingletonComponent::class)
 @Module(includes = [ CoreModule::class ])
-class AndroidCoreModule {
+internal interface AndroidCoreModule {
 
-    @Provides
-    internal fun provideAppNotificationChannels(
-            context: Context,
-            notificationManager: Provider<NotificationManagerCompat>): AppNotificationChannels {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            V26AppNotificationChannels(context, notificationManager.get())
-        } else {
-            LegacyAppNotificationChannels()
-        }
-    }
-
-    @InstallIn(SingletonComponent::class)
-    @Module
-    internal interface Bindings {
-
-        @Suppress("unused")
-        @Binds
-        fun bindFeatureRepository(
-            androidFeatureRepository: AndroidFeatureRepository): FeatureRepository
-    }
+    @Suppress("unused")
+    @Binds
+    fun bindFeatureRepository(
+        androidFeatureRepository: AndroidFeatureRepository): FeatureRepository
 }

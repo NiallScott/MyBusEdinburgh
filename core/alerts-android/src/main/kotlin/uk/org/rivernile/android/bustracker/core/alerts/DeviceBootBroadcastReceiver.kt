@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,5 +21,32 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest />
+ *
+ */
+
+package uk.org.rivernile.android.bustracker.core.alerts
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+
+/**
+ * This [BroadcastReceiver] is called when the device is booted.
+ *
+ * @author Niall Scott
+ */
+@AndroidEntryPoint
+class DeviceBootBroadcastReceiver : BroadcastReceiver() {
+
+    @Inject
+    lateinit var alertsRepository: AlertsRepository
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (Intent.ACTION_BOOT_COMPLETED == intent.action ||
+                Intent.ACTION_MY_PACKAGE_REPLACED == intent.action) {
+            alertsRepository.ensureTasksRunning()
+        }
+    }
+}

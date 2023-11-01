@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,5 +21,25 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest />
+ *
+ */
+
+package uk.org.rivernile.android.bustracker.core.alerts
+
+import android.app.Application
+import android.content.Context
+import androidx.test.runner.AndroidJUnitRunner
+import dagger.hilt.android.testing.HiltTestApplication
+
+/**
+ * This allows us to use our substitute [Application] instance for testing instead.
+ *
+ * @author Niall Scott
+ */
+@Suppress("unused") // Referenced from build.gradle
+class AlertsTestRunner : AndroidJUnitRunner() {
+
+    override fun newApplication(cl: ClassLoader, className: String, context: Context): Application {
+        return super.newApplication(cl, HiltTestApplication::class.java.name, context)
+    }
+}

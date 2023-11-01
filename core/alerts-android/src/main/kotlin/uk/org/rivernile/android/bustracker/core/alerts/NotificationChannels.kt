@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -23,5 +21,20 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest />
+ *
+ */
+
+package uk.org.rivernile.android.bustracker.core.alerts
+
+/**
+ * This is the [String] constant for the foreground tasks notification channel.
+ */
+internal const val CHANNEL_FOREGROUND_TASKS = "foregroundTasks"
+/**
+ * This is the [String] constant for the arrival alerts notification channel.
+ */
+internal const val CHANNEL_ARRIVAL_ALERTS = "arrivalAlerts"
+/**
+ * This is the [String] constant for the proximity alerts notification channel.
+ */
+internal const val CHANNEL_PROXIMITY_ALERTS = "proximityAlerts"

@@ -49,6 +49,7 @@ include(
     ":app",
     ":core",
     ":core:alerts",
+    ":core:alerts-android",
     ":core:app-properties",
     ":core:app-properties-android",
     ":core:busstop-db-updater",
