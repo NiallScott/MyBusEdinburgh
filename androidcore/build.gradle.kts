@@ -97,7 +97,7 @@ dependencies {
     implementation(libs.coroutines.android)
 
     // City implementations
-    "edinburghApi"(project(":edinburgh"))
+    "edinburghApi"(project(":cities:edinburgh"))
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)

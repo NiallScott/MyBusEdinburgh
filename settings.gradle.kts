@@ -47,6 +47,7 @@ rootProject.name = "MyBusEdinburgh"
 
 include(
     ":app",
+    ":cities:edinburgh",
     ":core",
     ":core:alerts",
     ":core:alerts-android",
@@ -82,7 +83,6 @@ include(
     ":database:database-test-android",
     ":database:settings-db-android",
     ":database:settings-db-core",
-    ":edinburgh",
     ":endpoint:internal-api-endpoint",
     ":endpoint:tracker-endpoint",
     ":androidcore",
