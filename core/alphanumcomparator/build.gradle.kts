@@ -26,21 +26,4 @@
 
 plugins {
     kotlin("jvm")
-    kotlin("kapt")
-}
-
-dependencies {
-    api(project(":core"))
-    implementation(project(":core:alphanumcomparator"))
-    implementation(project(":endpoint:tracker-endpoint"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-
-    // Edinburgh APIs
-    api(libs.edinburgh.bus.tracker.api)
-
-    // Tests
-    testImplementation(project(":testutils"))
 }

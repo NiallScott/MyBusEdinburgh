@@ -50,6 +50,7 @@ include(
     ":core",
     ":core:alerts",
     ":core:alerts-android",
+    ":core:alphanumcomparator",
     ":core:app-properties",
     ":core:app-properties-android",
     ":core:busstop-db-updater",
