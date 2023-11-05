@@ -146,18 +146,4 @@
             android:summaryOff="@string/preferences_checkbox_neareststops_gpsdisabled_unticked"
             android:defaultValue="false" />
     </PreferenceCategory>
-
-    <!-- Privacy -->
-    <PreferenceCategory
-        android:title="@string/preference_category_privacy"
-        app:isPreferenceVisible="false">
-        <!--
-        This preference category is invisible for now as the search history feature is turned off.
-        -->
-
-        <Preference
-            android:key="pref_clear_search_history"
-            android:title="@string/preferences_dialog_privacy_clearsearchhistory"
-            android:persistent="false" />
-    </PreferenceCategory>
 </PreferenceScreen>

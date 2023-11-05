@@ -101,16 +101,6 @@ class SettingsFragmentViewModelTest {
             4)
     }
 
-    @Test
-    fun onClearSearchHistoryClickedCausesShowClearSearchHistory() {
-        val viewModel = createViewModel()
-        val observer = viewModel.showClearSearchHistoryLiveData.test()
-
-        viewModel.onClearSearchHistoryClicked()
-
-        observer.assertSize(1)
-    }
-
     private fun createViewModel() =
         SettingsFragmentViewModel(
             preferenceRepository,

@@ -35,7 +35,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.flowOn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
-import uk.org.rivernile.android.bustracker.utils.SingleLiveEvent
 import javax.inject.Inject
 
 /**
@@ -63,18 +62,4 @@ class SettingsFragmentViewModel @Inject constructor(
         .liveTimesNumberOfDeparturesFlow
         .flowOn(defaultDispatcher)
         .asLiveData(viewModelScope.coroutineContext)
-
-    /**
-     * This property contains the [LiveData] object which is invoked when the user should be
-     * promoted to confirm clearing their search history.
-     */
-    val showClearSearchHistoryLiveData: LiveData<Unit> get() = showClearSearchHistory
-    private val showClearSearchHistory = SingleLiveEvent<Unit>()
-
-    /**
-     * This is called when the user has clicked on the 'Clear search history' preference item.
-     */
-    fun onClearSearchHistoryClicked() {
-        showClearSearchHistory.call()
-    }
 }

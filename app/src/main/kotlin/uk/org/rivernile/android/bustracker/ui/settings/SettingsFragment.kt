@@ -51,8 +51,6 @@ class SettingsFragment : PreferenceFragmentCompat(),
 
     companion object {
 
-        private const val DIALOG_CLEAR_SEARCH_HISTORY = "dialogClearSearchHistory"
-
         // Copied from the super class, so that our workaround uses the same Fragment tag.
         // Remove if/when the workaround is no longer required.
         private const val DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
@@ -75,9 +73,6 @@ class SettingsFragment : PreferenceFragmentCompat(),
         viewModel.appThemeLiveData.observe(viewLifecycleOwner, this::handleAppThemeChanged)
         viewModel.numberOfDeparturesPerServiceLiveData.observe(viewLifecycleOwner,
             this::handleNumberOfDeparturesPerServiceChanged)
-        viewModel.showClearSearchHistoryLiveData.observe(viewLifecycleOwner) {
-            showClearSearchHistoryDialog()
-        }
     }
 
     override fun onPreferenceDisplayDialog(
@@ -115,14 +110,6 @@ class SettingsFragment : PreferenceFragmentCompat(),
             val strings = resources.getStringArray(R.array.preferences_num_departures_entries)
             summary = strings[numberOfDepartures - 1]
         }
-    }
-
-    /**
-     * This is called when the user should confirm they wish to delete their search history.
-     */
-    private fun showClearSearchHistoryDialog() {
-        ClearSearchHistoryDialogFragment()
-                .show(childFragmentManager, DIALOG_CLEAR_SEARCH_HISTORY)
     }
 
     /**

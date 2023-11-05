@@ -164,9 +164,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="preferences_checkbox_neareststops_gpsdisabled">Disable GPS prompt</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled_ticked">You will not be prompted when device GPS access is disabled</string>
     <string name="preferences_checkbox_neareststops_gpsdisabled_unticked">You will be prompted when device GPS access is disabled</string>
-
-    <string name="preference_category_privacy">Privacy</string>
-    <string name="preferences_dialog_privacy_clearsearchhistory">Clear search history</string>
     
     <string-array name="preferences_num_departures_entries">
         <item>1 departure</item>
@@ -412,14 +409,6 @@ This version of strings.xml is in the developer's locale (en_GB) -->
     <string name="addtimealertdialog_error_btn_grant_permission">Grant permission</string>
     <string name="addtimealertdialog_error_btn_permission_denied">App settings</string>
     <string name="addtimealertdialog_error_no_app_settings">Unable to show app settings</string>
-
-    <!--
-    ************************************************
-    * Strings for ClearSearchHistoryDialogFragment *
-    ************************************************
-    -->
-    <string name="clearsearchhistorydialog_title">Clear search history</string>
-    <string name="clearsearchhistorydialog_body">Are you sure you want to clear your search history?</string>
 
     <!--
     *************************************
