@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,18 +24,6 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
-
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
-
-/**
- * This Dagger module is the root module in the core project.
- *
- * @author Niall Scott
- */
-@InstallIn(SingletonComponent::class)
-@Module(includes = [ CoreModule::class ])
-internal interface AndroidCoreModule
+plugins {
+    kotlin("jvm")
+}

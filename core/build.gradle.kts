@@ -40,6 +40,7 @@ dependencies {
     api(project(":core:connectivity"))
     api(project(":core:coroutines"))
     api(project(":core:favourites"))
+    api(project(":core:feature"))
     api(project(":core:http-core"))
     api(project(":core:http-file-downloader"))
     api(project(":core:livetimes"))

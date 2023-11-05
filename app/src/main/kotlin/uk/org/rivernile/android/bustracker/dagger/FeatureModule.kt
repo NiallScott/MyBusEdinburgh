@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,20 +24,26 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.features
+package uk.org.rivernile.android.bustracker.dagger
+
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
+import uk.org.rivernile.android.bustracker.features.AndroidFeatureRepository
 
 /**
- * This is an interface, to be implemented by the app, which provides whether the stop map feature
- * is available or not.
+ * The [Module] for features.
  *
  * @author Niall Scott
  */
-interface StopMapFeatureAvailabilityProvider {
+@InstallIn(SingletonComponent::class)
+@Module
+@Suppress("unused")
+interface FeatureModule {
 
-    /**
-     * Is the stop map feature available?
-     *
-     * @return `true` if the stop map feature is available, `false` if not.
-     */
-    fun isStopMapFeatureAvailable(): Boolean
+    @Suppress("unused")
+    @Binds
+    fun bindFeatureRepository(androidFeatureRepository: AndroidFeatureRepository): FeatureRepository
 }

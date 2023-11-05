@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,24 +27,39 @@
 package uk.org.rivernile.android.bustracker.features
 
 import android.content.Context
+import android.content.pm.PackageManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import uk.org.rivernile.android.bustracker.core.features.StopMapFeatureAvailabilityProvider
+import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
+import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * This is an app-specific implementation of [StopMapFeatureAvailabilityProvider].
+ * The Android-specific implementation of [FeatureRepository].
  *
  * @param context The application [Context].
  * @param googleApiAvailability A [GoogleApiAvailability] instance which we can use to determine if
  * Google Play Services is available and ready on the device.
+ * @param locationRepository Used to obtain location service information.
+ * @param packageManager Used to query the package manager for device features.
  * @author Niall Scott
  */
-class AppStopMapFeatureAvailabilityProvider @Inject constructor(
-        private val context: Context,
-        private val googleApiAvailability: GoogleApiAvailability)
-    : StopMapFeatureAvailabilityProvider {
+@Singleton
+class AndroidFeatureRepository @Inject constructor(
+    private val context: Context,
+    private val googleApiAvailability: GoogleApiAvailability,
+    private val locationRepository: LocationRepository,
+    private val packageManager: PackageManager) : FeatureRepository {
 
-    override fun isStopMapFeatureAvailable() =
-            googleApiAvailability.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+    override val hasStopMapUiFeature get() =
+        googleApiAvailability.isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
+
+    override val hasArrivalAlertFeature get() = true
+
+    override val hasProximityAlertFeature get() =
+        locationRepository.hasLocationFeature
+
+    override val hasCameraFeature get() =
+        packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
 }

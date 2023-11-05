@@ -32,9 +32,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.alerts.DeeplinkIntentFactory
-import uk.org.rivernile.android.bustracker.core.features.StopMapFeatureAvailabilityProvider
 import uk.org.rivernile.android.bustracker.core.alerts.AppDeeplinkIntentFactory
-import uk.org.rivernile.android.bustracker.features.AppStopMapFeatureAvailabilityProvider
 import uk.org.rivernile.android.bustracker.startup.AppThemeObserver
 import uk.org.rivernile.android.bustracker.startup.LegacyAppThemeObserver
 import uk.org.rivernile.android.bustracker.startup.V31AppThemeObserver
@@ -69,11 +67,5 @@ class ApplicationModule {
         @Binds
         fun bindDeeplinkIntentFactory(appDeeplinkIntentFactory: AppDeeplinkIntentFactory)
                 : DeeplinkIntentFactory
-
-        @Suppress("unused")
-        @Binds
-        fun bindStopMapFeatureAvailabilityProvider(
-            appStopMapFeatureAvailabilityProvider: AppStopMapFeatureAvailabilityProvider)
-                : StopMapFeatureAvailabilityProvider
     }
 }
