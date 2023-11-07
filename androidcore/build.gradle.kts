@@ -78,12 +78,13 @@ android {
 }
 
 dependencies {
-    // Our code module
-    api(project(":core"))
+
     implementation(project(":core:alerts-android"))
     implementation(project(":core:app-properties-android"))
     implementation(project(":core:busstop-db-updater-android"))
     implementation(project(":core:connectivity-android"))
+    api(project(":core:coroutines"))
+    implementation(project(":core:http-core"))
     implementation(project(":core:http-logging-android"))
     implementation(project(":core:location-android"))
     implementation(project(":core:logging-android"))
@@ -91,7 +92,36 @@ dependencies {
     api(project(":core:preferences-android"))
     implementation(project(":database:busstop-db-android"))
     implementation(project(":database:settings-db-android"))
+    implementation(project(":endpoint:internal-api-endpoint"))
+    implementation(project(":endpoint:tracker-endpoint"))
     implementation(project(":ui:text-formatting"))
+
+    // FIXME: these dependencies are listed here for now. This will be sorted when androidcore is
+    // removed from the project.
+    api(project(":core:alerts"))
+    api(project(":core:app-properties"))
+    api(project(":core:busstop-db-updater"))
+    api(project(":core:busstops"))
+    api(project(":core:config"))
+    api(project(":core:connectivity"))
+    api(project(":core:coroutines"))
+    api(project(":core:favourites"))
+    api(project(":core:feature"))
+    api(project(":core:http-core"))
+    api(project(":core:http-file-downloader"))
+    api(project(":core:livetimes"))
+    api(project(":core:location"))
+    api(project(":core:logging"))
+    api(project(":core:preferences"))
+    api(project(":core:services"))
+    api(project(":core:servicepoints"))
+    api(project(":core:servicestops"))
+    api(project(":core:time"))
+    api(project(":core:twitter"))
+    api(project(":database:busstop-db-core"))
+    api(project(":database:settings-db-core"))
+    api(project(":endpoint:internal-api-endpoint"))
+    api(project(":endpoint:tracker-endpoint"))
 
     // Kotlin
     implementation(libs.coroutines.android)
@@ -120,6 +150,9 @@ dependencies {
 
     // Play Services
     api(libs.play.services.location)
+
+    // (De-)serialisation
+    implementation(libs.kotlin.serialization.json)
 
     // Test dependencies
     androidTestImplementation(project(":testutils"))

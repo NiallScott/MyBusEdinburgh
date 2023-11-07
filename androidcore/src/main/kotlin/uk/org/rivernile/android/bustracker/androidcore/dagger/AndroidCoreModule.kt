@@ -29,7 +29,10 @@ package uk.org.rivernile.android.bustracker.androidcore.dagger
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
+import uk.org.rivernile.android.bustracker.core.coroutines.di.CoroutinesModule
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ApiModule
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModule
+import uk.org.rivernile.android.bustracker.core.http.di.CoreHttpModule
 
 /**
  * This Dagger module is the root module in the core project.
@@ -37,5 +40,10 @@ import uk.org.rivernile.android.bustracker.core.dagger.CoreModule
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module(includes = [ CoreModule::class ])
+@Module(includes = [
+    ApiModule::class,
+    CoroutinesModule::class,
+    CoreHttpModule::class,
+    TwitterModule::class
+])
 internal interface AndroidCoreModule

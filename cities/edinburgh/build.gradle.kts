@@ -30,13 +30,27 @@ plugins {
 }
 
 dependencies {
-    api(project(":core"))
+
     implementation(project(":core:alphanumcomparator"))
+    implementation(project(":core:config"))
+    implementation(project(":core:connectivity"))
+    implementation(project(":core:http-core"))
+    implementation(project(":core:livetimes"))
+    implementation(project(":core:logging"))
+    implementation(project(":core:services"))
+    implementation(project(":core:time"))
     implementation(project(":endpoint:tracker-endpoint"))
 
     // Dagger 2
     implementation(libs.dagger.core)
     kapt(libs.dagger.compiler)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlin.serialization)
+
+    // Okhttp
+    implementation(libs.okhttp)
 
     // Edinburgh APIs
     api(libs.edinburgh.bus.tracker.api)

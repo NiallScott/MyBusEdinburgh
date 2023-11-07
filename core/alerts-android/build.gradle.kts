@@ -53,7 +53,7 @@ android {
 
 dependencies {
 
-    implementation(project(":core:alerts"))
+    api(project(":core:alerts"))
     implementation(project(":core:busstops"))
     implementation(project(":core:coroutines"))
     implementation(project(":core:logging"))
