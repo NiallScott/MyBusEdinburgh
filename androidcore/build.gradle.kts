@@ -123,17 +123,12 @@ dependencies {
     api(project(":endpoint:internal-api-endpoint"))
     api(project(":endpoint:tracker-endpoint"))
 
-    // Kotlin
-    implementation(libs.coroutines.android)
-
     // City implementations
     "edinburghApi"(project(":cities:edinburgh"))
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-    api(libs.hilt.work)
-    kapt(libs.hilt.androidx.compiler)
 
     // AndroidX
     implementation(libs.androidx.appcompat)

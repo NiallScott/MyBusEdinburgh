@@ -24,24 +24,34 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.work.di
 
+import android.content.Context
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
+import androidx.work.WorkManager
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ApiModule
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModule
-import uk.org.rivernile.android.bustracker.core.http.di.CoreHttpModule
+import javax.inject.Singleton
 
 /**
- * This Dagger module is the root module in the core project.
+ * This Dagger module provides dependencies relating to Android Work Manager.
  *
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module(includes = [
-    ApiModule::class,
-    CoreHttpModule::class,
-    TwitterModule::class
-])
-internal interface AndroidCoreModule
+@Module
+internal class WorkModule {
+
+    @Provides
+    fun provideWorkManagerConfiguration(hiltWorkerFactory: HiltWorkerFactory): Configuration =
+        Configuration.Builder()
+            .setWorkerFactory(hiltWorkerFactory)
+            .build()
+
+    @Singleton
+    @Provides
+    fun provideWorkManager(context: Context): WorkManager = WorkManager.getInstance(context)
+}

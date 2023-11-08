@@ -55,7 +55,7 @@ dependencies {
 
     api(project(":core:alerts"))
     implementation(project(":core:busstops"))
-    implementation(project(":core:coroutines"))
+    implementation(project(":core:coroutines-android"))
     implementation(project(":core:logging"))
     implementation(project(":core:permission-android"))
     implementation(project(":core:preferences"))

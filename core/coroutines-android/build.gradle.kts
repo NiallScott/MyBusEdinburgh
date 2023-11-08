@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,35 +24,41 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
+}
 
-import android.content.Context
-import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
-import androidx.work.WorkManager
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.coroutines"
 
-/**
- * This Dagger module provides dependencies relating to Android Work Manager.
- *
- * @author Niall Scott
- */
-@InstallIn(SingletonComponent::class)
-@Module
-internal class WorkModule {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
+    }
 
-    @Provides
-    fun provideWorkManagerConfiguration(
-            hiltWorkerFactory: HiltWorkerFactory): Configuration =
-            Configuration.Builder()
-                    .setWorkerFactory(hiltWorkerFactory)
-                    .build()
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
 
-    @Singleton
-    @Provides
-    fun provideWorkManager(context: Context): WorkManager = WorkManager.getInstance(context)
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    api(project(":core:coroutines"))
+
+    // Kotlin Coroutines
+    implementation(libs.coroutines.android)
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 }

@@ -24,30 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
+}
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForMainDispatcher
-import uk.org.rivernile.android.bustracker.core.coroutines.di.ForServiceCoroutineScope
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.work"
 
-/**
- * This [Module] provides dependencies for [android.app.Service]s.
- *
- * @author Niall Scott
- */
-@InstallIn(SingletonComponent::class)
-@Module
-internal class ServiceModule {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
+    }
 
-    @Provides
-    @ForServiceCoroutineScope
-    fun provideServiceCoroutineScope(
-        @ForMainDispatcher mainCoroutineDispatcher: CoroutineDispatcher): CoroutineScope =
-        CoroutineScope(mainCoroutineDispatcher + Job())
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.hilt.work)
+
+    // WorkManager
+    implementation(libs.androidx.work)
 }
