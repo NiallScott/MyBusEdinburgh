@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,44 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.services
+plugins {
+    id("com.android.library")
+    kotlin("android")
+    kotlin("kapt")
+    id("com.google.dagger.hilt.android")
+}
 
-import android.content.Context
-import androidx.core.content.ContextCompat
-import uk.org.rivernile.android.bustracker.androidcore.R
-import javax.inject.Inject
+android {
+    namespace = "uk.org.rivernile.android.bustracker.core.edinburgh"
 
-/**
- * The Android-specific implement
- *
- * @param context The application [Context].
- * @author Niall Scott
- */
-internal class AndroidServiceColourProvider @Inject constructor(
-        private val context: Context) : ServiceColourProvider {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles += file("proguard-consumer-rules.pro")
 
-    override val nightServiceColour: Int get() =
-        ContextCompat.getColor(context, R.color.service_colour_night_bus)
+        buildConfigField(
+            "String",
+            "BUSTRACKER_API_KEY",
+            "\"${project.findProperty("mybus.edinburgh.apiKey") ?: "undefined"}\"")
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+}
+
+dependencies {
+
+    implementation(project(":cities:edinburgh"))
+    implementation(project(":endpoint:tracker-endpoint"))
+
+    // Hilt (dependency injection)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.edinburgh.di
 
 import dagger.Module
 
@@ -37,4 +37,4 @@ import dagger.Module
     BusTrackerModule::class,
     UtilModule::class
 ])
-interface EdinburghModule
+interface EdinburghCoreModule

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,33 +24,18 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.edinburgh.di
 
-import dagger.Binds
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.dagger.EdinburghModule
-import uk.org.rivernile.android.bustracker.core.services.AndroidServiceColourProvider
-import uk.org.rivernile.android.bustracker.core.services.ServiceColourProvider
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
 
 /**
- * Any dependencies which are flavour-specific should go here.
+ * This annotation defines a Dagger qualifier for the bus tracker API key.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module(includes = [ EdinburghModule::class ])
-internal interface FlavourModule {
-
-    @Suppress("unused")
-    @Binds
-    fun bindCleanUpTask(edinburghCleanUpTask: EdinburghCleanUpTask): CleanUpTask
-
-    @Suppress("unused")
-    @Binds
-    fun bindServiceColourProvider(
-            androidServiceColourProvider: AndroidServiceColourProvider): ServiceColourProvider
-}
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForBusTrackerApiKey

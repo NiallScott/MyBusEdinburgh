@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.edinburgh.di
 
 import com.davekoelle.alphanum.AlphanumComparator
 import dagger.Binds
@@ -42,30 +42,27 @@ import uk.org.rivernile.android.bustracker.core.services.ServiceColourOverride
  *
  * @author Niall Scott
  */
-@Module(includes = [ UtilModule.Bindings::class ])
-internal class UtilModule {
+@Module
+internal interface UtilModule {
 
-    @Provides
-    fun provideServiceComparator(): Comparator<String> = AlphanumComparator()
+    @Suppress("unused")
+    @Binds
+    fun bindIsNightServiceDetector(
+        edinburghIsNightServiceDetector: EdinburghIsNightServiceDetector): IsNightServiceDetector
 
-    @Module
-    interface Bindings {
+    @Suppress("unused")
+    @Binds
+    fun bindBuildConfiguration(
+        edinburghBuildConfiguration: EdinburghBuildConfiguration): BuildConfiguration
 
-        @Suppress("unused")
-        @Binds
-        fun bindIsNightServiceDetector(
-                edinburghIsNightServiceDetector: EdinburghIsNightServiceDetector)
-                : IsNightServiceDetector
+    @Suppress("unused")
+    @Binds
+    fun bindServiceColourOverride(
+        edinburghServiceColourOverride: EdinburghServiceColourOverride): ServiceColourOverride
 
-        @Suppress("unused")
-        @Binds
-        fun bindBuildConfiguration(
-                edinburghBuildConfiguration: EdinburghBuildConfiguration): BuildConfiguration
+    companion object {
 
-        @Suppress("unused")
-        @Binds
-        fun bindServiceColourOverride(
-                edinburghServiceColourOverride: EdinburghServiceColourOverride)
-                : ServiceColourOverride
+        @Provides
+        fun provideServiceComparator(): Comparator<String> = AlphanumComparator()
     }
 }

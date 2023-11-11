@@ -57,7 +57,6 @@ android {
 
             // URLs
             buildConfigField("String", "API_BASE_URL", "\"http://edinb.us/api/\"")
-            buildConfigField("String", "TRACKER_BASE_URL", "\"http://ws.mybustracker.co.uk/\"")
 
             // API keys
             buildConfigField("String", "API_KEY", "\"${getApiKey("edinburgh")}\"")
@@ -121,9 +120,6 @@ dependencies {
     api(project(":database:settings-db-core"))
     api(project(":endpoint:internal-api-endpoint"))
     api(project(":endpoint:tracker-endpoint"))
-
-    // City implementations
-    "edinburghApi"(project(":cities:edinburgh"))
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)

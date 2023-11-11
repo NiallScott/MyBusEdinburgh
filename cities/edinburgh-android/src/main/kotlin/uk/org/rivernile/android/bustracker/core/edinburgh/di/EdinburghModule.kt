@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,30 +24,41 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.edinburgh.di
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
-import uk.org.rivernile.android.bustracker.core.dagger.ForBusTrackerApiKey
+import uk.org.rivernile.android.bustracker.core.edinburgh.BuildConfig
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.di.ForTracker
+import uk.org.rivernile.android.bustracker.core.services.AndroidServiceColourProvider
+import uk.org.rivernile.android.bustracker.core.services.ServiceColourProvider
 
 /**
- * This [Module] provides dependencies for the Edinburgh Bus Tracker API.
+ * This [Module] provides dependencies specific to the Edinburgh implementation.
  *
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module
-class EdinburghBusTrackerModule {
+@Module(includes = [ EdinburghCoreModule::class ])
+internal interface EdinburghModule {
 
-    @Provides
-    @ForTracker
-    fun provideTrackerBaseUrl(): String = BuildConfig.TRACKER_BASE_URL
+    @Suppress("unused")
+    @Binds
+    fun bindServiceColourProvider(
+        androidServiceColourProvider: AndroidServiceColourProvider
+    ): ServiceColourProvider
 
-    @Provides
-    @ForBusTrackerApiKey
-    fun provideBusTrackerApiKey(): String = BuildConfig.API_KEY
+    companion object {
+
+        @Provides
+        @ForTracker
+        fun provideTrackerBaseUrl(): String = "http://ws.mybustracker.co.uk/"
+
+        @Provides
+        @ForBusTrackerApiKey
+        fun provideBusTrackerApiKey(): String = BuildConfig.BUSTRACKER_API_KEY
+    }
 }

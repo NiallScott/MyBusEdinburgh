@@ -24,7 +24,7 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.dagger
+package uk.org.rivernile.android.bustracker.core.edinburgh.di
 
 import dagger.Binds
 import dagger.Module
@@ -46,44 +46,43 @@ import java.util.concurrent.TimeUnit
  *
  * @author Niall Scott
  */
-@Module(includes = [ BusTrackerModule.Bindings::class ])
-internal class BusTrackerModule {
+@Module
+internal interface BusTrackerModule {
 
-    @Provides
-    fun provideApiKeyGenerator(@ForBusTrackerApiKey apiKey: String): ApiKeyGenerator =
-        ApiKeyGenerator(apiKey)
+    @Suppress("unused")
+    @Binds
+    fun bindTrackerEndpoint(edinburghTrackerEndpoint: EdinburghTrackerEndpoint): TrackerEndpoint
 
-    @Provides
-    fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghBusTrackerApi =
-        retrofit.create()
+    companion object {
 
-    @Provides
-    @ForTracker
-    fun provideRetrofit(
-        @ForTracker baseUrl: String,
-        @ForTracker okHttpClient: OkHttpClient,
-        @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(okHttpClient)
-            .addConverterFactory(jsonConverterFactory)
-            .build()
+        @Provides
+        fun provideApiKeyGenerator(@ForBusTrackerApiKey apiKey: String): ApiKeyGenerator =
+            ApiKeyGenerator(apiKey)
 
-    @Provides
-    @ForTracker
-    fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
-        okHttpClient.newBuilder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .followRedirects(false)
-            .build()
+        @Provides
+        fun provideEdinburghBusTrackerApi(@ForTracker retrofit: Retrofit): EdinburghBusTrackerApi =
+            retrofit.create()
 
-    @Module
-    interface Bindings {
+        @Provides
+        @ForTracker
+        fun provideRetrofit(
+            @ForTracker baseUrl: String,
+            @ForTracker okHttpClient: OkHttpClient,
+            @ForKotlinJsonSerialization jsonConverterFactory: Converter.Factory): Retrofit =
+            Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .client(okHttpClient)
+                .addConverterFactory(jsonConverterFactory)
+                .build()
 
-        @Suppress("unused")
-        @Binds
-        fun bindTrackerEndpoint(edinburghTrackerEndpoint: EdinburghTrackerEndpoint): TrackerEndpoint
+        @Provides
+        @ForTracker
+        fun provideOkhttpClient(okHttpClient: OkHttpClient): OkHttpClient =
+            okHttpClient.newBuilder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .followRedirects(false)
+                .build()
     }
 }

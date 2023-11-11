@@ -130,6 +130,7 @@ androidComponents {
 dependencies {
 
     implementation(project(":androidcore"))
+    "edinburghImplementation"(project(":cities:edinburgh-android"))
     implementation(project(":core:alerts-android"))
     implementation(project(":core:permission-android"))
     implementation(project(":core:work-android"))

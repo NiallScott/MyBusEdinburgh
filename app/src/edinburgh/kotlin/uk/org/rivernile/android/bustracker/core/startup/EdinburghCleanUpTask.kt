@@ -37,7 +37,7 @@ import javax.inject.Inject
  *
  * @author Niall Scott
  */
-internal class EdinburghCleanUpTask @Inject constructor(
+class EdinburghCleanUpTask @Inject constructor(
     private val context: Context,
     @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : CleanUpTask {
 
