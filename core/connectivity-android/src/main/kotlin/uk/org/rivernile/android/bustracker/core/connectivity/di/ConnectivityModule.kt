@@ -26,7 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.core.connectivity.di
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Build
+import androidx.core.content.getSystemService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -56,4 +59,8 @@ internal class ConnectivityModule {
             legacyConnectivityChecker.get()
         }
     }
+
+    @Provides
+    fun provideConnectivityManager(context: Context): ConnectivityManager =
+        requireNotNull(context.getSystemService())
 }

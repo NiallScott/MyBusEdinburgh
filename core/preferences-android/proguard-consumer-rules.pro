@@ -1,1 +1,7 @@
-# Consumer rules go here.
+#############
+# DataStore #
+#############
+
+-keepclassmembers class * extends androidx.datastore.preferences.protobuf.GeneratedMessageLite {
+    <fields>;
+}

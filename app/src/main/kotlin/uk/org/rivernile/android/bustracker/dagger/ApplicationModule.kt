@@ -25,7 +25,13 @@
 
 package uk.org.rivernile.android.bustracker.dagger
 
+import android.app.Application
+import android.app.UiModeManager
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.getSystemService
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -37,6 +43,7 @@ import uk.org.rivernile.android.bustracker.startup.AppThemeObserver
 import uk.org.rivernile.android.bustracker.startup.LegacyAppThemeObserver
 import uk.org.rivernile.android.bustracker.startup.V31AppThemeObserver
 import javax.inject.Provider
+import javax.inject.Singleton
 
 /**
  * The main application [Module].
@@ -45,27 +52,40 @@ import javax.inject.Provider
  */
 @InstallIn(SingletonComponent::class)
 @Module
-class ApplicationModule {
-
-    @Provides
-    fun provideAppThemeObserver(
-        legacyAppThemeObserver: Provider<LegacyAppThemeObserver>,
-        v31AppThemeObserver: Provider<V31AppThemeObserver>): AppThemeObserver {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            v31AppThemeObserver.get()
-        } else {
-            legacyAppThemeObserver.get()
-        }
-    }
+interface ApplicationModule {
 
     @Suppress("unused")
-    @InstallIn(SingletonComponent::class)
-    @Module
-    interface Bindings {
+    @Binds
+    fun bindContext(application: Application): Context
 
-        @Suppress("unused")
-        @Binds
-        fun bindDeeplinkIntentFactory(appDeeplinkIntentFactory: AppDeeplinkIntentFactory)
-                : DeeplinkIntentFactory
+    @Suppress("unused")
+    @Binds
+    fun bindDeeplinkIntentFactory(
+        appDeeplinkIntentFactory: AppDeeplinkIntentFactory): DeeplinkIntentFactory
+
+    companion object {
+
+        @Provides
+        fun providePackageManager(context: Context): PackageManager = context.packageManager
+
+        @Provides
+        fun provideUiModeManager(context: Context): UiModeManager =
+            requireNotNull(context.getSystemService())
+
+        @Provides
+        @Singleton
+        fun provideNotificationManagerCompat(context: Context): NotificationManagerCompat =
+            NotificationManagerCompat.from(context)
+
+        @Provides
+        fun provideAppThemeObserver(
+            legacyAppThemeObserver: Provider<LegacyAppThemeObserver>,
+            v31AppThemeObserver: Provider<V31AppThemeObserver>): AppThemeObserver {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                v31AppThemeObserver.get()
+            } else {
+                legacyAppThemeObserver.get()
+            }
+        }
     }
 }

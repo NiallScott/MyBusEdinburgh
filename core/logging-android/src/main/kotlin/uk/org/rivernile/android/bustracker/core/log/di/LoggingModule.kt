@@ -26,12 +26,15 @@
 
 package uk.org.rivernile.android.bustracker.core.log.di
 
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.log.CrashlyticsExceptionLogger
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
+import javax.inject.Singleton
 
 /**
  * This module provides dependencies related to logging.
@@ -45,4 +48,11 @@ internal interface LoggingModule {
     @Suppress("unused")
     @Binds
     fun bindExceptionLogger(crashlyticsExceptionLogger: CrashlyticsExceptionLogger): ExceptionLogger
+
+    companion object {
+
+        @Provides
+        @Singleton
+        fun provideFirebaseCrashlytics(): FirebaseCrashlytics = FirebaseCrashlytics.getInstance()
+    }
 }
