@@ -62,6 +62,8 @@ dependencies {
 
     implementation(project(":core:busstop-db-updater"))
     implementation(project(":core:coroutines"))
+    implementation(project(":core:preferences"))
+    implementation(project(":core:work-android"))
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)

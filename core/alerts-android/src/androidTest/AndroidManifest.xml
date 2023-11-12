@@ -34,11 +34,6 @@
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
-            tools:node="merge">
-
-            <meta-data
-                android:name="uk.org.rivernile.android.bustracker.core.database.busstop.StopDatabaseUpdaterInitialiser"
-                android:value="androidx.startup" />
-        </provider>
+            tools:node="remove" />
     </application>
 </manifest>

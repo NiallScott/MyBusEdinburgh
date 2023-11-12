@@ -133,7 +133,6 @@ dependencies {
     "edinburghImplementation"(project(":cities:edinburgh-android"))
     implementation(project(":core:alerts-android"))
     implementation(project(":core:permission-android"))
-    implementation(project(":core:work-android"))
     implementation(project(":ui:text-formatting"))
     implementation(project(":ui:widget:contentview"))
     implementation(project(":ui:widget:expandcollapseindicator"))

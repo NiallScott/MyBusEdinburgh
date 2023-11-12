@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
@@ -23,22 +21,42 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+ *
+ */
 
-    <application>
+package uk.org.rivernile.android.bustracker.core.work
 
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
+import android.content.Context
+import androidx.startup.Initializer
+import androidx.work.Configuration
+import androidx.work.WorkManager
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EarlyEntryPoint
+import dagger.hilt.android.EarlyEntryPoints
+import dagger.hilt.components.SingletonComponent
 
-            <meta-data
-                android:name="uk.org.rivernile.android.bustracker.core.database.busstop.StopDatabaseUpdaterInitialiser"
-                android:value="androidx.startup" />
-        </provider>
-    </application>
-</manifest>
+/**
+ * An app [Initializer] which initialises [WorkManager].
+ */
+@Suppress("unused")
+class WorkManagerInitialiser : Initializer<WorkManager> {
+
+    override fun create(context: Context): WorkManager {
+        val hiltEntryPoint = EarlyEntryPoints.get(
+            context,
+            WorkManagerInitialiserEntryPoint::class.java)
+
+        WorkManager.initialize(context, hiltEntryPoint.configuration)
+
+        return WorkManager.getInstance(context)
+    }
+
+    override fun dependencies(): List<Class<out Initializer<*>>> = emptyList()
+
+    @EarlyEntryPoint
+    @InstallIn(SingletonComponent::class)
+    internal interface WorkManagerInitialiserEntryPoint {
+
+        val configuration: Configuration
+    }
+}

@@ -46,7 +46,7 @@ import javax.net.SocketFactory
  * @author Niall Scott
  */
 @HiltWorker
-class StopDatabaseUpdateWorker @AssistedInject constructor(
+internal class StopDatabaseUpdateWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted private val params: WorkerParameters,
     private val updateChecker: DatabaseUpdateChecker)

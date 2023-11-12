@@ -39,8 +39,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import uk.org.rivernile.android.bustracker.core.alerts.DeeplinkIntentFactory
 import uk.org.rivernile.android.bustracker.core.alerts.AppDeeplinkIntentFactory
-import uk.org.rivernile.android.bustracker.core.startup.CleanUpTask
-import uk.org.rivernile.android.bustracker.core.startup.EdinburghCleanUpTask
 import uk.org.rivernile.android.bustracker.startup.AppThemeObserver
 import uk.org.rivernile.android.bustracker.startup.LegacyAppThemeObserver
 import uk.org.rivernile.android.bustracker.startup.V31AppThemeObserver
@@ -64,10 +62,6 @@ interface ApplicationModule {
     @Binds
     fun bindDeeplinkIntentFactory(
         appDeeplinkIntentFactory: AppDeeplinkIntentFactory): DeeplinkIntentFactory
-
-    @Suppress("unused")
-    @Binds
-    fun bindCleanUpTask(edinburghCleanUpTask: EdinburghCleanUpTask): CleanUpTask
 
     companion object {
 

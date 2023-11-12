@@ -181,7 +181,6 @@
             android:label="@string/about_title"
             android:parentActivityName="uk.org.rivernile.android.bustracker.ui.main.MainActivity" />
 
-        <!-- Removes the WorkManager initialiser, as we initialise this ourselves. -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
@@ -189,9 +188,8 @@
             tools:node="merge">
 
             <meta-data
-                android:name="androidx.work.WorkManagerInitializer"
-                android:value="androidx.startup"
-                tools:node="remove" />
+                android:name="uk.org.rivernile.android.bustracker.startup.AppThemeInitialiser"
+                android:value="androidx.startup" />
         </provider>
     </application>
 </manifest>

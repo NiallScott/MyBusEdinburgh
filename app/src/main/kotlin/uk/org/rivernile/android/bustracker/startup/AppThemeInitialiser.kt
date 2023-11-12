@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
 /*
  * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
@@ -23,22 +21,40 @@
  *  3. Software modifications that do not alter the functionality of the
  *     software but are simply adaptations to a specific environment are
  *     exempt from clause 2.
-*/ -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+ *
+ */
 
-    <application>
+package uk.org.rivernile.android.bustracker.startup
 
-        <provider
-            android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.androidx-startup"
-            android:exported="false"
-            tools:node="merge">
+import android.content.Context
+import androidx.startup.Initializer
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EarlyEntryPoint
+import dagger.hilt.android.EarlyEntryPoints
+import dagger.hilt.components.SingletonComponent
 
-            <meta-data
-                android:name="uk.org.rivernile.android.bustracker.core.database.busstop.StopDatabaseUpdaterInitialiser"
-                android:value="androidx.startup" />
-        </provider>
-    </application>
-</manifest>
+/**
+ * An app [Initializer] which observes the user's theming preference and applies this as it changes.
+ *
+ * @author Niall Scott
+ */
+@Suppress("unused")
+class AppThemeInitialiser : Initializer<Unit> {
+
+    override fun create(context: Context) {
+        EarlyEntryPoints.get(
+            context,
+            AppThemeInitialiserEntryPoint::class.java)
+            .appThemeObserver
+            .observeAppTheme()
+    }
+
+    override fun dependencies(): List<Class<out Initializer<*>>> = emptyList()
+
+    @EarlyEntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface AppThemeInitialiserEntryPoint {
+
+        val appThemeObserver: AppThemeObserver
+    }
+}

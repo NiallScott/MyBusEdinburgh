@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2009 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,11 +26,7 @@
 package uk.org.rivernile.android.bustracker
 
 import android.app.Application
-import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
-import uk.org.rivernile.android.bustracker.core.startup.StartUpTask
-import uk.org.rivernile.android.bustracker.startup.AppThemeObserver
-import javax.inject.Inject
 
 /**
  * This code is the very first code that will be executed when the application is started.
@@ -38,21 +34,4 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 @HiltAndroidApp
-class BusApplication : Application(), Configuration.Provider {
-
-    @Inject
-    lateinit var workerConfiguration: Configuration
-    @Inject
-    lateinit var appThemeObserver: AppThemeObserver
-    @Inject
-    lateinit var startUpTask: StartUpTask
-
-    override fun onCreate() {
-        super.onCreate()
-
-        appThemeObserver.observeAppTheme()
-        startUpTask.performStartUpTasks()
-    }
-
-    override fun getWorkManagerConfiguration() = workerConfiguration
-}
+class BusApplication : Application()

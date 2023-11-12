@@ -33,11 +33,16 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import kotlinx.coroutines.flow.collectIndexed
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import javax.inject.Singleton
+
+private const val WORKER_NAME = "StopDatabaseSync"
+private const val WORKER_PERIOD_HOURS = 6L
+private const val WORK_UUID = "4f4f5891-73ee-4ddf-8b8c-9fc28873dd12" // Randomly generated
 
 /**
  * The purpose of this class is to schedule the work to perform the bus stop database update checks.
@@ -47,18 +52,10 @@ import javax.inject.Singleton
  * @param preferenceRepository Used to access preferences.
  * @author Niall Scott
  */
-@Singleton
 internal class UpdateBusStopDatabaseWorkScheduler @Inject constructor(
-        private val context: Context,
-        private val workManager: WorkManager,
-        private val preferenceRepository: PreferenceRepository) {
-
-    companion object {
-
-        private const val WORKER_NAME = "StopDatabaseSync"
-        private const val WORKER_PERIOD_HOURS = 6L
-        private const val WORK_UUID = "4f4f5891-73ee-4ddf-8b8c-9fc28873dd12" // Randomly generated
-    }
+    private val context: Context,
+    private val workManager: WorkManager,
+    private val preferenceRepository: PreferenceRepository) {
 
     private val workUuid = UUID.fromString(WORK_UUID)
 
@@ -66,16 +63,19 @@ internal class UpdateBusStopDatabaseWorkScheduler @Inject constructor(
      * Schedules the recurring job to update the bus stop database, if required.
      */
     suspend fun scheduleUpdateBusStopDatabaseJob() {
-        preferenceRepository.isDatabaseUpdateWifiOnlyFlow.collectIndexed { index, value ->
-            if (index == 0) {
-                workManager.enqueueUniquePeriodicWork(
-                    WORKER_NAME,
-                    ExistingPeriodicWorkPolicy.KEEP,
-                    createWorkRequest(value))
-            } else {
-                workManager.updateWork(createWorkRequest(value))
+        preferenceRepository.isDatabaseUpdateWifiOnlyFlow
+            .distinctUntilChanged()
+            .map(this::createWorkRequest)
+            .collectIndexed { index, value ->
+                if (index == 0) {
+                    workManager.enqueueUniquePeriodicWork(
+                        WORKER_NAME,
+                        ExistingPeriodicWorkPolicy.KEEP,
+                        value)
+                } else {
+                    workManager.updateWork(value)
+                }
             }
-        }
     }
 
     /**
@@ -86,9 +86,9 @@ internal class UpdateBusStopDatabaseWorkScheduler @Inject constructor(
      */
     private fun createWorkRequest(wifiOnly: Boolean) =
         PeriodicWorkRequestBuilder<StopDatabaseUpdateWorker>(WORKER_PERIOD_HOURS, TimeUnit.HOURS)
-                .setId(workUuid)
-                .setConstraints(createConstraints(wifiOnly))
-                .build()
+            .setId(workUuid)
+            .setConstraints(createConstraints(wifiOnly))
+            .build()
 
     /**
      * Create a [Constraints] object which defines the work constraints.
@@ -97,7 +97,7 @@ internal class UpdateBusStopDatabaseWorkScheduler @Inject constructor(
      * @return A [Constraints] object which defines the work constraints.
      */
     private fun createConstraints(wifiOnly: Boolean) = Constraints.Builder()
-            .setRequiresBatteryNotLow(true)
-            .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
-            .build()
+        .setRequiresBatteryNotLow(true)
+        .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
+        .build()
 }

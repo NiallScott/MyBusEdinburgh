@@ -33,15 +33,17 @@ import uk.org.rivernile.android.bustracker.core.coroutines.di.ForIoDispatcher
 import javax.inject.Inject
 
 /**
- * This is the Edinburgh-specific implementation of [CleanUpTask].
+ * This is an Edinburgh-specific implementation to clean up data from previous app versions.
  *
+ * @param context The application [Context].
+ * @param ioDispatcher The IO [CoroutineDispatcher].
  * @author Niall Scott
  */
 class EdinburghCleanUpTask @Inject constructor(
     private val context: Context,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) : CleanUpTask {
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
 
-    override suspend fun performCleanUp() {
+    suspend fun performCleanUp() {
         withContext(ioDispatcher) {
             arrayOf(
                 context.getDatabasePath("suggestions.db"),

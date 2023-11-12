@@ -87,7 +87,7 @@
             tools:node="merge">
 
             <meta-data
-                android:name="uk.org.rivernile.android.bustracker.core.alerts.NotificationChannelsInitialiser"
+                android:name="uk.org.rivernile.android.bustracker.core.alerts.CheckAlertsInitialiser"
                 android:value="androidx.startup" />
         </provider>
     </application>
