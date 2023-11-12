@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,6 +29,7 @@ package uk.org.rivernile.android.bustracker.core.bundle
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.core.os.BundleCompat
 import java.io.Serializable
 
 /**
@@ -40,10 +41,8 @@ import java.io.Serializable
  * @return [Bundle.getParcelable].
  * @see Bundle.getParcelable
  */
-inline fun <reified T : Parcelable> Bundle.getParcelableCompat(key: String): T? = when {
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> getParcelable(key, T::class.java)
-    else -> @Suppress("DEPRECATION") getParcelable(key) as? T
-}
+inline fun <reified T : Parcelable> Bundle.getParcelableCompat(key: String): T? =
+    BundleCompat.getParcelable(this, key, T::class.java)
 
 /**
  * Android Tiramisu introduces a new method to obtain a [Serializable] from a [Bundle] and
