@@ -83,7 +83,7 @@ dependencies {
     implementation(project(":core:connectivity-android"))
     api(project(":core:coroutines"))
     implementation(project(":core:http-core"))
-    implementation(project(":core:http-logging-android"))
+    implementation(project(":core:http-core-android"))
     implementation(project(":core:location-android"))
     implementation(project(":core:logging-android"))
     implementation(project(":core:permission-android"))

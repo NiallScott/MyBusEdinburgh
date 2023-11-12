@@ -32,7 +32,7 @@ plugins {
 }
 
 android {
-    namespace = "uk.org.rivernile.android.bustracker.core.httplogging"
+    namespace = "uk.org.rivernile.android.bustracker.core.http"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

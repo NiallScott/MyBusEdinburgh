@@ -61,6 +61,10 @@ class CoreHttpModule {
         return builder.build()
     }
 
+    @Provides
+    @Singleton
+    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
+
     /**
      * Provide a [Converter.Factory] instance which uses the app-wide [Json] instance to perform
      * (de-)serialisation of JSON data in Retrofit.
