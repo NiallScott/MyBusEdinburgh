@@ -26,6 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
+import android.os.Build
+import androidx.test.filters.SdkSuppress
 import androidx.test.platform.app.InstrumentationRegistry
 import io.mockk.coEvery
 import io.mockk.every
@@ -49,6 +51,7 @@ import java.io.File
  *
  * @author Niall Scott
  */
+@SdkSuppress(minSdkVersion = Build.VERSION_CODES.P) // Because Mockk.
 @OptIn(ExperimentalCoroutinesApi::class)
 class AndroidBusStopDatabaseTest {
 

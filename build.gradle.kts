@@ -24,6 +24,7 @@
  *
  */
 
+import com.android.build.api.dsl.ManagedVirtualDevice
 import com.android.build.gradle.BasePlugin
 import com.android.build.gradle.BaseExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -69,6 +70,67 @@ subprojects {
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
                 targetCompatibility = JavaVersion.VERSION_17
+            }
+
+            testOptions {
+                @Suppress("UnstableApiUsage")
+                managedDevices {
+                    devices {
+                        maybeCreate<ManagedVirtualDevice>("pixel2api27").apply {
+                            device = "Pixel 2"
+                            apiLevel = 27
+                            systemImageSource = "aosp" // No ATD.
+                        }
+
+                        maybeCreate<ManagedVirtualDevice>("pixel2api28").apply {
+                            device = "Pixel 2"
+                            apiLevel = 28
+                            systemImageSource = "aosp" // No ATD.
+                        }
+
+                        maybeCreate<ManagedVirtualDevice>("pixel2api29").apply {
+                            device = "Pixel 2"
+                            apiLevel = 29
+                            systemImageSource = "aosp" // No ATD.
+                        }
+
+                        maybeCreate<ManagedVirtualDevice>("pixel2api30").apply {
+                            device = "Pixel 2"
+                            apiLevel = 30
+                            systemImageSource = "aosp-atd"
+                        }
+
+                        maybeCreate<ManagedVirtualDevice>("pixel2api31").apply {
+                            device = "Pixel 2"
+                            apiLevel = 31
+                            systemImageSource = "aosp-atd"
+                        }
+
+                        maybeCreate<ManagedVirtualDevice>("pixel2api33").apply {
+                            device = "Pixel 2"
+                            apiLevel = 33
+                            systemImageSource = "aosp-atd"
+                        }
+
+                        maybeCreate<ManagedVirtualDevice>("pixel2api34").apply {
+                            device = "Pixel 2"
+                            apiLevel = 34
+                            systemImageSource = "aosp" // No ATD - yet.
+                        }
+                    }
+
+                    groups {
+                        maybeCreate("allApis").apply {
+                            targetDevices += devices["pixel2api27"]
+                            targetDevices += devices["pixel2api28"]
+                            targetDevices += devices["pixel2api29"]
+                            targetDevices += devices["pixel2api30"]
+                            targetDevices += devices["pixel2api31"]
+                            targetDevices += devices["pixel2api33"]
+                            targetDevices += devices["pixel2api34"]
+                        }
+                    }
+                }
             }
         }
     }
