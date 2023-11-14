@@ -87,6 +87,7 @@ include(
     ":database:settings-db-android",
     ":database:settings-db-core",
     ":endpoint:internal-api-endpoint",
+    ":endpoint:internal-api-endpoint-android",
     ":endpoint:tracker-endpoint",
     ":androidcore",
     ":testutils",

@@ -156,6 +156,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.viewmodel)
     implementation(libs.androidx.livedata)
+    implementation(libs.androidx.startup)
 
     // Material Design
     implementation(libs.material)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,22 +24,40 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.internal
 
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ApiModule
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModule
+import uk.org.rivernile.android.bustracker.core.endpoint.internal.BuildConfig
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApi
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiAppName
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiKey
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiSchemaName
 
 /**
- * This Dagger module is the root module in the core project.
+ * This [Module] provides dependencies for the Edinburgh version of the internal API.
  *
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module(includes = [
-    ApiModule::class,
-    TwitterModule::class
-])
-internal interface AndroidCoreModule
+@Module
+internal class EdinburghInternalApiModule {
+
+    @Provides
+    @ForInternalApi
+    fun provideApiBaseUrl(): String = "http://edinb.us/api/"
+
+    @Provides
+    @ForInternalApiKey
+    fun provideApiKey(): String = BuildConfig.INTERNAL_API_KEY
+
+    @Provides
+    @ForInternalApiAppName
+    fun provideApiAppName(): String = "MBE"
+
+    @Provides
+    @ForInternalApiSchemaName
+    fun provideApiSchemaName(): String = "MBE_10"
+}

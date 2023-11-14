@@ -27,8 +27,6 @@
 plugins {
     id("com.android.library")
     kotlin("android")
-    kotlin("kapt")
-    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -46,24 +44,6 @@ android {
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
-        }
-    }
-
-    flavorDimensions += "city"
-
-    productFlavors {
-        create("edinburgh") {
-            dimension = "city"
-
-            // URLs
-            buildConfigField("String", "API_BASE_URL", "\"http://edinb.us/api/\"")
-
-            // API keys
-            buildConfigField("String", "API_KEY", "\"${getApiKey("edinburgh")}\"")
-
-            // Other
-            buildConfigField("String", "SCHEMA_NAME", "\"MBE_10\"")
-            buildConfigField("String", "API_APP_NAME", "\"MBE\"")
         }
     }
 
@@ -120,47 +100,4 @@ dependencies {
     api(project(":database:settings-db-core"))
     api(project(":endpoint:internal-api-endpoint"))
     api(project(":endpoint:tracker-endpoint"))
-
-    // Hilt (dependency injection)
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
-
-    // AndroidX
-    implementation(libs.androidx.appcompat)
-
-    // WorkManager
-    api(libs.androidx.work)
-
-    // DataStore
-    implementation(libs.androidx.datastore.preferences)
-
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics)
-
-    // Play Services
-    api(libs.play.services.location)
-
-    // (De-)serialisation
-    implementation(libs.kotlin.serialization.json)
-
-    // Test dependencies
-    androidTestImplementation(project(":testutils"))
-    androidTestImplementation(libs.kotlin.test.junit)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.mockito.android)
-    androidTestImplementation(libs.mockk.android)
-    androidTestImplementation(libs.androidx.work.test)
-    androidTestImplementation(libs.hilt.test)
-    kaptAndroidTest(libs.hilt.android.compiler)
-
-    testImplementation(project(":testutils"))
-    testImplementation(libs.androidx.arch.core.test)
-}
-
-fun getApiKey(city: String): String {
-    // Populate the build config with API keys which is provided as a project property so that
-    // ApiKey.java can pick them up.
-    return project.findProperty("mybus.${city}.apiKey") as? String ?: "undefined"
 }

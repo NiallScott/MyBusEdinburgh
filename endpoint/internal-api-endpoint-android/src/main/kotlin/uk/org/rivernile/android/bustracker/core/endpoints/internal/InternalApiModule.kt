@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,40 +24,22 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.androidcore.dagger
+package uk.org.rivernile.android.bustracker.core.endpoints.internal
 
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.androidcore.BuildConfig
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApi
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiAppName
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiKey
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ForInternalApiSchemaName
+import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ApiModule
+import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModule
 
 /**
- * This Dagger module provides dependencies for the API.
+ * This [Module] provides dependencies for the internal API.
  *
  * @author Niall Scott
  */
 @InstallIn(SingletonComponent::class)
-@Module
-internal class ApiModule {
-
-    @Provides
-    @ForInternalApi
-    fun provideApiBaseUrl(): String = BuildConfig.API_BASE_URL
-
-    @Provides
-    @ForInternalApiKey
-    fun provideApiKey(): String = BuildConfig.API_KEY
-
-    @Provides
-    @ForInternalApiAppName
-    fun provideApiAppName(): String = BuildConfig.API_APP_NAME
-
-    @Provides
-    @ForInternalApiSchemaName
-    fun provideApiSchemaName(): String = BuildConfig.SCHEMA_NAME
-}
+@Module(includes = [
+    ApiModule::class,
+    TwitterModule::class
+])
+internal interface InternalApiModule

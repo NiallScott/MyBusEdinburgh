@@ -32,7 +32,7 @@ plugins {
 }
 
 android {
-    namespace = "uk.org.rivernile.android.bustracker.core.database.busstop.updater"
+    namespace = "uk.org.rivernile.android.bustracker.core.endpoint.internal"
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -50,39 +50,25 @@ android {
         }
     }
 
-    packaging {
-        resources {
-            excludes += setOf(
-                "META-INF/*.md")
+    flavorDimensions += "city"
+
+    productFlavors {
+        create("edinburgh") {
+            dimension = "city"
+
+            buildConfigField(
+                "String",
+                "INTERNAL_API_KEY",
+                "\"${project.findProperty("mybus.edinburgh.apiKey") ?: "undefined"}\"")
         }
     }
 }
 
 dependencies {
 
-    implementation(project(":core:busstop-db-updater"))
-    implementation(project(":core:coroutines"))
-    implementation(project(":core:preferences"))
-    implementation(project(":core:work-android"))
-    implementation(project(":endpoint:internal-api-endpoint-android"))
+    implementation(project(":endpoint:internal-api-endpoint"))
 
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-    implementation(libs.hilt.work)
-    kapt(libs.hilt.androidx.compiler)
-
-    // WorkManager
-    implementation(libs.androidx.work)
-
-    // Okio
-    implementation(libs.okio)
-
-    // Test dependencies
-    androidTestImplementation(project(":testutils"))
-    androidTestImplementation(libs.kotlin.test.junit)
-    androidTestImplementation(libs.androidx.test.core)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.work.test)
-    androidTestImplementation(libs.mockk.android)
 }
