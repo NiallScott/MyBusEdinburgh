@@ -64,6 +64,7 @@ dependencies {
     implementation(project(":core:coroutines"))
     implementation(project(":core:preferences"))
     implementation(project(":core:work-android"))
+    implementation(project(":database:busstop-db-android"))
     implementation(project(":endpoint:internal-api-endpoint-android"))
 
     // Hilt (dependency injection)

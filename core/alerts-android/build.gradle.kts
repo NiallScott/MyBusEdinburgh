@@ -59,7 +59,8 @@ dependencies {
     implementation(project(":core:logging"))
     implementation(project(":core:permission-android"))
     implementation(project(":core:preferences"))
-    implementation(project(":database:busstop-db-core"))
+    implementation(project(":database:busstop-db-android"))
+    implementation(project(":database:settings-db-android"))
     implementation(project(":endpoint:tracker-endpoint"))
     implementation(project(":ui:text-formatting"))
 

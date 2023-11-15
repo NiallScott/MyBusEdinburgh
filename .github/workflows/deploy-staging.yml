@@ -45,10 +45,7 @@ jobs:
           -Pmybus.keystore.debug.keyAlias=${{ secrets.KEYSTORE_ALIAS }}
           -Pmybus.keystore.debug.keyPassword=${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
           clean
-          :core:test
-          :edinburgh:test
-          :androidcore:testEdinburghDebugUnitTest
-          :app:testEdinburghDebugUnitTest
+          test
           :app:lintEdinburghDebug
           :app:assembleDebug
           :app:appDistributionUploadEdinburghDebug

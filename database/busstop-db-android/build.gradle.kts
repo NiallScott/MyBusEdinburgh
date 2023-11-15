@@ -87,7 +87,7 @@ dependencies {
 
     implementation(project(":core:coroutines"))
     implementation(project(":core:logging"))
-    implementation(project(":database:busstop-db-core"))
+    api(project(":database:busstop-db-core"))
 
     // Kotlin
     implementation(libs.coroutines.android)

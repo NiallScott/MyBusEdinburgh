@@ -66,6 +66,7 @@ android {
 
 dependencies {
 
+    implementation(project(":core:http-core-android"))
     implementation(project(":endpoint:internal-api-endpoint"))
 
     // Hilt (dependency injection)

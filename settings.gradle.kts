@@ -89,7 +89,6 @@ include(
     ":endpoint:internal-api-endpoint",
     ":endpoint:internal-api-endpoint-android",
     ":endpoint:tracker-endpoint",
-    ":androidcore",
     ":testutils",
     ":ui:text-formatting",
     ":ui:widget:contentview",

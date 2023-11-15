@@ -45,10 +45,7 @@ jobs:
           -Pmybus.keystore.release.keyAlias=${{ secrets.KEYSTORE_ALIAS }}
           -Pmybus.keystore.release.keyPassword=${{ secrets.KEYSTORE_ALIAS_PASSWORD }}
           clean
-          :core:test
-          :edinburgh:test
-          :androidcore:testEdinburghReleaseUnitTest
-          :app:testEdinburghReleaseUnitTest
+          test
           :app:lintEdinburghRelease
           :app:assembleRelease
           :app:appDistributionUploadEdinburghRelease
