@@ -70,8 +70,8 @@ dependencies {
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-    implementation(libs.hilt.work)
-    kapt(libs.hilt.androidx.compiler)
+    implementation(libs.androidx.hilt.work)
+    kapt(libs.androidx.hilt.compiler)
 
     // WorkManager
     implementation(libs.androidx.work)

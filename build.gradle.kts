@@ -59,12 +59,12 @@ subprojects {
 
     plugins.withType<BasePlugin>().configureEach {
         extensions.configure<BaseExtension> {
-            compileSdkVersion(libs.versions.compile.sdk.version.get().toInt())
-            buildToolsVersion(libs.versions.build.tools.version.get())
+            compileSdkVersion(libs.versions.android.sdk.compile.get().toInt())
+            buildToolsVersion(libs.versions.android.build.tools.get())
 
             defaultConfig {
-                minSdk = libs.versions.min.sdk.version.get().toInt()
-                targetSdk = libs.versions.target.sdk.version.get().toInt()
+                minSdk = libs.versions.android.sdk.min.get().toInt()
+                targetSdk = libs.versions.android.sdk.target.get().toInt()
             }
 
             compileOptions {

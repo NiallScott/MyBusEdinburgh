@@ -62,4 +62,7 @@ dependencies {
     // Okhttp
     implementation(libs.okhttp)
     debugImplementation(libs.okhttp.logging)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }

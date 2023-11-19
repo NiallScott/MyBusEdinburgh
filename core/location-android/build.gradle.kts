@@ -62,4 +62,7 @@ dependencies {
 
     // Play Services
     implementation(libs.play.services.location)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }

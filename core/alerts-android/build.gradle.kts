@@ -65,7 +65,7 @@ dependencies {
     implementation(project(":ui:text-formatting"))
 
     // AndroidX
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core)
     implementation(libs.androidx.startup)
 
     // Hilt (dependency injection)

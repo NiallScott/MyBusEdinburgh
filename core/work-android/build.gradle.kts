@@ -56,8 +56,11 @@ dependencies {
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-    implementation(libs.hilt.work)
+    implementation(libs.androidx.hilt.work)
 
     // WorkManager
     implementation(libs.androidx.work)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }

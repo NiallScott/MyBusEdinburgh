@@ -56,4 +56,7 @@ dependencies {
     // Hilt (dependency injection)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }

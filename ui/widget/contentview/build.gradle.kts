@@ -52,4 +52,7 @@ android {
 dependencies {
 
     implementation(libs.androidx.annotation)
+
+    // Testing dependencies
+    androidTestImplementation(libs.androidx.test.runner)
 }
