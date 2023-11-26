@@ -25,9 +25,9 @@
  */
 
 plugins {
-    kotlin("jvm")
-    kotlin("kapt")
-    id("kotlinx-serialization")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {

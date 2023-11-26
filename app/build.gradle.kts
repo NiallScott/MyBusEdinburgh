@@ -27,15 +27,15 @@
 import com.android.build.api.variant.ResValue
 
 plugins {
-    id("com.android.application")
-    kotlin("android")
-    kotlin("plugin.parcelize")
-    kotlin("kapt")
-    id("com.google.dagger.hilt.android")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
-    id("com.google.firebase.appdistribution")
-    id("androidx.baselineprofile")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.firebase.appdistribution)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 android {

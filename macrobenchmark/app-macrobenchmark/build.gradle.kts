@@ -25,8 +25,8 @@
  */
 
 plugins {
-    id("com.android.test")
-    kotlin("android")
+    alias(libs.plugins.android.test)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
