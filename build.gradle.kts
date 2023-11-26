@@ -25,14 +25,16 @@
  */
 
 import com.android.build.api.dsl.ManagedVirtualDevice
-import com.android.build.gradle.BasePlugin
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.BasePlugin
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed, possibly in Gradle 8.1
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.android.test) apply false
+    alias(libs.plugins.androidx.baselineprofile) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.kotlin.kapt) apply false
@@ -70,6 +72,23 @@ subprojects {
             compileOptions {
                 sourceCompatibility = JavaVersion.VERSION_17
                 targetCompatibility = JavaVersion.VERSION_17
+            }
+
+            signingConfigs {
+                create("globalDebug") {
+                    storeFile = file(project.findProperty("mybus.keystore.debug.file")
+                        ?.toString()
+                        ?: "/dev/null")
+                    storePassword = project.findProperty("mybus.keystore.debug.storePassword")
+                        ?.toString()
+                        ?: "not_set"
+                    keyAlias = project.findProperty("mybus.keystore.debug.keyAlias")
+                        ?.toString()
+                        ?: "not_set"
+                    keyPassword = project.findProperty("mybus.keystore.debug.keyPassword")
+                        ?.toString()
+                        ?: "not_set"
+                }
             }
 
             testOptions {

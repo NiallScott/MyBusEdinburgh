@@ -35,6 +35,7 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("com.google.firebase.appdistribution")
+    id("androidx.baselineprofile")
 }
 
 android {
@@ -50,16 +51,6 @@ android {
     }
 
     signingConfigs {
-        create("globalDebug") {
-            storeFile = file(
-                project.findProperty("mybus.keystore.debug.file") as String? ?: "/dev/null")
-            storePassword =
-                project.findProperty("mybus.keystore.debug.storePassword") as String? ?: "not_set"
-            keyAlias = project.findProperty("mybus.keystore.debug.keyAlias") as String? ?: "not_set"
-            keyPassword = project.findProperty("mybus.keystore.debug.keyPassword") as String?
-                ?: "not_set"
-        }
-
         create("edinburgh") {
             storeFile = file(
                 project.findProperty("mybus.keystore.release.file") as String? ?: "/dev/null")
@@ -106,6 +97,13 @@ android {
             enableAndroidTestCoverage = true
             signingConfig = signingConfigs.getByName("globalDebug")
         }
+
+        create("benchmark") {
+            initWith(getByName("release"))
+            matchingFallbacks += "release"
+            proguardFiles += file("benchmark-rules.pro")
+            signingConfig = signingConfigs.getByName("globalDebug")
+        }
     }
 
     buildFeatures {
@@ -125,6 +123,11 @@ androidComponents {
                 .findProperty("mybus.${variant.flavorName}.${variant.buildType}.mapsKey") as? String
                 ?: "undefined")
     }
+}
+
+baselineProfile {
+    automaticGenerationDuringBuild = true
+    saveInSrc = false
 }
 
 dependencies {
@@ -176,6 +179,7 @@ dependencies {
     implementation(libs.androidx.viewmodel)
     implementation(libs.androidx.livedata)
     implementation(libs.androidx.startup)
+    implementation(libs.androidx.profileinstaller)
 
     // Material Design
     implementation(libs.material)
@@ -204,4 +208,6 @@ dependencies {
 
     testImplementation(project(":testutils"))
     testImplementation(libs.androidx.arch.core.test)
+
+    baselineProfile(project(":macrobenchmark:app-baselineprofile"))
 }

@@ -12,6 +12,7 @@ kotlin = "1.9.10"
 okhttp = "4.11.0"
 
 # AndroidX
+androidx-benchmark = "1.2.1"
 androidx-fragment = "1.6.2"
 androidx-hilt = "1.1.0"
 androidx-lifecycle = "2.6.2"
@@ -65,6 +66,7 @@ androidx-fragment-testing-manifest = { module = "androidx.fragment:fragment-test
 androidx-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
 androidx-palette = { module = "androidx.palette:palette-ktx", version = "1.0.0" }
 androidx-preference = { module = "androidx.preference:preference-ktx", version = "1.2.1" }
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version = "1.3.1" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version = "1.3.2" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "androidx-room" }
 androidx-room-core = { module = "androidx.room:room-ktx", version.ref = "androidx-room" }
@@ -94,11 +96,13 @@ picasso = { module = "com.squareup.picasso:picasso", version = "2.71828" }
 
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
+androidx-benchmark-macro = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "androidx-fragment" }
 androidx-room-test = { module = "androidx.room:room-testing", version.ref = "androidx-room" }
 androidx-test-core = { module = "androidx.test:core-ktx", version = "1.5.0" }
 androidx-test-espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
 androidx-test-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "espresso" }
+androidx-test-junit = { module = "androidx.test.ext:junit", version = "1.1.5" }
 androidx-test-monitor = { module = "androidx.test:monitor", version = "1.6.1" }
 androidx-test-runner = { module = "androidx.test:runner", version = "1.5.2" }
 androidx-work-test = { module = "androidx.work:work-testing", version.ref = "androidx-work" }
@@ -114,6 +118,8 @@ mockk-android = { module =  "io.mockk:mockk-android", version = "1.13.8" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
+android-test = { id = "com.android.test", version.ref = "android-gradle-plugin" }
+androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
 firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.0" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "2.9.5" }
 google-services = { id = "com.google.gms.google-services", version = "4.3.15" }
