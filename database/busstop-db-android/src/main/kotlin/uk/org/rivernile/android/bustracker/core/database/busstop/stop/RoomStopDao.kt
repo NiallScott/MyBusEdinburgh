@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
 import androidx.room.Dao
-import androidx.room.MapInfo
+import androidx.room.MapColumn
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
@@ -74,8 +74,9 @@ internal abstract class RoomStopDao {
         AND latitude NOT NULL 
         AND longitude NOT NULL 
     """)
-    @MapInfo(keyColumn = "stopCode")
-    abstract fun getStopDetailsFlow(stopCodes: Set<String>): Flow<Map<String, RoomStopDetails>?>
+    abstract fun getStopDetailsFlow(
+        stopCodes: Set<String>
+    ): Flow<Map<@MapColumn(columnName = "stopCode") String, RoomStopDetails>?>
 
     fun getStopDetailsWithServiceFilterFlow(
         serviceFilter: Set<String>?): Flow<List<StopDetails>?> {

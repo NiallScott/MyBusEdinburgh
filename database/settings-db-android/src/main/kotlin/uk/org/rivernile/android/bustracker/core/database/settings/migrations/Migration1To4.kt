@@ -44,8 +44,8 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  */
 internal class Migration1To4 : Migration(1, 4) {
 
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.apply {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.apply {
             createAlertsTable()
             migrateFavouriteStops()
             createNewAlertTriggers()

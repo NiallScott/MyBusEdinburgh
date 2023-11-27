@@ -78,8 +78,8 @@ import javax.inject.Inject
  */
 internal class Migration1To2 @Inject constructor() : Migration(1, 2) {
 
-    override fun migrate(database: SupportSQLiteDatabase) {
-        database.apply {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.apply {
             removeOldIndices()
             removeOldViews()
             migrateDatabaseInfo()

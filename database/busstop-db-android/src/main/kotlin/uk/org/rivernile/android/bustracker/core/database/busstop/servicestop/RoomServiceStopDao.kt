@@ -27,7 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.servicestop
 
 import androidx.room.Dao
-import androidx.room.MapInfo
+import androidx.room.MapColumn
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
@@ -55,9 +55,9 @@ internal abstract class RoomServiceStopDao {
         ORDER BY stopCode ASC, 
             CASE WHEN serviceName GLOB '[^0-9.]*' THEN serviceName ELSE cast(serviceName AS int) END
     """)
-    @MapInfo(
-        keyColumn = "stopCode",
-        valueColumn = "serviceName")
     abstract fun getServicesForStopsFlow(
-        stopCodes: Set<String>): Flow<Map<String, List<String>>?>
+        stopCodes: Set<String>
+    ): Flow<Map<
+            @MapColumn(columnName = "stopCode") String,
+            List<@MapColumn(columnName = "serviceName") String>>?>
 }
