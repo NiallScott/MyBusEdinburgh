@@ -39,7 +39,6 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.services.ServiceDetails
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 
@@ -56,21 +55,19 @@ class ServicesRetrieverTest {
     val coroutineRule = MainCoroutineRule()
 
     @Mock
-    private lateinit var serviceStopsRepository: ServiceStopsRepository
-    @Mock
     private lateinit var servicesRepository: ServicesRepository
 
     private lateinit var retriever: ServicesRetriever
 
     @Before
     fun setUp() {
-        retriever = ServicesRetriever(serviceStopsRepository, servicesRepository)
+        retriever = ServicesRetriever(servicesRepository)
     }
 
     @Test
     fun getServicesFlowEmitsNullWhenNullServicesForStop() = runTest {
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(null))
+        whenever(servicesRepository.getServiceDetailsFlow("123456"))
+            .thenReturn(flowOf(null))
 
         val observer = retriever.getServicesFlow("123456").test(this)
         advanceUntilIdle()
@@ -81,8 +78,8 @@ class ServicesRetrieverTest {
 
     @Test
     fun getServicesFlowEmitsNullWhenEmptyServicesForStop() = runTest {
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(emptyList()))
+        whenever(servicesRepository.getServiceDetailsFlow("123456"))
+            .thenReturn(flowOf(emptyList()))
 
         val observer = retriever.getServicesFlow("123456").test(this)
         advanceUntilIdle()
@@ -92,100 +89,49 @@ class ServicesRetrieverTest {
     }
 
     @Test
-    fun getServicesFlowEmitsServicesWhenServiceDetailsIsNull() = runTest {
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
-        whenever(servicesRepository.getServiceDetailsFlow(setOf("1", "2", "3")))
-                .thenReturn(flowOf(null))
-
-        val observer = retriever.getServicesFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                listOf(
-                        UiItem.Service(
-                                "1".hashCode().toLong(),
-                                "1",
-                                null,
-                                null),
-                        UiItem.Service(
-                                "2".hashCode().toLong(),
-                                "2",
-                                null,
-                                null),
-                        UiItem.Service(
-                                "3".hashCode().toLong(),
-                                "3",
-                                null,
-                                null)))
-    }
-
-    @Test
-    fun getServicesFlowEmitsServicesWhenServiceDetailsIsEmpty() = runTest {
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
-        whenever(servicesRepository.getServiceDetailsFlow(setOf("1", "2", "3")))
-                .thenReturn(flowOf(emptyMap()))
-
-        val observer = retriever.getServicesFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                listOf(
-                        UiItem.Service(
-                                "1".hashCode().toLong(),
-                                "1",
-                                null,
-                                null),
-                        UiItem.Service(
-                                "2".hashCode().toLong(),
-                                "2",
-                                null,
-                                null),
-                        UiItem.Service(
-                                "3".hashCode().toLong(),
-                                "3",
-                                null,
-                                null)))
-    }
-
-    @Test
     fun getServicesFlowEmitsServicesWhenServiceDetailsIsPopulated() = runTest {
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
-        whenever(servicesRepository.getServiceDetailsFlow(setOf("1", "2", "3")))
-                .thenReturn(flowOf(mapOf(
-                        "1" to ServiceDetails(
-                                "1",
-                                "Service 1",
-                                0xAABBCC),
-                        "3" to ServiceDetails(
-                                "3",
-                                "Service 3",
-                                null))))
+        whenever(servicesRepository.getServiceDetailsFlow("123456"))
+            .thenReturn(
+                flowOf(
+                    listOf(
+                        ServiceDetails(
+                            "1",
+                            "Service 1",
+                            0xAABBCC),
+                        ServiceDetails(
+                            "2",
+                            null,
+                            null),
+                        ServiceDetails(
+                            "3",
+                            "Service 3",
+                            null)
+                    )
+                )
+            )
 
         val observer = retriever.getServicesFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
-                listOf(
-                        UiItem.Service(
-                                "1".hashCode().toLong(),
-                                "1",
-                                "Service 1",
-                                0xAABBCC),
-                        UiItem.Service(
-                                "2".hashCode().toLong(),
-                                "2",
-                                null,
-                                null),
-                        UiItem.Service(
-                                "3".hashCode().toLong(),
-                                "3",
-                                "Service 3",
-                                null)))
+            listOf(
+                UiItem.Service(
+                    "1".hashCode().toLong(),
+                    "1",
+                    "Service 1",
+                    0xAABBCC),
+                UiItem.Service(
+                    "2".hashCode().toLong(),
+                    "2",
+                    null,
+                    null),
+                UiItem.Service(
+                    "3".hashCode().toLong(),
+                    "3",
+                    "Service 3",
+                    null)
+            )
+        )
     }
 }

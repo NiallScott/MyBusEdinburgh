@@ -64,11 +64,11 @@ internal class ProxyServiceDao(
             }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun getServiceDetailsFlow(services: Set<String>) =
+    override fun getServiceDetailsFlow(stopCode: String) =
         database.isDatabaseOpenFlow
             .flatMapLatest {
                 if (it) {
-                    database.roomServiceDao.getServiceDetailsFlow(services)
+                    database.roomServiceDao.getServiceDetailsFlow(stopCode)
                 } else {
                     emptyFlow()
                 }

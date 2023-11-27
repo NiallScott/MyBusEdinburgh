@@ -27,7 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
 import androidx.room.Dao
-import androidx.room.MapColumn
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -58,21 +57,24 @@ internal abstract class RoomServiceDao {
         return flow.map(this::mapToServiceColourMap)
     }
 
-    @Query("""
-        SELECT name, description, hexColour 
-        FROM service 
-        WHERE name IN (:services)
-    """)
-    abstract fun getServiceDetailsFlow(
-        services: Set<String>
-    ): Flow<Map<@MapColumn(columnName = "name") String, RoomServiceDetails>?>
-
     @get:Query("""
         SELECT name, hexColour 
         FROM service 
         WHERE hexColour NOT NULL
     """)
     abstract val coloursForAllServicesFlow: Flow<List<RoomServiceColour>?>
+
+    @Query("""
+        SELECT name, description, hexColour 
+        FROM service 
+        WHERE name IN (
+            SELECT serviceName 
+            FROM service_stop 
+            WHERE stopCode = :stopCode
+        )
+        ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
+    """)
+    abstract fun getServiceDetailsFlow(stopCode: String): Flow<List<RoomServiceDetails>?>
 
     @Query("""
         SELECT name, hexColour 

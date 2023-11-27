@@ -118,26 +118,32 @@ class ServicesRepositoryTest {
     @Test
     fun getServiceDetailsFlowEmitsExpectedValuesWhenOverrideIsNull() = runTest {
         val repository = ServicesRepository(serviceDao, null)
-        whenever(serviceDao.getServiceDetailsFlow(setOf("1", "2", "3")))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                mapOf("1" to MockServiceDetails("1", "Route", 1)),
-                mapOf(
-                    "1" to MockServiceDetails("1", "Route", 1),
-                    "2" to MockServiceDetails("2", "Route 2", 2))))
+        whenever(serviceDao.getServiceDetailsFlow("123456"))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(MockServiceDetails("1", "Route", 1)),
+                    listOf(
+                        MockServiceDetails("1", "Route", 1),
+                        MockServiceDetails("2", "Route 2", 2)
+                    )
+                )
+            )
 
-        val observer = repository.getServiceDetailsFlow(setOf("1", "2", "3")).test(this)
+        val observer = repository.getServiceDetailsFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
             null,
-            mapOf("1" to ServiceDetails("1", "Route", 1)),
-            mapOf(
-                "1" to ServiceDetails("1", "Route", 1),
-                "2" to ServiceDetails("2", "Route 2", 2)))
+            listOf(ServiceDetails("1", "Route", 1)),
+            listOf(
+                ServiceDetails("1", "Route", 1),
+                ServiceDetails("2", "Route 2", 2)
+            )
+        )
     }
 
     @Test
@@ -147,26 +153,32 @@ class ServicesRepositoryTest {
             .thenReturn(10)
         whenever(serviceColourOverride.overrideServiceColour("2", 2))
             .thenReturn(20)
-        whenever(serviceDao.getServiceDetailsFlow(setOf("1", "2", "3")))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                mapOf("1" to MockServiceDetails("1", "Route", 1)),
-                mapOf(
-                    "1" to MockServiceDetails("1", "Route", 1),
-                    "2" to MockServiceDetails("2", "Route 2", 2))))
+        whenever(serviceDao.getServiceDetailsFlow("123456"))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(MockServiceDetails("1", "Route", 1)),
+                    listOf(
+                        MockServiceDetails("1", "Route", 1),
+                        MockServiceDetails("2", "Route 2", 2)
+                    )
+                )
+            )
 
-        val observer = repository.getServiceDetailsFlow(setOf("1", "2", "3")).test(this)
+        val observer = repository.getServiceDetailsFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
 
         observer.assertValues(
             null,
-            mapOf("1" to ServiceDetails("1", "Route", 10)),
-            mapOf(
-                "1" to ServiceDetails("1", "Route", 10),
-                "2" to ServiceDetails("2", "Route 2", 20)))
+            listOf(ServiceDetails("1", "Route", 10)),
+            listOf(
+                ServiceDetails("1", "Route", 10),
+                ServiceDetails("2", "Route 2", 20)
+            )
+        )
     }
 
     @Test

@@ -66,17 +66,18 @@ class ServicesRepository @Inject internal constructor(
     }
 
     /**
-     * Get a [Flow] which emits a [Map] of service names to [ServiceDetails] for the given services,
-     * and will emit further items if the backing store changes.
+     * Get a [Flow] which emits a [List] of [ServiceDetails] for services which stop at the given
+     * [stopCode]. This [List] will return items already sorted.
      *
-     * @param services The services to get details for.
-     * @return The [Flow] which emits the service details.
+     * @param stopCode The stop code to get a [List] of [ServiceDetails] for.
+     * @return A [Flow] which emits the service details, or emits `null` when no services could be
+     * found or some other error occurred obtaining the services.
      */
-    fun getServiceDetailsFlow(services: Set<String>): Flow<Map<String, ServiceDetails>?> {
-        return serviceDao.getServiceDetailsFlow(services)
+    fun getServiceDetailsFlow(stopCode: String): Flow<List<ServiceDetails>?> {
+        return serviceDao.getServiceDetailsFlow(stopCode)
             .map { serviceDetails ->
-                serviceDetails?.mapValues {
-                    mapToServiceDetails(it.value)
+                serviceDetails?.map {
+                    mapToServiceDetails(it)
                 }
             }
     }

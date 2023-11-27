@@ -26,14 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.services.ServiceDetails
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import javax.inject.Inject
 
 /**
@@ -41,12 +37,10 @@ import javax.inject.Inject
  * services which stop at the stop, then populates the details for these services in to a
  * [UiItem.Service] object.
  *
- * @param serviceStopsRepository Used to retrieve the services which are known to stop at the stop.
  * @param servicesRepository Used to retrieve the details for the services.
  * @author Niall Scott
  */
 class ServicesRetriever @Inject constructor(
-    private val serviceStopsRepository: ServiceStopsRepository,
     private val servicesRepository: ServicesRepository) {
 
     /**
@@ -57,40 +51,34 @@ class ServicesRetriever @Inject constructor(
      * @return A [Flow] which emits a [List] of [UiItem.Service] for all known services at this
      * stop or `null` is emitted when there are no services for this stop.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun getServicesFlow(stopCode: String): Flow<List<UiItem.Service>?> =
-            serviceStopsRepository.getServicesForStopFlow(stopCode)
-                    .flatMapLatest(this::loadServiceDetails)
+        servicesRepository.getServiceDetailsFlow(stopCode)
+            .map(this::mapToUiItemServices)
 
     /**
-     * Given a [List] of service names, load the [UiItem.Service] for these services. If there are
-     * no services, `null` will be emitted.
+     * Given a [List] of [ServiceDetails], map this to a [List] of [UiItem.Service].
      *
-     * @param services The services to get [ServiceDetails] for.
-     * @return A [Flow] of the [UiItem.Service] for the given [services], or a [Flow] of `null`
-     * if there are no services.
+     * @param serviceDetails The [List] of [ServiceDetails] to map.
+     * @return The [List] of [UiItem.Service] which has been mapped, or `null` if [serviceDetails]
+     * is `null` or empty.
      */
-    private fun loadServiceDetails(services: List<String>?): Flow<List<UiItem.Service>?> {
-        return services?.takeIf(List<String>::isNotEmpty)?.let { s ->
-            servicesRepository.getServiceDetailsFlow(s.toSet())
-                .map { assembleServiceDetails(s, it) }
-        } ?: flowOf(null)
+    private fun mapToUiItemServices(serviceDetails: List<ServiceDetails>?): List<UiItem.Service>? {
+        return serviceDetails
+            ?.ifEmpty { null }
+            ?.map(this::mapToUiItemService)
     }
 
     /**
-     * Assemble the [List] of services in to a [List] of [UiItem.Service]s we've loaded. If
-     * [ServiceDetails] aren't available for a service, then we synthesise a [UiItem.Service] object
-     * for that service with default values.
+     * Given a [ServiceDetails] object, map this to a [UiItem.Service].
      *
-     * @param services The [List] of services for stop.
-     * @param serviceDetails The loaded [ServiceDetails] for the services.
-     * @return The services as a [List] of [UiItem.Service].
+     * @param serviceDetails The [ServiceDetails] to map.
+     * @return The [serviceDetails] as a [UiItem.Service].
      */
-    private fun assembleServiceDetails(
-        services: List<String>,
-        serviceDetails: Map<String, ServiceDetails>?) = services.map { service ->
-        serviceDetails?.get(service)?.let {
-            UiItem.Service(it.name.hashCode().toLong(), it.name, it.description, it.colour)
-        } ?: UiItem.Service(service.hashCode().toLong(), service, null, null)
+    private fun mapToUiItemService(serviceDetails: ServiceDetails): UiItem.Service {
+        return UiItem.Service(
+            serviceDetails.name.hashCode().toLong(),
+            serviceDetails.name,
+            serviceDetails.description,
+            serviceDetails.colour)
     }
 }

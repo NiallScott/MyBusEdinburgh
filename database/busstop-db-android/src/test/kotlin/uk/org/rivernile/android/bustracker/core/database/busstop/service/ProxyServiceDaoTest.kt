@@ -110,16 +110,16 @@ class ProxyServiceDaoTest {
 
     @Test
     fun getServiceDetailsFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<Map<String, RoomServiceDetails>>()
-        val second = mock<Map<String, RoomServiceDetails>>()
+        val first = mock<List<RoomServiceDetails>>()
+        val second = mock<List<RoomServiceDetails>>()
         whenever(database.isDatabaseOpenFlow)
             .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomServiceDao.getServiceDetailsFlow(anyOrNull()))
+        whenever(roomServiceDao.getServiceDetailsFlow("123456"))
             .thenReturn(
                 flowOf(first),
                 flowOf(second))
 
-        val observer = dao.getServiceDetailsFlow(setOf("test")).test(this)
+        val observer = dao.getServiceDetailsFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
 

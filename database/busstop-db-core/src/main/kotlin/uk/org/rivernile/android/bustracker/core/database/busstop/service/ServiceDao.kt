@@ -52,12 +52,12 @@ interface ServiceDao {
     fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?>
 
     /**
-     * Get a [Flow] which emits [ServiceDetails] for the given [services].
+     * Get a [Flow] which emits [ServiceDetails] for the given [stopCode].
      *
-     * @param services The services to get [ServiceDetails] for.
-     * @return A [Flow] which emits [Map]s of service name to [ServiceDetails]. May be `null` if
-     * [services] is empty, or if there are no items, or if there was some other issue getting the
-     * details.
+     * @param stopCode The stop code to get [ServiceDetails] for.
+     * @return A [Flow] which emits a [List] of [ServiceDetails] for the given stop code. May be
+     * `null` if there are no known services for the given stop code, or if there was some other
+     * issue getting the details.
      */
-    fun getServiceDetailsFlow(services: Set<String>): Flow<Map<String, ServiceDetails>?>
+    fun getServiceDetailsFlow(stopCode: String): Flow<List<ServiceDetails>?>
 }
