@@ -46,6 +46,12 @@ internal abstract class RoomServiceDao {
     """)
     abstract val allServiceNamesFlow: Flow<List<String>?>
 
+    @get:Query("""
+        SELECT COUNT(*) 
+        FROM service
+    """)
+    abstract val serviceCountFlow: Flow<Int?>
+
     fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> {
         val flow = services
             ?.ifEmpty { null }

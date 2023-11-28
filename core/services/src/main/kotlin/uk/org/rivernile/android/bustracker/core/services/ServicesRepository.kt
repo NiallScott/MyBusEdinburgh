@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.services
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDetails as StoredServiceDetails
@@ -86,6 +87,16 @@ class ServicesRepository @Inject internal constructor(
      * This provides a [Flow] which emits a [List] containing all known service names.
      */
     val allServiceNamesFlow: Flow<List<String>?> get() = serviceDao.allServiceNamesFlow
+
+    /**
+     * This [Flow] emits whether there are known services.
+     */
+    val hasServicesFlow: Flow<Boolean> get() =
+        serviceDao.serviceCountFlow
+            .map { count ->
+                count?.let { it > 0 } ?: false
+            }
+            .distinctUntilChanged()
 
     /**
      * Map a [StoredServiceDetails] to [ServiceDetails].

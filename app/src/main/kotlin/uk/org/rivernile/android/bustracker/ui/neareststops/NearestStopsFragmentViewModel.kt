@@ -138,9 +138,9 @@ class NearestStopsFragmentViewModel @Inject constructor(
             .map { it?.ifEmpty { null }?.asList() }
             .asLiveData(viewModelScope.coroutineContext)
 
-    private val allServiceNamesFlow = servicesRepository.allServiceNamesFlow
+    private val hasServicesFlow = servicesRepository.hasServicesFlow
             .flowOn(defaultDispatcher)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     private val uiStateFlow = uiStateRetriever.getUiStateFlow(
             permissionsStateFlow.filterNotNull(),
@@ -169,8 +169,8 @@ class NearestStopsFragmentViewModel @Inject constructor(
     /**
      * This [LiveData] emits the current enabled state of the filter button.
      */
-    val isFilterEnabledLiveData = allServiceNamesFlow
-            .map { hasLocationFeature && !it.isNullOrEmpty() }
+    val isFilterEnabledLiveData = hasServicesFlow
+            .map { hasLocationFeature && it }
             .distinctUntilChanged()
             .asLiveData(viewModelScope.coroutineContext)
 
@@ -390,7 +390,7 @@ class NearestStopsFragmentViewModel @Inject constructor(
      * This is called when the user has clicked on the filter menu item.
      */
     fun onFilterMenuItemClicked() {
-        if (!allServiceNamesFlow.value.isNullOrEmpty()) {
+        if (hasServicesFlow.value) {
             showServicesChooser.value = selectedServices
         }
     }

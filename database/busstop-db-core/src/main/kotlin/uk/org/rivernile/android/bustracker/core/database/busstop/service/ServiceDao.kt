@@ -41,6 +41,11 @@ interface ServiceDao {
     val allServiceNamesFlow: Flow<List<String>?>
 
     /**
+     * A [Flow] which emits the number of services.
+     */
+    val serviceCountFlow: Flow<Int?>
+
+    /**
      * Get a [Flow] which emits colours for services. If [services] is specified, then only the
      * given services will be returned, otherwise colours will be returned for all known services.
      *

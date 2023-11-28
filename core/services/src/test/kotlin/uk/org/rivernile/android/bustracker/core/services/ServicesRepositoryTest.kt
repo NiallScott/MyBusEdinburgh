@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.core.services
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertSame
@@ -191,6 +192,45 @@ class ServicesRepositoryTest {
         val result = repository.allServiceNamesFlow
 
         assertSame(mockFlow, result)
+    }
+
+    @Test
+    fun hasServicesFlowEmitsFalseWhenServiceCountIsNull() = runTest {
+        val repository = ServicesRepository(serviceDao, null)
+        whenever(serviceDao.serviceCountFlow)
+            .thenReturn(flowOf(null))
+
+        val observer = repository.hasServicesFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun hasServicesFlowEmitsFalseWhenServiceCountIs0() = runTest {
+        val repository = ServicesRepository(serviceDao, null)
+        whenever(serviceDao.serviceCountFlow)
+            .thenReturn(flowOf(0))
+
+        val observer = repository.hasServicesFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(false)
+    }
+
+    @Test
+    fun hasServicesFlowEmitsTrueWhenServiceCountIs1() = runTest {
+        val repository = ServicesRepository(serviceDao, null)
+        whenever(serviceDao.serviceCountFlow)
+            .thenReturn(flowOf(1))
+
+        val observer = repository.hasServicesFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(true)
     }
 
     private data class MockServiceDetails(

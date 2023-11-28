@@ -53,6 +53,17 @@ internal class ProxyServiceDao(
             }
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    override val serviceCountFlow get() =
+        database.isDatabaseOpenFlow
+            .flatMapLatest {
+                if (it) {
+                    database.roomServiceDao.serviceCountFlow
+                } else {
+                    emptyFlow()
+                }
+            }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getColoursForServicesFlow(services: Set<String>?) =
         database.isDatabaseOpenFlow
             .flatMapLatest {

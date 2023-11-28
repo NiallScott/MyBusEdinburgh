@@ -266,9 +266,9 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun isFilterEnabledLiveDataEmitsFalseWhenNoLocationFeatureAndNullServices() = runTest {
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(null))
+    fun isFilterEnabledLiveDataEmitsFalseWhenNoLocationFeatureAndHasServicesEmitsEmpty() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(emptyFlow())
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(false)
         val viewModel = createViewModel()
@@ -280,9 +280,9 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun isFilterEnabledLiveDataEmitsFalseWhenHasLocationFeatureAndNullServices() = runTest {
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(null))
+    fun isFilterEnabledLiveDataEmitsFalseWhenHasLocationFeatureAndHasServicesEmitsNull() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(emptyFlow())
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
         val viewModel = createViewModel()
@@ -294,9 +294,9 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun isFilterEnabledLiveDataEmitsFalseWhenHasLocationFeatureAndEmptyServices() = runTest {
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(emptyList()))
+    fun isFilterEnabledLiveDataEmitsFalseWhenHasLocationFeatureAndHasServicesEmitFalse() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(false))
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
         val viewModel = createViewModel()
@@ -308,9 +308,9 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun isFilterEnabledLiveDataEmitsTrueWhenHasLocationFeatureAndHasServices() = runTest {
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(listOf("1")))
+    fun isFilterEnabledLiveDataEmitsTrueWhenHasLocationFeatureAndHasServicesEmitsTrue() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         whenever(locationRepository.hasLocationFeature)
                 .thenReturn(true)
         val viewModel = createViewModel()
@@ -913,9 +913,9 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun onFilterMenuItemClickedDoesNotShowServiceChooserWhenServicesAreNull() = runTest {
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(null))
+    fun onFilterMenuItemClickedDoesNotShowServiceChooserWhenHasServicesEmitsEmpty() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(emptyFlow())
         val viewModel = createViewModel()
 
         val observer = viewModel.showServicesChooserLiveData.test()
@@ -927,9 +927,9 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun onFilterMenuItemClickedDoesNotShowServiceChooserWhenServicesAreEmpty() = runTest {
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(emptyList()))
+    fun onFilterMenuItemClickedDoesNotShowServiceChooserWhenHasServicesEmitsFalse() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.showServicesChooserLiveData.test()
@@ -941,10 +941,9 @@ class NearestStopsFragmentViewModelTest {
     }
 
     @Test
-    fun onFilterMenuItemClickedShowsServicesChooserWithNullChosenWhenServicesExist() = runTest {
-        val services = listOf("1", "2", "3")
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(services))
+    fun onFilterMenuItemClickedShowsServicesChooserWithNullChosenWhenHasServicesTure() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         val viewModel = createViewModel()
 
         viewModel.isFilterEnabledLiveData.test()
@@ -958,9 +957,8 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun onFilterMenuItemClickedShowsServicesChooserWithChosenWhenHasNullState() = runTest {
-        val services = listOf("1", "2", "3")
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(services))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         val viewModel = createViewModel(
                 SavedStateHandle(
                         mapOf(STATE_SELECTED_SERVICES to null)))
@@ -976,9 +974,8 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun onFilterMenuItemClickedShowsServicesChooserWithChosenWhenHasEmptyState() = runTest {
-        val services = listOf("1", "2", "3")
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(services))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         val viewModel = createViewModel(
                 SavedStateHandle(
                         mapOf(STATE_SELECTED_SERVICES to emptyArray<String>())))
@@ -994,9 +991,8 @@ class NearestStopsFragmentViewModelTest {
 
     @Test
     fun onFilterMenuItemClickedShowsServicesChooserWithChosenWhenHasState() = runTest {
-        val services = listOf("1", "2", "3")
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(services))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         val viewModel = createViewModel(
                 SavedStateHandle(
                         mapOf(STATE_SELECTED_SERVICES to arrayOf("1", "2"))))

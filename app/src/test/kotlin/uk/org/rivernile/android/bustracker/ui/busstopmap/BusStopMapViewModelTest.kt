@@ -369,11 +369,11 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenNullServices() = runTest {
+    fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenHasServicesHasNotEmitted() = runTest {
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
                 .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(null))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(emptyFlow())
         val viewModel = createViewModel()
 
         val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -383,11 +383,11 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenEmptyServices() = runTest {
+    fun isFilterMenuItemEnabledLiveDataEmitsFalseHasServicesEmitsFalse() = runTest {
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
                 .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(emptyList()))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(false))
         val viewModel = createViewModel()
 
         val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -400,8 +400,8 @@ class BusStopMapViewModelTest {
     fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesInProgress() = runTest {
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
                 .thenReturn(flowOf(PlayServicesAvailabilityResult.InProgress))
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(listOf("1", "2", "3")))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         val viewModel = createViewModel()
 
         val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -414,8 +414,8 @@ class BusStopMapViewModelTest {
     fun isFilterMenuItemEnabledLiveDataEmitsFalseWhenPlayServicesUnavailable() = runTest {
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
                 .thenReturn(flowOf(PlayServicesAvailabilityResult.Unavailable.Resolvable(1)))
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(listOf("1", "2", "3")))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         val viewModel = createViewModel()
 
         val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -429,8 +429,8 @@ class BusStopMapViewModelTest {
             return runTest {
                 whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
                         .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
-                whenever(servicesRepository.allServiceNamesFlow)
-                        .thenReturn(flowOf(listOf("1", "2", "3")))
+                whenever(servicesRepository.hasServicesFlow)
+                        .thenReturn(flowOf(true))
                 val viewModel = createViewModel()
 
                 val observer = viewModel.isFilterMenuItemEnabledLiveData.test()
@@ -745,9 +745,9 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun showServicesChooserLiveDataDoesNotEmitWhenServiceNamesIsNull() = runTest {
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(null))
+    fun showServicesChooserLiveDataDoesNotEmitWhenHasServicesDoesNotEmit() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(emptyFlow())
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
             .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
@@ -761,9 +761,9 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun showServicesChooserLiveDataDoesNotEmitWhenServiceNamesIsEmpty() = runTest {
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(emptyList()))
+    fun showServicesChooserLiveDataDoesNotEmitWhenHasServicesEmitsFalse() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(false))
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
             .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
@@ -777,10 +777,9 @@ class BusStopMapViewModelTest {
     }
 
     @Test
-    fun showServicesChooserLiveDataEmitsWhenServiceNamesIsPopulated() = runTest {
-        val services = listOf("1", "2", "3")
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(services))
+    fun showServicesChooserLiveDataEmitsWheHasServicesEmitsTrue() = runTest {
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
             .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
@@ -795,10 +794,9 @@ class BusStopMapViewModelTest {
 
     @Test
     fun showServicesChooserLiveDataEmitsParamsWithSelectedServices() = runTest {
-        val services = listOf("1", "2", "3")
         val selectedServices = listOf("1", "2")
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(services))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
             .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel()
@@ -814,10 +812,9 @@ class BusStopMapViewModelTest {
 
     @Test
     fun showServicesChooserLiveDataEmitsParamsWithSelectedServicesFromState() = runTest {
-        val services = listOf("1", "2", "3")
         val selectedServices = listOf("1", "2")
-        whenever(servicesRepository.allServiceNamesFlow)
-                .thenReturn(flowOf(services))
+        whenever(servicesRepository.hasServicesFlow)
+                .thenReturn(flowOf(true))
         whenever(playServicesAvailabilityChecker.apiAvailabilityFlow)
             .thenReturn(flowOf(PlayServicesAvailabilityResult.Available))
         val viewModel = createViewModel(

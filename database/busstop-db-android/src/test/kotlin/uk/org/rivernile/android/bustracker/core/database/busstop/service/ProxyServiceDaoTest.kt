@@ -91,6 +91,22 @@ class ProxyServiceDaoTest {
     }
 
     @Test
+    fun serviceCountFlowRespondsToDatabaseOpenStatus() = runTest {
+        whenever(database.isDatabaseOpenFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
+        whenever(roomServiceDao.serviceCountFlow)
+            .thenReturn(
+                flowOf(0),
+                flowOf(10))
+
+        val observer = dao.serviceCountFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(0, 10)
+    }
+
+    @Test
     fun getColoursForServicesFlowRespondsToDatabaseOpenStatus() = runTest {
         val first = mock<Map<String, Int>>()
         val second = mock<Map<String, Int>>()

@@ -121,9 +121,9 @@ class BusStopMapViewModel @Inject constructor(
                     SharingStarted.WhileSubscribed(replayExpirationMillis = 0L),
                     PlayServicesAvailabilityResult.InProgress)
 
-    private val allServiceNamesFlow = servicesRepository.allServiceNamesFlow
+    private val hasServicesFlow = servicesRepository.hasServicesFlow
             .flowOn(defaultDispatcher)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
 
     /**
      * This [LiveData] emits when the user should be asked to grant location permissions.
@@ -178,7 +178,7 @@ class BusStopMapViewModel @Inject constructor(
      * A [LiveData] which emits whether the filter menu item is enabled.
      */
     val isFilterMenuItemEnabledLiveData = combine(
-            allServiceNamesFlow,
+            hasServicesFlow,
             playServicesAvailabilityFlow,
             this::calculateFilterMenuItemEnabled)
             .distinctUntilChanged()
@@ -319,7 +319,7 @@ class BusStopMapViewModel @Inject constructor(
      * This is called when the services menu item is clicked.
      */
     fun onServicesMenuItemClicked() {
-        if (!allServiceNamesFlow.value.isNullOrEmpty()) {
+        if (hasServicesFlow.value) {
             showServicesChooser.value = selectedServicesFlow.value?.toList()
         }
     }
@@ -497,14 +497,14 @@ class BusStopMapViewModel @Inject constructor(
     /**
      * Calculate whether the filter menu item should be enabled.
      *
-     * @param serviceNames The loaded service names used for filtering.
+     * @param hasServices Whether services are known or not.
      * @param playServicesAvailabilityResult The Play Services availability result.
      * @return `true` if the filter menu item should be enabled, otherwise `false`.
      */
     private fun calculateFilterMenuItemEnabled(
-            serviceNames: List<String>?,
+            hasServices: Boolean,
             playServicesAvailabilityResult: PlayServicesAvailabilityResult) =
-            !serviceNames.isNullOrEmpty() &&
+            hasServices &&
                     playServicesAvailabilityResult is PlayServicesAvailabilityResult.Available
 
     /**
