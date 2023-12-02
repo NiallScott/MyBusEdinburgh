@@ -62,6 +62,10 @@ android {
                 "\"${project.findProperty("mybus.edinburgh.apiKey") ?: "undefined"}\"")
         }
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {

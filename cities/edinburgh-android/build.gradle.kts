@@ -54,6 +54,10 @@ android {
             enableAndroidTestCoverage = true
         }
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
