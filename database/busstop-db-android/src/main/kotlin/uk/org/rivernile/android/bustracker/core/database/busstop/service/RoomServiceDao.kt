@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
 import androidx.room.Dao
+import androidx.room.MapColumn
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -52,7 +53,7 @@ internal abstract class RoomServiceDao {
     """)
     abstract val serviceCountFlow: Flow<Int?>
 
-    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> {
+    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int?>?> {
         val flow = services
             ?.ifEmpty { null }
             ?.let {
@@ -60,15 +61,20 @@ internal abstract class RoomServiceDao {
             }
             ?: coloursForAllServicesFlow
 
-        return flow.map(this::mapToServiceColourMap)
+        return flow.map { serviceColours ->
+            serviceColours?.mapValues {
+                it.value?.colour
+            }
+        }
     }
 
     @get:Query("""
         SELECT name, hexColour 
-        FROM service 
-        WHERE hexColour NOT NULL
+        FROM service
     """)
-    abstract val coloursForAllServicesFlow: Flow<List<RoomServiceColour>?>
+    abstract val coloursForAllServicesFlow: Flow<Map<
+            @MapColumn(columnName = "name") String,
+            RoomServiceColour?>?>
 
     @Query("""
         SELECT name, description, hexColour 
@@ -89,24 +95,6 @@ internal abstract class RoomServiceDao {
         AND hexColour NOT NULL
     """)
     abstract fun getColoursForServicesFlowInternal(
-        services: Set<String>): Flow<List<RoomServiceColour>?>
-
-    private fun mapToServiceColourMap(serviceColours: List<RoomServiceColour>?): Map<String, Int>? {
-        return serviceColours
-            ?.ifEmpty { null }
-            ?.let { scs ->
-                val result = HashMap<String, Int>(scs.size)
-
-                scs.forEach { serviceColour ->
-                    serviceColour
-                        .colour
-                        ?.let { colour ->
-                            result[serviceColour.name] = colour
-                        }
-                }
-
-                result.ifEmpty { null }
-                    ?.toMap()
-            }
-    }
+        services: Set<String>
+    ): Flow<Map<@MapColumn(columnName = "name") String, RoomServiceColour?>?>
 }

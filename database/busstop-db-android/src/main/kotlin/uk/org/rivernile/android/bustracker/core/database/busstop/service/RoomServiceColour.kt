@@ -32,12 +32,10 @@ import androidx.room.TypeConverters
 /**
  * This data class holds service colour data.
  *
- * @property name The display name of the service.
  * @property colour The colour of the service in hex representation.
  * @author Niall Scott
  */
 internal data class RoomServiceColour(
-    val name: String,
     @field:TypeConverters(ColourTypeConverter::class)
     @ColumnInfo(
         name = "hexColour",

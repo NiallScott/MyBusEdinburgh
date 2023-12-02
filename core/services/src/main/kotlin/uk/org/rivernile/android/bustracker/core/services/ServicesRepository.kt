@@ -55,15 +55,19 @@ class ServicesRepository @Inject internal constructor(
      * @return The [Flow] which emits the service-colour mapping.
      */
     fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> {
-        val flow = serviceDao.getColoursForServicesFlow(services)
+        val initialResults = services
+            ?.ifEmpty { null }
+            ?.associateWith<String, Int?> { null }
+            ?: emptyMap()
 
-        return serviceColourOverride?.let { override ->
-            flow.map { coloursForServices ->
-                coloursForServices?.mapValues {
-                    override.overrideServiceColour(it.key, it.value) ?: it.value
-                }
+        return serviceDao.getColoursForServicesFlow(services)
+            .map { loadedResults ->
+                val combinedResult = loadedResults?.let {
+                    initialResults + it
+                } ?: initialResults
+
+                mapToColoursForServices(combinedResult)
             }
-        } ?: flow
     }
 
     /**
@@ -97,6 +101,29 @@ class ServicesRepository @Inject internal constructor(
                 count?.let { it > 0 } ?: false
             }
             .distinctUntilChanged()
+
+    /**
+     * Given a [loadedResults] [Map], apply the [ServiceColourOverride] implementation on each entry
+     * if available. Once this is done, produce a [Map] which contains only non-`null` values.
+     *
+     * @param loadedResults The loaded results [Map] containing mappings between service names and
+     * colour integers.
+     * @return The [loadedResults] [Map] with the [ServiceColourOverride] implementation applied
+     * on all entries (if available) and then all `null` values removed. Will be `null` when the
+     * resulting [Map] is empty.
+     */
+    private fun mapToColoursForServices(loadedResults: Map<String, Int?>): Map<String, Int>? {
+        return buildMap {
+            loadedResults.forEach { result ->
+                (serviceColourOverride
+                    ?.overrideServiceColour(result.key, result.value)
+                    ?: result.value)
+                    ?.let {
+                        this[result.key] = it
+                    }
+            }
+        }.ifEmpty { null }
+    }
 
     /**
      * Map a [StoredServiceDetails] to [ServiceDetails].

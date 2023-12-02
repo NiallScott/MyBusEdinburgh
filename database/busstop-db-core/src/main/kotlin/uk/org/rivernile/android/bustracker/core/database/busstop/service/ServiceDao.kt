@@ -54,7 +54,7 @@ interface ServiceDao {
      * @return A [Flow] which emits [Map]s where the service name is the key and the colour for the
      * service is the value. The [Flow] may emit `null` items.
      */
-    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?>
+    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int?>?>
 
     /**
      * Get a [Flow] which emits [ServiceDetails] for the given [stopCode].
