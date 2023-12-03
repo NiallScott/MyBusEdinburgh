@@ -42,11 +42,22 @@ internal class ProxyServiceDao(
     private val database: AndroidBusStopDatabase) : ServiceDao {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override val allServiceNamesFlow get() =
+    override val allServiceNamesWithColourFlow get() =
         database.isDatabaseOpenFlow
             .flatMapLatest {
                 if (it) {
-                    database.roomServiceDao.allServiceNamesFlow
+                    database.roomServiceDao.allServiceNamesWithColourFlow
+                } else {
+                    emptyFlow()
+                }
+            }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getServiceNamesWithColourFlow(stopCode: String) =
+        database.isDatabaseOpenFlow
+            .flatMapLatest {
+                if (it) {
+                    database.roomServiceDao.getServiceNamesWithColourFlow(stopCode)
                 } else {
                     emptyFlow()
                 }

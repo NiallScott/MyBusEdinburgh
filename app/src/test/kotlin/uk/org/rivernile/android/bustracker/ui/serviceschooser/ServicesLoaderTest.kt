@@ -40,8 +40,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.services.ServiceWithColour
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
@@ -64,8 +64,6 @@ class ServicesLoaderTest {
     private lateinit var state: State
     @Mock
     private lateinit var servicesRepository: ServicesRepository
-    @Mock
-    private lateinit var serviceStopsRepository: ServiceStopsRepository
 
     private lateinit var loader: ServicesLoader
 
@@ -74,8 +72,7 @@ class ServicesLoaderTest {
         loader = ServicesLoader(
             arguments,
             state,
-            servicesRepository,
-            serviceStopsRepository)
+            servicesRepository)
     }
 
     @Test
@@ -96,61 +93,21 @@ class ServicesLoaderTest {
     fun servicesFlowWithAllServicesLoadsAllServices() = runTest {
         whenever(arguments.paramsFlow)
             .thenReturn(flowOf(ServicesChooserParams.AllServices(0, null)))
-        whenever(servicesRepository.allServiceNamesFlow)
+        whenever(servicesRepository.allServiceNamesWithColourFlow)
             .thenReturn(
                 intervalFlowOf(
                     0L,
                     10L,
                     null,
                     emptyList(),
-                    listOf("1"),
-                    listOf("1", "2", "3")))
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
-            .thenReturn(flowOf(mapOf("1" to 1)))
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
-            .thenReturn(flowOf(
-                mapOf(
-                    "1" to 1,
-                    "3" to 3)))
-        whenever(state.selectedServicesFlow)
-            .thenReturn(flowOf(emptySet()))
-
-        val observer = loader.servicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            emptyList(),
-            emptyList(),
-            listOf(UiService("1", 1, false)),
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)))
-        verify(serviceStopsRepository, never())
-            .getServicesForStopFlow(any())
-    }
-
-    @Test
-    fun servicesFlowWithStopServicesLoadsStopServices() = runTest {
-        whenever(arguments.paramsFlow)
-            .thenReturn(flowOf(ServicesChooserParams.Stop(0, null, "123456")))
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-            .thenReturn(
-                intervalFlowOf(
-                    0L,
-                    10L,
-                    null,
-                    emptyList(),
-                    listOf("1"),
-                    listOf("1", "2", "3")))
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
-            .thenReturn(flowOf(mapOf("1" to 1)))
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
-            .thenReturn(flowOf(
-                mapOf(
-                    "1" to 1,
-                    "3" to 3)))
+                    listOf(ServiceWithColour("1", 1)),
+                    listOf(
+                        ServiceWithColour("1", 1),
+                        ServiceWithColour("2", null),
+                        ServiceWithColour("3", 3)
+                    )
+                )
+            )
         whenever(state.selectedServicesFlow)
             .thenReturn(flowOf(emptySet()))
 
@@ -167,20 +124,61 @@ class ServicesLoaderTest {
                 UiService("2", null, false),
                 UiService("3", 3, false)))
         verify(servicesRepository, never())
-            .allServiceNamesFlow
+            .getServiceNamesWithColourFlow(any())
+    }
+
+    @Test
+    fun servicesFlowWithStopServicesLoadsStopServices() = runTest {
+        whenever(arguments.paramsFlow)
+            .thenReturn(flowOf(ServicesChooserParams.Stop(0, null, "123456")))
+        whenever(servicesRepository.getServiceNamesWithColourFlow("123456"))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    emptyList(),
+                    listOf(ServiceWithColour("1", 1)),
+                    listOf(
+                        ServiceWithColour("1", 1),
+                        ServiceWithColour("2", null),
+                        ServiceWithColour("3", 3)
+                    )
+                )
+            )
+        whenever(state.selectedServicesFlow)
+            .thenReturn(flowOf(emptySet()))
+
+        val observer = loader.servicesFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(
+            emptyList(),
+            emptyList(),
+            listOf(UiService("1", 1, false)),
+            listOf(
+                UiService("1", 1, false),
+                UiService("2", null, false),
+                UiService("3", 3, false)))
+        verify(servicesRepository, never())
+            .allServiceNamesWithColourFlow
     }
 
     @Test
     fun servicesFlowWithAllServicesRespondsToSelectionChanges() = runTest {
         whenever(arguments.paramsFlow)
             .thenReturn(flowOf(ServicesChooserParams.AllServices(0, null)))
-        whenever(servicesRepository.allServiceNamesFlow)
-            .thenReturn(flowOf(listOf("1", "2", "3")))
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
-            .thenReturn(flowOf(
-                mapOf(
-                    "1" to 1,
-                    "3" to 3)))
+        whenever(servicesRepository.allServiceNamesWithColourFlow)
+            .thenReturn(
+                flowOf(
+                    listOf(
+                        ServiceWithColour("1", 1),
+                        ServiceWithColour("2", null),
+                        ServiceWithColour("3", 3)
+                    )
+                )
+            )
         whenever(state.selectedServicesFlow)
             .thenReturn(intervalFlowOf(
                 0L,
@@ -222,13 +220,16 @@ class ServicesLoaderTest {
     fun servicesFlowWithStopServicesRespondsToSelectionChanges() = runTest {
         whenever(arguments.paramsFlow)
             .thenReturn(flowOf(ServicesChooserParams.Stop(0, null, "123456")))
-        whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-            .thenReturn(flowOf(listOf("1", "2", "3")))
-        whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
-            .thenReturn(flowOf(
-                mapOf(
-                    "1" to 1,
-                    "3" to 3)))
+        whenever(servicesRepository.getServiceNamesWithColourFlow("123456"))
+            .thenReturn(
+                flowOf(
+                    listOf(
+                        ServiceWithColour("1", 1),
+                        ServiceWithColour("2", null),
+                        ServiceWithColour("3", 3)
+                    )
+                )
+            )
         whenever(state.selectedServicesFlow)
             .thenReturn(intervalFlowOf(
                 0L,

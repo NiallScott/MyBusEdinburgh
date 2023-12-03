@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDetails as StoredServiceDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceWithColour as StoredServiceWithColour
 import javax.inject.Inject
 
 /**
@@ -80,17 +81,28 @@ class ServicesRepository @Inject internal constructor(
      */
     fun getServiceDetailsFlow(stopCode: String): Flow<List<ServiceDetails>?> {
         return serviceDao.getServiceDetailsFlow(stopCode)
-            .map { serviceDetails ->
-                serviceDetails?.map {
-                    mapToServiceDetails(it)
-                }
-            }
+            .map(this::mapToServiceDetailsList)
     }
 
     /**
-     * This provides a [Flow] which emits a [List] containing all known service names.
+     * A [Flow] which emits ordered [List]s of [ServiceWithColour] for all known services.
      */
-    val allServiceNamesFlow: Flow<List<String>?> get() = serviceDao.allServiceNamesFlow
+    val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?> get() =
+        serviceDao.allServiceNamesWithColourFlow
+            .map(this::mapToServicesWithColour)
+
+    /**
+     * Get a [Flow] which emits ordered [List]s of [ServiceWithColour] for services which stop at
+     * the given [stopCode].
+     *
+     * @param stopCode The stop code to get services for.
+     * @return A [Flow] which emits ordered [List]s of [ServiceWithColour] for services which stop
+     * at the given [stopCode].
+     */
+    fun getServiceNamesWithColourFlow(stopCode: String): Flow<List<ServiceWithColour>?> {
+        return serviceDao.getServiceNamesWithColourFlow(stopCode)
+            .map(this::mapToServicesWithColour)
+    }
 
     /**
      * This [Flow] emits whether there are known services.
@@ -126,6 +138,19 @@ class ServicesRepository @Inject internal constructor(
     }
 
     /**
+     * Given a [List] of [StoredServiceDetails], map this to a [List] of [ServiceDetails].
+     *
+     * @param details The [List] to map.
+     * @return The mapped [List].
+     */
+    private fun mapToServiceDetailsList(
+        details: List<StoredServiceDetails>?): List<ServiceDetails>? {
+        return details
+            ?.ifEmpty { null }
+            ?.map(this::mapToServiceDetails)
+    }
+
+    /**
      * Map a [StoredServiceDetails] to [ServiceDetails].
      *
      * @param details The object to map.
@@ -139,5 +164,33 @@ class ServicesRepository @Inject internal constructor(
             details.name,
             details.description,
             colour)
+    }
+
+    /**
+     * Given a [List] of [StoredServiceWithColour]s, map this to a [List] of [ServiceWithColour].
+     *
+     * @param servicesWithColour The [List] to map.
+     * @return The mapped [List].
+     */
+    private fun mapToServicesWithColour(
+        servicesWithColour: List<StoredServiceWithColour>?): List<ServiceWithColour>? {
+        return servicesWithColour
+            ?.ifEmpty { null }
+            ?.map(this::mapToServiceWithColour)
+    }
+
+    /**
+     * Given a [StoredServiceWithColour], map this to a [ServiceWithColour].
+     *
+     * @param serviceWithColour The item to map.
+     * @return The mapped item.
+     */
+    private fun mapToServiceWithColour(
+        serviceWithColour: StoredServiceWithColour): ServiceWithColour {
+        val colour = serviceColourOverride
+            ?.overrideServiceColour(serviceWithColour.name, serviceWithColour.colour)
+            ?: serviceWithColour.colour
+
+        return ServiceWithColour(serviceWithColour.name, colour)
     }
 }

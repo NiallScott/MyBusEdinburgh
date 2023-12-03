@@ -31,9 +31,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import uk.org.rivernile.android.bustracker.core.services.ServiceWithColour
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
 import javax.inject.Inject
 
 /**
@@ -42,14 +41,12 @@ import javax.inject.Inject
  * @param arguments The arguments.
  * @param state Our state.
  * @param servicesRepository Where to get service data from.
- * @param serviceStopsRepository Where to get service stop data from.
  * @author Niall Scott
  */
 class ServicesLoader @Inject constructor(
     private val arguments: Arguments,
     private val state: State,
-    private val servicesRepository: ServicesRepository,
-    private val serviceStopsRepository: ServiceStopsRepository) {
+    private val servicesRepository: ServicesRepository) {
 
     /**
      * Emits [List]s of [UiService]s.
@@ -68,7 +65,6 @@ class ServicesLoader @Inject constructor(
     private val servicesWithColoursFlow get() = arguments
         .paramsFlow
         .flatMapLatest(this::loadServices)
-        .flatMapLatest(this::loadColoursForServices)
 
     /**
      * Given [params], load the appropriate services for these parameters.
@@ -79,42 +75,11 @@ class ServicesLoader @Inject constructor(
      */
     private fun loadServices(params: ServicesChooserParams?) = params?.let {
         when (it) {
-            is ServicesChooserParams.AllServices -> servicesRepository.allServiceNamesFlow
+            is ServicesChooserParams.AllServices -> servicesRepository.allServiceNamesWithColourFlow
             is ServicesChooserParams.Stop ->
-                serviceStopsRepository.getServicesForStopFlow(it.stopCode)
+                servicesRepository.getServiceNamesWithColourFlow(it.stopCode)
         }
     } ?: flowOf(null)
-
-    /**
-     * Given a [List] of services, load colours for these services.
-     *
-     * @param services The services to get colours for.
-     * @return A [Flow] which matches services to colours. If [services] is `null`, a flow of `null`
-     * will be returned.
-     */
-    private fun loadColoursForServices(services: List<String>?): Flow<List<ServiceColour>?> {
-        return services?.ifEmpty { null }?.let { s ->
-            servicesRepository.getColoursForServicesFlow(s.toSet())
-                .map {
-                    associateServicesToColours(s, it)
-                }
-        } ?: flowOf(null)
-    }
-
-    /**
-     * Given a [List] of services and a [Map] of colurs, pair services up with their colours.
-     *
-     * @param services The services which will be shown for selection.
-     * @param colours The mapping of services to colours.
-     * @return A [List] where the services have been matched with their colours, if available.
-     */
-    private fun associateServicesToColours(
-        services: List<String>,
-        colours: Map<String, Int>?): List<ServiceColour> {
-        return services.map {
-            ServiceColour(it, colours?.get(it))
-        }
-    }
 
     /**
      * Given [services] and the [selectedServices], pair these up to produce each service's
@@ -126,24 +91,13 @@ class ServicesLoader @Inject constructor(
      * [UiService].
      */
     private fun combineServicesWithSelected(
-        services: List<ServiceColour>?,
+        services: List<ServiceWithColour>?,
         selectedServices: Set<String>): List<UiService> {
         return services?.map {
             UiService(
-                it.serviceName,
+                it.name,
                 it.colour,
-                selectedServices.contains(it.serviceName))
+                selectedServices.contains(it.name))
         } ?: emptyList()
     }
-
-    /**
-     * This is used a temporary holder of service data until it is matched up with its selected
-     * state.
-     *
-     * @property serviceName The name of the service.
-     * @property colour The colour of the service.
-     */
-    private data class ServiceColour(
-        val serviceName: String,
-        val colour: Int?)
 }

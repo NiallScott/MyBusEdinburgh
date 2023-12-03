@@ -27,11 +27,9 @@
 package uk.org.rivernile.android.bustracker.core.services
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertSame
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,10 +37,10 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceDetails as StoredServiceDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.service.ServiceWithColour as StoredServiceWithColour
 import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
 import uk.org.rivernile.android.bustracker.coroutines.test
@@ -307,10 +305,10 @@ class ServicesRepositoryTest {
                     0L,
                     10L,
                     null,
-                    listOf(MockServiceDetails("1", "Route", 1)),
+                    listOf(FakeServiceDetails("1", "Route", 1)),
                     listOf(
-                        MockServiceDetails("1", "Route", 1),
-                        MockServiceDetails("2", "Route 2", 2)
+                        FakeServiceDetails("1", "Route", 1),
+                        FakeServiceDetails("2", "Route 2", 2)
                     )
                 )
             )
@@ -342,10 +340,10 @@ class ServicesRepositoryTest {
                     0L,
                     10L,
                     null,
-                    listOf(MockServiceDetails("1", "Route", 1)),
+                    listOf(FakeServiceDetails("1", "Route", 1)),
                     listOf(
-                        MockServiceDetails("1", "Route", 1),
-                        MockServiceDetails("2", "Route 2", 2)
+                        FakeServiceDetails("1", "Route", 1),
+                        FakeServiceDetails("2", "Route 2", 2)
                     )
                 )
             )
@@ -365,15 +363,147 @@ class ServicesRepositoryTest {
     }
 
     @Test
-    fun allServiceNameFlowGetsFlowFromDao() {
+    fun allServiceNamesWithColorFlowEmitsExpectedValuesWhenOverrideIsNull() = runTest {
         val repository = ServicesRepository(serviceDao, null)
-        val mockFlow = mock<Flow<List<String>?>>()
-        whenever(serviceDao.allServiceNamesFlow)
-                .thenReturn(mockFlow)
+        whenever(serviceDao.allServiceNamesWithColourFlow)
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(FakeServiceWithColour("1", 1)),
+                    listOf(
+                        FakeServiceWithColour("1", 1),
+                        FakeServiceWithColour("2", null),
+                        FakeServiceWithColour("3", 3)
+                    )
+                )
+            )
 
-        val result = repository.allServiceNamesFlow
+        val observer = repository.allServiceNamesWithColourFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
 
-        assertSame(mockFlow, result)
+        observer.assertValues(
+            null,
+            listOf(ServiceWithColour("1", 1)),
+            listOf(
+                ServiceWithColour("1", 1),
+                ServiceWithColour("2", null),
+                ServiceWithColour("3", 3)
+            )
+        )
+    }
+
+    @Test
+    fun allServiceNamesWithColorFlowEmitsExpectedValuesWhenOverrideIsNotNull() = runTest {
+        val repository = ServicesRepository(serviceDao, serviceColourOverride)
+        whenever(serviceColourOverride.overrideServiceColour(eq("1"), anyOrNull()))
+            .thenReturn(null)
+        whenever(serviceColourOverride.overrideServiceColour("2", null))
+            .thenReturn(2)
+        whenever(serviceColourOverride.overrideServiceColour("3", 3))
+            .thenReturn(33)
+        whenever(serviceDao.allServiceNamesWithColourFlow)
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(FakeServiceWithColour("1", 1)),
+                    listOf(
+                        FakeServiceWithColour("1", 1),
+                        FakeServiceWithColour("2", null),
+                        FakeServiceWithColour("3", 3)
+                    )
+                )
+            )
+
+        val observer = repository.allServiceNamesWithColourFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(
+            null,
+            listOf(ServiceWithColour("1", 1)),
+            listOf(
+                ServiceWithColour("1", 1),
+                ServiceWithColour("2", 2),
+                ServiceWithColour("3", 33)
+            )
+        )
+    }
+
+    @Test
+    fun getServiceNamesWithColourFlowEmitsExpectedValuesWhenOverrideIsNull() = runTest {
+        val repository = ServicesRepository(serviceDao, null)
+        whenever(serviceDao.getServiceNamesWithColourFlow("123456"))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(FakeServiceWithColour("1", 1)),
+                    listOf(
+                        FakeServiceWithColour("1", 1),
+                        FakeServiceWithColour("2", null),
+                        FakeServiceWithColour("3", 3)
+                    )
+                )
+            )
+
+        val observer = repository.getServiceNamesWithColourFlow("123456").test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(
+            null,
+            listOf(ServiceWithColour("1", 1)),
+            listOf(
+                ServiceWithColour("1", 1),
+                ServiceWithColour("2", null),
+                ServiceWithColour("3", 3)
+            )
+        )
+    }
+
+    @Test
+    fun getServiceNamesWithColourFlowEmitsExpectedValuesWhenOverrideIsNotNull() = runTest {
+        val repository = ServicesRepository(serviceDao, serviceColourOverride)
+        whenever(serviceColourOverride.overrideServiceColour(eq("1"), anyOrNull()))
+            .thenReturn(null)
+        whenever(serviceColourOverride.overrideServiceColour("2", null))
+            .thenReturn(2)
+        whenever(serviceColourOverride.overrideServiceColour("3", 3))
+            .thenReturn(33)
+        whenever(serviceDao.getServiceNamesWithColourFlow("123456"))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(FakeServiceWithColour("1", 1)),
+                    listOf(
+                        FakeServiceWithColour("1", 1),
+                        FakeServiceWithColour("2", null),
+                        FakeServiceWithColour("3", 3)
+                    )
+                )
+            )
+
+        val observer = repository.getServiceNamesWithColourFlow("123456").test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(
+            null,
+            listOf(ServiceWithColour("1", 1)),
+            listOf(
+                ServiceWithColour("1", 1),
+                ServiceWithColour("2", 2),
+                ServiceWithColour("3", 33)
+            )
+        )
     }
 
     @Test
@@ -415,8 +545,12 @@ class ServicesRepositoryTest {
         observer.assertValues(true)
     }
 
-    private data class MockServiceDetails(
+    private data class FakeServiceDetails(
         override val name: String,
         override val description: String?,
         override val colour: Int?) : StoredServiceDetails
+
+    private data class FakeServiceWithColour(
+        override val name: String,
+        override val colour: Int?) : StoredServiceWithColour
 }

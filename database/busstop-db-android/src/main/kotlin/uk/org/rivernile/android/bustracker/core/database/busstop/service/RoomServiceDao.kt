@@ -41,11 +41,23 @@ import kotlinx.coroutines.flow.map
 internal abstract class RoomServiceDao {
 
     @get:Query("""
-        SELECT name 
+        SELECT name, hexColour 
         FROM service 
         ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
     """)
-    abstract val allServiceNamesFlow: Flow<List<String>?>
+    abstract val allServiceNamesWithColourFlow: Flow<List<RoomServiceWithColour>?>
+
+    @Query("""
+        SELECT name, hexColour 
+        FROM service 
+        WHERE name IN (
+            SELECT serviceName  
+            FROM service_stop 
+            WHERE stopCode = :stopCode
+        )
+        ORDER BY CASE WHEN name GLOB '[^0-9.]*' THEN name ELSE cast(name AS int) END
+    """)
+    abstract fun getServiceNamesWithColourFlow(stopCode: String): Flow<List<RoomServiceWithColour>?>
 
     @get:Query("""
         SELECT COUNT(*) 

@@ -36,9 +36,18 @@ import kotlinx.coroutines.flow.Flow
 interface ServiceDao {
 
     /**
-     * A [Flow] which emits a [List] of all service names, if available.
+     * A [Flow] which emits a [List] of all [ServiceWithColour], if available.
      */
-    val allServiceNamesFlow: Flow<List<String>?>
+    val allServiceNamesWithColourFlow: Flow<List<ServiceWithColour>?>
+
+    /**
+     * Get a [Flow] which emits a [List] of all [ServiceWithColour] for a given [stopCode], if
+     * available.
+     *
+     * @return A [Flow] which emits a [List] of all [ServiceWithColour] for a given [stopCode], if
+     * available.
+     */
+    fun getServiceNamesWithColourFlow(stopCode: String): Flow<List<ServiceWithColour>?>
 
     /**
      * A [Flow] which emits the number of services.

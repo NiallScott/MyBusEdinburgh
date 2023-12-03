@@ -73,17 +73,35 @@ class ProxyServiceDaoTest {
     }
 
     @Test
-    fun allServiceNamesFlowRespondsToDatabaseOpenStatus() = runTest {
-        val first = mock<List<String>>()
-        val second = mock<List<String>>()
+    fun allServiceNamesWithColourFlowRespondsToDatabaseOpenStatus() = runTest {
+        val first = mock<List<RoomServiceWithColour>>()
+        val second = mock<List<RoomServiceWithColour>>()
         whenever(database.isDatabaseOpenFlow)
             .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
-        whenever(roomServiceDao.allServiceNamesFlow)
+        whenever(roomServiceDao.allServiceNamesWithColourFlow)
             .thenReturn(
                 flowOf(first),
                 flowOf(second))
 
-        val observer = dao.allServiceNamesFlow.test(this)
+        val observer = dao.allServiceNamesWithColourFlow.test(this)
+        advanceUntilIdle()
+        observer.finish()
+
+        observer.assertValues(first, second)
+    }
+
+    @Test
+    fun getServiceNamesWithColourFlowRespondsToDatabaseOpenStatus() = runTest {
+        val first = mock<List<RoomServiceWithColour>>()
+        val second = mock<List<RoomServiceWithColour>>()
+        whenever(database.isDatabaseOpenFlow)
+            .thenReturn(intervalFlowOf(0L, 10L, true, false, true))
+        whenever(roomServiceDao.getServiceNamesWithColourFlow("123456"))
+            .thenReturn(
+                flowOf(first),
+                flowOf(second))
+
+        val observer = dao.getServiceNamesWithColourFlow("123456").test(this)
         advanceUntilIdle()
         observer.finish()
 
