@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Converter
+import uk.org.rivernile.android.bustracker.core.http.UserAgentInterceptor
 import javax.inject.Singleton
 
 /**
@@ -49,13 +50,17 @@ class CoreHttpModule {
      * [OkHttpClient.newBuilder] to build upon the existing instance. This allows the thread and
      * connection pools to be shared between the instances, thus improving performance.
      *
+     * @param userAgentInterceptor An [Interceptor] which adds the app user agent to requests.
      * @param httpLoggingInterceptor The logging interceptor. Will be `null` on non-debug builds.
      * @return An [OkHttpClient] instance.
      */
     @Provides
     @Singleton
-    fun provideOkhttpClient(@ForHttpLogging httpLoggingInterceptor: Interceptor?): OkHttpClient {
-        val builder = OkHttpClient.Builder()
+    internal fun provideOkhttpClient(
+        userAgentInterceptor: UserAgentInterceptor,
+        @ForHttpLogging httpLoggingInterceptor: Interceptor?
+    ): OkHttpClient {
+        val builder = OkHttpClient.Builder().addInterceptor(userAgentInterceptor)
         httpLoggingInterceptor?.let(builder::addNetworkInterceptor)
 
         return builder.build()
@@ -63,7 +68,7 @@ class CoreHttpModule {
 
     @Provides
     @Singleton
-    fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
+    internal fun provideKotlinJsonSerialisation(): Json = Json { ignoreUnknownKeys = true }
 
     /**
      * Provide a [Converter.Factory] instance which uses the app-wide [Json] instance to perform
@@ -75,6 +80,6 @@ class CoreHttpModule {
     @Singleton
     @Provides
     @ForKotlinJsonSerialization
-    fun provideKotlinJsonConverterFactory(json: Json): Converter.Factory =
+    internal fun provideKotlinJsonConverterFactory(json: Json): Converter.Factory =
         json.asConverterFactory("application/json".toMediaType())
 }

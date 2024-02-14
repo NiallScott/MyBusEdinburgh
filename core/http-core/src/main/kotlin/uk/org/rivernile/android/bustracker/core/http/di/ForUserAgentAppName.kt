@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,27 +24,14 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.kapt)
-}
+package uk.org.rivernile.android.bustracker.core.http.di
 
-dependencies {
+import javax.inject.Qualifier
 
-    implementation(project(":core:app-properties"))
-    implementation(project(":core:coroutines"))
-
-    // Dagger 2
-    implementation(libs.dagger.core)
-    kapt(libs.dagger.compiler)
-
-    // Retrofit
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.kotlin.serialization)
-
-    // Okhttp
-    implementation(libs.okhttp)
-
-    // (De-)serialisation
-    implementation(libs.kotlin.serialization.json)
-}
+/**
+ * This annotation defines a user agent app name.
+ */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForUserAgentAppName
