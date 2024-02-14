@@ -21,7 +21,7 @@ androidx-work = "2.9.0"
 
 # Testing versions.
 espresso = "3.5.1"
-mockito = "5.5.0"
+mockito = "5.10.0"
 
 [libraries]
 # Coroutines
@@ -49,7 +49,7 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version = "2.9.0" }
 retrofit-converter-kotlin-serialization = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version = "1.0.0" }
 
 # (De-)serialisation
-kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.5.1" }
+kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.6.2" }
 
 # Edinburgh Bus Tracker API
 edinburgh-bus-tracker-api = { module = "uk.org.rivernile.edinburghbustrackerapi:api-kt", version = "1.3.0" }
@@ -81,7 +81,7 @@ androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "andr
 material = { module = "com.google.android.material:material", version = "1.10.0" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.1" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.2" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 
 # Play Services
@@ -112,7 +112,7 @@ junit = { module = "junit:junit", version = "4.13.2" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockito" }
-mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "4.1.0" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.2.1" }
 mockk-android = { module =  "io.mockk:mockk-android", version = "1.13.9" }
 
 [plugins]
@@ -120,9 +120,9 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 android-test = { id = "com.android.test", version.ref = "android-gradle-plugin" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.0.1" }
+firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.1.0" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "2.9.9" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.0" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.1" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
