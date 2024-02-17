@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,9 +26,16 @@
 
 package uk.org.rivernile.android.bustracker.core.http.di
 
+import android.content.Context
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Cache
+import java.io.File
+
+private const val HTTP_CACHE_DIR_NAME = "http_cache"
+private const val CACHE_DIRECTORY_MAX_SIZE_BYTES = 20971520L // 20MB
 
 /**
  * This [Module] provides dependencies for core HTTP.
@@ -38,4 +45,16 @@ import dagger.hilt.components.SingletonComponent
 @Suppress("unused")
 @InstallIn(SingletonComponent::class)
 @Module(includes = [ CoreHttpModule::class ])
-internal interface AndroidCoreHttpModule
+internal interface AndroidCoreHttpModule {
+
+    companion object {
+
+        @Provides
+        fun provideOkhttpCache(context: Context): Cache {
+            return Cache(
+                directory = File(context.cacheDir, HTTP_CACHE_DIR_NAME),
+                maxSize = CACHE_DIRECTORY_MAX_SIZE_BYTES
+            )
+        }
+    }
+}

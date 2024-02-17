@@ -30,6 +30,7 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.json.Json
+import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -52,15 +53,20 @@ class CoreHttpModule {
      *
      * @param userAgentInterceptor An [Interceptor] which adds the app user agent to requests.
      * @param httpLoggingInterceptor The logging interceptor. Will be `null` on non-debug builds.
+     * @param cache The Okhttp [Cache] to use.
      * @return An [OkHttpClient] instance.
      */
     @Provides
     @Singleton
     internal fun provideOkhttpClient(
         userAgentInterceptor: UserAgentInterceptor,
-        @ForHttpLogging httpLoggingInterceptor: Interceptor?
+        @ForHttpLogging httpLoggingInterceptor: Interceptor?,
+        cache: Cache
     ): OkHttpClient {
-        val builder = OkHttpClient.Builder().addInterceptor(userAgentInterceptor)
+        val builder = OkHttpClient.Builder()
+            .addInterceptor(userAgentInterceptor)
+            .cache(cache)
+
         httpLoggingInterceptor?.let(builder::addNetworkInterceptor)
 
         return builder.build()
