@@ -47,8 +47,8 @@ rootProject.name = "MyBusEdinburgh"
 
 include(
     ":app",
-    ":cities:edinburgh",
-    ":cities:edinburgh-android",
+    ":cities:edinburgh:edinburgh-core",
+    ":cities:edinburgh:edinburgh-android",
     ":core:alerts",
     ":core:alerts-android",
     ":core:alphanumcomparator",

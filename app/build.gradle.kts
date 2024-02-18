@@ -133,7 +133,7 @@ baselineProfile {
 
 dependencies {
 
-    "edinburghImplementation"(project(":cities:edinburgh-android"))
+    "edinburghImplementation"(project(":cities:edinburgh:edinburgh-android"))
     implementation(project(":core:alerts-android"))
     implementation(project(":core:app-properties-android"))
     implementation(project(":core:busstops"))
