@@ -6,7 +6,7 @@ android-sdk-target = "34"
 android-build-tools = "34.0.0"
 
 android-gradle-plugin = "8.2.2"
-coroutines = "1.7.3"
+coroutines = "1.8.0"
 dagger = "2.50"
 kotlin = "1.9.22"
 okhttp = "4.12.0"
