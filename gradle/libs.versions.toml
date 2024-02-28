@@ -94,6 +94,9 @@ play-services-maps-utils-ktx = { module = "com.google.maps.android:maps-utils-kt
 # Image loading
 picasso = { module = "com.squareup.picasso:picasso", version = "2.71828" }
 
+# Date/time
+kotlin-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.4.1" }
+
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
 androidx-benchmark-macro = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }

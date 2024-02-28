@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,6 +49,8 @@ include(
     ":app",
     ":cities:edinburgh:edinburgh-core",
     ":cities:edinburgh:edinburgh-android",
+    ":cities:edinburgh:edinburgh-service-updates-endpoint",
+    ":cities:edinburgh:lothian-api-core",
     ":core:alerts",
     ":core:alerts-android",
     ":core:alphanumcomparator",
