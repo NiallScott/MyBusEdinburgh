@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,5 +46,5 @@ sealed interface ScanQrCodeResult {
     /**
      * There was an error scanning the QR code, e.g. operation was cancelled.
      */
-    object Error : ScanQrCodeResult
+    data object Error : ScanQrCodeResult
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -65,24 +65,24 @@ sealed interface UiItem {
          * This item is shown when the distance between the device and the stop is unknown, but not
          * because of insufficient permission or any other known type of issue.
          */
-        object Unknown : Distance
+        data object Unknown : Distance
 
         /**
          * This item is shown when the distance cannot be shown because there is insufficient
          * permission access to obtain a location.
          */
-        object PermissionDenied : Distance
+        data object PermissionDenied : Distance
 
         /**
          * This item is shown when location is turned off on the device.
          */
-        object LocationOff : Distance
+        data object LocationOff : Distance
 
         /**
          * This is a pseudo-item: it is not shown. Instead, it acts as a marker to denote the
          * distance item should not be shown as the device does not have a location feature.
          */
-        object NoLocationFeature : Distance
+        data object NoLocationFeature : Distance
     }
 
     /**
@@ -102,5 +102,5 @@ sealed interface UiItem {
     /**
      * This item is shown when there are no known services for the stop.
      */
-    object NoServices : UiItem
+    data object NoServices : UiItem
 }

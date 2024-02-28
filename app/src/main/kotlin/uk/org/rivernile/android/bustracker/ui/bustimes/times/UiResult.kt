@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,7 @@ sealed interface UiResult {
     /**
      * This represents a request currently in progress.
      */
-    object InProgress : UiResult
+    data object InProgress : UiResult
 
     /**
      * This represents a successfully completed request.

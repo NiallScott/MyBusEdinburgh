@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,7 @@ sealed interface FileDownloadResponse {
     /**
      * The response was successful.
      */
-    object Success : FileDownloadResponse
+    data object Success : FileDownloadResponse
 
     /**
      * This interface describes errors which can arise from downloading a file.
@@ -55,6 +55,6 @@ sealed interface FileDownloadResponse {
         /**
          * The file download failed due to an error from the server.
          */
-        object ServerError : Error
+        data object ServerError : Error
     }
 }

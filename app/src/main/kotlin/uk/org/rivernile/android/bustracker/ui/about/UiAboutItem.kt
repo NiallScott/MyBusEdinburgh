@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -65,7 +65,7 @@ sealed interface UiAboutItem {
         /**
          * Credits item.
          */
-        object Credits : OneLineItem {
+        data object Credits : OneLineItem {
 
             override val id get() = ITEM_ID_CREDITS
 
@@ -75,7 +75,7 @@ sealed interface UiAboutItem {
         /**
          * Privacy policy item.
          */
-        object PrivacyPolicy : OneLineItem {
+        data object PrivacyPolicy : OneLineItem {
 
             override val id get() = ITEM_ID_PRIVACY_POLICY
 
@@ -85,7 +85,7 @@ sealed interface UiAboutItem {
         /**
          * Open source licences item.
          */
-        object OpenSourceLicences : OneLineItem {
+        data object OpenSourceLicences : OneLineItem {
 
             override val id get() = ITEM_ID_OPEN_SOURCE_LICENCES
 
@@ -116,7 +116,7 @@ sealed interface UiAboutItem {
         /**
          * App author item.
          */
-        object Author : TwoLinesItem {
+        data object Author : TwoLinesItem {
 
             override val id get() = ITEM_ID_AUTHOR
 
@@ -126,7 +126,7 @@ sealed interface UiAboutItem {
         /**
          * App website item.
          */
-        object Website : TwoLinesItem {
+        data object Website : TwoLinesItem {
 
             override val id get() = ITEM_ID_WEBSITE
 
@@ -136,7 +136,7 @@ sealed interface UiAboutItem {
         /**
          * App Twitter link item.
          */
-        object Twitter : TwoLinesItem {
+        data object Twitter : TwoLinesItem {
 
             override val id get() = ITEM_ID_TWITTER
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,7 +38,7 @@ sealed interface LatestTweetsResult {
     /**
      * The request is in progress.
      */
-    object InProgress : LatestTweetsResult
+    data object InProgress : LatestTweetsResult
 
     /**
      * The result is successful.
@@ -56,7 +56,7 @@ sealed interface LatestTweetsResult {
         /**
          * The result is not successful due to no connectivity.
          */
-        object NoConnectivity : Error
+        data object NoConnectivity : Error
 
         /**
          * The result is not successful due to an IO error.
@@ -69,6 +69,6 @@ sealed interface LatestTweetsResult {
         /**
          * The result is not successful because of a server error.
          */
-        object Server : Error
+        data object Server : Error
     }
 }
