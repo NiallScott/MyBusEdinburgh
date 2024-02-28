@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,7 +50,7 @@ sealed interface LatestTweetsResponse {
         /**
          * This response was not successful due to no connectivity.
          */
-        object NoConnectivity : Error
+        data object NoConnectivity : Error
 
         /**
          * This response was not successful due to an IO error.
@@ -63,11 +63,11 @@ sealed interface LatestTweetsResponse {
         /**
          * This response was not successful because authentication failed against the endpoint.
          */
-        object Authentication : Error
+        data object Authentication : Error
 
         /**
          * This response was not successful due to some unrecognised server error.
          */
-        object UnrecognisedServerError : Error
+        data object UnrecognisedServerError : Error
     }
 }

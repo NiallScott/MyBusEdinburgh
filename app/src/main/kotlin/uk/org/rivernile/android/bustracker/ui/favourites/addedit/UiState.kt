@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,7 @@ sealed interface UiState {
     /**
      * The progress layout should be shown.
      */
-    object InProgress : UiState
+    data object InProgress : UiState
 
     /**
      * This is the base class for a favourite stop mode.

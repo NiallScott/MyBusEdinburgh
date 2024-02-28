@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,7 +44,7 @@ sealed interface UiState {
     /**
      * The progress item.
      */
-    object InProgress : UiState
+    data object InProgress : UiState
 
     /**
      * This sealed interface encapsulates the possible error types.
@@ -60,7 +60,7 @@ sealed interface UiState {
          * This state is emitted when the device is not capable of obtaining the location. This is
          * an unrecoverable error.
          */
-        object NoLocationFeature : Error {
+        data object NoLocationFeature : Error {
 
             override val showResolveButton get() = false
         }
@@ -69,7 +69,7 @@ sealed interface UiState {
          * This state is emitted when we have insufficient permission from the user to obtain
          * locations.
          */
-        object InsufficientLocationPermissions : Error {
+        data object InsufficientLocationPermissions : Error {
 
             override val showResolveButton get() = true
         }
@@ -77,7 +77,7 @@ sealed interface UiState {
         /**
          * This state is emitted when the system location provider is unavailable.
          */
-        object LocationOff : Error {
+        data object LocationOff : Error {
 
             override val showResolveButton get() = true
         }
@@ -85,7 +85,7 @@ sealed interface UiState {
         /**
          * This state is emitted when the location is unknown.
          */
-        object LocationUnknown : Error {
+        data object LocationUnknown : Error {
 
             override val showResolveButton get() = false
         }
@@ -93,7 +93,7 @@ sealed interface UiState {
         /**
          * This state is emitted when there are no known nearest stops.
          */
-        object NoNearestStops : Error {
+        data object NoNearestStops : Error {
 
             override val showResolveButton get() = false
         }

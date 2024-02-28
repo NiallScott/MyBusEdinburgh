@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,17 +37,17 @@ sealed interface UiState {
     /**
      * The UI should present the empty search term state.
      */
-    object EmptySearchTerm : UiState
+    data object EmptySearchTerm : UiState
 
     /**
      * The UI should present the progress state.
      */
-    object InProgress : UiState
+    data object InProgress : UiState
 
     /**
      * The UI should present the no results state.
      */
-    object NoResults : UiState
+    data object NoResults : UiState
 
     /**
      * The UI should present the content state.

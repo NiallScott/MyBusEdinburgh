@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,12 +36,12 @@ sealed interface PlayServicesAvailabilityResult {
     /**
      * Play Services availability checking is currently in progress.
      */
-    object InProgress : PlayServicesAvailabilityResult
+    data object InProgress : PlayServicesAvailabilityResult
 
     /**
      * Play Services is available.
      */
-    object Available : PlayServicesAvailabilityResult
+    data object Available : PlayServicesAvailabilityResult
 
     /**
      * This sealed interface encapsulates the Play Services unavailable states.

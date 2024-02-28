@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,12 +36,12 @@ sealed interface LastRefreshTime {
     /**
      * There is not a last refresh time.
      */
-    object Never : LastRefreshTime
+    data object Never : LastRefreshTime
 
     /**
      * The last refresh occurred within the last minute.
      */
-    object Now : LastRefreshTime
+    data object Now : LastRefreshTime
 
     /**
      * The last refresh occurred within these number of minutes.
@@ -53,5 +53,5 @@ sealed interface LastRefreshTime {
     /**
      * The last refresh occurred more than one hour ago.
      */
-    object MoreThanOneHour : LastRefreshTime
+    data object MoreThanOneHour : LastRefreshTime
 }

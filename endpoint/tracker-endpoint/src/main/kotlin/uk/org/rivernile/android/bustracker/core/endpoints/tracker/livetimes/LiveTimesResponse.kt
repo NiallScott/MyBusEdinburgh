@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,7 +51,7 @@ sealed interface LiveTimesResponse {
         /**
          * This response was not successful due to no connectivity.
          */
-        object NoConnectivity : Error
+        data object NoConnectivity : Error
 
         /**
          * This response was not successful due to an Io error.
@@ -70,17 +70,17 @@ sealed interface LiveTimesResponse {
             /**
              * There was an authentication error against the server.
              */
-            object Authentication : ServerError
+            data object Authentication : ServerError
 
             /**
              * The server is reporting it is down for maintenance.
              */
-            object Maintenance : ServerError
+            data object Maintenance : ServerError
 
             /**
              * The server is reporting it is currently overloaded.
              */
-            object SystemOverloaded : ServerError
+            data object SystemOverloaded : ServerError
 
             /**
              * There was some other error which we don't handle.
