@@ -7,14 +7,14 @@ android-build-tools = "34.0.0"
 
 android-gradle-plugin = "8.2.2"
 coroutines = "1.8.0"
-dagger = "2.50"
+dagger = "2.51"
 kotlin = "1.9.22"
 okhttp = "4.12.0"
 
 # AndroidX
 androidx-benchmark = "1.2.3"
 androidx-fragment = "1.6.2"
-androidx-hilt = "1.1.0"
+androidx-hilt = "1.2.0"
 androidx-lifecycle = "2.7.0"
 androidx-room = "2.6.1"
 androidx-work = "2.9.0"
@@ -81,7 +81,7 @@ androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "andr
 material = { module = "com.google.android.material:material", version = "1.10.0" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.2" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.3" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 
 # Play Services
@@ -120,7 +120,7 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 android-test = { id = "com.android.test", version.ref = "android-gradle-plugin" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.1.0" }
+firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.2.0" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "2.9.9" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.1" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
@@ -129,4 +129,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "1.9.22-1.0.16" }
+ksp = { id = "com.google.devtools.ksp", version = "1.9.22-1.0.17" }
