@@ -49,6 +49,7 @@ include(
     ":app",
     ":cities:edinburgh:edinburgh-core",
     ":cities:edinburgh:edinburgh-android",
+    ":cities:edinburgh:edinburgh-service-updates",
     ":cities:edinburgh:edinburgh-service-updates-endpoint",
     ":cities:edinburgh:lothian-api-core",
     ":core:alerts",
