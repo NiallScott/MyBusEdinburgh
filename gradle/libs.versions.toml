@@ -81,11 +81,11 @@ androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "andr
 material = { module = "com.google.android.material:material", version = "1.10.0" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.3" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.4" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 
 # Play Services
-play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.1.0" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.2.0" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "18.2.0" }
 play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "3.4.0" }
 play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "3.4.0" }
