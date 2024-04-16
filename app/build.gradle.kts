@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -135,7 +135,6 @@ dependencies {
 
     "edinburghImplementation"(project(":cities:edinburgh:edinburgh-android"))
     implementation(project(":core:alerts-android"))
-    implementation(project(":core:app-properties-android"))
     implementation(project(":core:busstops"))
     implementation(project(":core:config"))
     implementation(project(":core:connectivity-android"))
@@ -156,7 +155,9 @@ dependencies {
     implementation(project(":database:busstop-db-android"))
     implementation(project(":endpoint:tracker-endpoint"))
     implementation(project(":endpoint:internal-api-endpoint"))
+    implementation(project(":ui:feature:about"))
     implementation(project(":ui:text-formatting"))
+    implementation(project(":ui:ui-core"))
     implementation(project(":ui:widget:contentview"))
     implementation(project(":ui:widget:expandcollapseindicator"))
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -25,12 +25,42 @@
  */
 
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-test-fixtures`
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+}
+
+android {
+    namespace = "uk.org.rivernile.android.bustracker.ui.core"
+
+    flavorDimensions += "city"
+
+    productFlavors {
+        create("edinburgh") {
+            dimension = "city"
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
+    }
+
+    buildFeatures {
+        compose = true
+    }
 }
 
 dependencies {
 
-    // Kotlin
-    implementation(libs.coroutines.core)
+    // Compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.material.compose)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,13 +24,27 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-test-fixtures`
-}
+package uk.org.rivernile.android.bustracker.ui.about
 
-dependencies {
+/**
+ * This sealed interface represents possible actions which can be performed on the 'about' screen.
+ *
+ * @author Niall Scott
+ */
+sealed interface UiAction {
 
-    // Kotlin
-    implementation(libs.coroutines.core)
+    /** The privacy policy should be shown. */
+    data object ShowPrivacyPolicy : UiAction
+
+    /** The app's store listing should be shown. */
+    data object ShowStoreListing : UiAction
+
+    /** The app author's website should be shown. */
+    data object ShowAuthorWebsite : UiAction
+
+    /** The app's website should be shown. */
+    data object ShowAppWebsite : UiAction
+
+    /** The app's Twitter account should be shown. */
+    data object ShowAppTwitter : UiAction
 }

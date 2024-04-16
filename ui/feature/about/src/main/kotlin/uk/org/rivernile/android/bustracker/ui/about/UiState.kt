@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,13 +24,20 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-test-fixtures`
-}
+package uk.org.rivernile.android.bustracker.ui.about
 
-dependencies {
-
-    // Kotlin
-    implementation(libs.coroutines.core)
-}
+/**
+ * This class represents a snapshot of the [UiState].
+ *
+ * @property items The [UiAboutItem]s to show the user.
+ * @property isCreditsShown Is the credits UI shown?
+ * @property isOpenSourceLicencesShown Is the open source licences UI shown?
+ * @property action Any action which should be performed.
+ * @author Niall Scott
+ */
+data class UiState(
+    val items: List<UiAboutItem>,
+    val isCreditsShown: Boolean = false,
+    val isOpenSourceLicencesShown: Boolean = false,
+    val action: UiAction? = null
+)

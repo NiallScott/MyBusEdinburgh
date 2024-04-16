@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,13 +24,16 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-test-fixtures`
-}
+package uk.org.rivernile.android.bustracker.core.database.busstop.database
 
-dependencies {
-
-    // Kotlin
-    implementation(libs.coroutines.core)
-}
+/**
+ * This is a fake [DatabaseMetadata] for use in testing.
+ *
+ * @property updateTimestamp See [DatabaseMetadata.updateTimestamp].
+ * @property topologyVersionId See [DatabaseMetadata.topologyVersionId].
+ * @author Niall Scott
+ */
+data class FakeDatabaseMetadata(
+    override val updateTimestamp: Long,
+    override val topologyVersionId: String?
+) : DatabaseMetadata
