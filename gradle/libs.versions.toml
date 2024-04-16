@@ -5,10 +5,10 @@ android-sdk-min = "23"
 android-sdk-target = "34"
 android-build-tools = "34.0.0"
 
-android-gradle-plugin = "8.3.0"
+android-gradle-plugin = "8.3.2"
 coroutines = "1.8.0"
-dagger = "2.51"
-kotlin = "1.9.22"
+dagger = "2.51.1"
+kotlin = "1.9.23"
 okhttp = "4.12.0"
 
 # AndroidX
@@ -81,7 +81,7 @@ androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "andr
 material = { module = "com.google.android.material:material", version = "1.10.0" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.7.4" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.8.1" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 
 # Play Services
@@ -129,4 +129,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ksp = { id = "com.google.devtools.ksp", version = "1.9.22-1.0.17" }
+ksp = { id = "com.google.devtools.ksp", version = "1.9.23-1.0.20" }
