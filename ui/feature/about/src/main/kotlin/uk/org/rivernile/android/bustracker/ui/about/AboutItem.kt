@@ -42,9 +42,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.DateFormat
+
+internal const val TEST_TAG_TITLE = "title"
+internal const val TEST_TAG_CAPTION = "caption"
 
 /**
  * Provides an 'about' item to be displayed.
@@ -83,8 +89,11 @@ private fun AboutItem1Line(
     modifier: Modifier = Modifier,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
+    val verticalPadding = dimensionResource(id = R.dimen.padding_default)
+    val horizontalPadding = dimensionResource(id = R.dimen.padding_double)
+
     AboutItemTitle(
-        text = stringResource(id = item.toTitleStringRes()),
+        text = stringResource(id = item.titleStringRes),
         modifier = modifier
             .clickable(
                 enabled = item.isClickable,
@@ -96,10 +105,10 @@ private fun AboutItem1Line(
             .defaultMinSize(minHeight = 56.dp)
             .wrapContentHeight(Alignment.CenterVertically)
             .padding(
-                top = dimensionResource(id = R.dimen.padding_default),
-                bottom = dimensionResource(id = R.dimen.padding_default),
-                start = dimensionResource(id = R.dimen.padding_double),
-                end = dimensionResource(id = R.dimen.padding_double)
+                top = verticalPadding,
+                bottom = verticalPadding,
+                start = horizontalPadding,
+                end = horizontalPadding
             )
     )
 }
@@ -111,28 +120,8 @@ private fun AboutItem2Lines(
     modifier: Modifier = Modifier,
     onItemClicked: (UiAboutItem) -> Unit
 ) {
-    val captionText = when (item) {
-        is UiAboutItem.TwoLinesItem.AppVersion -> stringResource(
-            id = R.string.about_version_format,
-            item.versionName,
-            item.versionCode
-        )
-        is UiAboutItem.TwoLinesItem.Author -> stringResource(id = R.string.app_author)
-        is UiAboutItem.TwoLinesItem.DatabaseVersion -> {
-            item.date?.let {
-                stringResource(
-                    id = R.string.about_database_version_format,
-                    it.time,
-                    dateFormat.format(it)
-                )
-            } ?: stringResource(id = R.string.about_database_version_loading)
-        }
-        is UiAboutItem.TwoLinesItem.TopologyVersion -> {
-            item.topologyId ?: stringResource(id = R.string.about_topology_version_loading)
-        }
-        is UiAboutItem.TwoLinesItem.Twitter -> stringResource(id = R.string.app_twitter)
-        is UiAboutItem.TwoLinesItem.Website -> stringResource(id = R.string.app_website)
-    }
+    val verticalPadding = dimensionResource(id = R.dimen.padding_default)
+    val horizontalPadding = dimensionResource(id = R.dimen.padding_double)
 
     Column(
         modifier = modifier
@@ -147,14 +136,14 @@ private fun AboutItem2Lines(
             .heightIn(min = 72.dp)
             .wrapContentHeight(Alignment.CenterVertically)
             .padding(
-                top = dimensionResource(id = R.dimen.padding_default),
-                bottom = dimensionResource(id = R.dimen.padding_default),
-                start = dimensionResource(id = R.dimen.padding_double),
-                end = dimensionResource(id = R.dimen.padding_double)
+                top = verticalPadding,
+                bottom = verticalPadding,
+                start = horizontalPadding,
+                end = horizontalPadding
             )
     ) {
-        AboutItemTitle(text = stringResource(id = item.toTitleStringRes()))
-        AboutItemCaption(text = captionText)
+        AboutItemTitle(text = stringResource(id = item.titleStringRes))
+        AboutItemCaption(text = item.captionText(dateFormat))
     }
 }
 
@@ -165,7 +154,11 @@ private fun AboutItemTitle(
 ) {
     Text(
         text = text,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics {
+                testTag = TEST_TAG_TITLE
+            },
         color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.bodyLarge
     )
@@ -178,14 +171,18 @@ private fun AboutItemCaption(
 ) {
     Text(
         text = text,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics {
+                testTag = TEST_TAG_CAPTION
+            },
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium
     )
 }
 
-@StringRes
-private fun UiAboutItem.toTitleStringRes(): Int {
+@get:StringRes
+private val UiAboutItem.titleStringRes: Int get() {
     return when (this) {
         is UiAboutItem.OneLineItem.Credits -> R.string.about_credits
         is UiAboutItem.OneLineItem.OpenSourceLicences -> R.string.about_open_source
@@ -199,21 +196,51 @@ private fun UiAboutItem.toTitleStringRes(): Int {
     }
 }
 
+@Composable
+private fun UiAboutItem.TwoLinesItem.captionText(dateFormat: DateFormat): String {
+    return when (this) {
+        is UiAboutItem.TwoLinesItem.AppVersion -> stringResource(
+            id = R.string.about_version_format,
+            versionName,
+            versionCode
+        )
+        is UiAboutItem.TwoLinesItem.Author -> stringResource(id = R.string.app_author)
+        is UiAboutItem.TwoLinesItem.DatabaseVersion -> {
+            date?.let {
+                stringResource(
+                    id = R.string.about_database_version_format,
+                    it.time,
+                    dateFormat.format(it)
+                )
+            } ?: stringResource(id = R.string.about_database_version_loading)
+        }
+        is UiAboutItem.TwoLinesItem.TopologyVersion -> {
+            topologyId ?: stringResource(id = R.string.about_topology_version_loading)
+        }
+        is UiAboutItem.TwoLinesItem.Twitter -> stringResource(id = R.string.app_twitter)
+        is UiAboutItem.TwoLinesItem.Website -> stringResource(id = R.string.app_website)
+    }
+}
+
 @Preview(name = "One line about item")
 @Composable
 private fun AboutItem1LinePreview() {
-    AboutItem1Line(
-        item = UiAboutItem.OneLineItem.PrivacyPolicy,
-        onItemClicked = { }
-    )
+    MyBusTheme {
+        AboutItem1Line(
+            item = UiAboutItem.OneLineItem.PrivacyPolicy,
+            onItemClicked = { }
+        )
+    }
 }
 
 @Preview(name = "Two lines about item")
 @Composable
 private fun AboutItem2LinePreview() {
-    AboutItem2Lines(
-        item = UiAboutItem.TwoLinesItem.Website,
-        dateFormat = DateFormat.getDateTimeInstance(),
-        onItemClicked = { }
-    )
+    MyBusTheme {
+        AboutItem2Lines(
+            item = UiAboutItem.TwoLinesItem.Website,
+            dateFormat = DateFormat.getDateTimeInstance(),
+            onItemClicked = { }
+        )
+    }
 }

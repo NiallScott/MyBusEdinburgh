@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,28 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-test-fixtures`
+package uk.org.rivernile.android.bustracker.ui.about.di
+
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import uk.org.rivernile.android.bustracker.ui.about.AboutActionLauncher
+import uk.org.rivernile.android.bustracker.ui.about.AndroidAboutActionLauncher
+
+/**
+ * A [Module] which provides dependencies for
+ * [uk.org.rivernile.android.bustracker.ui.about.AboutActivity].
+ *
+ * @author Niall Scott
+ */
+@InstallIn(ActivityComponent::class)
+@Module
+internal interface AboutActivityModule {
+
+    @Suppress("unused")
+    @Binds
+    fun bindAboutActionLauncher(
+        androidAboutActionLauncher: AndroidAboutActionLauncher
+    ): AboutActionLauncher
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,16 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-    `java-test-fixtures`
+package uk.org.rivernile.android.bustracker.core.log
+
+/**
+ * This provides a fake implementation of [ExceptionLogger] which can be used in testing.
+ *
+ * @author Niall Scott
+ */
+class FakeExceptionLogger : ExceptionLogger {
+
+    override fun log(throwable: Throwable) {
+        // Nothing here at the moment.
+    }
 }

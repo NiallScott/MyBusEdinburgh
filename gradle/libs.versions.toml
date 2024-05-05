@@ -105,6 +105,8 @@ picasso = { module = "com.squareup.picasso:picasso", version = "2.71828" }
 # Testing dependencies.
 androidx-arch-core-test = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
 androidx-benchmark-macro = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "androidx-benchmark" }
+androidx-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4" }
+androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "androidx-fragment" }
 androidx-room-test = { module = "androidx.room:room-testing", version.ref = "androidx-room" }
 androidx-test-core = { module = "androidx.test:core-ktx", version = "1.5.0" }

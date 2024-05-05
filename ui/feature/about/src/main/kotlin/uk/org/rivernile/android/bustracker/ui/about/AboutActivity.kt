@@ -104,7 +104,7 @@ class AboutActivity : ComponentActivity() {
 private const val CONTENT_TYPE_ONE_LINE = 1
 private const val CONTENT_TYPE_TWO_LINES = 2
 
-private val LocalAboutActionLauncher = staticCompositionLocalOf<AboutActionLauncher> {
+internal val LocalAboutActionLauncher = staticCompositionLocalOf<AboutActionLauncher> {
     error("LocalAboutActionLauncher has not been set with a value.")
 }
 
@@ -152,7 +152,7 @@ private fun AboutScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AboutScreenWithState(
+internal fun AboutScreenWithState(
     state: UiState,
     onNavigateUp: () -> Unit,
     onItemClicked: (UiAboutItem) -> Unit,
@@ -179,17 +179,19 @@ private fun AboutScreenWithState(
     }
 
     if (state.isCreditsShown) {
-        CreditsDialog(onDismissRequest =  onCreditsDialogDismissed)
+        CreditsDialog(onDismissRequest = onCreditsDialogDismissed)
     }
 
     if (state.isOpenSourceLicencesShown) {
         OpenSourceLicenceDialog(onDismissRequest = onOpenSourceLicenceDialogDismissed)
     }
 
-    LaunchAction(
-        action = state.action,
-        onActionLaunched = onActionLaunched
-    )
+    state.action?.let {
+        LaunchAction(
+            action = it,
+            onActionLaunched = onActionLaunched
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -204,7 +206,7 @@ private fun AboutTopAppBar(
         },
         navigationIcon = {
             IconButton(
-                onClick = { onNavigateUp() }
+                onClick = onNavigateUp
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -244,29 +246,26 @@ private fun AboutItemsList(
 
 @Composable
 private fun LaunchAction(
-    action: UiAction?,
+    action: UiAction,
     onActionLaunched: () -> Unit
 ) {
-    if (action != null) {
-        val context = LocalContext.current
-        val actionLauncher = LocalAboutActionLauncher.current
+    val actionLauncher = LocalAboutActionLauncher.current
 
-        LaunchedEffect(action) {
-            when (action) {
-                is UiAction.ShowStoreListing ->
-                    actionLauncher.launchStoreListing(context)
-                is UiAction.ShowAuthorWebsite ->
-                    actionLauncher.launchAuthorWebsite(context)
-                is UiAction.ShowAppWebsite ->
-                    actionLauncher.launchAppWebsite(context)
-                is UiAction.ShowAppTwitter ->
-                    actionLauncher.launchAppTwitter(context)
-                is UiAction.ShowPrivacyPolicy ->
-                    actionLauncher.launchPrivacyPolicy(context)
-            }
-
-            onActionLaunched()
+    LaunchedEffect(action) {
+        when (action) {
+            is UiAction.ShowStoreListing ->
+                actionLauncher.launchStoreListing()
+            is UiAction.ShowAuthorWebsite ->
+                actionLauncher.launchAuthorWebsite()
+            is UiAction.ShowAppWebsite ->
+                actionLauncher.launchAppWebsite()
+            is UiAction.ShowAppTwitter ->
+                actionLauncher.launchAppTwitter()
+            is UiAction.ShowPrivacyPolicy ->
+                actionLauncher.launchPrivacyPolicy()
         }
+
+        onActionLaunched()
     }
 }
 

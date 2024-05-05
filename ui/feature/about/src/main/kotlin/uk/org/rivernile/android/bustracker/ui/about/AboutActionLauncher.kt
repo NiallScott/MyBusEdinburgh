@@ -30,90 +30,119 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import dagger.hilt.android.qualifiers.ActivityContext
+import dagger.hilt.android.scopes.ActivityScoped
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import javax.inject.Inject
 
 /**
- * An implementation which launches actions for the 'About' screen.
+ * Launches actions for the 'about' screen.
  *
- * @param exceptionLogger Used to log exception events.
  * @author Niall Scott
  */
-internal class AboutActionLauncher @Inject constructor(
-    private val exceptionLogger: ExceptionLogger
-) {
+internal interface AboutActionLauncher {
 
     /**
      * Launch the app's store listing, i.e. the Play Store.
-     *
-     * @param context The [android.app.Activity] [Context].
      */
-    fun launchStoreListing(context: Context) {
+    fun launchStoreListing()
+
+    /**
+     * Launch the app author's website in the default web browser.
+     */
+    fun launchAuthorWebsite()
+
+    /**
+     * Launch the app's website in the default web browser.
+     */
+    fun launchAppWebsite()
+
+    /**
+     * Launch the app's Twitter account either with the installed app or the default web browser.
+     */
+    fun launchAppTwitter()
+
+    /**
+     * Launch the app's privacy policy in the default web browser.
+     */
+    fun launchPrivacyPolicy()
+}
+
+/**
+ * An implementation which launches actions for the 'About' screen.
+ *
+ * @param context The [android.app.Activity] [Context].
+ * @param exceptionLogger Used to log exception events.
+ * @author Niall Scott
+ */
+@ActivityScoped
+internal class AndroidAboutActionLauncher @Inject constructor(
+    @ActivityContext private val context: Context,
+    private val exceptionLogger: ExceptionLogger
+) : AboutActionLauncher {
+
+    /**
+     * Launch the app's store listing, i.e. the Play Store.
+     */
+    override fun launchStoreListing() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse("market://details?id=${context.packageName}")
         }
 
-        launchIntent(context, intent)
+        launchIntent(intent)
     }
 
     /**
      * Launch the app author's website in the default web browser.
-     *
-     * @param context The [android.app.Activity] [Context].
      */
-    fun launchAuthorWebsite(context: Context) {
+    override fun launchAuthorWebsite() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(context.getString(R.string.app_author_website))
         }
 
-        launchIntent(context, intent)
+        launchIntent(intent)
     }
 
     /**
      * Launch the app's website in the default web browser.
-     *
-     * @param context The [android.app.Activity] [Context].
      */
-    fun launchAppWebsite(context: Context) {
+    override fun launchAppWebsite() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(context.getString(R.string.app_website))
         }
 
-        launchIntent(context, intent)
+        launchIntent(intent)
     }
 
     /**
      * Launch the app's Twitter account either with the installed app or the default web browser.
-     *
-     * @param context The [android.app.Activity] [Context].
      */
-    fun launchAppTwitter(context: Context) {
+    override fun launchAppTwitter() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(context.getString(R.string.app_twitter))
         }
 
-        launchIntent(context, intent)
+        launchIntent(intent)
     }
 
     /**
      * Launch the app's privacy policy in the default web browser.
      */
-    fun launchPrivacyPolicy(context: Context) {
+    override fun launchPrivacyPolicy() {
         val intent = Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(context.getString(R.string.app_privacy_policy))
         }
 
-        launchIntent(context, intent)
+        launchIntent(intent)
     }
 
     /**
      * Launch a given [intent]. If no handling [android.app.Activity] can be found, this will be
      * caught and the exception logger will be informed.
      *
-     * @param context The [android.app.Activity] [Context].
      * @param intent The [Intent] to launch.
      */
-    private fun launchIntent(context: Context, intent: Intent) {
+    private fun launchIntent(intent: Intent) {
         try {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {

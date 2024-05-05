@@ -35,8 +35,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+
+internal const val TEST_TAG_OPEN_SOURCE_LICENCE_DIALOG = "dialog_open_source_licence"
 
 /**
  * Shows an [AlertDialog] which shows open source licences for the application
@@ -66,7 +70,11 @@ internal fun OpenSourceLicenceDialog(
             ) {
                 Text(text = stringResource(id = R.string.close))
             }
-        }
+        },
+        modifier = Modifier
+            .semantics {
+                testTag = TEST_TAG_OPEN_SOURCE_LICENCE_DIALOG
+            }
     )
 }
 

@@ -34,6 +34,10 @@ plugins {
 android {
     namespace = "uk.org.rivernile.android.bustracker.ui.about"
 
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
     flavorDimensions += "city"
 
     productFlavors {
@@ -78,10 +82,18 @@ dependencies {
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.material.compose)
 
     // Test dependencies
+    androidTestImplementation(testFixtures(project(":core:logging")))
+    androidTestImplementation(libs.androidx.compose.ui.test)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.espresso.intents)
+    androidTestImplementation(libs.kotlin.test.junit)
+
     testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(project(":testutils"))
     testImplementation(libs.coroutines.test)

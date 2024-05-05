@@ -35,8 +35,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
+
+internal const val TEST_TAG_CREDITS_DIALOG = "dialog_credits"
 
 /**
  * Shows an [AlertDialog] which displays application credits.
@@ -53,6 +57,7 @@ internal fun CreditsDialog(
             Text(text = stringResource(id = R.string.creditsdialog_title))
         },
         text = {
+            // FIXME: display the HTML properly when Compose introduces support.
             Text(
                 text = stringResource(id = R.string.creditsdialog_body),
                 modifier = Modifier
@@ -66,7 +71,11 @@ internal fun CreditsDialog(
             ) {
                 Text(text = stringResource(id = R.string.close))
             }
-        }
+        },
+        modifier = Modifier
+            .semantics {
+                testTag = TEST_TAG_CREDITS_DIALOG
+            }
     )
 }
 
