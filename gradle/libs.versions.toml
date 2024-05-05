@@ -5,7 +5,7 @@ android-sdk-min = "23"
 android-sdk-target = "34"
 android-build-tools = "34.0.0"
 
-android-gradle-plugin = "8.3.2"
+android-gradle-plugin = "8.4.0"
 coroutines = "1.8.0"
 dagger = "2.51.1"
 kotlin = "1.9.23"
@@ -13,7 +13,7 @@ okhttp = "4.12.0"
 
 # AndroidX
 androidx-benchmark = "1.2.4"
-androidx-fragment = "1.6.2"
+androidx-fragment = "1.7.0"
 androidx-hilt = "1.2.0"
 androidx-lifecycle = "2.7.0"
 androidx-room = "2.6.1"
@@ -59,8 +59,8 @@ androidx-activity = { module = "androidx.activity:activity", version = "1.9.0" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.7.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
-androidx-core = { module = "androidx.core:core-ktx", version = "1.13.0" }
-androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.1.0" }
+androidx-core = { module = "androidx.core:core-ktx", version = "1.13.1" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.1.1" }
 androidx-fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "androidx-fragment" }
 androidx-fragment-testing-manifest = { module = "androidx.fragment:fragment-testing-manifest", version.ref = "androidx-fragment" }
 androidx-livedata = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "androidx-lifecycle" }
@@ -74,14 +74,14 @@ androidx-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", versi
 androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.1.1" }
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version = "1.1.0" }
 androidx-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
-androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0-beta02" }
+androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0-rc01" }
 androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 
 # Material Design
 material = { module = "com.google.android.material:material", version = "1.10.0" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "32.8.1" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.0.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
 
 # Play Services
@@ -120,7 +120,7 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 android-test = { id = "com.android.test", version.ref = "android-gradle-plugin" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
-firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "4.2.0" }
+firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "2.9.9" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.1" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
