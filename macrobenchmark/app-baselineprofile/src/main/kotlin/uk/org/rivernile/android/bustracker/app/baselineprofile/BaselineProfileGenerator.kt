@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,7 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.app.baselineprofile
 
+import android.os.Build
 import androidx.benchmark.macro.junit4.BaselineProfileRule
+import androidx.test.filters.SdkSuppress
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,6 +37,7 @@ import org.junit.Test
  *
  * @author Niall Scott
  */
+@SdkSuppress(minSdkVersion = Build.VERSION_CODES.P)
 class BaselineProfileGenerator {
 
     @get:Rule
