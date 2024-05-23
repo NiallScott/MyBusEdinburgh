@@ -76,7 +76,7 @@ androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.1
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version = "1.1.0" }
 androidx-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0" }
-androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
+androidx-work = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }
 
 # Material Design
 material = { module = "com.google.android.material:material", version = "1.10.0" }

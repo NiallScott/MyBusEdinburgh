@@ -55,8 +55,8 @@ class LiveDataTestObserver<T> : Observer<T> {
 
     private val values = mutableListOf<T>()
 
-    override fun onChanged(t: T) {
-        values.add(t)
+    override fun onChanged(value: T) {
+        values.add(value)
     }
 
     /**
