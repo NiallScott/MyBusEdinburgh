@@ -23,7 +23,6 @@ import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SdkSuppress
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +46,6 @@ class WarmStartupBenchmark : AbstractStartupBenchmark(StartupMode.WARM)
  * Run this benchmark from Studio to see startup measurements, and captured system traces
  * for investigating your app's performance from a hot state.
  */
-@Ignore("Flaky - awaiting fix from Google.")
 @RunWith(AndroidJUnit4::class)
 class HotStartupBenchmark : AbstractStartupBenchmark(StartupMode.HOT)
 
