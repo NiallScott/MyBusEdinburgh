@@ -83,7 +83,7 @@ androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefre
 androidx-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "androidx-lifecycle" }
 androidx-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.1.0" }
-androidx-work = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
+androidx-work = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }
 
 # Material Design
 material = { module = "com.google.android.material:material", version = "1.10.0" }
@@ -91,7 +91,7 @@ material-compose = { module = "androidx.compose.material3:material3" }
 
 # Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.0.0" }
-firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics-ktx" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
 play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.2.0" }
@@ -124,7 +124,7 @@ kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.3.1" }
-mockk-android = { module =  "io.mockk:mockk-android", version = "1.13.10" }
+mockk-android = { module =  "io.mockk:mockk-android", version = "1.13.11" }
 turbine = { module = "app.cash.turbine:turbine", version = "1.1.0" }
 
 [plugins]
