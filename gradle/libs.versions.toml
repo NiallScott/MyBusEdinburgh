@@ -79,7 +79,7 @@ androidx-viewpager2 = { module = "androidx.viewpager2:viewpager2", version = "1.
 androidx-work = { module = "androidx.work:work-runtime", version.ref = "androidx-work" }
 
 # Material Design
-material = { module = "com.google.android.material:material", version = "1.10.0" }
+material = { module = "com.google.android.material:material", version = "1.12.0" }
 
 # Firebase
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.0.0" }

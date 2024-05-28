@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,6 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.MenuProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -45,7 +44,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.viewpager2.widget.MarginPageTransformer
 import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
@@ -126,10 +125,14 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
 
         viewBinding = ActivityDisplayStopDataBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+
+        window.navigationBarColor = MaterialColors.getColor(
+            viewBinding.root,
+            R.attr.colorSurfaceContainer
+        )
 
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.apply {
@@ -156,10 +159,6 @@ class DisplayStopDataActivity : AppCompatActivity(), StopDetailsFragment.Callbac
             }.attach()
 
             appBarLayout.apply {
-                background = SurfaceColors.SURFACE_2
-                        .getColor(this@DisplayStopDataActivity)
-                        .toDrawable()
-
                 if (collapsingLayout != null) {
                     addOnOffsetChangedListener(appBarOffsetChangedListener)
                 }
