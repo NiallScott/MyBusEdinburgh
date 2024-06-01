@@ -58,7 +58,7 @@ edinburgh-bus-tracker-api = { module = "uk.org.rivernile.edinburghbustrackerapi:
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity", version = "1.9.0" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.8.0" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.6.1" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.1.4" }
 androidx-core = { module = "androidx.core:core-ktx", version = "1.13.1" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version = "1.1.1" }
@@ -82,11 +82,11 @@ androidx-work = { module = "androidx.work:work-runtime", version.ref = "androidx
 material = { module = "com.google.android.material:material", version = "1.12.0" }
 
 # Firebase
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.0.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "33.1.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Play Services
-play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.2.0" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "18.2.0" }
 play-services-maps-ktx = { module = "com.google.maps.android:maps-ktx", version = "3.4.0" }
 play-services-maps-utils = { module = "com.google.maps.android:android-maps-utils", version = "3.4.0" }
@@ -123,7 +123,7 @@ android-test = { id = "com.android.test", version.ref = "android-gradle-plugin" 
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "androidx-benchmark" }
 firebase-appdistribution = { id = "com.google.firebase.appdistribution", version = "5.0.0" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.1" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.1" }
+google-services = { id = "com.google.gms.google-services", version = "4.4.2" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "dagger" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
