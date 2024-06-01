@@ -51,7 +51,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -65,8 +64,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
@@ -114,7 +113,7 @@ private fun EdgeToEdge() {
     val isDarkMode = isSystemInDarkTheme()
     val surfaceColour = MaterialTheme
         .colorScheme
-        .surfaceColorAtElevation(3.dp)
+        .surfaceContainer
         .toArgb()
 
     LaunchedEffect(Unit) {
@@ -201,8 +200,15 @@ private fun AboutTopAppBar(
     onNavigateUp: () -> Unit
 ) {
     TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+        ),
         title = {
-            Text(text = stringResource(id = R.string.about_title))
+            Text(
+                text = stringResource(id = R.string.about_title),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         },
         navigationIcon = {
             IconButton(
