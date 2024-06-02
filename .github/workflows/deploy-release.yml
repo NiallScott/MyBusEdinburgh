@@ -38,6 +38,8 @@ jobs:
       - name: Build, test and deploy
         run: >
           ./gradlew
+          --no-configuration-cache
+          --no-build-cache
           -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
           -Pmybus.edinburgh.apiKey=${{ secrets.EDINBURGH_API_KEY }}
           -Pmybus.edinburgh.release.mapsKey=${{ secrets.EDINBURGH_GOOGLE_MAPS_API_KEY }}
