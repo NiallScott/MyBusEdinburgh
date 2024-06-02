@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2015 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,9 +32,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
-import com.google.android.material.elevation.SurfaceColors
-import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
+import uk.org.rivernile.edinburghbustracker.android.R
 import uk.org.rivernile.edinburghbustracker.android.databinding.ActivityAboutBinding
 
 /**
@@ -61,9 +61,10 @@ class AboutActivity : AppCompatActivity(), AboutFragment.Callbacks {
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        viewBinding.appBarLayout.statusBarForeground =
-                MaterialShapeDrawable.createWithElevationOverlay(this)
-        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+        window.navigationBarColor = MaterialColors.getColor(
+            viewBinding.root,
+            R.attr.colorSurfaceContainer
+        )
 
         ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())

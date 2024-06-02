@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2018 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,8 +38,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
-import com.google.android.material.elevation.SurfaceColors
-import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.color.MaterialColors
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.ui.bustimes.DisplayStopDataActivity
 import uk.org.rivernile.android.bustracker.ui.HasScrollableContent
@@ -78,9 +77,10 @@ class BusStopMapActivity : AppCompatActivity(), BusStopMapFragment.Callbacks {
         setSupportActionBar(viewBinding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        viewBinding.appBarLayout.statusBarForeground =
-                MaterialShapeDrawable.createWithElevationOverlay(this)
-        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
+        window.navigationBarColor = MaterialColors.getColor(
+            viewBinding.root,
+            R.attr.colorSurfaceContainer
+        )
 
         ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())

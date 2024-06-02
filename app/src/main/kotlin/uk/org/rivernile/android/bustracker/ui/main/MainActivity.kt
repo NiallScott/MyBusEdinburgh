@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -57,10 +57,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.fragment.app.commit
-import com.google.android.material.elevation.SurfaceColors
+import com.google.android.material.color.MaterialColors
 import com.google.android.material.search.SearchBar
 import com.google.android.material.search.SearchView
-import com.google.android.material.shape.MaterialShapeDrawable
 import dagger.hilt.android.AndroidEntryPoint
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.ui.RequiresContentPadding
@@ -146,17 +145,18 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.navigationBarColor = SurfaceColors.SURFACE_2.getColor(this)
 
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
         setSupportActionBar(viewBinding.searchBar)
 
-        viewBinding.apply {
-            appBarLayout.statusBarForeground =
-                    MaterialShapeDrawable.createWithElevationOverlay(this@MainActivity)
+        window.navigationBarColor = MaterialColors.getColor(
+            viewBinding.root,
+            R.attr.colorSurfaceContainer
+        )
 
+        viewBinding.apply {
             setupHorizontalInsets()
             setupBottomNavigation()
             setupSearch()
@@ -200,7 +200,10 @@ class MainActivity : AppCompatActivity(),
     override fun onSupportActionModeStarted(mode: ActionMode) {
         super.onSupportActionModeStarted(mode)
 
-        window.statusBarColor = SurfaceColors.SURFACE_2.getColor(this)
+        window.statusBarColor = MaterialColors.getColor(
+            viewBinding.root,
+            R.attr.colorSurfaceContainer
+        )
         viewBinding.apply {
             appBarLayout.isInvisible = true
             bottomNavigation.isVisible = false

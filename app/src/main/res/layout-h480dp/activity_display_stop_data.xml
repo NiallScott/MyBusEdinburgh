@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (C) 2016 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2016 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        tools:background="?colorSurfaceVariant">
+        android:background="?colorSurfaceContainer">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             style="?collapsingToolbarLayoutMediumStyle"
