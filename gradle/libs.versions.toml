@@ -115,6 +115,7 @@ mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.3.1" }
 mockk-android = { module =  "io.mockk:mockk-android", version = "1.13.11" }
+turbine = { module = "app.cash.turbine:turbine", version = "1.1.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.map
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesRepository
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
 
@@ -49,7 +50,8 @@ import javax.inject.Inject
 class LiveTimesRetriever @Inject constructor(
     private val liveTimesRepository: LiveTimesRepository,
     private val servicesRepository: ServicesRepository,
-    private val liveTimesMapper: LiveTimesMapper) {
+    private val liveTimesMapper: LiveTimesMapper
+) {
 
     /**
      * Attempt a fetch of [LiveTimes] and then emit the results as a [UiResult] via a [Flow]. This
@@ -70,13 +72,14 @@ class LiveTimesRetriever @Inject constructor(
                 liveTimesMapper.mapLiveTimesAndColoursToUiResult(
                     stopCode,
                     it.first,
-                    it.second)
+                    it.second
+                )
             }
     }
 
     /**
      * This method returns a [Flow] which is a [Pair] of [LiveTimesResult] and a [Map] of service
-     * name to colour integer. The purpose of this is to combine a [LiveTimesResult] with service
+     * name to [ServiceColours]. The purpose of this is to combine a [LiveTimesResult] with service
      * colours.
      *
      * The data is represented as a [Pair] at this stage to satisfy the [Flow] operator interfaces.
@@ -93,12 +96,13 @@ class LiveTimesRetriever @Inject constructor(
      *
      * @param stopCode The stop code live times are being obtained for.
      * @param result The current [LiveTimesResult] of attempting to obtain [LiveTimes].
-     * @return A [Flow] which is a [Pair] of [LiveTimesResult] and maybe a [Map] of service colours,
-     * if available.
+     * @return A [Flow] which is a [Pair] of [LiveTimesResult] and maybe a [Map] of
+     * [ServiceColours], if available.
      */
     private fun obtainColoursForLiveTimes(
         stopCode: String,
-        result: LiveTimesResult): Flow<Pair<LiveTimesResult, Map<String, Int>?>> {
+        result: LiveTimesResult
+    ): Flow<Pair<LiveTimesResult, Map<String, ServiceColours>?>> {
         return when (result) {
             is LiveTimesResult.Success -> getColoursForLiveTimes(stopCode, result.liveTimes)
             else -> flowOf(null)
@@ -110,27 +114,28 @@ class LiveTimesRetriever @Inject constructor(
     /**
      * Given a [LiveTimes] success result and the [stopCode] (as [LiveTimes] can contain results for
      * multiple stops, so we need the [stopCode] to be able to look up the correct stop), load the
-     * service colours.
+     * [ServiceColours].
      *
      * If the [stopCode] isn't in the result, or there were no services, or none of the services
      * have colours attributed to them, then a [Flow] which only emits a single `null` will be
      * returned. Otherwise, a [Flow] will be returned which emits [Map]s of the service name to a
-     * colour integer, and this will emit new items if the backing data changes.
+     * [ServiceColours] object, and this will emit new items if the backing data changes.
      *
      * @param stopCode The stop code we are referencing in the [LiveTimes].
      * @param liveTimes This contains the [LiveTimes] data.
-     * @return A [Flow] which emits [Map]s of service names to colours, or emits `null` if unable to
-     * get colours.
+     * @return A [Flow] which emits [Map]s of service names to [ServiceColours], or emits `null` if
+     * unable to get colours.
      */
     private fun getColoursForLiveTimes(
         stopCode: String,
-        liveTimes: LiveTimes): Flow<Map<String, Int>?> {
+        liveTimes: LiveTimes
+    ): Flow<Map<String, ServiceColours>?> {
         return liveTimes.stops[stopCode]
-                ?.services
-                ?.map { it.serviceName }
-                ?.ifEmpty { null }
-                ?.toSet()
-                ?.let(servicesRepository::getColoursForServicesFlow)
-                ?: flowOf(null)
+            ?.services
+            ?.map { it.serviceName }
+            ?.ifEmpty { null }
+            ?.toSet()
+            ?.let(servicesRepository::getColoursForServicesFlow)
+            ?: flowOf(null)
     }
 }

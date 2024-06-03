@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,8 @@ import javax.inject.Inject
  */
 class LiveTimesTransformations @Inject constructor(
     private val isNightServiceDetector: IsNightServiceDetector,
-    private val serviceComparator: Comparator<String>) {
+    private val serviceComparator: Comparator<String>
+) {
 
     /**
      * Given a [List] of [UiService]s, remove night services if the user has set this preference,
@@ -52,8 +53,9 @@ class LiveTimesTransformations @Inject constructor(
      * [List] with night services filtered out if they should not be shown.
      */
     fun filterNightServices(
-            services: List<UiService>,
-            showNightServices: Boolean): List<UiService> {
+        services: List<UiService>,
+        showNightServices: Boolean
+    ): List<UiService> {
         return if (!showNightServices) {
             services.filterNot {
                 isNightServiceDetector.isNightService(it.serviceName)
@@ -71,7 +73,8 @@ class LiveTimesTransformations @Inject constructor(
      */
     fun sortServices(
         services: List<UiService>,
-        sortByTime: Boolean): List<UiService> {
+        sortByTime: Boolean
+    ): List<UiService> {
         val uiServiceComparator = compareBy(serviceComparator, UiService::serviceName)
 
         return if (sortByTime) {
@@ -96,20 +99,21 @@ class LiveTimesTransformations @Inject constructor(
      */
     fun applyExpansions(
         services: List<UiService>,
-        expandedServices: Set<String>): List<UiLiveTimesItem> {
+        expandedServices: Set<String>
+    ): List<UiLiveTimesItem> {
         val mappedServices = mutableListOf<UiLiveTimesItem>()
 
         services.forEach { service ->
             val serviceName = service.serviceName
-            val serviceColour = service.serviceColour
+            val serviceColours = service.serviceColours
 
             if (expandedServices.contains(service.serviceName)) {
                 service.vehicles.mapIndexedTo(mappedServices) { index, vehicle ->
-                    UiLiveTimesItem(serviceName, serviceColour, vehicle, index, true)
+                    UiLiveTimesItem(serviceName, serviceColours, vehicle, index, true)
                 }
             } else {
                 service.vehicles.firstOrNull()?.let {
-                    mappedServices += UiLiveTimesItem(serviceName, serviceColour, it, 0, false)
+                    mappedServices += UiLiveTimesItem(serviceName, serviceColours, it, 0, false)
                 }
             }
         }

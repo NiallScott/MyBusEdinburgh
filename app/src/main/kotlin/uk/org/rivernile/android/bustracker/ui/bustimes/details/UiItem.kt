@@ -27,6 +27,7 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 
 /**
  * This sealed interface has child classes which encapsulate the possible items shown on the UI.
@@ -43,9 +44,10 @@ sealed interface UiItem {
      * @property orientation The orientation of the marker to show on the map.
      */
     data class Map(
-            val latitude: Double,
-            val longitude: Double,
-            val orientation: StopOrientation) : UiItem
+        val latitude: Double,
+        val longitude: Double,
+        val orientation: StopOrientation
+    ) : UiItem
 
     /**
      * This sealed interface encapsulates the different states of the distance item.
@@ -91,13 +93,14 @@ sealed interface UiItem {
      * @property id The ID of the item.
      * @property name The name of the service.
      * @property description A description of this service.
-     * @property colour The colour of this service, if one is set.
+     * @property serviceColours The colours of this service, if set.
      */
     data class Service(
-            val id: Long,
-            val name: String,
-            val description: String?,
-            val colour: Int?) : UiItem
+        val id: Long,
+        val name: String,
+        val description: String?,
+        val serviceColours: ServiceColours?
+    ) : UiItem
 
     /**
      * This item is shown when there are no known services for the stop.

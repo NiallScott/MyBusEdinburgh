@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,11 +31,12 @@ package uk.org.rivernile.android.bustracker.core.services
  *
  * @property name The display name of the service.
  * @property description The service description.
- * @property colour The display colour of the service. This may be `null` if no colour is
+ * @property colours The display colours of the service. This may be `null` if no colours are
  * attributed.
  * @author Niall Scott
  */
 data class ServiceDetails(
     val name: String,
     val description: String?,
-    val colour: Int?)
+    val colours: ServiceColours?
+)
