@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,7 +41,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class ServicesRetriever @Inject constructor(
-    private val servicesRepository: ServicesRepository) {
+    private val servicesRepository: ServicesRepository
+) {
 
     /**
      * Get a [Flow] of the [UiItem.Service] for each known service for the given stop. If there are
@@ -79,6 +80,7 @@ class ServicesRetriever @Inject constructor(
             serviceDetails.name.hashCode().toLong(),
             serviceDetails.name,
             serviceDetails.description,
-            serviceDetails.colour)
+            serviceDetails.colours
+        )
     }
 }

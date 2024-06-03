@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,27 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-}
+package uk.org.rivernile.android.bustracker.core.services.di
 
-dependencies {
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import uk.org.rivernile.android.bustracker.core.services.AndroidServiceColoursGenerator
+import uk.org.rivernile.android.bustracker.core.services.ServiceColoursGenerator
 
-    implementation(project(":core:coroutines"))
-    implementation(project(":database:busstop-db-core"))
+/**
+ * This Dagger module provides dependencies for services.
+ *
+ * @author Niall Scott
+ */
+@InstallIn(SingletonComponent::class)
+@Module
+internal interface ServicesModule {
 
-    // Dependency injection
-    implementation(libs.javax.inject)
-
-    // Testing dependencies
-    testImplementation(testFixtures(project(":database:busstop-db-core")))
-    testImplementation(project(":testutils"))
-    testImplementation(libs.junit)
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
+    @Suppress("unused")
+    @Binds
+    fun bindServiceColoursGenerator(
+        androidServiceColoursGenerator: AndroidServiceColoursGenerator
+    ): ServiceColoursGenerator
 }

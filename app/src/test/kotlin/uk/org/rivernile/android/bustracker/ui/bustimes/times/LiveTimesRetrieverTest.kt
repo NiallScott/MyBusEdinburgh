@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -45,21 +41,19 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Serv
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesRepository
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [LiveTimesRetriever].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class LiveTimesRetrieverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var liveTimesRepository: LiveTimesRepository
@@ -70,7 +64,7 @@ class LiveTimesRetrieverTest {
 
     private lateinit var retriever: LiveTimesRetriever
 
-    @Before
+    @BeforeTest
     fun setUp() {
         retriever = LiveTimesRetriever(liveTimesRepository, servicesRepository, liveTimesMapper)
     }
@@ -79,20 +73,20 @@ class LiveTimesRetrieverTest {
     fun getLiveTimesFlowWithInProgressResultDoesNotGetColours() = runTest {
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            awaitComplete()
+        }
 
-        observer.assertValues(UiResult.InProgress)
         verify(servicesRepository, never())
-                .getColoursForServicesFlow(anyOrNull())
+            .getColoursForServicesFlow(anyOrNull())
     }
 
     @Test
@@ -101,397 +95,450 @@ class LiveTimesRetrieverTest {
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, errorResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", errorResult,
-                null))
-                .thenReturn(errorUiResult)
+            null))
+            .thenReturn(errorUiResult)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            assertEquals(errorUiResult, awaitItem())
+            awaitComplete()
+        }
 
-        observer.assertValues(UiResult.InProgress, errorUiResult)
         verify(servicesRepository, never())
-                .getColoursForServicesFlow(anyOrNull())
+            .getColoursForServicesFlow(anyOrNull())
     }
 
     @Test
     fun getLiveTimesFlowWithSuccessButNoStopDoesNotGetColours() = runTest {
         val successResult = LiveTimesResult.Success(
-                LiveTimes(
-                        emptyMap(),
-                        123L,
-                        false))
+            LiveTimes(
+                emptyMap(),
+                123L,
+                false
+            )
+        )
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_DATA)
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-                null))
-                .thenReturn(errorUiResult)
+            null))
+            .thenReturn(errorUiResult)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            assertEquals(errorUiResult, awaitItem())
+            awaitComplete()
+        }
 
-        observer.assertValues(UiResult.InProgress, errorUiResult)
         verify(servicesRepository, never())
-                .getColoursForServicesFlow(anyOrNull())
+            .getColoursForServicesFlow(anyOrNull())
     }
 
     @Test
     fun getLiveTimesFlowWithSuccessButNoServicesDoesNotGetColours() = runTest {
         val successResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        emptyList(),
-                                        false)
-                        ),
-                        123L,
-                        false))
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
+                        "123456",
+                        "Stop name",
+                        emptyList(),
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
         val errorUiResult = UiResult.Error(123L, ErrorType.NO_DATA)
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-                null))
-                .thenReturn(errorUiResult)
+            null))
+            .thenReturn(errorUiResult)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            assertEquals(errorUiResult, awaitItem())
+            awaitComplete()
+        }
 
-        observer.assertValues(UiResult.InProgress, errorUiResult)
         verify(servicesRepository, never())
-                .getColoursForServicesFlow(anyOrNull())
+            .getColoursForServicesFlow(anyOrNull())
     }
 
     @Test
     fun getLiveTimesFlowWithSuccessSingleServiceWithNullColours() = runTest {
         val successResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        emptyList(),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
-                        ),
-                        123L,
-                        false))
-        val serviceColoursFlow = flowOf<Map<String, Int>?>(null)
-        val successUiResult = UiResult.Success(
-                123L,
-                UiStop(
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
                         "123456",
                         "Stop name",
                         listOf(
-                                UiService(
-                                        "1",
-                                        null,
-                                        emptyList()))))
+                            Service(
+                                "1",
+                                emptyList(),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
+                        ),
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
+        val serviceColoursFlow = flowOf<Map<String, ServiceColours>?>(null)
+        val successUiResult = UiResult.Success(
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        null,
+                        emptyList()
+                    )
+                )
+            )
+        )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
-                .thenReturn(serviceColoursFlow)
+            .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-                null))
-                .thenReturn(successUiResult)
+            null))
+            .thenReturn(successUiResult)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiResult.InProgress, successUiResult)
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            assertEquals(successUiResult, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getLiveTimesFlowWithSuccessSingleServiceWithEmptyColours() = runTest {
         val successResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        emptyList(),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
-                        ),
-                        123L,
-                        false))
-        val serviceColoursFlow = flowOf<Map<String, Int>?>(emptyMap())
-        val successUiResult = UiResult.Success(
-                123L,
-                UiStop(
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
                         "123456",
                         "Stop name",
                         listOf(
-                                UiService(
-                                        "1",
-                                        null,
-                                        emptyList()))))
+                            Service(
+                                "1",
+                                emptyList(),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
+                        ),
+                        false)
+                ),
+                123L,
+                false
+            )
+        )
+        val serviceColoursFlow = flowOf<Map<String, ServiceColours>?>(emptyMap())
+        val successUiResult = UiResult.Success(
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        null,
+                        emptyList()
+                    )
+                )
+            )
+        )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
-                .thenReturn(serviceColoursFlow)
+            .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-                emptyMap()))
-                .thenReturn(successUiResult)
+            emptyMap()))
+            .thenReturn(successUiResult)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiResult.InProgress, successUiResult)
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            assertEquals(successUiResult, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getLiveTimesFlowWithSuccessSingleServiceGetsColours() = runTest {
         val successResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        emptyList(),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
-                        ),
-                        123L,
-                        false))
-        val serviceColours = mapOf(
-                "1" to 0xFFFFFF)
-        val serviceColoursFlow = flowOf(serviceColours)
-        val successUiResult = UiResult.Success(
-                123L,
-                UiStop(
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
                         "123456",
                         "Stop name",
                         listOf(
-                                UiService(
-                                        "1",
-                                        0xFFFFFF,
-                                        emptyList()))))
+                            Service(
+                                "1",
+                                emptyList(),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
+                        ),
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
+        val serviceColours = mapOf("1" to ServiceColours(1, 10))
+        val serviceColoursFlow = flowOf(serviceColours)
+        val successUiResult = UiResult.Success(
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        ServiceColours(1, 10),
+                        emptyList()
+                    )
+                )
+            )
+        )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
-                .thenReturn(serviceColoursFlow)
+            .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-                serviceColours))
-                .thenReturn(successUiResult)
+            serviceColours))
+            .thenReturn(successUiResult)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiResult.InProgress, successUiResult)
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            assertEquals(successUiResult, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getLiveTimesFlowWithSuccessMultipleServicesGetsColours() = runTest {
         val successResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        emptyList(),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false),
-                                                Service(
-                                                        "2",
-                                                        emptyList(),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false),
-                                                Service(
-                                                        "3",
-                                                        emptyList(),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
-                        ),
-                        123L,
-                        false))
-        val serviceColours = mapOf(
-                "1" to 0xFFFFFF,
-                "2" to 0xFF0000,
-                "3" to 0x00FF00)
-        val serviceColoursFlow = flowOf(serviceColours)
-        val successUiResult = UiResult.Success(
-                123L,
-                UiStop(
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
                         "123456",
                         "Stop name",
                         listOf(
-                                UiService(
-                                        "1",
-                                        0xFFFFFF,
-                                        emptyList()),
-                                UiService(
-                                        "2",
-                                        0xFF0000,
-                                        emptyList()),
-                                UiService(
-                                        "3",
-                                        0x00FF00,
-                                        emptyList())
-                        )))
+                            Service(
+                                "1",
+                                emptyList(),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            ),
+                            Service(
+                                "2",
+                                emptyList(),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            ),
+                            Service(
+                                "3",
+                                emptyList(),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
+                        ),
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
+        val serviceColours = mapOf(
+            "1" to ServiceColours(1, 10),
+            "2" to ServiceColours(2, 20),
+            "3" to ServiceColours(3, 30)
+        )
+        val serviceColoursFlow = flowOf(serviceColours)
+        val successUiResult = UiResult.Success(
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        ServiceColours(1, 10),
+                        emptyList()
+                    ),
+                    UiService(
+                        "2",
+                        ServiceColours(2, 20),
+                        emptyList()
+                    ),
+                    UiService(
+                        "3",
+                        ServiceColours(3, 30),
+                        emptyList()
+                    )
+                )
+            )
+        )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
-                .thenReturn(serviceColoursFlow)
+            .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-                serviceColours))
-                .thenReturn(successUiResult)
+            serviceColours))
+            .thenReturn(successUiResult)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiResult.InProgress, successUiResult)
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            assertEquals(successUiResult, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getLiveTimesFlowWithSuccessSingleServiceUpdatesColours() = runTest {
         val successResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        emptyList(),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
+                        "123456",
+                        "Stop name",
+                        listOf(
+                            Service(
+                                "1",
+                                emptyList(),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
                         ),
-                        123L,
-                        false))
-        val serviceColours1 = mapOf(
-                "1" to 0xFFFFFF)
-        val serviceColours2 = mapOf(
-                "1" to 0xFF0000)
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
+        val serviceColours1 = mapOf("1" to ServiceColours(1, 10))
+        val serviceColours2 = mapOf("1" to ServiceColours(2, 20))
         val serviceColoursFlow = flowOf(serviceColours1, serviceColours2)
         val successUiResult1 = UiResult.Success(
-                123L,
-                UiStop(
-                        "123456",
-                        "Stop name",
-                        listOf(
-                                UiService(
-                                        "1",
-                                        0xFFFFFF,
-                                        emptyList()))))
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        ServiceColours(1, 10),
+                        emptyList()
+                    )
+                )
+            )
+        )
         val successUiResult2 = UiResult.Success(
-                123L,
-                UiStop(
-                        "123456",
-                        "Stop name",
-                        listOf(
-                                UiService(
-                                        "1",
-                                        0xFF0000,
-                                        emptyList()))))
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        ServiceColours(2, 20),
+                        emptyList()
+                    )
+                )
+            )
+        )
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
-                .thenReturn(liveTimesFlow)
+            .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
-                .thenReturn(serviceColoursFlow)
+            .thenReturn(serviceColoursFlow)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-                "123456",
-                LiveTimesResult.InProgress,
-                null))
-                .thenReturn(UiResult.InProgress)
+            "123456",
+            LiveTimesResult.InProgress,
+            null))
+            .thenReturn(UiResult.InProgress)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-                serviceColours1))
-                .thenReturn(successUiResult1)
+            serviceColours1))
+            .thenReturn(successUiResult1)
         whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-                serviceColours2))
-                .thenReturn(successUiResult2)
+            serviceColours2))
+            .thenReturn(successUiResult2)
 
-        val observer = retriever.getLiveTimesFlow("123456", 4).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiResult.InProgress, successUiResult1, successUiResult2)
+        retriever.getLiveTimesFlow("123456", 4).test {
+            assertEquals(UiResult.InProgress, awaitItem())
+            assertEquals(successUiResult1, awaitItem())
+            assertEquals(successUiResult2, awaitItem())
+            awaitComplete()
+        }
     }
 }

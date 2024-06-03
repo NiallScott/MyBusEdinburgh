@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,17 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.LiveTimes
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.Date
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [LiveTimesMapper].
@@ -49,7 +50,7 @@ class LiveTimesMapperTest {
 
     private lateinit var mapper: LiveTimesMapper
 
-    @Before
+    @BeforeTest
     fun setUp() {
         mapper = LiveTimesMapper()
     }
@@ -137,10 +138,12 @@ class LiveTimesMapperTest {
     @Test
     fun mapLiveTimesAndColoursToUiResultWithStopNotFoundReturnsNoDataError() {
         val liveTimesResult = LiveTimesResult.Success(
-                LiveTimes(
-                        emptyMap(),
-                        123L,
-                        false))
+            LiveTimes(
+                emptyMap(),
+                123L,
+                false
+            )
+        )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -151,16 +154,19 @@ class LiveTimesMapperTest {
     @Test
     fun mapLiveTimesAndColoursToUiResultWithEmptyServicesReturnsNoDataError() {
         val liveTimesResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        emptyList(),
-                                        false)
-                        ),
-                        123L,
-                        false))
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
+                        "123456",
+                        "Stop name",
+                        emptyList(),
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -171,24 +177,28 @@ class LiveTimesMapperTest {
     @Test
     fun mapLiveTimesAndColoursToUiResultWithEmptyVehiclesInServicesReturnsNoDataError() {
         val liveTimesResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        emptyList(),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
+                        "123456",
+                        "Stop name",
+                        listOf(
+                            Service(
+                                "1",
+                                emptyList(),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
                         ),
-                        123L,
-                        false))
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
         val expected = UiResult.Error(123L, ErrorType.NO_DATA)
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -199,39 +209,41 @@ class LiveTimesMapperTest {
     @Test
     fun mapLiveTimesAndColoursToUiResultHasNullColourWhenNoColoursAreProvided() {
         val liveTimesResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        listOf(
-                                                                createVehicle()),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
-                        ),
-                        123L,
-                        false))
-        val expected = UiResult.Success(
-                123L,
-                UiStop(
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
                         "123456",
                         "Stop name",
                         listOf(
-                                UiService(
-                                        "1",
-                                        null,
-                                        listOf(
-                                                createUiVehicle())
-                                )
-                        )
+                            Service(
+                                "1",
+                                listOf(createVehicle()),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
+                        ),
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
+        val expected = UiResult.Success(
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        null,
+                        listOf(createUiVehicle())
+                    )
                 )
+            )
         )
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, null)
@@ -242,41 +254,43 @@ class LiveTimesMapperTest {
     @Test
     fun mapLiveTimesAndColoursToUiResultHasNonNullColourWhenColoursAreProvided() {
         val liveTimesResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        listOf(
-                                                                createVehicle()),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
-                        ),
-                        123L,
-                        false))
-        val expected = UiResult.Success(
-                123L,
-                UiStop(
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
                         "123456",
                         "Stop name",
                         listOf(
-                                UiService(
-                                        "1",
-                                        0xFFFFFF,
-                                        listOf(
-                                                createUiVehicle())
-                                )
-                        )
-                )
+                            Service(
+                                "1",
+                                listOf(createVehicle()),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
+                        ),
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
         )
-        val colours = mapOf("1" to 0xFFFFFF)
+        val expected = UiResult.Success(
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        ServiceColours(1, 2),
+                        listOf(createUiVehicle())
+                    )
+                )
+            )
+        )
+        val colours = mapOf("1" to ServiceColours(1, 2))
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, colours)
 
@@ -286,68 +300,72 @@ class LiveTimesMapperTest {
     @Test
     fun mapLiveTimesAndColoursToUiResultHasNonNullColourWhenColoursAreProvidedMultiple() {
         val liveTimesResult = LiveTimesResult.Success(
-                LiveTimes(
-                        mapOf(
-                                "123456" to Stop(
-                                        "123456",
-                                        "Stop name",
-                                        listOf(
-                                                Service(
-                                                        "1",
-                                                        listOf(
-                                                                createVehicle()),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false),
-                                                Service(
-                                                        "2",
-                                                        listOf(
-                                                                createVehicle()),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false),
-                                                Service(
-                                                        "3",
-                                                        listOf(
-                                                                createVehicle()),
-                                                        null,
-                                                        null,
-                                                        isDisrupted = false,
-                                                        isDiverted = false)
-                                        ),
-                                        false)
-                        ),
-                        123L,
-                        false))
-        val expected = UiResult.Success(
-                123L,
-                UiStop(
+            LiveTimes(
+                mapOf(
+                    "123456" to Stop(
                         "123456",
                         "Stop name",
                         listOf(
-                                UiService(
-                                        "1",
-                                        0xFFFFFF,
-                                        listOf(
-                                                createUiVehicle())),
-                                UiService(
-                                        "2",
-                                        null,
-                                        listOf(
-                                                createUiVehicle())),
-                                UiService(
-                                        "3",
-                                        0xFF0000,
-                                        listOf(
-                                                createUiVehicle()))
-                        )
+                            Service(
+                                "1",
+                                listOf(createVehicle()),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            ),
+                            Service(
+                                "2",
+                                listOf(createVehicle()),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            ),
+                            Service(
+                                "3",
+                                listOf(createVehicle()),
+                                null,
+                                null,
+                                isDisrupted = false,
+                                isDiverted = false
+                            )
+                        ),
+                        false
+                    )
+                ),
+                123L,
+                false
+            )
+        )
+        val expected = UiResult.Success(
+            123L,
+            UiStop(
+                "123456",
+                "Stop name",
+                listOf(
+                    UiService(
+                        "1",
+                        ServiceColours(1, 2),
+                        listOf(createUiVehicle())
+                    ),
+                    UiService(
+                        "2",
+                        null,
+                        listOf(createUiVehicle())
+                    ),
+                    UiService(
+                        "3",
+                        ServiceColours(3, 4),
+                        listOf(createUiVehicle())
+                    )
                 )
+            )
         )
         val colours = mapOf(
-                "1" to 0xFFFFFF,
-                "3" to 0xFF0000)
+            "1" to ServiceColours(1, 2),
+            "3" to ServiceColours(3, 4)
+        )
 
         val result = mapper.mapLiveTimesAndColoursToUiResult("123456", liveTimesResult, colours)
 
@@ -355,21 +373,23 @@ class LiveTimesMapperTest {
     }
 
     private fun createVehicle() = Vehicle(
-            null,
-            date,
-            2,
-            null,
-            null,
-            isEstimatedTime = false,
-            isDelayed = false,
-            isDiverted = false,
-            isTerminus = false,
-            isPartRoute = false)
+        null,
+        date,
+        2,
+        null,
+        null,
+        isEstimatedTime = false,
+        isDelayed = false,
+        isDiverted = false,
+        isTerminus = false,
+        isPartRoute = false
+    )
 
     private fun createUiVehicle() = UiVehicle(
-            null,
-            false,
-            date,
-            2,
-            false)
+        null,
+        false,
+        date,
+        2,
+        false
+    )
 }

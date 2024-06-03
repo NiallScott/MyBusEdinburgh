@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,40 +26,35 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServiceDetails
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [ServicesRetriever].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ServicesRetrieverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var servicesRepository: ServicesRepository
 
     private lateinit var retriever: ServicesRetriever
 
-    @Before
+    @BeforeTest
     fun setUp() {
         retriever = ServicesRetriever(servicesRepository)
     }
@@ -69,11 +64,10 @@ class ServicesRetrieverTest {
         whenever(servicesRepository.getServiceDetailsFlow("123456"))
             .thenReturn(flowOf(null))
 
-        val observer = retriever.getServicesFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(null)
+        retriever.getServicesFlow("123456").test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -81,11 +75,10 @@ class ServicesRetrieverTest {
         whenever(servicesRepository.getServiceDetailsFlow("123456"))
             .thenReturn(flowOf(emptyList()))
 
-        val observer = retriever.getServicesFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(null)
+        retriever.getServicesFlow("123456").test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -97,41 +90,47 @@ class ServicesRetrieverTest {
                         ServiceDetails(
                             "1",
                             "Service 1",
-                            0xAABBCC),
+                            ServiceColours(1, 10)
+                        ),
                         ServiceDetails(
                             "2",
                             null,
-                            null),
+                            null
+                        ),
                         ServiceDetails(
                             "3",
                             "Service 3",
-                            null)
+                            null
+                        )
                     )
                 )
             )
 
-        val observer = retriever.getServicesFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            listOf(
-                UiItem.Service(
-                    "1".hashCode().toLong(),
-                    "1",
-                    "Service 1",
-                    0xAABBCC),
-                UiItem.Service(
-                    "2".hashCode().toLong(),
-                    "2",
-                    null,
-                    null),
-                UiItem.Service(
-                    "3".hashCode().toLong(),
-                    "3",
-                    "Service 3",
-                    null)
+        retriever.getServicesFlow("123456").test {
+            assertEquals(
+                listOf(
+                    UiItem.Service(
+                        "1".hashCode().toLong(),
+                        "1",
+                        "Service 1",
+                        ServiceColours(1, 10)
+                    ),
+                    UiItem.Service(
+                        "2".hashCode().toLong(),
+                        "2",
+                        null,
+                        null
+                    ),
+                    UiItem.Service(
+                        "3".hashCode().toLong(),
+                        "3",
+                        "Service 3",
+                        null
+                    )
+                ),
+                awaitItem()
             )
-        )
+            awaitComplete()
+        }
     }
 }

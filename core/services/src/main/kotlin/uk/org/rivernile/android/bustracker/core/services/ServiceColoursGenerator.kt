@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,21 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-}
+package uk.org.rivernile.android.bustracker.core.services
 
-dependencies {
+/**
+ * A utility to generate colours for a service.
+ *
+ * @author Niall Scott
+ */
+interface ServiceColoursGenerator {
 
-    implementation(project(":core:coroutines"))
-    implementation(project(":database:busstop-db-core"))
-
-    // Dependency injection
-    implementation(libs.javax.inject)
-
-    // Testing dependencies
-    testImplementation(testFixtures(project(":database:busstop-db-core")))
-    testImplementation(project(":testutils"))
-    testImplementation(libs.junit)
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
+    /**
+     * Given a [serviceColour] (the service's primary colour), generate a [ServiceColours] instance
+     * with complimentary colours.
+     *
+     * @param serviceColour The colour of the service (its primary colour).
+     * @return The generated [ServiceColours], or `null` if [serviceColour] is `null`.
+     */
+    fun generateServiceColours(serviceColour: Int?): ServiceColours?
 }

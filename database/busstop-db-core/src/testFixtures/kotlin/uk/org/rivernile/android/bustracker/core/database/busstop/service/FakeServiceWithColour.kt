@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,14 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-}
+package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
-dependencies {
-
-    implementation(project(":core:coroutines"))
-    implementation(project(":database:busstop-db-core"))
-
-    // Dependency injection
-    implementation(libs.javax.inject)
-
-    // Testing dependencies
-    testImplementation(testFixtures(project(":database:busstop-db-core")))
-    testImplementation(project(":testutils"))
-    testImplementation(libs.junit)
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
-}
+/**
+ * A fake [ServiceWithColour] to be used in testing.
+ *
+ * @author Niall Scott
+ */
+data class FakeServiceWithColour(
+    override val name: String,
+    override val colour: Int?
+) : ServiceWithColour

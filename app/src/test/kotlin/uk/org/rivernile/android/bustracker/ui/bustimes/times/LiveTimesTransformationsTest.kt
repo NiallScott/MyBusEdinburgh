@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,39 +26,22 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doAnswer
-import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.livetimes.IsNightServiceDetector
 import java.util.Date
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Tests for [LiveTimesTransformations].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class LiveTimesTransformationsTest {
-
-    @Mock
-    private lateinit var isNightServiceDetector: IsNightServiceDetector
-
-    private lateinit var transformations: LiveTimesTransformations
-
-    @Before
-    fun setUp() {
-        transformations = LiveTimesTransformations(isNightServiceDetector, naturalOrder())
-    }
 
     @Test
     fun filterNightServicesCopesWithEmptyServicesWhenShowNightServicesIsEnabled() {
+        val transformations = createLiveTimesTransformations()
         val result = transformations.filterNightServices(emptyList(), true)
 
         assertTrue(result.isEmpty())
@@ -66,6 +49,7 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun filterNightServicesCopesWithEmptyServicesWhenShowNightServicesIsNotEnabled() {
+        val transformations = createLiveTimesTransformations()
         val result = transformations.filterNightServices(emptyList(), false)
 
         assertTrue(result.isEmpty())
@@ -73,19 +57,24 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun filterNightServicesDoesNotFilterOutServicesWhenShowingNightServicesAndNoNightBuses() {
+        val transformations = createLiveTimesTransformations()
         val services = listOf(
-                UiService(
-                        "1",
-                        null,
-                        emptyList()),
-                UiService(
-                        "2",
-                        null,
-                        emptyList()),
-                UiService(
-                        "3",
-                        null,
-                        emptyList()))
+            UiService(
+                "1",
+                null,
+                emptyList()
+            ),
+            UiService(
+                "2",
+                null,
+                emptyList()
+            ),
+            UiService(
+                "3",
+                null,
+                emptyList()
+            )
+        )
 
         val result = transformations.filterNightServices(services, true)
 
@@ -94,31 +83,38 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun filterNightServiceFiltersOutNightServicesWhenNotShowingNightServices() {
-        doAnswer {
-            it.arguments[0] == "2"
-        }.whenever(isNightServiceDetector).isNightService(any())
+        val transformations = createLiveTimesTransformations(
+            isNightService = { it == "2" }
+        )
         val services = listOf(
-                UiService(
-                        "1",
-                        null,
-                        emptyList()),
-                UiService(
-                        "2",
-                        null,
-                        emptyList()),
-                UiService(
-                        "3",
-                        null,
-                        emptyList()))
+            UiService(
+                "1",
+                null,
+                emptyList()
+            ),
+            UiService(
+                "2",
+                null,
+                emptyList()
+            ),
+            UiService(
+                "3",
+                null,
+                emptyList()
+            )
+        )
         val expected = listOf(
-                UiService(
-                        "1",
-                        null,
-                        emptyList()),
-                UiService(
-                        "3",
-                        null,
-                        emptyList()))
+            UiService(
+                "1",
+                null,
+                emptyList()
+            ),
+            UiService(
+                "3",
+                null,
+                emptyList()
+            )
+        )
 
         val result = transformations.filterNightServices(services, false)
 
@@ -127,6 +123,7 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun sortServicesCopesWithEmptyListWhenSortingByTime() {
+        val transformations = createLiveTimesTransformations()
         val result = transformations.sortServices(emptyList(), true)
 
         assertTrue(result.isEmpty())
@@ -134,6 +131,7 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun sortServicesCopesWithEmptyListWhenSortingByService() {
+        val transformations = createLiveTimesTransformations()
         val result = transformations.sortServices(emptyList(), false)
 
         assertTrue(result.isEmpty())
@@ -141,57 +139,73 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun sortServicesSortedByTimeMovesServiceWithEmptyVehiclesToEnd() {
+        val transformations = createLiveTimesTransformations()
         val date = Date()
         val services = listOf(
-                UiService(
-                        "1",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false))),
-                UiService(
-                        "2",
-                        null,
-                        emptyList()),
-                UiService(
-                        "3",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        4,
-                                        false))))
+            UiService(
+                "1",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "2",
+                null,
+                emptyList()
+            ),
+            UiService(
+                "3",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        4,
+                        false)
+                )
+            )
+        )
         val expected = listOf(
-                UiService(
-                        "3",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        4,
-                                        false))),
-                UiService(
-                        "1",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false))),
-                UiService(
-                        "2",
-                        null,
-                        emptyList()))
+            UiService(
+                "3",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        4,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "1",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "2",
+                null,
+                emptyList()
+            )
+        )
 
         val result = transformations.sortServices(services, true)
 
@@ -200,69 +214,90 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun sortServicesSortedByTimeSortsAsExpected() {
+        val transformations = createLiveTimesTransformations()
         val date = Date()
         val services = listOf(
-                UiService(
-                        "2",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false))),
-                UiService(
-                        "1",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false))),
-                UiService(
-                        "3",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        4,
-                                        false))))
+            UiService(
+                "2",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "1",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "3",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        4,
+                        false
+                    )
+                )
+            )
+        )
         val expected = listOf(
-                UiService(
-                        "3",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        4,
-                                        false))),
-                UiService(
-                        "1",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false))),
-                UiService(
-                        "2",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false))))
+            UiService(
+                "3",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        4,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "1",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "2",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    )
+                )
+            )
+        )
 
         val result = transformations.sortServices(services, true)
 
@@ -271,6 +306,7 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun applyExpansionsYieldsEmptyListWhenInputIsEmpty() {
+        val transformations = createLiveTimesTransformations()
         val result = transformations.applyExpansions(emptyList(), emptySet())
 
         assertTrue(result.isEmpty())
@@ -278,55 +314,68 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun applyExpansionsDoesNotAddCollapsedServiceWithZeroVehicles() {
+        val transformations = createLiveTimesTransformations()
         val date = Date()
         val services = listOf(
-                UiService(
-                        "1",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false))),
-                UiService(
-                        "2",
-                        null,
-                        emptyList()),
-                UiService(
-                        "3",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        4,
-                                        false))))
+            UiService(
+                "1",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "2",
+                null,
+                emptyList()
+            ),
+            UiService(
+                "3",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        4,
+                        false
+                    )
+                )
+            )
+        )
         val expected = listOf(
-                UiLiveTimesItem(
-                        "1",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                10,
-                                false),
-                        0,
-                        false),
-                UiLiveTimesItem(
-                        "3",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                4,
-                                false),
-                        0,
-                        false)
+            UiLiveTimesItem(
+                "1",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    10,
+                    false
+                ),
+                0,
+                false
+            ),
+            UiLiveTimesItem(
+                "3",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    4,
+                    false
+                ),
+                0,
+                false
+            )
         )
 
         val result = transformations.applyExpansions(services, emptySet())
@@ -336,74 +385,90 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun applyExpansionsExpandsServices() {
+        val transformations = createLiveTimesTransformations()
         val date = Date()
         val services = listOf(
-                UiService(
-                        "1",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false),
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        12,
-                                        false))),
-                UiService(
-                        "3",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        4,
-                                        false),
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        6,
-                                        false))))
+            UiService(
+                "1",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    ),
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        12,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "3",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        4,
+                        false
+                    ),
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        6,
+                        false
+                    )
+                )
+            )
+        )
         val expected = listOf(
-                UiLiveTimesItem(
-                        "1",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                10,
-                                false),
-                        0,
-                        true),
-                UiLiveTimesItem(
-                        "1",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                12,
-                                false),
-                        1,
-                        true),
-                UiLiveTimesItem(
-                        "3",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                4,
-                                false),
-                        0,
-                        false)
+            UiLiveTimesItem(
+                "1",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    10,
+                    false
+                ),
+                0,
+                true
+            ),
+            UiLiveTimesItem(
+                "1",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    12,
+                    false
+                ),
+                1,
+                true
+            ),
+            UiLiveTimesItem(
+                "3",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    4,
+                    false
+                ),
+                0,
+                false
+            )
         )
 
         val result = transformations.applyExpansions(services, setOf("1"))
@@ -413,89 +478,118 @@ class LiveTimesTransformationsTest {
 
     @Test
     fun applyExpansionsExpandsServicesWhenAllExpanded() {
+        val transformations = createLiveTimesTransformations()
         val date = Date()
         val services = listOf(
-                UiService(
-                        "1",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        10,
-                                        false),
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        12,
-                                        false))),
-                UiService(
-                        "3",
-                        null,
-                        listOf(
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        4,
-                                        false),
-                                UiVehicle(
-                                        "Destination",
-                                        false,
-                                        date,
-                                        6,
-                                        false))))
+            UiService(
+                "1",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        10,
+                        false
+                    ),
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        12,
+                        false
+                    )
+                )
+            ),
+            UiService(
+                "3",
+                null,
+                listOf(
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        4,
+                        false
+                    ),
+                    UiVehicle(
+                        "Destination",
+                        false,
+                        date,
+                        6,
+                        false
+                    )
+                )
+            )
+        )
         val expected = listOf(
-                UiLiveTimesItem(
-                        "1",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                10,
-                                false),
-                        0,
-                        true),
-                UiLiveTimesItem(
-                        "1",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                12,
-                                false),
-                        1,
-                        true),
-                UiLiveTimesItem(
-                        "3",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                4,
-                                false),
-                        0,
-                        true),
-                UiLiveTimesItem(
-                        "3",
-                        null,
-                        UiVehicle(
-                                "Destination",
-                                false,
-                                date,
-                                6,
-                                false),
-                        1,
-                        true)
+            UiLiveTimesItem(
+                "1",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    10,
+                    false
+                ),
+                0,
+                true
+            ),
+            UiLiveTimesItem(
+                "1",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    12,
+                    false
+                ),
+                1,
+                true
+            ),
+            UiLiveTimesItem(
+                "3",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    4,
+                    false
+                ),
+                0,
+                true
+            ),
+            UiLiveTimesItem(
+                "3",
+                null,
+                UiVehicle(
+                    "Destination",
+                    false,
+                    date,
+                    6,
+                    false
+                ),
+                1,
+                true
+            )
         )
 
         val result = transformations.applyExpansions(services, setOf("1", "3"))
 
         assertEquals(expected, result)
+    }
+
+    private fun createLiveTimesTransformations(
+        isNightService: (String) -> Boolean = { false }
+    ): LiveTimesTransformations {
+        return LiveTimesTransformations(
+            isNightServiceDetector = object : IsNightServiceDetector {
+                override fun isNightService(serviceName: String) = isNightService(serviceName)
+            },
+            serviceComparator = naturalOrder()
+        )
     }
 }

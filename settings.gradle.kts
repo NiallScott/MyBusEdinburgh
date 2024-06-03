@@ -76,6 +76,7 @@ include(
     ":core:preferences",
     ":core:preferences-android",
     ":core:services",
+    ":core:services-android",
     ":core:servicepoints",
     ":core:servicestops",
     ":core:time",

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,12 +46,13 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemBusTimes
  * @author Niall Scott
  */
 class ParentViewHolder(
-        private val viewBinding: ListItemBusTimesParentBinding,
-        private val populator: ViewHolderFieldPopulator,
-        private val clickListener: OnParentClickedListener)
-    : RecyclerView.ViewHolder(viewBinding.root) {
+    private val viewBinding: ListItemBusTimesParentBinding,
+    private val populator: ViewHolderFieldPopulator,
+    private val clickListener: OnParentClickedListener
+) : RecyclerView.ViewHolder(viewBinding.root) {
 
     private val defaultBackground = MaterialColors.getColor(itemView, R.attr.colorTertiary)
+    private val defaultTextColour = MaterialColors.getColor(itemView, R.attr.colorOnTertiary)
 
     private var item: UiLiveTimesItem? = null
 
@@ -72,7 +73,7 @@ class ParentViewHolder(
 
         viewBinding.apply {
             populateServiceName(newItem)
-            populateServiceBackground(oldItem, newItem)
+            populateServiceColours(oldItem, newItem)
             populator.populateDestination(txtDestination, newItem)
             populator.populateTime(txtTime, newItem)
             populateExpandCollapseIndicator(oldItem, newItem)
@@ -90,20 +91,23 @@ class ParentViewHolder(
     }
 
     /**
-     * Populate the service text background with the service colour.
+     * Populate the service text background and text colour with the service colours.
      *
      * @param oldItem The old item, used to decide if the item should be updated.
      * @param newItem The new item containing the service colour to populate.
      */
-    private fun populateServiceBackground(oldItem: UiLiveTimesItem?, newItem: UiLiveTimesItem?) {
-        viewBinding.apply {
+    private fun populateServiceColours(oldItem: UiLiveTimesItem?, newItem: UiLiveTimesItem?) {
+        viewBinding.txtServiceName.apply {
             newItem?.also {
-                if (oldItem == null || oldItem.serviceColour != it.serviceColour) {
-                    val backgroundColour = it.serviceColour ?: defaultBackground
-                    txtServiceName.backgroundTintList = ColorStateList.valueOf(backgroundColour)
+                if (oldItem == null || oldItem.serviceColours != it.serviceColours) {
+                    val backgroundColour = it.serviceColours?.primaryColour ?: defaultBackground
+                    val textColour = it.serviceColours?.colourOnPrimary ?: defaultTextColour
+                    backgroundTintList = ColorStateList.valueOf(backgroundColour)
+                    setTextColor(textColour)
                 }
             } ?: run {
-                txtServiceName.backgroundTintList = ColorStateList.valueOf(defaultBackground)
+                backgroundTintList = ColorStateList.valueOf(defaultBackground)
+                setTextColor(defaultTextColour)
             }
         }
     }
@@ -115,8 +119,9 @@ class ParentViewHolder(
      * @param newItem Contains the new expand state.
      */
     private fun populateExpandCollapseIndicator(
-            oldItem: UiLiveTimesItem?,
-            newItem: UiLiveTimesItem?) {
+        oldItem: UiLiveTimesItem?,
+        newItem: UiLiveTimesItem?
+    ) {
         viewBinding.apply {
             newItem?.also {
                 val oldState = oldItem?.expanded ?: it.expanded

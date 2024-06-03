@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -41,21 +41,24 @@ import javax.inject.Inject
  * @param serviceColourOverride An implementation which may override the loaded service colours with
  * a hard-wired implementation. The actual implementation will most likely be defined per product
  * flavour.
+ * @param serviceColoursGenerator An implementation which generates colours for a service.
  * @author Niall Scott
  */
 class ServicesRepository @Inject internal constructor(
     private val serviceDao: ServiceDao,
-    private val serviceColourOverride: ServiceColourOverride?) {
+    private val serviceColourOverride: ServiceColourOverride?,
+    private val serviceColoursGenerator: ServiceColoursGenerator
+) {
 
     /**
-     * Get a [Flow] which returns a [Map] of service names to colours for the service, and will emit
-     * further items if the backing store changes.
+     * Get a [Flow] which returns a [Map] of service names to [ServiceColours] for the service, and
+     * will emit further items if the backing store changes.
      *
      * @param services The services to get colours for. If `null` or empty, colours for all known
      * services will be returned.
      * @return The [Flow] which emits the service-colour mapping.
      */
-    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, Int>?> {
+    fun getColoursForServicesFlow(services: Set<String>?): Flow<Map<String, ServiceColours>?> {
         val initialResults = services
             ?.ifEmpty { null }
             ?.associateWith<String, Int?> { null }
@@ -124,12 +127,17 @@ class ServicesRepository @Inject internal constructor(
      * on all entries (if available) and then all `null` values removed. Will be `null` when the
      * resulting [Map] is empty.
      */
-    private fun mapToColoursForServices(loadedResults: Map<String, Int?>): Map<String, Int>? {
+    private fun mapToColoursForServices(
+        loadedResults: Map<String, Int?>
+    ): Map<String, ServiceColours>? {
         return buildMap {
             loadedResults.forEach { result ->
-                (serviceColourOverride
+                val serviceColour = serviceColourOverride
                     ?.overrideServiceColour(result.key, result.value)
-                    ?: result.value)
+                    ?: result.value
+
+                serviceColoursGenerator
+                    .generateServiceColours(serviceColour)
                     ?.let {
                         this[result.key] = it
                     }
@@ -163,7 +171,8 @@ class ServicesRepository @Inject internal constructor(
         return ServiceDetails(
             details.name,
             details.description,
-            colour)
+            serviceColoursGenerator.generateServiceColours(colour)
+        )
     }
 
     /**
@@ -191,6 +200,9 @@ class ServicesRepository @Inject internal constructor(
             ?.overrideServiceColour(serviceWithColour.name, serviceWithColour.colour)
             ?: serviceWithColour.colour
 
-        return ServiceWithColour(serviceWithColour.name, colour)
+        return ServiceWithColour(
+            serviceWithColour.name,
+            serviceColoursGenerator.generateServiceColours(colour)
+        )
     }
 }

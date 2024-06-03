@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,24 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-}
+package uk.org.rivernile.android.bustracker.core.services
 
-dependencies {
+import androidx.palette.graphics.Palette.Swatch
+import javax.inject.Inject
 
-    implementation(project(":core:coroutines"))
-    implementation(project(":database:busstop-db-core"))
+/**
+ * This is the Android-specific implementation of [ServiceColoursGenerator].
+ *
+ * @author Niall Scott
+ */
+internal class AndroidServiceColoursGenerator @Inject constructor() : ServiceColoursGenerator {
 
-    // Dependency injection
-    implementation(libs.javax.inject)
-
-    // Testing dependencies
-    testImplementation(testFixtures(project(":database:busstop-db-core")))
-    testImplementation(project(":testutils"))
-    testImplementation(libs.junit)
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
+    override fun generateServiceColours(serviceColour: Int?): ServiceColours? {
+        return serviceColour?.let { sc ->
+            ServiceColours(
+                primaryColour = sc,
+                colourOnPrimary = Swatch(sc, 1).bodyTextColor
+            )
+        }
+    }
 }

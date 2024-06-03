@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,10 +39,14 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemStopDeta
  * @author Niall Scott
  */
 class ServiceViewHolder(
-        private val viewBinding: ListItemStopDetailsServiceBinding)
-    : RecyclerView.ViewHolder(viewBinding.root) {
+    private val viewBinding: ListItemStopDetailsServiceBinding
+) : RecyclerView.ViewHolder(viewBinding.root) {
 
     private val defaultBackground = MaterialColors.getColor(viewBinding.root, R.attr.colorTertiary)
+    private val defaultTextColour = MaterialColors.getColor(
+        viewBinding.root,
+        R.attr.colorOnTertiary
+    )
 
     /**
      * Populate this [RecyclerView.ViewHolder] with the contents of [newItem].
@@ -56,14 +60,17 @@ class ServiceViewHolder(
                 txtServiceName.text = it.name
                 txtDescription.text = it.description
 
-                if (oldItem == null || oldItem.colour != it.colour) {
-                    val backgroundColour = it.colour ?: defaultBackground
+                if (oldItem == null || oldItem.serviceColours != it.serviceColours) {
+                    val backgroundColour = it.serviceColours?.primaryColour ?: defaultBackground
+                    val textColour = it.serviceColours?.colourOnPrimary ?: defaultTextColour
                     txtServiceName.backgroundTintList = ColorStateList.valueOf(backgroundColour)
+                    txtServiceName.setTextColor(textColour)
                 }
             } ?: run {
                 txtServiceName.text = null
                 txtDescription.text = null
                 txtServiceName.backgroundTintList = ColorStateList.valueOf(defaultBackground)
+                txtServiceName.setTextColor(defaultTextColour)
             }
         }
     }

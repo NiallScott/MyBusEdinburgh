@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePoint
 import uk.org.rivernile.android.bustracker.core.servicepoints.ServicePointsRepository
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
 import javax.inject.Inject
 
@@ -41,8 +42,9 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class RouteLineRetriever @Inject constructor(
-        private val servicePointsRepository: ServicePointsRepository,
-        private val servicesRepository: ServicesRepository) {
+    private val servicePointsRepository: ServicePointsRepository,
+    private val servicesRepository: ServicesRepository
+) {
 
     /**
      * Given a [Set] of selected services, retrieve the route lines for these services. If
@@ -53,12 +55,13 @@ class RouteLineRetriever @Inject constructor(
      * [selectedServices] is `null` or empty, or `null` if no route lines could be found.
      */
     fun getRouteLinesFlow(selectedServices: Set<String>?) =
-            selectedServices?.ifEmpty { null }?.let {
-                combine(
-                        servicePointsRepository.getServicePointsFlow(it),
-                        servicesRepository.getColoursForServicesFlow(it),
-                        this::mapToRouteLines)
-            } ?: flowOf(null)
+        selectedServices?.ifEmpty { null }?.let {
+            combine(
+                servicePointsRepository.getServicePointsFlow(it),
+                servicesRepository.getColoursForServicesFlow(it),
+                this::mapToRouteLines
+            )
+        } ?: flowOf(null)
 
     /**
      * Given a loaded [List] of [ServicePoint]s and a loaded mapping of service colours, map this
@@ -71,15 +74,17 @@ class RouteLineRetriever @Inject constructor(
      */
     private fun mapToRouteLines(
         servicePoints: List<ServicePoint>?,
-        serviceColours: Map<String, Int>?): List<UiServiceRoute>? {
+        serviceColours: Map<String, ServiceColours>?
+    ): List<UiServiceRoute>? {
         return servicePoints?.ifEmpty { null }?.let { points ->
             val result = mutableMapOf<String, MutableUiServiceRoute>()
 
             points.forEach { point ->
                 val service = result.getOrPut(point.serviceName) {
                     MutableUiServiceRoute(
-                            point.serviceName,
-                            serviceColours?.get(point.serviceName))
+                        point.serviceName,
+                        serviceColours?.get(point.serviceName)?.primaryColour
+                    )
                 }
 
                 val mutablePoints = service.lines.getOrPut(point.chainage) {
@@ -90,8 +95,8 @@ class RouteLineRetriever @Inject constructor(
             }
 
             result.values
-                    .mapNotNull(MutableUiServiceRoute::build)
-                    .ifEmpty { null }
+                .mapNotNull(MutableUiServiceRoute::build)
+                .ifEmpty { null }
         }
     }
 
@@ -105,9 +110,10 @@ class RouteLineRetriever @Inject constructor(
      * @property lines The route lines for this service.
      */
     private data class MutableUiServiceRoute(
-            val serviceName: String,
-            val serviceColour: Int?,
-            val lines: MutableMap<Int, MutableList<UiLatLon>> = mutableMapOf()) {
+        val serviceName: String,
+        val serviceColour: Int?,
+        val lines: MutableMap<Int, MutableList<UiLatLon>> = mutableMapOf()
+    ) {
 
         /**
          * From this [MutableUiServiceRoute], build the non-mutable [UiServiceRoute] version. This
@@ -118,16 +124,17 @@ class RouteLineRetriever @Inject constructor(
          * empty and no meaningful object can be built.
          */
         fun build(): UiServiceRoute? = lines
-                .values
-                .mapNotNull { points ->
-                    points.ifEmpty { null }?.let(::UiServiceLine)
-                }
-                .ifEmpty { null }
-                ?.let {
-                    UiServiceRoute(
-                            serviceName,
-                            serviceColour,
-                            it)
-                }
+            .values
+            .mapNotNull { points ->
+                points.ifEmpty { null }?.let(::UiServiceLine)
+            }
+            .ifEmpty { null }
+            ?.let {
+                UiServiceRoute(
+                    serviceName,
+                    serviceColour,
+                    it
+                )
+            }
     }
 }

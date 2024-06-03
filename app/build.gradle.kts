@@ -148,6 +148,7 @@ dependencies {
     implementation(project(":core:permission-android"))
     implementation(project(":core:preferences-android"))
     implementation(project(":core:services"))
+    implementation(project(":core:services-android"))
     implementation(project(":core:servicepoints"))
     implementation(project(":core:servicestops"))
     implementation(project(":core:time"))
@@ -174,7 +175,6 @@ dependencies {
     implementation(libs.androidx.recyclerview)
     implementation(libs.androidx.viewpager2)
     implementation(libs.androidx.swiperefreshlayout)
-    implementation(libs.androidx.palette)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.preference)
     implementation(libs.androidx.datastore.preferences)
@@ -208,8 +208,13 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.intents)
     androidTestImplementation(libs.mockito.android)
 
+    testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(project(":testutils"))
     testImplementation(libs.androidx.arch.core.test)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.turbine)
 
     baselineProfile(project(":macrobenchmark:app-baselineprofile"))
 }

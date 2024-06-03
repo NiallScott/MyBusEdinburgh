@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,7 +46,8 @@ import javax.inject.Inject
 class ServicesLoader @Inject constructor(
     private val arguments: Arguments,
     private val state: State,
-    private val servicesRepository: ServicesRepository) {
+    private val servicesRepository: ServicesRepository
+) {
 
     /**
      * Emits [List]s of [UiService]s.
@@ -55,7 +56,8 @@ class ServicesLoader @Inject constructor(
         combine(
             servicesWithColoursFlow,
             state.selectedServicesFlow,
-            this::combineServicesWithSelected)
+            this::combineServicesWithSelected
+        )
 
     /**
      * This [Flow] emits services with colours. The service listing is based on the parameters which
@@ -92,12 +94,14 @@ class ServicesLoader @Inject constructor(
      */
     private fun combineServicesWithSelected(
         services: List<ServiceWithColour>?,
-        selectedServices: Set<String>): List<UiService> {
+        selectedServices: Set<String>
+    ): List<UiService> {
         return services?.map {
             UiService(
                 it.name,
-                it.colour,
-                selectedServices.contains(it.name))
+                it.colours,
+                selectedServices.contains(it.name)
+            )
         } ?: emptyList()
     }
 }

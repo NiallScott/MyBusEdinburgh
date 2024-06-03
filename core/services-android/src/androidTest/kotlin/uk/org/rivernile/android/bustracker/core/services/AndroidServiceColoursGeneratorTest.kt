@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,42 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-}
+package uk.org.rivernile.android.bustracker.core.services
 
-dependencies {
+import android.graphics.Color
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
-    implementation(project(":core:coroutines"))
-    implementation(project(":database:busstop-db-core"))
+/**
+ * Tests for [AndroidServiceColoursGenerator].
+ *
+ * @author Niall Scott
+ */
+class AndroidServiceColoursGeneratorTest {
 
-    // Dependency injection
-    implementation(libs.javax.inject)
+    private lateinit var generator: AndroidServiceColoursGenerator
 
-    // Testing dependencies
-    testImplementation(testFixtures(project(":database:busstop-db-core")))
-    testImplementation(project(":testutils"))
-    testImplementation(libs.junit)
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
+    @BeforeTest
+    fun setUp() {
+        generator = AndroidServiceColoursGenerator()
+    }
+
+    @Test
+    fun generateServiceColoursReturnsNullWhenServiceColourIsNull() {
+        val result = generator.generateServiceColours(null)
+
+        assertNull(result)
+    }
+
+    @Test
+    fun generateServiceColoursReturnsNonNullWhenServiceColourIsNotNull() {
+        val serviceColour = Color.parseColor("#AABBCC")
+        val result = generator.generateServiceColours(serviceColour)
+
+        assertNotNull(result)
+        assertEquals(serviceColour, result.primaryColour)
+    }
 }
