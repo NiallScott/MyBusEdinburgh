@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -40,23 +36,21 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import uk.org.rivernile.android.bustracker.core.services.ServiceWithColour
 import uk.org.rivernile.android.bustracker.core.services.ServicesRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [ServicesLoader].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ServicesLoaderTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var arguments: Arguments
@@ -67,12 +61,13 @@ class ServicesLoaderTest {
 
     private lateinit var loader: ServicesLoader
 
-    @Before
+    @BeforeTest
     fun setUp() {
         loader = ServicesLoader(
             arguments,
             state,
-            servicesRepository)
+            servicesRepository
+        )
     }
 
     @Test
@@ -82,11 +77,10 @@ class ServicesLoaderTest {
         whenever(state.selectedServicesFlow)
             .thenReturn(flowOf(emptySet()))
 
-        val observer = loader.servicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(emptyList())
+        loader.servicesFlow.test {
+            assertEquals(emptyList(), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -100,29 +94,35 @@ class ServicesLoaderTest {
                     10L,
                     null,
                     emptyList(),
-                    listOf(ServiceWithColour("1", 1)),
+                    listOf(ServiceWithColour("1", ServiceColours(1, 10))),
                     listOf(
-                        ServiceWithColour("1", 1),
+                        ServiceWithColour("1", ServiceColours(1, 10)),
                         ServiceWithColour("2", null),
-                        ServiceWithColour("3", 3)
+                        ServiceWithColour("3", ServiceColours(3, 30))
                     )
                 )
             )
         whenever(state.selectedServicesFlow)
             .thenReturn(flowOf(emptySet()))
 
-        val observer = loader.servicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
+        loader.servicesFlow.test {
+            assertEquals(emptyList(), awaitItem())
+            assertEquals(emptyList(), awaitItem())
+            assertEquals(
+                listOf(UiService("1", ServiceColours(1, 10), false)),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), false),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
 
-        observer.assertValues(
-            emptyList(),
-            emptyList(),
-            listOf(UiService("1", 1, false)),
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)))
         verify(servicesRepository, never())
             .getServiceNamesWithColourFlow(any())
     }
@@ -138,29 +138,35 @@ class ServicesLoaderTest {
                     10L,
                     null,
                     emptyList(),
-                    listOf(ServiceWithColour("1", 1)),
+                    listOf(ServiceWithColour("1", ServiceColours(1, 10))),
                     listOf(
-                        ServiceWithColour("1", 1),
+                        ServiceWithColour("1", ServiceColours(1, 10)),
                         ServiceWithColour("2", null),
-                        ServiceWithColour("3", 3)
+                        ServiceWithColour("3", ServiceColours(3, 30))
                     )
                 )
             )
         whenever(state.selectedServicesFlow)
             .thenReturn(flowOf(emptySet()))
 
-        val observer = loader.servicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
+        loader.servicesFlow.test {
+            assertEquals(emptyList(), awaitItem())
+            assertEquals(emptyList(), awaitItem())
+            assertEquals(
+                listOf(UiService("1", ServiceColours(1, 10), false)),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), false),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
 
-        observer.assertValues(
-            emptyList(),
-            emptyList(),
-            listOf(UiService("1", 1, false)),
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)))
         verify(servicesRepository, never())
             .allServiceNamesWithColourFlow
     }
@@ -173,47 +179,68 @@ class ServicesLoaderTest {
             .thenReturn(
                 flowOf(
                     listOf(
-                        ServiceWithColour("1", 1),
+                        ServiceWithColour("1", ServiceColours(1, 10)),
                         ServiceWithColour("2", null),
-                        ServiceWithColour("3", 3)
+                        ServiceWithColour("3", ServiceColours(3, 30))
                     )
                 )
             )
         whenever(state.selectedServicesFlow)
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                emptySet(),
-                setOf("1"),
-                setOf("1", "3"),
-                setOf("4"),
-                emptySet()))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    emptySet(),
+                    setOf("1"),
+                    setOf("1", "3"),
+                    setOf("4"),
+                    emptySet()
+                )
+            )
 
-        val observer = loader.servicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)),
-            listOf(
-                UiService("1", 1, true),
-                UiService("2", null, false),
-                UiService("3", 3, false)),
-            listOf(
-                UiService("1", 1, true),
-                UiService("2", null, false),
-                UiService("3", 3, true)),
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)),
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)))
+        loader.servicesFlow.test {
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), false),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), true),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), true),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), true)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), false),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), false),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
     }
 
     @Test
@@ -224,46 +251,66 @@ class ServicesLoaderTest {
             .thenReturn(
                 flowOf(
                     listOf(
-                        ServiceWithColour("1", 1),
+                        ServiceWithColour("1", ServiceColours(1, 10)),
                         ServiceWithColour("2", null),
-                        ServiceWithColour("3", 3)
+                        ServiceWithColour("3", ServiceColours(3, 30))
                     )
                 )
             )
         whenever(state.selectedServicesFlow)
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                emptySet(),
-                setOf("1"),
-                setOf("1", "3"),
-                setOf("4"),
-                emptySet()))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    emptySet(),
+                    setOf("1"),
+                    setOf("1", "3"),
+                    setOf("4"),
+                    emptySet()
+                )
+            )
 
-        val observer = loader.servicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)),
-            listOf(
-                UiService("1", 1, true),
-                UiService("2", null, false),
-                UiService("3", 3, false)),
-            listOf(
-                UiService("1", 1, true),
-                UiService("2", null, false),
-                UiService("3", 3, true)),
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)),
-            listOf(
-                UiService("1", 1, false),
-                UiService("2", null, false),
-                UiService("3", 3, false)))
+        loader.servicesFlow.test {
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), false),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), true),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), true),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), true)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), false),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                listOf(
+                    UiService("1", ServiceColours(1, 10), false),
+                    UiService("2", null, false),
+                    UiService("3", ServiceColours(3, 30), false)
+                ),
+                awaitItem()
+            )
+        }
     }
 }

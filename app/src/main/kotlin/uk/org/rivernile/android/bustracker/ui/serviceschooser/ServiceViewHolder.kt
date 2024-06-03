@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -28,7 +28,6 @@ package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
 import android.content.res.ColorStateList
 import androidx.annotation.ColorInt
-import androidx.palette.graphics.Palette.Swatch
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.color.MaterialColors
 import uk.org.rivernile.edinburghbustracker.android.R
@@ -43,11 +42,15 @@ import uk.org.rivernile.edinburghbustracker.android.databinding.ListItemServiceC
  */
 class ServiceViewHolder(
     private val viewBinding: ListItemServiceChooserServiceBinding,
-    private val clickListener: OnServiceClickedListener)
-    : RecyclerView.ViewHolder(viewBinding.root) {
+    private val clickListener: OnServiceClickedListener
+) : RecyclerView.ViewHolder(viewBinding.root) {
 
     private var item: UiService? = null
     private val defaultBackground = MaterialColors.getColor(viewBinding.root, R.attr.colorTertiary)
+    private val defaultTextColour = MaterialColors.getColor(
+        viewBinding.root,
+        R.attr.colorOnTertiary
+    )
     private val colourOnSurface = MaterialColors.getColor(viewBinding.root, R.attr.colorOnSurface)
 
     init {
@@ -70,13 +73,16 @@ class ServiceViewHolder(
                 text = it.serviceName
                 isChecked = it.isSelected
 
-                if (oldItem == null || oldItem.serviceColour != it.serviceColour) {
-                    val backgroundColour = it.serviceColour ?: defaultBackground
+                if (oldItem == null || oldItem.serviceColours != it.serviceColours) {
+                    val backgroundColour = it.serviceColours?.primaryColour ?: defaultBackground
+                    val textColour = it.serviceColours?.colourOnPrimary ?: defaultTextColour
                     backgroundTintList = ColorStateList.valueOf(backgroundColour)
                     setTextColor(
                         createColorStateListForServiceName(
                             colourOnSurface,
-                            getSelectedTextColour(backgroundColour)))
+                            textColour
+                        )
+                    )
                 }
             } ?: run {
                 text = null
@@ -85,7 +91,9 @@ class ServiceViewHolder(
                 setTextColor(
                     createColorStateListForServiceName(
                         colourOnSurface,
-                        getSelectedTextColour(defaultBackground)))
+                        defaultTextColour
+                    )
+                )
             }
         }
     }
@@ -109,25 +117,17 @@ class ServiceViewHolder(
      */
     private fun createColorStateListForServiceName(
         @ColorInt unselectedColour: Int,
-        @ColorInt selectedColor: Int): ColorStateList {
+        @ColorInt selectedColor: Int
+    ): ColorStateList {
         return ColorStateList(
             arrayOf(
                 intArrayOf(android.R.attr.state_checked),
-                intArrayOf()),
+                intArrayOf()
+            ),
             intArrayOf(
                 selectedColor,
-                unselectedColour))
-    }
-
-    /**
-     * For a given [serviceColour], get an appropriately contrasting text colour for when the
-     * service is in the selected state.
-     *
-     * @param serviceColour The colour of the service.
-     * @return The appropriately contrasting text colour for the service when in the selected state.
-     */
-    @ColorInt
-    private fun getSelectedTextColour(@ColorInt serviceColour: Int): Int {
-        return Swatch(serviceColour, 1).bodyTextColor
+                unselectedColour
+            )
+        )
     }
 }

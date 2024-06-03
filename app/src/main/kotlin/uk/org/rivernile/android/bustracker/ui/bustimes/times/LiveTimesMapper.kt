@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -31,6 +31,7 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Serv
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
 import uk.org.rivernile.android.bustracker.core.livetimes.LiveTimesResult
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
 import java.net.UnknownHostException
 import javax.inject.Inject
 
@@ -54,7 +55,8 @@ class LiveTimesMapper @Inject constructor() {
     fun mapLiveTimesAndColoursToUiResult(
         stopCode: String,
         result: LiveTimesResult,
-        serviceColours: Map<String, Int>?): UiResult {
+        serviceColours: Map<String, ServiceColours>?
+    ): UiResult {
         return when (result) {
             is LiveTimesResult.InProgress -> UiResult.InProgress
             is LiveTimesResult.Success -> mapSuccess(stopCode, result.liveTimes, serviceColours)
@@ -79,7 +81,8 @@ class LiveTimesMapper @Inject constructor() {
     private fun mapSuccess(
         stopCode: String,
         liveTimes: LiveTimes,
-        serviceColours: Map<String, Int>?): UiResult {
+        serviceColours: Map<String, ServiceColours>?
+    ): UiResult {
         return liveTimes
             .stops[stopCode]
             ?.let {
@@ -101,13 +104,14 @@ class LiveTimesMapper @Inject constructor() {
      * @param serviceColours The service colours to be used in service mapping.
      * @return The mapped [Stop] as a [UiStop].
      */
-    private fun mapStopToUiStop(stop: Stop, serviceColours: Map<String, Int>?) =
+    private fun mapStopToUiStop(stop: Stop, serviceColours: Map<String, ServiceColours>?) =
         UiStop(
             stop.stopCode,
             stop.stopName,
             stop.services.mapNotNull {
                 mapServiceToUiService(it, serviceColours)
-            })
+            }
+        )
 
     /**
      * Given a [Service], map it to a [UiService]. Also combine this with [serviceColours], if
@@ -121,7 +125,8 @@ class LiveTimesMapper @Inject constructor() {
      */
     private fun mapServiceToUiService(
         service: Service,
-        serviceColours: Map<String, Int>?): UiService? {
+        serviceColours: Map<String, ServiceColours>?
+    ): UiService? {
         return service
             .vehicles
             .ifEmpty { null }
@@ -129,7 +134,8 @@ class LiveTimesMapper @Inject constructor() {
                 UiService(
                     service.serviceName,
                     serviceColours?.get(service.serviceName),
-                    it.map(this::mapVehicleToUiVehicle))
+                    it.map(this::mapVehicleToUiVehicle)
+                )
             }
     }
 
@@ -145,7 +151,8 @@ class LiveTimesMapper @Inject constructor() {
             vehicle.isDiverted,
             vehicle.departureTime,
             vehicle.departureMinutes,
-            vehicle.isEstimatedTime)
+            vehicle.isEstimatedTime
+        )
 
     /**
      * Given a [LiveTimesResult.Error], map it to a [UiResult.Error].

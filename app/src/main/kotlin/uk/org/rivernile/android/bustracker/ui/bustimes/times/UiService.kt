@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,19 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
+
 /**
  * This is the representation of a service for displaying on the UI.
  *
  * @property serviceName The name of the service.
- * @property serviceColour The colour to tint the service elements as. If `null`, then a default
+ * @property serviceColours The colour to tint the service elements as. If `null`, then a default
  * colour should be used instead.
  * @property vehicles The departures for this service.
  * @author Niall Scott
  */
 data class UiService(
-        val serviceName: String,
-        val serviceColour: Int?,
-        val vehicles: List<UiVehicle>)
+    val serviceName: String,
+    val serviceColours: ServiceColours?,
+    val vehicles: List<UiVehicle>
+)

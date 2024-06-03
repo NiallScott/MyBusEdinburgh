@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,15 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.ui.serviceschooser
 
+import uk.org.rivernile.android.bustracker.core.services.ServiceColours
+
 /**
  * This class represents a service item to be displayed within the services chooser.
  *
  * @property serviceName The name of the service.
- * @property serviceColour The colour of the service, if available.
+ * @property serviceColours The colour of the service, if available.
  * @property isSelected Is the service selected?
  * @author Niall Scott
  */
 data class UiService(
     val serviceName: String,
-    val serviceColour: Int?,
-    val isSelected: Boolean)
+    val serviceColours: ServiceColours?,
+    val isSelected: Boolean
+)
