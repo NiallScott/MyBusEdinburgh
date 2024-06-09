@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,18 @@
  *
  */
 
-plugins {
-    `java-test-fixtures`
-    alias(libs.plugins.kotlin.jvm)
-}
+package uk.org.rivernile.android.bustracker.core.coroutines.di
+
+import javax.inject.Qualifier
+import kotlin.annotation.MustBeDocumented
+import kotlin.annotation.Retention
+
+/**
+ * This annotation defines a Dagger qualifier for the ViewModel Kotlin coroutine scope.
+ *
+ * @author Niall Scott
+ */
+@Qualifier
+@MustBeDocumented
+@Retention(AnnotationRetention.RUNTIME)
+annotation class ForViewModelCoroutineScope

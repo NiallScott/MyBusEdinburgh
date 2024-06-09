@@ -30,11 +30,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import uk.org.rivernile.android.bustracker.core.coroutines.di.ForDefaultDispatcher
+import uk.org.rivernile.android.bustracker.core.coroutines.di.ForViewModelCoroutineScope
 import javax.inject.Inject
 
 /**
@@ -43,14 +45,16 @@ import javax.inject.Inject
  * @param state The state held for this instance.
  * @param aboutItemsGenerator Used to generate the [UiAboutItem]s.
  * @param defaultDispatcher The default [CoroutineDispatcher].
+ * @param viewModelCoroutineScope The [ViewModel] [CoroutineScope] to use.
  * @author Niall Scott
  */
 @HiltViewModel
 internal class AboutViewModel @Inject constructor(
     private val state: AboutViewModelState,
     private val aboutItemsGenerator: AboutItemsGenerator,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
-) : ViewModel() {
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher,
+    @ForViewModelCoroutineScope viewModelCoroutineScope: CoroutineScope
+) : ViewModel(viewModelCoroutineScope) {
 
     /**
      * This [kotlinx.coroutines.flow.StateFlow] emits the latest [UiState].

@@ -28,6 +28,7 @@ package uk.org.rivernile.android.bustracker.ui.about
 
 import app.cash.turbine.test
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
@@ -73,7 +74,10 @@ class AboutViewModelTest {
             .thenReturn(emptyFlow())
         whenever(state.actionFlow)
             .thenReturn(emptyFlow())
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.uiStateFlow.test {
             assertEquals(expectedUiState, awaitItem())
@@ -103,7 +107,10 @@ class AboutViewModelTest {
             .thenReturn(flowOf(false))
         whenever(state.actionFlow)
             .thenReturn(flowOf(null))
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.uiStateFlow.test {
             assertEquals(expectedUiState1, awaitItem())
@@ -128,7 +135,10 @@ class AboutViewModelTest {
             .thenReturn(flowOf(false))
         whenever(state.actionFlow)
             .thenReturn(flowOf(null))
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.uiStateFlow.test {
             assertEquals(
@@ -175,7 +185,10 @@ class AboutViewModelTest {
             .thenReturn(intervalFlowOf(0L, 1L, true, false, true))
         whenever(state.actionFlow)
             .thenReturn(flowOf(null))
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.uiStateFlow.test {
             assertEquals(
@@ -231,7 +244,10 @@ class AboutViewModelTest {
                     null
                 )
             )
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.uiStateFlow.test {
             assertEquals(
@@ -272,7 +288,10 @@ class AboutViewModelTest {
 
     @Test
     fun onItemClickedWhenItemIsCreditsSetsCreditsShownToTrue() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onItemClicked(UiAboutItem.OneLineItem.Credits)
 
@@ -282,7 +301,10 @@ class AboutViewModelTest {
 
     @Test
     fun onItemClickedWhenItemIsPrivacyPolicySetsActionToShowPrivacyPolicy() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onItemClicked(UiAboutItem.OneLineItem.PrivacyPolicy)
 
@@ -292,7 +314,10 @@ class AboutViewModelTest {
 
     @Test
     fun onItemClickedWhenItemIsOpenSourceLicencesSetsShowOpenSourceLicencesToTrue() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onItemClicked(UiAboutItem.OneLineItem.OpenSourceLicences)
 
@@ -302,7 +327,10 @@ class AboutViewModelTest {
 
     @Test
     fun onItemClickedWhenItemIsAppVersionSetsActionToShowStoreListing() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onItemClicked(
             UiAboutItem.TwoLinesItem.AppVersion(
@@ -317,7 +345,10 @@ class AboutViewModelTest {
 
     @Test
     fun onItemClickedWhenItemIsAuthorSetsActionToShowAuthorWebsite() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onItemClicked(UiAboutItem.TwoLinesItem.Author)
 
@@ -327,7 +358,10 @@ class AboutViewModelTest {
 
     @Test
     fun onItemClickedWhenItemIsTwitterSetsActionToShowAppTwitter() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onItemClicked(UiAboutItem.TwoLinesItem.Twitter)
 
@@ -337,7 +371,10 @@ class AboutViewModelTest {
 
     @Test
     fun onItemClickedWhenItemIsWebsiteSetsActionToShowAppWebsite() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onItemClicked(UiAboutItem.TwoLinesItem.Website)
 
@@ -347,7 +384,10 @@ class AboutViewModelTest {
 
     @Test
     fun onCreditsDialogDismissedSetsIsCreditsShownToFalse() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onCreditsDialogDismissed()
 
@@ -357,7 +397,10 @@ class AboutViewModelTest {
 
     @Test
     fun onOpenSourceDialogDismissedSetsIsOpenSourceLicencesShownToFalse() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onOpenSourceDialogDismissed()
 
@@ -367,7 +410,10 @@ class AboutViewModelTest {
 
     @Test
     fun onActionLaunchedSetsActionToNull() = runTest {
-        val viewModel = createViewModel(UnconfinedTestDispatcher(testScheduler))
+        val viewModel = createViewModel(
+            defaultDispatcher = UnconfinedTestDispatcher(testScheduler),
+            viewModelScope = backgroundScope
+        )
 
         viewModel.onActionLaunched()
 
@@ -375,11 +421,15 @@ class AboutViewModelTest {
             .action = null
     }
 
-    private fun createViewModel(defaultDispatcher: CoroutineDispatcher): AboutViewModel {
+    private fun createViewModel(
+        defaultDispatcher: CoroutineDispatcher,
+        viewModelScope: CoroutineScope
+    ): AboutViewModel {
         return AboutViewModel(
             state,
             aboutItemsGenerator,
-            defaultDispatcher
+            defaultDispatcher,
+            viewModelScope
         )
     }
 }

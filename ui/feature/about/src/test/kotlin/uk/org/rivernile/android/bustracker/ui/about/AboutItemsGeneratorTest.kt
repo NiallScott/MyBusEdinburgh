@@ -27,16 +27,14 @@
 package uk.org.rivernile.android.bustracker.ui.about
 
 import app.cash.turbine.test
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.app.AppRepository
 import uk.org.rivernile.android.bustracker.core.app.AppVersion
-import uk.org.rivernile.android.bustracker.core.database.busstop.BusStopDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.app.FakeAppRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.FakeBusStopDatabaseRepository
+import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.FakeDatabaseMetadata
 import java.util.Date
 import kotlin.test.Test
@@ -50,27 +48,11 @@ private const val EXPECTED_VERSION_CODE = 4L
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class AboutItemsGeneratorTest {
-
-    @Mock
-    private lateinit var appRepository: AppRepository
-    @Mock
-    private lateinit var busStopDatabaseRepository: BusStopDatabaseRepository
-
-    private lateinit var generator: AboutItemsGenerator
-
-    @Before
-    fun setUp() {
-        generator = AboutItemsGenerator(
-            appRepository,
-            busStopDatabaseRepository
-        )
-    }
 
     @Test
     fun createAboutItemsReturnsItemsButMissingDatabaseInfoWhenNoDatabaseInfo() {
-        givenAppRepositoryReturnsAppVersion()
+        val generator = createAboutItemsGenerator()
         val expected = createdExpectedItems()
 
         val result = generator.createAboutItems()
@@ -80,7 +62,7 @@ class AboutItemsGeneratorTest {
 
     @Test
     fun createAboutItemsReturnsItemsWithDatabaseInfoWhenDatabaseInfoIsPresent() {
-        givenAppRepositoryReturnsAppVersion()
+        val generator = createAboutItemsGenerator()
         val expected = createdExpectedItems(
             databaseUpdateTime = Date(123L),
             topologyId = "abc123"
@@ -98,16 +80,16 @@ class AboutItemsGeneratorTest {
 
     @Test
     fun aboutItemsFlowEmitsItemWithDatabaseInfoThenItemWithDatabaseInfo() = runTest {
-        givenAppRepositoryReturnsAppVersion()
-        whenever(busStopDatabaseRepository.databaseMetadataFlow)
-            .thenReturn(
+        val generator = createAboutItemsGenerator(
+            onDatabaseMetadataFlow = {
                 flowOf(
                     FakeDatabaseMetadata(
                         updateTimestamp = 123L,
                         topologyVersionId = "abc123"
                     )
                 )
-            )
+            }
+        )
         val expected1 = createdExpectedItems()
         val expected2 = createdExpectedItems(
             databaseUpdateTime = Date(123L),
@@ -119,16 +101,6 @@ class AboutItemsGeneratorTest {
             assertEquals(expected2, awaitItem())
             awaitComplete()
         }
-    }
-
-    private fun givenAppRepositoryReturnsAppVersion() {
-        whenever(appRepository.appVersion)
-            .thenReturn(
-                AppVersion(
-                    versionName = EXPECTED_VERSION_NAME,
-                    versionCode = EXPECTED_VERSION_CODE
-                )
-            )
     }
 
     private fun createdExpectedItems(
@@ -148,4 +120,22 @@ class AboutItemsGeneratorTest {
         UiAboutItem.OneLineItem.PrivacyPolicy,
         UiAboutItem.OneLineItem.OpenSourceLicences
     )
+
+    private fun createAboutItemsGenerator(
+        onDatabaseMetadataFlow: () -> Flow<DatabaseMetadata?> = { emptyFlow() }
+    ): AboutItemsGenerator {
+        return AboutItemsGenerator(
+            appRepository = FakeAppRepository(
+                onAppVersion = {
+                    AppVersion(
+                        versionName = EXPECTED_VERSION_NAME,
+                        versionCode = EXPECTED_VERSION_CODE
+                    )
+                }
+            ),
+            busStopDatabaseRepository = FakeBusStopDatabaseRepository(
+                onDatabaseMetadataFlow = onDatabaseMetadataFlow
+            )
+        )
+    }
 }

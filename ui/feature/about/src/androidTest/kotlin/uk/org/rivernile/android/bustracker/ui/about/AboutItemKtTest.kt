@@ -34,12 +34,12 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
-import org.junit.Before
 import org.junit.Rule
 import uk.org.rivernile.android.bustracker.ui.theme.MyBusTheme
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -56,7 +56,7 @@ class AboutItemKtTest {
 
     private lateinit var dateFormat: DateFormat
 
-    @Before
+    @BeforeTest
     fun setUp() {
         dateFormat = SimpleDateFormat.getDateTimeInstance()
     }

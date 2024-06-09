@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,7 +24,16 @@
  *
  */
 
-plugins {
-    `java-test-fixtures`
-    alias(libs.plugins.kotlin.jvm)
+package uk.org.rivernile.android.bustracker.core.app
+
+/**
+ * A fake [AppRepository] to be used in testing.
+ *
+ * @author Niall Scott
+ */
+class FakeAppRepository(
+    private val onAppVersion: () -> AppVersion = { throw NotImplementedError() }
+) : AppRepository {
+
+    override val appVersion get() = onAppVersion()
 }

@@ -65,7 +65,7 @@ android {
 dependencies {
 
     implementation(project(":core:app-properties-android"))
-    implementation(project(":core:coroutines"))
+    implementation(project(":core:coroutines-android"))
     implementation(project(":core:logging"))
     implementation(project(":database:busstop-db-android"))
     implementation(project(":ui:ui-core"))
@@ -94,6 +94,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.intents)
     androidTestImplementation(libs.kotlin.test.junit)
 
+    testImplementation(testFixtures(project(":core:app-properties")))
     testImplementation(testFixtures(project(":database:busstop-db-core")))
     testImplementation(project(":testutils"))
     testImplementation(libs.coroutines.test)
