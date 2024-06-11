@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,11 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.IOException
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -47,8 +45,10 @@ import uk.org.rivernile.android.bustracker.core.http.FileDownloader
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.core.utils.FileConsistencyChecker
 import uk.org.rivernile.android.bustracker.core.utils.TemporaryFileCreator
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [DatabaseUpdater].
@@ -62,9 +62,6 @@ class DatabaseUpdaterTest {
 
         private const val TEMP_FILE_PREFIX = "mybus-database-download"
     }
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var temporaryFileCreator: TemporaryFileCreator
@@ -82,21 +79,9 @@ class DatabaseUpdaterTest {
 
     private val databaseVersion = DatabaseVersion("MBE", "abc123", "http://host/db.db", "xyz789")
 
-    private lateinit var updater: DatabaseUpdater
-
-    @Before
-    fun setUp() {
-        updater = DatabaseUpdater(
-            temporaryFileCreator,
-            fileDownloader,
-            fileConsistencyChecker,
-            databaseRepository,
-            exceptionLogger,
-            coroutineRule.testDispatcher)
-    }
-
     @Test
     fun returnsFalseWhenTheTemporaryFileCouldNotBeCreated() = runTest {
+        val updater = createDatabaseUpdater()
         whenever(temporaryFileCreator.createTemporaryFile(TEMP_FILE_PREFIX))
             .thenThrow(IOException::class.java)
 
@@ -111,6 +96,7 @@ class DatabaseUpdaterTest {
 
     @Test
     fun returnsFalseAndDeletesDownloadFileWhenDownloadFails() = runTest {
+        val updater = createDatabaseUpdater()
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Error.ServerError)
@@ -128,6 +114,7 @@ class DatabaseUpdaterTest {
 
     @Test
     fun returnsFalseAndDeletesDownloadFileWhenFileConsistencyFailsToReadFile() = runTest {
+        val updater = createDatabaseUpdater()
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Success)
@@ -150,6 +137,7 @@ class DatabaseUpdaterTest {
 
     @Test
     fun returnsFalseAndDeletesDownloadWhenFileConsistencyDoesNotPass() = runTest {
+        val updater = createDatabaseUpdater()
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Success)
@@ -169,6 +157,7 @@ class DatabaseUpdaterTest {
 
     @Test
     fun returnsFalseAndDeletesDownloadFileWhenReplaceDatabaseReturnsFalse() = runTest {
+        val updater = createDatabaseUpdater()
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Success)
@@ -188,6 +177,7 @@ class DatabaseUpdaterTest {
 
     @Test
     fun returnsTrueAndReplacesDatabaseWhenDownloadIsSuccessfulAndFileConsistencyPasses() = runTest {
+        val updater = createDatabaseUpdater()
         givenCreatesTemporaryFile()
         whenever(fileDownloader.downloadFile(any(), any(), anyOrNull()))
             .thenReturn(FileDownloadResponse.Success)
@@ -206,5 +196,17 @@ class DatabaseUpdaterTest {
     private suspend fun givenCreatesTemporaryFile() {
         whenever(temporaryFileCreator.createTemporaryFile(TEMP_FILE_PREFIX))
             .thenReturn(downloadFile)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun TestScope.createDatabaseUpdater(): DatabaseUpdater {
+        return DatabaseUpdater(
+            temporaryFileCreator,
+            fileDownloader,
+            fileConsistencyChecker,
+            databaseRepository,
+            exceptionLogger,
+            UnconfinedTestDispatcher(testScheduler)
+        )
     }
 }
