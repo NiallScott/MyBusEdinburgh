@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,7 +47,8 @@ import kotlin.coroutines.coroutineContext
  */
 class TimeAlertRunner @Inject internal constructor(
     private val checkTimesTask: CheckTimesTask,
-    private val alertsRepository: AlertsRepository) {
+    private val alertsRepository: AlertsRepository
+) {
 
     companion object {
 

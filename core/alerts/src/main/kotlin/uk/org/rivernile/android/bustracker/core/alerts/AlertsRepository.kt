@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -57,7 +57,8 @@ class AlertsRepository @Inject internal constructor(
     private val arrivalAlertTaskLauncher: ArrivalAlertTaskLauncher,
     private val proximityAlertTaskLauncher: ProximityAlertTaskLauncher,
     private val alertsDao: AlertsDao,
-    private val timeUtils: TimeUtils) {
+    private val timeUtils: TimeUtils
+) {
 
     /**
      * Add a new arrival alert.
@@ -276,7 +277,8 @@ class AlertsRepository @Inject internal constructor(
             entity.timeAdded,
             entity.stopCode,
             entity.serviceNames,
-            entity.timeTrigger)
+            entity.timeTrigger
+        )
 
     /**
      * Map a given [entity] to a [ProximityAlert].
@@ -289,5 +291,6 @@ class AlertsRepository @Inject internal constructor(
             entity.id,
             entity.timeAdded,
             entity.stopCode,
-            entity.distanceFrom)
+            entity.distanceFrom
+        )
 }

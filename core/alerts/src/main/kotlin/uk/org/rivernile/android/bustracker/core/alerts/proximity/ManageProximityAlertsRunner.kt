@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -42,7 +42,8 @@ import javax.inject.Inject
  */
 class ManageProximityAlertsRunner @Inject internal constructor(
     private val alertsRepository: AlertsRepository,
-    private val proximityAlertTracker: ProximityAlertTracker) {
+    private val proximityAlertTracker: ProximityAlertTracker
+) {
 
     /**
      * Run this [ManageProximityAlertsRunner]. This responds to changes in the set proximity alerts

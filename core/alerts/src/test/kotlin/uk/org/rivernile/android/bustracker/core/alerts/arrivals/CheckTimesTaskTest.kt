@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,9 +27,6 @@
 package uk.org.rivernile.android.bustracker.core.alerts.arrivals
 
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -47,8 +44,9 @@ import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Live
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Service
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Stop
 import uk.org.rivernile.android.bustracker.core.endpoints.tracker.livetimes.Vehicle
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import java.util.Date
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Unit tests for [CheckTimesTask].
@@ -57,9 +55,6 @@ import java.util.Date
  */
 @RunWith(MockitoJUnitRunner::class)
 class CheckTimesTaskTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     lateinit var alertsRepository: AlertsRepository
@@ -70,12 +65,13 @@ class CheckTimesTaskTest {
 
     private lateinit var checkTimesTask: CheckTimesTask
 
-    @Before
+    @BeforeTest
     fun setUp() {
         checkTimesTask = CheckTimesTask(
             alertsRepository,
             trackerEndpoint,
-            alertNotificationDispatcher)
+            alertNotificationDispatcher
+        )
     }
 
     @Test
@@ -333,10 +329,13 @@ class CheckTimesTaskTest {
         val stop1 = createStop("123", listOf(service1, service2, service3))
         val stop2 = createStop("456", listOf(service4, service5, service6))
         val stop3 = createStop("789", listOf(service7, service8, service9))
-        val liveTimes = createLiveTimes(mapOf(
-            "123" to stop1,
-            "456" to stop2,
-            "789" to stop3))
+        val liveTimes = createLiveTimes(
+            mapOf(
+                "123" to stop1,
+                "456" to stop2,
+                "789" to stop3
+            )
+        )
         whenever(trackerEndpoint.getLiveTimes(listOf("123", "456", "789"), 1))
             .thenReturn(LiveTimesResponse.Success(liveTimes))
 
@@ -377,7 +376,8 @@ class CheckTimesTaskTest {
             isDelayed = false,
             isDiverted = false,
             isTerminus = false,
-            isPartRoute = false)
+            isPartRoute = false
+        )
 
     private fun createService(serviceName: String, vehicles: List<Vehicle>) =
         Service(
@@ -386,18 +386,21 @@ class CheckTimesTaskTest {
             null,
             null,
             isDisrupted = false,
-            isDiverted = false)
+            isDiverted = false
+        )
 
     private fun createStop(stopCode: String, services: List<Service>) =
         Stop(
             stopCode,
             null,
             services,
-            false)
+            false
+        )
 
     private fun createLiveTimes(stops: Map<String, Stop>) =
         LiveTimes(
             stops,
             123L,
-            false)
+            false
+        )
 }

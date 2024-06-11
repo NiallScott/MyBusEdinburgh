@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -32,8 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -45,6 +43,8 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.alerts.AlertsRepository
 import uk.org.rivernile.android.bustracker.core.alerts.ProximityAlert
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 /**
  * Tests for [ManageProximityAlertsRunner].
@@ -62,11 +62,12 @@ class ManageProximityAlertsRunnerTest {
 
     private lateinit var runner: ManageProximityAlertsRunner
 
-    @Before
+    @BeforeTest
     fun setUp() {
         runner = ManageProximityAlertsRunner(
             alertsRepository,
-            proximityAlertTracker)
+            proximityAlertTracker
+        )
     }
 
     @Test
