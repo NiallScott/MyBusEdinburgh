@@ -96,6 +96,8 @@ include(
     ":macrobenchmark:app-baselineprofile",
     ":macrobenchmark:app-macrobenchmark",
     ":testutils",
+    ":ui:feature:about",
     ":ui:text-formatting",
+    ":ui:ui-core",
     ":ui:widget:contentview",
     ":ui:widget:expandcollapseindicator")

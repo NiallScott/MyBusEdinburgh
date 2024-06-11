@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2024 Niall 'Rivernile' Scott
+  ~
+  ~ This software is provided 'as-is', without any express or implied
+  ~ warranty.  In no event will the authors or contributors be held liable for
+  ~ any damages arising from the use of this software.
+  ~
+  ~ The aforementioned copyright holder(s) hereby grant you a
+  ~ non-transferrable right to use this software for any purpose (including
+  ~ commercial applications), and to modify it and redistribute it, subject to
+  ~ the following conditions:
+  ~
+  ~  1. This notice may not be removed or altered from any file it appears in.
+  ~
+  ~  2. Any modifications made to this software, except those defined in
+  ~     clause 3 of this agreement, must be released under this license, and
+  ~     the source code of any modifications must be made available on a
+  ~     publically accessible (and locateable) website, or sent to the
+  ~     original author of this software.
+  ~
+  ~  3. Software modifications that do not alter the functionality of the
+  ~     software but are simply adaptations to a specific environment are
+  ~     exempt from clause 2.
+  ~
+  -->
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:locale="en">
+
+    <string name="about_title">About</string>
+    <string name="about_version">Application version</string>
+    <string name="about_author">Author</string>
+    <string name="about_database_version">Database version</string>
+    <string name="about_topology_version">Topology version</string>
+    <string name="about_website">Website</string>
+    <string name="about_twitter">Twitter</string>
+    <string name="about_credits">Credits</string>
+    <string name="about_privacy_policy">Privacy policy</string>
+    <string name="about_open_source">Open source licences</string>
+
+    <string name="about_database_version_loading">Loading&#8230;</string>
+    <string name="about_topology_version_loading">Loading&#8230;</string>
+
+    <string name="creditsdialog_title">Credits</string>
+    <string name="creditsdialog_body">
+        <![CDATA[
+            <h5>Thanks to the following people and entities for making this application happen;</h5>
+
+            <p>
+                &#8226; Gordon Christie (EdinBus for iOS developer)<br/>
+                &#8226; The City of Edinburgh Council<br/>
+                &#8226; Anthony Totton (App icon, website and graphics)<br/>
+                &#8226; INEO Systrans<br/>
+                &#8226; Lothian Buses
+            </p>
+
+            <h5>Disclaimer</h5>
+            <p>
+                Permission has been granted from The City of Edinburgh Council for this application
+                to tie in to their data feed. Neither the author of the application, nor The City of
+                Edinburgh Council take any responsibility for the accuracy of data supplied by this
+                application or its implications, or any data loss or any other issues arising
+                through the usage of this application. Usage of this application signifies the user
+                takes complete responsibility.
+            </p>
+        ]]>
+    </string>
+
+    <string name="opensourcelicensedialog_title">Open source licenses</string>
+</resources>

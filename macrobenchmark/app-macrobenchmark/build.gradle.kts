@@ -58,6 +58,12 @@ android {
     experimentalProperties["android.experimental.self-instrumenting"] = true
 }
 
+androidComponents {
+    beforeVariants {
+        it.enable = it.buildType == "benchmark"
+    }
+}
+
 dependencies {
     implementation(libs.androidx.benchmark.macro)
     implementation(libs.androidx.test.runner)
