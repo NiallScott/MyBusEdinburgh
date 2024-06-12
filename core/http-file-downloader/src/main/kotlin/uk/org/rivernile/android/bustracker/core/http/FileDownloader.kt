@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,7 +50,8 @@ import javax.net.SocketFactory
 class FileDownloader @Inject internal constructor(
     private val okHttpClient: OkHttpClient,
     private val exceptionLogger: ExceptionLogger,
-    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher) {
+    @ForIoDispatcher private val ioDispatcher: CoroutineDispatcher
+) {
 
     /**
      * Download a file from the given [url] to [toLocation]. If [socketFactory] is not-`null`, this
@@ -66,7 +67,8 @@ class FileDownloader @Inject internal constructor(
     suspend fun downloadFile(
         url: String,
         toLocation: File,
-        socketFactory: SocketFactory? = null): FileDownloadResponse {
+        socketFactory: SocketFactory? = null
+    ): FileDownloadResponse {
         val okHttpClient = socketFactory?.let {
             this.okHttpClient.newBuilder()
                 .socketFactory(it)

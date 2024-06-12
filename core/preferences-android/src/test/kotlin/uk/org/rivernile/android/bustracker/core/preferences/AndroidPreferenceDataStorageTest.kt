@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -33,17 +33,13 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.mutablePreferencesOf
 import androidx.datastore.preferences.core.preferencesOf
 import androidx.datastore.preferences.core.stringPreferencesKey
+import app.cash.turbine.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -54,7 +50,11 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [AndroidPreferenceDataStorage].
@@ -93,11 +93,12 @@ class AndroidPreferenceDataStorageTest {
 
     private lateinit var dataStorage: AndroidPreferenceDataStorage
 
-    @Before
+    @BeforeTest
     fun setUp() {
         dataStorage = AndroidPreferenceDataStorage(
             dataStoreSource,
-            exceptionLogger)
+            exceptionLogger
+        )
     }
 
     @Test
@@ -110,18 +111,17 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to DEFAULT_WIFI_ONLY),
             preferencesOf(key to true),
             preferencesOf(key to true),
-            preferencesOf(key to false))
+            preferencesOf(key to false)
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.isDatabaseUpdateWifiOnlyFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            DEFAULT_WIFI_ONLY,
-            true,
-            false)
+        dataStorage.isDatabaseUpdateWifiOnlyFlow.test {
+            assertEquals(DEFAULT_WIFI_ONLY, awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -136,19 +136,18 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to APP_THEME_LIGHT),
             preferencesOf(key to APP_THEME_DARK),
             preferencesOf(key to APP_THEME_DARK),
-            preferencesOf())
+            preferencesOf()
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.appThemeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            AppTheme.SYSTEM_DEFAULT,
-            AppTheme.LIGHT,
-            AppTheme.DARK,
-            AppTheme.SYSTEM_DEFAULT)
+        dataStorage.appThemeFlow.test {
+            assertEquals(AppTheme.SYSTEM_DEFAULT, awaitItem())
+            assertEquals(AppTheme.LIGHT, awaitItem())
+            assertEquals(AppTheme.DARK, awaitItem())
+            assertEquals(AppTheme.SYSTEM_DEFAULT, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -163,39 +162,54 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(
                 keyAlertSound to DEFAULT_ALERT_SOUND,
                 keyAlertVibrate to DEFAULT_ALERT_VIBRATE,
-                keyAlertLed to DEFAULT_ALERT_LED),
+                keyAlertLed to DEFAULT_ALERT_LED
+            ),
             preferencesOf(
                 keyAlertSound to false,
                 keyAlertVibrate to false,
-                keyAlertLed to false),
+                keyAlertLed to false
+            ),
             preferencesOf(
                 keyAlertSound to false,
                 keyAlertVibrate to false,
-                keyAlertLed to false),
+                keyAlertLed to false
+            ),
             preferencesOf(
                 keyAlertSound to false,
                 keyAlertVibrate to false,
-                keyAlertLed to true))
+                keyAlertLed to true
+            )
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.alertNotificationPreferencesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            AlertNotificationPreferences(
-                hasSound = DEFAULT_ALERT_SOUND,
-                hasVibration = DEFAULT_ALERT_VIBRATE,
-                hasLedFlash = DEFAULT_ALERT_LED),
-            AlertNotificationPreferences(
-                hasSound = false,
-                hasVibration = false,
-                hasLedFlash = false),
-            AlertNotificationPreferences(
-                hasSound = false,
-                hasVibration = false,
-                hasLedFlash = true))
+        dataStorage.alertNotificationPreferencesFlow.test {
+            assertEquals(
+                AlertNotificationPreferences(
+                    hasSound = DEFAULT_ALERT_SOUND,
+                    hasVibration = DEFAULT_ALERT_VIBRATE,
+                    hasLedFlash = DEFAULT_ALERT_LED
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                AlertNotificationPreferences(
+                    hasSound = false,
+                    hasVibration = false,
+                    hasLedFlash = false
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                AlertNotificationPreferences(
+                    hasSound = false,
+                    hasVibration = false,
+                    hasLedFlash = true
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
     }
 
     @Test
@@ -208,18 +222,17 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to DEFAULT_AUTO_REFRESH),
             preferencesOf(key to true),
             preferencesOf(key to true),
-            preferencesOf(key to false))
+            preferencesOf(key to false)
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.isLiveTimesAutoRefreshEnabledFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            DEFAULT_AUTO_REFRESH,
-            true,
-            false)
+        dataStorage.isLiveTimesAutoRefreshEnabledFlow.test {
+            assertEquals(DEFAULT_AUTO_REFRESH, awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -236,14 +249,12 @@ class AndroidPreferenceDataStorageTest {
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.isLiveTimesShowNightServicesEnabledFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            DEFAULT_SHOW_NIGHT_BUSES,
-            false,
-            true)
+        dataStorage.isLiveTimesShowNightServicesEnabledFlow.test {
+            assertEquals(DEFAULT_SHOW_NIGHT_BUSES, awaitItem())
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -256,18 +267,16 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to DEFAULT_SERVICE_SORTING),
             preferencesOf(key to true),
             preferencesOf(key to true),
-            preferencesOf(key to false))
+            preferencesOf(key to false)
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.isLiveTimesSortByTimeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            DEFAULT_SERVICE_SORTING,
-            true,
-            false)
+        dataStorage.isLiveTimesSortByTimeFlow.test {
+            assertEquals(DEFAULT_SERVICE_SORTING, awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+        }
     }
 
     @Test
@@ -280,18 +289,17 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to DEFAULT_NUMBER_OF_DEPARTURES_PER_SERVICE.toString()),
             preferencesOf(key to "9"),
             preferencesOf(key to "9"),
-            preferencesOf(key to "5"))
+            preferencesOf(key to "5")
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.liveTimesNumberOfDeparturesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            4,
-            9,
-            5)
+        dataStorage.liveTimesNumberOfDeparturesFlow.test {
+            assertEquals(4, awaitItem())
+            assertEquals(9, awaitItem())
+            assertEquals(5, awaitItem())
+            awaitComplete()
+        }
         verify(exceptionLogger, never())
             .log(any())
     }
@@ -320,18 +328,17 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to DEFAULT_MAP_ZOOM_BUTTONS),
             preferencesOf(key to false),
             preferencesOf(key to false),
-            preferencesOf(key to true))
+            preferencesOf(key to true)
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.isMapZoomControlsVisibleFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            DEFAULT_MAP_ZOOM_BUTTONS,
-            false,
-            true)
+        dataStorage.isMapZoomControlsVisibleFlow.test {
+            assertEquals(DEFAULT_MAP_ZOOM_BUTTONS, awaitItem())
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -344,18 +351,17 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to DEFAULT_DISABLE_GPS_PROMPT),
             preferencesOf(key to true),
             preferencesOf(key to true),
-            preferencesOf(key to false))
+            preferencesOf(key to false)
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.isGpsPromptDisabledFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            DEFAULT_DISABLE_GPS_PROMPT,
-            true,
-            false)
+        dataStorage.isGpsPromptDisabledFlow.test {
+            assertEquals(DEFAULT_DISABLE_GPS_PROMPT, awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -370,36 +376,50 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(
                 keyMapLastLatitude to DEFAULT_LATITUDE.toString(),
                 keyMapLastLongitude to DEFAULT_LONGITUDE.toString(),
-                keyMapLastZoom to DEFAULT_MAP_LAST_ZOOM),
+                keyMapLastZoom to DEFAULT_MAP_LAST_ZOOM
+            ),
             preferencesOf(
                 keyMapLastLatitude to "1.1",
                 keyMapLastLongitude to "2.2",
-                keyMapLastZoom to 3.14f),
+                keyMapLastZoom to 3.14f
+            ),
             preferencesOf(
                 keyMapLastLatitude to "1.1",
                 keyMapLastLongitude to "2.2",
-                keyMapLastZoom to 3.14f),
-            preferencesOf())
+                keyMapLastZoom to 3.14f
+            ),
+            preferencesOf()
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.lastMapCameraLocationFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            LastMapCameraLocation(
-                DEFAULT_LATITUDE,
-                DEFAULT_LONGITUDE,
-                DEFAULT_MAP_LAST_ZOOM),
-            LastMapCameraLocation(
-                1.1,
-                2.2,
-                3.14f),
-            LastMapCameraLocation(
-                DEFAULT_LATITUDE,
-                DEFAULT_LONGITUDE,
-                DEFAULT_MAP_LAST_ZOOM))
+        dataStorage.lastMapCameraLocationFlow.test {
+            assertEquals(
+                LastMapCameraLocation(
+                    DEFAULT_LATITUDE,
+                    DEFAULT_LONGITUDE,
+                    DEFAULT_MAP_LAST_ZOOM
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                LastMapCameraLocation(
+                    1.1,
+                    2.2,
+                    3.14f
+                ),
+                awaitItem()
+            )
+            assertEquals(
+                LastMapCameraLocation(
+                    DEFAULT_LATITUDE,
+                    DEFAULT_LONGITUDE,
+                    DEFAULT_MAP_LAST_ZOOM
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
         verify(exceptionLogger, never())
             .log(any())
     }
@@ -413,13 +433,16 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(
                 keyMapLastLatitude to "not a number",
                 keyMapLastLongitude to "2.2",
-                keyMapLastZoom to 3.14f))
+                keyMapLastZoom to 3.14f
+            )
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
         val expected = LastMapCameraLocation(
             DEFAULT_LATITUDE,
             DEFAULT_LONGITUDE,
-            3.14f)
+            3.14f
+        )
 
         val result = dataStorage.lastMapCameraLocationFlow.first()
 
@@ -437,13 +460,16 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(
                 keyMapLastLatitude to "1.1",
                 keyMapLastLongitude to "not a number",
-                keyMapLastZoom to 3.14f))
+                keyMapLastZoom to 3.14f
+            )
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
         val expected = LastMapCameraLocation(
             DEFAULT_LATITUDE,
             DEFAULT_LONGITUDE,
-            3.14f)
+            3.14f
+        )
 
         val result = dataStorage.lastMapCameraLocationFlow.first()
 
@@ -462,18 +488,17 @@ class AndroidPreferenceDataStorageTest {
             preferencesOf(key to DEFAULT_MAP_LAST_TYPE),
             preferencesOf(key to 2),
             preferencesOf(key to 2),
-            preferencesOf(key to 3))
+            preferencesOf(key to 3)
+        )
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flow)
 
-        val observer = dataStorage.mapTypeFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            DEFAULT_MAP_LAST_TYPE,
-            2,
-            3)
+        dataStorage.mapTypeFlow.test {
+            assertEquals(DEFAULT_MAP_LAST_TYPE, awaitItem())
+            assertEquals(2, awaitItem())
+            assertEquals(3, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -576,7 +601,8 @@ class AndroidPreferenceDataStorageTest {
         val newValue = LastMapCameraLocation(
             latitude = 1.1,
             longitude = 2.2,
-            zoomLevel = 3.14f)
+            zoomLevel = 3.14f
+        )
 
         dataStorage.setLastMapCameraLocation(newValue)
         advanceUntilIdle()

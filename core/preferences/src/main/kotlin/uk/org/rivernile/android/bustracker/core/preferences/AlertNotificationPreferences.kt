@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,4 +37,5 @@ package uk.org.rivernile.android.bustracker.core.preferences
 data class AlertNotificationPreferences(
     val hasSound: Boolean,
     val hasVibration: Boolean,
-    val hasLedFlash: Boolean)
+    val hasLedFlash: Boolean
+)

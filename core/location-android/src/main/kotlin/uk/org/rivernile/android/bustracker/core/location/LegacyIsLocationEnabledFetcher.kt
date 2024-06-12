@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,8 +47,8 @@ import javax.inject.Inject
  */
 internal class LegacyIsLocationEnabledFetcher @Inject constructor(
     private val context: Context,
-    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher)
-    : IsLocationEnabledFetcher {
+    @ForDefaultDispatcher private val defaultDispatcher: CoroutineDispatcher
+) : IsLocationEnabledFetcher {
 
     // Settings.Secure.LOCATION_MODE is deprecated in newer Android versions, hence this
     // implementation.
@@ -57,7 +57,8 @@ internal class LegacyIsLocationEnabledFetcher @Inject constructor(
         val mode = Settings.Secure.getInt(
             context.contentResolver,
             Settings.Secure.LOCATION_MODE,
-            Settings.Secure.LOCATION_MODE_OFF)
+            Settings.Secure.LOCATION_MODE_OFF
+        )
 
         mode != Settings.Secure.LOCATION_MODE_OFF
     }

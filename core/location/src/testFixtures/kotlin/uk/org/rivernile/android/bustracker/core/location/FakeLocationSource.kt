@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,38 +24,20 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.http
+package uk.org.rivernile.android.bustracker.core.location
+
+import kotlinx.coroutines.flow.Flow
 
 /**
- * This sealed interface and its children define the possible responses from performing a file
- * download.
+ * A fake [LocationSource] for testing.
  *
  * @author Niall Scott
  */
-sealed interface FileDownloadResponse {
+class FakeLocationSource(
+    private val onUserVisibleLocationFlow: () -> Flow<DeviceLocation> =
+        { throw NotImplementedError() }
+) : LocationSource {
 
-    /**
-     * The response was successful.
-     */
-    data object Success : FileDownloadResponse
-
-    /**
-     * This interface describes errors which can arise from downloading a file.
-     */
-    sealed interface Error : FileDownloadResponse {
-
-        /**
-         * This response was not successful due to an IO error.
-         *
-         * @property throwable The [Throwable] which causes this error.
-         */
-        data class IoError(
-            val throwable: Throwable
-        ) : Error
-
-        /**
-         * The file download failed due to an error from the server.
-         */
-        data object ServerError : Error
-    }
+    override val userVisibleLocationFlow: Flow<DeviceLocation>
+        get() = onUserVisibleLocationFlow()
 }

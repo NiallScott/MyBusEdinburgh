@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,200 +26,269 @@
 
 package uk.org.rivernile.android.bustracker.core.preferences
 
-import kotlinx.coroutines.flow.Flow
+import app.cash.turbine.test
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertSame
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [PreferenceRepository].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class PreferenceRepositoryTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
-    @Mock
-    private lateinit var dataStorage: PreferenceDataStorage
-
-    private lateinit var repository: PreferenceRepository
-
-    @Before
-    fun setUp() {
-        repository = PreferenceRepository(dataStorage)
-    }
 
     @Test
     fun isDatabaseUpdateWifiOnlyFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<Boolean>>()
-        whenever(dataStorage.isDatabaseUpdateWifiOnlyFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onIsDatabaseUpdateWifiOnlyFlow = { flowOf(false, true, false) }
+            )
+        )
 
-        val result = repository.isDatabaseUpdateWifiOnlyFlow
-
-        assertSame(flow, result)
+        repository.isDatabaseUpdateWifiOnlyFlow.test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun appThemeFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<AppTheme>>()
-        whenever(dataStorage.appThemeFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onAppThemeFlow = { flowOf(AppTheme.SYSTEM_DEFAULT, AppTheme.LIGHT, AppTheme.DARK) }
+            )
+        )
 
-        val result = repository.appThemeFlow
-
-        assertSame(flow, result)
+        repository.appThemeFlow.test {
+            assertEquals(AppTheme.SYSTEM_DEFAULT, awaitItem())
+            assertEquals(AppTheme.LIGHT, awaitItem())
+            assertEquals(AppTheme.DARK, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun alertNotificationPreferencesFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<AlertNotificationPreferences>>()
-        whenever(dataStorage.alertNotificationPreferencesFlow)
-            .thenReturn(flow)
+        val first = AlertNotificationPreferences(
+            hasSound = false,
+            hasVibration = false,
+            hasLedFlash = false
+        )
+        val second = AlertNotificationPreferences(
+            hasSound = true,
+            hasVibration = true,
+            hasLedFlash = true
+        )
+        val third = AlertNotificationPreferences(
+            hasSound = true,
+            hasVibration = false,
+            hasLedFlash = true
+        )
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onAlertNotificationPreferencesFlow = { flowOf(first, second, third) }
+            )
+        )
 
-        val result = repository.alertNotificationPreferencesFlow
-
-        assertSame(flow, result)
+        repository.alertNotificationPreferencesFlow.test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            assertEquals(third, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun isLiveTimesAutoRefreshEnabledFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<Boolean>>()
-        whenever(dataStorage.isLiveTimesAutoRefreshEnabledFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onIsLiveTimesAutoRefreshEnabledFlow = { flowOf(false, true, false) }
+            )
+        )
 
-        val result = repository.isLiveTimesAutoRefreshEnabledFlow
-
-        assertSame(flow, result)
+        repository.isLiveTimesAutoRefreshEnabledFlow.test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun isLiveTimesShowNightServicesEnabledFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<Boolean>>()
-        whenever(dataStorage.isLiveTimesShowNightServicesEnabledFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onIsLiveTimesShowNightServicesEnabledFlow = { flowOf(false, true, false) }
+            )
+        )
 
-        val result = repository.isLiveTimesShowNightServicesEnabledFlow
-
-        assertSame(flow, result)
+        repository.isLiveTimesShowNightServicesEnabledFlow.test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun isLiveTimesSortByTimeFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<Boolean>>()
-        whenever(dataStorage.isLiveTimesSortByTimeFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onIsLiveTimesSortByTimeFlow = { flowOf(false, true, false) }
+            )
+        )
 
-        val result = repository.isLiveTimesSortByTimeFlow
-
-        assertSame(flow, result)
+        repository.isLiveTimesSortByTimeFlow.test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun liveTimesNumberOfDeparturesFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<Int>>()
-        whenever(dataStorage.liveTimesNumberOfDeparturesFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onLiveTimesNumberOfDeparturesFlow = { flowOf(1, 2, 3) }
+            )
+        )
 
-        val result = repository.liveTimesNumberOfDeparturesFlow
-
-        assertSame(flow, result)
+        repository.liveTimesNumberOfDeparturesFlow.test {
+            assertEquals(1, awaitItem())
+            assertEquals(2, awaitItem())
+            assertEquals(3, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun isGpsPromptDisabledFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<Boolean>>()
-        whenever(dataStorage.isGpsPromptDisabledFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onIsGpsPromptDisabledFlow = { flowOf(false, true, false) }
+            )
+        )
 
-        val result = repository.isGpsPromptDisabledFlow
-
-        assertSame(flow, result)
+        repository.isGpsPromptDisabledFlow.test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun isMapZoomControlsVisibleFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<Boolean>>()
-        whenever(dataStorage.isMapZoomControlsVisibleFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onIsMapZoomControlsVisibleFlow = { flowOf(false, true, false) }
+            )
+        )
 
-        val result = repository.isMapZoomControlsVisibleFlow
-
-        assertSame(flow, result)
+        repository.isMapZoomControlsVisibleFlow.test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun lastMapCameraLocationFlowReturnsFlowFromPreferenceDataStorage() = runTest {
-        val flow = mock<Flow<LastMapCameraLocation>>()
-        whenever(dataStorage.lastMapCameraLocationFlow)
-            .thenReturn(flow)
+        val first = LastMapCameraLocation(1.1, 1.2, 1f)
+        val second = LastMapCameraLocation(2.1, 2.2, 2f)
+        val third = LastMapCameraLocation(3.1, 3.2, 3f)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onLastMapCameraLocationFlow = { flowOf(first, second, third) }
+            )
+        )
 
-        val result = repository.lastMapCameraLocationFlow
-
-        assertSame(flow, result)
+        repository.lastMapCameraLocationFlow.test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            assertEquals(third, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun mapTypeFlowReturnsFlowFromPreferenceDatsStorage() = runTest {
-        val flow = mock<Flow<Int>>()
-        whenever(dataStorage.mapTypeFlow)
-            .thenReturn(flow)
+        val repository = createPreferenceRepository(
+            preferenceDataStorage = FakePreferenceDataStorage(
+                onMapTypeFlow = { flowOf(1, 2, 3) }
+            )
+        )
 
-        val result = repository.mapTypeFlow
-
-        assertSame(flow, result)
+        repository.mapTypeFlow.test {
+            assertEquals(1, awaitItem())
+            assertEquals(2, awaitItem())
+            assertEquals(3, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun toggleSortByTimeCallsMethodInPreferenceDataStorage() = runTest {
+        val dataStorage = FakePreferenceDataStorage()
+        val repository = createPreferenceRepository(preferenceDataStorage = dataStorage)
+
         repository.toggleSortByTime()
 
-        verify(dataStorage)
-            .toggleSortByTime()
+        assertEquals(1, dataStorage.toggleSortByTimeInvocationCount)
     }
 
     @Test
     fun toggleAutoRefreshCallsMethodInPreferenceDataStorage() = runTest {
+        val dataStorage = FakePreferenceDataStorage()
+        val repository = createPreferenceRepository(preferenceDataStorage = dataStorage)
+
         repository.toggleAutoRefresh()
 
-        verify(dataStorage)
-            .toggleAutoRefresh()
+        assertEquals(1, dataStorage.toggleAutoRefreshInvocationCount)
     }
 
     @Test
     fun setIsGpsPromptDisabledCallsMethodInPreferenceDataStorage() = runTest {
+        val dataStorage = FakePreferenceDataStorage()
+        val repository = createPreferenceRepository(preferenceDataStorage = dataStorage)
+
         repository.setIsGpsPromptDisabled(true)
 
-        verify(dataStorage)
-            .setIsGpsPromptDisabled(true)
+        assertTrue(dataStorage.isGpsPromptDisabled)
     }
 
     @Test
     fun setLastMapCameraLocationCallsMethodInPreferenceDataStorage() = runTest {
+        val dataStorage = FakePreferenceDataStorage()
+        val repository = createPreferenceRepository(preferenceDataStorage = dataStorage)
+
         val cameraLocation = LastMapCameraLocation(1.1, 2.2, 3f)
         repository.setLastMapCameraLocation(cameraLocation)
 
-        verify(dataStorage)
-            .setLastMapCameraLocation(cameraLocation)
+        assertEquals(cameraLocation, dataStorage.lastMapCameraLocation)
     }
 
     @Test
     fun setMapTypeCallsMethodInPreferenceDataStorage() = runTest {
+        val dataStorage = FakePreferenceDataStorage()
+        val repository = createPreferenceRepository(preferenceDataStorage = dataStorage)
+
         repository.setMapType(1)
 
-        verify(dataStorage)
-            .setMapType(1)
+        assertEquals(1, dataStorage.mapType)
+    }
+
+    private fun createPreferenceRepository(
+        preferenceDataStorage: PreferenceDataStorage = FakePreferenceDataStorage()
+    ): PreferenceRepository {
+        return PreferenceRepository(preferenceDataStorage)
     }
 }
