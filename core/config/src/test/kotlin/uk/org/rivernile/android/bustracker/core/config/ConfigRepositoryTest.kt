@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,13 @@
 
 package uk.org.rivernile.android.bustracker.core.config
 
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [ConfigRepository].
@@ -47,7 +47,7 @@ class ConfigRepositoryTest {
 
     private lateinit var repository: ConfigRepository
 
-    @Before
+    @BeforeTest
     fun setUp() {
         repository = ConfigRepository(buildConfiguration)
     }

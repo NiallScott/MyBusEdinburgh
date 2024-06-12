@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,8 @@ import javax.inject.Inject
  */
 @RequiresApi(Build.VERSION_CODES.N)
 internal class V24ConnectivityChecker @Inject constructor(
-        private val connectivityManager: ConnectivityManager) : ConnectivityChecker {
+    private val connectivityManager: ConnectivityManager
+) : ConnectivityChecker {
 
     override val hasInternetConnectivity get() =
         isNetworkInternetCapable(connectivityManager.activeNetwork)
@@ -80,12 +81,13 @@ internal class V24ConnectivityChecker @Inject constructor(
      * @param network The [Network] to test for internet connectivity.
      */
     private suspend fun ProducerScope<Boolean>.handleNetworkEventForConnectivity(
-            network: Network?) {
+        network: Network?
+    ) {
         send(isNetworkInternetCapable(network))
     }
 
     private fun isNetworkInternetCapable(network: Network?) = network
-            ?.let(connectivityManager::getNetworkCapabilities)
-            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            ?: false
+        ?.let(connectivityManager::getNetworkCapabilities)
+        ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        ?: false
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,16 +24,21 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.favourites
+package uk.org.rivernile.android.bustracker.core.networking
+
+import kotlinx.coroutines.flow.Flow
 
 /**
- * A favourite stop.
+ * A fake [ConnectivityChecker] to be used in testing.
  *
- * @property stopCode The stop code.
- * @property stopName The name.
  * @author Niall Scott
  */
-data class FavouriteStop(
-    val stopCode: String,
-    val stopName: String
-)
+class FakeConnectivityChecker(
+    val onHasInternetConnectivity: () -> Boolean = { throw NotImplementedError() },
+    val onHasInternetConnectivityFlow: () -> Flow<Boolean> = { throw NotImplementedError() }
+) : ConnectivityChecker {
+
+    override val hasInternetConnectivity get() = onHasInternetConnectivity()
+
+    override val hasInternetConnectivityFlow get() = onHasInternetConnectivityFlow()
+}

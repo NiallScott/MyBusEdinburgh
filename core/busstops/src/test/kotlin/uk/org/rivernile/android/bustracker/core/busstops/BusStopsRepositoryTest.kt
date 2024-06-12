@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,8 @@
 
 package uk.org.rivernile.android.bustracker.core.busstops
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -47,28 +42,26 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetail
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopSearchResult
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [BusStopsRepository].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class BusStopsRepositoryTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var stopsDao: StopDao
 
     private lateinit var repository: BusStopsRepository
 
-    @Before
+    @BeforeTest
     fun setUp() {
         repository = BusStopsRepository(stopsDao)
     }
@@ -78,21 +71,22 @@ class BusStopsRepositoryTest {
         val stopName1 = mock<StopName>()
         val stopName2 = mock<StopName>()
         whenever(stopsDao.getNameForStopFlow("123456"))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                stopName1,
-                stopName2))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    stopName1,
+                    stopName2
+                )
+            )
 
-        val observer = repository.getNameForStopFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            stopName1,
-            stopName2)
+        repository.getNameForStopFlow("123456").test {
+            assertNull(awaitItem())
+            assertEquals(stopName1, awaitItem())
+            assertEquals(stopName2, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -100,21 +94,22 @@ class BusStopsRepositoryTest {
         val stopDetails1 = mock<StopDetails>()
         val stopDetails2 = mock<StopDetails>()
         whenever(stopsDao.getStopDetailsFlow("123456"))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                stopDetails1,
-                stopDetails2))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    stopDetails1,
+                    stopDetails2
+                )
+            )
 
-        val observer = repository.getBusStopDetailsFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            stopDetails1,
-            stopDetails2)
+        repository.getBusStopDetailsFlow("123456").test {
+            assertNull(awaitItem())
+            assertEquals(stopDetails1, awaitItem())
+            assertEquals(stopDetails2, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -122,21 +117,22 @@ class BusStopsRepositoryTest {
         val stopDetails1 = mapOf<String, StopDetails>()
         val stopDetails2 = mapOf<String, StopDetails>()
         whenever(stopsDao.getStopDetailsFlow(setOf("123456", "987654")))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                stopDetails1,
-                stopDetails2))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    stopDetails1,
+                    stopDetails2
+                )
+            )
 
-        val observer = repository.getBusStopDetailsFlow(setOf("123456", "987654")).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            stopDetails1,
-            stopDetails2)
+        repository.getBusStopDetailsFlow(setOf("123456", "987654")).test {
+            assertNull(awaitItem())
+            assertEquals(stopDetails1, awaitItem())
+            assertEquals(stopDetails2, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -144,21 +140,23 @@ class BusStopsRepositoryTest {
         val stopDetails1 = mock<StopDetailsWithServices>()
         val stopDetails2 = mock<StopDetailsWithServices>()
         whenever(stopsDao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                listOf(stopDetails1),
-                listOf(stopDetails1, stopDetails2)))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(stopDetails1),
+                    listOf(stopDetails1, stopDetails2)
+                )
+            )
 
-        val observer = repository.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, null).test(this)
-        advanceUntilIdle()
-        observer.finish()
+        repository.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, null).test {
+            assertNull(awaitItem())
+            assertEquals(listOf(stopDetails1), awaitItem())
+            assertEquals(listOf(stopDetails1, stopDetails2), awaitItem())
+            awaitComplete()
+        }
 
-        observer.assertValues(
-            null,
-            listOf(stopDetails1),
-            listOf(stopDetails1, stopDetails2))
         verify(stopsDao, never())
             .getStopDetailsWithinSpanFlow(any(), any(), any(), any(), any())
     }
@@ -168,22 +166,23 @@ class BusStopsRepositoryTest {
         val stopDetails1 = mock<StopDetailsWithServices>()
         val stopDetails2 = mock<StopDetailsWithServices>()
         whenever(stopsDao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                listOf(stopDetails1),
-                listOf(stopDetails1, stopDetails2)))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(stopDetails1),
+                    listOf(stopDetails1, stopDetails2)
+                )
+            )
 
-        val observer = repository.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, emptySet())
-            .test(this)
-        advanceUntilIdle()
-        observer.finish()
+        repository.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, emptySet()).test {
+            assertNull(awaitItem())
+            assertEquals(listOf(stopDetails1), awaitItem())
+            assertEquals(listOf(stopDetails1, stopDetails2), awaitItem())
+            awaitComplete()
+        }
 
-        observer.assertValues(
-            null,
-            listOf(stopDetails1),
-            listOf(stopDetails1, stopDetails2))
         verify(stopsDao, never())
             .getStopDetailsWithinSpanFlow(any(), any(), any(), any(), any())
     }
@@ -193,27 +192,29 @@ class BusStopsRepositoryTest {
         val stopDetails1 = mock<StopDetailsWithServices>()
         val stopDetails2 = mock<StopDetailsWithServices>()
         whenever(stopsDao.getStopDetailsWithinSpanFlow(1.1, 2.2, 3.3, 4.4, setOf("1", "2", "3")))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                listOf(stopDetails1),
-                listOf(stopDetails1, stopDetails2)))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(stopDetails1),
+                    listOf(stopDetails1, stopDetails2)
+                )
+            )
 
-        val observer = repository.getStopDetailsWithinSpanFlow(
+        repository.getStopDetailsWithinSpanFlow(
             1.1,
             2.2,
             3.3,
             4.4,
-            setOf("1", "2", "3"))
-            .test(this)
-        advanceUntilIdle()
-        observer.finish()
+            setOf("1", "2", "3")
+        ).test {
+            assertNull(awaitItem())
+            assertEquals(listOf(stopDetails1), awaitItem())
+            assertEquals(listOf(stopDetails1, stopDetails2), awaitItem())
+            awaitComplete()
+        }
 
-        observer.assertValues(
-            null,
-            listOf(stopDetails1),
-            listOf(stopDetails1, stopDetails2))
         verify(stopsDao, never())
             .getStopDetailsWithinSpanFlow(any(), any(), any(), any())
     }
@@ -223,22 +224,22 @@ class BusStopsRepositoryTest {
         val stopDetails1 = mock<StopDetails>()
         val stopDetails2 = mock<StopDetails>()
         whenever(stopsDao.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                listOf(stopDetails1),
-                listOf(stopDetails1, stopDetails2)))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(stopDetails1),
+                    listOf(stopDetails1, stopDetails2)
+                )
+            )
 
-        val observer = repository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3"))
-            .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            listOf(stopDetails1),
-            listOf(stopDetails1, stopDetails2))
+        repository.getStopDetailsWithServiceFilterFlow(setOf("1", "2", "3")).test {
+            assertNull(awaitItem())
+            assertEquals(listOf(stopDetails1), awaitItem())
+            assertEquals(listOf(stopDetails1, stopDetails2), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -246,21 +247,22 @@ class BusStopsRepositoryTest {
         val searchResult1 = mock<StopSearchResult>()
         val searchResult2 = mock<StopSearchResult>()
         whenever(stopsDao.getStopSearchResultsFlow("search term"))
-            .thenReturn(intervalFlowOf(
-                0L,
-                10L,
-                null,
-                listOf(searchResult1),
-                listOf(searchResult1, searchResult2)))
+            .thenReturn(
+                intervalFlowOf(
+                    0L,
+                    10L,
+                    null,
+                    listOf(searchResult1),
+                    listOf(searchResult1, searchResult2)
+                )
+            )
 
-        val observer = repository.getStopSearchResultsFlow("search term").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            null,
-            listOf(searchResult1),
-            listOf(searchResult1, searchResult2))
+        repository.getStopSearchResultsFlow("search term").test {
+            assertNull(awaitItem())
+            assertEquals(listOf(searchResult1), awaitItem())
+            assertEquals(listOf(searchResult1, searchResult2), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test

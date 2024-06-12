@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,8 +46,8 @@ class CoroutinesModule {
     @Singleton
     @ForApplicationCoroutineScope
     fun provideApplicationCoroutineScope(
-            @ForDefaultDispatcher defaultDispatcher: CoroutineDispatcher): CoroutineScope =
-            CoroutineScope(SupervisorJob() + defaultDispatcher)
+        @ForDefaultDispatcher defaultDispatcher: CoroutineDispatcher
+    ): CoroutineScope = CoroutineScope(SupervisorJob() + defaultDispatcher)
 
     @Provides
     @ForMainDispatcher

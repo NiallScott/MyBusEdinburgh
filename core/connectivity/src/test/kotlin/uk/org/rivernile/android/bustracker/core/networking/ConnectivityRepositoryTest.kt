@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,48 +26,28 @@
 
 package uk.org.rivernile.android.bustracker.core.networking
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import app.cash.turbine.test
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [ConnectivityRepository].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(MockitoJUnitRunner::class)
 class ConnectivityRepositoryTest {
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
-    @Mock
-    private lateinit var connectivityChecker: ConnectivityChecker
-
-    private lateinit var repository: ConnectivityRepository
-
-    @Before
-    fun setUp() {
-        repository = ConnectivityRepository(connectivityChecker, coroutineRule.scope)
-    }
-
     @Test
-    fun hasInternetConnectivityReturnsFalseWhenConnectivityCheckerReturnsFalse() {
-        whenever(connectivityChecker.hasInternetConnectivity)
-                .thenReturn(false)
+    fun hasInternetConnectivityReturnsFalseWhenConnectivityCheckerReturnsFalse() = runTest {
+        val repository = createConnectivityRepository(
+            onHasInternetConnectivity = { false }
+        )
 
         val result = repository.hasInternetConnectivity
 
@@ -75,9 +55,10 @@ class ConnectivityRepositoryTest {
     }
 
     @Test
-    fun hasInternetConnectivityReturnsTrueWhenConnectivityCheckerReturnsTrue() {
-        whenever(connectivityChecker.hasInternetConnectivity)
-                .thenReturn(true)
+    fun hasInternetConnectivityReturnsTrueWhenConnectivityCheckerReturnsTrue() = runTest {
+        val repository = createConnectivityRepository(
+            onHasInternetConnectivity = { true }
+        )
 
         val result = repository.hasInternetConnectivity
 
@@ -86,13 +67,31 @@ class ConnectivityRepositoryTest {
 
     @Test
     fun hasInternetConnectivityFlowEmitsValuesFromConnectivityChecker() = runTest {
-        whenever(connectivityChecker.hasInternetConnectivityFlow)
-                .thenReturn(intervalFlowOf(0L, 10L, false, true, true, false, false, true))
+        val repository = createConnectivityRepository(
+            onHasInternetConnectivityFlow = {
+                intervalFlowOf(0L, 10L, false, true, true, false, false, true)
+            }
+        )
 
-        val observer = repository.hasInternetConnectivityFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
+        repository.hasInternetConnectivityFlow.test {
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            assertFalse(awaitItem())
+            assertTrue(awaitItem())
+            ensureAllEventsConsumed()
+        }
+    }
 
-        observer.assertValues(false, true, false, true)
+    private fun TestScope.createConnectivityRepository(
+        onHasInternetConnectivity: () -> Boolean = { false },
+        onHasInternetConnectivityFlow: () -> Flow<Boolean> = { emptyFlow() }
+    ): ConnectivityRepository {
+        return ConnectivityRepository(
+            FakeConnectivityChecker(
+                onHasInternetConnectivity = onHasInternetConnectivity,
+                onHasInternetConnectivityFlow = onHasInternetConnectivityFlow
+            ),
+            backgroundScope
+        )
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,7 +45,8 @@ import javax.inject.Singleton
 @Singleton
 class FavouritesRepository @Inject internal constructor(
     private val favouriteStopsDao: FavouriteStopsDao,
-    private val entityFactory: FavouriteStopEntityFactory) {
+    private val entityFactory: FavouriteStopEntityFactory
+) {
 
     /**
      * Add a new favourite stop, or if it already exists, update the stop with new data.
@@ -55,7 +56,8 @@ class FavouritesRepository @Inject internal constructor(
     suspend fun addOrUpdateFavouriteStop(favouriteStop: FavouriteStop) {
         val entity = entityFactory.createFavouriteStopEntity(
             favouriteStop.stopCode,
-            favouriteStop.stopName)
+            favouriteStop.stopName
+        )
 
         favouriteStopsDao.addOrUpdateFavouriteStop(entity)
     }
@@ -118,7 +120,8 @@ class FavouritesRepository @Inject internal constructor(
         return entity?.let {
             FavouriteStop(
                 it.stopCode,
-                it.stopName)
+                it.stopName
+            )
         }
     }
 }

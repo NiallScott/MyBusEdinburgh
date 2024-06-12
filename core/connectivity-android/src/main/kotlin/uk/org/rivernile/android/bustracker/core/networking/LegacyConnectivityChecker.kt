@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,8 +46,9 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 internal class LegacyConnectivityChecker @Inject constructor(
-        private val context: Context,
-        private val connectivityManager: ConnectivityManager) : ConnectivityChecker {
+    private val context: Context,
+    private val connectivityManager: ConnectivityManager
+) : ConnectivityChecker {
 
     @Suppress("DEPRECATION")
     override val hasInternetConnectivity get() =

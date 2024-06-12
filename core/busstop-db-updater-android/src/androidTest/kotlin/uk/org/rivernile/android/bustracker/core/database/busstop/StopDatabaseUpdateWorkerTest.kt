@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,10 +36,9 @@ import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit4.MockKRule
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
 import org.junit.Rule
-import org.junit.Test
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [StopDatabaseUpdateWorker].
@@ -47,9 +46,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  * @author Niall Scott
  */
 class StopDatabaseUpdateWorkerTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @get:Rule
     val mockkRule = MockKRule(this)
@@ -87,10 +83,11 @@ class StopDatabaseUpdateWorkerTest {
         override fun createWorker(
             appContext: Context,
             workerClassName: String,
-            workerParameters: WorkerParameters) =
-            StopDatabaseUpdateWorker(
-                appContext,
-                workerParameters,
-                updateChecker)
+            workerParameters: WorkerParameters
+        ) = StopDatabaseUpdateWorker(
+            appContext,
+            workerParameters,
+            updateChecker
+        )
     }
 }
