@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.service
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -40,21 +36,18 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopDatabase
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [ProxyServiceDao].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ProxyServiceDaoTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var database: AndroidBusStopDatabase
@@ -64,7 +57,7 @@ class ProxyServiceDaoTest {
 
     private lateinit var dao: ProxyServiceDao
 
-    @Before
+    @BeforeTest
     fun setUp() {
         dao = ProxyServiceDao(database)
 
@@ -81,13 +74,14 @@ class ProxyServiceDaoTest {
         whenever(roomServiceDao.allServiceNamesWithColourFlow)
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.allServiceNamesWithColourFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.allServiceNamesWithColourFlow.test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -99,13 +93,14 @@ class ProxyServiceDaoTest {
         whenever(roomServiceDao.getServiceNamesWithColourFlow("123456"))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getServiceNamesWithColourFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getServiceNamesWithColourFlow("123456").test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -115,13 +110,14 @@ class ProxyServiceDaoTest {
         whenever(roomServiceDao.serviceCountFlow)
             .thenReturn(
                 flowOf(0),
-                flowOf(10))
+                flowOf(10)
+            )
 
-        val observer = dao.serviceCountFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(0, 10)
+        dao.serviceCountFlow.test {
+            assertEquals(0, awaitItem())
+            assertEquals(10, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -133,13 +129,14 @@ class ProxyServiceDaoTest {
         whenever(roomServiceDao.getColoursForServicesFlow(anyOrNull()))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getColoursForServicesFlow(null).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getColoursForServicesFlow(null).test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -151,12 +148,13 @@ class ProxyServiceDaoTest {
         whenever(roomServiceDao.getServiceDetailsFlow("123456"))
             .thenReturn(
                 flowOf(first),
-                flowOf(second))
+                flowOf(second)
+            )
 
-        val observer = dao.getServiceDetailsFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(first, second)
+        dao.getServiceDetailsFlow("123456").test {
+            assertEquals(first, awaitItem())
+            assertEquals(second, awaitItem())
+            awaitComplete()
+        }
     }
 }

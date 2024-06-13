@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,29 +30,26 @@ import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.IOException
-import org.junit.After
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
 import uk.org.rivernile.android.bustracker.core.database.busstop.migrations.Migration1To2
-import uk.org.rivernile.android.bustracker.core.log.ExceptionLogger
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import uk.org.rivernile.android.bustracker.core.log.FakeExceptionLogger
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 /**
  * Tests for [DownloadedDatabasePreparer].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class DownloadedDatabasePreparerTest {
 
     companion object {
@@ -60,44 +57,15 @@ class DownloadedDatabasePreparerTest {
         private const val DB_NAME = "downloaded-database-preparer-test"
     }
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
+    private val exceptionLogger = FakeExceptionLogger()
 
-    @Mock
-    private lateinit var exceptionLogger: ExceptionLogger
-
-    private lateinit var preparer: DownloadedDatabasePreparer
-
-    @Before
+    @BeforeTest
     fun setUp() {
         // This is done at the starting of the test to ensure we start with a clean slate.
         deleteExistingDatabase()
-
-        val frameworkSQLiteOpenHelperFactory = FrameworkSQLiteOpenHelperFactory()
-
-        val databaseOpener = DatabaseOpener(
-            context,
-            frameworkSQLiteOpenHelperFactory)
-
-        val bundledDatabaseOpenHelperFactory = BundledDatabaseOpenHelperFactory(
-            context,
-            frameworkSQLiteOpenHelperFactory,
-            databaseOpener,
-            exceptionLogger)
-
-        val databaseFactory = RoomBusStopDatabaseFactory(
-            context,
-            Migration1To2(),
-            bundledDatabaseOpenHelperFactory)
-
-        preparer = DownloadedDatabasePreparer(
-            databaseOpener,
-            databaseFactory,
-            exceptionLogger,
-            coroutineRule.testDispatcher)
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         // This is done again at the end of the test to clean up.
         deleteExistingDatabase()
@@ -105,18 +73,22 @@ class DownloadedDatabasePreparerTest {
 
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseFileDoesNotExist() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME)
 
         assertFalse(databaseFile.exists())
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
         assertFalse(result)
-        verify(exceptionLogger)
-            .log(any<IOException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<IOException>(last())
+        }
     }
 
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseFileIsEmpty() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME).apply {
             createNewFile()
         }
@@ -124,12 +96,15 @@ class DownloadedDatabasePreparerTest {
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
         assertFalse(result)
-        verify(exceptionLogger)
-            .log(any<IOException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<IOException>(last())
+        }
     }
 
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseFileIsCorrupt() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME).apply {
             writeText("This is a corrupt file")
         }
@@ -137,33 +112,43 @@ class DownloadedDatabasePreparerTest {
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
         assertFalse(result)
-        verify(exceptionLogger)
-            .log(any<IOException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<IOException>(last())
+        }
     }
 
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseDoesNotHaveExpectedSchema() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .close()
 
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
         assertFalse(result)
-        verify(exceptionLogger)
-            .log(any<SQLException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<SQLException>(last())
+        }
     }
 
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseVersionIsTooHigh() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .apply {
                 version = 3
             }
@@ -172,17 +157,22 @@ class DownloadedDatabasePreparerTest {
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
         assertFalse(result)
-        verify(exceptionLogger)
-            .log(any<IllegalStateException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<IllegalStateException>(last())
+        }
     }
 
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseVersionIs2ButBadSchema() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .apply {
                 version = 2
             }
@@ -191,17 +181,22 @@ class DownloadedDatabasePreparerTest {
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
         assertFalse(result)
-        verify(exceptionLogger)
-            .log(any<IllegalStateException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<IllegalStateException>(last())
+        }
     }
 
     @Test
     fun prepareDownloadedDatabaseReturnsFalseWhenDatabaseVersionIs2WithOldSchema() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .apply {
                 version = 2
                 createOldSchema()
@@ -211,17 +206,22 @@ class DownloadedDatabasePreparerTest {
         val result = preparer.prepareDownloadedDatabase(databaseFile)
 
         assertFalse(result)
-        verify(exceptionLogger)
-            .log(any<IllegalStateException>())
+        with(exceptionLogger.loggedThrowables) {
+            assertEquals(1, size)
+            assertIs<IllegalStateException>(last())
+        }
     }
 
     @Test
     fun prepareDownloadedDatabaseReturnsTrueWhenDatabaseVersionIsMissingButGoodSchema() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .apply {
                 createOldSchema()
             }
@@ -234,11 +234,14 @@ class DownloadedDatabasePreparerTest {
 
     @Test
     fun prepareDownloadedDatabaseReturnsTrueWhenDatabaseVersionIs0WithGoodSchema() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .apply {
                 version = 0
                 createOldSchema()
@@ -252,11 +255,14 @@ class DownloadedDatabasePreparerTest {
 
     @Test
     fun prepareDownloadedDatabaseReturnsTrueWhenDatabaseVersionIs1WithGoodSchema() = runTest {
+        val preparer = createDownloadedDatabasePreparer()
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .apply {
                 version = 1
                 createOldSchema()
@@ -323,5 +329,31 @@ class DownloadedDatabasePreparerTest {
 
     private fun deleteExistingDatabase() {
         context.deleteDatabase(DB_NAME)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun TestScope.createDownloadedDatabasePreparer(): DownloadedDatabasePreparer {
+        val context = context
+        val frameworkSQLiteOpenHelperFactory = FrameworkSQLiteOpenHelperFactory()
+        val databaseOpener = DatabaseOpener(
+            context = context,
+            frameworkSQLiteOpenHelperFactory = frameworkSQLiteOpenHelperFactory
+        )
+
+        return DownloadedDatabasePreparer(
+            databaseOpener = databaseOpener,
+            databaseFactory = RoomBusStopDatabaseFactory(
+                context = context,
+                migration1To2 = Migration1To2(),
+                bundledDatabaseOpenHelperFactory = BundledDatabaseOpenHelperFactory(
+                    context = context,
+                    frameworkSQLiteOpenHelperFactory = frameworkSQLiteOpenHelperFactory,
+                    databaseOpener = databaseOpener,
+                    exceptionLogger = exceptionLogger
+                )
+            ),
+            exceptionLogger = exceptionLogger,
+            ioDispatcher = UnconfinedTestDispatcher(testScheduler)
+        )
     }
 }

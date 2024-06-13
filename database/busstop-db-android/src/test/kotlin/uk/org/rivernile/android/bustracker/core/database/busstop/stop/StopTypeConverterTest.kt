@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,9 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [StopTypeConverter].
@@ -39,7 +39,7 @@ class StopTypeConverterTest {
 
     private lateinit var converter: StopTypeConverter
 
-    @Before
+    @BeforeTest
     fun setUp() {
         converter = StopTypeConverter()
     }

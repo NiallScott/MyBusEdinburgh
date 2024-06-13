@@ -33,7 +33,10 @@ package uk.org.rivernile.android.bustracker.core.log
  */
 class FakeExceptionLogger : ExceptionLogger {
 
+    val loggedThrowables get() = _loggedThrowables.toList()
+    private val _loggedThrowables = mutableListOf<Throwable>()
+
     override fun log(throwable: Throwable) {
-        // Nothing here at the moment.
+        _loggedThrowables += throwable
     }
 }

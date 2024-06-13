@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,5 +43,7 @@ internal data class RoomServiceDetails(
     @field:TypeConverters(ColourTypeConverter::class)
     @ColumnInfo(
         name = "hexColour",
-        typeAffinity = ColumnInfo.TEXT)
-    override val colour: Int?) : ServiceDetails
+        typeAffinity = ColumnInfo.TEXT
+    )
+    override val colour: Int?
+) : ServiceDetails

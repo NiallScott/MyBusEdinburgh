@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -39,7 +39,8 @@ import uk.org.rivernile.android.bustracker.core.database.busstop.AndroidBusStopD
  * @author Niall Scott
  */
 internal class ProxyStopDao(
-    private val database: AndroidBusStopDatabase) : StopDao {
+    private val database: AndroidBusStopDatabase
+) : StopDao {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getNameForStopFlow(stopCode: String) =
@@ -101,7 +102,8 @@ internal class ProxyStopDao(
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
-        maxLongitude: Double) =
+        maxLongitude: Double
+    ) =
         database.isDatabaseOpenFlow
             .flatMapLatest {
                 if (it) {
@@ -119,7 +121,8 @@ internal class ProxyStopDao(
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>) =
+        serviceFilter: Set<String>
+    ) =
         database.isDatabaseOpenFlow
             .flatMapLatest {
                 if (it) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -79,7 +79,8 @@ internal abstract class RoomStopDao {
     ): Flow<Map<@MapColumn(columnName = "stopCode") String, RoomStopDetails>?>
 
     fun getStopDetailsWithServiceFilterFlow(
-        serviceFilter: Set<String>?): Flow<List<StopDetails>?> {
+        serviceFilter: Set<String>?
+    ): Flow<List<StopDetails>?> {
         return serviceFilter
             ?.ifEmpty { null }
             ?.let {
@@ -107,7 +108,8 @@ internal abstract class RoomStopDao {
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
-        maxLongitude: Double): Flow<List<RoomStopDetailsWithServices>?>
+        maxLongitude: Double
+    ): Flow<List<RoomStopDetailsWithServices>?>
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, latitude, longitude, orientation, (
@@ -134,7 +136,8 @@ internal abstract class RoomStopDao {
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>): Flow<List<RoomStopDetailsWithServices>?>
+        serviceFilter: Set<String>
+    ): Flow<List<RoomStopDetailsWithServices>?>
 
     @Query("""
         SELECT stopCode, stopName AS name, locality, orientation, (
@@ -174,5 +177,6 @@ internal abstract class RoomStopDao {
         AND longitude NOT NULL
     """)
     abstract fun getStopDetailsWithServiceFilterFlowInternal(
-        serviceFilter: Set<String>): Flow<List<RoomStopDetails>?>
+        serviceFilter: Set<String>
+    ): Flow<List<RoomStopDetails>?>
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -44,10 +44,13 @@ import androidx.room.PrimaryKey
     indices = [
         Index(
             name = "service_index",
-            value = [ "name" ])
-    ])
+            value = [ "name" ]
+        )
+    ]
+)
 internal data class RoomServiceEntity(
     @PrimaryKey val id: Int,
     val name: String,
     val description: String?,
-    val hexColour: String?)
+    val hexColour: String?
+)

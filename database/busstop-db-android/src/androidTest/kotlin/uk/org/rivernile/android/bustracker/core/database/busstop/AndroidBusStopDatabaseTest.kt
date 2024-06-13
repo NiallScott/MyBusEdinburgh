@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -36,15 +36,16 @@ import io.mockk.junit4.MockKRule
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Rule
-import org.junit.Test
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.test
 import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [AndroidBusStopDatabase].
@@ -59,9 +60,6 @@ class AndroidBusStopDatabaseTest {
 
         private const val DATABASE_NAME = "busstops10.db"
     }
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @get:Rule
     val mockkRule = MockKRule(this)
@@ -122,11 +120,12 @@ class AndroidBusStopDatabaseTest {
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
-    private fun createDatabase(): AndroidBusStopDatabase {
+    private fun TestScope.createDatabase(): AndroidBusStopDatabase {
         return AndroidBusStopDatabase(
             context,
             databaseFactory,
             downloadedDatabasePreparer,
-            coroutineRule.testDispatcher)
+            StandardTestDispatcher(testScheduler)
+        )
     }
 }

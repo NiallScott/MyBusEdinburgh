@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -74,6 +74,7 @@ internal class BusStopDatabaseModule {
     fun provideStopDao(database: AndroidBusStopDatabase): StopDao =
         database.stopDao
 
+    @Suppress("unused")
     @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {
@@ -81,7 +82,7 @@ internal class BusStopDatabaseModule {
         @Suppress("unused")
         @Binds
         fun bindBusStopDatabaseRepository(
-            androidBusStopDatabaseRepository: AndroidBusStopDatabaseRepository):
-                BusStopDatabaseRepository
+            androidBusStopDatabaseRepository: AndroidBusStopDatabaseRepository
+        ): BusStopDatabaseRepository
     }
 }

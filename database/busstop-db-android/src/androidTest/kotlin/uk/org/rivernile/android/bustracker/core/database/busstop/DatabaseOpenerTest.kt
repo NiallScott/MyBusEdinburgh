@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -30,11 +30,11 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
 import okio.IOException
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Before
-import org.junit.Test
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 /**
  * Tests for [DatabaseOpener].
@@ -50,17 +50,18 @@ class DatabaseOpenerTest {
 
     private lateinit var opener: DatabaseOpener
 
-    @Before
+    @BeforeTest
     fun setUp() {
         // This is done at the starting of the test to ensure we start with a clean slate.
         deleteExistingDatabase()
 
         opener = DatabaseOpener(
             context,
-            FrameworkSQLiteOpenHelperFactory())
+            FrameworkSQLiteOpenHelperFactory()
+        )
     }
 
-    @After
+    @AfterTest
     fun tearDown() {
         // This is done again at the end of the test to clean up.
         deleteExistingDatabase()
@@ -93,10 +94,12 @@ class DatabaseOpenerTest {
     @Test
     fun createOpenHelperSetsTheDatabaseVersionTo1WhenNoVersionWasFound() {
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .close()
 
         opener.createOpenHelper(databaseFile)
@@ -109,10 +112,12 @@ class DatabaseOpenerTest {
     @Test
     fun createOpenHelperSetsTheDatabaseVersionTo1WhenVersionIs0() {
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .use {
                 it.version = 0
             }
@@ -127,10 +132,12 @@ class DatabaseOpenerTest {
     @Test
     fun createOpenHelperLeavesTheDatabaseVersionAt1WhenTheVersionIsAlready1() {
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .use {
                 it.version = 1
             }
@@ -145,10 +152,12 @@ class DatabaseOpenerTest {
     @Test
     fun createOpenHelperLeavesTheDatabaseVersionAt2WhenTheVersionIs2() {
         val databaseFile = context.getDatabasePath(DB_NAME)
-        SQLiteDatabase.openDatabase(
-            databaseFile.absolutePath,
-            null,
-            SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY)
+        SQLiteDatabase
+            .openDatabase(
+                databaseFile.absolutePath,
+                null,
+                SQLiteDatabase.OPEN_READWRITE or SQLiteDatabase.CREATE_IF_NECESSARY
+            )
             .use {
                 it.version = 2
             }

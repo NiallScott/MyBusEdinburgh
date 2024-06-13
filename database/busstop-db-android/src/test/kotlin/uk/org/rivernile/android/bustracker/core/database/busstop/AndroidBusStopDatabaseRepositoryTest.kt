@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.core.database.busstop
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -43,21 +36,20 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.database.DatabaseMetadata
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
 import java.io.File
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for [AndroidBusStopDatabaseRepository].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class AndroidBusStopDatabaseRepositoryTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var database: AndroidBusStopDatabase
@@ -66,11 +58,12 @@ class AndroidBusStopDatabaseRepositoryTest {
 
     private lateinit var repository: AndroidBusStopDatabaseRepository
 
-    @Before
+    @BeforeTest
     fun setUp() {
         repository = AndroidBusStopDatabaseRepository(
-                database,
-                databaseDao)
+            database,
+            databaseDao
+        )
     }
 
     @Test
@@ -101,11 +94,10 @@ class AndroidBusStopDatabaseRepositoryTest {
         whenever(databaseDao.databaseMetadataFlow)
             .thenReturn(flowOf(databaseMetadata))
 
-        val observer = repository.databaseMetadataFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(databaseMetadata)
+        repository.databaseMetadataFlow.test {
+            assertEquals(databaseMetadata, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test

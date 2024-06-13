@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -35,4 +35,5 @@ package uk.org.rivernile.android.bustracker.core.database.busstop.stop
  */
 internal data class RoomStopName(
     override val name: String,
-    override val locality: String?) : StopName
+    override val locality: String?
+) : StopName
