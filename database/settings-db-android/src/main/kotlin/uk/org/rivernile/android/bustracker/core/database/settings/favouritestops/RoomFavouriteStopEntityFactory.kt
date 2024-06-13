@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,9 +37,11 @@ internal class RoomFavouriteStopEntityFactory @Inject constructor() : FavouriteS
 
     override fun createFavouriteStopEntity(
         stopCode: String,
-        stopName: String): FavouriteStopEntity {
+        stopName: String
+    ): FavouriteStopEntity {
         return RoomFavouriteStopEntity(
             stopCode,
-            stopName)
+            stopName
+        )
     }
 }

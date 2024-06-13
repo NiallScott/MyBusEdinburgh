@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -37,4 +37,5 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "favourite_stops")
 internal data class RoomFavouriteStopEntity(
     @PrimaryKey override val stopCode: String,
-    override val stopName: String) : FavouriteStopEntity
+    override val stopName: String
+) : FavouriteStopEntity

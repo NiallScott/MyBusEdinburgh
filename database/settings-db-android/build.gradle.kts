@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -85,9 +85,10 @@ dependencies {
 
     // Test dependencies
     androidTestImplementation(project(":database:database-test-android"))
-    androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.room.test)
+    androidTestImplementation(libs.kotlin.test.junit)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test.junit)
 }

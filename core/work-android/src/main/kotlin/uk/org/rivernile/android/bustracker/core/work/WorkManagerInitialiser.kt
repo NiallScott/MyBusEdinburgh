@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,13 +38,13 @@ import dagger.hilt.components.SingletonComponent
 /**
  * An app [Initializer] which initialises [WorkManager].
  */
-@Suppress("unused")
 class WorkManagerInitialiser : Initializer<WorkManager> {
 
     override fun create(context: Context): WorkManager {
         val hiltEntryPoint = EarlyEntryPoints.get(
             context,
-            WorkManagerInitialiserEntryPoint::class.java)
+            WorkManagerInitialiserEntryPoint::class.java
+        )
 
         WorkManager.initialize(context, hiltEntryPoint.configuration)
 

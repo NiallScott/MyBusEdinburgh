@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -40,7 +40,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class ServicePointsRepository @Inject internal constructor(
-    private val servicePointsDao: ServicePointDao) {
+    private val servicePointsDao: ServicePointDao
+) {
 
     /**
      * This is a [Flow] which emits a [List] of [ServicePoint]s for the given [serviceNames]. `null`
@@ -58,5 +59,5 @@ class ServicePointsRepository @Inject internal constructor(
      * @return A [List] of [ServicePoint]s for the given [serviceNames].
      */
     fun getServicePointsFlow(serviceNames: Set<String>?): Flow<List<ServicePoint>?> =
-            servicePointsDao.getServicePointsFlow(serviceNames)
+        servicePointsDao.getServicePointsFlow(serviceNames)
 }

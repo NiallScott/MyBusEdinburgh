@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -64,12 +64,13 @@ internal class SettingsDatabaseModule {
     @Singleton
     fun provideSettingsDatabase(
         context: Context,
-        callback: SettingsDatabaseCallback) =
-        Room.databaseBuilder(context, RoomSettingsDatabase::class.java, DATABASE_NAME)
-            .addMigrations(*allMigrations)
-            .addCallback(callback)
-            .fallbackToDestructiveMigration()
-            .build()
+        callback: SettingsDatabaseCallback
+    ): RoomSettingsDatabase = Room
+        .databaseBuilder(context, RoomSettingsDatabase::class.java, DATABASE_NAME)
+        .addMigrations(*allMigrations)
+        .addCallback(callback)
+        .fallbackToDestructiveMigration()
+        .build()
 
     @Provides
     fun provideAlertsDao(database: RoomSettingsDatabase): RoomAlertsDao =
@@ -82,8 +83,10 @@ internal class SettingsDatabaseModule {
     private val allMigrations get() = arrayOf(
         Migration1To4(),
         Migration2To4(),
-        Migration3To4())
+        Migration3To4()
+    )
 
+    @Suppress("unused")
     @InstallIn(SingletonComponent::class)
     @Module
     interface Bindings {

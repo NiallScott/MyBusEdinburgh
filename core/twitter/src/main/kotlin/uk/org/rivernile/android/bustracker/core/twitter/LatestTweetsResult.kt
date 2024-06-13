@@ -46,7 +46,8 @@ sealed interface LatestTweetsResult {
      * @property tweets The tweet data.
      */
     data class Success(
-        val tweets: List<Tweet>?) : LatestTweetsResult
+        val tweets: List<Tweet>?
+    ) : LatestTweetsResult
 
     /**
      * This interface describes errors which can arise from getting the latest tweets.
@@ -64,7 +65,8 @@ sealed interface LatestTweetsResult {
          * @property throwable The [Throwable] which caused this error.
          */
         data class Io(
-            val throwable: Throwable) : Error
+            val throwable: Throwable
+        ) : Error
 
         /**
          * The result is not successful because of a server error.

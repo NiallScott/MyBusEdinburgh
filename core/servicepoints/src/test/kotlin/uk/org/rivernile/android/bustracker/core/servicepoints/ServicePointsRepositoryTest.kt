@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,44 +26,71 @@
 
 package uk.org.rivernile.android.bustracker.core.servicepoints
 
-import kotlinx.coroutines.flow.Flow
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePoint
+import app.cash.turbine.test
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.FakeServicePoint
+import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.FakeServicePointDao
 import uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint.ServicePointDao
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [ServicePointsRepository].
  *
  * @author Niall Scott
  */
-@RunWith(MockitoJUnitRunner::class)
 class ServicePointsRepositoryTest {
 
-    @Mock
-    private lateinit var servicePointDao: ServicePointDao
+    @Test
+    fun getServicePointsFlowReturnsFlowInstanceFromDao() = runTest {
+        val first = FakeServicePoint(
+            serviceName = "1",
+            chainage = 1,
+            latitude = 1.1,
+            longitude = 1.2
+        )
+        val second = FakeServicePoint(
+            serviceName = "2",
+            chainage = 2,
+            latitude = 2.1,
+            longitude = 2.2
+        )
+        val third = FakeServicePoint(
+            serviceName = "3",
+            chainage = 3,
+            latitude = 3.1,
+            longitude = 3.2
+        )
+        val repository = createServicePointsRepository(
+            servicePointDao = FakeServicePointDao(
+                onGetServicePointsFlow = {
+                    assertEquals(setOf("1", "2", "3"), it)
+                    flowOf(
+                        null,
+                        listOf(first),
+                        listOf(
+                            first,
+                            second,
+                            third
+                        )
+                    )
+                }
+            )
+        )
 
-    private lateinit var repository: ServicePointsRepository
-
-    @Before
-    fun setUp() {
-        repository = ServicePointsRepository(servicePointDao)
+        repository.getServicePointsFlow(setOf("1", "2", "3")).test {
+            assertNull(awaitItem())
+            assertEquals(listOf(first), awaitItem())
+            assertEquals(listOf(first, second, third), awaitItem())
+            awaitComplete()
+        }
     }
 
-    @Test
-    fun getServicePointsFlowReturnsFlowInstanceFromDao() {
-        val flow = mock<Flow<List<ServicePoint>?>>()
-        whenever(servicePointDao.getServicePointsFlow(setOf("1", "2", "3")))
-                .thenReturn(flow)
-
-        val result = repository.getServicePointsFlow(setOf("1", "2", "3"))
-
-        assertEquals(flow, result)
+    private fun createServicePointsRepository(
+        servicePointDao: ServicePointDao = FakeServicePointDao()
+    ): ServicePointsRepository {
+        return ServicePointsRepository(servicePointDao)
     }
 }

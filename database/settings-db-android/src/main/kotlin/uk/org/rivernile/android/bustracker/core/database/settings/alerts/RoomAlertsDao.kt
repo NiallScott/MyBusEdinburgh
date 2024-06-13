@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -247,7 +247,8 @@ internal abstract class RoomAlertsDao : AlertsDao {
             arrivalAlert.stopCode,
             null,
             arrivalAlert.serviceNames.joinToString(","),
-            arrivalAlert.timeTrigger)
+            arrivalAlert.timeTrigger
+        )
 
     /**
      * Map the given [ProximityAlertEntity] to a [RoomAlertEntity].
@@ -263,7 +264,8 @@ internal abstract class RoomAlertsDao : AlertsDao {
             proximityAlert.stopCode,
             proximityAlert.distanceFrom,
             null,
-            null)
+            null
+        )
 
     /**
      * Map the given [List] of [RoomAlertEntity]s to a [List] of [AlertEntity]s.
@@ -310,7 +312,8 @@ internal abstract class RoomAlertsDao : AlertsDao {
                 it.timeAdded,
                 it.stopCode,
                 serviceNames,
-                timeTrigger)
+                timeTrigger
+            )
         }
     }
 
@@ -328,7 +331,8 @@ internal abstract class RoomAlertsDao : AlertsDao {
                 it.id,
                 it.timeAdded,
                 it.stopCode,
-                distanceFrom)
+                distanceFrom
+            )
         }
     }
 }

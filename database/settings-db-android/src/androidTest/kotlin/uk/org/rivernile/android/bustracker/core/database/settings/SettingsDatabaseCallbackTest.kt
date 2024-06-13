@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -55,7 +55,8 @@ class SettingsDatabaseCallbackTest {
         InstrumentationRegistry.getInstrumentation(),
         RoomSettingsDatabase::class.java,
         emptyList(),
-        FrameworkSQLiteOpenHelperFactory())
+        FrameworkSQLiteOpenHelperFactory()
+    )
 
     private lateinit var callback: SettingsDatabaseCallback
 
@@ -173,10 +174,12 @@ class SettingsDatabaseCallbackTest {
     }
 
     private val database get() =
-        Room.databaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            RoomSettingsDatabase::class.java,
-            TEST_DB)
+        Room
+            .databaseBuilder(
+                InstrumentationRegistry.getInstrumentation().targetContext,
+                RoomSettingsDatabase::class.java,
+                TEST_DB
+            )
             .addCallback(callback)
             .build()
             .openHelper

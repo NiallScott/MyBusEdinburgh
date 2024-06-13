@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,23 +24,20 @@
  *
  */
 
-plugins {
-    alias(libs.plugins.kotlin.jvm)
-}
+package uk.org.rivernile.android.bustracker.core.database.busstop.servicepoint
 
-dependencies {
+import kotlinx.coroutines.flow.Flow
 
-    implementation(project(":core:coroutines"))
-    implementation(project(":database:busstop-db-core"))
+/**
+ * A fake [ServicePointDao] for testing.
+ *
+ * @author Niall Scott
+ */
+class FakeServicePointDao(
+    private val onGetServicePointsFlow: (Set<String>?) -> Flow<List<ServicePoint>?> =
+        { throw NotImplementedError() }
+) : ServicePointDao {
 
-    // Dependency injection
-    implementation(libs.javax.inject)
-
-    // Testing dependencies
-    testImplementation(testFixtures(project(":database:busstop-db-core")))
-    testImplementation(project(":testutils"))
-    testImplementation(libs.coroutines.test)
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlin.test.junit)
-    testImplementation(libs.turbine)
+    override fun getServicePointsFlow(serviceNames: Set<String>?) =
+        onGetServicePointsFlow(serviceNames)
 }

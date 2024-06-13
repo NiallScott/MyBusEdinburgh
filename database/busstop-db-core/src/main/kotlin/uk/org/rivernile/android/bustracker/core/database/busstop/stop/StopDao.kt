@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -95,7 +95,8 @@ interface StopDao {
         minLatitude: Double,
         minLongitude: Double,
         maxLatitude: Double,
-        maxLongitude: Double): Flow<List<StopDetailsWithServices>?>
+        maxLongitude: Double
+    ): Flow<List<StopDetailsWithServices>?>
 
     /**
      * Return a [Flow] which emits [List]s of [StopDetailsWithServices] objects which are within
@@ -117,7 +118,8 @@ interface StopDao {
         minLongitude: Double,
         maxLatitude: Double,
         maxLongitude: Double,
-        serviceFilter: Set<String>): Flow<List<StopDetailsWithServices>?>
+        serviceFilter: Set<String>
+    ): Flow<List<StopDetailsWithServices>?>
 
     /**
      * Return a [Flow] which emits [List]s of [StopSearchResult] objects, based upon the supplied
