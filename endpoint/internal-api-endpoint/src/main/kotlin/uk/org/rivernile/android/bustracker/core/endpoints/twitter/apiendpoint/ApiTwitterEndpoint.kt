@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,14 +56,16 @@ internal class ApiTwitterEndpoint @Inject constructor(
     private val apiKeyGenerator: ApiKeyGenerator,
     @ForInternalApiAppName private val appName: String,
     private val tweetsMapper: TweetsMapper,
-    private val exceptionLogger: ExceptionLogger) : TwitterEndpoint {
+    private val exceptionLogger: ExceptionLogger
+) : TwitterEndpoint {
 
     override suspend fun getLatestTweets(): LatestTweetsResponse {
         return if (connectivityRepository.hasInternetConnectivity) {
             try {
                 val response = twitterService.getLatestTweets(
                     apiKeyGenerator.generateHashedApiKey(),
-                    appName)
+                    appName
+                )
 
                 if (response.isSuccessful) {
                     LatestTweetsResponse.Success(tweetsMapper.mapTweets(response.body()))

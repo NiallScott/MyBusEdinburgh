@@ -40,7 +40,8 @@ sealed interface DatabaseVersionResponse {
      * @property databaseVersion The database version properties.
      */
     data class Success(
-        val databaseVersion: DatabaseVersion) : DatabaseVersionResponse
+        val databaseVersion: DatabaseVersion
+    ) : DatabaseVersionResponse
 
     /**
      * This interface describes error which can arise from getting the database version.
@@ -53,7 +54,8 @@ sealed interface DatabaseVersionResponse {
          * @property throwable The [Throwable] which caused this error.
          */
         data class Io(
-            val throwable: Throwable) : Error
+            val throwable: Throwable
+        ) : Error
 
         /**
          * There was an error from the server.

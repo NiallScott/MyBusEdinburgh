@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -52,13 +52,15 @@ internal class JsonApiEndpoint @Inject constructor(
     private val apiServiceFactory: ApiServiceFactory,
     private val apiKeyGenerator: ApiKeyGenerator,
     @ForInternalApiSchemaName private val schemaType: String,
-    private val exceptionLogger: ExceptionLogger) : ApiEndpoint {
+    private val exceptionLogger: ExceptionLogger
+) : ApiEndpoint {
 
     override suspend fun getDatabaseVersion(
-            socketFactory: SocketFactory?): DatabaseVersionResponse {
+            socketFactory: SocketFactory?
+    ): DatabaseVersionResponse {
         return try {
             val response = apiServiceFactory.getApiInstance(socketFactory)
-                    .getDatabaseVersion(apiKeyGenerator.generateHashedApiKey(), schemaType)
+                .getDatabaseVersion(apiKeyGenerator.generateHashedApiKey(), schemaType)
 
             if (response.isSuccessful) {
                 mapToDatabaseVersion(response.body())?.let {
@@ -91,10 +93,11 @@ internal class JsonApiEndpoint @Inject constructor(
             val checksum = it.checksum ?: return null
 
             DatabaseVersion(
-                    schemaVersion,
-                    topologyId,
-                    databaseUrl,
-                    checksum)
+                schemaVersion,
+                topologyId,
+                databaseUrl,
+                checksum
+            )
         }
     }
 }

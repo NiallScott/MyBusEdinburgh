@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,4 +43,5 @@ internal data class JsonDatabaseVersion(
     @SerialName("db_schema_version") val schemaVersion: String? = null,
     @SerialName("topo_id") val topologyId: String? = null,
     @SerialName("db_url") val databaseUrl: String? = null,
-    @SerialName("checksum") val checksum: String? = null)
+    @SerialName("checksum") val checksum: String? = null
+)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -47,5 +47,6 @@ internal interface ApiService {
     @GET("DatabaseVersion")
     suspend fun getDatabaseVersion(
         @Query("key") apiKey: String,
-        @Query("schemaType") schemaType: String): Response<JsonDatabaseVersion>
+        @Query("schemaType") schemaType: String
+    ): Response<JsonDatabaseVersion>
 }
