@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -38,15 +38,10 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -54,7 +49,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceDataStoreSource
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 /**
  * Tests for [SettingsPreferenceDataStore].
@@ -65,24 +64,12 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 @RunWith(MockitoJUnitRunner::class)
 class SettingsPreferenceDataStoreTest {
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
     @Mock
     private lateinit var dataStoreSource: PreferenceDataStoreSource
 
-    private lateinit var dataStore: SettingsPreferenceDataStore
-
-    @Before
-    fun setUp() {
-        dataStore = SettingsPreferenceDataStore(
-            dataStoreSource,
-            coroutineRule.scope,
-            coroutineRule.testDispatcher)
-    }
-
     @Test
     fun putStringWithNullValueRemovesValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val key = stringPreferencesKey("key1")
         val preferences = mutablePreferencesOf(key to "foobar")
         doAnswer {
@@ -100,6 +87,7 @@ class SettingsPreferenceDataStoreTest {
 
     @Test
     fun putStringWithNonNullValueAddsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val key = stringPreferencesKey("key1")
         val preferences = mutablePreferencesOf()
         doAnswer {
@@ -117,6 +105,7 @@ class SettingsPreferenceDataStoreTest {
 
     @Test
     fun putStringSetWithNullValueRemovesValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val key = stringSetPreferencesKey("key1")
         val preferences = mutablePreferencesOf(key to setOf("a", "b", "c"))
         doAnswer {
@@ -134,6 +123,7 @@ class SettingsPreferenceDataStoreTest {
 
     @Test
     fun putStringSetWithNonNullValueAddsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val key = stringSetPreferencesKey("key1")
         val preferences = mutablePreferencesOf()
         doAnswer {
@@ -152,6 +142,7 @@ class SettingsPreferenceDataStoreTest {
 
     @Test
     fun putIntAddsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val key = intPreferencesKey("key1")
         val preferences = mutablePreferencesOf()
         doAnswer {
@@ -169,6 +160,7 @@ class SettingsPreferenceDataStoreTest {
 
     @Test
     fun putLongAddsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val key = longPreferencesKey("key1")
         val preferences = mutablePreferencesOf()
         doAnswer {
@@ -186,6 +178,7 @@ class SettingsPreferenceDataStoreTest {
 
     @Test
     fun putFloatAddsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val key = floatPreferencesKey("key1")
         val preferences = mutablePreferencesOf()
         doAnswer {
@@ -203,6 +196,7 @@ class SettingsPreferenceDataStoreTest {
 
     @Test
     fun putBooleanAddsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val key = booleanPreferencesKey("key1")
         val preferences = mutablePreferencesOf()
         doAnswer {
@@ -219,7 +213,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getStringWithKeyNotAddedReturnsDefaultValue() {
+    fun getStringWithKeyNotAddedReturnsDefaultValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferencesOf()))
 
@@ -229,7 +224,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getStringWithKeyAddedReturnsValue() {
+    fun getStringWithKeyAddedReturnsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val preferences = preferencesOf(
             stringPreferencesKey("key1") to "value")
         whenever(dataStoreSource.preferencesFlow)
@@ -241,7 +237,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getStringSetWithKeyNotAddedReturnsDefaultValue() {
+    fun getStringSetWithKeyNotAddedReturnsDefaultValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferencesOf()))
         val expected = setOf("default")
@@ -252,7 +249,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getStringSetWithKeyAddedReturnsValue() {
+    fun getStringSetWithKeyAddedReturnsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val expected = setOf("1", "2", "3")
         val preferences = preferencesOf(
             stringSetPreferencesKey("key1") to expected)
@@ -265,7 +263,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getIntWithKeyNotAddedReturnsDefaultValue() {
+    fun getIntWithKeyNotAddedReturnsDefaultValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferencesOf()))
 
@@ -275,7 +274,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getIntWithKeyAddedReturnsValue() {
+    fun getIntWithKeyAddedReturnsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         val preferences = preferencesOf(
             intPreferencesKey("key1") to 42)
         whenever(dataStoreSource.preferencesFlow)
@@ -287,7 +287,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getLongWithKeyNotAddedReturnsDefaultValue() {
+    fun getLongWithKeyNotAddedReturnsDefaultValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferencesOf()))
 
@@ -297,9 +298,9 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getLongWithKeyAddedReturnsValue() {
-        val preferences = preferencesOf(
-            longPreferencesKey("key1") to 42)
+    fun getLongWithKeyAddedReturnsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
+        val preferences = preferencesOf(longPreferencesKey("key1") to 42)
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferences))
 
@@ -309,7 +310,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getFloatWithKeyNotAddedReturnsDefaultValue() {
+    fun getFloatWithKeyNotAddedReturnsDefaultValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferencesOf()))
 
@@ -319,9 +321,9 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getFloatWithKeyAddedReturnsValue() {
-        val preferences = preferencesOf(
-            floatPreferencesKey("key1") to 3.14f)
+    fun getFloatWithKeyAddedReturnsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
+        val preferences = preferencesOf(floatPreferencesKey("key1") to 3.14f)
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferences))
 
@@ -331,7 +333,8 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getBooleanWithKeyNotAddedReturnsDefaultValue() {
+    fun getBooleanWithKeyNotAddedReturnsDefaultValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferencesOf()))
 
@@ -341,14 +344,22 @@ class SettingsPreferenceDataStoreTest {
     }
 
     @Test
-    fun getBooleanWithKeyAddedReturnsValue() {
-        val preferences = preferencesOf(
-            booleanPreferencesKey("key1") to true)
+    fun getBooleanWithKeyAddedReturnsValue() = runTest {
+        val dataStore = createSettingsPreferenceDataStore()
+        val preferences = preferencesOf(booleanPreferencesKey("key1") to true)
         whenever(dataStoreSource.preferencesFlow)
             .thenReturn(flowOf(preferences))
 
         val result = dataStore.getBoolean("key1", false)
 
         assertTrue(result)
+    }
+
+    private fun TestScope.createSettingsPreferenceDataStore(): SettingsPreferenceDataStore {
+        return SettingsPreferenceDataStore(
+            dataStoreSource,
+            backgroundScope,
+            UnconfinedTestDispatcher(testScheduler)
+        )
     }
 }

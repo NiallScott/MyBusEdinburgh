@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,41 +26,34 @@
 
 package uk.org.rivernile.android.bustracker.ui.neareststops
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
 import uk.org.rivernile.android.bustracker.core.config.ConfigRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetailsWithServices
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetailsWithServices
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.location.DeviceLocation
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [UiStateRetriever].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class UiStateRetrieverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var locationRepository: LocationRepository
@@ -71,54 +64,56 @@ class UiStateRetrieverTest {
 
     private lateinit var retriever: UiStateRetriever
 
-    @Before
+    @BeforeTest
     fun setUp() {
         retriever = UiStateRetriever(
-                locationRepository,
-                busStopsRepository,
-                configRepository)
+            locationRepository,
+            busStopsRepository,
+            configRepository
+        )
     }
 
     @Test
     fun getUiStateFlowWithNoLocationFeatureEmitsNoLocationFeatureError() = runTest {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(false)
+            .thenReturn(false)
 
-        val observer = retriever.getUiStateFlow(emptyFlow(), emptyFlow()).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.Error.NoLocationFeature)
+        retriever.getUiStateFlow(emptyFlow(), emptyFlow()).test {
+            assertEquals(UiState.Error.NoLocationFeature, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getUiStateFlowWithNoPermissionsEmitsPermissionsError() = runTest {
         givenHasLocationFeature()
 
-        val observer = retriever.getUiStateFlow(
+        retriever
+            .getUiStateFlow(
                 flowOf(PermissionsState(PermissionState.UNGRANTED, PermissionState.UNGRANTED)),
-                flowOf(null))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.Error.InsufficientLocationPermissions)
+                flowOf(null)
+            )
+            .test {
+                assertEquals(UiState.Error.InsufficientLocationPermissions, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
     fun getUiStateFlowWithLocationNotEnabledEmitsLocationOffError() = runTest {
         givenHasLocationFeature()
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(false))
+            .thenReturn(flowOf(false))
 
-        val observer = retriever.getUiStateFlow(
+        retriever
+            .getUiStateFlow(
                 flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
-                flowOf(null))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.Error.LocationOff)
+                flowOf(null)
+            )
+            .test {
+                assertEquals(UiState.Error.LocationOff, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -126,16 +121,17 @@ class UiStateRetrieverTest {
         givenHasLocationFeature()
         givenLocationIsEnabled()
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(emptyFlow())
+            .thenReturn(emptyFlow())
 
-        val observer = retriever.getUiStateFlow(
+        retriever
+            .getUiStateFlow(
                 flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
-                flowOf(null))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.Error.LocationUnknown)
+                flowOf(null)
+            )
+            .test {
+                assertEquals(UiState.Error.LocationUnknown, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -143,16 +139,17 @@ class UiStateRetrieverTest {
         givenHasLocationFeature()
         givenLocationIsEnabled()
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(emptyFlow())
+            .thenReturn(emptyFlow())
 
-        val observer = retriever.getUiStateFlow(
+        retriever
+            .getUiStateFlow(
                 flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.UNGRANTED)),
-                flowOf(null))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.Error.LocationUnknown)
+                flowOf(null)
+            )
+            .test {
+                assertEquals(UiState.Error.LocationUnknown, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -160,16 +157,17 @@ class UiStateRetrieverTest {
         givenHasLocationFeature()
         givenLocationIsEnabled()
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(emptyFlow())
+            .thenReturn(emptyFlow())
 
-        val observer = retriever.getUiStateFlow(
+        retriever
+            .getUiStateFlow(
                 flowOf(PermissionsState(PermissionState.UNGRANTED, PermissionState.GRANTED)),
-                flowOf(null))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiState.Error.LocationUnknown)
+                flowOf(null)
+            )
+            .test {
+                assertEquals(UiState.Error.LocationUnknown, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -177,29 +175,31 @@ class UiStateRetrieverTest {
         givenHasLocationFeature()
         givenLocationIsEnabled()
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(flowOf(DeviceLocation(10.0, 20.5)))
+            .thenReturn(flowOf(DeviceLocation(10.0, 20.5)))
         whenever(configRepository.nearestStopsLatitudeSpan)
-                .thenReturn(1.1)
+            .thenReturn(1.1)
         whenever(configRepository.nearestStopsLongitudeSpan)
-                .thenReturn(2.2)
-        whenever(busStopsRepository.getStopDetailsWithinSpanFlow(
+            .thenReturn(2.2)
+        whenever(busStopsRepository
+            .getStopDetailsWithinSpanFlow(
                 8.9,
                 18.3,
                 11.1,
                 22.7,
-                null))
-                .thenReturn(flowOf(null))
+                null
+            )
+        ).thenReturn(flowOf(null))
 
-        val observer = retriever.getUiStateFlow(
+        retriever
+            .getUiStateFlow(
                 flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
-                flowOf(null))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiState.Error.LocationUnknown,
-                UiState.Error.NoNearestStops)
+                flowOf(null)
+            )
+            .test {
+                assertEquals(UiState.Error.LocationUnknown, awaitItem())
+                assertEquals(UiState.Error.NoNearestStops, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -207,29 +207,31 @@ class UiStateRetrieverTest {
         givenHasLocationFeature()
         givenLocationIsEnabled()
         whenever(locationRepository.userVisibleLocationFlow)
-                .thenReturn(flowOf(DeviceLocation(10.0, 20.5)))
+            .thenReturn(flowOf(DeviceLocation(10.0, 20.5)))
         whenever(configRepository.nearestStopsLatitudeSpan)
-                .thenReturn(1.1)
+            .thenReturn(1.1)
         whenever(configRepository.nearestStopsLongitudeSpan)
-                .thenReturn(2.2)
-        whenever(busStopsRepository.getStopDetailsWithinSpanFlow(
+            .thenReturn(2.2)
+        whenever(busStopsRepository
+            .getStopDetailsWithinSpanFlow(
                 8.9,
                 18.3,
                 11.1,
                 22.7,
-                null))
-                .thenReturn(flowOf(emptyList()))
+                null
+            )
+        ).thenReturn(flowOf(emptyList()))
 
-        val observer = retriever.getUiStateFlow(
+        retriever
+            .getUiStateFlow(
                 flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
-                flowOf(null))
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiState.Error.LocationUnknown,
-                UiState.Error.NoNearestStops)
+                flowOf(null)
+            )
+            .test {
+                assertEquals(UiState.Error.LocationUnknown, awaitItem())
+                assertEquals(UiState.Error.NoNearestStops, awaitItem())
+                awaitComplete()
+            }
     }
 
     @Test
@@ -243,76 +245,95 @@ class UiStateRetrieverTest {
             .thenReturn(1.1)
         whenever(configRepository.nearestStopsLongitudeSpan)
             .thenReturn(2.2)
-        val stopDetails1 = MockStopDetailsWithServices(
+        val stopDetails1 = FakeStopDetailsWithServices(
             "111111",
-            MockStopName("Name 1", "Locality 1"),
-            MockStopLocation(1.1, 1.2),
+            FakeStopName("Name 1", "Locality 1"),
+            FakeStopLocation(1.1, 1.2),
             StopOrientation.NORTH,
-            "1, 2, 3")
-        val stopDetails2 = MockStopDetailsWithServices(
+            "1, 2, 3"
+        )
+        val stopDetails2 = FakeStopDetailsWithServices(
             "222222",
-            MockStopName("Name 2", "Locality 2"),
-            MockStopLocation(2.1, 2.2),
+            FakeStopName("Name 2", "Locality 2"),
+            FakeStopLocation(2.1, 2.2),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6")
-        val stopDetails3 = MockStopDetailsWithServices(
+            "4, 5, 6"
+        )
+        val stopDetails3 = FakeStopDetailsWithServices(
             "333333",
-            MockStopName("Name 3", null),
-            MockStopLocation(3.1, 3.2),
+            FakeStopName("Name 3", null),
+            FakeStopLocation(3.1, 3.2),
             StopOrientation.EAST,
-            null)
-        whenever(busStopsRepository.getStopDetailsWithinSpanFlow(
-            8.9,
-            18.3,
-            11.1,
-            22.7,
-            null))
-            .thenReturn(flowOf(listOf(stopDetails1, stopDetails2, stopDetails3)))
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(1.1, 1.2),
-            deviceLocation))
-            .thenReturn(2.2f)
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(2.1, 2.2),
-            deviceLocation))
-            .thenReturn(3.3f)
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(3.1, 3.2),
-            deviceLocation))
-            .thenReturn(1.1f)
+            null
+        )
+        whenever(busStopsRepository
+            .getStopDetailsWithinSpanFlow(
+                8.9,
+                18.3,
+                11.1,
+                22.7,
+                null
+            )
+        ).thenReturn(flowOf(listOf(stopDetails1, stopDetails2, stopDetails3)))
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(1.1, 1.2),
+                deviceLocation
+            )
+        ).thenReturn(2.2f)
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(2.1, 2.2),
+                deviceLocation
+            )
+        ).thenReturn(3.3f)
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(3.1, 3.2),
+                deviceLocation
+            )
+        ).thenReturn(1.1f)
 
-        val observer = retriever.getUiStateFlow(
-            flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
-            flowOf(null))
-            .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            UiState.Error.LocationUnknown,
-            UiState.Success(
-                listOf(
-                    UiNearestStop(
-                        "333333",
-                        MockStopName("Name 3", null),
-                        null,
-                        1,
-                        StopOrientation.EAST,
-                        false),
-                    UiNearestStop(
-                        "111111",
-                        MockStopName("Name 1", "Locality 1"),
-                        "1, 2, 3",
-                        2,
-                        StopOrientation.NORTH,
-                        false),
-                    UiNearestStop(
-                        "222222",
-                        MockStopName("Name 2", "Locality 2"),
-                        "4, 5, 6",
-                        3,
-                        StopOrientation.NORTH_EAST,
-                        false))))
+        retriever
+            .getUiStateFlow(
+                flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
+                flowOf(null)
+            )
+            .test {
+                assertEquals(UiState.Error.LocationUnknown, awaitItem())
+                assertEquals(
+                    UiState.Success(
+                        listOf(
+                            UiNearestStop(
+                                "333333",
+                                FakeStopName("Name 3", null),
+                                null,
+                                1,
+                                StopOrientation.EAST,
+                                false
+                            ),
+                            UiNearestStop(
+                                "111111",
+                                FakeStopName("Name 1", "Locality 1"),
+                                "1, 2, 3",
+                                2,
+                                StopOrientation.NORTH,
+                                false
+                            ),
+                            UiNearestStop(
+                                "222222",
+                                FakeStopName("Name 2", "Locality 2"),
+                                "4, 5, 6",
+                                3,
+                                StopOrientation.NORTH_EAST,
+                                false
+                            )
+                        )
+                    ),
+                    awaitItem()
+                )
+                awaitComplete()
+            }
     }
 
     @Test
@@ -326,76 +347,95 @@ class UiStateRetrieverTest {
             .thenReturn(1.1)
         whenever(configRepository.nearestStopsLongitudeSpan)
             .thenReturn(2.2)
-        val stopDetails1 = MockStopDetailsWithServices(
+        val stopDetails1 = FakeStopDetailsWithServices(
             "111111",
-            MockStopName("Name 1", "Locality 1"),
-            MockStopLocation(1.1, 1.2),
+            FakeStopName("Name 1", "Locality 1"),
+            FakeStopLocation(1.1, 1.2),
             StopOrientation.NORTH,
-            "1, 2, 3")
-        val stopDetails2 = MockStopDetailsWithServices(
+            "1, 2, 3"
+        )
+        val stopDetails2 = FakeStopDetailsWithServices(
             "222222",
-            MockStopName("Name 2", "Locality 2"),
-            MockStopLocation(2.1, 2.2),
+            FakeStopName("Name 2", "Locality 2"),
+            FakeStopLocation(2.1, 2.2),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6")
-        val stopDetails3 = MockStopDetailsWithServices(
+            "4, 5, 6"
+        )
+        val stopDetails3 = FakeStopDetailsWithServices(
             "333333",
-            MockStopName("Name 3", null),
-            MockStopLocation(3.1, 3.2),
+            FakeStopName("Name 3", null),
+            FakeStopLocation(3.1, 3.2),
             StopOrientation.EAST,
-            null)
-        whenever(busStopsRepository.getStopDetailsWithinSpanFlow(
-            8.9,
-            18.3,
-            11.1,
-            22.7,
-            emptySet()))
-            .thenReturn(flowOf(listOf(stopDetails1, stopDetails2, stopDetails3)))
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(1.1, 1.2),
-            deviceLocation))
-            .thenReturn(2.2f)
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(2.1, 2.2),
-            deviceLocation))
-            .thenReturn(3.3f)
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(3.1, 3.2),
-            deviceLocation))
-            .thenReturn(1.1f)
+            null
+        )
+        whenever(busStopsRepository
+            .getStopDetailsWithinSpanFlow(
+                8.9,
+                18.3,
+                11.1,
+                22.7,
+                emptySet()
+            )
+        ).thenReturn(flowOf(listOf(stopDetails1, stopDetails2, stopDetails3)))
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(1.1, 1.2),
+                deviceLocation
+            )
+        ).thenReturn(2.2f)
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(2.1, 2.2),
+                deviceLocation
+            )
+        ).thenReturn(3.3f)
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(3.1, 3.2),
+                deviceLocation
+            )
+        ).thenReturn(1.1f)
 
-        val observer = retriever.getUiStateFlow(
-            flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
-            flowOf(emptySet()))
-            .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            UiState.Error.LocationUnknown,
-            UiState.Success(
-                listOf(
-                    UiNearestStop(
-                        "333333",
-                        MockStopName("Name 3", null),
-                        null,
-                        1,
-                        StopOrientation.EAST,
-                        false),
-                    UiNearestStop(
-                        "111111",
-                        MockStopName("Name 1", "Locality 1"),
-                        "1, 2, 3",
-                        2,
-                        StopOrientation.NORTH,
-                        false),
-                    UiNearestStop(
-                        "222222",
-                        MockStopName("Name 2", "Locality 2"),
-                        "4, 5, 6",
-                        3,
-                        StopOrientation.NORTH_EAST,
-                        false))))
+        retriever
+            .getUiStateFlow(
+                flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
+                flowOf(emptySet())
+            )
+            .test {
+                assertEquals(UiState.Error.LocationUnknown, awaitItem())
+                assertEquals(
+                    UiState.Success(
+                        listOf(
+                            UiNearestStop(
+                                "333333",
+                                FakeStopName("Name 3", null),
+                                null,
+                                1,
+                                StopOrientation.EAST,
+                                false
+                            ),
+                            UiNearestStop(
+                                "111111",
+                                FakeStopName("Name 1", "Locality 1"),
+                                "1, 2, 3",
+                                2,
+                                StopOrientation.NORTH,
+                                false
+                            ),
+                            UiNearestStop(
+                                "222222",
+                                FakeStopName("Name 2", "Locality 2"),
+                                "4, 5, 6",
+                                3,
+                                StopOrientation.NORTH_EAST,
+                                false
+                            )
+                        )
+                    ),
+                    awaitItem()
+                )
+                awaitComplete()
+            }
     }
 
     @Test
@@ -409,100 +449,104 @@ class UiStateRetrieverTest {
             .thenReturn(1.1)
         whenever(configRepository.nearestStopsLongitudeSpan)
             .thenReturn(2.2)
-        val stopDetails1 = MockStopDetailsWithServices(
+        val stopDetails1 = FakeStopDetailsWithServices(
             "111111",
-            MockStopName("Name 1", "Locality 1"),
-            MockStopLocation(1.1, 1.2),
+            FakeStopName("Name 1", "Locality 1"),
+            FakeStopLocation(1.1, 1.2),
             StopOrientation.NORTH,
-            "1, 2, 3")
-        val stopDetails2 = MockStopDetailsWithServices(
+            "1, 2, 3"
+        )
+        val stopDetails2 = FakeStopDetailsWithServices(
             "222222",
-            MockStopName("Name 2", "Locality 2"),
-            MockStopLocation(2.1, 2.2),
+            FakeStopName("Name 2", "Locality 2"),
+            FakeStopLocation(2.1, 2.2),
             StopOrientation.NORTH_EAST,
-            "4, 5, 6")
-        val stopDetails3 = MockStopDetailsWithServices(
+            "4, 5, 6"
+        )
+        val stopDetails3 = FakeStopDetailsWithServices(
             "333333",
-            MockStopName("Name 3", null),
-            MockStopLocation(3.1, 3.2),
+            FakeStopName("Name 3", null),
+            FakeStopLocation(3.1, 3.2),
             StopOrientation.EAST,
-            null)
-        whenever(busStopsRepository.getStopDetailsWithinSpanFlow(
-            8.9,
-            18.3,
-            11.1,
-            22.7,
-            setOf("1", "2", "3")))
-            .thenReturn(flowOf(listOf(stopDetails1, stopDetails2, stopDetails3)))
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(1.1, 1.2),
-            deviceLocation))
-            .thenReturn(2.2f)
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(2.1, 2.2),
-            deviceLocation))
-            .thenReturn(3.3f)
-        whenever(locationRepository.distanceBetween(
-            DeviceLocation(3.1, 3.2),
-            deviceLocation))
-            .thenReturn(1.1f)
+            null
+        )
+        whenever(busStopsRepository
+            .getStopDetailsWithinSpanFlow(
+                8.9,
+                18.3,
+                11.1,
+                22.7,
+                setOf("1", "2", "3")
+            )
+        ).thenReturn(flowOf(listOf(stopDetails1, stopDetails2, stopDetails3)))
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(1.1, 1.2),
+                deviceLocation
+            )
+        ).thenReturn(2.2f)
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(2.1, 2.2),
+                deviceLocation
+            )
+        ).thenReturn(3.3f)
+        whenever(locationRepository
+            .distanceBetween(
+                DeviceLocation(3.1, 3.2),
+                deviceLocation
+            )
+        ).thenReturn(1.1f)
 
-        val observer = retriever.getUiStateFlow(
-            flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
-            flowOf(setOf("1", "2", "3")))
-            .test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            UiState.Error.LocationUnknown,
-            UiState.Success(
-                listOf(
-                    UiNearestStop(
-                        "333333",
-                        MockStopName("Name 3", null),
-                        null,
-                        1,
-                        StopOrientation.EAST,
-                        false),
-                    UiNearestStop(
-                        "111111",
-                        MockStopName("Name 1", "Locality 1"),
-                        "1, 2, 3",
-                        2,
-                        StopOrientation.NORTH,
-                        false),
-                    UiNearestStop(
-                        "222222",
-                        MockStopName("Name 2", "Locality 2"),
-                        "4, 5, 6",
-                        3,
-                        StopOrientation.NORTH_EAST,
-                        false))))
+        retriever
+            .getUiStateFlow(
+                flowOf(PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)),
+                flowOf(setOf("1", "2", "3"))
+            )
+            .test {
+                assertEquals(UiState.Error.LocationUnknown, awaitItem())
+                assertEquals(
+                    UiState.Success(
+                        listOf(
+                            UiNearestStop(
+                                "333333",
+                                FakeStopName("Name 3", null),
+                                null,
+                                1,
+                                StopOrientation.EAST,
+                                false
+                            ),
+                            UiNearestStop(
+                                "111111",
+                                FakeStopName("Name 1", "Locality 1"),
+                                "1, 2, 3",
+                                2,
+                                StopOrientation.NORTH,
+                                false
+                            ),
+                            UiNearestStop(
+                                "222222",
+                                FakeStopName("Name 2", "Locality 2"),
+                                "4, 5, 6",
+                                3,
+                                StopOrientation.NORTH_EAST,
+                                false
+                            )
+                        )
+                    ),
+                    awaitItem()
+                )
+                awaitComplete()
+            }
     }
 
     private fun givenHasLocationFeature() {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(true)
+            .thenReturn(true)
     }
 
     private fun givenLocationIsEnabled() {
         whenever(locationRepository.isLocationEnabledFlow)
-                .thenReturn(flowOf(true))
+            .thenReturn(flowOf(true))
     }
-
-    private data class MockStopName(
-        override val name: String,
-        override val locality: String?) : StopName
-
-    private data class MockStopLocation(
-        override val latitude: Double,
-        override val longitude: Double) : StopLocation
-
-    private data class MockStopDetailsWithServices(
-        override val stopCode: String,
-        override val stopName: StopName,
-        override val location: StopLocation,
-        override val orientation: StopOrientation,
-        override val serviceListing: String?) : StopDetailsWithServices
 }

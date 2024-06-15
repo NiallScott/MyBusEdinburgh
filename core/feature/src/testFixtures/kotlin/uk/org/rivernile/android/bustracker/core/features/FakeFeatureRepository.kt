@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,24 +24,25 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.core.endpoints.internal
-
-import dagger.Module
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import uk.org.rivernile.android.bustracker.core.endpoints.api.di.ApiModule
-import uk.org.rivernile.android.bustracker.core.endpoints.twitter.di.TwitterModule
+package uk.org.rivernile.android.bustracker.core.features
 
 /**
- * This [Module] provides dependencies for the internal API.
+ * A fake [FeatureRepository] for testing.
  *
  * @author Niall Scott
  */
-@InstallIn(SingletonComponent::class)
-@Module(
-    includes = [
-        ApiModule::class,
-        TwitterModule::class
-    ]
-)
-internal interface InternalApiModule
+class FakeFeatureRepository(
+    private val onHasStopMapUiFeature: () -> Boolean = { throw NotImplementedError() },
+    private val onHasArrivalAlertFeature: () -> Boolean = { throw NotImplementedError() },
+    private val onHasProximityAlertFeature: () -> Boolean = { throw NotImplementedError() },
+    private val onHasCameraFeature: () -> Boolean = { throw NotImplementedError() }
+) : FeatureRepository {
+
+    override val hasStopMapUiFeature get() = onHasStopMapUiFeature()
+
+    override val hasArrivalAlertFeature get() = onHasArrivalAlertFeature()
+
+    override val hasProximityAlertFeature get() = onHasProximityAlertFeature()
+
+    override val hasCameraFeature get() = onHasCameraFeature()
+}

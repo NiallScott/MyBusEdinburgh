@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2019 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -56,7 +56,8 @@ data class Vehicle(
     val isDelayed: Boolean,
     val isDiverted: Boolean,
     val isTerminus: Boolean,
-    val isPartRoute: Boolean): Comparable<Vehicle> {
+    val isPartRoute: Boolean
+): Comparable<Vehicle> {
 
     override fun compareTo(other: Vehicle) = departureTime.compareTo(other.departureTime)
 }

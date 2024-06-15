@@ -40,7 +40,8 @@ sealed interface LiveTimesResponse {
      * @property liveTimes The [LiveTimes].
      */
     data class Success(
-        val liveTimes: LiveTimes) : LiveTimesResponse
+        val liveTimes: LiveTimes
+    ) : LiveTimesResponse
 
     /**
      * This sealed interface and its descendants encapsulate error responses from requesting live
@@ -59,7 +60,8 @@ sealed interface LiveTimesResponse {
          * @param throwable The Io error.
          */
         data class Io(
-            val throwable: Throwable) : Error
+            val throwable: Throwable
+        ) : Error
 
         /**
          * This sealed interface and its descendants encapsulate possible server errors from
@@ -88,7 +90,8 @@ sealed interface LiveTimesResponse {
              * @property error A string which describes the error.
              */
             data class Other(
-                val error: String? = null) : ServerError
+                val error: String? = null
+            ) : ServerError
         }
     }
 }

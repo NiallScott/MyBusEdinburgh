@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -45,8 +45,9 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class AlertsStateRetriever @Inject constructor(
-        private val featureRepository: FeatureRepository,
-        private val alertsRepository: AlertsRepository) {
+    private val featureRepository: FeatureRepository,
+    private val alertsRepository: AlertsRepository
+) {
 
     /**
      * This [Flow] emits the visibility state of UI allowing the user to see or manipulate arrival
@@ -71,8 +72,8 @@ class AlertsStateRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getHasArrivalAlertFlow(selectedStopCodeFlow: Flow<String?>) =
-            selectedStopCodeFlow
-                    .flatMapLatest(this::loadHasArrivalAlert)
+        selectedStopCodeFlow
+            .flatMapLatest(this::loadHasArrivalAlert)
 
     /**
      * Get a [Flow] which uses the [selectedStopCodeFlow] as the currently selected stop code and
@@ -85,8 +86,8 @@ class AlertsStateRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getHasProximityAlertFlow(selectedStopCodeFlow: Flow<String?>) =
-            selectedStopCodeFlow
-                    .flatMapLatest(this::loadHasProximityAlert)
+        selectedStopCodeFlow
+            .flatMapLatest(this::loadHasProximityAlert)
 
     /**
      * Load whether the given [stopCode] has an arrival alert set against it or not. If the
@@ -99,7 +100,7 @@ class AlertsStateRetriever @Inject constructor(
      */
     private fun loadHasArrivalAlert(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
         alertsRepository.hasArrivalAlertFlow(it)
-                .onStart<Boolean?> { emit(null) }
+            .onStart<Boolean?> { emit(null) }
     } ?: flowOf(null)
 
     /**
@@ -113,6 +114,6 @@ class AlertsStateRetriever @Inject constructor(
      */
     private fun loadHasProximityAlert(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
         alertsRepository.hasProximityAlertFlow(it)
-                .onStart<Boolean?> { emit(null) }
+            .onStart<Boolean?> { emit(null) }
     } ?: flowOf(null)
 }

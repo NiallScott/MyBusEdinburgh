@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2023 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -29,11 +29,9 @@ package uk.org.rivernile.android.bustracker.ui.serviceschooser
 import androidx.lifecycle.SavedStateHandle
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
-import org.junit.Rule
-import org.junit.Test
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [Arguments].
@@ -41,9 +39,6 @@ import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
  * @author Niall Scott
  */
 class ArgumentsTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Test
     fun paramsFlowIsNullByDefault() = runTest {
@@ -60,7 +55,10 @@ class ArgumentsTest {
         val arguments = Arguments(
             SavedStateHandle(
                 mapOf(
-                    Arguments.STATE_PARAMS to allServices)))
+                    Arguments.STATE_PARAMS to allServices
+                )
+            )
+        )
 
         val result = arguments.paramsFlow.first()
 
@@ -73,7 +71,10 @@ class ArgumentsTest {
         val arguments = Arguments(
             SavedStateHandle(
                 mapOf(
-                    Arguments.STATE_PARAMS to stop)))
+                    Arguments.STATE_PARAMS to stop
+                )
+            )
+        )
 
         val result = arguments.paramsFlow.first()
 

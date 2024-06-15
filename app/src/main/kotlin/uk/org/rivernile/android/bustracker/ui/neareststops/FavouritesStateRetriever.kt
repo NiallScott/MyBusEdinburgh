@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -43,7 +43,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class FavouritesStateRetriever @Inject constructor(
-        private val favouritesRepository: FavouritesRepository) {
+    private val favouritesRepository: FavouritesRepository
+) {
 
     /**
      * Get a [Flow] which uses the [selectedStopCodeFlow] as the currently selected stop code and
@@ -56,8 +57,8 @@ class FavouritesStateRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getIsAddedAsFavouriteStopFlow(selectedStopCodeFlow: Flow<String?>) =
-            selectedStopCodeFlow
-                    .flatMapLatest(this::loadIsFavouriteStop)
+        selectedStopCodeFlow
+            .flatMapLatest(this::loadIsFavouriteStop)
 
     /**
      * Load whether the given [stopCode] is added as a user favourite or not. If the [stopCode]
@@ -70,6 +71,6 @@ class FavouritesStateRetriever @Inject constructor(
      */
     private fun loadIsFavouriteStop(stopCode: String?) = stopCode?.ifEmpty { null }?.let {
         favouritesRepository.isStopAddedAsFavouriteFlow(it)
-                .onStart<Boolean?> { emit(null) }
+            .onStart<Boolean?> { emit(null) }
     } ?: flowOf(null)
 }

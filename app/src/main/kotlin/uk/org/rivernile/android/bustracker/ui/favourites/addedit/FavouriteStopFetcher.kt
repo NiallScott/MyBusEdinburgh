@@ -50,7 +50,8 @@ import javax.inject.Inject
  */
 class FavouriteStopFetcher @Inject constructor(
     private val favouritesRepository: FavouritesRepository,
-    private val busStopsRepository: BusStopsRepository) {
+    private val busStopsRepository: BusStopsRepository
+) {
 
     /**
      * Load combined stop details for the given stop code.
@@ -116,7 +117,8 @@ class FavouriteStopFetcher @Inject constructor(
          * @property favouriteStop The loaded [FavouriteStop]. This may be `null` if it does not exist.
          */
         data class Item(
-            val favouriteStop: FavouriteStop?) : FavouriteResult
+            val favouriteStop: FavouriteStop?
+        ) : FavouriteResult
     }
 
     /**
@@ -137,6 +139,7 @@ class FavouriteStopFetcher @Inject constructor(
          * @property stopName The loaded [StopName]. This may be `null` if it does not exist.
          */
         data class Item(
-            val stopName: StopName?) : StopNameResult
+            val stopName: StopName?
+        ) : StopNameResult
     }
 }
