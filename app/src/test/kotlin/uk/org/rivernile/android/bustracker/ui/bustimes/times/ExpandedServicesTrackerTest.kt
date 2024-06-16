@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,21 +27,16 @@
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Rule
-import org.junit.Test
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [ExpandedServicesTracker].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class ExpandedServicesTrackerTest {
 
     companion object {
@@ -49,47 +44,41 @@ class ExpandedServicesTrackerTest {
         private const val STATE_KEY_EXPANDED_SERVICES = "expandedServices"
     }
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
     @Test
     fun initialStateWithNoPreviousStateIsEmpty() = runTest {
         val handle = SavedStateHandle()
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(emptySet())
+        tracker.expandedServicesFlow.test {
+            assertEquals(emptySet(), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun initialStateWithEmptyPreviousStateIsEmpty() = runTest {
         val handle = SavedStateHandle(
-            mapOf(
-                STATE_KEY_EXPANDED_SERVICES to arrayListOf<String>()))
+            mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf<String>())
+        )
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(emptySet())
+        tracker.expandedServicesFlow.test {
+            assertEquals(emptySet(), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun initialStateWithPopulatedServicesIsNonEmpty() = runTest {
         val handle = SavedStateHandle(
-            mapOf(
-                STATE_KEY_EXPANDED_SERVICES to arrayListOf("1", "2", "3")))
+            mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf("1", "2", "3"))
+        )
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(setOf("1", "2", "3"))
+        tracker.expandedServicesFlow.test {
+            assertEquals(setOf("1", "2", "3"), awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -97,71 +86,59 @@ class ExpandedServicesTrackerTest {
         val handle = SavedStateHandle()
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesFlow.test(this)
-        advanceUntilIdle()
-        tracker.onServiceClicked("1")
-        advanceUntilIdle()
-        observer.finish()
+        tracker.expandedServicesFlow.test {
+            tracker.onServiceClicked("1")
 
-        observer.assertValues(
-                emptySet(),
-                setOf("1"))
+            assertEquals(emptySet(), awaitItem())
+            assertEquals(setOf("1"), awaitItem())
+            ensureAllEventsConsumed()
+        }
         assertEquals(listOf("1"), handle[STATE_KEY_EXPANDED_SERVICES])
     }
 
     @Test
     fun onServiceClickedAfterPopulatedInitialStateRemovesService() = runTest {
         val handle = SavedStateHandle(
-                mapOf(
-                        STATE_KEY_EXPANDED_SERVICES to arrayListOf("1")))
+                mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf("1"))
+        )
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesFlow.test(this)
-        advanceUntilIdle()
-        tracker.onServiceClicked("1")
-        advanceUntilIdle()
-        observer.finish()
+        tracker.expandedServicesFlow.test {
+            tracker.onServiceClicked("1")
 
-        observer.assertValues(
-                setOf("1"),
-                emptySet())
+            assertEquals(setOf("1"), awaitItem())
+            assertEquals(emptySet(), awaitItem())
+            ensureAllEventsConsumed()
+        }
         assertEquals(arrayListOf<String>(), handle[STATE_KEY_EXPANDED_SERVICES])
     }
 
     @Test
     fun onServiceClickedWithMultipleRandomInteractionsYieldsCorrectState() = runTest {
         val handle = SavedStateHandle(
-            mapOf(
-                STATE_KEY_EXPANDED_SERVICES to arrayListOf("1")))
+            mapOf(STATE_KEY_EXPANDED_SERVICES to arrayListOf("1"))
+        )
         val tracker = ExpandedServicesTracker(handle)
 
-        val observer = tracker.expandedServicesFlow.test(this)
-        advanceUntilIdle()
-        tracker.onServiceClicked("2")
-        advanceUntilIdle()
-        tracker.onServiceClicked("3")
-        advanceUntilIdle()
-        tracker.onServiceClicked("1")
-        advanceUntilIdle()
-        tracker.onServiceClicked("4")
-        advanceUntilIdle()
-        tracker.onServiceClicked("4")
-        advanceUntilIdle()
-        tracker.onServiceClicked("4")
-        advanceUntilIdle()
-        tracker.onServiceClicked("2")
-        advanceUntilIdle()
-        observer.finish()
+        tracker.expandedServicesFlow.test {
+            tracker.onServiceClicked("2")
+            tracker.onServiceClicked("3")
+            tracker.onServiceClicked("1")
+            tracker.onServiceClicked("4")
+            tracker.onServiceClicked("4")
+            tracker.onServiceClicked("4")
+            tracker.onServiceClicked("2")
 
-        observer.assertValues(
-                setOf("1"),
-                setOf("1", "2"),
-                setOf("1", "2", "3"),
-                setOf("2", "3"),
-                setOf("2", "3", "4"),
-                setOf("2", "3"),
-                setOf("2", "3", "4"),
-                setOf("3", "4"))
+            assertEquals(setOf("1"), awaitItem())
+            assertEquals(setOf("1", "2"), awaitItem())
+            assertEquals(setOf("1", "2", "3"), awaitItem())
+            assertEquals(setOf("2", "3"), awaitItem())
+            assertEquals(setOf("2", "3", "4"), awaitItem())
+            assertEquals(setOf("2", "3"), awaitItem())
+            assertEquals(setOf("2", "3", "4"), awaitItem())
+            assertEquals(setOf("3", "4"), awaitItem())
+            ensureAllEventsConsumed()
+        }
         assertEquals(listOf("3", "4"), handle[STATE_KEY_EXPANDED_SERVICES])
     }
 }

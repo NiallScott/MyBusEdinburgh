@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,36 +26,27 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [LiveTimesTransform].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class LiveTimesTransformTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var preferenceRepository: PreferenceRepository
@@ -75,15 +66,16 @@ class LiveTimesTransformTest {
 
     private lateinit var transform: LiveTimesTransform
 
-    @Before
+    @BeforeTest
     fun setUp() {
         transform = LiveTimesTransform(
             preferenceRepository,
             transformations,
-            expandedServicesTracker)
+            expandedServicesTracker
+        )
 
         whenever(uiStop.services)
-                .thenReturn(uiServices1)
+            .thenReturn(uiServices1)
     }
 
     @Test
@@ -92,11 +84,10 @@ class LiveTimesTransformTest {
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(emptySet()))
 
-        val observer = transform.getLiveTimesTransformFlow(UiResult.InProgress).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiTransformedResult.InProgress)
+        transform.getLiveTimesTransformFlow(UiResult.InProgress).test {
+            assertEquals(UiTransformedResult.InProgress, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -106,11 +97,10 @@ class LiveTimesTransformTest {
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(emptySet()))
 
-        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR))
+        transform.getLiveTimesTransformFlow(uiResult).test {
+            assertEquals(UiTransformedResult.Error(123L, ErrorType.SERVER_ERROR), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -126,11 +116,10 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices1, emptySet()))
             .thenReturn(emptyList())
 
-        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiTransformedResult.Error(123L, ErrorType.NO_DATA))
+        transform.getLiveTimesTransformFlow(uiResult).test {
+            assertEquals(UiTransformedResult.Error(123L, ErrorType.NO_DATA), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -149,23 +138,18 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices1, setOf("1")))
             .thenReturn(listOf(uiLiveTimesItem1))
 
-        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)))
+        transform.getLiveTimesTransformFlow(uiResult).test {
+            assertEquals(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getLiveTimesTransformFlowWithSuccessCopesWithNightServicePreferenceChange() = runTest {
         whenever(preferenceRepository.isLiveTimesShowNightServicesEnabledFlow)
-            .thenReturn(flow {
-                emit(false)
-                delay(200L)
-                emit(true)
-            })
+            .thenReturn(intervalFlowOf(0L, 200L, false, true))
         whenever(preferenceRepository.isLiveTimesSortByTimeFlow)
-                .thenReturn(flowOf(false))
+            .thenReturn(flowOf(false))
         val uiResult = UiResult.Success(123L, uiStop)
         whenever(expandedServicesTracker.expandedServicesFlow)
             .thenReturn(flowOf(setOf("1")))
@@ -182,13 +166,11 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices2, setOf("1")))
             .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
+        transform.getLiveTimesTransformFlow(uiResult).test {
+            assertEquals(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)), awaitItem())
+            assertEquals(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -211,13 +193,11 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices2, setOf("1")))
             .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
+        transform.getLiveTimesTransformFlow(uiResult).test {
+            assertEquals(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)), awaitItem())
+            assertEquals(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -238,13 +218,11 @@ class LiveTimesTransformTest {
         whenever(transformations.applyExpansions(uiServices1, setOf("1", "2")))
             .thenReturn(listOf(uiLiveTimesItem2))
 
-        val observer = transform.getLiveTimesTransformFlow(uiResult).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)),
-            UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)))
+        transform.getLiveTimesTransformFlow(uiResult).test {
+            assertEquals(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem1)), awaitItem())
+            assertEquals(UiTransformedResult.Success(123L, listOf(uiLiveTimesItem2)), awaitItem())
+            awaitComplete()
+        }
     }
 
     private fun givenPreferencesReturnsFlowWithNominalValues() {

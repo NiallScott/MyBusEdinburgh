@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,7 +51,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class DistanceRetriever @Inject constructor(
-    private val locationRepository: LocationRepository) {
+    private val locationRepository: LocationRepository
+) {
 
     /**
      * Create a [Flow] which emits [UiItem.Distance] items. As a pre-requisite, it requires the
@@ -67,7 +68,8 @@ class DistanceRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun createDistanceFlow(
         permissionsStateFlow: Flow<PermissionsState>,
-        stopDetailsFlow: Flow<StopDetails?>): Flow<UiItem.Distance> {
+        stopDetailsFlow: Flow<StopDetails?>
+    ): Flow<UiItem.Distance> {
         return if (locationRepository.hasLocationFeature) {
             permissionsStateFlow
                 .map(this::isPermissionsSufficient)
@@ -93,7 +95,8 @@ class DistanceRetriever @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun handlePermissionsStateChanged(
         isPermissionsSufficient: Boolean,
-        stopDetailsFlow: Flow<StopDetails?>): Flow<UiItem.Distance> {
+        stopDetailsFlow: Flow<StopDetails?>
+    ): Flow<UiItem.Distance> {
         return if (isPermissionsSufficient) {
             locationRepository.isLocationEnabledFlow
                 .distinctUntilChanged()
@@ -116,7 +119,8 @@ class DistanceRetriever @Inject constructor(
      */
     private fun handleLocationEnabled(
         isEnabled: Boolean,
-        stopDetailsFlow: Flow<StopDetails?>) = if (isEnabled) {
+        stopDetailsFlow: Flow<StopDetails?>
+    ) = if (isEnabled) {
         locationRepository.userVisibleLocationFlow
             .combine(stopDetailsFlow, this::calculateDistanceBetween)
             .onStart { emit(UiItem.Distance.Unknown) }
@@ -141,7 +145,8 @@ class DistanceRetriever @Inject constructor(
      */
     private fun calculateDistanceBetween(
         location: DeviceLocation,
-        stopDetails: StopDetails?): UiItem.Distance {
+        stopDetails: StopDetails?
+    ): UiItem.Distance {
         val stopLocation = stopDetails?.let {
             DeviceLocation(it.location.latitude, it.location.longitude)
         } ?: return UiItem.Distance.Unknown

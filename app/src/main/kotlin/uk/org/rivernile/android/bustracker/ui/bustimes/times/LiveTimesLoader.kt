@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -60,7 +60,8 @@ class LiveTimesLoader @Inject constructor(
     private val refreshController: RefreshController,
     private val liveTimesRetriever: LiveTimesRetriever,
     private val liveTimesTransform: LiveTimesTransform,
-    private val preferenceRepository: PreferenceRepository) {
+    private val preferenceRepository: PreferenceRepository
+) {
 
     /**
      * A [Flow] which emits events relating to loading bus times, including the actual result.
@@ -81,9 +82,10 @@ class LiveTimesLoader @Inject constructor(
         combine(
             arguments.stopCodeFlow,
             preferenceRepository.liveTimesNumberOfDeparturesFlow,
-            refreshController.refreshTriggerFlow) { stopCode, numberOfDepartures, _ ->
-                LoadParams(stopCode, numberOfDepartures)
-            }
+            refreshController.refreshTriggerFlow
+        ) { stopCode, numberOfDepartures, _ ->
+            LoadParams(stopCode, numberOfDepartures)
+        }
 
     /**
      * Given [params], load live times with these parameters.
@@ -104,6 +106,7 @@ class LiveTimesLoader @Inject constructor(
      * @param numberOfDepartures The number of departures per service.
      */
     private data class LoadParams(
-            val stopCode: String?,
-            val numberOfDepartures: Int)
+        val stopCode: String?,
+        val numberOfDepartures: Int
+    )
 }

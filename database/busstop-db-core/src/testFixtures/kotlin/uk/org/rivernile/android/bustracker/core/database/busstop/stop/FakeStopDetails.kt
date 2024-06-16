@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
+ * Copyright (C) 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -24,30 +24,16 @@
  *
  */
 
-package uk.org.rivernile.android.bustracker.ui.bustimes.times
-
-import androidx.lifecycle.LiveData
+package uk.org.rivernile.android.bustracker.core.database.busstop.stop
 
 /**
- * This is a [LiveData] object that's used as convenience to monitor whether the lifecycle is
- * currently in an active state and forwards this state to [RefreshController].
+ * A fake [StopDetails] for use in tests.
  *
- * @param refreshController The [RefreshController] to forward the active state to.
  * @author Niall Scott
  */
-class RefreshLiveData(
-    private val refreshController: RefreshController
-) : LiveData<Unit>() {
-
-    override fun onActive() {
-        super.onActive()
-
-        refreshController.setActiveState(true)
-    }
-
-    override fun onInactive() {
-        super.onInactive()
-
-        refreshController.setActiveState(false)
-    }
-}
+data class FakeStopDetails(
+    override val stopCode: String,
+    override val stopName: StopName,
+    override val location: StopLocation,
+    override val orientation: StopOrientation
+) : StopDetails

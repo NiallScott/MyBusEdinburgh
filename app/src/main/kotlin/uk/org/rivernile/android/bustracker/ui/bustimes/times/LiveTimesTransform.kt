@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,7 +50,8 @@ import javax.inject.Inject
 class LiveTimesTransform @Inject constructor(
     private val preferenceRepository: PreferenceRepository,
     private val transformations: LiveTimesTransformations,
-    private val expandedServicesTracker: ExpandedServicesTracker) {
+    private val expandedServicesTracker: ExpandedServicesTracker
+) {
 
     /**
      * Get a [Flow] which is the result of transforming the [UiResult] in to a
@@ -96,7 +97,8 @@ class LiveTimesTransform @Inject constructor(
         result: UiResult,
         sortByTime: Boolean,
         showNightServices: Boolean,
-        expandedServices: Set<String>): UiTransformedResult {
+        expandedServices: Set<String>
+    ): UiTransformedResult {
         return when (result) {
             is UiResult.InProgress -> UiTransformedResult.InProgress
             is UiResult.Success -> mapSuccess(
@@ -125,7 +127,8 @@ class LiveTimesTransform @Inject constructor(
         success: UiResult.Success,
         sortByTime: Boolean,
         showNightServices: Boolean,
-        expandedServices: Set<String>): UiTransformedResult {
+        expandedServices: Set<String>
+    ): UiTransformedResult {
         return success
             .stop
             .services

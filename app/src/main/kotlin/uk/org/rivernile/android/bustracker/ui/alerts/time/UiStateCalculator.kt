@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -51,17 +51,17 @@ class UiStateCalculator @Inject constructor() {
      * @return A [Flow] of [UiState]s, which emits new items when relevant states change.
      */
     fun createUiStateFlow(
-            stopCodeFlow: Flow<String?>,
-            stopDetailsFlow: Flow<StopDetails?>,
-            availableServicesFlow: Flow<List<String>?>,
-            permissionsFlow: Flow<PermissionsState>) =
-            combine(
-                    stopCodeFlow,
-                    stopDetailsFlow,
-                    availableServicesFlow,
-                    permissionsFlow,
-                    this::calculateUiState)
-                    .distinctUntilChanged()
+        stopCodeFlow: Flow<String?>,
+        stopDetailsFlow: Flow<StopDetails?>,
+        availableServicesFlow: Flow<List<String>?>,
+        permissionsFlow: Flow<PermissionsState>
+    ) = combine(
+        stopCodeFlow,
+        stopDetailsFlow,
+        availableServicesFlow,
+        permissionsFlow,
+        this::calculateUiState
+    ).distinctUntilChanged()
 
     /**
      * Calculate the current [UiState] based upon the state of other data streams.
@@ -73,10 +73,11 @@ class UiStateCalculator @Inject constructor() {
      * @return The calculated [UiState].
      */
     private fun calculateUiState(
-            stopCode: String?,
-            stopDetails: StopDetails?,
-            availableServices: List<String>?,
-            permissionsState: PermissionsState): UiState {
+        stopCode: String?,
+        stopDetails: StopDetails?,
+        availableServices: List<String>?,
+        permissionsState: PermissionsState
+    ): UiState {
         val postNotificationPermissionState = permissionsState.postNotificationsPermission
 
         return when {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -50,7 +50,8 @@ import javax.inject.Inject
  */
 class AlertsRetriever @Inject constructor(
     private val alertsRepository: AlertsRepository,
-    private val busStopsRepository: BusStopsRepository,) {
+    private val busStopsRepository: BusStopsRepository
+) {
 
     /**
      * This produces a [Flow] which emits [List]s of [UiAlert]s.
@@ -89,7 +90,8 @@ class AlertsRetriever @Inject constructor(
      */
     private fun combineAlertsAndStopDetails(
         alerts: List<Alert>,
-        stopDetailsMap: Map<String, StopDetails>?) = alerts.mapNotNull {
+        stopDetailsMap: Map<String, StopDetails>?
+    ) = alerts.mapNotNull {
         val stopDetails = stopDetailsMap?.get(it.stopCode)
 
         when (it) {
@@ -109,13 +111,14 @@ class AlertsRetriever @Inject constructor(
      */
     private fun combineArrivalAlertAndStopDetails(
         alert: ArrivalAlert,
-        stopDetails: StopDetails?) =
-        UiAlert.ArrivalAlert(
-            alert.id,
-            alert.stopCode,
-            stopDetails,
-            alert.serviceNames,
-            alert.timeTrigger)
+        stopDetails: StopDetails?
+    ) = UiAlert.ArrivalAlert(
+        alert.id,
+        alert.stopCode,
+        stopDetails,
+        alert.serviceNames,
+        alert.timeTrigger
+    )
 
     /**
      * Given a [ProximityAlert] and possible [StopDetails], combine them in to a single
@@ -127,10 +130,11 @@ class AlertsRetriever @Inject constructor(
      */
     private fun combineProximityAlertAndStopDetails(
         alert: ProximityAlert,
-        stopDetails: StopDetails?) =
-        UiAlert.ProximityAlert(
-            alert.id,
-            alert.stopCode,
-            stopDetails,
-            alert.distanceFrom)
+        stopDetails: StopDetails?
+    ) = UiAlert.ProximityAlert(
+        alert.id,
+        alert.stopCode,
+        stopDetails,
+        alert.distanceFrom
+    )
 }

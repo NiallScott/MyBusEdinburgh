@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,19 +26,18 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
+import app.cash.turbine.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [LastRefreshTimeCalculator].
@@ -54,78 +53,63 @@ class LastRefreshTimeCalculatorTest {
         private const val MORE_THAN_ONE_HOUR_MILLIS = 7200000L
     }
 
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
-
     @Mock
     private lateinit var timeUtils: TimeUtils
 
     private lateinit var calculator: LastRefreshTimeCalculator
 
-    @Before
+    @BeforeTest
     fun setUp() {
         calculator = LastRefreshTimeCalculator(timeUtils)
     }
 
     @Test
     fun getLastRefreshTimeFlowWithNegativeRefreshTimeOnlyEmitsNever() = runTest {
-        val observer = calculator.getLastRefreshTimeFlow(-1).test(this)
-        advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
-        observer.finish()
+        calculator.getLastRefreshTimeFlow(-1).test {
+            advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
 
-        observer.assertValues(LastRefreshTime.Never)
+            assertEquals(LastRefreshTime.Never, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getLastRefreshTimeFlowWithZeroRefreshTimeOnlyEmitsNever() = runTest {
-        val observer = calculator.getLastRefreshTimeFlow(0).test(this)
-        advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
-        observer.finish()
+        calculator.getLastRefreshTimeFlow(0).test {
+            advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
 
-        observer.assertValues(LastRefreshTime.Never)
+            assertEquals(LastRefreshTime.Never, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getLastRefreshTimeFlowWithNegativeNumberOfMinutesEmitsNever() = runTest {
         whenever(timeUtils.currentTimeMills)
-                .thenReturn(350000L)
+            .thenReturn(350000L)
 
-        val observer = calculator.getLastRefreshTimeFlow(3600000L).test(this)
-        advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
-        observer.finish()
+        calculator.getLastRefreshTimeFlow(3600000L).test {
+            advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
 
-        observer.assertValues(LastRefreshTime.Never)
+            assertEquals(LastRefreshTime.Never, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getLastRefreshTimeFlowWithTimeProgressingEmitsExpectedElements() = runTest {
         whenever(timeUtils.currentTimeMills)
-                .thenReturn(50001L, 600001L, 600002L, 1800001L, 3540001L, 3700001L)
+            .thenReturn(50001L, 600001L, 600002L, 1800001L, 3540001L, 3700001L)
 
-        val observer = calculator.getLastRefreshTimeFlow(1L).test(this)
-        advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
-        observer.finish()
+        calculator.getLastRefreshTimeFlow(1L).test {
+            advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
 
-        observer.assertValues(
-                LastRefreshTime.Now,
-                LastRefreshTime.Minutes(10),
-                LastRefreshTime.Minutes(30),
-                LastRefreshTime.Minutes(59),
-                LastRefreshTime.MoreThanOneHour)
-    }
-
-    @Test
-    fun getLastRefreshTimeFlowWithCancellationEmitsExpectedItems() = runTest {
-        whenever(timeUtils.currentTimeMills)
-                .thenReturn(50001L, 600001L, 600002L, 1800001L, 3540001L, 3700001L)
-
-        val observer = calculator.getLastRefreshTimeFlow(1L).test(this)
-        advanceTimeBy(25000L)
-        observer.finish()
-        advanceTimeBy(MORE_THAN_ONE_HOUR_MILLIS)
-
-        observer.assertValues(
-                LastRefreshTime.Now,
-                LastRefreshTime.Minutes(10))
+            assertEquals(LastRefreshTime.Now, awaitItem())
+            assertEquals(LastRefreshTime.Minutes(10), awaitItem())
+            assertEquals(LastRefreshTime.Minutes(30), awaitItem())
+            assertEquals(LastRefreshTime.Minutes(59), awaitItem())
+            assertEquals(LastRefreshTime.MoreThanOneHour, awaitItem())
+            awaitComplete()
+        }
     }
 }

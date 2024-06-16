@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2020 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,13 +26,9 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.times
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -42,21 +38,18 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.preferences.PreferenceRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
 import uk.org.rivernile.android.bustracker.coroutines.intervalFlowOf
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [LiveTimesLoader].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class LiveTimesLoaderTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var arguments: Arguments
@@ -71,14 +64,15 @@ class LiveTimesLoaderTest {
 
     private lateinit var loader: LiveTimesLoader
 
-    @Before
+    @BeforeTest
     fun setUp() {
         loader = LiveTimesLoader(
             arguments,
             refreshController,
             liveTimesRetriever,
             liveTimesTransform,
-            preferenceRepository)
+            preferenceRepository
+        )
     }
 
     @Test
@@ -90,15 +84,14 @@ class LiveTimesLoaderTest {
         whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
             .thenReturn(flowOf(4))
         val expected = mock<UiTransformedResult.Error>()
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(
-            UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE)))
-            .thenReturn(flowOf(expected))
+        whenever(liveTimesTransform
+            .getLiveTimesTransformFlow(UiResult.Error(Long.MAX_VALUE, ErrorType.NO_STOP_CODE))
+        ).thenReturn(flowOf(expected))
 
-        val observer = loader.liveTimesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(expected)
+        loader.liveTimesFlow.test {
+            assertEquals(expected, awaitItem())
+            awaitComplete()
+        }
         verify(liveTimesRetriever, never())
                 .getLiveTimesFlow(any(), any())
     }
@@ -111,19 +104,18 @@ class LiveTimesLoaderTest {
         whenever(refreshController.refreshTriggerFlow)
             .thenReturn(flowOf(Unit))
         whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
-                .thenReturn(flowOf(4))
+            .thenReturn(flowOf(4))
         whenever(liveTimesRetriever.getLiveTimesFlow("123456", 4))
-                .thenReturn(flowOf(UiResult.Success(123L, stop)))
+            .thenReturn(flowOf(UiResult.Success(123L, stop)))
         val expected = mock<UiTransformedResult.Success>()
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(
-            UiResult.Success(123L, stop)))
-            .thenReturn(flowOf(expected))
+        whenever(liveTimesTransform
+            .getLiveTimesTransformFlow(UiResult.Success(123L, stop))
+        ).thenReturn(flowOf(expected))
 
-        val observer = loader.liveTimesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(expected)
+        loader.liveTimesFlow.test {
+            assertEquals(expected, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -142,18 +134,18 @@ class LiveTimesLoaderTest {
             .thenReturn(flowOf(UiResult.Success(123L, stop2)))
         val expected1 = mock<UiTransformedResult.Success>()
         val expected2 = mock<UiTransformedResult.Success>()
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(
-            UiResult.Success(123L, stop1)))
-            .thenReturn(flowOf(expected1))
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(
-            UiResult.Success(123L, stop2)))
-            .thenReturn(flowOf(expected2))
+        whenever(liveTimesTransform
+            .getLiveTimesTransformFlow(UiResult.Success(123L, stop1))
+        ).thenReturn(flowOf(expected1))
+        whenever(liveTimesTransform
+            .getLiveTimesTransformFlow(UiResult.Success(123L, stop2))
+        ).thenReturn(flowOf(expected2))
 
-        val observer = loader.liveTimesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(expected1, expected2)
+        loader.liveTimesFlow.test {
+            assertEquals(expected1, awaitItem())
+            assertEquals(expected2, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -171,18 +163,18 @@ class LiveTimesLoaderTest {
             .thenReturn(flowOf(UiResult.Success(123L, stop)))
         val expected1 = mock<UiTransformedResult.Error>()
         val expected2 = mock<UiTransformedResult.Success>()
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(
-            UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)))
-            .thenReturn(flowOf(expected1))
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(
-            UiResult.Success(123L, stop)))
-            .thenReturn(flowOf(expected2))
+        whenever(liveTimesTransform
+            .getLiveTimesTransformFlow(UiResult.Error(123L, ErrorType.NO_CONNECTIVITY))
+        ).thenReturn(flowOf(expected1))
+        whenever(liveTimesTransform
+            .getLiveTimesTransformFlow(UiResult.Success(123L, stop))
+        ).thenReturn(flowOf(expected2))
 
-        val observer = loader.liveTimesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(expected1, expected2)
+        loader.liveTimesFlow.test {
+            assertEquals(expected1, awaitItem())
+            assertEquals(expected2, awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
@@ -195,22 +187,22 @@ class LiveTimesLoaderTest {
         whenever(refreshController.refreshTriggerFlow)
             .thenReturn(intervalFlowOf(0L, 10L, Unit, Unit))
         whenever(preferenceRepository.liveTimesNumberOfDeparturesFlow)
-                .thenReturn(flowOf(4))
+            .thenReturn(flowOf(4))
         whenever(liveTimesRetriever.getLiveTimesFlow("123456", 4))
-                .thenReturn(loadFlow1, loadFlow2)
+            .thenReturn(loadFlow1, loadFlow2)
         val expected1 = mock<UiTransformedResult.Error>()
         val expected2 = mock<UiTransformedResult.Success>()
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(
-            UiResult.Error(123L, ErrorType.NO_CONNECTIVITY)))
-            .thenReturn(flowOf(expected1))
-        whenever(liveTimesTransform.getLiveTimesTransformFlow(
-            UiResult.Success(123L, stop)))
-            .thenReturn(flowOf(expected2))
+        whenever(liveTimesTransform
+            .getLiveTimesTransformFlow(UiResult.Error(123L, ErrorType.NO_CONNECTIVITY))
+        ).thenReturn(flowOf(expected1))
+        whenever(liveTimesTransform
+            .getLiveTimesTransformFlow(UiResult.Success(123L, stop))
+        ).thenReturn(flowOf(expected2))
 
-        val observer = loader.liveTimesFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(expected1, expected2)
+        loader.liveTimesFlow.test {
+            assertEquals(expected1, awaitItem())
+            assertEquals(expected2, awaitItem())
+            awaitComplete()
+        }
     }
 }

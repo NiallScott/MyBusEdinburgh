@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2021 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -46,7 +46,8 @@ import javax.inject.Inject
  * @author Niall Scott
  */
 class UiStateCalculator @Inject constructor(
-        private val locationRepository: LocationRepository) {
+    private val locationRepository: LocationRepository
+) {
 
     /**
      * Create a [Flow] which emits [UiState]s based on other relevant states.
@@ -58,14 +59,14 @@ class UiStateCalculator @Inject constructor(
      * @return A [Flow] of [UiState]s, which emits new items when relevant states change.
      */
     fun createUiStateFlow(
-            permissionStateFlow: Flow<PermissionState>,
-            stopDetailsFlow: Flow<StopDetails?>) =
-            combine(
-                    locationEnabledFlow,
-                    permissionStateFlow,
-                    stopDetailsFlow,
-                    this::calculateUiState)
-                    .distinctUntilChanged()
+        permissionStateFlow: Flow<PermissionState>,
+        stopDetailsFlow: Flow<StopDetails?>
+    ) = combine(
+        locationEnabledFlow,
+        permissionStateFlow,
+        stopDetailsFlow,
+        this::calculateUiState
+    ).distinctUntilChanged()
 
     /**
      * A [Flow] which emits the enabled state of device location services.
@@ -88,9 +89,10 @@ class UiStateCalculator @Inject constructor(
      * @return The calculated [UiState].
      */
     private fun calculateUiState(
-            locationEnabled: Boolean,
-            permissionState: PermissionState,
-            stopDetails: StopDetails?) = when {
+        locationEnabled: Boolean,
+        permissionState: PermissionState,
+        stopDetails: StopDetails?
+    ) = when {
         !locationRepository.hasLocationFeature -> UiState.ERROR_NO_LOCATION_FEATURE
         permissionState == PermissionState.UNGRANTED -> UiState.ERROR_PERMISSION_UNGRANTED
         permissionState == PermissionState.DENIED -> UiState.ERROR_PERMISSION_DENIED

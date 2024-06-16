@@ -74,11 +74,13 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
             .thenReturn(liveTimesFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
-            .thenReturn(UiResult.InProgress)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        ).thenReturn(UiResult.InProgress)
 
         retriever.getLiveTimesFlow("123456", 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
@@ -96,14 +98,16 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, errorResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
             .thenReturn(liveTimesFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
-            .thenReturn(UiResult.InProgress)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", errorResult,
-            null))
-            .thenReturn(errorUiResult)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        ).thenReturn(UiResult.InProgress)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", errorResult, null)
+        ).thenReturn(errorUiResult)
 
         retriever.getLiveTimesFlow("123456", 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
@@ -128,14 +132,16 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
             .thenReturn(liveTimesFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
-            .thenReturn(UiResult.InProgress)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-            null))
-            .thenReturn(errorUiResult)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        ).thenReturn(UiResult.InProgress)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", successResult, null)
+        ).thenReturn(errorUiResult)
 
         retriever.getLiveTimesFlow("123456", 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
@@ -167,14 +173,16 @@ class LiveTimesRetrieverTest {
         val liveTimesFlow = flowOf(LiveTimesResult.InProgress, successResult)
         whenever(liveTimesRepository.getLiveTimesFlow("123456", 4))
             .thenReturn(liveTimesFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
-            .thenReturn(UiResult.InProgress)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-            null))
-            .thenReturn(errorUiResult)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        ).thenReturn(UiResult.InProgress)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", successResult, null)
+        ).thenReturn(errorUiResult)
 
         retriever.getLiveTimesFlow("123456", 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
@@ -231,14 +239,16 @@ class LiveTimesRetrieverTest {
             .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
             .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
-            .thenReturn(UiResult.InProgress)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-            null))
-            .thenReturn(successUiResult)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        ).thenReturn(UiResult.InProgress)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", successResult, null)
+        ).thenReturn(successUiResult)
 
         retriever.getLiveTimesFlow("123456", 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
@@ -291,13 +301,15 @@ class LiveTimesRetrieverTest {
             .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
             .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
-            .thenReturn(UiResult.InProgress)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-            emptyMap()))
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        ).thenReturn(UiResult.InProgress)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", successResult, emptyMap()))
             .thenReturn(successUiResult)
 
         retriever.getLiveTimesFlow("123456", 4).test {
@@ -353,14 +365,17 @@ class LiveTimesRetrieverTest {
             .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
             .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        )
             .thenReturn(UiResult.InProgress)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-            serviceColours))
-            .thenReturn(successUiResult)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", successResult, serviceColours)
+        ).thenReturn(successUiResult)
 
         retriever.getLiveTimesFlow("123456", 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
@@ -445,14 +460,16 @@ class LiveTimesRetrieverTest {
             .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1", "2", "3")))
             .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
-            .thenReturn(UiResult.InProgress)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-            serviceColours))
-            .thenReturn(successUiResult)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        ).thenReturn(UiResult.InProgress)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", successResult, serviceColours)
+        ).thenReturn(successUiResult)
 
         retriever.getLiveTimesFlow("123456", 4).test {
             assertEquals(UiResult.InProgress, awaitItem())
@@ -522,17 +539,19 @@ class LiveTimesRetrieverTest {
             .thenReturn(liveTimesFlow)
         whenever(servicesRepository.getColoursForServicesFlow(setOf("1")))
             .thenReturn(serviceColoursFlow)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult(
-            "123456",
-            LiveTimesResult.InProgress,
-            null))
-            .thenReturn(UiResult.InProgress)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-            serviceColours1))
-            .thenReturn(successUiResult1)
-        whenever(liveTimesMapper.mapLiveTimesAndColoursToUiResult("123456", successResult,
-            serviceColours2))
-            .thenReturn(successUiResult2)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult(
+                "123456",
+                LiveTimesResult.InProgress,
+                null
+            )
+        ).thenReturn(UiResult.InProgress)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", successResult, serviceColours1)
+        ).thenReturn(successUiResult1)
+        whenever(liveTimesMapper
+            .mapLiveTimesAndColoursToUiResult("123456", successResult, serviceColours2)
+        ).thenReturn(successUiResult2)
 
         retriever.getLiveTimesFlow("123456", 4).test {
             assertEquals(UiResult.InProgress, awaitItem())

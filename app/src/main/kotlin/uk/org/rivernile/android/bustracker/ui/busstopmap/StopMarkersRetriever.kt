@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -49,7 +49,8 @@ import javax.inject.Inject
 class StopMarkersRetriever @Inject constructor(
     private val savedState: SavedStateHandle,
     private val busStopsRepository: BusStopsRepository,
-    private val serviceListingRetriever: ServiceListingRetriever) {
+    private val serviceListingRetriever: ServiceListingRetriever
+) {
 
     companion object {
 
@@ -62,14 +63,14 @@ class StopMarkersRetriever @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     val stopMarkersFlow: Flow<List<UiStopMarker>?> get() =
-            savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
-                    .flatMapLatest(this::loadBusStops)
-                    .combine(serviceListingFlow, this::mapToUiStopMarkers)
+        savedState.getStateFlow<Array<String>?>(STATE_SELECTED_SERVICES, null)
+            .flatMapLatest(this::loadBusStops)
+            .combine(serviceListingFlow, this::mapToUiStopMarkers)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val serviceListingFlow get() =
         savedState.getStateFlow<String?>(STATE_SELECTED_STOP_CODE, null)
-                .flatMapLatest(serviceListingRetriever::getServiceListingFlow)
+            .flatMapLatest(serviceListingRetriever::getServiceListingFlow)
 
     /**
      * This is called when stops should be loaded.
@@ -77,7 +78,7 @@ class StopMarkersRetriever @Inject constructor(
      * @param filteredServices Filtered services, if any.
      */
     private fun loadBusStops(filteredServices: Array<String>?) =
-            busStopsRepository.getStopDetailsWithServiceFilterFlow(filteredServices?.toSet())
+        busStopsRepository.getStopDetailsWithServiceFilterFlow(filteredServices?.toSet())
 
     /**
      * Given an optional [List] of [StopDetails] and an optional [UiServiceListing], map this to a
@@ -89,12 +90,12 @@ class StopMarkersRetriever @Inject constructor(
      */
     private fun mapToUiStopMarkers(
         stopDetails: List<StopDetails>?,
-        serviceListing: UiServiceListing?) =
-        stopDetails?.map { sd ->
-            val sl = serviceListing?.takeIf { it.stopCode == sd.stopCode }
+        serviceListing: UiServiceListing?
+    ) = stopDetails?.map { sd ->
+        val sl = serviceListing?.takeIf { it.stopCode == sd.stopCode }
 
-            mapToUiStopMarker(sd, sl)
-        }?.ifEmpty { null }
+        mapToUiStopMarker(sd, sl)
+    }?.ifEmpty { null }
 
     /**
      * Given a [StopDetails], map this to a [UiStopMarker]. If [serviceListing] is not `null`, this
@@ -106,11 +107,12 @@ class StopMarkersRetriever @Inject constructor(
      */
     private fun mapToUiStopMarker(
         stopDetails: StopDetails,
-        serviceListing: UiServiceListing?) =
-        UiStopMarker(
-            stopDetails.stopCode,
-            stopDetails.stopName,
-            LatLng(stopDetails.location.latitude, stopDetails.location.longitude),
-            stopDetails.orientation,
-            serviceListing)
+        serviceListing: UiServiceListing?
+    ) = UiStopMarker(
+        stopDetails.stopCode,
+        stopDetails.stopName,
+        LatLng(stopDetails.location.latitude, stopDetails.location.longitude),
+        stopDetails.orientation,
+        serviceListing
+    )
 }

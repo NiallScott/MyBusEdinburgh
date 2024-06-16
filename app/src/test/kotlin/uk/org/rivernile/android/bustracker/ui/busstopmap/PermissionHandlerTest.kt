@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -27,12 +27,8 @@
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.advanceUntilIdle
+import app.cash.turbine.test
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -40,15 +36,15 @@ import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.location.LocationRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
 import uk.org.rivernile.android.bustracker.core.utils.TimeUtils
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [PermissionHandler].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class PermissionHandlerTest {
 
@@ -56,9 +52,6 @@ class PermissionHandlerTest {
 
         private const val STATE_REQUESTED_LOCATION_PERMISSIONS = "requestedLocationPermissions"
     }
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var locationRepository: LocationRepository
@@ -90,31 +83,32 @@ class PermissionHandlerTest {
     fun permissionsStateFlowEmitsPermissionsState() = runTest {
         val handler = createPermissionHandler()
         val permissionStates = arrayOf(
-                PermissionsState(PermissionState.UNGRANTED, PermissionState.UNGRANTED),
-                PermissionsState(PermissionState.UNGRANTED, PermissionState.GRANTED),
-                PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED))
+            PermissionsState(PermissionState.UNGRANTED, PermissionState.UNGRANTED),
+            PermissionsState(PermissionState.UNGRANTED, PermissionState.GRANTED),
+            PermissionsState(PermissionState.GRANTED, PermissionState.GRANTED)
+        )
 
-        val observer = handler.permissionsStateFlow.test(this)
-        handler.permissionsState = permissionStates[0]
-        advanceUntilIdle()
-        handler.permissionsState = permissionStates[1]
-        advanceUntilIdle()
-        handler.permissionsState = permissionStates[2]
-        advanceUntilIdle()
-        observer.finish()
+        handler.permissionsStateFlow.test {
+            handler.permissionsState = permissionStates[0]
+            handler.permissionsState = permissionStates[1]
+            handler.permissionsState = permissionStates[2]
 
-        observer.assertValues(*permissionStates)
+            assertNull(awaitItem())
+            assertEquals(permissionStates[0], awaitItem())
+            assertEquals(permissionStates[1], awaitItem())
+            assertEquals(permissionStates[2], awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun requestLocationPermissionsFlowDoesNotEmitValidValueByDefault() = runTest {
         val handler = createPermissionHandler()
 
-        val observer = handler.requestLocationPermissionsFlow.test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertNoValues()
+        handler.permissionsStateFlow.test {
+            assertNull(awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -122,14 +116,14 @@ class PermissionHandlerTest {
         givenLocationFeatureAvailability(false)
         val handler = createPermissionHandler()
 
-        val observer = handler.requestLocationPermissionsFlow.test(this)
-        handler.permissionsState = PermissionsState(
+        handler.requestLocationPermissionsFlow.test {
+            handler.permissionsState = PermissionsState(
                 PermissionState.UNGRANTED,
-                PermissionState.UNGRANTED)
-        advanceUntilIdle()
-        observer.finish()
+                PermissionState.UNGRANTED
+            )
 
-        observer.assertNoValues()
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -137,14 +131,14 @@ class PermissionHandlerTest {
         givenLocationFeatureAvailability(true)
         val handler = createPermissionHandler()
 
-        val observer = handler.requestLocationPermissionsFlow.test(this)
-        handler.permissionsState = PermissionsState(
-                PermissionState.UNGRANTED,
-                PermissionState.GRANTED)
-        advanceUntilIdle()
-        observer.finish()
+        handler.requestLocationPermissionsFlow.test {
+            handler.permissionsState = PermissionsState(
+                    PermissionState.UNGRANTED,
+                    PermissionState.GRANTED
+            )
 
-        observer.assertNoValues()
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -152,14 +146,14 @@ class PermissionHandlerTest {
         givenLocationFeatureAvailability(true)
         val handler = createPermissionHandler()
 
-        val observer = handler.requestLocationPermissionsFlow.test(this)
-        handler.permissionsState = PermissionsState(
+        handler.requestLocationPermissionsFlow.test {
+            handler.permissionsState = PermissionsState(
                 PermissionState.GRANTED,
-                PermissionState.UNGRANTED)
-        advanceUntilIdle()
-        observer.finish()
+                PermissionState.UNGRANTED
+            )
 
-        observer.assertNoValues()
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
@@ -167,57 +161,62 @@ class PermissionHandlerTest {
         givenLocationFeatureAvailability(true)
         val handler = createPermissionHandler()
 
-        val observer = handler.requestLocationPermissionsFlow.test(this)
-        handler.permissionsState = PermissionsState(
+        handler.requestLocationPermissionsFlow.test {
+            handler.permissionsState = PermissionsState(
                 PermissionState.GRANTED,
-                PermissionState.GRANTED)
-        advanceUntilIdle()
-        observer.finish()
+                PermissionState.GRANTED
+            )
 
-        observer.assertNoValues()
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun requestLocationPermissionsFlowRequestsPermissionsWhenCoarseAndFineAreUngranted() = runTest {
         givenLocationFeatureAvailability(true)
         whenever(timeUtils.currentTimeMills)
-                .thenReturn(123L)
+            .thenReturn(123L)
         val handler = createPermissionHandler()
 
-        val observer = handler.requestLocationPermissionsFlow.test(this)
-        handler.permissionsState = PermissionsState(
+        handler.requestLocationPermissionsFlow.test {
+            handler.permissionsState = PermissionsState(
                 PermissionState.UNGRANTED,
-                PermissionState.UNGRANTED)
-        advanceUntilIdle()
-        observer.finish()
+                PermissionState.UNGRANTED
+            )
 
-        observer.assertValues(123L)
+            assertEquals(123L, awaitItem())
+            ensureAllEventsConsumed()
+        }
     }
 
     @Test
     fun requestLocationPermissionsFlowDoesNotRequestPermissionsWhenSavedStateIsTrue() = runTest {
         givenLocationFeatureAvailability(true)
         val handler = createPermissionHandler(
-                SavedStateHandle(mapOf(STATE_REQUESTED_LOCATION_PERMISSIONS to true)))
+            SavedStateHandle(
+                mapOf(STATE_REQUESTED_LOCATION_PERMISSIONS to true)
+            )
+        )
 
-        val observer = handler.requestLocationPermissionsFlow.test(this)
-        handler.permissionsState = PermissionsState(
+        handler.requestLocationPermissionsFlow.test {
+            handler.permissionsState = PermissionsState(
                 PermissionState.UNGRANTED,
-                PermissionState.UNGRANTED)
-        advanceUntilIdle()
-        observer.finish()
+                PermissionState.UNGRANTED
+            )
 
-        observer.assertNoValues()
+            ensureAllEventsConsumed()
+        }
     }
 
     private fun givenLocationFeatureAvailability(hasFeature: Boolean) {
         whenever(locationRepository.hasLocationFeature)
-                .thenReturn(hasFeature)
+            .thenReturn(hasFeature)
     }
 
     private fun createPermissionHandler(savedState: SavedStateHandle = SavedStateHandle()) =
-            PermissionHandler(
-                    savedState,
-                    locationRepository,
-                    timeUtils)
+        PermissionHandler(
+            savedState,
+            locationRepository,
+            timeUtils
+        )
 }

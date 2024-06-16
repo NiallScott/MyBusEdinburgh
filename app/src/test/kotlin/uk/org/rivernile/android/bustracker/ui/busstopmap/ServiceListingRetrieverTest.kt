@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,102 +26,92 @@
 
 package uk.org.rivernile.android.bustracker.ui.busstopmap
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.servicestops.ServiceStopsRepository
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Tests for [ServiceListingRetriever].
  *
  * @author Niall Scott
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class ServiceListingRetrieverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var serviceStopsRepository: ServiceStopsRepository
 
     private lateinit var retriever: ServiceListingRetriever
 
-    @Before
+    @BeforeTest
     fun setUp() {
         retriever = ServiceListingRetriever(serviceStopsRepository)
     }
 
     @Test
     fun getServiceListingFlowWithNullStopCodeReturnsFlowOfNull() = runTest {
-        val observer = retriever.getServiceListingFlow(null).test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(null)
+        retriever.getServiceListingFlow(null).test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getServiceListingFlowWithEmptyStopCodeReturnsFlowOfNull() = runTest {
-        val observer = retriever.getServiceListingFlow("").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(null)
+        retriever.getServiceListingFlow("").test {
+            assertNull(awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getServiceListingFlowWithNullServiceListingEmitsCorrectItems() = runTest {
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
 
-        val observer = retriever.getServiceListingFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiServiceListing.InProgress("123456"),
-                UiServiceListing.Empty("123456"))
+        retriever.getServiceListingFlow("123456").test {
+            assertEquals(UiServiceListing.InProgress("123456"), awaitItem())
+            assertEquals(UiServiceListing.Empty("123456"), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getServiceListingFlowWithEmptyServiceListingEmitsCorrectItems() = runTest {
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(emptyList()))
+            .thenReturn(flowOf(emptyList()))
 
-        val observer = retriever.getServiceListingFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiServiceListing.InProgress("123456"),
-                UiServiceListing.Empty("123456"))
+        retriever.getServiceListingFlow("123456").test {
+            assertEquals(UiServiceListing.InProgress("123456"), awaitItem())
+            assertEquals(UiServiceListing.Empty("123456"), awaitItem())
+            awaitComplete()
+        }
     }
 
     @Test
     fun getServiceListingFlowWithServiceListingEmitsCorrectItems() = runTest {
         whenever(serviceStopsRepository.getServicesForStopFlow("123456"))
-                .thenReturn(flowOf(listOf("1", "2", "3")))
+            .thenReturn(flowOf(listOf("1", "2", "3")))
 
-        val observer = retriever.getServiceListingFlow("123456").test(this)
-        advanceUntilIdle()
-        observer.finish()
-
-        observer.assertValues(
-                UiServiceListing.InProgress("123456"),
+        retriever.getServiceListingFlow("123456").test {
+            assertEquals(UiServiceListing.InProgress("123456"), awaitItem())
+            assertEquals(
                 UiServiceListing.Success(
-                        "123456",
-                        listOf("1", "2", "3")))
+                    "123456",
+                    listOf("1", "2", "3")
+                ),
+                awaitItem()
+            )
+            awaitComplete()
+        }
     }
 }

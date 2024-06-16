@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 - 2023 Niall 'Rivernile' Scott
+ * Copyright (C) 2022 - 2024 Niall 'Rivernile' Scott
  *
  * This software is provided 'as-is', without any express or implied
  * warranty.  In no event will the authors or contributors be held liable for
@@ -26,16 +26,10 @@
 
 package uk.org.rivernile.android.bustracker.ui.bustimes.details
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
+import app.cash.turbine.test
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnitRunner
@@ -43,24 +37,21 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import uk.org.rivernile.android.bustracker.core.busstops.BusStopsRepository
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopDetails
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopLocation
-import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopName
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopDetails
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopLocation
+import uk.org.rivernile.android.bustracker.core.database.busstop.stop.FakeStopName
 import uk.org.rivernile.android.bustracker.core.database.busstop.stop.StopOrientation
 import uk.org.rivernile.android.bustracker.core.features.FeatureRepository
 import uk.org.rivernile.android.bustracker.core.permission.PermissionState
-import uk.org.rivernile.android.bustracker.coroutines.MainCoroutineRule
-import uk.org.rivernile.android.bustracker.coroutines.test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 /**
  * Tests for [UiItemRetriever].
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class UiItemRetrieverTest {
-
-    @get:Rule
-    val coroutineRule = MainCoroutineRule()
 
     @Mock
     private lateinit var busStopsRepository: BusStopsRepository
@@ -73,191 +64,221 @@ class UiItemRetrieverTest {
 
     private lateinit var retriever: UiItemRetriever
 
-    @Before
+    @BeforeTest
     fun setUp() {
         retriever = UiItemRetriever(
-                busStopsRepository,
-                distanceRetriever,
-                servicesRetriever,
-                featureRepository)
+            busStopsRepository,
+            distanceRetriever,
+            servicesRetriever,
+            featureRepository
+        )
     }
 
     @Test
     fun createUiItemFlowEmitsUnknownDistanceAndNoServicesWhenStopCodeIsNull() = runTest {
-        val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
-                .thenReturn(flowOf(UiItem.Distance.Unknown))
+            .thenReturn(flowOf(UiItem.Distance.Unknown))
 
-        val observer = retriever.createUiItemFlow(
+        retriever
+            .createUiItemFlow(
                 MutableStateFlow<String?>(null),
-                flowOf(PermissionsState(
+                flowOf(
+                    PermissionsState(
                         PermissionState.GRANTED,
-                        PermissionState.GRANTED)),
-                sharedFlowCoroutineScope)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-        sharedFlowCoroutineScope.cancel()
-
-        observer.assertValues(
-                listOf(
+                        PermissionState.GRANTED
+                    )
+                ),
+                backgroundScope
+            )
+            .test {
+                assertEquals(
+                    listOf(
                         UiItem.Distance.Unknown,
-                        UiItem.NoServices))
+                        UiItem.NoServices
+                    ),
+                    awaitItem()
+                )
+                ensureAllEventsConsumed()
+            }
     }
 
     @Test
     fun createUiItemFlowEmitsUnknownDistanceAndNoServicesWhenStopServicesNull() = runTest {
-        val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
-                .thenReturn(flowOf(UiItem.Distance.Unknown))
+            .thenReturn(flowOf(UiItem.Distance.Unknown))
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         whenever(servicesRetriever.getServicesFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
 
-        val observer = retriever.createUiItemFlow(
+        retriever
+            .createUiItemFlow(
                 MutableStateFlow<String?>("123456"),
-                flowOf(PermissionsState(
+                flowOf(
+                    PermissionsState(
                         PermissionState.GRANTED,
-                        PermissionState.GRANTED)),
-                sharedFlowCoroutineScope)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-        sharedFlowCoroutineScope.cancel()
-
-        observer.assertValues(
-                listOf(
+                        PermissionState.GRANTED
+                    )
+                ),
+                backgroundScope
+            )
+            .test {
+                assertEquals(
+                    listOf(
                         UiItem.Distance.Unknown,
-                        UiItem.NoServices))
+                        UiItem.NoServices
+                    ),
+                    awaitItem()
+                )
+                ensureAllEventsConsumed()
+            }
     }
 
     @Test
     fun createUiItemFlowEmitsNoServicesWhenStopDetailsIsNullAndServicesEmpty() = runTest {
-        val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val services = emptyList<UiItem.Service>()
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
-                .thenReturn(flowOf(UiItem.Distance.Unknown))
+            .thenReturn(flowOf(UiItem.Distance.Unknown))
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         whenever(servicesRetriever.getServicesFlow("123456"))
-                .thenReturn(flowOf(services))
+            .thenReturn(flowOf(services))
 
-        val observer = retriever.createUiItemFlow(
+        retriever
+            .createUiItemFlow(
                 MutableStateFlow<String?>("123456"),
-                flowOf(PermissionsState(
+                flowOf(
+                    PermissionsState(
                         PermissionState.GRANTED,
-                        PermissionState.GRANTED)),
-                sharedFlowCoroutineScope)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-        sharedFlowCoroutineScope.cancel()
-
-        observer.assertValues(
-                listOf(
+                        PermissionState.GRANTED
+                    )
+                ),
+                backgroundScope
+            )
+            .test {
+                assertEquals(
+                    listOf(
                         UiItem.Distance.Unknown,
-                        UiItem.NoServices))
+                        UiItem.NoServices
+                    ),
+                    awaitItem()
+                )
+                ensureAllEventsConsumed()
+            }
     }
 
     @Test
     fun createUiItemFlowEmitsServicesWhenStopDetailsIsNullAndServicesPopulated() = runTest {
-        val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val service1 = mock<UiItem.Service>()
         val service2 = mock<UiItem.Service>()
         val service3 = mock<UiItem.Service>()
         val services = listOf(service1, service2, service3)
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
-                .thenReturn(flowOf(UiItem.Distance.Unknown))
+            .thenReturn(flowOf(UiItem.Distance.Unknown))
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
         whenever(servicesRetriever.getServicesFlow("123456"))
-                .thenReturn(flowOf(services))
+            .thenReturn(flowOf(services))
 
-        val observer = retriever.createUiItemFlow(
+        retriever
+            .createUiItemFlow(
                 MutableStateFlow<String?>("123456"),
-                flowOf(PermissionsState(
+                flowOf(
+                    PermissionsState(
                         PermissionState.GRANTED,
-                        PermissionState.GRANTED)),
-                sharedFlowCoroutineScope)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-        sharedFlowCoroutineScope.cancel()
-
-        observer.assertValues(
-                listOf(
+                        PermissionState.GRANTED
+                    )
+                ),
+                backgroundScope
+            )
+            .test {
+                assertEquals(
+                    listOf(
                         UiItem.Distance.Unknown,
                         service1,
                         service2,
-                        service3))
+                        service3),
+                    awaitItem()
+                )
+                ensureAllEventsConsumed()
+            }
     }
 
     @Test
     fun createUiItemFlowDoesNotEmitMapItemWhenDoesNotHaveMapFeature() = runTest {
-        val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val stopDetails = createStopDetails()
         givenStopMapFeatureAvailability(false)
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
-                .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
+            .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flowOf(stopDetails))
+            .thenReturn(flowOf(stopDetails))
         whenever(servicesRetriever.getServicesFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
 
-        val observer = retriever.createUiItemFlow(
+        retriever
+            .createUiItemFlow(
                 MutableStateFlow<String?>("123456"),
-                flowOf(PermissionsState(
+                flowOf(
+                    PermissionsState(
                         PermissionState.GRANTED,
-                        PermissionState.GRANTED)),
-                sharedFlowCoroutineScope)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-        sharedFlowCoroutineScope.cancel()
-
-        observer.assertValues(
-                listOf(
+                        PermissionState.GRANTED
+                    )
+                ),
+                backgroundScope
+            )
+            .test {
+                assertEquals(
+                    listOf(
                         UiItem.Distance.Known(1.2f),
-                        UiItem.NoServices))
+                        UiItem.NoServices
+                    ),
+                    awaitItem()
+                )
+                ensureAllEventsConsumed()
+            }
     }
 
     @Test
     fun createUiItemFlowEmitsMapItemWhenHasMapFeature() = runTest {
-        val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val stopDetails = createStopDetails()
         givenStopMapFeatureAvailability(true)
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
-                .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
+            .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flowOf(stopDetails))
+            .thenReturn(flowOf(stopDetails))
         whenever(servicesRetriever.getServicesFlow("123456"))
-                .thenReturn(flowOf(null))
+            .thenReturn(flowOf(null))
 
-        val observer = retriever.createUiItemFlow(
+        retriever
+            .createUiItemFlow(
                 MutableStateFlow<String?>("123456"),
-                flowOf(PermissionsState(
+                flowOf(
+                    PermissionsState(
                         PermissionState.GRANTED,
-                        PermissionState.GRANTED)),
-                sharedFlowCoroutineScope)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-        sharedFlowCoroutineScope.cancel()
-
-        observer.assertValues(
-                listOf(
+                        PermissionState.GRANTED
+                    )
+                ),
+                backgroundScope
+            )
+            .test {
+                assertEquals(
+                    listOf(
                         UiItem.Map(
-                                1.1,
-                                2.2,
-                                StopOrientation.EAST),
+                            1.1,
+                            2.2,
+                            StopOrientation.EAST
+                        ),
                         UiItem.Distance.Known(1.2f),
-                        UiItem.NoServices))
+                        UiItem.NoServices
+                    ),
+                    awaitItem()
+                )
+                ensureAllEventsConsumed()
+            }
     }
 
     @Test
     fun createUiItemFlowWithRepresentativeExample() = runTest {
-        val sharedFlowCoroutineScope = createSharedFlowCoroutineScope()
         val stopDetails = createStopDetails()
         val service1 = mock<UiItem.Service>()
         val service2 = mock<UiItem.Service>()
@@ -265,63 +286,57 @@ class UiItemRetrieverTest {
         val services = listOf(service1, service2, service3)
         givenStopMapFeatureAvailability(true)
         whenever(distanceRetriever.createDistanceFlow(any(), any()))
-                .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
+            .thenReturn(flowOf(UiItem.Distance.Known(1.2f)))
         whenever(busStopsRepository.getBusStopDetailsFlow("123456"))
-                .thenReturn(flowOf(stopDetails))
+            .thenReturn(flowOf(stopDetails))
         whenever(servicesRetriever.getServicesFlow("123456"))
-                .thenReturn(flowOf(services))
+            .thenReturn(flowOf(services))
 
-        val observer = retriever.createUiItemFlow(
+        retriever
+            .createUiItemFlow(
                 MutableStateFlow<String?>("123456"),
-                flowOf(PermissionsState(
+                flowOf(
+                    PermissionsState(
                         PermissionState.GRANTED,
-                        PermissionState.GRANTED)),
-                sharedFlowCoroutineScope)
-                .test(this)
-        advanceUntilIdle()
-        observer.finish()
-        sharedFlowCoroutineScope.cancel()
-
-        observer.assertValues(
-                listOf(
+                        PermissionState.GRANTED
+                    )
+                ),
+                backgroundScope
+            )
+            .test {
+                assertEquals(
+                    listOf(
                         UiItem.Map(
-                                1.1,
-                                2.2,
-                                StopOrientation.EAST),
+                            1.1,
+                            2.2,
+                            StopOrientation.EAST
+                        ),
                         UiItem.Distance.Known(1.2f),
                         service1,
                         service2,
-                        service3))
+                        service3
+                    ),
+                    awaitItem()
+                )
+                ensureAllEventsConsumed()
+            }
     }
-
-    private fun createSharedFlowCoroutineScope() = CoroutineScope(coroutineRule.testDispatcher)
 
     private fun givenStopMapFeatureAvailability(isAvailable: Boolean) {
         whenever(featureRepository.hasStopMapUiFeature)
-                .thenReturn(isAvailable)
+            .thenReturn(isAvailable)
     }
 
-    private fun createStopDetails() = MockStopDetails(
+    private fun createStopDetails() = FakeStopDetails(
         "123456",
-        MockStopName(
+        FakeStopName(
             "Stop name",
-            "Locality"),
-        MockStopLocation(
+            "Locality"
+        ),
+        FakeStopLocation(
             1.1,
-            2.2),
-        StopOrientation.EAST)
-
-    private data class MockStopName(
-        override val name: String,
-        override val locality: String?) : StopName
-
-    private data class MockStopLocation(
-        override val latitude: Double,
-        override val longitude: Double) : StopLocation
-
-    private data class MockStopDetails(
-        override val stopCode: String,
-        override val stopName: StopName,
-        override val location: StopLocation,
-        override val orientation: StopOrientation) : StopDetails
+            2.2
+        ),
+        StopOrientation.EAST
+    )
 }
