@@ -112,6 +112,7 @@ dependencies {
     androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.turbine)
 
     testImplementation(project(":testutils"))
     testImplementation(libs.coroutines.test)
